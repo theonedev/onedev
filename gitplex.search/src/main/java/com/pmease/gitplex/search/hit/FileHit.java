@@ -11,7 +11,7 @@ public class FileHit extends QueryHit {
 	private static final long serialVersionUID = 1L;
 
 	public FileHit(String blobPath) {
-		super(blobPath);
+		super(blobPath, null);
 	}
 
 	@Override
@@ -26,11 +26,6 @@ public class FileHit extends QueryHit {
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		
 		return new Label(componentId, fileName);
-	}
-
-	@Override
-	public int getLineNo() {
-		return 0;
 	}
 
 	@Override

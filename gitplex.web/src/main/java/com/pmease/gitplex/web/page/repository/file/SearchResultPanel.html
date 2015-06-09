@@ -1,6 +1,12 @@
 <wicket:panel>
 	<div class="head clearfix">
 		<div class="title pull-left">Search Result</div>
+		<div class="actions pull-left">
+			<a wicket:id="prevMatch" title="Show previous match"><i class="fa fa-arrow-up"></i></a>
+			<a wicket:id="nextMatch" title="Show next match"><i class="fa fa-arrow-down"></i></a>
+			<a wicket:id="expandAll" title="Expand all"><i class="fa fa-plus-square-o"></i></a>
+			<a wicket:id="collapseAll" title="Collapse all"><i class="fa fa-minus-square-o"></i></a>
+		</div>
 		<wicket:enclosure child="hasMoreMessage">
 			<div class="warning pull-left">
 				(<span wicket:id="hasMoreMessage"></span>)

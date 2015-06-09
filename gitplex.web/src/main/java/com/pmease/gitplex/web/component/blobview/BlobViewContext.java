@@ -3,11 +3,14 @@ package com.pmease.gitplex.web.component.blobview;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -20,9 +23,10 @@ public abstract class BlobViewContext implements Serializable {
 	
 	public abstract BlobIdent getBlobIdent();
 	
-	public abstract int getLine();
+	@Nullable
+	public abstract TokenPosition getBlobHighlight();
 	
-	public abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, int line);
+	public abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos);
 	
 	public abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	

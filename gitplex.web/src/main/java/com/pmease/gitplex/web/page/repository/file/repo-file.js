@@ -28,8 +28,11 @@ $(window).load(function() {
 		if ($("#main>.foot").is(":visible")) 
 			height -= $("#main>.foot").outerHeight();
 		if ($searchResult.is(":visible")) {
+			$searchResult.outerWidth(width);
+			var $searchResultBody = $searchResult.find(">div>.body");
+			$searchResultBody.outerWidth($searchResult.width());
 			height -= $searchResult.outerHeight();
-			$searchResult.find(">div>.body").outerHeight($searchResult.height()
+			$searchResultBody.outerHeight($searchResult.height()
 					-$searchResult.find(">div>.head").outerHeight()
 					-$("#search-result-resize-handle").outerHeight());
 		}

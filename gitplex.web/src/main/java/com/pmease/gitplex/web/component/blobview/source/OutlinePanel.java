@@ -18,7 +18,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.lang.Symbol;
+import com.pmease.gitplex.core.GitPlex;
 
 @SuppressWarnings("serial")
 class OutlinePanel extends Panel {
@@ -91,8 +94,14 @@ class OutlinePanel extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 
-						String script = String.format("gitplex.sourceview.gotoSymbol('%s', %d);", 
-								OutlinePanel.this.getMarkupId(), symbol.getLineNo());
+						String tokenPos;
+						try {
+							tokenPos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(symbol.getPos());
+						} catch (JsonProcessingException e) {
+							throw new RuntimeException(e);
+						}
+						String script = String.format("gitplex.sourceview.gotoSymbol('%s', %s);", 
+								OutlinePanel.this.getMarkupId(), tokenPos);
 						tag.put("onclick", script);
 					}
 					

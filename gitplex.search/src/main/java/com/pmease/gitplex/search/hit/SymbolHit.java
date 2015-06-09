@@ -12,7 +12,7 @@ public class SymbolHit extends QueryHit {
 	private final Symbol symbol;
 	
 	public SymbolHit(String blobPath, Symbol symbol) {
-		super(blobPath);
+		super(blobPath, symbol.getPos());
 		this.symbol = symbol;
 	}
 
@@ -28,11 +28,6 @@ public class SymbolHit extends QueryHit {
 	@Override
 	public Component render(String componentId) {
 		return symbol.render(componentId);
-	}
-
-	@Override
-	public int getLineNo() {
-		return symbol.getLineNo();
 	}
 
 	@Override

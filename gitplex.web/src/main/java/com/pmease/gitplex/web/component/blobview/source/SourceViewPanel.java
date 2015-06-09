@@ -28,9 +28,14 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.FileMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
@@ -53,6 +58,8 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private static final int MAX_OCCURRENCE_QUERY_ENTRIES = 1000;
 	
+	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
+	
 	private Component codeContainer;
 	
 	private OutlinePanel outlinePanel;
@@ -63,7 +70,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	private final List<Symbol> symbols;
+	private final List<Symbol> symbols = new ArrayList<>();
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -71,10 +78,13 @@ public class SourceViewPanel extends BlobViewPanel {
 		Preconditions.checkArgument(context.getBlob().getText() != null);
 		
 		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getBlobIdent().path);
-		if (extractor != null)
-			symbols = extractor.extract(context.getBlob().getText().getContent());
-		else
-			symbols = new ArrayList<>();
+		if (extractor != null) {
+			try {
+				symbols.addAll(extractor.extract(context.getBlob().getText().getContent()));
+			} catch (ExtractException e) {
+				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
+			}
+		}
 	}
 	
 	@Override
@@ -128,7 +138,7 @@ public class SourceViewPanel extends BlobViewPanel {
 								context.getBlobIdent().revision, 
 								hit.getBlobPath(), 
 								FileMode.REGULAR_FILE.getBits());
-						context.onSelect(target, blobIdent, hit.getLineNo());
+						context.onSelect(target, blobIdent, hit.getTokenPos());
 					}
 					
 				};
@@ -218,12 +228,18 @@ public class SourceViewPanel extends BlobViewPanel {
 				response.render(CssHeaderItem.forReference(
 						new CssResourceReference(SourceViewPanel.class, "source-view.css")));
 				
+				String blobHighlight;
+				try {
+					blobHighlight = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getBlobHighlight());
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				} 
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
 				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s);", 
 						codeContainer.getMarkupId(), 
 						StringEscapeUtils.escapeEcmaScript(context.getBlob().getText().getContent()),
 						context.getBlobIdent().path, 
-						context.getLine(),
+						blobHighlight,
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")));
 				response.render(OnDomReadyHeaderItem.forScript(script));

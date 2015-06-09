@@ -20,6 +20,7 @@ import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.lang.java.JavaExtractor;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
@@ -153,7 +154,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 
 			@Override
 			public List<Symbol> extract(String text) throws ExtractException {
-				return Lists.<Symbol>newArrayList(new Symbol(null, "tiger", 0) {
+				return Lists.<Symbol>newArrayList(new Symbol(null, "tiger", new TokenPosition(0, null)) {
 
 					private static final long serialVersionUID = 1L;
 

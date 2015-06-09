@@ -4,7 +4,6 @@ import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,6 +18,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.util.Charsets;
 import com.pmease.gitplex.search.FieldConstants;
 import com.pmease.gitplex.search.IndexConstants;
@@ -57,17 +57,15 @@ public class TextQuery extends BlobQuery {
 						int lineNo = 0;
 						for (String line: Splitter.on(CharMatcher.anyOf("\n\r")).split(content)) {
 							if (line.length() <= MAX_LINE_LEN) {
-								List<TextHit.Range> matches = new ArrayList<>();
 								Matcher matcher = pattern.matcher(line);
-								while (matcher.find())
-									matches.add(new TextHit.Range(matcher.start(), matcher.end()));
-								
-								if (!matches.isEmpty()) {
-									TextHit hit = new TextHit(blobPath, line, lineNo, matches);
-									hits.add(hit);
+								while (matcher.find()) {
+									TokenPosition.Range range = new TokenPosition.Range(matcher.start(), matcher.end());
+									hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
 									if (hits.size() >= getCount())
 										break;
 								}
+								if (hits.size() >= getCount())
+									break;
 							}
 							lineNo++;
 						}
@@ -76,7 +74,6 @@ public class TextQuery extends BlobQuery {
 						
 						int lineNo = 0;
 						for (String line: Splitter.on("\n").split(content)) {
-							List<TextHit.Range> matches = new ArrayList<>();
 							String casedLine = getCasedText(line);
 							int start = casedLine.indexOf(searchFor, 0);
 							while (start != -1) {
@@ -94,20 +91,22 @@ public class TextQuery extends BlobQuery {
 									else
 										afterChar = line.charAt(end);
 									
-									if (!isWordChar(beforeChar) && !isWordChar(afterChar))
-										matches.add(new TextHit.Range(start, end));
+									if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
+										TokenPosition.Range range = new TokenPosition.Range(start, end);
+										hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
+										if (hits.size() >= getCount())
+											break;
+									}
 								} else {
-									matches.add(new TextHit.Range(start, end));
+									TokenPosition.Range range = new TokenPosition.Range(start, end);
+									hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
+									if (hits.size() >= getCount())
+										break;
 								}
 								start = casedLine.indexOf(searchFor, end);
 							}
-							if (!matches.isEmpty()) {
-								TextHit hit = new TextHit(blobPath, line, lineNo, matches);
-								hits.add(hit);
-								if (hits.size() >= getCount())
-									break;
-							}
-							
+							if (hits.size() >= getCount())
+								break;
 							lineNo++;
 						}
 					}

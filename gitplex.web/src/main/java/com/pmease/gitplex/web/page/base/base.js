@@ -164,11 +164,9 @@ $(document).ready(function() {
 	
 	$(window).load(function() {
 		$(document).mousedown(function() { 
-			console.log("down");
 			gitplex.spaceGreedy.mouseDown = true;
 		});
 		$(document).mouseup(function() {
-			console.log("up");
 			gitplex.spaceGreedy.mouseDown = false;
 		});		
 		gitplex.spaceGreedy.check();

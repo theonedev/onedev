@@ -405,10 +405,10 @@ public abstract class BlobSearchPanel extends Panel {
 		List<QueryHit> hits = new ArrayList<>();
 		hits.addAll(symbolHits);
 		if (symbolHits.size() == MAX_INSTANT_QUERY_ENTRIES)
-			hits.add(new MoreSymbolHit(null));
+			hits.add(new MoreSymbolHit());
 		hits.addAll(textHits);
 		if (textHits.size() == MAX_INSTANT_QUERY_ENTRIES)
-			hits.add(new MoreTextHit(null));
+			hits.add(new MoreTextHit());
 		
 		if (activeHitIndex >=0 && activeHitIndex<hits.size())
 			return hits.get(activeHitIndex);
@@ -609,13 +609,8 @@ public abstract class BlobSearchPanel extends Panel {
 	
 	private static class MoreSymbolHit extends QueryHit {
 
-		public MoreSymbolHit(String blobPath) {
-			super(blobPath);
-		}
-
-		@Override
-		public int getLineNo() {
-			throw new UnsupportedOperationException();
+		public MoreSymbolHit() {
+			super(null, null);
 		}
 
 		@Override
@@ -642,13 +637,8 @@ public abstract class BlobSearchPanel extends Panel {
 	
 	private static class MoreTextHit extends QueryHit {
 
-		public MoreTextHit(String blobPath) {
-			super(blobPath);
-		}
-
-		@Override
-		public int getLineNo() {
-			throw new UnsupportedOperationException();
+		public MoreTextHit() {
+			super(null, null);
 		}
 
 		@Override

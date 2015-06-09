@@ -8,28 +8,27 @@ public class LangToken implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final LangToken EOF = new LangToken(Token.EOF, "", -1, -1);
+	public static final LangToken EOF = new LangToken(Token.EOF, "", null);
 	
 	private final int type;
 	
 	private final String text;
 	
-	private final int line;
-	
-	private final int posInLine;
+	private final TokenPosition pos;
 	
 	public LangToken(Token antlrToken) {
-		this.type = antlrToken.getType();
-		this.text = antlrToken.getText();
-		this.line = antlrToken.getLine()-1;
-		this.posInLine = antlrToken.getCharPositionInLine();
+		type = antlrToken.getType();
+		text = antlrToken.getText();
+		TokenPosition.Range range = new TokenPosition.Range(
+				antlrToken.getCharPositionInLine(), 
+				antlrToken.getCharPositionInLine() + text.length());
+		pos = new TokenPosition(antlrToken.getLine()-1, range);
 	}
 
-	public LangToken(int type, String text, int line, int posInLine) {
+	public LangToken(int type, String text, TokenPosition pos) {
 		this.type = type;
 		this.text = text;
-		this.line = line;
-		this.posInLine = posInLine;
+		this.pos = pos;
 	}
 	
 	public boolean is(int type) {
@@ -60,14 +59,10 @@ public class LangToken implements Serializable {
 		return text;
 	}
 
-	public int getLine() {
-		return line;
+	public TokenPosition getPos() {
+		return pos;
 	}
 	
-	public int getPosInLine() {
-		return posInLine;
-	}
-
 	public LangToken checkType(int... expectedTypes) {
 		if (!is(expectedTypes))
 			throw new UnexpectedTokenException(this);

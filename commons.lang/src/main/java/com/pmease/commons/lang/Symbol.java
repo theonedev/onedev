@@ -16,12 +16,12 @@ public abstract class Symbol implements Serializable {
 	
 	private final String name;
 	
-	private final int lineNo;
+	private final TokenPosition pos;
 	
-	public Symbol(@Nullable Symbol parent, @Nullable String name, int lineNo) {
+	public Symbol(@Nullable Symbol parent, @Nullable String name, TokenPosition pos) {
 		this.parent = parent;
 		this.name = name;
-		this.lineNo = lineNo;
+		this.pos = pos;
 	}
 	
 	public Symbol getParent() {
@@ -40,8 +40,8 @@ public abstract class Symbol implements Serializable {
 		return name;
 	}
 	
-	public int getLineNo() {
-		return lineNo;
+	public TokenPosition getPos() {
+		return pos;
 	}
 	
 	public abstract Component render(String componentId);

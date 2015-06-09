@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.gitplex.search.hit.TextHit.Range;
+import com.pmease.commons.lang.TokenPosition;
 
 @SuppressWarnings("serial")
 public class TextHitPanel extends Panel {
@@ -33,17 +33,11 @@ public class TextHitPanel extends Panel {
 			protected List<Segment> load() {
 				List<Segment> segments = new ArrayList<>();
 				
-				String line = hit.getLine();
-				List<TextHit.Range> ranges = hit.getRanges(); 
-				segments.add(new Segment(line.substring(0, ranges.get(0).getStart()), false));
-				for (int i=0; i<ranges.size(); i++) {
-					Range range = ranges.get(i);
-					segments.add(new Segment(line.substring(range.getStart(), range.getEnd()), true));
-					if (i+1<ranges.size())
-						segments.add(new Segment(line.substring(range.getEnd(), ranges.get(i+1).getStart()), false));
-					else
-						segments.add(new Segment(line.substring(range.getEnd()), false));
-				}
+				String lineContent = hit.getLineContent();
+				TokenPosition.Range range = hit.getTokenPos().getRange();
+				segments.add(new Segment(lineContent.substring(0, range.getStart()), false));
+				segments.add(new Segment(lineContent.substring(range.getStart(), range.getEnd()), true));
+				segments.add(new Segment(lineContent.substring(range.getEnd()), false));
 				return segments;
 			}
 			

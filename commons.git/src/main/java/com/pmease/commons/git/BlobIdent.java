@@ -9,6 +9,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.google.common.base.Objects;
+
 public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	
 	private static final long serialVersionUID = 1L;
@@ -80,6 +82,15 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 			.append(mode)
 			.toHashCode();
 	}		
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(BlobIdent.class)
+				.add("revision", revision)
+				.add("path", path)
+				.omitNullValues()
+				.toString();
+	}
 
 	@Override
 	public int compareTo(BlobIdent ident) {

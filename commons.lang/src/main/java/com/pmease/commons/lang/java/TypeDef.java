@@ -13,6 +13,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.lang.java.icons.Icons;
 
 public class TypeDef extends JavaSymbol {
@@ -28,8 +29,8 @@ public class TypeDef extends JavaSymbol {
 	private final List<Modifier> modifiers;
 
 	public TypeDef(@Nullable Symbol parent, @Nullable String packageName, 
-			String name, int lineNo, Kind kind, List<Modifier> modifiers) {
-		super(parent, name, lineNo);
+			String name, TokenPosition pos, Kind kind, List<Modifier> modifiers) {
+		super(parent, name, pos);
 
 		this.packageName = packageName;
 		this.kind = kind;

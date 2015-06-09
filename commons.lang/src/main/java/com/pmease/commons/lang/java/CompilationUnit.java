@@ -10,6 +10,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.lang.java.icons.Icons;
 
 public class CompilationUnit extends JavaSymbol {
@@ -18,8 +19,8 @@ public class CompilationUnit extends JavaSymbol {
 	
 	private String packageName;
 
-	public CompilationUnit(@Nullable String packageName, int lineNo) {
-		super(null, null, lineNo);
+	public CompilationUnit(@Nullable String packageName, TokenPosition pos) {
+		super(null, null, pos);
 		
 		this.packageName = packageName;
 	}

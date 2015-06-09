@@ -7,23 +7,31 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 
+import com.pmease.commons.lang.TokenPosition;
+
 public abstract class QueryHit implements Serializable, Comparable<QueryHit> {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private final String blobPath;
 	
+	private final TokenPosition tokenPos;
+	
 	private transient Integer score;
 	
-	public QueryHit(String blobPath) {
+	public QueryHit(String blobPath, @Nullable TokenPosition tokenPos) {
 		this.blobPath = blobPath;
+		this.tokenPos = tokenPos;
 	}
 
 	public String getBlobPath() {
 		return blobPath;
 	}
 	
-	public abstract int getLineNo();
+	@Nullable
+	public TokenPosition getTokenPos() {
+		return tokenPos;
+	}
 
 	public abstract Component render(String componentId);
 	

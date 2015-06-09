@@ -9,6 +9,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.lang.java.icons.Icons;
 
 public class MethodDef extends JavaSymbol {
@@ -21,9 +22,9 @@ public class MethodDef extends JavaSymbol {
 
 	private final List<Modifier> modifiers;
 	
-	public MethodDef(TypeDef parent, String name, int lineNo, 
+	public MethodDef(TypeDef parent, String name, TokenPosition pos, 
 			@Nullable String type, @Nullable String params, List<Modifier> modifiers) {
-		super(parent, name, lineNo);
+		super(parent, name, pos);
 		
 		this.type = type;
 		this.params = params;

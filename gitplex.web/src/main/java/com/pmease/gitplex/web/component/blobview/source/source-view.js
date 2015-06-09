@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, activeLine, ajaxIndicatorUrl, symbolQuery) {
+	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -84,7 +84,8 @@ gitplex.sourceview = {
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
 
-				gitplex.sourceview.gotoLine(cm, activeLine);
+			    if (tokenPos)
+			    	gitplex.sourceview.gotoToken(cm, tokenPos);
 			}
 			cm.setSize($code.width(), $code.height());
 		});
@@ -98,16 +99,23 @@ gitplex.sourceview = {
 		$tooltip.align();
 	},
 	
-	gotoSymbol: function(outlineId, line) {
+	gotoSymbol: function(outlineId, tokenPos) {
 		var cm = $('#'+ outlineId).closest(".source-view").find(".CodeMirror")[0].CodeMirror;		
-		gitplex.sourceview.gotoLine(cm, line);
+		gitplex.sourceview.gotoToken(cm, tokenPos);
 	},
 	
-	gotoLine: function(cm, line) {
-		cm.setCursor(line);
+	gotoToken: function(cm, tokenPos) {
 		var h = cm.getScrollInfo().clientHeight;
-		var coords = cm.charCoords({line: line, ch: 0}, "local");
+		var coords = cm.charCoords({line: tokenPos.line, ch: 0}, "local");
 		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+		
+		if (tokenPos.range) {
+			var anchor = {line: tokenPos.line, ch: tokenPos.range.start};
+			var head = {line: tokenPos.line, ch: tokenPos.range.end}; 
+			cm.setSelection(anchor, head);
+		} else {
+			cm.setCursor(tokenPos.line);
+		}
 	}
 	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -15,6 +16,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.MatchedBlob;
@@ -25,6 +27,10 @@ import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 @SuppressWarnings("serial")
 abstract class SearchResultPanel extends Panel {
 
+	private enum ExpandStatus {EXPAND_ALL, COLLAPSE_ALL};
+	
+	private static final String HITS_ID = "hits";
+	
 	private final List<MatchedBlob> blobs;
 	
 	private final boolean hasMore;
@@ -56,6 +62,42 @@ abstract class SearchResultPanel extends Panel {
 		String message = "too many matches, displaying " + BlobSearchPanel.MAX_ADVANCED_QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
+		add(new AjaxLink<Void>("prevMatch") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				
+			}
+			
+		});
+		add(new AjaxLink<Void>("nextMatch") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				
+			}
+			
+		});
+		add(new AjaxLink<Void>("expandAll") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				RequestCycle.get().setMetaData(ExpandStatusKey.INSTANCE, ExpandStatus.EXPAND_ALL);
+				target.add(SearchResultPanel.this);
+				target.appendJavaScript("$(window).resize();");
+			}
+			
+		});
+		add(new AjaxLink<Void>("collapseAll") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				RequestCycle.get().setMetaData(ExpandStatusKey.INSTANCE, ExpandStatus.COLLAPSE_ALL);
+				target.add(SearchResultPanel.this);
+				target.appendJavaScript("$(window).resize();");
+			}
+			
+		});
 		add(new AjaxLink<Void>("close") {
 
 			@Override
@@ -69,7 +111,7 @@ abstract class SearchResultPanel extends Panel {
 
 			@Override
 			protected void populateItem(final ListItem<MatchedBlob> item) {
-				final WebMarkupContainer hitsContainer = new WebMarkupContainer("hits") {
+				final WebMarkupContainer hitsContainer = new WebMarkupContainer(HITS_ID) {
 
 					@Override
 					protected void onConfigure() {
@@ -79,11 +121,19 @@ abstract class SearchResultPanel extends Panel {
 					}
 					
 				};
-				hitsContainer.setVisibilityAllowed(false);
+				ExpandStatus expandStatus = RequestCycle.get().getMetaData(ExpandStatusKey.INSTANCE);
+				if (expandStatus == ExpandStatus.EXPAND_ALL) 
+					hitsContainer.setVisibilityAllowed(true);
+				else if (expandStatus == ExpandStatus.COLLAPSE_ALL) 
+					hitsContainer.setVisibilityAllowed(false);				
+				else
+					hitsContainer.setVisibilityAllowed(item.getIndex() == 0);
+					
 				hitsContainer.setOutputMarkupPlaceholderTag(true);
+				
 				item.add(hitsContainer);
 				
-				hitsContainer.add(new ListView<QueryHit>("hits", item.getModelObject().getHits()) {
+				hitsContainer.add(new ListView<QueryHit>(HITS_ID, item.getModelObject().getHits()) {
 
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
@@ -96,7 +146,7 @@ abstract class SearchResultPanel extends Panel {
 							}
 							
 						});
-						item.add(new Label("lineNo", String.valueOf(hit.getLineNo()+1) + ":"));
+						item.add(new Label("lineNo", String.valueOf(hit.getTokenPos().getLine()+1) + ":"));
 						item.add(new AjaxLink<Void>("lineLink") {
 
 							@Override
@@ -187,4 +237,8 @@ abstract class SearchResultPanel extends Panel {
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 
 	protected abstract void onClose(AjaxRequestTarget target);
+
+	private static class ExpandStatusKey extends MetaDataKey<ExpandStatus> {
+		static final ExpandStatusKey INSTANCE = new ExpandStatusKey();		
+	};
 }

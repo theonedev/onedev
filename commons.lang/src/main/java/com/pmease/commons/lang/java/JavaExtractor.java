@@ -50,6 +50,7 @@ import com.pmease.commons.lang.LangStream;
 import com.pmease.commons.lang.LangToken;
 import com.pmease.commons.lang.Symbol;
 import com.pmease.commons.lang.TokenFilter;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.util.Pair;
 
 public class JavaExtractor extends AbstractExtractor {
@@ -82,13 +83,13 @@ public class JavaExtractor extends AbstractExtractor {
 		
 		CompilationUnit compilationUnit;
 		if (token.is(PACKAGE)) {
-			int lineNo = token.getLine(); 
+			TokenPosition pos = token.getPos(); 
 			token = stream.next();
 			String packageName = skipTypeName(stream);
-			compilationUnit = new CompilationUnit(packageName, lineNo);
+			compilationUnit = new CompilationUnit(packageName, pos);
 			token = stream.next();
 		} else {
-			compilationUnit = new CompilationUnit(null, -1);
+			compilationUnit = new CompilationUnit(null, null);
 		}
 		
 		symbols.add(compilationUnit);
@@ -344,7 +345,7 @@ public class JavaExtractor extends AbstractExtractor {
 			List<Modifier> modifiers, @Nullable String typeRef) {
 		LangToken token = stream.current();
 		String name = token.getText();
-		int lineNo = token.getLine();
+		TokenPosition pos = token.getPos();
 		String params = null;
 		String type = null;
 		
@@ -408,7 +409,7 @@ public class JavaExtractor extends AbstractExtractor {
 		if (token.is(LBRACE))
 			stream.nextClosed(LBRACE, RBRACE);
 		
-		symbols.add(new MethodDef(parent, name, lineNo, type, params, modifiers));
+		symbols.add(new MethodDef(parent, name, pos, type, params, modifiers));
 	}
 	
 	/*
@@ -422,12 +423,12 @@ public class JavaExtractor extends AbstractExtractor {
 		LangToken token = stream.current();
 		while (!token.is(SEMI)) {
 			stream.next();
-			symbols.add(new FieldDef(parent, token.getText(), token.getLine(), typeRef + skipDims(stream), modifiers));
+			symbols.add(new FieldDef(parent, token.getText(), token.getPos(), typeRef + skipDims(stream), modifiers));
 			token = stream.current();
 			if (token.is(ASSIGN)) {
 				stream.next();
 				for (Pair<LangToken, String> fieldInfo: skipValue(stream)) {
-					symbols.add(new FieldDef(parent, fieldInfo.getFirst().getText(), fieldInfo.getFirst().getLine(), 
+					symbols.add(new FieldDef(parent, fieldInfo.getFirst().getText(), fieldInfo.getFirst().getPos(), 
 							typeRef + fieldInfo.getSecond(), modifiers));
 				}
 				token = stream.current();
@@ -449,25 +450,25 @@ public class JavaExtractor extends AbstractExtractor {
 			stream.next().checkType(INTERFACE); // 'interface'
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.ANNOTATION, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getPos(), TypeDef.Kind.ANNOTATION, modifiers);			
 			symbols.add(typeDef);
 			defineTypeBody(stream, symbols, typeDef, packageName);
 		} else if (token.is(CLASS)) {
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.CLASS, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getPos(), TypeDef.Kind.CLASS, modifiers);			
 			symbols.add(typeDef);
 			defineTypeBody(stream, symbols, typeDef, packageName);
 		} else if (token.is(INTERFACE)) {
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.INTERFACE, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getPos(), TypeDef.Kind.INTERFACE, modifiers);			
 			symbols.add(typeDef);
 			defineTypeBody(stream, symbols, typeDef, packageName);
 		} else { 
 			stream.next().checkType(Identifier); // identifier
 			token = defineTypeHead(stream);
-			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getLine(), TypeDef.Kind.ENUM, modifiers);			
+			TypeDef typeDef = new TypeDef(parent, packageName, token.getText(), token.getPos(), TypeDef.Kind.ENUM, modifiers);			
 			symbols.add(typeDef);
 			
 			// process enum constants
@@ -480,7 +481,7 @@ public class JavaExtractor extends AbstractExtractor {
 				} else {
 					skipModifiers(stream); // skip annotations
 					
-					symbols.add(new FieldDef(typeDef, stream.current().getText(), stream.current().getLine(), 
+					symbols.add(new FieldDef(typeDef, stream.current().getText(), stream.current().getPos(), 
 							null, Lists.newArrayList(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)));
 					token = stream.next();
 					if (token.is(LPAREN)) { // enum constant arguments

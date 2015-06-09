@@ -9,6 +9,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.lang.java.icons.Icons;
 
 public class FieldDef extends JavaSymbol {
@@ -19,9 +20,9 @@ public class FieldDef extends JavaSymbol {
 	
 	private final List<Modifier> modifiers;
 	
-	public FieldDef(TypeDef parent, String name, int lineNo, 
+	public FieldDef(TypeDef parent, String name, TokenPosition pos, 
 			@Nullable String type, List<Modifier> modifiers) {
-		super(parent, name, lineNo);
+		super(parent, name, pos);
 		
 		this.type = type;
 		this.modifiers = modifiers;

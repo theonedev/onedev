@@ -70,7 +70,6 @@
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;
-	display: none;
 }
 #repo-file>.search-result>.ui-resizable-handle {
     background: #EEE url("hgrabber.gif") no-repeat scroll center top;
@@ -82,6 +81,9 @@
 	font-size: 16px;
 	border-bottom: 1px solid #DDD;
 	background: white;
+}
+#repo-file>.search-result>div>.head .actions {
+	margin-left: 16px;
 }
 #repo-file>.search-result>div>.head .warning {
 	margin-left: 8px;
@@ -100,6 +102,7 @@
 #repo-file>.search-result>div>.body>li {
 	border: none; 
 	padding: 2px 0;
+	white-space: nowrap;
 }
 #repo-file>.search-result>div>.body>li a {
 	color: #333;

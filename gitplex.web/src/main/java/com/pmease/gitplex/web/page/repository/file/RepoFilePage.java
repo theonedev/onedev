@@ -37,6 +37,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.ObjectNotFoundException;
 import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.HistoryBehavior;
@@ -45,7 +46,10 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
+import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.search.query.BlobQuery;
+import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.filelist.FileListPanel;
@@ -75,7 +79,7 @@ public class RepoFilePage extends RepositoryPage {
 
 	private BlobIdent file = new BlobIdent();
 	
-	private int line;
+	private TokenPosition tokenPos;
 	
 	private Component revisionSelector;
 	
@@ -146,7 +150,7 @@ public class RepoFilePage extends RepositoryPage {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				file = new BlobIdent(file.revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
-				line = hit.getLineNo();
+				tokenPos = hit.getTokenPos();
 				
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -192,7 +196,18 @@ public class RepoFilePage extends RepositoryPage {
 			
 		});
 		
-		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
+//		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
+		
+		BlobQuery query = new TextQuery("hello", false, false, false, 1000);
+		
+		List<QueryHit> hits;
+		try {
+			hits = GitPlex.getInstance(SearchManager.class).search(getRepository(), file.revision, query);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		
+		add(newSearchResult(hits));
 		
 		add(new WebSocketRenderBehavior() {
 			
@@ -214,7 +229,7 @@ public class RepoFilePage extends RepositoryPage {
 			@Override
 			protected void onPopState(AjaxRequestTarget target, Serializable state) {
 				file = ((State) state).file;
-				line = ((State) state).line;
+				tokenPos = ((State) state).tokenPos;
 				trait.revision = file.revision;
 
 				target.add(revisionIndexing);
@@ -246,7 +261,7 @@ public class RepoFilePage extends RepositoryPage {
 						jgitRepo.close();
 					}
 				}
-				line = 0;
+				tokenPos = null;
 
 				target.add(revisionIndexing);
 				newRevisionSelector(target);
@@ -272,7 +287,7 @@ public class RepoFilePage extends RepositoryPage {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
 				RepoFilePage.this.file = file;
-				line = 0;
+				tokenPos = null;
 
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -296,7 +311,7 @@ public class RepoFilePage extends RepositoryPage {
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
 					RepoFilePage.this.file = file;
-					line = 0;
+					tokenPos = null;
 					
 					newFileViewer(target);
 					newFileNavigator(target);
@@ -319,15 +334,15 @@ public class RepoFilePage extends RepositoryPage {
 				}
 
 				@Override
-				public int getLine() {
-					return line;
+				public TokenPosition getBlobHighlight() {
+					return tokenPos;
 				}
 
 				@Override
-				public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, int line) {
+				public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
 					RepoFilePage.this.file = new BlobIdent(file.revision, blobIdent.path, 
 							FileMode.REGULAR_FILE.getBits()); 
-					RepoFilePage.this.line = line;
+					RepoFilePage.this.tokenPos = tokenPos;
 					
 					newFileNavigator(target);
 					newFileViewer(target);
@@ -375,7 +390,7 @@ public class RepoFilePage extends RepositoryPage {
 		String url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
 		State state = new State();
 		state.file = file;
-		state.line = line;
+		state.tokenPos = tokenPos;
 		historyBehavior.pushState(target, url, state);
 	}
 
@@ -402,12 +417,20 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void renderSearchResult(AjaxRequestTarget target, List<QueryHit> hits) {
-		Component searchResult = new SearchResultPanel(SEARCH_RESULD_ID, hits) {
-				
+		Component searchResult = newSearchResult(hits);
+		
+		replace(searchResult);
+		target.add(searchResult);
+		target.appendJavaScript("$('#repo-file>.search-result').show(); $(window).resize();");
+	}
+	
+	private Component newSearchResult(List<QueryHit> hits) {
+		return new SearchResultPanel(SEARCH_RESULD_ID, hits) {
+			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				file = new BlobIdent(file.revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
-				line = hit.getLineNo();
+				tokenPos = hit.getTokenPos();
 				
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -425,9 +448,6 @@ public class RepoFilePage extends RepositoryPage {
 			}
 			
 		};
-		replace(searchResult);
-		target.add(searchResult);
-		target.appendJavaScript("$('#repo-file>.search-result').show(); $(window).resize();");
 	}
 	
 	private static class RevisionIndexed implements Serializable {
@@ -450,7 +470,7 @@ public class RepoFilePage extends RepositoryPage {
 
 		BlobIdent file = new BlobIdent();
 		
-		int line;
+		TokenPosition tokenPos;
 	}
 	
 	public static class IndexedListener implements IndexListener {
