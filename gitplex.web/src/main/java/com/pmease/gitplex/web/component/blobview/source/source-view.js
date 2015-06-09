@@ -63,7 +63,7 @@ gitplex.sourceview = {
 					foldGutter: true,
 					matchBrackets: true,
 					scrollbarStyle: "simple",
-					highlightIdentifiers: {delay: 300},
+					highlightIdentifiers: {delay: 500},
 					tokenHover: {
 						getTooltip: function(tokenEl) {
 							var tooltip = document.createElement("div");

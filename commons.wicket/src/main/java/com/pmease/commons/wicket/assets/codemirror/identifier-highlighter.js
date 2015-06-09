@@ -12,7 +12,7 @@
 	"use strict";
 
 	var DEFAULT_TOKEN_STYLE = "identifierhighlight";
-	var DEFAULT_DELAY = 100;
+	var DEFAULT_DELAY = 500;
 
 	function State(options) {
 		if (typeof options == "object") {
@@ -50,15 +50,7 @@
 
   	function highlightIdentifiers(cm) { 
   		cm.operation(function() {
-  			var state = cm.state.identifierHighlighter;
-  			if (state.overlay) {
-  				cm.removeOverlay(state.overlay);
-  				state.overlay = null;
-  			}
   			if (!cm.somethingSelected()) {
-  				clearScrollbarMatches(state);
-  				if (CodeMirror.commands.clearSearch)
-  					CodeMirror.commands.clearSearch(cm);
   				var re = /[\w$]/;
   				var cur = cm.getCursor(), line = cm.getLine(cur.line), start = cur.ch, end = start;
   				while (start && re.test(line.charAt(start - 1))) --start;
@@ -68,15 +60,22 @@
   					if (tokenType != null) {
   	  					if (tokenType.indexOf("variable") > -1 
   	  							|| tokenType.indexOf("property") > -1 
-  	  							|| tokenType.indexOf("def") > -1) {
+  	  							|| tokenType.indexOf("def") > -1 
+  	  							|| tokenType.indexOf("string") > -1
+  	  							|| tokenType.indexOf("string2") > -1) {
+	  	  		  			var state = cm.state.identifierHighlighter;
+		  	  	  			if (state.overlay) {
+		  	  	  				cm.removeOverlay(state.overlay);
+		  	  	  				state.overlay = null;
+		  	  	  			}
 		  					var query = line.slice(start, end);
 		  					cm.addOverlay(state.overlay = makeOverlay(query, re, state.style));
 	
-		  					if (cm.showMatchesOnScrollbar) {
+		  					if (cm.showMatchesOnScrollbar2) {
 		  						clearScrollbarMatches(state);
 		  						
 		  						var queryRe = new RegExp("\\b" + query + "\\b");
-		  						state.annotate = cm.showMatchesOnScrollbar(queryRe, false);
+		  						state.annotate = cm.showMatchesOnScrollbar2(queryRe, false);
 		  					}
   	  					}
   					}

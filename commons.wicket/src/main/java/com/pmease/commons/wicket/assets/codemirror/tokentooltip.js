@@ -72,9 +72,13 @@
 		var node = e.target || e.srcElement, $node = $(node);
 		if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
 				|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def") || $node.hasClass("cm-meta")) {
-			// we do not want to show token tooltip too frequently to disturb the user, so only display 
-			// it if you moves the mouse intentionally over to the element without pressing the mouse
-			// button
+			/*
+			 * !state.mousePressed: 
+			 * 			not to show tooltip while we are holding mouse to select text
+			 * state.mouseMoved:
+			 * 			not to show tooltip while mouse goes over identifier while we 
+			 * 			are scrolling the document
+			 */
 			if (!state.mousePressed && state.mouseMoved && !state.showTimeout) {
 				state.onNodeMouseOutOrUpOrDown = function(e) {
 					prepareToHide(state);

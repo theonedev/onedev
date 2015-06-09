@@ -12,7 +12,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.google.common.base.Objects;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
@@ -44,7 +44,9 @@ public class CommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return commitModel.getObject().getShortMessage();
+				// do not use jgit shortMessage here as it concatenates all lines in the first 
+				// paragraph to cause detail message toggle inaccurate
+				return StringUtils.substringBefore(commitModel.getObject().getFullMessage(), "\n").trim();
 			}
 		}));
 
@@ -53,7 +55,7 @@ public class CommitMessagePanel extends Panel {
 			@Override
 			public String getObject() {
 				RevCommit commit = commitModel.getObject();
-				return commit.getFullMessage().trim().substring(commit.getShortMessage().trim().length()).trim();
+				return StringUtils.substringAfter(commit.getFullMessage(), "\n").trim();
 			}
 			
 		}) {
@@ -63,7 +65,7 @@ public class CommitMessagePanel extends Panel {
 				super.onConfigure();
 				
 				RevCommit commit = commitModel.getObject();
-				setVisible(!Objects.equal(commit.getShortMessage().trim(), commit.getFullMessage().trim()));
+				setVisible(StringUtils.substringAfter(commit.getFullMessage(), "\n").trim().length()!=0);
 			}
 		});
 		
@@ -73,7 +75,7 @@ public class CommitMessagePanel extends Panel {
 				super.onConfigure();
 				
 				RevCommit commit = commitModel.getObject();
-				setVisible(!Objects.equal(commit.getShortMessage().trim(), commit.getFullMessage().trim()));
+				setVisible(StringUtils.substringAfter(commit.getFullMessage(), "\n").trim().length()!=0);
 			}
 		};
 		add(detailedToggle);

@@ -34,3 +34,12 @@
 	max-width: 900px; 
 	max-height: 600px;
 }
+
+.CodeMirror-search-match2 {
+  background: #666;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  opacity: .5;
+}
