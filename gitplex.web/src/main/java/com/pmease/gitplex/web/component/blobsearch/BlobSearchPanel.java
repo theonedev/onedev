@@ -143,9 +143,8 @@ public abstract class BlobSearchPanel extends Panel {
 							
 						};
 						link.add(hit.render("label"));
+						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
-						
-						item.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 
 						if (item.getIndex() == activeHitIndex)
 							item.add(AttributeModifier.append("class", "active"));
@@ -243,8 +242,8 @@ public abstract class BlobSearchPanel extends Panel {
 							
 						};
 						link.add(hit.render("label"));
+						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
-						item.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 
 						if (item.getIndex() + symbolHits.size() == activeHitIndex)
 							item.add(AttributeModifier.append("class", " active"));

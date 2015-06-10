@@ -34,7 +34,14 @@
 	max-width: 900px; 
 	max-height: 600px;
 }
-
+.CodeMirror-search-match {
+  background: orange;
+  border-top: 1px solid orange;
+  border-bottom: 1px solid orange;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  opacity: .5;
+}
 .CodeMirror-search-match2 {
   background: #666;
   border-top: 1px solid #666;

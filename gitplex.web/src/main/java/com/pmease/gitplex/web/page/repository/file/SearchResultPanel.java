@@ -153,6 +153,8 @@ abstract class SearchResultPanel extends Panel {
 							protected void onInitialize() {
 								super.onInitialize();
 								add(hit.render("label"));
+								add(new Label("scope", hit.getScope())
+										.setVisible(!(hit instanceof TextHit) && hit.getScope()!=null));
 							}
 
 							@Override
@@ -161,9 +163,6 @@ abstract class SearchResultPanel extends Panel {
 							}
 							
 						});
-						
-						item.add(new Label("scope", hit.getScope())
-								.setVisible(!(hit instanceof TextHit) && hit.getScope()!=null));
 					}
 					
 				});
