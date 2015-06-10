@@ -230,7 +230,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				
 				String blobHighlight;
 				try {
-					blobHighlight = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getBlobHighlight());
+					blobHighlight = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPosition());
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
 				} 

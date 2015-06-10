@@ -24,7 +24,7 @@ public abstract class BlobViewContext implements Serializable {
 	public abstract BlobIdent getBlobIdent();
 	
 	@Nullable
-	public abstract TokenPosition getBlobHighlight();
+	public abstract TokenPosition getTokenPosition();
 	
 	public abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos);
 	

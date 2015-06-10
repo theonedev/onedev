@@ -334,7 +334,7 @@ public class RepoFilePage extends RepositoryPage {
 				}
 
 				@Override
-				public TokenPosition getBlobHighlight() {
+				public TokenPosition getTokenPosition() {
 					return tokenPos;
 				}
 
