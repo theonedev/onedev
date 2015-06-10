@@ -80,7 +80,11 @@ gitplex.sourceview = {
 				
 			    var modeInfo = CodeMirror.findModeByFileName(filePath);
 			    if (modeInfo) {
-				    cm.setOption("mode", modeInfo.mime);
+			    	// specify mode via mime does not work for gfm (github flavored markdown)
+			    	if (modeInfo.mode === "gfm")
+			    		cm.setOption("mode", "gfm");
+			    	else
+			    		cm.setOption("mode", modeInfo.mime);
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
 
