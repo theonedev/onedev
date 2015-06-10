@@ -85,7 +85,7 @@ gitplex.sourceview = {
 			    }
 
 			    if (tokenPos)
-			    	gitplex.sourceview.gotoToken(cm, tokenPos);
+			    	gitplex.sourceview.highlightToken(cm, tokenPos);
 			}
 			cm.setSize($code.width(), $code.height());
 		});
@@ -99,12 +99,10 @@ gitplex.sourceview = {
 		$tooltip.align();
 	},
 	
-	gotoSymbol: function(outlineId, tokenPos) {
-		var cm = $('#'+ outlineId).closest(".source-view").find(".CodeMirror")[0].CodeMirror;		
-		gitplex.sourceview.gotoToken(cm, tokenPos);
-	},
-	
-	gotoToken: function(cm, tokenPos) {
+	highlightToken: function(cm, tokenPos) {
+		if (typeof cm === "string") 
+			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
+		
 		var h = cm.getScrollInfo().clientHeight;
 		var coords = cm.charCoords({line: tokenPos.line, ch: 0}, "local");
 		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
@@ -116,6 +114,7 @@ gitplex.sourceview = {
 		} else {
 			cm.setCursor(tokenPos.line);
 		}
+		
 	}
-	
+		
 }

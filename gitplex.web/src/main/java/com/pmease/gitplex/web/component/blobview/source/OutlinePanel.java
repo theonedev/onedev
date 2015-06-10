@@ -7,24 +7,21 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.lang.Symbol;
-import com.pmease.gitplex.core.GitPlex;
 
 @SuppressWarnings("serial")
-class OutlinePanel extends Panel {
+abstract class OutlinePanel extends Panel {
 
 	private final List<Symbol> symbols;
 	
@@ -88,21 +85,11 @@ class OutlinePanel extends Panel {
 				
 				fragment.add(new Image("icon", symbol.getIcon()));
 				
-				WebMarkupContainer link = new WebMarkupContainer("link") {
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-
-						String tokenPos;
-						try {
-							tokenPos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(symbol.getPos());
-						} catch (JsonProcessingException e) {
-							throw new RuntimeException(e);
-						}
-						String script = String.format("gitplex.sourceview.gotoSymbol('%s', %s);", 
-								OutlinePanel.this.getMarkupId(), tokenPos);
-						tag.put("onclick", script);
+					public void onClick(AjaxRequestTarget target) {
+						onSelect(target, symbol);
 					}
 					
 				};
@@ -120,4 +107,5 @@ class OutlinePanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
+	protected abstract void onSelect(AjaxRequestTarget target, Symbol symbol);
 }

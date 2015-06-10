@@ -34,7 +34,7 @@ public abstract class BlobViewPanel extends Panel {
 		
 		this.context = context;
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -133,4 +133,8 @@ public abstract class BlobViewPanel extends Panel {
 		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.blobView('%s');", getMarkupId())));
 	}
 
+	public BlobViewContext getContext() {
+		return context;
+	}
+	
 }

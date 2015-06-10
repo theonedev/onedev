@@ -52,6 +52,7 @@ import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
+import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
 import com.pmease.gitplex.web.component.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
@@ -305,6 +306,15 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void newFileViewer(AjaxRequestTarget target) {
+		if (target != null && fileViewer instanceof SourceViewPanel) {
+			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
+			if (sourceViewer.getContext().getBlobIdent().equals(file)) {
+				if (tokenPos != null)
+					sourceViewer.highlightToken(target, tokenPos);
+				return;
+			}
+		}
+		
 		if (file.path == null || file.isTree()) {
 			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, file) {
 
@@ -321,16 +331,11 @@ public class RepoFilePage extends RepositoryPage {
 				
 			};
 		} else {
-			fileViewer = new BlobViewContext() {
+			fileViewer = new BlobViewContext(file) {
 
 				@Override
 				public Repository getRepository() {
 					return RepoFilePage.this.getRepository();
-				}
-
-				@Override
-				public BlobIdent getBlobIdent() {
-					return file;
 				}
 
 				@Override

@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
@@ -19,9 +18,18 @@ public abstract class BlobViewContext implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public abstract Repository getRepository();
+	/*
+	 * Store blobIdent in view context so that we can compare it with 
+	 * selected file to avoid re-rendering source view if file is not 
+	 * changed 
+	 */
+	private final BlobIdent blobIdent;
+
+	public BlobViewContext(BlobIdent blobIdent) {
+		this.blobIdent = blobIdent;
+	}
 	
-	public abstract BlobIdent getBlobIdent();
+	public abstract Repository getRepository();
 	
 	@Nullable
 	public abstract TokenPosition getTokenPosition();
@@ -29,14 +37,18 @@ public abstract class BlobViewContext implements Serializable {
 	public abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos);
 	
 	public abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
-	
-	public Blob getBlob() {
-		return getRepository().getBlob(getBlobIdent());
+
+	public BlobIdent getBlobIdent() {
+		return blobIdent;
 	}
 	
-	public Panel render(String panelId) {
+	public Blob getBlob() {
+		return getRepository().getBlob(blobIdent);
+	}
+	
+	public BlobViewPanel render(String panelId) {
 		for (BlobRenderer renderer: GitPlex.getExtensions(BlobRenderer.class)) {
-			Panel panel = renderer.render(panelId, this);
+			BlobViewPanel panel = renderer.render(panelId, this);
 			if (panel != null)
 				return panel;
 		}

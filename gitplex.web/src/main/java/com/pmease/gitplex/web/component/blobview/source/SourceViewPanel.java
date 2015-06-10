@@ -39,6 +39,7 @@ import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
@@ -94,6 +95,17 @@ public class SourceViewPanel extends BlobViewPanel {
 		return fragment;
 	}
 
+	public void highlightToken(AjaxRequestTarget target, TokenPosition tokenPos) {
+		try {
+			String json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(tokenPos);
+			String script = String.format("gitplex.sourceview.highlightToken('%s', %s);", 
+					codeContainer.getMarkupId(), json);
+			target.appendJavaScript(script);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -101,7 +113,14 @@ public class SourceViewPanel extends BlobViewPanel {
 		add(codeContainer = new WebMarkupContainer("code"));
 		codeContainer.setOutputMarkupId(true);
 		
-		add(outlinePanel = new OutlinePanel("outline", symbols));
+		add(outlinePanel = new OutlinePanel("outline", symbols) {
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Symbol symbol) {
+				highlightToken(target, symbol.getPos());
+			}
+			
+		});
 		outlinePanel.setVisible(!symbols.isEmpty());
 		
 		add(symbolsContainer = new WebMarkupContainer("symbols"));
@@ -228,9 +247,9 @@ public class SourceViewPanel extends BlobViewPanel {
 				response.render(CssHeaderItem.forReference(
 						new CssResourceReference(SourceViewPanel.class, "source-view.css")));
 				
-				String blobHighlight;
+				String highlightToken;
 				try {
-					blobHighlight = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPosition());
+					highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPosition());
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
 				} 
@@ -239,7 +258,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						codeContainer.getMarkupId(), 
 						StringEscapeUtils.escapeEcmaScript(context.getBlob().getText().getContent()),
 						context.getBlobIdent().path, 
-						blobHighlight,
+						highlightToken,
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
