@@ -317,10 +317,8 @@ public class DefaultIndexManager implements IndexManager {
 				logger.info("Commit {} indexed (checked blobs: {}, indexed blobs: {})", 
 						commitId.getName(), indexResult.getChecked(), indexResult.getIndexed());
 				
-				if (indexResult.getIndexed() != 0) {
-					for (IndexListener listener: listeners)
-						listener.commitIndexed(repository, revision);
-				}
+				for (IndexListener listener: listeners)
+					listener.commitIndexed(repository, revision);
 				
 				return indexResult;
 			}
