@@ -37,7 +37,6 @@
 		}
 		if (val) {
 			cm.state.identifierHighlighter = new State(val);
-			highlightIdentifiers(cm);
 			cm.on("cursorActivity", cursorActivity);
 		}
 	});
