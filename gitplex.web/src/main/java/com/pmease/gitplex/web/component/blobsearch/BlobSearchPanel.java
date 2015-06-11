@@ -335,8 +335,6 @@ public abstract class BlobSearchPanel extends Panel {
 				
 				instantSearchInput = instantSearchField.getInput();
 
-				System.out.println(instantSearchInput);
-				
 				if (StringUtils.isNotBlank(instantSearchInput)) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 
