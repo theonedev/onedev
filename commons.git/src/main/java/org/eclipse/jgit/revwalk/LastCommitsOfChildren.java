@@ -26,6 +26,7 @@ import org.eclipse.jgit.util.RawParseUtils;
 
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.util.StringUtils;
 
 /**
  * This class calculates last commits of children of a git tree.
@@ -355,7 +356,7 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 		
 		public Value(RevCommit commit) {
 			this.id = commit.copy();
-			this.summary = commit.getShortMessage();
+			this.summary = StringUtils.substringBefore(commit.getFullMessage(), "\n").trim();
 			this.timestamp = commit.getCommitTime();
 		}
 

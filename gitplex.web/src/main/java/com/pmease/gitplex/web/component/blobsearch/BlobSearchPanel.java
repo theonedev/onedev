@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -66,6 +68,11 @@ import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
 @SuppressWarnings("serial")
 public abstract class BlobSearchPanel extends Panel {
 
+	/*
+	 * Entries to query is much more than entries to be displayed in order to 
+	 * cover important symbols (for instant types are important than fields...)
+	 * so that they can be sorted to be displayed first  
+	 */
 	private static final int SYMBOL_QUERY_ENTRIES = 1000;
 	
 	private static final int SYMBOL_DISPLAY_ENTRIES = 15;
@@ -316,11 +323,20 @@ public abstract class BlobSearchPanel extends Panel {
 		instantSearchField.add(new AjaxFormComponentUpdatingBehavior("inputchange focus click") {
 			
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setChannel(new AjaxChannel("blob-instant-search", AjaxChannel.Type.DROP));
+			}
+
+			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (instantSearchResult != null)
 					target.add(instantSearchResult);
 				
 				instantSearchInput = instantSearchField.getInput();
+
+				System.out.println(instantSearchInput);
+				
 				if (StringUtils.isNotBlank(instantSearchInput)) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 

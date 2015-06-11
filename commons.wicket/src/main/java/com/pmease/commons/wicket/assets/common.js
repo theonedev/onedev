@@ -496,7 +496,7 @@ pmease.commons = {
 			ajaxLoadingIndicator[0].timer = setTimeout(function() {
 				if (!$(".ajax-indicator").is(":visible"))
 					ajaxLoadingIndicator.show();
-			}, 500);		
+			}, 5000);		
 		});
 		
 		Wicket.Event.subscribe('/ajax/call/complete', function() {

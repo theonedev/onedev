@@ -34,14 +34,11 @@ import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.util.FS;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -539,7 +536,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	public FileRepository openAsJGitRepo() {
 		try {
-			return (FileRepository) RepositoryCache.open(FileKey.exact(git().repoDir(), FS.DETECTED), true);
+			return new FileRepository(git().repoDir());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

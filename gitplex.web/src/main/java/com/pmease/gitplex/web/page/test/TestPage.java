@@ -1,8 +1,13 @@
 package com.pmease.gitplex.web.page.test;
 
-import com.pmease.gitplex.web.page.base.BasePage;
+import org.apache.wicket.markup.html.WebPage;
 
 @SuppressWarnings("serial")
-public class TestPage extends BasePage {
+public class TestPage extends WebPage {
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+	}
 
 }
