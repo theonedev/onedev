@@ -35,14 +35,14 @@ public class SymbolQuery extends BlobQuery {
 
 	private static final Logger logger = LoggerFactory.getLogger(SymbolQuery.class);
 	
-	public SymbolQuery(String searchFor, boolean regex, boolean exactMatch, boolean caseSensitive, 
+	public SymbolQuery(String term, boolean regex, boolean exactMatch, boolean caseSensitive, 
 			@Nullable String pathPrefix, Collection<String> pathSuffixes, int count) {
-		super(FieldConstants.BLOB_SYMBOLS.name(), searchFor, regex, exactMatch, 
+		super(FieldConstants.BLOB_SYMBOLS.name(), term, regex, exactMatch, 
 				caseSensitive, pathPrefix, pathSuffixes, count);
 	}
 
-	public SymbolQuery(String searchFor, boolean regex, boolean exactMatch, boolean caseSensitive, int count) {
-		this(searchFor, regex, exactMatch, caseSensitive, null, null, count);
+	public SymbolQuery(String term, boolean regex, boolean exactMatch, boolean caseSensitive, int count) {
+		this(term, regex, exactMatch, caseSensitive, null, null, count);
 	}
 	
 	@Override
@@ -97,7 +97,7 @@ public class SymbolQuery extends BlobQuery {
 
 	private boolean matches(String text) {
 		Pattern pattern = getPattern();
-		String searchFor = getCasedSearchFor();
+		String searchFor = getCasedTerm();
 		if (pattern != null) {
 			return pattern.matcher(text).find();
 		} else {
@@ -110,17 +110,20 @@ public class SymbolQuery extends BlobQuery {
 	}
 
 	@Override
-	protected Query getLuceneQueryOfSearchFor() {
+	protected Query asLuceneQuery(String term) {
 		if (isRegex()) { 
-			return new RegexLiterals(getSearchFor()).asWildcardQuery(getFieldName());
-		} else if (getSearchFor().length() != 0) { 
-			if (isWordMatch())
-				return new TermQuery(new Term(getFieldName(), getSearchFor().toLowerCase()));
-			else
-				return new WildcardQuery(new Term(getFieldName(), getSearchFor().toLowerCase() + "*"));
+			return new RegexLiterals(term).asWildcardQuery(getFieldName());
 		} else {
-			return null;
-		}
+			term = StringUtils.replaceChars(term, "*?", "");
+			if (StringUtils.isNotBlank(term)) { 
+				if (isWordMatch())
+					return new TermQuery(new Term(getFieldName(), term.toLowerCase()));
+				else
+					return new WildcardQuery(new Term(getFieldName(), term.toLowerCase() + "*"));
+			} else {
+				throw new TooGeneralQueryException();
+			}			
+		} 
 	}
 	
 }

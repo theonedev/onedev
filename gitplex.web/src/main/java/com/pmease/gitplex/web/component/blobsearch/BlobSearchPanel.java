@@ -43,7 +43,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.AjaxEvent;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
@@ -60,13 +60,17 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
+import com.pmease.gitplex.search.query.TooGeneralQueryException;
+import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class BlobSearchPanel extends Panel {
 
-	private static final int MAX_INSTANT_QUERY_ENTRIES = 15;
+	private static final int SYMBOL_QUERY_ENTRIES = 1000;
 	
-	public static final int MAX_ADVANCED_QUERY_ENTRIES = 1000;
+	private static final int SYMBOL_DISPLAY_ENTRIES = 15;
+	
+	private static final int TEXT_QUERY_ENTRIES = 15;
 	
 	private final IModel<Repository> repoModel;
 	
@@ -161,11 +165,14 @@ public abstract class BlobSearchPanel extends Panel {
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
 								SymbolQuery query = new SymbolQuery(
-										instantSearchInput, false, false, false, MAX_ADVANCED_QUERY_ENTRIES);
+										instantSearchInput, false, false, false, SearchResultPanel.MAX_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
 									renderQueryHits(target, hits);
+								} catch (TooGeneralQueryException e) {
+									// this is impossible as we already queried part of the result
+									throw new IllegalStateException();
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
@@ -178,7 +185,7 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(symbolHits.size()==MAX_INSTANT_QUERY_ENTRIES);
+						setVisible(symbolHits.size()==SYMBOL_DISPLAY_ENTRIES);
 					}
 
 					@Override
@@ -260,11 +267,14 @@ public abstract class BlobSearchPanel extends Panel {
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
 								TextQuery query = new TextQuery(
-										instantSearchInput, false, false, false, MAX_ADVANCED_QUERY_ENTRIES);
+										instantSearchInput, false, false, false, SearchResultPanel.MAX_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
 									renderQueryHits(target, hits);
+								} catch (TooGeneralQueryException e) {
+									// this is impossible as we already queried part of the result
+									throw new IllegalStateException();
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
@@ -277,7 +287,7 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(textHits.size()==MAX_INSTANT_QUERY_ENTRIES);
+						setVisible(textHits.size()==TEXT_QUERY_ENTRIES);
 					}
 
 					@Override
@@ -311,22 +321,28 @@ public abstract class BlobSearchPanel extends Panel {
 					target.add(instantSearchResult);
 				
 				instantSearchInput = instantSearchField.getInput();
-				if (!Strings.isNullOrEmpty(instantSearchInput)) {
+				if (StringUtils.isNotBlank(instantSearchInput)) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 
-					BlobQuery blobQuery = new SymbolQuery(instantSearchField.getInput(), 
-							false, false, false, MAX_INSTANT_QUERY_ENTRIES);
+					BlobQuery blobQuery = new SymbolQuery(instantSearchInput, false, false, false, SYMBOL_QUERY_ENTRIES);
+					
 					try {
 						symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), blobQuery);
+					} catch (TooGeneralQueryException e) {
+						symbolHits = new ArrayList<>();
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
+					
+					if (symbolHits.size() > SYMBOL_DISPLAY_ENTRIES) 
+						symbolHits = new ArrayList<>(symbolHits.subList(0, SYMBOL_DISPLAY_ENTRIES));
 
 					if (instantSearchInput.length() >= IndexConstants.NGRAM_SIZE) {
-						TextQuery textQuery = new TextQuery(instantSearchField.getInput(), 
-								false, false, false, MAX_INSTANT_QUERY_ENTRIES);
+						TextQuery textQuery = new TextQuery(instantSearchInput, false, false, false, TEXT_QUERY_ENTRIES);
 						try {
 							textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), textQuery);
+						} catch (TooGeneralQueryException e) {
+							symbolHits = new ArrayList<>();
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}
@@ -403,10 +419,10 @@ public abstract class BlobSearchPanel extends Panel {
 	private QueryHit getActiveHit() {
 		List<QueryHit> hits = new ArrayList<>();
 		hits.addAll(symbolHits);
-		if (symbolHits.size() == MAX_INSTANT_QUERY_ENTRIES)
+		if (symbolHits.size() == SYMBOL_DISPLAY_ENTRIES)
 			hits.add(new MoreSymbolHit());
 		hits.addAll(textHits);
-		if (textHits.size() == MAX_INSTANT_QUERY_ENTRIES)
+		if (textHits.size() == TEXT_QUERY_ENTRIES)
 			hits.add(new MoreTextHit());
 		
 		if (activeHitIndex >=0 && activeHitIndex<hits.size())
@@ -468,7 +484,7 @@ public abstract class BlobSearchPanel extends Panel {
 		@Override
 		protected Component newContent(String id, ModalBehavior behavior) {
 			Fragment fragment = new Fragment(id, "advancedSearchFrag", BlobSearchPanel.this);
-			Form<?> form = new Form<Void>("form");
+			final Form<?> form = new Form<Void>("form");
 			form.setOutputMarkupId(true);
 			fragment.add(form);
 			
@@ -549,21 +565,23 @@ public abstract class BlobSearchPanel extends Panel {
 							BlobQuery query;
 							if (searchType.equals(SEARCH_SYMBOLS)) {
 								query = new SymbolQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
+										null, pathSuffixes, SearchResultPanel.MAX_QUERY_ENTRIES);
 							} else {
 								query = new TextQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, MAX_ADVANCED_QUERY_ENTRIES);
+										null, pathSuffixes, SearchResultPanel.MAX_QUERY_ENTRIES);
 							}
-							
+
 							try {
 								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 								List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
 								renderQueryHits(target, hits);
+								close(target);
+							} catch (TooGeneralQueryException e) {
+								searchForInput.error("Query term is too general.");
+								target.add(form);
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
 							}								
-							
-							close(target);
 						}
 						
 					});

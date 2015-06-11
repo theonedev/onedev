@@ -30,14 +30,14 @@ public class TextQuery extends BlobQuery {
 
 	private static int MAX_LINE_LEN = 1024;
 	
-	public TextQuery(String searchFor, boolean regex, boolean matchWord, boolean caseSensitive, 
+	public TextQuery(String term, boolean regex, boolean matchWord, boolean caseSensitive, 
 			@Nullable String pathPrefix, @Nullable Collection<String> pathSuffixes, int count) {
-		super(FieldConstants.BLOB_TEXT.name(), searchFor, regex, matchWord, caseSensitive, 
+		super(FieldConstants.BLOB_TEXT.name(), term, regex, matchWord, caseSensitive, 
 				pathPrefix, pathSuffixes, count);
 	}
 
-	public TextQuery(String searchFor, boolean regex, boolean matchWord, boolean caseSensitive, int count) {
-		this(searchFor, regex, matchWord, caseSensitive, null, null, count);
+	public TextQuery(String term, boolean regex, boolean matchWord, boolean caseSensitive, int count) {
+		this(term, regex, matchWord, caseSensitive, null, null, count);
 	}
 	
 	@Override
@@ -70,14 +70,14 @@ public class TextQuery extends BlobQuery {
 							lineNo++;
 						}
 					} else {
-						String searchFor = getCasedSearchFor();
+						String casedTerm = getCasedTerm();
 						
 						int lineNo = 0;
 						for (String line: Splitter.on("\n").split(content)) {
 							String casedLine = getCasedText(line);
-							int start = casedLine.indexOf(searchFor, 0);
+							int start = casedLine.indexOf(casedTerm, 0);
 							while (start != -1) {
-								int end = start + searchFor.length();
+								int end = start + casedTerm.length();
 								if (isWordMatch()) {
 									char beforeChar;
 									if (start == 0)
@@ -103,7 +103,7 @@ public class TextQuery extends BlobQuery {
 									if (hits.size() >= getCount())
 										break;
 								}
-								start = casedLine.indexOf(searchFor, end);
+								start = casedLine.indexOf(casedTerm, end);
 							}
 							if (hits.size() >= getCount())
 								break;
@@ -122,13 +122,13 @@ public class TextQuery extends BlobQuery {
 	}
 
 	@Override
-	protected Query getLuceneQueryOfSearchFor() {
+	protected Query asLuceneQuery(String term) {
 		if (isRegex()) 
-			return new RegexLiterals(getSearchFor()).asNGramQuery(getFieldName(), NGRAM_SIZE);
-		else if (getSearchFor().length() >= NGRAM_SIZE)  
-			return new NGramLuceneQuery(getFieldName(), getSearchFor(), NGRAM_SIZE);
+			return new RegexLiterals(term).asNGramQuery(getFieldName(), NGRAM_SIZE);
+		else if (term.length() >= NGRAM_SIZE)  
+			return new NGramLuceneQuery(getFieldName(), term, NGRAM_SIZE);
 		else 
-			return null;
+			throw new TooGeneralQueryException();
 	}
 	
 }

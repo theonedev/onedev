@@ -1,5 +1,5 @@
 .cm-identifierhighlight {
-	background: #D0D0D0;
+	background: #ACF0A6;
 }
 .CodeMirror-selected {
 	background-color: #3399FF !important;
@@ -35,17 +35,17 @@
 	max-height: 600px;
 }
 .CodeMirror-search-match {
-  background: orange;
-  border-top: 1px solid orange;
-  border-bottom: 1px solid orange;
+  background: gold;
+  border-top: 1px solid gold;
+  border-bottom: 1px solid gold;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   opacity: .5;
 }
 .CodeMirror-search-match2 {
-  background: #666;
-  border-top: 1px solid #666;
-  border-bottom: 1px solid #666;
+  background: #68E55D;
+  border-top: 1px solid #68E55D;
+  border-bottom: 1px solid #68E55D;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   opacity: .5;

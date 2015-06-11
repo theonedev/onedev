@@ -331,7 +331,7 @@ public class RepoFilePage extends RepositoryPage {
 				
 			};
 		} else {
-			fileViewer = new BlobViewContext(file) {
+			fileViewer = new BlobViewContext(new BlobIdent(file)) {
 
 				@Override
 				public Repository getRepository() {

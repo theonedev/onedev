@@ -20,7 +20,7 @@ public abstract class BlobQuery {
 
 	private final String fieldName;
 	
-	private final String searchFor;
+	private final String term;
 	
 	private final int count;
 
@@ -36,12 +36,12 @@ public abstract class BlobQuery {
 	
 	private transient Pattern pattern;
 	
-	private transient String casedSearchFor;
+	private transient String casedTerm;
 	
-	public BlobQuery(String fieldName, String searchFor, boolean regex, boolean wordMatch, boolean caseSensitive, 
+	public BlobQuery(String fieldName, String term, boolean regex, boolean wordMatch, boolean caseSensitive, 
 			@Nullable String pathPrefix, @Nullable Collection<String> pathSuffixes, int count) {
 		this.fieldName = fieldName;
-		this.searchFor = searchFor;
+		this.term = term;
 		this.regex = regex;
 		this.wordMatch = wordMatch;
 		this.caseSensitive = caseSensitive;
@@ -54,8 +54,8 @@ public abstract class BlobQuery {
 		return fieldName;
 	}
 
-	public String getSearchFor() {
-		return searchFor;
+	public String getTerm() {
+		return term;
 	}
 
 	public int getCount() {
@@ -84,11 +84,17 @@ public abstract class BlobQuery {
 
 	public abstract void collect(TreeWalk treeWalk, List<QueryHit> hits);
 
-	public Query asLuceneQuery() {
+	/**
+	 * Get lucene query representation of this query
+	 * 
+	 * @return 
+	 * 			lucene query
+	 * @throws 
+	 * 			TooGeneralQueryException if supplied query term is too general to possibly cause query slow
+	 */
+	public Query asLuceneQuery() throws TooGeneralQueryException {
 		BooleanQuery query = new BooleanQuery(true);
-		Query searchForQuery = getLuceneQueryOfSearchFor();
-		if (searchForQuery != null)
-			query.add(searchForQuery, Occur.MUST);
+		query.add(asLuceneQuery(getTerm()), Occur.MUST);
 		
 		if (pathPrefix != null)
 			query.add(new WildcardQuery(BLOB_PATH.term(pathPrefix + "*")), Occur.MUST);
@@ -105,13 +111,20 @@ public abstract class BlobQuery {
 			return new WildcardQuery(BLOB_PATH.term("*"));
 	}
 
-	@Nullable
-	protected abstract Query getLuceneQueryOfSearchFor();
+	/**
+	 * Get lucene query representation of the search term
+	 *  
+	 * @return
+	 * 			lucene query
+	 * @throws 
+	 * 			TooGeneralQueryException if supplied query term is too general to possibly cause query slow
+	 */
+	protected abstract Query asLuceneQuery(String term) throws TooGeneralQueryException;
 	
 	protected Pattern getPattern() {
 		if (regex) {
 			if (pattern == null) {
-				String expression = getSearchFor();
+				String expression = getTerm();
 				if (isWordMatch()) {
 					if (!expression.startsWith("\\b"))
 						expression = "\\b" + expression;
@@ -129,14 +142,14 @@ public abstract class BlobQuery {
 		}
 	}
 	
-	protected String getCasedSearchFor() {
-		if (casedSearchFor == null) {
+	protected String getCasedTerm() {
+		if (casedTerm == null) {
 			if (caseSensitive)
-				casedSearchFor = searchFor;
+				casedTerm = term;
 			else
-				casedSearchFor = searchFor.toLowerCase();
+				casedTerm = term.toLowerCase();
 		}
-		return casedSearchFor;
+		return casedTerm;
 	}
 	
 	protected String getCasedText(String text) {

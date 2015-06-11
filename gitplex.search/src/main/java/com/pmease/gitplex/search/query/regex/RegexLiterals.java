@@ -4,8 +4,6 @@ import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.lucene.index.Term;
@@ -16,6 +14,7 @@ import org.apache.lucene.search.WildcardQuery;
 
 import com.google.common.base.Strings;
 import com.pmease.gitplex.search.query.NGramLuceneQuery;
+import com.pmease.gitplex.search.query.TooGeneralQueryException;
 
 public class RegexLiterals {
 	
@@ -29,9 +28,14 @@ public class RegexLiterals {
 		OrLiterals orLiterals = (OrLiterals) new LiteralVisitor().visit(new PCREParser(tokens).parse());
 		rows = orLiterals.flattern(true);
 	}
-	
-	@Nullable
-	public Query asNGramQuery(String fieldName, int gramSize) {
+
+	/**
+	 * @param fieldName
+	 * @param gramSize
+	 * @return
+	 * @throws TooGeneralQueryException
+	 */
+	public Query asNGramQuery(String fieldName, int gramSize) throws TooGeneralQueryException {
 		BooleanQuery orQuery = new BooleanQuery();
 		for (List<LeafLiterals> row: rows) {
 			BooleanQuery andQuery = new BooleanQuery();
@@ -45,11 +49,15 @@ public class RegexLiterals {
 		if (orQuery.getClauses().length != 0)
 			return orQuery;
 		else
-			return null;
+			throw new TooGeneralQueryException();
 	}
 
-	@Nullable
-	public Query asWildcardQuery(String fieldName) {
+	/**
+	 * @param fieldName
+	 * @return
+	 * @throws TooGeneralQueryException
+	 */
+	public Query asWildcardQuery(String fieldName) throws TooGeneralQueryException {
 		BooleanQuery orQuery = new BooleanQuery();
 		for (List<LeafLiterals> row: rows) {
 			BooleanQuery andQuery = new BooleanQuery();
@@ -63,7 +71,7 @@ public class RegexLiterals {
 		if (orQuery.getClauses().length != 0)
 			return orQuery;
 		else
-			return null;
+			throw new TooGeneralQueryException();
 	}
 	
 	@Override
