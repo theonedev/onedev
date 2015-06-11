@@ -73,7 +73,7 @@ public abstract class BlobSearchPanel extends Panel {
 	 * cover important symbols (for instant types are important than fields...)
 	 * so that they can be sorted to be displayed first  
 	 */
-	private static final int SYMBOL_QUERY_ENTRIES = 1000;
+	private static final int SYMBOL_QUERY_ENTRIES = 300;
 	
 	private static final int SYMBOL_DISPLAY_ENTRIES = 15;
 	

@@ -835,7 +835,7 @@ pmease.commons = {
 
 $(function() {
 	pmease.commons.setupDropdownAndModel();
-	pmease.commons.setupAjaxLoadingIndicator();
+//	pmease.commons.setupAjaxLoadingIndicator();
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.scroll.setupScrollStop();
