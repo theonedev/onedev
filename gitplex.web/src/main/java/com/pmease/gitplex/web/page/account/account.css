@@ -1,4 +1,4 @@
-#account.sidebar>table>tbody>tr>td.nav {
+#account.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
 	width: 220px;
 }
 #account.sidebar>table>tbody>tr>td.nav>.head {

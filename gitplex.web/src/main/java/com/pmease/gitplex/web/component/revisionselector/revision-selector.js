@@ -29,7 +29,8 @@ gitplex.revisionSelector = {
 			if (activeBottom+margin>contentBottom) 
 				$refs.scrollTop($refs.scrollTop()+(activeBottom+margin-contentBottom));
 		};
-		$input.bind("keydown", "up", function() {
+		$input.bind("keydown", "up", function(e) {
+			e.preventDefault();
 			var $active = $container.find("ul.refs li.active");
 			var $prev = $active.prev("li");
 			if ($prev.length != 0) {
@@ -39,7 +40,8 @@ gitplex.revisionSelector = {
 			}
 			scrollIfNecessary();
 		});
-		$input.bind("keydown", "down", function() {
+		$input.bind("keydown", "down", function(e) {
+			e.preventDefault();
 			var $active = $container.find("ul.refs li.active");
 			var $next = $active.next("li");
 			if ($next.length != 0) {

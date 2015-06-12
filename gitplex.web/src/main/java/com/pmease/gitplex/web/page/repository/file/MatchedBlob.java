@@ -1,7 +1,9 @@
-package com.pmease.gitplex.search.hit;
+package com.pmease.gitplex.web.page.repository.file;
 
 import java.io.Serializable;
 import java.util.List;
+
+import com.pmease.gitplex.search.hit.QueryHit;
 
 public class MatchedBlob implements Serializable {
 	

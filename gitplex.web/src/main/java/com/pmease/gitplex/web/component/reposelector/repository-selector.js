@@ -29,7 +29,8 @@ gitplex.repositorySelector = {
 				$accounts.scrollTop($accounts.scrollTop()+(activeBottom+margin-contentBottom));
 		};
 		
-		$input.bind("keydown", "up", function() {
+		$input.bind("keydown", "up", function(e) {
+			e.preventDefault();
 			var $active = $container.find("li.repository.active");
 			var $prev = $active.prev("li.repository");
 			if ($prev.length != 0) {
@@ -45,7 +46,8 @@ gitplex.repositorySelector = {
 			scrollIfNecessary();
 		});
 		
-		$input.bind("keydown", "down", function() {
+		$input.bind("keydown", "down", function(e) {
+			e.preventDefault();
 			var $active = $container.find("li.repository.active");
 			var $next = $active.next("li.repository");
 			if ($next.length != 0) {

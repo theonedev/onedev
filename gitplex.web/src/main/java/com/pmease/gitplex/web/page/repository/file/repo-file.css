@@ -94,6 +94,13 @@
 #repo-file>.search-result>div>.head a {
 	color: #666;
 }
+#repo-file>.search-result>div>.head em {
+	margin-right: 8px;
+}
+#repo-file>.search-result>div>.head em i {
+	color: #999;
+}
+
 #repo-file>.search-result>div>.body {
 	overflow: auto;
 	padding: 0 10px;
@@ -101,11 +108,19 @@
 }
 #repo-file>.search-result>div>.body>li {
 	border: none; 
-	padding: 2px 0;
 	white-space: nowrap;
+}
+#repo-file>.search-result>div>.body>li .expand {
+	margin-right: -4px;
 }
 #repo-file>.search-result>div>.body>li a {
 	color: #333;
+}
+#repo-file>.search-result>div>.body>li a.selectable {
+	display: inline-block;
+}
+#repo-file>.search-result>div>.body a.selectable.active span {
+	background-color: inherit !important;
 }
 #repo-file>.search-result>div>.body>li>ul {
 	margin-left: 34px;

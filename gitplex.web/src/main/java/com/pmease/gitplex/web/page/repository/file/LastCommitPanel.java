@@ -7,15 +7,10 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.LogCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
@@ -28,23 +23,12 @@ class LastCommitPanel extends Panel {
 	
 	private final BlobIdent blob;
 
-	private final IModel<RevCommit> commitModel = new LoadableDetachableModel<RevCommit>() {
+	private final IModel<Commit> commitModel = new LoadableDetachableModel<Commit>() {
 
 		@Override
-		protected RevCommit load() {
-			Git git = Git.wrap(repoModel.getObject().openAsJGitRepo());
-			try {
-				LogCommand log = git.log();
-				log.setMaxCount(1);
-				if (blob.path != null)
-					log.addPath(blob.path);
-				log.add(repoModel.getObject().getObjectId(blob.revision, true));
-				return log.call().iterator().next();
-			} catch (MissingObjectException | IncorrectObjectTypeException | GitAPIException e) {
-				throw new RuntimeException(e);
-			} finally {
-				git.close();
-			}
+		protected Commit load() {
+			// call git command line for performance reason
+			return repoModel.getObject().git().log(null, blob.revision, blob.path, 1, 0).iterator().next();
 		}
 		
 	};
@@ -64,7 +48,7 @@ class LastCommitPanel extends Panel {
 
 			@Override
 			public PersonIdent getObject() {
-				return commitModel.getObject().getAuthorIdent();
+				return commitModel.getObject().getAuthor();
 			}
 			
 		}));
@@ -73,14 +57,14 @@ class LastCommitPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return DateUtils.formatAge(commitModel.getObject().getAuthorIdent().getWhen());
+				return DateUtils.formatAge(commitModel.getObject().getAuthor().getWhen());
 			}
 			
 		}));
 		
 		add(new CommitMessagePanel("message", repoModel, commitModel));
 		
-		add(new TextField<String>("hash", Model.of(commitModel.getObject().name())));
+		add(new TextField<String>("hash", Model.of(commitModel.getObject().getHash())));
 		
 		setOutputMarkupId(true);
 	}

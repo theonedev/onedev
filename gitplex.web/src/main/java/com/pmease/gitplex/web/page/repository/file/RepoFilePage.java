@@ -64,6 +64,8 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIR
 @SuppressWarnings("serial")
 public class RepoFilePage extends RepositoryPage {
 
+	public static final int MAX_QUERY_ENTRIES = 1000;
+	
 	private static final String PARAM_REVISION = "revision";
 	
 	private static final String PARAM_PATH = "path";
@@ -426,7 +428,10 @@ public class RepoFilePage extends RepositoryPage {
 		
 		replace(searchResult);
 		target.add(searchResult);
-		target.appendJavaScript("$('#repo-file>.search-result').show(); $(window).resize();");
+		target.appendJavaScript(""
+				+ "$('#repo-file>.search-result').show(); "
+				+ "$('#repo-file>.search-result>div>.body').focus(); "
+				+ "$(window).resize();");
 	}
 	
 	private Component newSearchResult(List<QueryHit> hits) {

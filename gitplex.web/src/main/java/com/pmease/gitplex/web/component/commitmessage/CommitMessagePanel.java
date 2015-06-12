@@ -10,9 +10,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
@@ -22,9 +21,9 @@ public class CommitMessagePanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<RevCommit> commitModel;
+	private final IModel<Commit> commitModel;
 	
-	public CommitMessagePanel(String id, IModel<Repository> repoModel, IModel<RevCommit> commitModel) {
+	public CommitMessagePanel(String id, IModel<Repository> repoModel, IModel<Commit> commitModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
@@ -37,16 +36,14 @@ public class CommitMessagePanel extends Panel {
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("link",
 				RepoCommitPage.class,
-				RepoCommitPage.paramsOf(repoModel.getObject(), commitModel.getObject().name()));
+				RepoCommitPage.paramsOf(repoModel.getObject(), commitModel.getObject().getHash()));
 		
 		add(link);
 		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				// do not use jgit shortMessage here as it concatenates all lines in the first 
-				// paragraph to cause detail message toggle inaccurate
-				return StringUtils.substringBefore(commitModel.getObject().getFullMessage(), "\n").trim();
+				return commitModel.getObject().getSubject();
 			}
 		}));
 
@@ -54,8 +51,7 @@ public class CommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				RevCommit commit = commitModel.getObject();
-				return StringUtils.substringAfter(commit.getFullMessage(), "\n").trim();
+				return commitModel.getObject().getBody();
 			}
 			
 		}) {
@@ -64,8 +60,7 @@ public class CommitMessagePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				RevCommit commit = commitModel.getObject();
-				setVisible(StringUtils.substringAfter(commit.getFullMessage(), "\n").trim().length()!=0);
+				setVisible(commitModel.getObject().getBody() != null);
 			}
 		});
 		
@@ -74,8 +69,7 @@ public class CommitMessagePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				RevCommit commit = commitModel.getObject();
-				setVisible(StringUtils.substringAfter(commit.getFullMessage(), "\n").trim().length()!=0);
+				setVisible(commitModel.getObject().getBody() != null);
 			}
 		};
 		add(detailedToggle);

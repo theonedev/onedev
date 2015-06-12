@@ -161,7 +161,8 @@ $(document).ready(function() {
 	$(window).on("beforeunload", function() {
 		$(":focus").trigger("blur");
 	});
-	
+
+	/*
 	$(window).load(function() {
 		$(document).mousedown(function() { 
 			gitplex.spaceGreedy.mouseDown = true;
@@ -171,4 +172,5 @@ $(document).ready(function() {
 		});		
 		gitplex.spaceGreedy.check();
 	});
+	*/
 });

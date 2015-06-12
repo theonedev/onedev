@@ -20,17 +20,3 @@
 .repository-selector ul.repositories {
 	margin: 0 0 8px 24px;
 }
-.repository-selector li.repository a {
-	display: block;
-	text-decoration: none;
-	color: #333;
-	padding: 2px 5px;
-}
-.repository-selector li.repository:hover a {
-	background: #EEE;
-	color: black;
-}
-.repository-selector li.repository.active a {
-	background: #666;
-	color: white;
-}

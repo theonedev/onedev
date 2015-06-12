@@ -16,16 +16,18 @@
 			<a wicket:id="close" title="Close"><i class="fa fa-close"></i></a>
 		</div>
 	</div>
-	<ul class="body list-unstyled">
+	<ul class="body list-unstyled" tabindex="0">
 		<li wicket:id="blobs" class="blob">
 			<a wicket:id="expandLink" class="expand"><i wicket:id="icon"></i></a> 
-			<i class="fa fa-file-o icon"></i>
-			<a wicket:id="pathLink" class="path"><span wicket:id="label"></span></a> 
+			<a wicket:id="blobLink" class="blob selectable">
+				<i class="fa fa-file-o icon"></i>
+				<span wicket:id="label"></span>
+			</a> 
 			<ul wicket:id="hits" class="list-unstyled">
 				<li wicket:id="hits" class="hit">
-					<img wicket:id="icon"></img>
-					<span wicket:id="lineNo" class="line-no"></span>
-					<a wicket:id="lineLink">
+					<a wicket:id="hitLink" class="hit selectable">
+						<img wicket:id="icon"></img>
+						<span wicket:id="lineNo" class="line-no"></span>
 						<span wicket:id="label"></span>
 						<wicket:enclosure child="scope">
 							<span class="scope">

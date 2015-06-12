@@ -32,7 +32,7 @@ gitplex.blobSearch = {
 		function scrollIfNecessary() {
 			var margin = 36;
 			var $container = $dropdown.find(".instant-search-result");
-			var $active = $dropdown.find("tr.hit.active");
+			var $active = $dropdown.find("li.hit.active");
 			var containerTop = $container.offset().top;
 			var activeTop = $active.offset().top;
 			if (activeTop-margin<containerTop)
@@ -43,15 +43,16 @@ gitplex.blobSearch = {
 			if (activeBottom+margin>containerBottom) 
 				$container.scrollTop($container.scrollTop()+(activeBottom+margin-containerBottom));
 		};
-		function keyup() {
-			var $active = $dropdown.find("tr.hit.active");
-			var $prev = $active.prev("tr.hit");
+		function keyup(e) {
+			e.preventDefault();
+			var $active = $dropdown.find("li.hit.active");
+			var $prev = $active.prev("li.hit");
 			if ($prev.length != 0) {
 				$active.removeClass("active");
 				$prev.addClass("active");
 				callback("up");
 			} else if ($active.closest(".texts.section").length != 0) {
-				var $lastSymbolHit = $dropdown.find(".symbols.section tr.hit:last-child");
+				var $lastSymbolHit = $dropdown.find(".symbols.section li.hit:last-child");
 				if ($lastSymbolHit.length != 0) {
 					$active.removeClass("active");
 					$lastSymbolHit.addClass("active");
@@ -60,15 +61,16 @@ gitplex.blobSearch = {
 			}
 			scrollIfNecessary();
 		};
-		function keydown() {
-			var $active = $dropdown.find("tr.hit.active");
-			var $next = $active.next("tr.hit");
+		function keydown(e) {
+			e.preventDefault();
+			var $active = $dropdown.find("li.hit.active");
+			var $next = $active.next("li.hit");
 			if ($next.length != 0) {
 				$active.removeClass("active");
 				$next.addClass("active");
 				callback("down");
 			} else if ($active.closest(".symbols.section").length != 0) {
-				var $firstTextHit = $dropdown.find(".texts.section tr.hit:first-child");
+				var $firstTextHit = $dropdown.find(".texts.section li.hit:first-child");
 				if ($firstTextHit.length != 0) {
 					$active.removeClass("active");
 					$firstTextHit.addClass("active");
@@ -77,17 +79,17 @@ gitplex.blobSearch = {
 			}
 			scrollIfNecessary();
 		}
-		$input.bind("keydown", "up", function() {
-			keyup();
+		$input.bind("keydown", "up", function(e) {
+			keyup(e);
 		});
-		$input.bind("keydown", "down", function() {
-			keydown();
+		$input.bind("keydown", "down", function(e) {
+			keydown(e);
 		});
-		$dropdown.bind("keydown", "up", function() {
-			keyup();
+		$dropdown.bind("keydown", "up", function(e) {
+			keyup(e);
 		});
-		$dropdown.bind("keydown", "down", function() {
-			keydown();
+		$dropdown.bind("keydown", "down", function(e) {
+			keydown(e);
 		});
 	}
 };

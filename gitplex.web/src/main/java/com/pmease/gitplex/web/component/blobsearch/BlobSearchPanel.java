@@ -63,11 +63,13 @@ import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
-import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class BlobSearchPanel extends Panel {
 
+	public static final int ADVANCED_QUERY_ENTRIES = 1000;
+	
 	/*
 	 * Entries to query is much more than entries to be displayed in order to 
 	 * cover important symbols (for instant types are important than fields...)
@@ -137,14 +139,6 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						item.add(new Image("icon", hit.getIcon()) {
-
-							@Override
-							protected boolean shouldAddAntiCacheParameter() {
-								return false;
-							}
-							
-						});
 						AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 							@Override
@@ -153,6 +147,14 @@ public abstract class BlobSearchPanel extends Panel {
 							}
 							
 						};
+						link.add(new Image("icon", hit.getIcon()) {
+
+							@Override
+							protected boolean shouldAddAntiCacheParameter() {
+								return false;
+							}
+							
+						});
 						link.add(hit.render("label"));
 						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
@@ -172,7 +174,7 @@ public abstract class BlobSearchPanel extends Panel {
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
 								SymbolQuery query = new SymbolQuery(
-										instantSearchInput, false, false, false, SearchResultPanel.MAX_QUERY_ENTRIES);
+										instantSearchInput, false, false, false, RepoFilePage.MAX_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
@@ -239,14 +241,6 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						item.add(new Image("icon", hit.getIcon()) {
-
-							@Override
-							protected boolean shouldAddAntiCacheParameter() {
-								return false;
-							}
-							
-						});
 						AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 							@Override
@@ -255,6 +249,14 @@ public abstract class BlobSearchPanel extends Panel {
 							}
 							
 						};
+						link.add(new Image("icon", hit.getIcon()) {
+
+							@Override
+							protected boolean shouldAddAntiCacheParameter() {
+								return false;
+							}
+							
+						});
 						link.add(hit.render("label"));
 						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
@@ -274,7 +276,7 @@ public abstract class BlobSearchPanel extends Panel {
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
 								TextQuery query = new TextQuery(
-										instantSearchInput, false, false, false, SearchResultPanel.MAX_QUERY_ENTRIES);
+										instantSearchInput, false, false, false, RepoFilePage.MAX_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
@@ -579,10 +581,10 @@ public abstract class BlobSearchPanel extends Panel {
 							BlobQuery query;
 							if (searchType.equals(SEARCH_SYMBOLS)) {
 								query = new SymbolQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, SearchResultPanel.MAX_QUERY_ENTRIES);
+										null, pathSuffixes, ADVANCED_QUERY_ENTRIES);
 							} else {
 								query = new TextQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, SearchResultPanel.MAX_QUERY_ENTRIES);
+										null, pathSuffixes, ADVANCED_QUERY_ENTRIES);
 							}
 
 							try {

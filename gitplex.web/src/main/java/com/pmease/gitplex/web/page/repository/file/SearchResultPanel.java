@@ -1,14 +1,25 @@
 package com.pmease.gitplex.web.page.repository.file;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
@@ -16,30 +27,42 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.gitplex.search.hit.FileHit;
-import com.pmease.gitplex.search.hit.MatchedBlob;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
+import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 
 @SuppressWarnings("serial")
-public abstract class SearchResultPanel extends Panel {
+abstract class SearchResultPanel extends Panel {
 
-	public static final int MAX_QUERY_ENTRIES = 1000;
-	
 	private enum ExpandStatus {EXPAND_ALL, COLLAPSE_ALL};
 	
 	private static final String HITS_ID = "hits";
 	
+	private static final String EXPAND_LINK_ID = "expandLink";
+	
 	private final List<MatchedBlob> blobs;
 	
 	private final boolean hasMore;
+	
+	private int activeBlobIndex = -1;
+	
+	private int activeHitIndex = -1;
+	
+	private ListView<MatchedBlob> blobsView;
+	
+	private AjaxLink<Void> prevMatchLink;
 
+	private AjaxLink<Void> nextMatchLink;
+	
 	public SearchResultPanel(String id, List<QueryHit> hits) {
 		super(id);
 		
-		hasMore = (hits.size() == SearchResultPanel.MAX_QUERY_ENTRIES);
+		hasMore = (hits.size() == BlobSearchPanel.ADVANCED_QUERY_ENTRIES);
 		
 		Map<String, MatchedBlob> hitsByBlob = new LinkedHashMap<>();
 
@@ -54,31 +77,135 @@ public abstract class SearchResultPanel extends Panel {
 		}
 		
 		blobs = new ArrayList<>(hitsByBlob.values());
+		for (MatchedBlob blob: blobs) {
+			Collections.sort(blob.getHits(), new Comparator<QueryHit>() {
+
+				@Override
+				public int compare(QueryHit hit1, QueryHit hit2) {
+					return hit1.getTokenPos().getLine() - hit2.getTokenPos().getLine();
+				}
+				
+			});
+		}
 	}
 
+	private void onActiveIndexChange(AjaxRequestTarget target) {
+		Component hitsContainer = blobsView.get(activeBlobIndex).get(HITS_ID);
+		if (!hitsContainer.isVisibilityAllowed()) {
+			hitsContainer.setVisibilityAllowed(true);
+			target.add(hitsContainer);
+			target.add(blobsView.get(activeBlobIndex).get(EXPAND_LINK_ID));
+		} 
+
+		String activeLinkId = getMarkupId() + "-" + activeBlobIndex; 
+		if (activeHitIndex != -1)
+			activeLinkId += "-" + activeHitIndex;
+
+		String script = String.format(""
+				+ "$('#%s').find('.selectable').removeClass('active');"
+				+ "$('#%s').addClass('active');"
+				+ "gitplex.repofile.scrollSearchResult();", 
+				getMarkupId(), activeLinkId);
+		target.appendJavaScript(script);
+		
+		target.add(prevMatchLink);
+		target.add(nextMatchLink);
+		
+		MatchedBlob activeBlob = blobs.get(activeBlobIndex);
+		if (activeHitIndex != -1)
+			onSelect(target, activeBlob.getHits().get(activeHitIndex));
+		else 
+			onSelect(target, new FileHit(activeBlob.getBlobPath()));
+	}
+	
+	private void onPrevMatch(AjaxRequestTarget target) {
+		if (prevMatchLink.isEnabled()) {		
+			if (activeHitIndex>0) {
+				activeHitIndex--;
+			} else {
+				activeBlobIndex--;
+				MatchedBlob activeBlob = blobs.get(activeBlobIndex);
+				if (activeBlob.getHits().isEmpty())
+					activeHitIndex = -1;
+				else
+					activeHitIndex = activeBlob.getHits().size()-1;
+			}
+			
+			onActiveIndexChange(target);
+		}
+	}
+	
+	private void onNextMatch(AjaxRequestTarget target) {
+		if (nextMatchLink.isEnabled()) {
+			if (activeBlobIndex == -1) {
+				activeBlobIndex = 0;
+				MatchedBlob activeBlob = blobs.get(activeBlobIndex);
+				if (activeBlob.getHits().isEmpty())
+					activeHitIndex = -1;
+				else
+					activeHitIndex = 0;
+			} else {
+				MatchedBlob activeBlob = blobs.get(activeBlobIndex);
+				activeHitIndex++;
+				if (activeHitIndex==activeBlob.getHits().size()) {
+					activeBlobIndex++;
+					activeBlob = blobs.get(activeBlobIndex);
+					if (activeBlob.getHits().isEmpty())
+						activeHitIndex = -1;
+					else
+						activeHitIndex = 0;
+				}
+			}
+			
+			onActiveIndexChange(target);
+		}
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String message = "too many matches, displaying " + MAX_QUERY_ENTRIES + " of them";
+		String message = "too many matches, displaying " + BlobSearchPanel.ADVANCED_QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
-		add(new AjaxLink<Void>("prevMatch") {
+		add(prevMatchLink = new AjaxLink<Void>("prevMatch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				onPrevMatch(target);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
 				
+				setEnabled(activeBlobIndex>0 || activeHitIndex>0);
 			}
 			
 		});
-		add(new AjaxLink<Void>("nextMatch") {
+		prevMatchLink.setOutputMarkupId(true);
+		
+		add(nextMatchLink = new AjaxLink<Void>("nextMatch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				
+				onNextMatch(target);
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				int lastBlobIndex = blobs.size()-1;
+				if (lastBlobIndex < 0)
+					setEnabled(false);
+				else
+					setEnabled(activeBlobIndex<lastBlobIndex  || activeHitIndex<blobs.get(lastBlobIndex).getHits().size()-1);
 			}
 			
 		});
+		nextMatchLink.setOutputMarkupId(true);
+		
 		add(new AjaxLink<Void>("expandAll") {
 
 			@Override
@@ -86,6 +213,21 @@ public abstract class SearchResultPanel extends Panel {
 				RequestCycle.get().setMetaData(ExpandStatusKey.INSTANCE, ExpandStatus.EXPAND_ALL);
 				target.add(SearchResultPanel.this);
 				target.appendJavaScript("$(window).resize();");
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				boolean visible = false;
+				for (MatchedBlob blob: blobs) {
+					if (!blob.getHits().isEmpty()) {
+						visible = true;
+						break;
+					}
+				}
+				
+				setVisible(visible);
 			}
 			
 		});
@@ -96,6 +238,21 @@ public abstract class SearchResultPanel extends Panel {
 				RequestCycle.get().setMetaData(ExpandStatusKey.INSTANCE, ExpandStatus.COLLAPSE_ALL);
 				target.add(SearchResultPanel.this);
 				target.appendJavaScript("$(window).resize();");
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				boolean visible = false;
+				for (MatchedBlob blob: blobs) {
+					if (!blob.getHits().isEmpty()) {
+						visible = true;
+						break;
+					}
+				}
+				
+				setVisible(visible);
 			}
 			
 		});
@@ -108,67 +265,22 @@ public abstract class SearchResultPanel extends Panel {
 			
 		});
 		
-		add(new ListView<MatchedBlob>("blobs", blobs) {
+		add(blobsView = new ListView<MatchedBlob>("blobs", blobs) {
 
 			@Override
-			protected void populateItem(final ListItem<MatchedBlob> item) {
+			protected void populateItem(final ListItem<MatchedBlob> blobItem) {
 				final WebMarkupContainer hitsContainer = new WebMarkupContainer(HITS_ID) {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						setVisible(!item.getModelObject().getHits().isEmpty());
+						setVisible(!blobItem.getModelObject().getHits().isEmpty());
 					}
 					
 				};
-				ExpandStatus expandStatus = RequestCycle.get().getMetaData(ExpandStatusKey.INSTANCE);
-				if (expandStatus == ExpandStatus.EXPAND_ALL) 
-					hitsContainer.setVisibilityAllowed(true);
-				else if (expandStatus == ExpandStatus.COLLAPSE_ALL) 
-					hitsContainer.setVisibilityAllowed(false);				
-				else
-					hitsContainer.setVisibilityAllowed(item.getIndex() == 0);
-					
-				hitsContainer.setOutputMarkupPlaceholderTag(true);
 				
-				item.add(hitsContainer);
-				
-				hitsContainer.add(new ListView<QueryHit>(HITS_ID, item.getModelObject().getHits()) {
-
-					@Override
-					protected void populateItem(ListItem<QueryHit> item) {
-						final QueryHit hit = item.getModelObject();
-						item.add(new Image("icon", hit.getIcon()) {
-
-							@Override
-							protected boolean shouldAddAntiCacheParameter() {
-								return false;
-							}
-							
-						});
-						item.add(new Label("lineNo", String.valueOf(hit.getTokenPos().getLine()+1) + ":"));
-						item.add(new AjaxLink<Void>("lineLink") {
-
-							@Override
-							protected void onInitialize() {
-								super.onInitialize();
-								add(hit.render("label"));
-								add(new Label("scope", hit.getScope())
-										.setVisible(!(hit instanceof TextHit) && hit.getScope()!=null));
-							}
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								onSelect(target, hit);
-							}
-							
-						});
-					}
-					
-				});
-				
-				item.add(new AjaxLink<Void>("expandLink") {
+				blobItem.add(new AjaxLink<Void>(EXPAND_LINK_ID) {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -186,7 +298,7 @@ public abstract class SearchResultPanel extends Panel {
 
 							@Override
 							protected String load() {
-								if (item.getModelObject().getHits().isEmpty())
+								if (blobItem.getModelObject().getHits().isEmpty())
 									return "fa fa-fw fa-angle-right fa-none";
 								else if (hitsContainer.isVisibilityAllowed())
 									return "fa fa-fw fa-caret-down";
@@ -205,31 +317,132 @@ public abstract class SearchResultPanel extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						setEnabled(!item.getModelObject().getHits().isEmpty());
+						setEnabled(!blobItem.getModelObject().getHits().isEmpty());
 					}
 					
 				});
 				
-				item.add(new AjaxLink<Void>("pathLink") {
+				blobItem.add(new AjaxLink<Void>("blobLink") {
 
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
 						
-						add(new Label("label", item.getModelObject().getBlobPath()));
+						add(new Label("label", blobItem.getModelObject().getBlobPath()));
+						
+						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
+							add(AttributeAppender.append("class", " active"));
+						
+						setMarkupId(SearchResultPanel.this.getMarkupId() + "-" + blobItem.getIndex());
 					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						onSelect(target, new FileHit(item.getModelObject().getBlobPath()));
+						activeBlobIndex = blobItem.getIndex();
+						activeHitIndex = -1;
+						onActiveIndexChange(target);
 					}
 					
 				});
+				
+				ExpandStatus expandStatus = RequestCycle.get().getMetaData(ExpandStatusKey.INSTANCE);
+				if (expandStatus == ExpandStatus.EXPAND_ALL) 
+					hitsContainer.setVisibilityAllowed(true);
+				else if (expandStatus == ExpandStatus.COLLAPSE_ALL) 
+					hitsContainer.setVisibilityAllowed(false);				
+				else
+					hitsContainer.setVisibilityAllowed(blobItem.getIndex() == 0);
+					
+				hitsContainer.setOutputMarkupPlaceholderTag(true);
+				
+				blobItem.add(hitsContainer);
+				
+				hitsContainer.add(new ListView<QueryHit>(HITS_ID, blobItem.getModelObject().getHits()) {
+
+					@Override
+					protected void populateItem(final ListItem<QueryHit> hitItem) {
+						final QueryHit hit = hitItem.getModelObject();
+						hitItem.add(new AjaxLink<Void>("hitLink") {
+
+							@Override
+							protected void onInitialize() {
+								super.onInitialize();
+								
+								add(new Image("icon", hit.getIcon()) {
+
+									@Override
+									protected boolean shouldAddAntiCacheParameter() {
+										return false;
+									}
+									
+								});
+								add(new Label("lineNo", String.valueOf(hit.getTokenPos().getLine()+1) + ":"));
+								add(hit.render("label"));
+								add(new Label("scope", hit.getScope())
+										.setVisible(!(hit instanceof TextHit) && hit.getScope()!=null));
+								
+								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
+									add(AttributeAppender.append("class", " active"));
+
+								setMarkupId(SearchResultPanel.this.getMarkupId() 
+										+ "-" + blobItem.getIndex() + "-" + hitItem.getIndex());
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								activeBlobIndex = blobItem.getIndex();
+								activeHitIndex = hitItem.getIndex();
+								onActiveIndexChange(target);
+							}
+							
+						});
+					}
+					
+				});
+				
 			}
 			
 		});
 		
 		add(new WebMarkupContainer("noMatchingResult").setVisible(blobs.isEmpty()));
+		
+		add(new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				String key = params.getParameterValue("key").toString();
+				
+				if (key.equals("up")) 
+					onPrevMatch(target);
+				else if (key.equals("down")) 
+					onNextMatch(target);
+				else 
+					throw new IllegalStateException("Unrecognized key: " + key);
+			}
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setChannel(new AjaxChannel("search-results", AjaxChannel.Type.DROP));
+			}
+
+			@Override
+			public void renderHead(Component component, IHeaderResponse response) {
+				super.renderHead(component, response);
+
+				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
+				
+				String script = String.format(""
+						+ "var $body = $('#%s>.body');"
+						+ "var callback = %s;"
+						+ "$body.bind('keydown', 'up', function(e) {e.preventDefault();callback('up');});"
+						+ "$body.bind('keydown', 'down', function(e) {e.preventDefault();callback('down');});", 
+						getMarkupId(), getCallbackFunction(CallbackParameter.explicit("key")));
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		});
 		
 		setOutputMarkupId(true);
 	}

@@ -44,6 +44,22 @@ form>.actions>:last-child {
 	color: #777;
 }
 
+li.selectable a, a.selectable {
+	border: 1px solid white;
+	text-decoration: none;
+	display: block;
+	padding: 2px 4px;
+	color: #333;
+}
+li.selectable:hover a, a.selectable:hover {
+	background-color: #E0F0FC;
+	border-color: #BBDFF9;
+}
+li.selectable.active a, a.selectable.active {
+	background-color: #CBE8FB;
+	border-color: #8BC8F9;
+}
+
 /* DIRECTORY CHOOSER */
 .dropdown-panel .directory-chooser {max-height: 650px; overflow: auto; padding: 12px 24px 12px 12px;}
 .dropdown-panel .directory-chooser .title {font-weight: bold; border-bottom: 1px solid #888888;}

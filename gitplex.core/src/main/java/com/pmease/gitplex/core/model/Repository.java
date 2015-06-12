@@ -34,11 +34,14 @@ import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.FS;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -81,7 +84,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
-	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
+	private static final int LAST_COMMITS_CACHE_THRESHOLD = 500;
 	
 	private static final int MAX_READ_BLOB_SIZE = 5*1024*1024;
 	
@@ -536,7 +539,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	public FileRepository openAsJGitRepo() {
 		try {
-			return new FileRepository(git().repoDir());
+			return (FileRepository) RepositoryCache.open(FileKey.exact(git().repoDir(), FS.DETECTED), true);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

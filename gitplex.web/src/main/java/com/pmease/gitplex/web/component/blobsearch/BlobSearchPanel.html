@@ -11,54 +11,54 @@
 			<div class="symbols section">
 				<div class="title">File names and symbols</div>
 				<wicket:enclosure child="symbolHits">
-				<table>
-					<tr wicket:id="symbolHits" class="hit">
-						<td class="icon"><img wicket:id="icon"></img></td>
-						<td class="content">
-							<a wicket:id="link">
-								<span wicket:id="label"></span>
-								<wicket:enclosure child="scope">
-									<span class="scope">
-									-- <span wicket:id="scope"></span> 
-									</span>
-								</wicket:enclosure>
-							</a>
-						</td>
-					</tr>
+				<ul class="list-unstyled">
+					<li wicket:id="symbolHits" class="hit selectable">
+						<a wicket:id="link">
+							<span class="icon"><img wicket:id="icon"></img></span>
+							<span wicket:id="label" class="text"></span>
+							<wicket:enclosure child="scope">
+								<span class="scope">
+								-- <span wicket:id="scope"></span> 
+								</span>
+							</wicket:enclosure>
+						</a>
+					</li>
 					<wicket:enclosure child="moreSymbolHits">
-					<tr class="hit more-matches">
-						<td class="icon"><i class="fa fa-arrow-circle-right"></i></td>
-						<td><a wicket:id="moreSymbolHits">Show more</a></td>
-					</tr>
+					<li class="hit selectable more-matches">
+						<a wicket:id="moreSymbolHits">
+							<span class="icon"><i class="fa fa-arrow-circle-right"></i></span>						
+							<span class="text">Show more</span>
+						</a>
+					</li>
 					</wicket:enclosure>
-				</table>
+				</ul>
 				</wicket:enclosure>
 				<div wicket:id="noSymbolHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
 			</div>
 			<div wicket:id="texts" class="texts section">
 				<div class="title">Text occurrences</div>
 				<wicket:enclosure child="textHits">
-				<table>
-					<tr wicket:id="textHits" class="hit">
-						<td class="icon"><img wicket:id="icon"></img></td>
-						<td class="content">
-							<a wicket:id="link">
-								<span wicket:id="label"></span>
-								<wicket:enclosure child="scope">
-									<span class="scope">
-									-- <span wicket:id="scope"></span> 
-									</span>
-								</wicket:enclosure>
-							</a>
-						</td>
-					</tr>
+				<ul class="list-unstyled">
+					<li wicket:id="textHits" class="hit selectable">
+						<a wicket:id="link">
+							<span class="icon"><img wicket:id="icon"></img></span>
+							<span wicket:id="label" class="text"></span>
+							<wicket:enclosure child="scope">
+								<span class="scope">
+								-- <span wicket:id="scope"></span> 
+								</span>
+							</wicket:enclosure>
+						</a>
+					</li>
 					<wicket:enclosure child="moreTextHits">
-					<tr class="hit more-matches">
-						<td class="icon"><i class="fa fa-arrow-circle-right fa-fw"></i></td>
-						<td><a wicket:id="moreTextHits">Show more</a></td>
-					</tr>
+					<li class="hit selectable more-matches">
+						<a wicket:id="moreTextHits">
+							<span class="icon"><i class="fa fa-arrow-circle-right"></i></span>						
+							<span class="text">Show more</span>
+						</a>
+					</li>
 					</wicket:enclosure>
-				</table>
+				</ul>
 				</wicket:enclosure>
 				<div wicket:id="noTextHits" class="no-matches"><i class="fa fa-info-circle"></i> No matches</div>
 			</div>

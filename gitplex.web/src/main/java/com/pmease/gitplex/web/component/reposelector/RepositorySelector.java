@@ -42,6 +42,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.page.account.AccountPage;
+import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public abstract class RepositorySelector extends Panel {
@@ -224,7 +225,17 @@ public abstract class RepositorySelector extends Panel {
 
 							@Override
 							public int compare(Repository repo1, Repository repo2) {
-								return repo1.getName().compareTo(repo2.getName());
+								if (getPage() instanceof RepositoryPage) {
+									Repository repo = ((RepositoryPage)getPage()).getRepository();
+									if (repo1.equals(repo))
+										return -1;
+									else if (repo2.equals(repo))
+										return 1;
+									else 
+										return repo1.getName().compareTo(repo2.getName());
+								} else {
+									return repo1.getName().compareTo(repo2.getName());
+								}
 							}
 							
 						});
