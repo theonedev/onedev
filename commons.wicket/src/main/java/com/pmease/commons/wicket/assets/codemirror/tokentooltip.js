@@ -20,10 +20,9 @@
 			this.options.tooltipClass = DEFAULT_TOOLTIP_CLASS;
 		if (!this.options.hoverClass)
 			this.options.hoverClass = DEFAULT_HOVER_CLASS;
-		this.onMouseOver = function(e) {onMouseOver(cm, e);};	
-		
+
 		var self = this;
-		self.mousePressed = 0;
+		this.onMouseOver = function(e) {onMouseOver(cm, e);};	
 		this.onMouseMove = function(e) {
 			// IE fires mouse move event after mouse click sometimes, so we check 
 			// if mouse is really moved here
@@ -33,9 +32,17 @@
 				self.clientY = e.clientY;
 			}
 		};
-		// detect mouse up/down on whole document
-		$(document).mousedown(function(e) {self.mousePressed=true; self.mouseMoved=false;});
-		$(document).mouseup(function(e) {self.mousePressed=false; self.mouseMoved=false;});
+		this.onMouseDown = function(e) {
+			self.mousePressed=true; self.mouseMoved=false;
+			// detect mouse up on whole document
+			$(document).on("mouseup", self.onMouseUp);
+			
+		}
+		this.onMouseUp = function(e) {
+			self.mousePressed=false; self.mouseMoved=false;
+			$(document).off("mouseup", self.onMouseUp);
+		}
+		
 		this.onScroll = function(e) {self.mouseMoved = false;};
 	}
 
@@ -131,8 +138,7 @@
 			CodeMirror.off(cm.getWrapperElement(), "mouseover", cm.state.tokenHover.onMouseOver);
 			CodeMirror.off(cm.getWrapperElement(), "mousemove", cm.state.tokenHover.onMouseMove);
 			CodeMirror.off(cm.getWrapperElement(), "mousedown", cm.state.tokenHover.onMouseDown);
-			CodeMirror.off(cm.getWrapperElement(), "mouseup", cm.state.tokenHover.onMouseUp);
-			cm.off("scroll", state.onScroll);
+			cm.off("scroll", cm.state.tokenHover.onScroll);
 			delete cm.state.tokenHover;
 		}
 
@@ -141,7 +147,6 @@
 			CodeMirror.on(cm.getWrapperElement(), "mouseover", state.onMouseOver);
 			CodeMirror.on(cm.getWrapperElement(), "mousemove", state.onMouseMove);
 			CodeMirror.on(cm.getWrapperElement(), "mousedown", state.onMouseDown);
-			CodeMirror.on(cm.getWrapperElement(), "mouseup", state.onMouseUp);
 			cm.on("scroll", state.onScroll);
 		}
 	});

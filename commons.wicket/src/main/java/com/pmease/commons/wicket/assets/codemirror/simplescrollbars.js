@@ -41,18 +41,22 @@
 
     // downRepeat is used to speed up scroll button when user holds mouse for a while
     this.downRepeat = 1;
-    CodeMirror.on(document, "mouseup", function() {
+
+    function onBarMouseUp(e) {
+        CodeMirror.off(document, "mouseup", onBarMouseUp);
     	if (self.downRepeatTimer) {
     		clearTimeout(self.downRepeatTimer);
     		self.downRepeatTimer = null;
     		self.downRepeat = 1;
     	}
-    });    
+    }
 
     CodeMirror.on(this.node, "mousedown", onBarMouseDown);
 
     function onBarMouseDown(e) {
-    	if (self.inner == e.target)
+        CodeMirror.on(document, "mouseup", onBarMouseUp);    
+
+        if (self.inner == e.target)
     		return;
     	
         CodeMirror.e_preventDefault(e);
