@@ -11,7 +11,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -40,6 +39,7 @@ import com.google.common.base.Throwables;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -230,10 +230,10 @@ public abstract class RevisionSelector extends Panel {
 				};
 				fragment.add(keyBehavior);
 				
-				revField.add(new AjaxFormComponentUpdatingBehavior("inputchange") {
+				revField.add(new FormComponentInputBehavior() {
 					
 					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
+					protected void onInput(AjaxRequestTarget target) {
 						revInput = revField.getInput();
 						filteredRefs.clear();
 						if (StringUtils.isNotBlank(revInput)) {

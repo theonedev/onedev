@@ -13,7 +13,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -38,6 +37,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -97,10 +97,10 @@ public abstract class RepositorySelector extends Panel {
 		
 		final TextField<String> accountSearchField = new TextField<String>("searchAccount", Model.of(""));
 		add(accountSearchField);
-		accountSearchField.add(new AjaxFormComponentUpdatingBehavior("inputchange") {
+		accountSearchField.add(new FormComponentInputBehavior() {
 			
 			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
+			protected void onInput(AjaxRequestTarget target) {
 				accountSearch = accountSearchField.getInput();
 				if (accountSearch != null)
 					accountSearch = accountSearch.trim().toLowerCase();
@@ -133,10 +133,10 @@ public abstract class RepositorySelector extends Panel {
 		
 		final TextField<String> repoSearchField = new TextField<String>("searchRepo", Model.of(""));
 		add(repoSearchField);
-		repoSearchField.add(new AjaxFormComponentUpdatingBehavior("inputchange") {
+		repoSearchField.add(new FormComponentInputBehavior() {
 			
 			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
+			protected void onInput(AjaxRequestTarget target) {
 				repoSearch = repoSearchField.getInput();
 				if (repoSearch != null)
 					repoSearch = repoSearch.trim().toLowerCase();

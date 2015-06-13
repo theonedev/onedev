@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -231,24 +230,7 @@ public class RepoBranchesPage extends RepositoryPage {
 		}));
 		
 		add(searchInput = new ClearableTextField<String>("searchBranches", Model.of("")));
-		searchInput.add(new OnSearchingBehavior() {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				// IE triggers "input" event when the focused on the search input even if nothing is 
-				// input into search box yet. To work around this issue, we compare search string 
-				// against previous value to only update the branches table if there is an actual 
-				// change.
-				String newSearchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(newSearchFor))
-					newSearchFor = newSearchFor.trim().toLowerCase();
-				else
-					newSearchFor = null;
-				if (!ObjectUtils.equals(newSearchFor, searchFor))
-					super.onUpdate(target);
-			}
-			
-		});
+		searchInput.add(new OnSearchingBehavior());
 		
 		branchesContainer = new WebMarkupContainer("branchesContainer");
 		branchesContainer.setOutputMarkupId(true);
@@ -571,7 +553,7 @@ public class RepoBranchesPage extends RepositoryPage {
 		}
 
 		@Override
-		protected void onUpdate(AjaxRequestTarget target) {
+		protected void onTypingDone(AjaxRequestTarget target) {
 			target.add(branchesContainer);
 			target.add(pagingNavigator);
 		}

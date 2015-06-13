@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -64,23 +63,14 @@ public class AccountsPage extends LayoutPage {
 		super.onInitialize();
 		
 		add(searchInput = new ClearableTextField<String>("searchAccounts", Model.of("")));
-		searchInput.add(new OnSearchingBehavior() {
+		searchInput.add(new OnTypingDoneBehavior(100) {
 
 			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				// IE triggers "input" event when the focused on the search input even if nothing is 
-				// input into search box yet. To work around this issue, we compare search string 
-				// against previous value to only update the branches table if there is an actual 
-				// change.
-				String newSearchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(newSearchFor))
-					newSearchFor = newSearchFor.trim().toLowerCase();
-				else
-					newSearchFor = null;
-				if (!ObjectUtils.equals(newSearchFor, searchFor))
-					super.onUpdate(target);
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(accountsContainer);
+				target.add(pagingNavigator);
 			}
-			
+
 		});
 		
 		add(new Link<Void>("addNew") {
@@ -240,17 +230,4 @@ public class AccountsPage extends LayoutPage {
 		response.render(CssHeaderItem.forReference(new CssResourceReference(AccountsPage.class, "accounts.css")));
 	}
 
-	private class OnSearchingBehavior extends OnTypingDoneBehavior {
-
-		public OnSearchingBehavior() {
-			super(100);
-		}
-
-		@Override
-		protected void onUpdate(AjaxRequestTarget target) {
-			target.add(accountsContainer);
-			target.add(pagingNavigator);
-		}
-
-	}
 }

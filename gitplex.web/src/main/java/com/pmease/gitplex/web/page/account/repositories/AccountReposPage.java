@@ -62,21 +62,12 @@ public class AccountReposPage extends AccountLayoutPage {
 		final TextField<String> searchField;
 		
 		add(searchField = new ClearableTextField<String>("searchRepos", Model.of("")));
-		searchField.add(new OnSearchingBehavior() {
+		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				// IE triggers "input" event when the focused on the search input even if nothing is 
-				// input into search box yet. To work around this issue, we compare search string 
-				// against previous value to only update the branches table if there is an actual 
-				// change.
-				String newSearchInput = searchField.getInput();
-				if (newSearchInput != null)
-					newSearchInput = newSearchInput.toLowerCase().trim();
-				else
-					newSearchInput = "";
-				if (!newSearchInput.equals(searchInput))
-					super.onUpdate(target);
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(reposContainer);
+				target.add(pagingNavigator);
 			}
 			
 		});
@@ -216,17 +207,4 @@ public class AccountReposPage extends AccountLayoutPage {
 		response.render(CssHeaderItem.forReference(new CssResourceReference(AccountReposPage.class, "account-repos.css")));
 	}
 
-	private class OnSearchingBehavior extends OnTypingDoneBehavior {
-
-		public OnSearchingBehavior() {
-			super(100);
-		}
-
-		@Override
-		protected void onUpdate(AjaxRequestTarget target) {
-			target.add(reposContainer);
-			target.add(pagingNavigator);
-		}
-
-	}
 }
