@@ -17,7 +17,7 @@ gitplex.filelist = {
 			url: lastCommitsUrl,
 			cache: false, 
 			success: function(lastCommits) {
-				if (document.contains($container[0])) { // add this check to avoid rendering last commits if directory is changed
+				if (jQuery.contains(document, $container[0])) { // add this check to avoid rendering last commits if directory is changed
 					var $table = $container.find(".file-list>table");
 					$table.find("tr.child").each(function() {
 						var $row = $(this);

@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -24,6 +25,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -39,6 +41,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class FileNavigator extends Panel {
@@ -91,6 +94,13 @@ public abstract class FileNavigator extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						onSelect(target, blobIdent);
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), blobIdent);
+						tag.put("href", urlFor(RepoFilePage.class, params));
 					}
 					
 				};
@@ -217,6 +227,14 @@ public abstract class FileNavigator extends Panel {
 									public void onClick(AjaxRequestTarget target) {
 										onSelect(target, model.getObject());
 										hide(target);
+									}
+
+									@Override
+									protected void onComponentTag(ComponentTag tag) {
+										super.onComponentTag(tag);
+										
+										PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), model.getObject());
+										tag.put("href", urlFor(RepoFilePage.class, params));
 									}
 									
 								};

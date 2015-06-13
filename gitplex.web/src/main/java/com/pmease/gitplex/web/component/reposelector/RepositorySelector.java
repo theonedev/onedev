@@ -16,6 +16,7 @@ import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -31,6 +32,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
@@ -43,6 +45,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class RepositorySelector extends Panel {
@@ -253,6 +256,14 @@ public abstract class RepositorySelector extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								onSelect(target, repoItem.getModelObject());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								
+								PageParameters params = RepoFilePage.paramsOf(repoItem.getModelObject(), null, null);
+								tag.put("href", urlFor(RepoFilePage.class, params));
 							}
 							
 						};

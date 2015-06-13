@@ -14,6 +14,7 @@ import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -31,6 +32,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
@@ -44,6 +46,7 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
@@ -296,6 +299,14 @@ public abstract class RevisionSelector extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						selectRevision(target, item.getModelObject());
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						
+						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), item.getModelObject(), null);
+						tag.put("href", urlFor(RepoFilePage.class, params));
 					}
 					
 				};

@@ -11,6 +11,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -34,6 +35,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class FileListPanel extends Panel {
@@ -62,18 +64,31 @@ public abstract class FileListPanel extends Panel {
 			}
 			
 		};
+		
+		final BlobIdent parentIdent;
+		if (directory.path == null) {
+			parentIdent = null;
+		} else if (directory.path.indexOf('/') != -1) {
+			parentIdent = new BlobIdent(
+					directory.revision, 
+					StringUtils.substringBeforeLast(directory.path, "/"), 
+					FileMode.TREE.getBits());
+		} else {
+			parentIdent = new BlobIdent(directory.revision, null, FileMode.TREE.getBits());
+		}
 		parent.add(new AjaxLink<Void>("link") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				if (directory.path.indexOf('/') != -1) {
-					onSelect(target, new BlobIdent(
-							directory.revision, 
-							StringUtils.substringBeforeLast(directory.path, "/"), 
-							FileMode.TREE.getBits()));
-				} else {
-					onSelect(target, new BlobIdent(directory.revision, null, FileMode.TREE.getBits()));
-				}
+				onSelect(target, parentIdent);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), parentIdent); 
+				tag.put("href", urlFor(RepoFilePage.class, params));
 			}
 			
 		});
@@ -147,6 +162,14 @@ public abstract class FileListPanel extends Panel {
 				item.add(pathIcon);
 				
 				AjaxLink<Void> pathLink = new AjaxLink<Void>("pathLink") {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						
+						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), blobIdent); 
+						tag.put("href", urlFor(RepoFilePage.class, params));
+					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {

@@ -409,6 +409,10 @@ public class RepoFilePage extends RepositoryPage {
 		return params;
 	}
 	
+	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
+		return paramsOf(repository, blobIdent.revision, blobIdent.path);
+	}
+	
 	private void renderSearchResult(AjaxRequestTarget target, List<QueryHit> hits) {
 		Component searchResult = newSearchResult(hits);
 		
