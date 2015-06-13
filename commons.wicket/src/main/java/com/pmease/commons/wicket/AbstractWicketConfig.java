@@ -1,18 +1,13 @@
 package com.pmease.commons.wicket;
 
-import java.util.Map;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.application.IComponentInstantiationListener;
 import org.apache.wicket.markup.html.pages.AbstractErrorPage;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import com.pmease.commons.bootstrap.Bootstrap;
-import com.pmease.commons.wicket.behavior.StickyBehavior;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 
@@ -53,6 +48,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			}
 		});
 		
+		/*
 		getAjaxRequestTargetListeners().add(new AjaxRequestTarget.IListener() {
 			
 			@Override
@@ -75,6 +71,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			}
 			
 		});
+		*/
 
 		// getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 	}

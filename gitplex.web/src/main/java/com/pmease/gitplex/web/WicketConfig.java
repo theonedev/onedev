@@ -17,7 +17,6 @@ import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCac
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 
 import com.pmease.commons.wicket.AbstractWicketConfig;
-import com.pmease.gitplex.web.mapper.RootMapper;
 import com.pmease.gitplex.web.page.error.BaseErrorPage;
 import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
 
@@ -68,7 +67,7 @@ public class WicketConfig extends AbstractWicketConfig {
 
 		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
 
-		mount(new RootMapper(this));
+		mount(new UrlMapper(this));
 	}
 
 	public Iterable<IRequestMapper> getRequestMappers() {

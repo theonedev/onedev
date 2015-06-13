@@ -158,10 +158,6 @@ var gitplex = {
 };
 
 $(document).ready(function() {
-	$(window).on("beforeunload", function() {
-		$(":focus").trigger("blur");
-	});
-
 	/*
 	$(window).load(function() {
 		$(document).mousedown(function() { 

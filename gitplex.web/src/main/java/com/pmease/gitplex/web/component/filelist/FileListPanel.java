@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
@@ -192,33 +190,24 @@ public abstract class FileListPanel extends Panel {
 			
 		});
 		
-		add(new AbstractDefaultAjaxBehavior() {
-			
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-			}
-			
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-				
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(FileListPanel.class, "file-list.js")));
-				response.render(CssHeaderItem.forReference(
-						new CssResourceReference(FileListPanel.class, "file-list.css")));
-				
-				PageParameters params = LastCommitsResource.paramsOf(repoModel.getObject(), directory.revision, directory.path); 
-				String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
-				response.render(OnDomReadyHeaderItem.forScript(
-						String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl)));
-				response.render(OnDomReadyHeaderItem.forScript(getCallbackScript()));
-			}
-
-		});
-		
 		setOutputMarkupId(true);
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(FileListPanel.class, "file-list.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(FileListPanel.class, "file-list.css")));
+		
+		PageParameters params = LastCommitsResource.paramsOf(repoModel.getObject(), directory.revision, directory.path); 
+		String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
+		response.render(OnDomReadyHeaderItem.forScript(
+				String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl)));
+	}
+
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent file);
 	
 	private ObjectId getCommitId() {
