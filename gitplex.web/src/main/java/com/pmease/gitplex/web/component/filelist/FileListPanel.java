@@ -3,10 +3,7 @@ package com.pmease.gitplex.web.component.filelist;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
@@ -25,26 +22,18 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public abstract class FileListPanel extends Panel {
@@ -184,28 +173,6 @@ public abstract class FileListPanel extends Panel {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				LastCommitsOfChildren lastCommits = repoModel.getObject().getLastCommitsOfChildren(
-						directory.revision, directory.path);
-				
-				Map<String, LastCommitInfo> map = new HashMap<>();
-				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
-					LastCommitInfo info = new LastCommitInfo();
-					PageParameters params = RepoCommitPage.paramsOf(
-							repoModel.getObject(), entry.getValue().getId().name());
-					info.url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
-					info.summary = entry.getValue().getSummary();
-					info.age = DateUtils.formatAge(new Date(entry.getValue().getTimestamp()*1000L));
-					map.put(entry.getKey(), info);
-				}
-				String json;
-				try {
-					json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(map);
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-				String script = String.format("gitplex.filelist.renderLastCommits('%s', %s);", 
-						getMarkupId(), json);
-				target.appendJavaScript(script);
 			}
 			
 			@Override
@@ -217,8 +184,10 @@ public abstract class FileListPanel extends Panel {
 				response.render(CssHeaderItem.forReference(
 						new CssResourceReference(FileListPanel.class, "file-list.css")));
 				
+				PageParameters params = LastCommitsResource.paramsOf(repoModel.getObject(), directory.revision, directory.path); 
+				String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
 				response.render(OnDomReadyHeaderItem.forScript(
-						String.format("gitplex.filelist.init('%s')", getMarkupId())));
+						String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl)));
 				response.render(OnDomReadyHeaderItem.forScript(getCallbackScript()));
 			}
 
@@ -240,12 +209,4 @@ public abstract class FileListPanel extends Panel {
 		super.onDetach();
 	}
 
-	@SuppressWarnings("unused")
-	private static class LastCommitInfo {
-		String url;
-		
-		String summary;
-		
-		String age;
-	}
 }

@@ -46,10 +46,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
-import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.BlobQuery;
-import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
@@ -199,19 +196,8 @@ public class RepoFilePage extends RepositoryPage {
 			
 		});
 		
-//		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
-		
-		BlobQuery query = new TextQuery("hello", false, false, false, 1000);
-		
-		List<QueryHit> hits;
-		try {
-			hits = GitPlex.getInstance(SearchManager.class).search(getRepository(), file.revision, query);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-		
-		add(newSearchResult(hits));
-		
+		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
+
 		add(new WebSocketRenderBehavior() {
 			
 			@Override

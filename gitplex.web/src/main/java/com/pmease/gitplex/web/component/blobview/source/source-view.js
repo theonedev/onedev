@@ -122,4 +122,3 @@ gitplex.sourceview = {
 	}
 		
 }
-console.log(gitplex.sourceview);

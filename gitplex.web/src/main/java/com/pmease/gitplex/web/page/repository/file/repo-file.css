@@ -70,6 +70,7 @@
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;
+	display: none;
 }
 #repo-file>.search-result>.ui-resizable-handle {
     background: #EEE url("hgrabber.gif") no-repeat scroll center top;

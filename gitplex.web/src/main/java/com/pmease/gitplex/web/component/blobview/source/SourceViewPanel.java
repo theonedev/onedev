@@ -162,9 +162,9 @@ public class SourceViewPanel extends BlobViewPanel {
 					
 				};
 				link.add(hit.render("label"));
-				item.add(link);
+				link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 				
-				item.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
+				item.add(link);
 			}
 
 			@Override
