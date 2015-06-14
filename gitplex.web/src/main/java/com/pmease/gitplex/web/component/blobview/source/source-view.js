@@ -87,7 +87,7 @@ gitplex.sourceview = {
 			    		cm.setOption("mode", modeInfo.mime);
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
-
+			    
 			    if (tokenPos)
 			    	gitplex.sourceview.highlightToken(cm, tokenPos);
 			}

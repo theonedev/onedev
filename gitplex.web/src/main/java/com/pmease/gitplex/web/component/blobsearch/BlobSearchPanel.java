@@ -14,8 +14,6 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -46,7 +44,6 @@ import org.apache.wicket.request.resource.ResourceReference;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.AjaxEvent;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -374,8 +371,6 @@ public abstract class BlobSearchPanel extends Panel {
 					instantSearchDropdown.hide(target);
 				}
 				activeHitIndex = 0;
-				
-				send(BlobSearchPanel.this, Broadcast.BREADTH, new InstantSearchUpdated(target));
 			}			
 			
 		});
@@ -504,23 +499,25 @@ public abstract class BlobSearchPanel extends Panel {
 			form.setOutputMarkupId(true);
 			fragment.add(form);
 			
-			searchFor = instantSearchInput;
-			
 			WebMarkupContainer searchForContainer = new WebMarkupContainer("searchFor");
 			form.add(searchForContainer);
-			final TextField<String> searchForInput = new TextField<String>("input", new PropertyModel<String>(this, "searchFor")) {
+			final TextField<String> searchForInput = new TextField<String>("input", new IModel<String>() {
 
 				@Override
-				public void onEvent(IEvent<?> event) {
-					super.onEvent(event);
-					if (event.getPayload() instanceof InstantSearchUpdated) {
-						InstantSearchUpdated instantSearchUpdated = (InstantSearchUpdated) event.getPayload();
-						searchFor = instantSearchInput;
-						instantSearchUpdated.getTarget().add(this);
-					}
+				public void detach() {
 				}
-				
-			};
+
+				@Override
+				public String getObject() {
+					return searchFor;
+				}
+
+				@Override
+				public void setObject(String object) {
+					searchFor = object;
+				}
+						
+			});
 			searchForInput.setOutputMarkupId(true);
 			searchForInput.setRequired(true);
 			searchForContainer.add(searchForInput);
@@ -631,14 +628,6 @@ public abstract class BlobSearchPanel extends Panel {
 		}
 		
 	};
-	
-	private static class InstantSearchUpdated extends AjaxEvent {
-
-		public InstantSearchUpdated(AjaxRequestTarget target) {
-			super(target);
-		}
-
-	}
 	
 	private static class MoreSymbolHit extends QueryHit {
 

@@ -380,11 +380,11 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getRepository(), file.revision, file.path);
-		String url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
+		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		State state = new State();
 		state.file = file;
 		state.tokenPos = tokenPos;
-		historyBehavior.pushState(target, url, state);
+		historyBehavior.pushState(target, url.toString(), state);
 	}
 
 	@Override
