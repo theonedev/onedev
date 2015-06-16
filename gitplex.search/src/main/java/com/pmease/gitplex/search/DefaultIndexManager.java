@@ -1,12 +1,23 @@
 package com.pmease.gitplex.search;
 
-import static com.pmease.gitplex.search.FieldConstants.*;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_HASH;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_INDEX_VERSION;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_NAME;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_PATH;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_PRIMARY_SYMBOLS;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_SECONDARY_SYMBOLS;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_TEXT;
+import static com.pmease.gitplex.search.FieldConstants.COMMIT_HASH;
+import static com.pmease.gitplex.search.FieldConstants.COMMIT_INDEX_VERSION;
+import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT;
+import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_HASH;
+import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_INDEX_VERSION;
+import static com.pmease.gitplex.search.FieldConstants.META;
 import static com.pmease.gitplex.search.IndexConstants.MAX_INDEXABLE_SIZE;
 import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,7 +61,7 @@ import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.util.Charsets;
+import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitplex.core.manager.IndexResult;
@@ -229,9 +240,8 @@ public class DefaultIndexManager implements IndexManager {
 		ObjectLoader objectLoader = repo.open(blobId);
 		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
 			byte[] bytes = objectLoader.getCachedBytes();
-			Charset charset = Charsets.detectFrom(bytes);
-			if (charset != null) {
-				String content = new String(bytes, charset);
+			String content = ContentDetector.convertToText(bytes, blobName);
+			if (content != null) {
 				document.add(new TextField(BLOB_TEXT.name(), content, Store.NO));
 				
 				if (extractor != null) {

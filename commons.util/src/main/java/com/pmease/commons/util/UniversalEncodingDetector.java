@@ -12,17 +12,12 @@ import org.mozilla.universalchardet.UniversalDetector;
  * Copied from tika UniversalEncodingDetector
  *
  */
-class UniversalEncodingDetector {
+public class UniversalEncodingDetector {
 	private static final int BUFSIZE = 1024;
 
     private static final int LOOKAHEAD = 16 * BUFSIZE;
 
-    public static Charset detect(InputStream input)
-            throws IOException {
-        if (input == null) {
-            return null;
-        }
-
+    public static Charset detect(InputStream input) throws IOException {
         input.mark(LOOKAHEAD);
         try {
             UniversalEncodingListener listener =

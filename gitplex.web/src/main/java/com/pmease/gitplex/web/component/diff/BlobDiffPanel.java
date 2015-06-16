@@ -8,7 +8,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
-import com.pmease.commons.util.MediaTypes;
+import com.pmease.commons.util.ContentDetector;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
@@ -48,7 +48,7 @@ public class BlobDiffPanel extends Panel {
 			oldMediaType = MediaType.TEXT_PLAIN;
 		} else if (oldBlobType == FileMode.TYPE_FILE) {
 			byte[] oldContent = repoModel.getObject().getBlob(change.getOldBlobInfo()).getBytes();
-			oldMediaType = MediaTypes.detectFrom(oldContent, change.getOldPath());
+			oldMediaType = ContentDetector.detectMediaType(oldContent, change.getOldPath());
 		} else {
 			oldMediaType = null;
 		}
@@ -57,7 +57,7 @@ public class BlobDiffPanel extends Panel {
 			newMediaType = MediaType.TEXT_PLAIN;
 		} else if (newBlobType == FileMode.TYPE_FILE) {
 			byte[] newContent = repoModel.getObject().getBlob(change.getNewBlobInfo()).getBytes();
-			newMediaType = MediaTypes.detectFrom(newContent, change.getNewPath());
+			newMediaType = ContentDetector.detectMediaType(newContent, change.getNewPath());
 		} else {
 			newMediaType = null;
 		}

@@ -12,12 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.mime.MediaType;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.extensionpoint.TextConverter;
 import com.pmease.commons.git.extensionpoint.TextConverterProvider;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.Charsets;
-import com.pmease.commons.util.MediaTypes;
+import com.pmease.commons.util.ContentDetector;
 
 @SuppressWarnings("serial")
 public class BlobText implements Serializable {
@@ -111,7 +111,7 @@ public class BlobText implements Serializable {
 		if (blobMode == FileMode.TYPE_GITLINK || blobMode == FileMode.TYPE_SYMLINK) 
 			return new BlobText(new String(blobContent));
 		
-		MediaType mediaType = MediaTypes.detectFrom(blobContent, blobPath);
+		MediaType mediaType = ContentDetector.detectMediaType(blobContent, blobPath);
 
 		for (TextConverterProvider provider: AppLoader.getExtensions(TextConverterProvider.class)) {
 			TextConverter textConverter = provider.getTextConverter(mediaType);
@@ -119,7 +119,7 @@ public class BlobText implements Serializable {
 				return new BlobText(textConverter.convert(blobContent), true, Charsets.UTF_8.name(), mediaType);
 		}
 		
-		Charset charset = Charsets.detectFrom(blobContent);
+		Charset charset = ContentDetector.detectCharset(blobContent);
 		if (charset != null) {
 			List<String> lines = new ArrayList<>();
 			StringBuilder builder = new StringBuilder();

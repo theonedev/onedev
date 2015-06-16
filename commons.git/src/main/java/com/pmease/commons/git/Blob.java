@@ -8,9 +8,9 @@ import javax.annotation.Nullable;
 
 import org.apache.tika.mime.MediaType;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.pmease.commons.util.Charsets;
-import com.pmease.commons.util.MediaTypes;
+import com.pmease.commons.util.ContentDetector;
 
 public class Blob {
 	
@@ -55,7 +55,7 @@ public class Blob {
 			if (ident.isGitLink() || ident.isSymbolLink() || ident.isTree())
 				mediaType = MediaType.TEXT_PLAIN;
 			else
-				mediaType = MediaTypes.detectFrom(bytes, ident.path);
+				mediaType = ContentDetector.detectMediaType(bytes, ident.path);
 		}
 		return mediaType;
 	}
@@ -73,11 +73,14 @@ public class Blob {
  				Charset charset = Charsets.UTF_8;
  				optionalText = Optional.of(new Text(charset, new String(bytes, charset)));
  			} else if (!isPartial()) {
-				Charset charset = Charsets.detectFrom(bytes);
-				if (charset != null)
+				if (!ContentDetector.isBinary(bytes, ident.path)) {
+					Charset charset = ContentDetector.detectCharset(bytes);
+					if (charset == null)
+						charset = Charset.defaultCharset();
 					optionalText = Optional.of(new Text(charset, new String(bytes, charset)));
-				else 
+				} else {
 					optionalText = Optional.absent();
+				}
 			} else {
 				optionalText = Optional.absent();
 			}

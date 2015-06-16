@@ -6,7 +6,6 @@ import static com.pmease.gitplex.search.FieldConstants.BLOB_SECONDARY_SYMBOLS;
 import static com.pmease.gitplex.search.IndexConstants.MAX_INDEXABLE_SIZE;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -26,7 +25,7 @@ import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
 import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.util.Charsets;
+import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -68,9 +67,8 @@ public class SymbolQuery extends BlobQuery {
 				objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 				if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
 					byte[] bytes = objectLoader.getCachedBytes();
-					Charset charset = Charsets.detectFrom(bytes);
-					if (charset != null) {
-						String content = new String(bytes, charset);
+					String content = ContentDetector.convertToText(bytes, blobPath);
+					if (content != null) {
 						try {
 							for (Symbol symbol: extractor.extract(content)) {
 								if (hits.size() < getCount()) {

@@ -5,7 +5,6 @@ import static com.pmease.gitplex.search.FieldConstants.BLOB_TEXT;
 import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +23,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.pmease.commons.lang.TokenPosition;
-import com.pmease.commons.util.Charsets;
+import com.pmease.commons.util.ContentDetector;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
@@ -88,12 +87,9 @@ public class TextQuery extends BlobQuery {
 		try {
 			objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 			if (objectLoader.getSize() <= IndexConstants.MAX_INDEXABLE_SIZE) {
-				byte[] bytes = objectLoader.getCachedBytes();
-				Charset charset = Charsets.detectFrom(bytes);
-				if (charset != null) {
-					String blobPath = treeWalk.getPathString();
-					String content = new String(bytes, charset);
-
+				String blobPath = treeWalk.getPathString();
+				String content = ContentDetector.convertToText(objectLoader.getCachedBytes(), blobPath);
+				if (content != null) {
 					Pattern pattern = getPattern();
 					if (pattern != null) {
 						int lineNo = 0;
