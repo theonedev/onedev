@@ -63,5 +63,7 @@ public abstract class Symbol implements Serializable {
 	
 	@Nullable
 	public abstract String getScope();
+
+	public abstract boolean isPrimary();
 	
 }

@@ -58,4 +58,9 @@ public class CompilationUnit extends JavaSymbol {
 		return packageName;
 	}
 
+	@Override
+	public boolean isPrimary() {
+		return false;
+	}
+
 }

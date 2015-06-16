@@ -11,18 +11,12 @@
 	background: #EEE;
 }
 
-#repo-file>.head .revision-selector, #repo-file>.head .file-navigator, #repo-file>.head .blob-search {
+#repo-file>.head .revision-selector, #repo-file>.head .file-navigator, #repo-file>.head .search {
 	padding: 5px 8px;
 }
-#repo-file>.head .blob-search input {
-	margin: -9px 4px -5px 0;
-	border-top: none;
-	border-bottom: none;
-	border-left: 1px solid #BBB;
-	border-right: 1px solid #BBB;
-	box-shadow: none;
-	border-radius: 0;
-	height: 28px;
+#repo-file>.head .search>a {
+	color: #666;
+	margin: 0 4px;
 }
 
 #repo-file>.revision-indexing {

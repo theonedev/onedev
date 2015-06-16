@@ -41,7 +41,7 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public ResourceReference getIcon() {
-		return new PackageResourceReference(FileHit.class, "bullet.png");
+		return new PackageResourceReference(FileHit.class, "bullet.gif");
 	}
 
 	@Override

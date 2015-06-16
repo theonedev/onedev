@@ -34,11 +34,12 @@ import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
-import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
 
 @SuppressWarnings("serial")
-abstract class SearchResultPanel extends Panel {
+public abstract class SearchResultPanel extends Panel {
 
+	public static final int QUERY_ENTRIES = 1000;
+	
 	private enum ExpandStatus {EXPAND_ALL, COLLAPSE_ALL};
 	
 	private static final String HITS_ID = "hits";
@@ -62,7 +63,7 @@ abstract class SearchResultPanel extends Panel {
 	public SearchResultPanel(String id, List<QueryHit> hits) {
 		super(id);
 		
-		hasMore = (hits.size() == BlobSearchPanel.ADVANCED_QUERY_ENTRIES);
+		hasMore = (hits.size() == QUERY_ENTRIES);
 		
 		Map<String, MatchedBlob> hitsByBlob = new LinkedHashMap<>();
 
@@ -165,7 +166,7 @@ abstract class SearchResultPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String message = "too many matches, displaying " + BlobSearchPanel.ADVANCED_QUERY_ENTRIES + " of them";
+		String message = "too many matches, displaying " + QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
 		add(prevMatchLink = new AjaxLink<Void>("prevMatch") {

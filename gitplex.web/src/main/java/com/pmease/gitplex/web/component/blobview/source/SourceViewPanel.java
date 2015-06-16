@@ -51,13 +51,12 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {
 
-	private static final int MAX_DECLARATION_QUERY_ENTRIES = 20;
-	
-	private static final int MAX_OCCURRENCE_QUERY_ENTRIES = 1000;
+	private static final int QUERY_ENTRIES = 20;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
 	
@@ -188,7 +187,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						BlobQuery query = new TextQuery(symbol, false, true, true, 
-									null, null, MAX_OCCURRENCE_QUERY_ENTRIES);
+									null, null, SearchResultPanel.QUERY_ENTRIES);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(context.getRepository(), 
@@ -222,10 +221,15 @@ public class SourceViewPanel extends BlobViewPanel {
 				symbol = params.getParameterValue("symbol").toString();
 				if (symbol.startsWith("@"))
 					symbol = symbol.substring(1);
-				SymbolQuery query = new SymbolQuery(symbol, false, true, true, MAX_DECLARATION_QUERY_ENTRIES);
 				try {
+					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 					symbolHits = searchManager.search(context.getRepository(), context.getBlobIdent().revision, query);
+					if (symbolHits.size() < QUERY_ENTRIES) {
+						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
+						symbolHits.addAll(searchManager.search(context.getRepository(), 
+								context.getBlobIdent().revision, query));
+					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}								

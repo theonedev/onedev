@@ -5,12 +5,15 @@ import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.apache.lucene.index.Term;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.WildcardQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.pmease.gitplex.search.query.NGramLuceneQuery;
@@ -18,14 +21,22 @@ import com.pmease.gitplex.search.query.TooGeneralQueryException;
 
 public class RegexLiterals {
 	
+	private static final Logger logger = LoggerFactory.getLogger(RegexLiterals.class);
+	
 	private final List<List<LeafLiterals>> rows;
 	
 	public RegexLiterals(String regex) {
 		ANTLRInputStream stream = new ANTLRInputStream(regex);
 		PCRELexer lexer = new PCRELexer(stream);
+		lexer.removeErrorListeners();
+		lexer.addErrorListener(ErrorListener.INSTANCE);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		
-		OrLiterals orLiterals = (OrLiterals) new LiteralVisitor().visit(new PCREParser(tokens).parse());
+		PCREParser parser = new PCREParser(tokens);
+		parser.removeErrorListeners();
+		parser.addErrorListener(ErrorListener.INSTANCE);
+		
+		OrLiterals orLiterals = (OrLiterals) new LiteralVisitor().visit(parser.parse());
 		rows = orLiterals.flattern(true);
 	}
 
@@ -52,28 +63,6 @@ public class RegexLiterals {
 			throw new TooGeneralQueryException();
 	}
 
-	/**
-	 * @param fieldName
-	 * @return
-	 * @throws TooGeneralQueryException
-	 */
-	public Query asWildcardQuery(String fieldName) throws TooGeneralQueryException {
-		BooleanQuery orQuery = new BooleanQuery();
-		for (List<LeafLiterals> row: rows) {
-			BooleanQuery andQuery = new BooleanQuery();
-			for (LeafLiterals literals: row) {
-				if (literals.getLiteral() != null && literals.getLiteral().length() != 0)
-					andQuery.add(new WildcardQuery(new Term(fieldName, literals.getLiteral() + "*")), Occur.MUST);
-			}
-			if (andQuery.getClauses().length != 0)
-				orQuery.add(andQuery, Occur.SHOULD);
-		}
-		if (orQuery.getClauses().length != 0)
-			return orQuery;
-		else
-			throw new TooGeneralQueryException();
-	}
-	
 	@Override
 	public String toString() {
 		StringBuilder orBuilder = new StringBuilder();
@@ -93,4 +82,19 @@ public class RegexLiterals {
 		return orBuilder.toString();
 	}
 
+	private static class ErrorListener extends BaseErrorListener {
+
+		private static final ErrorListener INSTANCE = new ErrorListener();
+		
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer,
+								Object offendingSymbol,
+								int line,
+								int charPositionInLine,
+								String msg,
+								RecognitionException e) {
+			logger.error("line " + line + ":" + charPositionInLine + " " + msg);
+		}
+		
+	}
 }

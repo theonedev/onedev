@@ -152,4 +152,9 @@ public class TypeDef extends JavaSymbol {
 		return new PackageResourceReference(Icons.class, icon);
 	}
 
+	@Override
+	public boolean isPrimary() {
+		return true;
+	}
+
 }

@@ -99,5 +99,10 @@ public class MethodDef extends JavaSymbol {
 		else
 			return getParent().getName();
 	}
+
+	@Override
+	public boolean isPrimary() {
+		return false;
+	}
 	
 }

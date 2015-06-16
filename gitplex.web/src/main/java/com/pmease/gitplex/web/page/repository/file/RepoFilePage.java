@@ -41,13 +41,16 @@ import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.HistoryBehavior;
+import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
+import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.web.component.blobsearch.BlobSearchPanel;
+import com.pmease.gitplex.web.component.blobsearch.advanced.AdvancedSearchPanel;
+import com.pmease.gitplex.web.component.blobsearch.instant.InstantSearchPanel;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
 import com.pmease.gitplex.web.component.filelist.FileListPanel;
@@ -61,8 +64,6 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIR
 @SuppressWarnings("serial")
 public class RepoFilePage extends RepositoryPage {
 
-	public static final int MAX_QUERY_ENTRIES = 1000;
-	
 	private static final String PARAM_REVISION = "revision";
 	
 	private static final String PARAM_PATH = "path";
@@ -138,7 +139,7 @@ public class RepoFilePage extends RepositoryPage {
 		newFileNavigator(null);
 		newFileViewer(null);
 		
-		add(new BlobSearchPanel("fileSearcher", repoModel, new AbstractReadOnlyModel<String>() {
+		add(new InstantSearchPanel("instantSearch", repoModel, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -159,11 +160,47 @@ public class RepoFilePage extends RepositoryPage {
 			}
 			
 			@Override
-			protected void renderQueryHits(AjaxRequestTarget target, List<QueryHit> hits) {
+			protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
 				renderSearchResult(target, hits);
 			}
 			
 		});
+		
+		ModalPanel advancedSearchModal = new ModalPanel("advancedSearchModal") {
+
+			@Override
+			protected Component newContent(String id, ModalBehavior behavior) {
+				return new AdvancedSearchPanel(id, repoModel, new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return file.revision;
+					}
+					
+				}) {
+
+					@Override
+					protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
+						renderSearchResult(target, hits);
+						close(target);
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						close(target);
+					}
+
+					@Override
+					protected BlobIdent getCurrentBlob() {
+						return file;
+					}
+					
+				};
+			}
+			
+		};
+		add(advancedSearchModal);
+		add(new WebMarkupContainer("advancedSearch").add(new ModalBehavior(advancedSearchModal)));
 		
 		add(revisionIndexing = new WebMarkupContainer("revisionIndexing") {
 
@@ -350,7 +387,6 @@ public class RepoFilePage extends RepositoryPage {
 				
 			}.render(FILE_VIEWER_ID);
 		}
-		
 		lastCommit = new AjaxLazyLoadPanel(LAST_COMMIT_ID) {
 			
 			@Override

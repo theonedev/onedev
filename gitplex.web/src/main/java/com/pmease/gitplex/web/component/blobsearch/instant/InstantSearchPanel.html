@@ -1,0 +1,64 @@
+<wicket:panel>
+	<span class="instant-search">
+		<input wicket:id="input" placeholder="Symbol, file, or text" class="form-control input-sm"/> 
+		<a title="Instant search" onclick="if (!$(this).prev().is(':visible')) $(this).prev().show().focus();"><i class="fa fa-search"></i></a>
+	</span>		
+	<div wicket:id="resultDropdown"></div>
+	<wicket:fragment wicket:id="resultFrag">
+		<div class="instant-search-result">
+			<wicket:enclosure child="symbolHits">
+			<div class="symbols section">
+				<div wicket:id="symbolsTitle" class="title">Symbols and files</div>
+				<ul class="list-unstyled">
+					<li wicket:id="symbolHits" class="hit selectable">
+						<a wicket:id="link">
+							<span class="icon"><img wicket:id="icon"></img></span>
+							<span wicket:id="label" class="text"></span>
+							<wicket:enclosure child="scope">
+								<span class="scope">
+								-- <span wicket:id="scope"></span> 
+								</span>
+							</wicket:enclosure>
+						</a>
+					</li>
+					<wicket:enclosure child="moreSymbolHits">
+					<li class="hit selectable more-matches">
+						<a wicket:id="moreSymbolHits">
+							<span class="icon"><wicket:link><img src="point.png"></img></wicket:link></span>						
+							<em class="text">Show more</em>
+						</a>
+					</li>
+					</wicket:enclosure>
+				</ul>
+			</div>
+			</wicket:enclosure>
+			<wicket:enclosure child="textHits">
+			<div class="texts section">
+				<div wicket:id="textsTitle" class="title">Text occurrences</div>
+				<ul class="list-unstyled">
+					<li wicket:id="textHits" class="hit selectable">
+						<a wicket:id="link">
+							<span class="icon"><img wicket:id="icon"></img></span>
+							<span wicket:id="label" class="text"></span>
+							<wicket:enclosure child="scope">
+								<span class="scope">
+								-- <span wicket:id="scope"></span> 
+								</span>
+							</wicket:enclosure>
+						</a>
+					</li>
+					<wicket:enclosure child="moreTextHits">
+					<li class="hit selectable more-matches">
+						<a wicket:id="moreTextHits">
+							<span class="icon"><wicket:link><img src="point.png"></img></wicket:link></span>						
+							<em class="text">Show more</em>
+						</a>
+					</li>
+					</wicket:enclosure>
+				</ul>
+			</div>
+			</wicket:enclosure>
+			<em wicket:id="noMatches"><i class="fa fa-info-circle"></i> No any matches</em>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

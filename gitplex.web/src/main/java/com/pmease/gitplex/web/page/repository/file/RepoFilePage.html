@@ -4,7 +4,11 @@
 		<div class="head clearfix">
 			<div wicket:id="revisionSelector" class="pull-left"></div>
 			<div wicket:id="fileNavigator" class="pull-left"></div>
-			<div wicket:id="fileSearcher" class="pull-right"></div>
+			<div class="pull-right search">
+				<span wicket:id="instantSearch"></span>
+				<a wicket:id="advancedSearch" title="Advanced search"><i class="fa fa-binoculars"></i></a>
+				<div wicket:id="advancedSearchModal"></div>
+			</div>
 		</div>
 		<div wicket:id="revisionIndexing" class="revision-indexing">
 			<img wicket:id="icon"></img> 

@@ -82,4 +82,9 @@ public class FieldDef extends JavaSymbol {
 			return getParent().getName();
 	}
 
+	@Override
+	public boolean isPrimary() {
+		return false;
+	}
+
 }

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.blobsearch;
+package com.pmease.gitplex.web.component.blobsearch.instant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,18 +12,12 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.Radio;
-import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -32,63 +26,45 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Splitter;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalPanel;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
+import com.pmease.gitplex.search.query.FileQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
 
 @SuppressWarnings("serial")
-public abstract class BlobSearchPanel extends Panel {
+public abstract class InstantSearchPanel extends Panel {
 
-	public static final int ADVANCED_QUERY_ENTRIES = 1000;
+	private static final int QUERY_ENTRIES = 15;
 	
-	/*
-	 * Entries to query is much more than entries to be displayed in order to 
-	 * cover important symbols (for instant types are important than fields...)
-	 * so that they can be sorted to be displayed first  
-	 */
-	private static final int SYMBOL_QUERY_ENTRIES = 300;
+	final IModel<Repository> repoModel;
 	
-	private static final int SYMBOL_DISPLAY_ENTRIES = 15;
+	final IModel<String> revisionModel;
 	
-	private static final int TEXT_QUERY_ENTRIES = 15;
+	private TextField<String> searchField;
 	
-	private final IModel<Repository> repoModel;
+	private String searchInput;
 	
-	private final IModel<String> revisionModel;
+	private DropdownPanel searchDropdown;
 	
-	private TextField<String> instantSearchField;
-	
-	private String instantSearchInput;
-	
-	private DropdownPanel instantSearchDropdown;
-	
-	private WebMarkupContainer instantSearchResult;
+	private WebMarkupContainer searchResult;
 	
 	private List<QueryHit> symbolHits;
 	
@@ -100,7 +76,7 @@ public abstract class BlobSearchPanel extends Panel {
 	
 	private int activeHitIndex;
 	
-	public BlobSearchPanel(String id, IModel<Repository> repoModel, IModel<String> revisionModel) {
+	public InstantSearchPanel(String id, IModel<Repository> repoModel, IModel<String> revisionModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
@@ -111,14 +87,23 @@ public abstract class BlobSearchPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		instantSearchDropdown = new DropdownPanel("instantSearchDropdown") {
+		searchDropdown = new DropdownPanel("resultDropdown") {
 
 			@Override
 			protected Component newContent(String id) {
-				instantSearchResult = new Fragment(id, "instantSearchResultFrag", BlobSearchPanel.this);
-				instantSearchResult.setOutputMarkupId(true);
+				searchResult = new Fragment(id, "resultFrag", InstantSearchPanel.this);
+				searchResult.setOutputMarkupId(true);
 				
-				instantSearchResult.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
+				searchResult.add(new WebMarkupContainer("symbolsTitle") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!textHits.isEmpty());
+					}
+					
+				});
+				searchResult.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
 
 					@Override
 					public List<QueryHit> getObject() {
@@ -161,7 +146,7 @@ public abstract class BlobSearchPanel extends Panel {
 					}
 					
 				});
-				instantSearchResult.add(new AjaxLink<Void>("moreSymbolHits") {
+				searchResult.add(new AjaxLink<Void>("moreSymbolHits") {
 
 					@Override
 					protected void onInitialize() {
@@ -170,19 +155,35 @@ public abstract class BlobSearchPanel extends Panel {
 							
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
-								SymbolQuery query = new SymbolQuery(
-										instantSearchInput, false, false, false, RepoFilePage.MAX_QUERY_ENTRIES);
 								try {
+									List<QueryHit> hits = new ArrayList<>();
+
+									BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
+											null, null, SearchResultPanel.QUERY_ENTRIES);
+
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-									renderQueryHits(target, hits);
+									
+									hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+									
+									if (hits.size() < SearchResultPanel.QUERY_ENTRIES) {
+										query = new FileQuery(searchInput+"*", false, null, 
+												SearchResultPanel.QUERY_ENTRIES-hits.size());
+										hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+									}
+									
+									if (hits.size() < SearchResultPanel.QUERY_ENTRIES) {
+										query = new SymbolQuery(searchInput+"*", false, false, 
+												null, null, SearchResultPanel.QUERY_ENTRIES-hits.size());
+										hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+									}
+									onSearchComplete(target, hits);
 								} catch (TooGeneralQueryException e) {
 									// this is impossible as we already queried part of the result
 									throw new IllegalStateException();
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
-								instantSearchDropdown.hide(target);
+								searchDropdown.hide(target);
 							}
 							
 						});
@@ -191,7 +192,7 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(symbolHits.size()==SYMBOL_DISPLAY_ENTRIES);
+						setVisible(symbolHits.size() == QUERY_ENTRIES);
 					}
 
 					@Override
@@ -200,27 +201,17 @@ public abstract class BlobSearchPanel extends Panel {
 					}
 					
 				});
-				instantSearchResult.add(new WebMarkupContainer("noSymbolHits") {
+				
+				searchResult.add(new WebMarkupContainer("textsTitle") {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(symbolHits.isEmpty());
+						setVisible(!symbolHits.isEmpty());
 					}
 					
 				});
-				
-				WebMarkupContainer textSection = new WebMarkupContainer("texts") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(instantSearchInput != null && instantSearchInput.length() >= IndexConstants.NGRAM_SIZE);
-					}
-					
-				};
-				instantSearchResult.add(textSection);
-				textSection.add(new ListView<QueryHit>("textHits", new AbstractReadOnlyModel<List<QueryHit>>() {
+				searchResult.add(new ListView<QueryHit>("textHits", new AbstractReadOnlyModel<List<QueryHit>>() {
 
 					@Override
 					public List<QueryHit> getObject() {
@@ -263,7 +254,7 @@ public abstract class BlobSearchPanel extends Panel {
 					}
 					
 				});
-				textSection.add(new AjaxLink<Void>("moreTextHits") {
+				searchResult.add(new AjaxLink<Void>("moreTextHits") {
 
 					@Override
 					protected void onInitialize() {
@@ -272,19 +263,19 @@ public abstract class BlobSearchPanel extends Panel {
 							
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
-								TextQuery query = new TextQuery(
-										instantSearchInput, false, false, false, RepoFilePage.MAX_QUERY_ENTRIES);
+								TextQuery query = new TextQuery(searchInput, false, false, false, 
+										null, null, SearchResultPanel.QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-									renderQueryHits(target, hits);
+									onSearchComplete(target, hits);
 								} catch (TooGeneralQueryException e) {
 									// this is impossible as we already queried part of the result
 									throw new IllegalStateException();
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
-								instantSearchDropdown.hide(target);
+								searchDropdown.hide(target);
 							}
 							
 						});
@@ -293,7 +284,7 @@ public abstract class BlobSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(textHits.size()==TEXT_QUERY_ENTRIES);
+						setVisible(textHits.size() == QUERY_ENTRIES);
 					}
 
 					@Override
@@ -302,82 +293,89 @@ public abstract class BlobSearchPanel extends Panel {
 					}
 					
 				});
-				textSection.add(new WebMarkupContainer("noTextHits") {
+				
+				searchResult.add(new WebMarkupContainer("noMatches") {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(textHits.isEmpty());
+						setVisible(symbolHits.isEmpty() && textHits.isEmpty());
 					}
 					
 				});
 				
-				return instantSearchResult;
+				return searchResult;
 			}
 			
 		};
-		add(instantSearchDropdown);
+		add(searchDropdown);
 		
-		instantSearchField = new TextField<>("instantSearchInput", Model.of(""));
-		instantSearchField.add(new AjaxFormComponentUpdatingBehavior("inputchange focus click") {
+		searchField = new TextField<>("input", Model.of(""));
+		searchField.add(new AjaxFormComponentUpdatingBehavior("inputchange focus click") {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.setChannel(new AjaxChannel("blob-instant-search", AjaxChannel.Type.DROP));
+				attributes.setChannel(new AjaxChannel("instant-search", AjaxChannel.Type.DROP));
 			}
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				if (instantSearchResult != null)
-					target.add(instantSearchResult);
+				if (searchResult != null)
+					target.add(searchResult);
 				
-				instantSearchInput = instantSearchField.getInput();
+				searchInput = searchField.getInput();
 
-				if (StringUtils.isNotBlank(instantSearchInput)) {
+				if (StringUtils.isNotBlank(searchInput)) {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 
-					BlobQuery blobQuery = new SymbolQuery(instantSearchInput, false, false, false, SYMBOL_QUERY_ENTRIES);
-					
 					try {
-						symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), blobQuery);
+						BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
+								null, null, QUERY_ENTRIES);
+						symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+						
+						if (symbolHits.size() < QUERY_ENTRIES) {
+							query = new FileQuery(searchInput+"*", false, null, 
+									QUERY_ENTRIES-symbolHits.size());
+							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+						}
+						
+						if (symbolHits.size() < QUERY_ENTRIES) {
+							query = new SymbolQuery(searchInput+"*", false, false, 
+									null, null, QUERY_ENTRIES-symbolHits.size());
+							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+						}
 					} catch (TooGeneralQueryException e) {
 						symbolHits = new ArrayList<>();
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
 					
-					if (symbolHits.size() > SYMBOL_DISPLAY_ENTRIES) 
-						symbolHits = new ArrayList<>(symbolHits.subList(0, SYMBOL_DISPLAY_ENTRIES));
-
-					if (instantSearchInput.length() >= IndexConstants.NGRAM_SIZE) {
-						TextQuery textQuery = new TextQuery(instantSearchInput, false, false, false, TEXT_QUERY_ENTRIES);
-						try {
-							textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), textQuery);
-						} catch (TooGeneralQueryException e) {
-							symbolHits = new ArrayList<>();
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}
-					} else {
+					try {
+						BlobQuery query = new TextQuery(searchInput, false, false, false, 
+								null, null, QUERY_ENTRIES);
+						textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+					} catch (TooGeneralQueryException e) {
 						textHits = new ArrayList<>();
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
 					}
 					
-					instantSearchDropdown.show(target);
+					searchDropdown.show(target);
 				} else {
 					symbolHits = new ArrayList<>();
 					textHits = new ArrayList<>();
 					
-					instantSearchDropdown.hide(target);
+					searchDropdown.hide(target);
 				}
 				activeHitIndex = 0;
 			}			
 			
 		});
-		instantSearchField.add(new DropdownBehavior(instantSearchDropdown)
+		searchField.add(new DropdownBehavior(searchDropdown)
 				.mode(null)
 				.alignWithTrigger(100, 100, 100, 0, 6, true));
-		instantSearchField.add(new AbstractDefaultAjaxBehavior() {
+		searchField.add(new AbstractDefaultAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -409,31 +407,27 @@ public abstract class BlobSearchPanel extends Panel {
 				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 
 				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(BlobSearchPanel.class, "blob-search.js")));
+						new JavaScriptResourceReference(InstantSearchPanel.class, "instant-search.js")));
 				
 				String script = String.format(
-						"gitplex.blobSearch.init('%s', '%s', %s);", 
-						instantSearchField.getMarkupId(true), instantSearchDropdown.getMarkupId(true),
+						"gitplex.instantsearch.init('%s', '%s', %s);", 
+						searchField.getMarkupId(true), searchDropdown.getMarkupId(true),
 						getCallbackFunction(CallbackParameter.explicit("key")));
 				
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});
-		add(instantSearchField);
-		
-		ModalPanel advancedSearchDlg = new AdvancedSearchDlg("advancedSearchDlg");
-		add(advancedSearchDlg);
-		add(new WebMarkupContainer("advancedSearch").add(new ModalBehavior(advancedSearchDlg)));
+		add(searchField);
 	}
 	
 	private QueryHit getActiveHit() {
 		List<QueryHit> hits = new ArrayList<>();
 		hits.addAll(symbolHits);
-		if (symbolHits.size() == SYMBOL_DISPLAY_ENTRIES)
+		if (symbolHits.size() == QUERY_ENTRIES)
 			hits.add(new MoreSymbolHit());
 		hits.addAll(textHits);
-		if (textHits.size() == TEXT_QUERY_ENTRIES)
+		if (textHits.size() == QUERY_ENTRIES)
 			hits.add(new MoreTextHit());
 		
 		if (activeHitIndex >=0 && activeHitIndex<hits.size())
@@ -449,7 +443,7 @@ public abstract class BlobSearchPanel extends Panel {
 		super.renderHead(response);
 		
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(BlobSearchPanel.class, "blob-search.css")));
+				new CssResourceReference(InstantSearchPanel.class, "instant-search.css")));
 	}
 
 	@Override
@@ -461,173 +455,14 @@ public abstract class BlobSearchPanel extends Panel {
 	}
 
 	private void selectHit(AjaxRequestTarget target, QueryHit hit) {
-		target.appendJavaScript(String.format("$('#%s').hide();", instantSearchField.getMarkupId(true)));
-		instantSearchDropdown.hide(target);
+		target.appendJavaScript(String.format("$('#%s').hide();", searchField.getMarkupId(true)));
+		searchDropdown.hide(target);
 		onSelect(target, hit);
 	}
 	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 	
-	protected abstract void renderQueryHits(AjaxRequestTarget target, List<QueryHit> hits);
-	
-	private class AdvancedSearchDlg extends ModalPanel {
-
-		private static final String SEARCH_TEXTS = "texts";
-		
-		private static final String SEARCH_SYMBOLS = "symbols";
-		
-		private String searchFor;
-		
-		private boolean regex;
-		
-		private boolean wholeWord;
-		
-		private boolean caseSensitive;
-		
-		private String searchType = SEARCH_TEXTS;
-		
-		private String fileTypes;
-		
-		public AdvancedSearchDlg(String id) {
-			super(id);
-		}
-		
-		@Override
-		protected Component newContent(String id, ModalBehavior behavior) {
-			Fragment fragment = new Fragment(id, "advancedSearchFrag", BlobSearchPanel.this);
-			final Form<?> form = new Form<Void>("form");
-			form.setOutputMarkupId(true);
-			fragment.add(form);
-			
-			WebMarkupContainer searchForContainer = new WebMarkupContainer("searchFor");
-			form.add(searchForContainer);
-			final TextField<String> searchForInput = new TextField<String>("input", new IModel<String>() {
-
-				@Override
-				public void detach() {
-				}
-
-				@Override
-				public String getObject() {
-					return searchFor;
-				}
-
-				@Override
-				public void setObject(String object) {
-					searchFor = object;
-				}
-						
-			});
-			searchForInput.setOutputMarkupId(true);
-			searchForInput.setRequired(true);
-			searchForContainer.add(searchForInput);
-			searchForContainer.add(new FeedbackPanel("feedback", searchForInput));
-			searchForContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-				@Override
-				protected String load() {
-					if (searchForInput.hasErrorMessage())
-						return " has-error";
-					else
-						return "";
-				}
-				
-			}));
-			
-			form.add(new CheckBox("regex", new PropertyModel<Boolean>(this, "regex")));
-			form.add(new CheckBox("wholeWord", new PropertyModel<Boolean>(this, "wholeWord")));
-			form.add(new CheckBox("caseSensitive", new PropertyModel<Boolean>(this, "caseSensitive")));
-			
-			form.add(new RadioGroup<String>("searchType", new PropertyModel<String>(this, "searchType")) {
-
-				@Override
-				protected void onInitialize() {
-					super.onInitialize();
-					
-					add(new Radio<String>("texts", Model.of(SEARCH_TEXTS)));
-					add(new Radio<String>("symbols", Model.of(SEARCH_SYMBOLS)));
-				}
-				
-			});
-			
-			form.add(new TextField<String>("fileTypes", new PropertyModel<String>(this, "fileTypes")));
-			
-			form.add(new AjaxSubmitLink("search") {
-
-				private RunTaskBehavior runTaskBehavior;
-				
-				@Override
-				protected void onInitialize() {
-					super.onInitialize();
-					
-					add(runTaskBehavior = new RunTaskBehavior() {
-						
-						@Override
-						protected void runTask(AjaxRequestTarget target) {
-							List<String> pathSuffixes = new ArrayList<>();
-							if (fileTypes != null) {
-								for (String fileType: Splitter.on(CharMatcher.anyOf(", \t")).trimResults().omitEmptyStrings().split(fileTypes)) {
-									if (fileType.startsWith("*"))
-										fileType = fileType.substring(1);
-									if (!fileType.startsWith("."))
-										fileType = "." + fileType;
-									pathSuffixes.add(fileType);
-								}
-							}
-							
-							BlobQuery query;
-							if (searchType.equals(SEARCH_SYMBOLS)) {
-								query = new SymbolQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, ADVANCED_QUERY_ENTRIES);
-							} else {
-								query = new TextQuery(searchFor, regex, wholeWord, caseSensitive, 
-										null, pathSuffixes, ADVANCED_QUERY_ENTRIES);
-							}
-
-							try {
-								SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-								List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-								renderQueryHits(target, hits);
-								close(target);
-							} catch (TooGeneralQueryException e) {
-								searchForInput.error("Query term is too general.");
-								target.add(form);
-							} catch (InterruptedException e) {
-								throw new RuntimeException(e);
-							}								
-						}
-						
-					});
-				}
-
-				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
-					target.add(form);
-				}
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
-					
-					runTaskBehavior.requestRun(target);
-				}
-				
-			});
-			
-			form.add(new AjaxLink<Void>("cancel") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					close(target);
-				}
-				
-			});
-			
-			return fragment;
-		}
-		
-	};
+	protected abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
 	private static class MoreSymbolHit extends QueryHit {
 

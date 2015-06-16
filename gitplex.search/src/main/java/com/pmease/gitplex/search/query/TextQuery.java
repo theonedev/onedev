@@ -1,10 +1,11 @@
 package com.pmease.gitplex.search.query;
 
+import static com.pmease.gitplex.search.FieldConstants.BLOB_NAME;
+import static com.pmease.gitplex.search.FieldConstants.BLOB_TEXT;
 import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +13,11 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.CharUtils;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
@@ -20,7 +25,6 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.util.Charsets;
-import com.pmease.gitplex.search.FieldConstants;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
@@ -29,15 +33,53 @@ import com.pmease.gitplex.search.query.regex.RegexLiterals;
 public class TextQuery extends BlobQuery {
 
 	private static int MAX_LINE_LEN = 1024;
+
+	private final String term;
 	
-	public TextQuery(String term, boolean regex, boolean matchWord, boolean caseSensitive, 
-			@Nullable String pathPrefix, @Nullable Collection<String> pathSuffixes, int count) {
-		super(FieldConstants.BLOB_TEXT.name(), term, regex, matchWord, caseSensitive, 
-				pathPrefix, pathSuffixes, count);
+	private final boolean regex;
+	
+	private final boolean caseSensitive;
+	
+	private final boolean wholeWord;
+
+	private final String directory;
+	
+	private final String fileNames;
+	
+	private transient Pattern pattern;
+	
+	public TextQuery(String term, boolean regex, boolean caseSensitive, boolean wordMatch, 
+			@Nullable String directory, @Nullable String fileNames, int count) {
+		super(count);
+		
+		this.term = term;
+		this.regex = regex;
+		this.caseSensitive = caseSensitive;
+		this.wholeWord = wordMatch;
+		this.directory = directory;
+		this.fileNames = fileNames;
 	}
 
-	public TextQuery(String term, boolean regex, boolean matchWord, boolean caseSensitive, int count) {
-		this(term, regex, matchWord, caseSensitive, null, null, count);
+	@Nullable
+	private Pattern getPattern() {
+		if (regex) {
+			if (pattern == null) {
+				String expression = term;
+				if (wholeWord) {
+					if (!expression.startsWith("\\b"))
+						expression = "\\b" + expression;
+					if (!expression.endsWith("\\b"))
+						expression = expression + "\\b";
+				}
+				if (caseSensitive)
+					pattern = Pattern.compile(expression);
+				else
+					pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+			}
+			return pattern;
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
@@ -70,15 +112,24 @@ public class TextQuery extends BlobQuery {
 							lineNo++;
 						}
 					} else {
-						String casedTerm = getCasedTerm();
+						String normalizedTerm;
+						if (!caseSensitive)
+							normalizedTerm = term.toLowerCase();
+						else
+							normalizedTerm = term;
 						
 						int lineNo = 0;
 						for (String line: Splitter.on("\n").split(content)) {
-							String casedLine = getCasedText(line);
-							int start = casedLine.indexOf(casedTerm, 0);
+							String normalizedLine;
+							if (!caseSensitive)
+								normalizedLine = line.toLowerCase();
+							else
+								normalizedLine = line;
+							
+							int start = normalizedLine.indexOf(normalizedTerm, 0);
 							while (start != -1) {
-								int end = start + casedTerm.length();
-								if (isWordMatch()) {
+								int end = start + normalizedTerm.length();
+								if (wholeWord) {
 									char beforeChar;
 									if (start == 0)
 										beforeChar = ' ';
@@ -103,7 +154,7 @@ public class TextQuery extends BlobQuery {
 									if (hits.size() >= getCount())
 										break;
 								}
-								start = casedLine.indexOf(casedTerm, end);
+								start = normalizedLine.indexOf(normalizedTerm, end);
 							}
 							if (hits.size() >= getCount())
 								break;
@@ -122,13 +173,28 @@ public class TextQuery extends BlobQuery {
 	}
 
 	@Override
-	protected Query asLuceneQuery(String term) {
-		if (isRegex()) 
-			return new RegexLiterals(term).asNGramQuery(getFieldName(), NGRAM_SIZE);
-		else if (term.length() >= NGRAM_SIZE)  
-			return new NGramLuceneQuery(getFieldName(), term, NGRAM_SIZE);
+	public Query asLuceneQuery() throws TooGeneralQueryException {
+		BooleanQuery query = new BooleanQuery(true);
+
+		if (directory != null)
+			applyDirectory(query, directory);
+
+		if (fileNames != null) {
+			BooleanQuery subQuery = new BooleanQuery(true);
+			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
+				subQuery.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), Occur.SHOULD);
+			if (subQuery.getClauses().length != 0)
+				query.add(subQuery, Occur.MUST);
+		}
+
+		if (regex) 
+			query.add(new RegexLiterals(term).asNGramQuery(BLOB_TEXT.name(), NGRAM_SIZE), Occur.MUST);
+		else if (term.length() >= NGRAM_SIZE)
+			query.add(new NGramLuceneQuery(BLOB_TEXT.name(), term, NGRAM_SIZE), Occur.MUST);
 		else 
 			throw new TooGeneralQueryException();
+
+		return query;
 	}
 	
 }

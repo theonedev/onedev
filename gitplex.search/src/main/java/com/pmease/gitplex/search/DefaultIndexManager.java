@@ -1,16 +1,6 @@
 package com.pmease.gitplex.search;
 
-import static com.pmease.gitplex.search.FieldConstants.BLOB_HASH;
-import static com.pmease.gitplex.search.FieldConstants.BLOB_INDEX_VERSION;
-import static com.pmease.gitplex.search.FieldConstants.BLOB_PATH;
-import static com.pmease.gitplex.search.FieldConstants.BLOB_SYMBOLS;
-import static com.pmease.gitplex.search.FieldConstants.BLOB_TEXT;
-import static com.pmease.gitplex.search.FieldConstants.COMMIT_HASH;
-import static com.pmease.gitplex.search.FieldConstants.COMMIT_INDEX_VERSION;
-import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT;
-import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_HASH;
-import static com.pmease.gitplex.search.FieldConstants.LAST_COMMIT_INDEX_VERSION;
-import static com.pmease.gitplex.search.FieldConstants.META;
+import static com.pmease.gitplex.search.FieldConstants.*;
 import static com.pmease.gitplex.search.IndexConstants.MAX_INDEXABLE_SIZE;
 import static com.pmease.gitplex.search.IndexConstants.NGRAM_SIZE;
 
@@ -230,10 +220,11 @@ public class DefaultIndexManager implements IndexManager {
 		document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.NO));
 		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.YES));
 		
+		String blobName = blobPath;
 		if (blobPath.indexOf('/') != -1) 
-			document.add(new StringField(BLOB_SYMBOLS.name(), StringUtils.substringAfterLast(blobPath, "/").toLowerCase(), Store.NO));
-		else
-			document.add(new StringField(BLOB_SYMBOLS.name(), blobPath.toLowerCase(), Store.NO));
+			blobName = StringUtils.substringAfterLast(blobPath, "/");
+		
+		document.add(new StringField(BLOB_NAME.name(), blobName.toLowerCase(), Store.NO));
 		
 		ObjectLoader objectLoader = repo.open(blobId);
 		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
@@ -246,9 +237,17 @@ public class DefaultIndexManager implements IndexManager {
 				if (extractor != null) {
 					try {
 						for (Symbol symbol: extractor.extract(content)) {
-							String name = symbol.getName();
-							if (name != null)
-								document.add(new StringField(BLOB_SYMBOLS.name(), name.toLowerCase(), Store.NO));
+							String fieldValue = symbol.getName();
+							if (fieldValue != null) {
+								fieldValue = fieldValue.toLowerCase();
+								
+								String fieldName;
+								if (symbol.isPrimary())
+									fieldName = BLOB_PRIMARY_SYMBOLS.name();
+								else
+									fieldName = BLOB_SECONDARY_SYMBOLS.name();
+								document.add(new StringField(fieldName, fieldValue, Store.NO));
+							}
 						}
 					} catch (ExtractException e) {
 						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
