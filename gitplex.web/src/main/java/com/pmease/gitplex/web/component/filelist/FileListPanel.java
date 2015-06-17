@@ -183,9 +183,9 @@ public abstract class FileListPanel extends Panel {
 				item.add(pathLink);
 				
 				if (item.getIndex() == 0)
-					item.add(new Label("lastCommitSummary", "Loading last commit info..."));
+					item.add(new Label("lastCommit", "Loading last commit info..."));
 				else
-					item.add(new Label("lastCommitSummary"));
+					item.add(new Label("lastCommit"));
 			}
 			
 		});

@@ -2,6 +2,7 @@
 	width: 200px; 
 	display: none; 
 	cursor: text;
+	margin-right: 8px;
 }
 .instant-search a {
 	color: #666;

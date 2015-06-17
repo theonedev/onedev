@@ -27,9 +27,15 @@ gitplex.filelist = {
 							path = path.substring(0, index);
 						var lastCommit = lastCommits[path];
 						
-						var $summary = $row.children(".last-commit.summary");
-						$summary.empty().append("<a href='" + lastCommit.url + "'>" + lastCommit.summary + "</a>");
-						$row.children(".last-commit.age").append(lastCommit.age);
+						var html = "<img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> ";
+						if (lastCommit.authorUrl)
+							html += "<a href='" + lastCommit.authorUrl + "'>" + lastCommit.authorName + "</a>";
+						else
+							html += "<span>" + lastCommit.authorName + "</span>";
+						
+						$row.children(".last-commit.author").empty().append(html);
+						$row.children(".last-commit.when").append("<span class='when'>" + lastCommit.when + "</span>");
+						$row.children(".last-commit.message").append("<a href='" + lastCommit.url + "'>" + lastCommit.summary + "</a>");
 					});
 				}
 			}

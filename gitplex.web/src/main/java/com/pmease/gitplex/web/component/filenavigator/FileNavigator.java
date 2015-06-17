@@ -38,7 +38,6 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -116,6 +115,16 @@ public abstract class FileNavigator extends Panel {
 				}
 				
 				item.add(link);
+				
+				item.add(new WebMarkupContainer("separator") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(item.getIndex() != item.getParent().size()-1);
+					}
+					
+				});
 				
 				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
 				
@@ -252,7 +261,7 @@ public abstract class FileNavigator extends Panel {
 					
 				};
 				item.add(subtreeDropdown);
-				subtreeDropdownTrigger.add(new DropdownBehavior(subtreeDropdown).mode(new DropdownMode.Hover()));
+				subtreeDropdownTrigger.add(new DropdownBehavior(subtreeDropdown));
 				item.add(subtreeDropdownTrigger);
 			}
 			

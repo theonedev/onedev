@@ -11,10 +11,10 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.codec.Base64;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.glassfish.jersey.internal.util.Base64;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -92,10 +92,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public String getAvatarUrl(PersonIdent person) {
-		User user = userManager.findByPerson(person);
-		if (user != null) 
-			return getAvatarUrl(user);
-		else if (configManager.getSystemSetting().isGravatarEnabled())
+		if (configManager.getSystemSetting().isGravatarEnabled())
 			return Gravatar.getURL(person.getEmailAddress(), GRAVATAR_SIZE);
 		else 
 			return generateAvatar(person.getName(), person.getEmailAddress());

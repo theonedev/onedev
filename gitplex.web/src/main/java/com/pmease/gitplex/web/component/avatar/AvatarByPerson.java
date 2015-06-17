@@ -12,6 +12,8 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
@@ -41,7 +43,14 @@ public class AvatarByPerson extends WebComponent {
 
 			@Override
 			protected String load() {
-				return GitPlex.getInstance(AvatarManager.class).getAvatarUrl(getPerson());
+				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
+				
+				PersonIdent person = getPerson();
+				User user = GitPlex.getInstance(UserManager.class).findByPerson(person);
+				if (user != null) 
+					return avatarManager.getAvatarUrl(user);
+				else
+					return avatarManager.getAvatarUrl(person);
 			}
 			
 		};

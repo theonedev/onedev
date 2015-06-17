@@ -117,13 +117,10 @@ html, body {
 	font-weight: bold;
 }
 #main>.foot {
-	background: #303845;
-	color: #BBB;
 	font-size: 11px;
 	margin: 0 -15px;
 	padding: 8px; 
 }
-
 section>.head {
 	font-size: 18px;
 	margin-bottom: 20px;

@@ -17,6 +17,7 @@ import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
@@ -350,14 +351,14 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 
 		private final ObjectId id;
 		
-		private final String summary;
+		private final PersonIdent author;
 		
-		private final long timestamp;
+		private final String summary;
 		
 		public Value(RevCommit commit) {
 			this.id = commit.copy();
+			this.author = commit.getAuthorIdent();
 			this.summary = StringUtils.substringBefore(commit.getFullMessage(), "\n").trim();
-			this.timestamp = commit.getCommitTime();
 		}
 
 		public ObjectId getId() {
@@ -368,8 +369,8 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 			return summary;
 		}
 
-		public long getTimestamp() {
-			return timestamp;
+		public PersonIdent getAuthor() {
+			return author;
 		}
 
 		@Override

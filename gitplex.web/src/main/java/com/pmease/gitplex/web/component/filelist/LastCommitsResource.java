@@ -1,24 +1,29 @@
 package com.pmease.gitplex.web.component.filelist;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.exception.AccessDeniedException;
+import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -59,13 +64,31 @@ class LastCommitsResource extends AbstractResource {
 				
 				LastCommitsOfChildren lastCommits = repo.getLastCommitsOfChildren(revision, path);
 				
+				UserManager userManager = GitPlex.getInstance(UserManager.class);
+				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
+				
 				Map<String, LastCommitInfo> map = new HashMap<>();
 				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
 					LastCommitInfo info = new LastCommitInfo();
-					PageParameters params = RepoCommitPage.paramsOf(repo, entry.getValue().getId().name());
+
+					LastCommitsOfChildren.Value value = entry.getValue();
+					PageParameters params = RepoCommitPage.paramsOf(repo, value.getId().name());
 					info.url = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
-					info.summary = entry.getValue().getSummary();
-					info.age = DateUtils.formatAge(new Date(entry.getValue().getTimestamp()*1000L));
+					info.summary = StringEscapeUtils.escapeHtml4(value.getSummary());
+					info.when = DateUtils.formatAge(value.getAuthor().getWhen());
+					
+					PersonIdent author = value.getAuthor();
+					User user = userManager.findByPerson(author);
+					if (user != null) {
+						info.authorName = StringEscapeUtils.escapeHtml4(user.getDisplayName());
+						info.authorAvatarUrl = avatarManager.getAvatarUrl(user);
+						params = AccountReposPage.paramsOf(user);
+						info.authorUrl = RequestCycle.get().urlFor(AccountReposPage.class, params).toString();
+					} else {
+						info.authorName = StringEscapeUtils.escapeHtml4(author.getName());
+						info.authorAvatarUrl = avatarManager.getAvatarUrl(author);
+					}
+					
 					map.put(entry.getKey(), info);
 				}
 				String json;
@@ -98,7 +121,14 @@ class LastCommitsResource extends AbstractResource {
 		
 		String summary;
 		
-		String age;
+		String when;
+		
+		String authorAvatarUrl;
+		
+		String authorName;
+		
+		@Nullable
+		String authorUrl;
 	}
 	
 }

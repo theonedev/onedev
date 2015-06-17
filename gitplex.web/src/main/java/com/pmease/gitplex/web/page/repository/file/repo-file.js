@@ -39,6 +39,24 @@ $(window).load(function() {
 	
 	$(window).resize(function(e) {
 		e.stopPropagation();
+
+		var $head = $("#repo-file>.head");
+		var $revisionSelector = $head.find(">.revision-selector");
+		var maxWidth = $head.width() - $revisionSelector.outerWidth() - 60;
+		var maxHeight = $head.height();
+		
+		var $fileNavigator = $head.find(">.file-navigator");
+		if ($fileNavigator.length != 0) {
+			if ($fileNavigator.outerWidth() > maxWidth || $fileNavigator.outerHeight() > maxHeight)
+				$("#repo-file>.file-navigator").show().append($fileNavigator);
+		} else {
+			$fileNavigator = $("#repo-file>.file-navigator>div");
+			if ($fileNavigator.outerWidth() <= maxWidth && $fileNavigator.outerHeight() <= maxHeight) {
+				$fileNavigator.insertAfter($revisionSelector);
+				$("#repo-file>.file-navigator").hide();
+			}
+		}
+		
 		var $fileViewer = $("#repo-file>.file-viewer");
 		var width = $(window).width()-$("#repo-file").parent().prev().outerWidth();
 		var height = $(window).height()-$fileViewer.offset().top;

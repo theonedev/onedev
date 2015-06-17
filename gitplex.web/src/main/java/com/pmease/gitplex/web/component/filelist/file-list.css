@@ -9,8 +9,20 @@
 	border-top: 1px solid #EEE; 
 	vertical-align: top;
 }
+.file-list>table>tbody>tr>td.path, .file-list>table>tbody>tr>td.last-commit.author, 
+.file-list>table>tbody>tr>td.last-commit.when {
+	white-space: nowrap;
+}
+.file-list>table>tbody>tr>td.last-commit img {
+	width: 20px;
+	height: 20px;
+}
 .file-list>table>tbody>tr>td.last-commit, .file-list>table>tbody>tr>td.last-commit a {
 	color: #444;
+	font-size: 13px;
+}
+.file-list>table>tbody>tr>td.last-commit .when {
+	color: #888;
 }
 .file-list>table>tbody>tr:first-child>td {
 	border-top: none;

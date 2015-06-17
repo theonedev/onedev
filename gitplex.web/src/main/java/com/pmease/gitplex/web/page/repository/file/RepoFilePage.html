@@ -2,19 +2,21 @@
 <wicket:extend>
 	<div id="repo-file">
 		<div class="head clearfix">
-			<div wicket:id="revisionSelector" class="pull-left"></div>
-			<div wicket:id="fileNavigator" class="pull-left"></div>
-			<div class="pull-right search">
+			<div wicket:id="revisionSelector" class="revision-selector pull-left"></div>
+			<div wicket:id="fileNavigator" class="file-navigator pull-left"></div>
+			<div class="search">
 				<span wicket:id="instantSearch"></span>
 				<a wicket:id="advancedSearch" title="Advanced search"><i class="fa fa-binoculars"></i></a>
 				<div wicket:id="advancedSearchModal"></div>
 			</div>
 		</div>
+		<!-- below is used to hold file navigator if there is not enough space in head -->
+		<div class="file-navigator clearfix"></div>
 		<div wicket:id="revisionIndexing" class="revision-indexing">
 			<img wicket:id="icon"></img> 
 			<span>Revision indexing in progress... (search in this revision will be accurate after indexed)</span>
 		</div>
-		<div wicket:id="lastCommit" class="last-commit clearfix"></div>
+		<div wicket:id="lastCommit" class="last-commit"></div>
 		<div wicket:id="fileViewer" class="file-viewer"></div>
 		<div class="search-result">
 			<div id="search-result-resize-handle" class="ui-resizable-handle ui-resizable-n"></div>

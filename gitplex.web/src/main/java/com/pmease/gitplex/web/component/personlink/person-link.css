@@ -1,5 +1,6 @@
 a.person-link {
 	text-decoration: none;
+	color: #444;
 }
 a.person-link>span:hover {
 	text-decoration: underline;

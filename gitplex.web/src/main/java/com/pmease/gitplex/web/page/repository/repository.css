@@ -9,6 +9,9 @@
 	margin-right: 4px;
 	vertical-align: middle;
 }
+#repository>.head>.nav .separator {
+	margin: 0 6px;
+}
 #repository>.head>.clone {
 	font-size: 14px;
 }
