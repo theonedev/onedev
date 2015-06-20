@@ -90,13 +90,18 @@ gitplex.sourceview = {
 			    
 			    if (tokenPos)
 			    	gitplex.sourceview.highlightToken(cm, tokenPos);
-			    if (blameBlocks)
-			    	gitplex.sourceview.blame(cm, blameBlocks);
-			}
+			    if (blameBlocks) {
+			    	// render blame blocks with a timer to avoid the issue that occasionally 
+			    	// blame gutter becomes much wider than expected
+			    	setTimeout(function() {
+				    	gitplex.sourceview.blame(cm, blameBlocks);
+			    	}, 10);
+			    }
+			} 
 			cm.setSize($code.width(), $code.height());
 		});
 	}, 
-	
+		
 	symbolsQueried: function(codeId, symbolsId) {
 		var $symbols = $("#" + symbolsId);
 		var $tooltip = $("#" + codeId + "-symbolstooltip");
