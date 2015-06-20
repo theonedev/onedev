@@ -52,6 +52,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.blobsearch.advanced.AdvancedSearchPanel;
 import com.pmease.gitplex.web.component.blobsearch.instant.InstantSearchPanel;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
+import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
 import com.pmease.gitplex.web.component.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.filenavigator.FileNavigator;
@@ -67,7 +68,7 @@ public class RepoFilePage extends RepositoryPage {
 	private static final String PARAM_REVISION = "revision";
 	
 	private static final String PARAM_PATH = "path";
-
+	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
@@ -125,6 +126,7 @@ public class RepoFilePage extends RepositoryPage {
 				jgitRepo.close();
 			}
 		}
+		
 	}
 	
 	private ObjectId getCommitId() {
@@ -256,6 +258,7 @@ public class RepoFilePage extends RepositoryPage {
 			protected void onPopState(AjaxRequestTarget target, Serializable state) {
 				file = ((State) state).file;
 				tokenPos = ((State) state).tokenPos;
+				
 				trait.revision = file.revision;
 
 				target.add(revisionIndexing);
@@ -334,8 +337,18 @@ public class RepoFilePage extends RepositoryPage {
 		if (target != null && fileViewer instanceof SourceViewPanel) {
 			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
 			if (sourceViewer.getContext().getBlobIdent().equals(file)) {
-				if (tokenPos != null)
+				sourceViewer.getContext().setTokenPosition(tokenPos);
+				if (tokenPos != null) {
 					sourceViewer.highlightToken(target, tokenPos);
+				} else {
+					BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
+					if (!(blobViewer instanceof SourceViewPanel)) {
+						fileViewer.replaceWith(blobViewer);
+						fileViewer = blobViewer;
+						target.add(fileViewer);
+						target.appendJavaScript("$(window).resize();");
+					}
+				}
 				return;
 			}
 		}
@@ -356,16 +369,11 @@ public class RepoFilePage extends RepositoryPage {
 				
 			};
 		} else {
-			fileViewer = new BlobViewContext(new BlobIdent(file)) {
+			BlobViewContext context = new BlobViewContext(new BlobIdent(file)) {
 
 				@Override
 				public Repository getRepository() {
 					return RepoFilePage.this.getRepository();
-				}
-
-				@Override
-				public TokenPosition getTokenPosition() {
-					return tokenPos;
 				}
 
 				@Override
@@ -385,7 +393,10 @@ public class RepoFilePage extends RepositoryPage {
 					renderSearchResult(target, hits);
 				}
 				
-			}.render(FILE_VIEWER_ID);
+			};
+			context.setTokenPosition(tokenPos);
+			
+			fileViewer = context.render(FILE_VIEWER_ID);
 		}
 		lastCommit = new AjaxLazyLoadPanel(LAST_COMMIT_ID) {
 			
@@ -507,6 +518,7 @@ public class RepoFilePage extends RepositoryPage {
 		BlobIdent file = new BlobIdent();
 		
 		TokenPosition tokenPos;
+		
 	}
 	
 	public static class IndexedListener implements IndexListener {

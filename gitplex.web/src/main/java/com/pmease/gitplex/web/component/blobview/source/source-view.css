@@ -22,3 +22,36 @@
 .source-view>.outline .tree-node {
 	line-height: 1.6;
 }
+
+.CodeMirror {
+	font-size: 13px;
+}
+.CodeMirror-gutters {
+	background: white;
+}
+.CodeMirror-annotations {
+	width: 240px;
+}
+
+.CodeMirror-annotation {
+	font-size: 12px;
+	font-family: monospace;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	padding: 0 4px;
+	color: white;
+}
+.CodeMirror-annotation .hash, .CodeMirror-annotation .date {
+	margin-right: 8px;
+}
+.CodeMirror-annotation a, .CodeMirror-annotation a:hover {
+	color: #B3D5F3;
+}
+.CodeMirror-annotation.even {
+	background: #2B8D17;		
+}
+.CodeMirror-annotation.odd {
+	background: #F81E1E;
+	
+}

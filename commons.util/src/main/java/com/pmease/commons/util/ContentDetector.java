@@ -50,6 +50,9 @@ public class ContentDetector {
 	}
 	
 	public static boolean isBinary(byte[] contentBytes, @Nullable String fileName) {
+		if (contentBytes.length == 0)
+			return false;
+		
 		MediaType mediaType = detectMediaType(contentBytes, fileName);
 		
 		return !mediaType.getType().equalsIgnoreCase("text")

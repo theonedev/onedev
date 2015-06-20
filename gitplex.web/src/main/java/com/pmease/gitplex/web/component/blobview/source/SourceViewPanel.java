@@ -34,7 +34,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.ExtractException;
 import com.pmease.commons.lang.Extractor;
 import com.pmease.commons.lang.Extractors;
@@ -51,7 +53,9 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {
@@ -68,9 +72,17 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private String symbol = "";
 	
+	private boolean blamed;
+	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
 	private final List<Symbol> symbols = new ArrayList<>();
+	
+	public SourceViewPanel(String id, BlobViewContext context, boolean blamed) {
+		this(id, context);
+		
+		this.blamed = blamed;
+	}
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -258,19 +270,77 @@ public class SourceViewPanel extends BlobViewPanel {
 					throw new RuntimeException(e);
 				} 
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
-				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s);", 
+				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s);", 
 						codeContainer.getMarkupId(), 
 						StringEscapeUtils.escapeEcmaScript(context.getBlob().getText().getContent()),
 						context.getBlobIdent().path, 
 						highlightToken,
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
-						getCallbackFunction(CallbackParameter.explicit("symbol")));
+						getCallbackFunction(CallbackParameter.explicit("symbol")), 
+						getBlameBlocks());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});		
 		
 		setOutputMarkupId(true);
+	}
+
+	private String getBlameBlocks() {
+		if (blamed) {
+			int fromLine = 0;
+			List<BlameBlock> blocks = new ArrayList<>();
+			for (Blame blame: context.getRepository().git().blame(
+					context.getBlobIdent().path, context.getBlobIdent().revision, -1, -1)) {
+				BlameBlock block = new BlameBlock();
+				block.authorDate = DateUtils.formatDate(blame.getCommit().getAuthor().getWhen());
+				block.authorName = StringEscapeUtils.escapeHtml4(blame.getCommit().getAuthor().getName());
+				block.commitHash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
+				block.commitMessage = blame.getCommit().getSubject();
+				PageParameters params = RepoCommitPage.paramsOf(context.getRepository(), blame.getCommit().getHash());
+				block.commitUrl = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
+				block.fromLine = fromLine;
+				block.toLine = fromLine + blame.getLines().size();
+				fromLine = block.toLine;
+				blocks.add(block);
+			}
+			try {
+				return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(blocks);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return "undefined";
+		}
+	}
+	
+	public void blame(AjaxRequestTarget target, boolean blamed) {
+		this.blamed = blamed;
+		String script = String.format("gitplex.sourceview.blame('%s', %s);", 
+				codeContainer.getMarkupId(), getBlameBlocks());
+		target.appendJavaScript(script);
+	}
+	
+	public boolean isBlamed() {
+		return blamed;
+	}
+
+	@SuppressWarnings("unused")
+	private static class BlameBlock {
+		
+		String commitMessage;
+		
+		String commitHash;
+		
+		String commitUrl;
+		
+		String authorName;
+		
+		String authorDate;
+		
+		int fromLine;
+		
+		int toLine;
 	}
 	
 }

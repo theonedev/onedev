@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery) {
+	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blameBlocks) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -90,6 +90,8 @@ gitplex.sourceview = {
 			    
 			    if (tokenPos)
 			    	gitplex.sourceview.highlightToken(cm, tokenPos);
+			    if (blameBlocks)
+			    	gitplex.sourceview.blame(cm, blameBlocks);
 			}
 			cm.setSize($code.width(), $code.height());
 		});
@@ -119,6 +121,33 @@ gitplex.sourceview = {
 			cm.setCursor(tokenPos.line);
 		}
 		
-	}
+	},
+	
+	blame: function(cm, blocks) {
+		if (typeof cm === "string") 
+			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
+		if (blocks) {
+    		cm.setOption("gutters", ["CodeMirror-annotations", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
+    		for (var i in blocks) {
+    			var block = blocks[i];
+    			for (var line=block.fromLine; line<block.toLine; line++) {
+        			var $ele = $(document.createElement("div"));
+        			$ele.addClass("CodeMirror-annotation");
+        			if (i % 2 == 0)
+        				$ele.addClass("even");
+        			else
+        				$ele.addClass("odd");
+            		$("<a class='hash'>" + block.commitHash + "</a>").appendTo($ele).attr("href", block.commitUrl).attr("title", block.commitMessage);
+            		$ele.append("<span class='date'>" + block.authorDate + "</span>");
+            		$ele.append("<span class='author'>" + block.authorName + "</span>");
+            		cm.setGutterMarker(line, "CodeMirror-annotations", $ele[0]);
+    			}
+    		}    		
+		} else {
+			cm.clearGutter("CodeMirror-annotations");
+			cm.setOption("gutters", ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
+		}
+	}
+	
 }

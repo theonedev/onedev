@@ -496,7 +496,7 @@ pmease.commons = {
 			ajaxLoadingIndicator[0].timer = setTimeout(function() {
 				if (!$(".ajax-indicator").is(":visible"))
 					ajaxLoadingIndicator.show();
-			}, 5000);		
+			}, 2000);		
 		});
 		
 		Wicket.Event.subscribe('/ajax/call/complete', function() {
@@ -835,7 +835,7 @@ pmease.commons = {
 
 $(function() {
 	pmease.commons.setupDropdownAndModel();
-//	pmease.commons.setupAjaxLoadingIndicator();
+	pmease.commons.setupAjaxLoadingIndicator();
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.scroll.setupScrollStop();

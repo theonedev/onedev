@@ -17,6 +17,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
+import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -84,6 +85,38 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				BlobViewPanel blobView = BlobViewPanel.this;
+				
+				if (blobView instanceof SourceViewPanel) {
+					SourceViewPanel sourceView = (SourceViewPanel) blobView;
+					if (sourceView.isBlamed()) {
+						BlobViewPanel newBlobView = sourceView.getContext().render(sourceView.getId());
+						if (newBlobView instanceof SourceViewPanel) {
+							sourceView.blame(target, false);
+							target.appendJavaScript("$('.blame-toggle').removeClass('active').blur();");
+						} else {
+							blobView.replaceWith(newBlobView);
+							target.add(newBlobView);
+							target.appendJavaScript("$(window).resize();");
+						}
+					} else {
+						sourceView.blame(target, true);
+						target.appendJavaScript("$('.blame-toggle').addClass('active');");
+					}
+				} else {
+					SourceViewPanel sourceView = new SourceViewPanel(blobView.getId(), context, true);
+					blobView.replaceWith(sourceView);
+					target.add(sourceView);
+					target.appendJavaScript("$(window).resize();");
+					target.appendJavaScript("$('.blame-toggle').addClass('active');");
+				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(context.getBlob().getText() != null);
 			}
 			
 		});

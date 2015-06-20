@@ -24,7 +24,11 @@ public abstract class BlobViewContext implements Serializable {
 	 * changed 
 	 */
 	private final BlobIdent blobIdent;
-
+	
+	private TokenPosition tokenPosition;
+	
+	private boolean blame;
+	
 	public BlobViewContext(BlobIdent blobIdent) {
 		this.blobIdent = blobIdent;
 	}
@@ -32,8 +36,22 @@ public abstract class BlobViewContext implements Serializable {
 	public abstract Repository getRepository();
 	
 	@Nullable
-	public abstract TokenPosition getTokenPosition();
-	
+	public TokenPosition getTokenPosition() {
+		return tokenPosition;
+	}
+
+	public void setTokenPosition(@Nullable TokenPosition tokenPosition) {
+		this.tokenPosition = tokenPosition;
+	}
+
+	public boolean isBlame() {
+		return blame;
+	}
+
+	public void setBlame(boolean blame) {
+		this.blame = blame;
+	}
+
 	public abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos);
 	
 	public abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
@@ -52,7 +70,7 @@ public abstract class BlobViewContext implements Serializable {
 			if (panel != null)
 				return panel;
 		}
-		
+				
 		throw new IllegalStateException("No applicable blob renderer found for current context.");
 	}
 	
