@@ -818,19 +818,34 @@ pmease.commons = {
 		});
 	},
 	
-	setupHistory: function() {
-		// Use a timeout here solve the problem that Safari (and previous versions of Chrome) 
-		// fires event "onpopstate" on initial page load and this causes the page to reload 
-		// infinitely  
-		setTimeout(function() {
-			window.onpopstate = function(event) {
-				if (!event.state)
-					location.reload();
-				else
-					$(document).trigger("onpopstate", [event.state.component, event.state.state]);
-			};
-		}, 1000);
-	}
+	history: {
+		init: function() {
+			// Use a timeout here solve the problem that Safari (and previous versions of Chrome) 
+			// fires event "onpopstate" on initial page load and this causes the page to reload 
+			// infinitely  
+			setTimeout(function() {
+				window.onpopstate = function(event) {
+					if (!event.state || !event.state.state)
+						location.reload();
+					else 
+						$(document).trigger("onpopstate", [event.state.component, event.state.state]);
+				};
+			}, 1000);
+		},
+		setScrollPos: function(scrollPos) {
+			var state = history.state;
+			if (!state)
+				state = {};
+			history.replaceState({scrollPos: scrollPos, state: state.state, component: state.component}, '', window.location.href );
+		}, 
+		getScrollPos: function() {
+			if (history.state && history.state.scrollPos)
+				return history.state.scrollPos;
+			else
+				return undefined;
+		}
+	},
+	
 };
 
 $(function() {
@@ -840,5 +855,5 @@ $(function() {
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.scroll.setupScrollStop();
 	pmease.commons.websocket.setupCallback();
-	pmease.commons.setupHistory();
+	pmease.commons.history.init();
 });

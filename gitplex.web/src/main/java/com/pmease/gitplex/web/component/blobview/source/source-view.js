@@ -87,9 +87,19 @@ gitplex.sourceview = {
 			    		cm.setOption("mode", modeInfo.mime);
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
+
+			    cm.on("scroll", function() {
+			    	var scrollInfo = cm.getScrollInfo();
+			    	pmease.commons.history.setScrollPos({left: scrollInfo.left, top: scrollInfo.top});
+			    });
 			    
 			    if (tokenPos)
 			    	gitplex.sourceview.highlightToken(cm, tokenPos);
+
+			    var scrollPos = pmease.commons.history.getScrollPos();
+			    if (scrollPos)
+			    	cm.scrollTo(scrollPos.left, scrollPos.top);
+			    
 			    if (blameBlocks) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
 			    	// blame gutter becomes much wider than expected
