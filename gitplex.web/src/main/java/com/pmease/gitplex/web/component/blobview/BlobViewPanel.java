@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.component.blobview;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -17,7 +18,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
-import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -84,32 +84,16 @@ public abstract class BlobViewPanel extends Panel {
 		add(new AjaxLink<Void>("blame") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				BlobViewPanel blobView = BlobViewPanel.this;
+			protected void onInitialize() {
+				super.onInitialize();
 				
-				if (blobView instanceof SourceViewPanel) {
-					SourceViewPanel sourceView = (SourceViewPanel) blobView;
-					if (sourceView.isBlamed()) {
-						BlobViewPanel newBlobView = sourceView.getContext().render(sourceView.getId());
-						if (newBlobView instanceof SourceViewPanel) {
-							sourceView.blame(target, false);
-							target.appendJavaScript("$('.blame-toggle').removeClass('active').blur();");
-						} else {
-							blobView.replaceWith(newBlobView);
-							target.add(newBlobView);
-							target.appendJavaScript("$(window).resize();");
-						}
-					} else {
-						sourceView.blame(target, true);
-						target.appendJavaScript("$('.blame-toggle').addClass('active');");
-					}
-				} else {
-					SourceViewPanel sourceView = new SourceViewPanel(blobView.getId(), context, true);
-					blobView.replaceWith(sourceView);
-					target.add(sourceView);
-					target.appendJavaScript("$(window).resize();");
-					target.appendJavaScript("$('.blame-toggle').addClass('active');");
-				}
+				if (context.isBlame())
+					add(AttributeAppender.append("class", " active"));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				context.onBlameChange(target);
 			}
 
 			@Override

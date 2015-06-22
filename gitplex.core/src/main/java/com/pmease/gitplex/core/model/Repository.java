@@ -551,7 +551,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		
 		final File cacheDir = new File(
 				GitPlex.getInstance(StorageManager.class).getCacheDir(this), 
-				"history/" + path + "/gitplex_last_commits_of_children");
+				"last_commits/" + path + "/gitplex_last_commits");
 		
 		final ReadWriteLock lock;
 		try {

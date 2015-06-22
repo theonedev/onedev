@@ -819,24 +819,24 @@ pmease.commons = {
 	},
 	
 	history: {
-		init: function() {
+		init: function(callback) {
 			// Use a timeout here solve the problem that Safari (and previous versions of Chrome) 
 			// fires event "onpopstate" on initial page load and this causes the page to reload 
 			// infinitely  
 			setTimeout(function() {
 				window.onpopstate = function(event) {
-					if (!event.state || !event.state.state)
+					if (!event.state || !event.state.data)
 						location.reload();
 					else 
-						$(document).trigger("onpopstate", [event.state.component, event.state.state]);
+						callback(event.state.data);
 				};
-			}, 1000);
+			}, 100);
 		},
 		setScrollPos: function(scrollPos) {
 			var state = history.state;
 			if (!state)
 				state = {};
-			history.replaceState({scrollPos: scrollPos, state: state.state, component: state.component}, '', window.location.href );
+			history.replaceState({scrollPos: scrollPos, data: state.data}, '', window.location.href );
 		}, 
 		getScrollPos: function() {
 			if (history.state && history.state.scrollPos)
@@ -855,5 +855,4 @@ $(function() {
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.scroll.setupScrollStop();
 	pmease.commons.websocket.setupCallback();
-	pmease.commons.history.init();
 });

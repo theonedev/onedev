@@ -36,7 +36,6 @@ import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.diff.AroundContext;
-import com.pmease.commons.wicket.behavior.HistoryBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -82,6 +81,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private String oldCommitHash;
 	
 	private String newCommitHash;
+	
+	private WebMarkupContainer optionsContainer;
 	
 	private final IModel<PullRequestComment> commentModel;
 	
@@ -176,7 +177,7 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final WebMarkupContainer optionsContainer = new WebMarkupContainer("compareOptions") {
+		optionsContainer = new WebMarkupContainer("compareOptions") {
 			
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -387,23 +388,6 @@ public class RequestComparePage extends RequestDetailPage {
 
 		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommitHash, newCommitHash, file) {
 			
-			private HistoryBehavior historyBehavior;
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(historyBehavior = new HistoryBehavior() {
-
-					@Override
-					protected void onPopState(AjaxRequestTarget target, Serializable state) {
-						compareResult.select(target, (String) state);
-						target.add(optionsContainer);
-					}
-					
-				});
-			}
-
 			@Override
 			protected InlineCommentSupport getInlineCommentSupport(final Change change) {
 				List<String> commentables = getPullRequest().getCommentables();
@@ -473,7 +457,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (commentId != null)
 					url.append("&comment=").append(commentId);
 				
-				historyBehavior.pushState(target, url.toString(), file);
+				pushState(target, url.toString(), file);
 			}
 			
 		});
@@ -646,4 +630,13 @@ public class RequestComparePage extends RequestDetailPage {
 	private PullRequestComment getComment() {
 		return commentModel.getObject();
 	}
+
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+
+		compareResult.select(target, (String) data);
+		target.add(optionsContainer);
+	}
+	
 }

@@ -72,17 +72,9 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private String symbol = "";
 	
-	private boolean blamed;
-	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
 	private final List<Symbol> symbols = new ArrayList<>();
-	
-	public SourceViewPanel(String id, BlobViewContext context, boolean blamed) {
-		this(id, context);
-		
-		this.blamed = blamed;
-	}
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -287,7 +279,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 
 	private String getBlameBlocks() {
-		if (blamed) {
+		if (context.isBlame()) {
 			int fromLine = 0;
 			List<BlameBlock> blocks = new ArrayList<>();
 			for (Blame blame: context.getRepository().git().blame(
@@ -314,17 +306,6 @@ public class SourceViewPanel extends BlobViewPanel {
 		}
 	}
 	
-	public void blame(AjaxRequestTarget target, boolean blamed) {
-		this.blamed = blamed;
-		String script = String.format("gitplex.sourceview.blame('%s', %s);", 
-				codeContainer.getMarkupId(), getBlameBlocks());
-		target.appendJavaScript(script);
-	}
-	
-	public boolean isBlamed() {
-		return blamed;
-	}
-
 	@SuppressWarnings("unused")
 	private static class BlameBlock {
 		

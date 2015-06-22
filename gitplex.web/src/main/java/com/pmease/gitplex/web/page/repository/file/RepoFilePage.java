@@ -40,7 +40,6 @@ import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.behavior.HistoryBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
@@ -69,6 +68,8 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private static final String PARAM_PATH = "path";
 	
+	private static final String PARAM_BLAME = "blame";
+	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
@@ -83,6 +84,8 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private TokenPosition tokenPos;
 	
+	private boolean blame;
+	
 	private Component revisionSelector;
 	
 	private Component fileNavigator;
@@ -92,8 +95,6 @@ public class RepoFilePage extends RepositoryPage {
 	private Component lastCommit;
 	
 	private Component fileViewer;
-	
-	private HistoryBehavior historyBehavior;
 	
 	private final RevisionIndexed trait = new RevisionIndexed();
 	
@@ -127,6 +128,7 @@ public class RepoFilePage extends RepositoryPage {
 			}
 		}
 		
+		blame = params.get(PARAM_BLAME).toBoolean(false);
 	}
 	
 	private ObjectId getCommitId() {
@@ -252,22 +254,6 @@ public class RepoFilePage extends RepositoryPage {
 			
 		});
 		
-		add(historyBehavior = new HistoryBehavior() {
-
-			@Override
-			protected void onPopState(AjaxRequestTarget target, Serializable state) {
-				file = ((State) state).file;
-				tokenPos = ((State) state).tokenPos;
-				
-				trait.revision = file.revision;
-
-				target.add(revisionIndexing);
-				newRevisionSelector(target);
-				newFileNavigator(target);
-				newFileViewer(target);
-			}
-			
-		});
 	}
 	
 	private void newRevisionSelector(AjaxRequestTarget target) {
@@ -291,6 +277,7 @@ public class RepoFilePage extends RepositoryPage {
 					}
 				}
 				tokenPos = null;
+				blame = false;
 
 				target.add(revisionIndexing);
 				newRevisionSelector(target);
@@ -317,6 +304,7 @@ public class RepoFilePage extends RepositoryPage {
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
 				RepoFilePage.this.file = file;
 				tokenPos = null;
+				blame = false;
 
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -336,7 +324,8 @@ public class RepoFilePage extends RepositoryPage {
 	private void newFileViewer(AjaxRequestTarget target) {
 		if (target != null && fileViewer instanceof SourceViewPanel) {
 			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-			if (sourceViewer.getContext().getBlobIdent().equals(file)) {
+			BlobViewContext context = sourceViewer.getContext();
+			if (context.getBlobIdent().equals(file) && context.isBlame() == blame) {
 				sourceViewer.getContext().setTokenPosition(tokenPos);
 				if (tokenPos != null) {
 					sourceViewer.highlightToken(target, tokenPos);
@@ -360,6 +349,7 @@ public class RepoFilePage extends RepositoryPage {
 				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
 					RepoFilePage.this.file = file;
 					tokenPos = null;
+					blame = false;
 					
 					newFileViewer(target);
 					newFileNavigator(target);
@@ -381,6 +371,7 @@ public class RepoFilePage extends RepositoryPage {
 					RepoFilePage.this.file = new BlobIdent(file.revision, blobIdent.path, 
 							FileMode.REGULAR_FILE.getBits()); 
 					RepoFilePage.this.tokenPos = tokenPos;
+					blame = false;
 					
 					newFileNavigator(target);
 					newFileViewer(target);
@@ -392,9 +383,19 @@ public class RepoFilePage extends RepositoryPage {
 				public void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
 					renderSearchResult(target, hits);
 				}
+
+				@Override
+				public void onBlameChange(AjaxRequestTarget target) {
+					blame = !blame;
+					
+					newFileViewer(target);
+					
+					pushState(target);
+				}
 				
 			};
 			context.setTokenPosition(tokenPos);
+			context.setBlame(blame);
 			
 			fileViewer = context.render(FILE_VIEWER_ID);
 		}
@@ -426,12 +427,13 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), file.revision, file.path);
+		PageParameters params = paramsOf(getRepository(), file.revision, file.path, blame);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
-		State state = new State();
+		HistoryData state = new HistoryData();
 		state.file = file;
 		state.tokenPos = tokenPos;
-		historyBehavior.pushState(target, url.toString(), state);
+		state.blame = blame;
+		pushState(target, url.toString(), state);
 	}
 
 	@Override
@@ -448,16 +450,26 @@ public class RepoFilePage extends RepositoryPage {
 	}
 
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
+		return paramsOf(repository, revision, path, false);
+	}
+	
+	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path, boolean blame) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
 		if (path != null)
 			params.set(PARAM_PATH, path);
+		if (blame)
+			params.set(PARAM_BLAME, blame);
 		return params;
 	}
 	
 	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
-		return paramsOf(repository, blobIdent.revision, blobIdent.path);
+		return paramsOf(repository, blobIdent, false);
+	}
+	
+	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent, boolean blame) {
+		return paramsOf(repository, blobIdent.revision, blobIdent.path, blame);
 	}
 	
 	private void renderSearchResult(AjaxRequestTarget target, List<QueryHit> hits) {
@@ -497,6 +509,21 @@ public class RepoFilePage extends RepositoryPage {
 		};
 	}
 	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		HistoryData historyData = (HistoryData) data;
+		file = historyData.file;
+		tokenPos = historyData.tokenPos;
+		blame = historyData.blame;
+		
+		trait.revision = file.revision;
+
+		target.add(revisionIndexing);
+		newRevisionSelector(target);
+		newFileNavigator(target);
+		newFileViewer(target);
+	}
+	
 	private static class RevisionIndexed implements Serializable {
 
 		Long repoId;
@@ -513,12 +540,13 @@ public class RepoFilePage extends RepositoryPage {
 		
 	}
 	
-	private static class State implements Serializable {
+	private static class HistoryData implements Serializable {
 
 		BlobIdent file = new BlobIdent();
 		
 		TokenPosition tokenPos;
 		
+		boolean blame;
 	}
 	
 	public static class IndexedListener implements IndexListener {

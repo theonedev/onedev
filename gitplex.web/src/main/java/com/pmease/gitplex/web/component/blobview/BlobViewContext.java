@@ -55,6 +55,8 @@ public abstract class BlobViewContext implements Serializable {
 	public abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos);
 	
 	public abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
+	
+	public abstract void onBlameChange(AjaxRequestTarget target);
 
 	public BlobIdent getBlobIdent() {
 		return blobIdent;
