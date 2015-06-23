@@ -156,6 +156,7 @@ public class RepoFilePage extends RepositoryPage {
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				file = new BlobIdent(file.revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
 				tokenPos = hit.getTokenPos();
+				blame = false;
 				
 				newFileNavigator(target);
 				newFileViewer(target);

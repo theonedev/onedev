@@ -6,9 +6,7 @@ import java.util.List;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
-import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -313,12 +311,6 @@ public abstract class InstantSearchPanel extends Panel {
 		searchField = new TextField<>("input", Model.of(""));
 		searchField.add(new AjaxFormComponentUpdatingBehavior("inputchange focus click") {
 			
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.setChannel(new AjaxChannel("instant-search", AjaxChannel.Type.DROP));
-			}
-
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (searchResult != null)

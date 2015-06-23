@@ -40,17 +40,7 @@
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0 4px;
-	color: white;
 }
 .CodeMirror-annotation .hash, .CodeMirror-annotation .date {
 	margin-right: 8px;
-}
-.CodeMirror-annotation a, .CodeMirror-annotation a:hover {
-	color: #B3D5F3;
-}
-.CodeMirror-annotation.even {
-	background: #2B8D17;		
-}
-.CodeMirror-annotation.odd {
-	background: #F81E1E;	
 }

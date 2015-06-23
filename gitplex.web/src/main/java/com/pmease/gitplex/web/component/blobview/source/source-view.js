@@ -146,18 +146,12 @@ gitplex.sourceview = {
     		cm.setOption("gutters", ["CodeMirror-annotations", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
     		for (var i in blocks) {
     			var block = blocks[i];
-    			for (var line=block.fromLine; line<block.toLine; line++) {
-        			var $ele = $(document.createElement("div"));
-        			$ele.addClass("CodeMirror-annotation");
-        			if (i % 2 == 0)
-        				$ele.addClass("even");
-        			else
-        				$ele.addClass("odd");
-            		$("<a class='hash'>" + block.commitHash + "</a>").appendTo($ele).attr("href", block.commitUrl).attr("title", block.commitMessage);
-            		$ele.append("<span class='date'>" + block.authorDate + "</span>");
-            		$ele.append("<span class='author'>" + block.authorName + "</span>");
-            		cm.setGutterMarker(line, "CodeMirror-annotations", $ele[0]);
-    			}
+    			var $ele = $(document.createElement("div"));
+    			$ele.addClass("CodeMirror-annotation");
+        		$("<a class='hash'>" + block.commitHash + "</a>").appendTo($ele).attr("href", block.commitUrl).attr("title", block.commitMessage);
+        		$ele.append("<span class='date'>" + block.authorDate + "</span>");
+        		$ele.append("<span class='author'>" + block.authorName + "</span>");
+        		cm.setGutterMarker(block.fromLine, "CodeMirror-annotations", $ele[0]);
     		}    		
 		} else {
 			cm.clearGutter("CodeMirror-annotations");
