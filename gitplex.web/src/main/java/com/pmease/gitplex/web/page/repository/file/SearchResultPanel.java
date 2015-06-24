@@ -11,7 +11,9 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -43,6 +45,8 @@ public abstract class SearchResultPanel extends Panel {
 	private static final String HITS_ID = "hits";
 	
 	private static final String EXPAND_LINK_ID = "expandLink";
+	
+	private static final String NAV_CHANNEL = "blob-search-result-nav";
 	
 	private final List<MatchedBlob> blobs;
 	
@@ -324,6 +328,12 @@ public abstract class SearchResultPanel extends Panel {
 				blobItem.add(new AjaxLink<Void>("blobLink") {
 
 					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
+					}
+					
+					@Override
 					protected void onInitialize() {
 						super.onInitialize();
 						
@@ -388,6 +398,12 @@ public abstract class SearchResultPanel extends Panel {
 							}
 
 							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
+							}
+							
+							@Override
 							public void onClick(AjaxRequestTarget target) {
 								activeBlobIndex = blobItem.getIndex();
 								activeHitIndex = hitItem.getIndex();
@@ -406,6 +422,12 @@ public abstract class SearchResultPanel extends Panel {
 		add(new WebMarkupContainer("noMatchingResult").setVisible(blobs.isEmpty()));
 		
 		add(new AbstractDefaultAjaxBehavior() {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
+			}
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {

@@ -493,6 +493,8 @@ pmease.commons = {
 
 		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
 			var ajaxLoadingIndicator = $("#ajax-loading-indicator");
+			if (ajaxLoadingIndicator[0].timer)
+				clearTimeout(ajaxLoadingIndicator[0].timer);
 			ajaxLoadingIndicator[0].timer = setTimeout(function() {
 				if (!$(".ajax-indicator").is(":visible"))
 					ajaxLoadingIndicator.show();
@@ -501,7 +503,10 @@ pmease.commons = {
 		
 		Wicket.Event.subscribe('/ajax/call/complete', function() {
 			var ajaxLoadingIndicator = $("#ajax-loading-indicator");
-			clearTimeout(ajaxLoadingIndicator[0].timer);
+			if (ajaxLoadingIndicator[0].timer) {
+				clearTimeout(ajaxLoadingIndicator[0].timer);
+				ajaxLoadingIndicator[0].timer = null;
+			}
 			ajaxLoadingIndicator.hide();
 		});
 	}, 
