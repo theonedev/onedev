@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blameBlocks) {
+	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blames) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -100,11 +100,11 @@ gitplex.sourceview = {
 			    if (scrollPos)
 			    	cm.scrollTo(scrollPos.left, scrollPos.top);
 			    
-			    if (blameBlocks) {
+			    if (blames) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
 			    	// blame gutter becomes much wider than expected
 			    	setTimeout(function() {
-				    	gitplex.sourceview.blame(cm, blameBlocks);
+				    	gitplex.sourceview.blame(cm, blames);
 			    	}, 10);
 			    }
 			} 
@@ -138,20 +138,23 @@ gitplex.sourceview = {
 		
 	},
 	
-	blame: function(cm, blocks) {
+	blame: function(cm, blames) {
 		if (typeof cm === "string") 
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
-		if (blocks) {
+		if (blames) {
     		cm.setOption("gutters", ["CodeMirror-annotations", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
-    		for (var i in blocks) {
-    			var block = blocks[i];
+    		for (var i in blames) {
+    			var blame = blames[i];
     			var $ele = $(document.createElement("div"));
     			$ele.addClass("CodeMirror-annotation");
-        		$("<a class='hash'>" + block.commitHash + "</a>").appendTo($ele).attr("href", block.commitUrl).attr("title", block.commitMessage);
-        		$ele.append("<span class='date'>" + block.authorDate + "</span>");
-        		$ele.append("<span class='author'>" + block.authorName + "</span>");
-        		cm.setGutterMarker(block.fromLine, "CodeMirror-annotations", $ele[0]);
+        		$("<a class='hash'>" + blame.hash + "</a>").appendTo($ele).attr("href", blame.url).attr("title", blame.message);
+        		$ele.append("<span class='date'>" + blame.authorDate + "</span>");
+        		$ele.append("<span class='author'>" + blame.authorName + "</span>");
+        		for (var j in blame.ranges) {
+        			var range = blame.ranges[j];
+            		cm.setGutterMarker(range.beginLine, "CodeMirror-annotations", $ele[0]);
+        		}
     		}    		
 		} else {
 			cm.clearGutter("CodeMirror-annotations");

@@ -280,24 +280,23 @@ public class SourceViewPanel extends BlobViewPanel {
 
 	private String getBlameBlocks() {
 		if (context.isBlame()) {
-			int fromLine = 0;
-			List<BlameBlock> blocks = new ArrayList<>();
-			for (Blame blame: context.getRepository().git().blame(
-					context.getBlobIdent().path, context.getBlobIdent().revision, -1, -1)) {
-				BlameBlock block = new BlameBlock();
-				block.authorDate = DateUtils.formatDate(blame.getCommit().getAuthor().getWhen());
-				block.authorName = StringEscapeUtils.escapeHtml4(blame.getCommit().getAuthor().getName());
-				block.commitHash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
-				block.commitMessage = blame.getCommit().getSubject();
+			List<BlameCommit> commits = new ArrayList<>();
+			
+			String commitHash = context.getRepository().getObjectId(context.getBlobIdent().revision, true).name();
+			
+			for (Blame blame: context.getRepository().git().blame(commitHash, context.getBlobIdent().path).values()) {
+				BlameCommit commit = new BlameCommit();
+				commit.authorDate = DateUtils.formatDate(blame.getCommit().getAuthor().getWhen());
+				commit.authorName = StringEscapeUtils.escapeHtml4(blame.getCommit().getAuthor().getName());
+				commit.hash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
+				commit.message = blame.getCommit().getSubject();
 				PageParameters params = RepoCommitPage.paramsOf(context.getRepository(), blame.getCommit().getHash());
-				block.commitUrl = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
-				block.fromLine = fromLine;
-				block.toLine = fromLine + blame.getLines().size();
-				fromLine = block.toLine;
-				blocks.add(block);
+				commit.url = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
+				commit.ranges = blame.getRanges();
+				commits.add(commit);
 			}
 			try {
-				return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(blocks);
+				return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commits);
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
@@ -307,21 +306,19 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 	
 	@SuppressWarnings("unused")
-	private static class BlameBlock {
+	private static class BlameCommit {
 		
-		String commitMessage;
+		String hash;
 		
-		String commitHash;
+		String message;
 		
-		String commitUrl;
+		String url;
 		
 		String authorName;
 		
 		String authorDate;
 		
-		int fromLine;
-		
-		int toLine;
+		List<Blame.Range> ranges;
 	}
 	
 }

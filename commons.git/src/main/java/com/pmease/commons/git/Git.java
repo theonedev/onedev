@@ -535,25 +535,17 @@ public class Git implements Serializable {
 	}
 	
 	/**
-	 * Display commit information for every region of specified file and revision. 
+	 * Display commit information for every region of specified commit and file. 
 	 * 
 	 * @param file
 	 * 			file for blame
-	 * @param revision
-	 * 			revision of the file for blame
-	 * @param start
-	 * 			specify start line to be included in the blame. Use <tt>-1</tt> 
-	 * 			to blame from start of the file
-	 * @param end
-	 * 			specify end line to be included in the blame. Use <tt>-1</tt> to 
-	 * 			blame to the end of file  
+	 * @param commitHash
+	 * 			commit hash of the file for blame
 	 * @return
-	 * 			list of blame objects. The blame object consists of commit information 
-	 * 			and lines associated with this commit. All lines of all blame objects
-	 * 			consist the whole file. 
+	 * 			map of commit hash to commit blame
 	 */
-	public List<Blame> blame(String file, String revision, int start, int end) {
-		return new BlameCommand(repoDir).file(file).revision(revision).start(start).end(end).call();
+	public Map<String, Blame> blame(String commitHash, String file) {
+		return new BlameCommand(repoDir).commitHash(commitHash).file(file).call();
 	}
 
 	public boolean isBinary(String file, String revision) {

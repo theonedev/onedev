@@ -7,7 +7,7 @@ import org.apache.wicket.request.Request;
 
 public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;	
 
 	public WebSession(Request request) {
 		super(request);

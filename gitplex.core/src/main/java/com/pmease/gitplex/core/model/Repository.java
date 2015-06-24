@@ -84,7 +84,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
-	private static final int LAST_COMMITS_CACHE_THRESHOLD = 500;
+	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	
 	private static final int MAX_READ_BLOB_SIZE = 5*1024*1024;
 	

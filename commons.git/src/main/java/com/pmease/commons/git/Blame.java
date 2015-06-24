@@ -1,38 +1,61 @@
 package com.pmease.commons.git;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class Blame {
 	
 	private final BriefCommit commit;
+
+	private final List<Range> ranges;
 	
-	private final List<String> lines;
-	
-	public Blame(BriefCommit commit, List<String> lines) {
+	public Blame(BriefCommit commit, List<Range> ranges) {
 		this.commit = commit;
-		this.lines = new ArrayList<>(lines);
+		this.ranges = ranges;
 	}
 
 	public BriefCommit getCommit() {
 		return commit;
 	}
 	
-	public List<String> getLines() {
-		return Collections.unmodifiableList(lines);
+	public List<Range> getRanges() {
+		return ranges;
 	}
 
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(commit);
-		buffer.append("\n========================================================================\n");
+		StringBuilder builder = new StringBuilder();
+		builder.append(commit.getHash()).append(": ");
+		for (Range range: ranges) 
+			builder.append(range).append(", ");
 		
-		for (String line: getLines())
-			buffer.append(line).append("\n");
-		
-		return buffer.toString();
+		return StringUtils.stripEnd(builder.toString(), ", ");
 	}
-	
+
+	public static class Range {
+		
+		private final int beginLine; // 0-indexed, inclusive
+		
+		private final int endLine; // 0-indexed, exclusive
+		
+		public Range(int beginLine, int endLine) {
+			this.beginLine = beginLine;
+			this.endLine = endLine;
+		}
+
+		public int getBeginLine() {
+			return beginLine;
+		}
+
+		public int getEndLine() {
+			return endLine;
+		}
+
+		@Override
+		public String toString() {
+			return beginLine + "-" + endLine;
+		}
+		
+	}
 }

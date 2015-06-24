@@ -3,7 +3,7 @@ package com.pmease.commons.git.command;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -28,9 +28,10 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "9th line\n", 
 				"initial commit");
 		
-		List<Blame> blames = git.blame("file", "master", 3, -1);
+		String commitHash = git.parseRevision("master", true);
+		Map<String, Blame> blames = git.blame(commitHash, "file");
 		assertEquals(1, blames.size());
-		assertEquals(7, blames.get(0).getLines().size());
+		assertEquals(commitHash + ": 0-9", blames.get(commitHash).toString());
 		
 		addFileAndCommit(
 				"file", 
@@ -45,26 +46,14 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "nineth line\n",
 				"second commit");
 		
-		blames = git.blame("file", "master", -1, -1);
-		assertEquals(3, blames.size());
-		assertEquals(1, blames.get(0).getLines().size());
-		assertEquals(7, blames.get(1).getLines().size());
-		assertEquals(1, blames.get(2).getLines().size());
-		assertEquals(blames.get(0).getCommit().getHash(), blames.get(2).getCommit().getHash());
-
-		blames = git.blame("file", "master", 5, 9);
+		commitHash = git.parseRevision("master", true);
+		blames = git.blame(commitHash, "file");
 		assertEquals(2, blames.size());
-		assertEquals(4, blames.get(0).getLines().size());
-
-		blames = git.blame("file", "master", 10, 9);
-		assertEquals(0, blames.size());
-
-		blames = git.blame("file", "master", 8, 100);
-		assertEquals(2, blames.size());
-
-		blames = git.blame("file", "master", 80, 100);
-		assertEquals(0, blames.size());
-
+		
+		assertEquals(commitHash + ": 0-1, 8-9", blames.get(commitHash).toString());
+		commitHash = git.parseRevision("master~1", true);
+		assertEquals(commitHash + ": 1-8", blames.get(commitHash).toString());
+		
 		addFileAndCommit(
 				"file", 
 				"first line\n"
@@ -73,9 +62,13 @@ public class BlameCommandTest extends AbstractGitTest {
 		
 		Git bareGit = new Git(new File(tempDir, "bare"));
 		bareGit.clone(git, true, false, false, null);
-		blames = bareGit.blame("file", "master", -1, -1);
+		commitHash = bareGit.parseRevision("master", true);
+		blames = bareGit.blame(commitHash, "file");
+		
+		commitHash = bareGit.parseRevision("master~1", true);
 		
 		assertEquals(1, blames.size());
+		assertEquals(commitHash + ": 0-2", blames.get(commitHash).toString());
 	}
 
 }

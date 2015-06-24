@@ -4,9 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.collections.map.AbstractReferenceMap;
+import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,24 +23,24 @@ import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
 
-public class BlameCommand extends GitCommand<List<Blame>> {
+public class BlameCommand extends GitCommand<Map<String, Blame>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(BlameCommand.class);
 	
-	private String revision;
+	private static final ReferenceMap cache = new ReferenceMap(AbstractReferenceMap.HARD, AbstractReferenceMap.WEAK);
+	
+	private static final int CACHE_THRESHOLD = 1000;
+	
+	private String commitHash;
 	
 	private String file;
-	
-	private int start = -1;
-	
-	private int end = -1;
 	
 	public BlameCommand(File repoDir) {
 		super(repoDir);
 	}
 
-	public BlameCommand revision(String revision) {
-		this.revision = revision;
+	public BlameCommand commitHash(String commitHash) {
+		this.commitHash = commitHash;
 		return this;
 	}
 	
@@ -45,125 +49,111 @@ public class BlameCommand extends GitCommand<List<Blame>> {
 		return this;
 	}
 	
-	public BlameCommand start(int start) {
-		this.start = start;
-		return this;
-	}
-	
-	public BlameCommand end(int end) {
-		this.end = end;
-		return this;
-	}
-	
 	private Commandline buildCmd() {
 		Commandline cmd = cmd().addArgs("blame", "--porcelain");
-		if (start != -1) {
-			if (end != -1)
-				cmd.addArgs("-L", "" + start + "," + end);
-			else
-				cmd.addArgs("-L", "" + start);
-		} else if (end != -1) {
-			cmd.addArgs("-L", "," + end);
-		}
-		
-		cmd.addArgs(revision, "--", file);
+		cmd.addArgs(commitHash, "--", file);
 		return cmd;
 	}
 	
 	@Override
-	public List<Blame> call() {
+	public Map<String, Blame> call() {
+		Preconditions.checkArgument(commitHash!=null && GitUtils.isHash(commitHash), "commit hash has to be specified.");
 		Preconditions.checkNotNull(file, "file parameter has to be specified.");
-		Preconditions.checkNotNull(revision, "revision has to be specified.");
+
+		String cacheKey = commitHash + ":" + file;
+		
+		@SuppressWarnings("unchecked")
+		Map<String, Blame> cached = (Map<String, Blame>) cache.get(cacheKey);
+		if (cached != null)
+			return cached;
 		
 		Commandline cmd = buildCmd();
 		
-		final List<Blame> blames = new ArrayList<>();
+		final Map<String, Blame> blames = new HashMap<>();
 		final Map<String, BriefCommit> commitMap = new HashMap<>();
 		
-		final BlameBuilder blameBuilder = new BlameBuilder();
+		final AtomicReference<BriefCommit> commitRef = new AtomicReference<>(null);
 		final BriefCommitBuilder commitBuilder = new BriefCommitBuilder();
 		
-		final boolean endOfFile[] = new boolean[]{false};
+		final AtomicBoolean endOfFile = new AtomicBoolean(false);
+		final AtomicInteger beginLine = new AtomicInteger(0);
+		final AtomicInteger endLine = new AtomicInteger(0);
 		
-		while (true) {
-			ExecuteResult result = cmd.execute(new LineConsumer() {
-	
-				@Override
-				public void consume(String line) {
-					if (line.startsWith("\t")) {
-						if (blameBuilder.commit == null)
-							blameBuilder.commit = commitMap.get(commitBuilder.hash);
-						blameBuilder.lines.add(line.substring(1));
-						commitBuilder.hash = null;
-					} else if (commitBuilder.hash == null) {
-						commitBuilder.hash = StringUtils.substringBefore(line, " ");
-						if (blameBuilder.commit != null && !commitBuilder.hash.equals(blameBuilder.commit.getHash())) {
-							blames.add(blameBuilder.build());
-							blameBuilder.commit = null;
-							blameBuilder.lines.clear();
+		long time = System.currentTimeMillis();
+		
+		ExecuteResult result = cmd.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				if (line.startsWith("\t")) {
+					if (commitRef.get() == null)
+						commitRef.set(commitMap.get(commitBuilder.hash));
+					endLine.getAndIncrement();
+					commitBuilder.hash = null;
+				} else if (commitBuilder.hash == null) {
+					commitBuilder.hash = StringUtils.substringBefore(line, " ");
+					BriefCommit commit = commitRef.get();
+					if (commit != null && !commitBuilder.hash.equals(commit.getHash())) {
+						Blame blame = blames.get(commit.getHash());
+						if (blame == null) {
+							blame = new Blame(commit, new ArrayList<Blame.Range>());
+							blames.put(commit.getHash(), blame);
 						}
-					} else if (line.startsWith("author ")) {
-						commitBuilder.author = line.substring("author ".length());
-					} else if (line.startsWith("author-mail ")) {
-						line = StringUtils.substringAfter(line, "<");
-						commitBuilder.authorEmail = StringUtils.substringBeforeLast(line, ">");
-					} else if (line.startsWith("author-time ")) {
-						commitBuilder.authorDate = new Date(1000L * Long.parseLong(line.substring("author-time ".length())));
-					} else if (line.startsWith("committer ")) {
-						commitBuilder.committer = line.substring("committer ".length());
-					} else if (line.startsWith("committer-mail ")) {
-						line = StringUtils.substringAfter(line, "<");
-						commitBuilder.committerEmail = StringUtils.substringBeforeLast(line, ">");
-					} else if (line.startsWith("committer-time ")) {
-						commitBuilder.committerDate = new Date(1000L * Long.parseLong(line.substring("committer-time ".length())));
-					} else if (line.startsWith("summary ")) {
-						commitBuilder.summary = line.substring("summary ".length());
-						commitMap.put(commitBuilder.hash, commitBuilder.build());
-					} 
-				}
-				
-			}, new LineConsumer() {
-				
-				@Override
-				public void consume(String line) {
-					if (line.startsWith("fatal: file ") && line.contains("has only ")) {
-						endOfFile[0] = true;
-						logger.debug(line.substring("fatal: ".length()));
-					} else {
-						logger.error(line);
+						blame.getRanges().add(new Blame.Range(beginLine.get(), endLine.get()));
+						commitRef.set(null);
+						beginLine.set(endLine.get());
 					}
-				}
-				
-			});
-			
-			if (endOfFile[0]) {
-				if (end != -1) {
-					end = -1;
-					endOfFile[0] = false;
-					cmd = buildCmd();
-				} else {
-					break;
-				}
-			} else {
-				result.checkReturnCode();
-				break;
+				} else if (line.startsWith("author ")) {
+					commitBuilder.author = line.substring("author ".length());
+				} else if (line.startsWith("author-mail ")) {
+					line = StringUtils.substringAfter(line, "<");
+					commitBuilder.authorEmail = StringUtils.substringBeforeLast(line, ">");
+				} else if (line.startsWith("author-time ")) {
+					commitBuilder.authorDate = new Date(1000L * Long.parseLong(line.substring("author-time ".length())));
+				} else if (line.startsWith("committer ")) {
+					commitBuilder.committer = line.substring("committer ".length());
+				} else if (line.startsWith("committer-mail ")) {
+					line = StringUtils.substringAfter(line, "<");
+					commitBuilder.committerEmail = StringUtils.substringBeforeLast(line, ">");
+				} else if (line.startsWith("committer-time ")) {
+					commitBuilder.committerDate = new Date(1000L * Long.parseLong(line.substring("committer-time ".length())));
+				} else if (line.startsWith("summary ")) {
+					commitBuilder.summary = line.substring("summary ".length());
+					commitMap.put(commitBuilder.hash, commitBuilder.build());
+				} 
 			}
+			
+		}, new LineConsumer() {
+			
+			@Override
+			public void consume(String line) {
+				if (line.startsWith("fatal: file ") && line.contains("has only ")) {
+					endOfFile.set(true);
+					logger.debug(line.substring("fatal: ".length()));
+				} else {
+					logger.error(line);
+				}
+			}
+			
+		});
+		
+		if (!endOfFile.get())
+			result.checkReturnCode();
+		
+		if (endLine.get() > beginLine.get()) {
+			BriefCommit commit = commitRef.get();
+			Blame blame = blames.get(commit.getHash());
+			if (blame == null) {
+				blame = new Blame(commit, new ArrayList<Blame.Range>());
+				blames.put(commit.getHash(), blame);
+			}
+			blame.getRanges().add(new Blame.Range(beginLine.get(), endLine.get()));
 		}
 		
-		if (!blameBuilder.lines.isEmpty())
-			blames.add(blameBuilder.build());
+		if (System.currentTimeMillis()-time > CACHE_THRESHOLD)
+			cache.put(cacheKey, blames);
 		
 		return blames;
-	}
-
-	private static class BlameBuilder {
-		private BriefCommit commit;
-		
-		private List<String> lines = new ArrayList<>();
-		
-		private Blame build() {
-			return new Blame(commit, lines);
-		}
 	}
 
     private static class BriefCommitBuilder {
