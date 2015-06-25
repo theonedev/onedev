@@ -27,7 +27,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(BlameCommand.class);
 	
-	private static final ReferenceMap cache = new ReferenceMap(AbstractReferenceMap.HARD, AbstractReferenceMap.WEAK);
+	private static final ReferenceMap cache = new ReferenceMap(AbstractReferenceMap.HARD, AbstractReferenceMap.SOFT);
 	
 	private static final int CACHE_THRESHOLD = 1000;
 	

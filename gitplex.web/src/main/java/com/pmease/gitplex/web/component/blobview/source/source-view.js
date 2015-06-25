@@ -146,14 +146,13 @@ gitplex.sourceview = {
     		cm.setOption("gutters", ["CodeMirror-annotations", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
     		for (var i in blames) {
     			var blame = blames[i];
-    			var $ele = $(document.createElement("div"));
-    			$ele.addClass("CodeMirror-annotation");
-        		$("<a class='hash'>" + blame.hash + "</a>").appendTo($ele).attr("href", blame.url).attr("title", blame.message);
-        		$ele.append("<span class='date'>" + blame.authorDate + "</span>");
-        		$ele.append("<span class='author'>" + blame.authorName + "</span>");
         		for (var j in blame.ranges) {
-        			var range = blame.ranges[j];
-            		cm.setGutterMarker(range.beginLine, "CodeMirror-annotations", $ele[0]);
+        			var $ele = $(document.createElement("div"));
+        			$ele.addClass("CodeMirror-annotation");
+            		$("<a class='hash'>" + blame.hash + "</a>").appendTo($ele).attr("href", blame.url).attr("title", blame.message);
+            		$ele.append("<span class='date'>" + blame.authorDate + "</span>");
+            		$ele.append("<span class='author'>" + blame.authorName + "</span>");
+            		cm.setGutterMarker(blame.ranges[j].beginLine, "CodeMirror-annotations", $ele[0]);
         		}
     		}    		
 		} else {
