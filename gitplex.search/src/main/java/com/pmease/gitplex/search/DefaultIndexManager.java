@@ -46,6 +46,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -121,106 +122,105 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private IndexResult index(org.eclipse.jgit.lib.Repository jgitRepo, AnyObjectId commitId, 
 			IndexWriter writer, final IndexSearcher searcher) throws Exception {
-		RevWalk revWalk = new RevWalk(jgitRepo);
-		TreeWalk treeWalk = new TreeWalk(jgitRepo);
-		
-		treeWalk.addTree(revWalk.parseCommit(commitId).getTree());
-		treeWalk.setRecursive(true);
-		
-		if (searcher != null) {
-			if (getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commitId)))
-				return new IndexResult(0, 0);
+		try (RevWalk revWalk = new RevWalk(jgitRepo); TreeWalk treeWalk = new TreeWalk(jgitRepo)) {
+			treeWalk.addTree(revWalk.parseCommit(commitId).getTree());
+			treeWalk.setRecursive(true);
 			
-			TopDocs topDocs = searcher.search(META.query(LAST_COMMIT.name()), 1);
-			if (topDocs.scoreDocs.length != 0) {
-				Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
-				String lastCommitAnalyzersVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
-				if (lastCommitAnalyzersVersion.equals(extractors.getVersion())) {
-					String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
-					ObjectId lastCommitId = jgitRepo.resolve(lastCommitHash);
-					if (jgitRepo.hasObject(lastCommitId)) { 
-						treeWalk.addTree(revWalk.parseCommit(lastCommitId).getTree());
-						treeWalk.setFilter(TreeFilter.ANY_DIFF);
+			if (searcher != null) {
+				if (getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commitId)))
+					return new IndexResult(0, 0);
+				
+				TopDocs topDocs = searcher.search(META.query(LAST_COMMIT.name()), 1);
+				if (topDocs.scoreDocs.length != 0) {
+					Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
+					String lastCommitAnalyzersVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
+					if (lastCommitAnalyzersVersion.equals(extractors.getVersion())) {
+						String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
+						ObjectId lastCommitId = jgitRepo.resolve(lastCommitHash);
+						if (jgitRepo.hasObject(lastCommitId)) { 
+							treeWalk.addTree(revWalk.parseCommit(lastCommitId).getTree());
+							treeWalk.setFilter(TreeFilter.ANY_DIFF);
+						}
 					}
 				}
 			}
-		}
-
-		int indexed = 0;
-		int checked = 0;
-		while (treeWalk.next()) {
-			if ((treeWalk.getRawMode(0) & FileMode.TYPE_MASK) == FileMode.TYPE_FILE 
-					&& (treeWalk.getTreeCount() == 1 || !treeWalk.idEqual(0, 1))) {
-				ObjectId blobId = treeWalk.getObjectId(0);
-				String blobPath = treeWalk.getPathString();
-				
-				BooleanQuery query = new BooleanQuery();
-				query.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
-				query.add(BLOB_PATH.query(blobPath), Occur.MUST);
-				
-				final AtomicReference<String> blobIndexVersionRef = new AtomicReference<>(null);
-				if (searcher != null) {
-					searcher.search(query, new Collector() {
-
-						private AtomicReaderContext context;
-
-						@Override
-						public void setScorer(Scorer scorer) throws IOException {
-						}
-
-						@Override
-						public void collect(int doc) throws IOException {
-							blobIndexVersionRef.set(searcher.doc(context.docBase+doc).get(BLOB_INDEX_VERSION.name()));
-						}
-
-						@Override
-						public void setNextReader(AtomicReaderContext context) throws IOException {
-							this.context = context;
-						}
-
-						@Override
-						public boolean acceptsDocsOutOfOrder() {
-							return true;
-						}
-						
-					});
-					checked++;
-				}
-
-				Extractor extractor = extractors.getExtractor(blobPath);
-				String currentBlobIndexVersion = getCurrentBlobIndexVersion(extractor);
-				String blobIndexVersion = blobIndexVersionRef.get();
-				if (blobIndexVersion != null) {
-					if (currentBlobIndexVersion != null) {
-						if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
+	
+			int indexed = 0;
+			int checked = 0;
+			while (treeWalk.next()) {
+				if ((treeWalk.getRawMode(0) & FileMode.TYPE_MASK) == FileMode.TYPE_FILE 
+						&& (treeWalk.getTreeCount() == 1 || !treeWalk.idEqual(0, 1))) {
+					ObjectId blobId = treeWalk.getObjectId(0);
+					String blobPath = treeWalk.getPathString();
+					
+					BooleanQuery query = new BooleanQuery();
+					query.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
+					query.add(BLOB_PATH.query(blobPath), Occur.MUST);
+					
+					final AtomicReference<String> blobIndexVersionRef = new AtomicReference<>(null);
+					if (searcher != null) {
+						searcher.search(query, new Collector() {
+	
+							private AtomicReaderContext context;
+	
+							@Override
+							public void setScorer(Scorer scorer) throws IOException {
+							}
+	
+							@Override
+							public void collect(int doc) throws IOException {
+								blobIndexVersionRef.set(searcher.doc(context.docBase+doc).get(BLOB_INDEX_VERSION.name()));
+							}
+	
+							@Override
+							public void setNextReader(AtomicReaderContext context) throws IOException {
+								this.context = context;
+							}
+	
+							@Override
+							public boolean acceptsDocsOutOfOrder() {
+								return true;
+							}
+							
+						});
+						checked++;
+					}
+	
+					Extractor extractor = extractors.getExtractor(blobPath);
+					String currentBlobIndexVersion = getCurrentBlobIndexVersion(extractor);
+					String blobIndexVersion = blobIndexVersionRef.get();
+					if (blobIndexVersion != null) {
+						if (currentBlobIndexVersion != null) {
+							if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
+								writer.deleteDocuments(query);
+								indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
+								indexed++;
+							}
+						} else {
 							writer.deleteDocuments(query);
-							indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
-							indexed++;
 						}
-					} else {
-						writer.deleteDocuments(query);
+					} else if (currentBlobIndexVersion != null) {
+						indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
+						indexed++;
 					}
-				} else if (currentBlobIndexVersion != null) {
-					indexBlob(writer, jgitRepo, extractor, blobId, blobPath);
-					indexed++;
 				}
 			}
+	
+			// record current commit so that we know which commit has been indexed
+			Document document = new Document();
+			document.add(new StringField(COMMIT_HASH.name(), commitId.getName(), Store.NO));
+			document.add(new StoredField(COMMIT_INDEX_VERSION.name(), getCurrentCommitIndexVersion()));
+			writer.updateDocument(COMMIT_HASH.term(commitId.getName()), document);
+			
+			// record last commit so that we only need to indexing changed files for subsequent commits
+			document = new Document();
+			document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
+			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), extractors.getVersion()));
+			document.add(new StoredField(LAST_COMMIT_HASH.name(), commitId.getName()));
+			writer.updateDocument(META.term(LAST_COMMIT.name()), document);
+			
+			return new IndexResult(checked, indexed);
 		}
-
-		// record current commit so that we know which commit has been indexed
-		Document document = new Document();
-		document.add(new StringField(COMMIT_HASH.name(), commitId.getName(), Store.NO));
-		document.add(new StoredField(COMMIT_INDEX_VERSION.name(), getCurrentCommitIndexVersion()));
-		writer.updateDocument(COMMIT_HASH.term(commitId.getName()), document);
-		
-		// record last commit so that we only need to indexing changed files for subsequent commits
-		document = new Document();
-		document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
-		document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), extractors.getVersion()));
-		document.add(new StoredField(LAST_COMMIT_HASH.name(), commitId.getName()));
-		writer.updateDocument(META.term(LAST_COMMIT.name()), document);
-		
-		return new IndexResult(checked, indexed);
 	}
 	
 	private void indexBlob(IndexWriter writer, org.eclipse.jgit.lib.Repository repo, 
@@ -296,29 +296,23 @@ public class DefaultIndexManager implements IndexManager {
 						try (IndexReader reader = DirectoryReader.open(directory)) {
 							IndexSearcher searcher = new IndexSearcher(reader);
 							try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-								org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
-								try {
+								try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
 									indexResult = index(jgitRepo, commitId, writer, searcher);
 									writer.commit();
 								} catch (Exception e) {
 									writer.rollback();
 									throw Throwables.propagate(e);
-								} finally {
-									jgitRepo.close();
 								}
 							}
 						}
 					} else {
 						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-							org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
-							try {
+							try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
 								indexResult = index(jgitRepo, commitId, writer, null);
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
 								throw Throwables.propagate(e);
-							} finally {
-								jgitRepo.close();
 							}
 						}
 					}

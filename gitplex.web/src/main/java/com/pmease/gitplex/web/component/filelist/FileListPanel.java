@@ -24,6 +24,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -96,9 +97,9 @@ public abstract class FileListPanel extends Panel {
 
 			@Override
 			protected List<BlobIdent> load() {
-				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
-				try {
-					RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
+				try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
+						RevWalk revWalk = new RevWalk(jgitRepo)) {
+					RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 					TreeWalk treeWalk;
 					if (directory.path != null) {
 						treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, directory.path, revTree));
@@ -134,9 +135,7 @@ public abstract class FileListPanel extends Panel {
 					return children;
 				} catch (IOException e) {
 					throw new RuntimeException(e);
-				} finally {
-					jgitRepo.close();
-				}
+				} 
 			}
 			
 		}) {

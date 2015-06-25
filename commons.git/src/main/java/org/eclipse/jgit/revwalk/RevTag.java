@@ -87,16 +87,22 @@ public class RevTag extends RevObject {
 
 	/**
 	 * Parse an annotated tag from its canonical format.
-	 *
+	 * <p>
 	 * This method inserts the tag directly into the caller supplied revision
 	 * pool, making it appear as though the tag exists in the repository, even
 	 * if it doesn't. The repository under the pool is not affected.
+	 * <p>
+	 * The body of the tag (message, tagger, signature) is always retained in
+	 * the returned {@code RevTag}, even if the supplied {@code RevWalk} has
+	 * been configured with {@code setRetainBody(false)}.
 	 *
 	 * @param rw
 	 *            the revision pool to allocate the tag within. The tag's object
 	 *            pointer will be obtained from this pool.
 	 * @param raw
-	 *            the canonical formatted tag to be parsed.
+	 *            the canonical formatted tag to be parsed. This buffer will be
+	 *            retained by the returned {@code RevTag} and must not be
+	 *            modified by the caller.
 	 * @return the parsed tag, in an isolated revision pool that is not
 	 *         available to the caller.
 	 * @throws CorruptObjectException
@@ -104,13 +110,12 @@ public class RevTag extends RevObject {
 	 */
 	public static RevTag parse(RevWalk rw, byte[] raw)
 			throws CorruptObjectException {
-		ObjectInserter.Formatter fmt = new ObjectInserter.Formatter();
-		boolean retain = rw.isRetainBody();
-		rw.setRetainBody(true);
-		RevTag r = rw.lookupTag(fmt.idFor(Constants.OBJ_TAG, raw));
-		r.parseCanonical(rw, raw);
-		rw.setRetainBody(retain);
-		return r;
+		try (ObjectInserter.Formatter fmt = new ObjectInserter.Formatter()) {
+			RevTag r = rw.lookupTag(fmt.idFor(Constants.OBJ_TAG, raw));
+			r.parseCanonical(rw, raw);
+			r.buffer = raw;
+			return r;
+		}
 	}
 
 	private RevObject object;
@@ -265,7 +270,18 @@ public class RevTag extends RevObject {
 		return tagName;
 	}
 
-	final void disposeBody() {
+	/**
+	 * Discard the message buffer to reduce memory usage.
+	 * <p>
+	 * After discarding the memory usage of the {@code RevTag} is reduced to
+	 * only the {@link #getObject()} pointer and {@link #getTagName()}.
+	 * Accessing other properties such as {@link #getTaggerIdent()} or either
+	 * message function requires reloading the buffer by invoking
+	 * {@link RevWalk#parseBody(RevObject)}.
+	 *
+	 * @since 4.0
+	 */
+	public final void disposeBody() {
 		buffer = null;
 	}
 }

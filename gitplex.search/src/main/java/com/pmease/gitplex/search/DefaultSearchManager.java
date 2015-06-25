@@ -24,6 +24,7 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -87,9 +88,8 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
-					final org.eclipse.jgit.lib.Repository jgitRepo = repository.openAsJGitRepo();
-					try {
-						final RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
+					try (FileRepository jgitRepo = repository.openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)){
+						final RevTree revTree = revWalk.parseCommit(commitId).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
 						searcher.search(query.asLuceneQuery(), new Collector() {
@@ -127,9 +127,6 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 							}
 							
 						});
-						
-					} finally {
-						jgitRepo.close();
 					}
 				} finally {
 					searcherManager.release(searcher);

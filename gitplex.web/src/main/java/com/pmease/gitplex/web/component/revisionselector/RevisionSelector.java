@@ -34,6 +34,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Git;
@@ -85,8 +86,7 @@ public abstract class RevisionSelector extends Panel {
 
 			@Override
 			protected String load() {
-				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
-				try {
+				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
 					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + revision) != null)
 						return "fa fa-ext fa-branch";
 					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + revision) != null)
@@ -95,8 +95,6 @@ public abstract class RevisionSelector extends Panel {
 						return "fa fa-ext fa-commit";
 				} catch (IOException e) {
 					throw new RuntimeException(e);
-				} finally {
-					jgitRepo.close();
 				}
 			}
 			
@@ -128,8 +126,7 @@ public abstract class RevisionSelector extends Panel {
 			private List<String> findRefs() {
 				List<String> refs = new ArrayList<>();
 				
-				org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
-				try {
+				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
 					if (branchesActive)
 						refs.addAll(jgitRepo.getRefDatabase().getRefs(Git.REFS_HEADS).keySet());
 					else
@@ -137,8 +134,6 @@ public abstract class RevisionSelector extends Panel {
 					Collections.sort(refs);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
-				} finally {
-					jgitRepo.close();
 				}
 				return refs;
 			}

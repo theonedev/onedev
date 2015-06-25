@@ -393,10 +393,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		
 		Blob blob = blobCache.get(ident);
 		if (blob == null) {
-			FileRepository jgitRepo = openAsJGitRepo();
-			try {
+			try (FileRepository jgitRepo = openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)) {
 				ObjectId commitId = getObjectId(ident.revision, true);
-				RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
+				RevTree revTree = revWalk.parseCommit(commitId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
 				if (treeWalk != null) {
 					if (ident.isGitLink()) {
@@ -424,18 +423,15 @@ public class Repository extends AbstractEntity implements UserBelonging {
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
-			} finally {
-				jgitRepo.close();
 			}
 		}
 		return blob;
 	}
 	
 	public InputStream getInputStream(BlobIdent ident) {
-		FileRepository jgitRepo = openAsJGitRepo();
-		try {
+		try (FileRepository jgitRepo = openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)) {
 			ObjectId commitId = getObjectId(ident.revision, true);
-			RevTree revTree = new RevWalk(jgitRepo).parseCommit(commitId).getTree();
+			RevTree revTree = revWalk.parseCommit(commitId).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
 			if (treeWalk != null) {
 				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
@@ -445,8 +441,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		} finally {
-			jgitRepo.close();
 		}
 	}
 	
@@ -491,15 +485,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	public ObjectId getObjectId(String revision, boolean mustExist) {
 		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
-			org.eclipse.jgit.lib.Repository jgitRepo = openAsJGitRepo();
-			try {
+			try (FileRepository jgitRepo = openAsJGitRepo()) {
 				ObjectId objectId = jgitRepo.resolve(revision);
 				optional = Optional.fromNullable(objectId);
 				objectIdCache.put(revision, optional);
 			} catch (RevisionSyntaxException | IOException e) {
 				throw new RuntimeException(e);
-			} finally {
-				jgitRepo.close();
 			}
 		}
 		if (mustExist && !optional.isPresent())
@@ -601,8 +592,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 		final AnyObjectId commitId = getObjectId(revision, true);
 		
-		org.eclipse.jgit.lib.Repository jgitRepo = openAsJGitRepo();
-		try {
+		try (FileRepository jgitRepo = openAsJGitRepo()) {
 			long time = System.currentTimeMillis();
 			LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(jgitRepo, commitId, path, cache);
 			long elapsed = System.currentTimeMillis()-time;
@@ -621,8 +611,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 				}
 			}
 			return lastCommits;
-		} finally {
-			jgitRepo.close();
 		}
 	}
 

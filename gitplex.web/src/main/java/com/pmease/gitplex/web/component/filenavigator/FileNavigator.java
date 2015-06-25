@@ -27,6 +27,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -129,16 +130,14 @@ public abstract class FileNavigator extends Panel {
 				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
 				
 				if (blobIdent.path != null && item.getIndex() == size()-1) {
-					org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
-					try {
-						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
+					try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
+							RevWalk revWalk = new RevWalk(jgitRepo)) {
+						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 						if (!treeWalk.isSubtree())
 							subtreeDropdownTrigger.setVisible(false);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
-					} finally {
-						jgitRepo.close();
 					}
 				}
 				
@@ -154,9 +153,9 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
-								org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
-								try {
-									RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
+								try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();
+										RevWalk revWalk = new RevWalk(jgitRepo)) {
+									RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
 									if (blobIdent.path != null) {
 										treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, blobIdent.path, revTree));
@@ -174,8 +173,6 @@ public abstract class FileNavigator extends Panel {
 									return roots.iterator();
 								} catch (IOException e) {
 									throw new RuntimeException(e);
-								} finally {
-									jgitRepo.close();
 								}
 							}
 
@@ -283,9 +280,9 @@ public abstract class FileNavigator extends Panel {
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
 	
 	private List<BlobIdent> getChildren(BlobIdent blobIdent) {
-		org.eclipse.jgit.lib.Repository jgitRepo = repoModel.getObject().openAsJGitRepo();
-		try {
-			RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
+		try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
+				RevWalk revWalk = new RevWalk(jgitRepo)) {
+			RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 			treeWalk.setRecursive(false);
 			treeWalk.enterSubtree();
@@ -297,8 +294,6 @@ public abstract class FileNavigator extends Panel {
 			return children;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		} finally {
-			jgitRepo.close();
 		}
 	}
 

@@ -26,6 +26,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -112,9 +113,9 @@ public class RepoFilePage extends RepositoryPage {
 		
 		file.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
 		if (file.path != null) {
-			org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
-			try {
-				RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
+			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+					RevWalk revWalk = new RevWalk(jgitRepo)) {
+				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
 				if (treeWalk == null) {
 					throw new ObjectNotFoundException("Unable to find blob path '" + file.path
@@ -123,8 +124,6 @@ public class RepoFilePage extends RepositoryPage {
 				file.mode = treeWalk.getRawMode(0);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
-			} finally {
-				jgitRepo.close();
 			}
 		}
 		
@@ -265,16 +264,14 @@ public class RepoFilePage extends RepositoryPage {
 				file.revision = revision;
 				trait.revision = revision;
 				if (file.path != null) {
-					org.eclipse.jgit.lib.Repository jgitRepo = getRepository().openAsJGitRepo();
-					try {
-						RevTree revTree = new RevWalk(jgitRepo).parseCommit(getCommitId()).getTree();
+					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+							RevWalk revWalk = new RevWalk(jgitRepo)) {
+						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
 						if (treeWalk == null)
 							file.path = null;
 					} catch (IOException e) {
 						throw new RuntimeException(e);
-					} finally {
-						jgitRepo.close();
 					}
 				}
 				tokenPos = null;

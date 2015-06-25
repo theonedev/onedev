@@ -69,7 +69,7 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 	 */
 	public LastCommitsOfChildren(final Repository repo, AnyObjectId until, 
 			@Nullable String treePath, @Nullable final Cache cache) {
-		try {
+		try (RevWalk revWalk = new RevWalk(repo)) {
 			treePath = GitUtils.normalizePath(treePath);
 			if (treePath == null) 
 				treePath = "";
@@ -78,7 +78,6 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 			final Set<String> children = new HashSet<>();
 			final Set<String> modifiedChildren = new HashSet<>();
 
-			RevWalk revWalk = new RevWalk(repo);
 			RevCommit untilCommit = revWalk.parseCommit(until);
 
 			/*
@@ -93,11 +92,12 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 				while (treeWalk.next())
 					children.add(treeWalk.getPathString().substring(treePath.length()+1));
 			} else {
-				TreeWalk treeWalk = new TreeWalk(repo);
-				treeWalk.addTree(untilCommit.getTree());
-				treeWalk.setRecursive(false);
-				while (treeWalk.next())
-					children.add(treeWalk.getPathString().substring(treePath.length()));
+				try (TreeWalk treeWalk = new TreeWalk(repo)) {
+					treeWalk.addTree(untilCommit.getTree());
+					treeWalk.setRecursive(false);
+					while (treeWalk.next())
+						children.add(treeWalk.getPathString().substring(treePath.length()));
+				}
 			}
 			
 			revWalk.markStart(untilCommit);
@@ -161,147 +161,147 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 						return true;
 					}
 					
-					TreeWalk treeWalker = new TreeWalk(revWalker.reader);
-					treeWalker.setRecursive(true);
-
-					RevCommit[] pList = commit.parents;
-					int nParents = pList.length;
-
-					ObjectId[] trees = new ObjectId[nParents + 1];
-					for (int i = 0; i < nParents; i++) {
-						RevCommit p = commit.parents[i];
-						if ((p.flags & PARSED) == 0)
-							p.parseHeaders(revWalker);
-						trees[i] = p.getTree();
-					}
-					trees[nParents] = commit.getTree();
-					treeWalker.reset(trees);
-					
-					final boolean[] changed = new boolean[nParents];
-					final AtomicReference<String> childRef = new AtomicReference<>();
-					
-					treeWalker.setFilter(new TreeFilter() {
-
-						@Override
-						public boolean include(TreeWalk walker) 
-								throws MissingObjectException, IncorrectObjectTypeException, IOException {
-							if (treePathRaw.length == 0 || walker.isPathPrefix(treePathRaw, treePathRaw.length) == 0) {
-								// we will enter into this block if current walking path is either parent of 
-								// tree path, or the same as tree path, or child of tree path 
-								
-								int walkPathLen = walker.getPathLength();
-								if (walkPathLen <= treePathRaw.length) {
-									int n = walker.getTreeCount();
-									if (n == 1) {
-										// we are comparing against an empty tree, so current commit
-										// is the initial commit
-										walker.setRecursive(true);
-										return true;
-									} else {
-										int m = walker.getRawMode(n-1);
-										for (int i = 0; i < n-1; i++) {
-											if (walker.getRawMode(i) != m || !walker.idEqual(i, n-1)) {
-												// current path has been changed since its parents, and 
-												// we need to walk down to further check the children
-												walker.setRecursive(true);
-												return true;
-											}
-										}
-									}
-									// otherwise this path is not relevant
-									return false;
-								} else {
-									boolean modified = false;
-									int n = walker.getTreeCount();
-									if (n == 1) {
-										modified = true;
-									} else {
-										int m = walker.getRawMode(n-1);
-										for (int i = 0; i < n-1; i++) {
-											if (walker.getRawMode(i) != m || !walker.idEqual(i, n-1)) {
-												modified = true;
-												changed[i] = true;
-											} else {
-												changed[i] = false;
-											}
-										}
-									}
-									if (modified) {
-										childRef.set(RawParseUtils.decode(
-												Constants.CHARSET, 
-												walker.getRawPath(), 
-												treePathRaw.length!=0?treePathRaw.length+1:0, 
-												walkPathLen));
-										// this child has been modified, and this info is sufficient to 
-										// us and we no longer need to recurse into the sub tree
-										walker.setRecursive(false);
-										return true;
-									} else {
-										return false;
-									}						
-								}  
-							} else {
-								return false;
-							}
+					try (TreeWalk treeWalker = new TreeWalk(revWalker.reader)) {
+						treeWalker.setRecursive(true);
+	
+						RevCommit[] pList = commit.parents;
+						int nParents = pList.length;
+	
+						ObjectId[] trees = new ObjectId[nParents + 1];
+						for (int i = 0; i < nParents; i++) {
+							RevCommit p = commit.parents[i];
+							if ((p.flags & PARSED) == 0)
+								p.parseHeaders(revWalker);
+							trees[i] = p.getTree();
 						}
-
-						@Override
-						public boolean shouldBeRecursive() {
-							throw new UnsupportedOperationException();
-						}
-
-						@Override
-						public TreeFilter clone() {
-							throw new UnsupportedOperationException();
-						}
+						trees[nParents] = commit.getTree();
+						treeWalker.reset(trees);
 						
-					});
-
-					if (nParents <= 1) {
-						while (treeWalker.next()) {
-							String child = childRef.get();
-							if (children.contains(child) && !containsKey(child))
-								modifiedChildren.add(child);
-						}
-					} else {
-						int[] changes = new int[nParents];
-						while (treeWalker.next()) {
-							String child = childRef.get();
-							if (children.contains(child) && !containsKey(child)) {
-								boolean same = false;
-								for (int i = 0; i < nParents; i++) {
-									if (changed[i]) 
-										changes[i] ++;
-									else
-										same = true;
+						final boolean[] changed = new boolean[nParents];
+						final AtomicReference<String> childRef = new AtomicReference<>();
+						
+						treeWalker.setFilter(new TreeFilter() {
+	
+							@Override
+							public boolean include(TreeWalk walker) 
+									throws MissingObjectException, IncorrectObjectTypeException, IOException {
+								if (treePathRaw.length == 0 || walker.isPathPrefix(treePathRaw, treePathRaw.length) == 0) {
+									// we will enter into this block if current walking path is either parent of 
+									// tree path, or the same as tree path, or child of tree path 
+									
+									int walkPathLen = walker.getPathLength();
+									if (walkPathLen <= treePathRaw.length) {
+										int n = walker.getTreeCount();
+										if (n == 1) {
+											// we are comparing against an empty tree, so current commit
+											// is the initial commit
+											walker.setRecursive(true);
+											return true;
+										} else {
+											int m = walker.getRawMode(n-1);
+											for (int i = 0; i < n-1; i++) {
+												if (walker.getRawMode(i) != m || !walker.idEqual(i, n-1)) {
+													// current path has been changed since its parents, and 
+													// we need to walk down to further check the children
+													walker.setRecursive(true);
+													return true;
+												}
+											}
+										}
+										// otherwise this path is not relevant
+										return false;
+									} else {
+										boolean modified = false;
+										int n = walker.getTreeCount();
+										if (n == 1) {
+											modified = true;
+										} else {
+											int m = walker.getRawMode(n-1);
+											for (int i = 0; i < n-1; i++) {
+												if (walker.getRawMode(i) != m || !walker.idEqual(i, n-1)) {
+													modified = true;
+													changed[i] = true;
+												} else {
+													changed[i] = false;
+												}
+											}
+										}
+										if (modified) {
+											childRef.set(RawParseUtils.decode(
+													Constants.CHARSET, 
+													walker.getRawPath(), 
+													treePathRaw.length!=0?treePathRaw.length+1:0, 
+													walkPathLen));
+											// this child has been modified, and this info is sufficient to 
+											// us and we no longer need to recurse into the sub tree
+											walker.setRecursive(false);
+											return true;
+										} else {
+											return false;
+										}						
+									}  
+								} else {
+									return false;
 								}
-								
-								// consider child as modified only if it is different
-								// from all parents; otherwise, postpone checking of 
-								// child to parents of this commit
-								if (!same)
+							}
+	
+							@Override
+							public boolean shouldBeRecursive() {
+								throw new UnsupportedOperationException();
+							}
+	
+							@Override
+							public TreeFilter clone() {
+								throw new UnsupportedOperationException();
+							}
+							
+						});
+	
+						if (nParents <= 1) {
+							while (treeWalker.next()) {
+								String child = childRef.get();
+								if (children.contains(child) && !containsKey(child))
 									modifiedChildren.add(child);
 							}
-						}
-
-						for (int i = 0; i < nParents; i++) {
-							/*
-							 * Jump to parent whose children we care about are 
-							 * the same as current commit. This will speed up 
-							 * the calculation as we no longer need to walk 
-							 * unnecessary branches
-							 */
-							if (changes[i] == 0) {
-								RevCommit p = pList[i];
-								commit.parents = new RevCommit[]{p};
-								return false;
+						} else {
+							int[] changes = new int[nParents];
+							while (treeWalker.next()) {
+								String child = childRef.get();
+								if (children.contains(child) && !containsKey(child)) {
+									boolean same = false;
+									for (int i = 0; i < nParents; i++) {
+										if (changed[i]) 
+											changes[i] ++;
+										else
+											same = true;
+									}
+									
+									// consider child as modified only if it is different
+									// from all parents; otherwise, postpone checking of 
+									// child to parents of this commit
+									if (!same)
+										modifiedChildren.add(child);
+								}
+							}
+	
+							for (int i = 0; i < nParents; i++) {
+								/*
+								 * Jump to parent whose children we care about are 
+								 * the same as current commit. This will speed up 
+								 * the calculation as we no longer need to walk 
+								 * unnecessary branches
+								 */
+								if (changes[i] == 0) {
+									RevCommit p = pList[i];
+									commit.parents = new RevCommit[]{p};
+									return false;
+								}
 							}
 						}
+						// include current commit only if it is determined as last commit
+						// of some children
+						return !modifiedChildren.isEmpty();
 					}
-					
-					// include current commit only if it is determined as last commit
-					// of some children
-					return !modifiedChildren.isEmpty();
 				}
 
 				@Override
