@@ -320,26 +320,6 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void newFileViewer(AjaxRequestTarget target) {
-		if (target != null && fileViewer instanceof SourceViewPanel) {
-			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-			BlobViewContext context = sourceViewer.getContext();
-			if (context.getBlobIdent().equals(file) && context.isBlame() == blame) {
-				sourceViewer.getContext().setTokenPosition(tokenPos);
-				if (tokenPos != null) {
-					sourceViewer.highlightToken(target, tokenPos);
-				} else {
-					BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
-					if (!(blobViewer instanceof SourceViewPanel)) {
-						fileViewer.replaceWith(blobViewer);
-						fileViewer = blobViewer;
-						target.add(fileViewer);
-						target.appendJavaScript("$(window).resize();");
-					}
-				}
-				return;
-			}
-		}
-		
 		if (file.path == null || file.isTree()) {
 			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, file) {
 
@@ -386,8 +366,27 @@ public class RepoFilePage extends RepositoryPage {
 				public void onBlameChange(AjaxRequestTarget target) {
 					blame = !blame;
 					
-					newFileViewer(target);
-					
+					if (fileViewer instanceof SourceViewPanel) {
+						SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
+						BlobViewContext context = sourceViewer.getContext();
+						context.setBlame(blame);
+						if (blame || tokenPos != null) {
+							sourceViewer.onBlameChange(target);
+						} else {
+							BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
+							if (blobViewer instanceof SourceViewPanel) {
+								sourceViewer.onBlameChange(target);
+							} else {
+								fileViewer.replaceWith(blobViewer);
+								fileViewer = blobViewer;
+								target.add(fileViewer);
+								target.appendJavaScript("$(window).resize();");
+							}
+						}
+					} else {
+						newFileViewer(target);
+					}
+
 					pushState(target);
 				}
 				
@@ -486,13 +485,31 @@ public class RepoFilePage extends RepositoryPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				file = new BlobIdent(file.revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
 				tokenPos = hit.getTokenPos();
-				blame = false;
-				
-				newFileNavigator(target);
-				newFileViewer(target);
-
+				if (hit.getBlobPath().equals(file.path) && fileViewer instanceof SourceViewPanel) {
+					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
+					BlobViewContext context = sourceViewer.getContext();
+					context.setTokenPosition(tokenPos);
+					if (tokenPos != null || blame) {
+						sourceViewer.highlightToken(target, tokenPos);
+					} else {
+						BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
+						if (blobViewer instanceof SourceViewPanel) {
+							sourceViewer.highlightToken(target, tokenPos);
+						} else {
+							fileViewer.replaceWith(blobViewer);
+							fileViewer = blobViewer;
+							target.add(fileViewer);
+							target.appendJavaScript("$(window).resize();");
+						}
+					}
+				} else {
+					blame = false;
+					file.path = hit.getBlobPath();
+					file.mode = FileMode.REGULAR_FILE.getBits();
+					newFileNavigator(target);
+					newFileViewer(target);
+				}
 				pushState(target);
 			}
 

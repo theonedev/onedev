@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blames) {
+	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blameCommits) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -100,11 +100,11 @@ gitplex.sourceview = {
 			    if (scrollPos)
 			    	cm.scrollTo(scrollPos.left, scrollPos.top);
 			    
-			    if (blames) {
+			    if (blameCommits) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
 			    	// blame gutter becomes much wider than expected
 			    	setTimeout(function() {
-				    	gitplex.sourceview.blame(cm, blames);
+				    	gitplex.sourceview.blame(cm, blameCommits);
 			    	}, 10);
 			    }
 			} 
@@ -124,35 +124,46 @@ gitplex.sourceview = {
 		if (typeof cm === "string") 
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
-		var h = cm.getScrollInfo().clientHeight;
-		var coords = cm.charCoords({line: tokenPos.line, ch: 0}, "local");
-		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
-		
-		if (tokenPos.range) {
-			var anchor = {line: tokenPos.line, ch: tokenPos.range.start};
-			var head = {line: tokenPos.line, ch: tokenPos.range.end}; 
-			cm.setSelection(anchor, head);
+		if (tokenPos) {
+			var h = cm.getScrollInfo().clientHeight;
+			var coords = cm.charCoords({line: tokenPos.line, ch: 0}, "local");
+			cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+			
+			if (tokenPos.range) {
+				var anchor = {line: tokenPos.line, ch: tokenPos.range.start};
+				var head = {line: tokenPos.line, ch: tokenPos.range.end}; 
+				cm.setSelection(anchor, head);
+			} else {
+				cm.setCursor(tokenPos.line);
+			}
 		} else {
-			cm.setCursor(tokenPos.line);
+			cm.setCursor(0, 0);
 		}
-		
 	},
 	
-	blame: function(cm, blames) {
+	blame: function(cm, blameCommits) {
 		if (typeof cm === "string") 
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
-		if (blames) {
+		if (blameCommits) {
     		cm.setOption("gutters", ["CodeMirror-annotations", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
-    		for (var i in blames) {
-    			var blame = blames[i];
-        		for (var j in blame.ranges) {
+    		for (var i in blameCommits) {
+    			var commit = blameCommits[i];
+        		for (var j in commit.ranges) {
+        			var range = commit.ranges[j];
         			var $ele = $(document.createElement("div"));
         			$ele.addClass("CodeMirror-annotation");
-            		$("<a class='hash'>" + blame.hash + "</a>").appendTo($ele).attr("href", blame.url).attr("title", blame.message);
-            		$ele.append("<span class='date'>" + blame.authorDate + "</span>");
-            		$ele.append("<span class='author'>" + blame.authorName + "</span>");
-            		cm.setGutterMarker(blame.ranges[j].beginLine, "CodeMirror-annotations", $ele[0]);
+            		$("<a class='hash'>" + commit.hash + "</a>").appendTo($ele).attr("href", commit.url).attr("title", commit.message);
+            		$ele.append("<span class='date'>" + commit.authorDate + "</span>");
+            		$ele.append("<span class='author'>" + commit.authorName + "</span>");
+            		cm.setGutterMarker(range.beginLine, "CodeMirror-annotations", $ele[0]);
+            		
+            		for (var line = range.beginLine+1; line<range.endLine; line++) {
+            			var $ele = $(document.createElement("div"));
+            			$ele.addClass("CodeMirror-annotation");
+                		$ele.append("<span class='same-as-above fa fa-arrow-up' title='same as above'></span>");
+                		cm.setGutterMarker(line, "CodeMirror-annotations", $ele[0]);
+            		}
         		}
     		}    		
 		} else {

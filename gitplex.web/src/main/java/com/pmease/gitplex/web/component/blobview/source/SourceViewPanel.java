@@ -3,6 +3,8 @@ package com.pmease.gitplex.web.component.blobview.source;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -98,15 +100,20 @@ public class SourceViewPanel extends BlobViewPanel {
 		return fragment;
 	}
 
-	public void highlightToken(AjaxRequestTarget target, TokenPosition tokenPos) {
-		try {
-			String json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(tokenPos);
-			String script = String.format("gitplex.sourceview.highlightToken('%s', %s);", 
-					codeContainer.getMarkupId(), json);
-			target.appendJavaScript(script);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+	public void highlightToken(AjaxRequestTarget target, @Nullable TokenPosition tokenPos) {
+		String json;
+		if (tokenPos != null) {
+			try {
+				json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(tokenPos);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			json = "undefined";
 		}
+		String script = String.format("gitplex.sourceview.highlightToken('%s', %s);", 
+				codeContainer.getMarkupId(), json);
+		target.appendJavaScript(script);
 	}
 	
 	@Override
@@ -269,7 +276,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						highlightToken,
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")), 
-						getBlameBlocks());
+						getBlameCommits());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
@@ -277,8 +284,14 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		setOutputMarkupId(true);
 	}
+	
+	public void onBlameChange(AjaxRequestTarget target) {
+		String script = String.format("gitplex.sourceview.blame('%s', %s);", 
+				codeContainer.getMarkupId(), getBlameCommits());
+		target.appendJavaScript(script);
+	}
 
-	private String getBlameBlocks() {
+	private String getBlameCommits() {
 		if (context.isBlame()) {
 			List<BlameCommit> commits = new ArrayList<>();
 			

@@ -44,3 +44,11 @@
 .CodeMirror-annotation .hash, .CodeMirror-annotation .date {
 	margin-right: 8px;
 }
+.CodeMirror-annotation .same-as-above {
+	margin-left: 100px;
+	color: #999;
+	font-size: 10px;
+}
+.CodeMirror-activeline .CodeMirror-annotation {
+	background: #E8F2FE;	
+}

@@ -87,13 +87,30 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				if (context.isBlame())
-					add(AttributeAppender.append("class", " active"));
+				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						if (context.isBlame())
+							return " active";
+						else
+							return " ";
+					}
+					
+				}));
+				
+				setOutputMarkupId(true);
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				context.onBlameChange(target);
+				
+				// this blob view panel might be replaced with another panel
+				if (findPage() != null) {
+					target.add(this);
+					target.focusComponent(null);
+				}
 			}
 
 			@Override
