@@ -6,8 +6,11 @@ gitplex.blobView = function(containerId) {
     	pmease.commons.history.setScrollPos({left: $body.scrollLeft(), top: $body.scrollTop()});
 	});
 
-	gitplex.spaceGreedy.getScrollTop = function() {
-		return $body.scrollTop();
+	gitplex.expandable.getScrollTop = function() {
+		return $body.scrollTop();			
+	};
+	gitplex.expandable.setScrollTop = function(scrollTop) {
+		$body.scrollTop(scrollTop);
 	};
 
 	$blobView.on("autofit", function(event, width, height) {

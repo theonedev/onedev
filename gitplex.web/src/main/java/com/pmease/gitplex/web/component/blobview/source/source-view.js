@@ -25,11 +25,16 @@ gitplex.sourceview = {
 			});
 		}
 		
-		gitplex.spaceGreedy.getScrollTop = function() {
+		gitplex.expandable.getScrollTop = function() {
 			if (cm)
 				return cm.getScrollInfo().top;
 			else
 				return 0;
+		};
+		
+		gitplex.expandable.setScrollTop = function(scrollTop) {
+			if (cm)
+				cm.scrollTo(undefined, scrollTop);
 		};
 		
 		$sourceView.on("autofit", function(event, width, height) {
@@ -74,7 +79,16 @@ gitplex.sourceview = {
 							return tooltip;
 						} 
 					},
-					gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+					gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+					extraKeys: {
+						"F11": function(cm) {
+							cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+						},
+						"Esc": function(cm) {
+							if (cm.getOption("fullScreen"))
+								cm.setOption("fullScreen", false);
+				        }
+					}
 				};
 				cm = CodeMirror($code[0], options);
 				
@@ -108,6 +122,8 @@ gitplex.sourceview = {
 			    	}, 10);
 			    }
 			} 
+			if (cm.getOption("fullScreen"))
+				cm.setOption("fullScreen", false);
 			cm.setSize($code.width(), $code.height());
 		});
 	}, 

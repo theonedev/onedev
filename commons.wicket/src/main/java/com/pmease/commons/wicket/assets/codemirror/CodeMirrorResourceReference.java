@@ -48,6 +48,7 @@ public class CodeMirrorResourceReference extends WebjarsJavaScriptResourceRefere
 					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/selection/active-line.js")),
 					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/selection/mark-selection.js")),
 					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/scroll/annotatescrollbar.js")),
+					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/display/fullscreen.js")),
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "annotatescrollbar2.js")),
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "simplescrollbars.js")),
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "tokentooltip.js")),
@@ -59,6 +60,7 @@ public class CodeMirrorResourceReference extends WebjarsJavaScriptResourceRefere
 					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/fold/foldgutter.css")),
 					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/scroll/simplescrollbars.css")),
 					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/search/matchesonscrollbar.css")),
+					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/display/fullscreen.css")),
 					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")),
 					
 					CssHeaderItem.forReference(new CssResourceReference(CodeMirrorResourceReference.class, "codemirror.css")),

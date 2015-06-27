@@ -133,40 +133,40 @@ var gitplex = {
 		}
 	},
 	
-	spaceGreedy: {
+	expandable: {
 		mouseDown: false,
 		check: function() {
-			var $hideable = $(".hideable");
-			if (gitplex.spaceGreedy.getScrollTop && !gitplex.spaceGreedy.mouseDown) {
+			if (gitplex.expandable.getScrollTop && !gitplex.expandable.mouseDown && $(".CodeMirror-fullscreen").length == 0) {
+				var scrollTop = gitplex.expandable.getScrollTop();
+				var $hideable = $(".hideable");
 				if ($hideable.is(":visible")) {
 					var height = 0;
 					$hideable.each(function() {
 						height += $(this).outerHeight();
 					});
-					if (gitplex.spaceGreedy.getScrollTop()>height+10) {
+					if (scrollTop>height+10) {
 						$hideable.hide();
 						$(window).resize();
+						gitplex.expandable.setScrollTop(scrollTop-height);
 					}
-				} else if (gitplex.spaceGreedy.getScrollTop() < 5) {
+				} else if (scrollTop < 5) {
 					$hideable.show();
 					$(window).resize();
 				}
 			}
-			setTimeout(gitplex.spaceGreedy.check, 100);
+			setTimeout(gitplex.expandable.check, 100);
 		}
 	}
 };
 
 $(document).ready(function() {
-	/*
 	$(window).load(function() {
 		$(document).mousedown(function() { 
-			gitplex.spaceGreedy.mouseDown = true;
+			gitplex.expandable.mouseDown = true;
 		});
 		$(document).mouseup(function() {
-			gitplex.spaceGreedy.mouseDown = false;
+			gitplex.expandable.mouseDown = false;
 		});		
-		gitplex.spaceGreedy.check();
+		gitplex.expandable.check();
 	});
-	*/
 });
