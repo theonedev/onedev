@@ -47,7 +47,7 @@ import com.pmease.gitplex.search.query.FileQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
-import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
+import com.pmease.gitplex.web.component.blobsearch.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class InstantSearchPanel extends Panel {
@@ -410,7 +410,7 @@ public abstract class InstantSearchPanel extends Panel {
 						new JavaScriptResourceReference(InstantSearchPanel.class, "instant-search.js")));
 				
 				String script = String.format(
-						"gitplex.instantsearch.init('%s', '%s', %s);", 
+						"gitplex.blobInstantSearch.init('%s', '%s', %s);", 
 						searchField.getMarkupId(true), searchDropdown.getMarkupId(true),
 						getCallbackFunction(CallbackParameter.explicit("key")));
 				

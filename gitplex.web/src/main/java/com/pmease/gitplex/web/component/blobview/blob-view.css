@@ -6,6 +6,9 @@
 	padding: 6px 12px;
 	height: 36px;
 }
+.blob-view>.head>.actions>.btn-group:FIRST-CHILD {
+	margin-right: 4px;
+}
 .blob-view>.head>.info {
 	color: #666;
 }

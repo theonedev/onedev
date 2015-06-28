@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.file;
+package com.pmease.gitplex.web.component.blobsearch.result;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -29,6 +30,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.gitplex.search.hit.FileHit;
@@ -65,7 +68,7 @@ public abstract class SearchResultPanel extends Panel {
 	public SearchResultPanel(String id, List<QueryHit> hits) {
 		super(id);
 		
-		hasMore = (hits.size() == QUERY_ENTRIES);
+		hasMore = (hits.size() == SearchResultPanel.QUERY_ENTRIES);
 		
 		Map<String, MatchedBlob> hitsByBlob = new LinkedHashMap<>();
 
@@ -107,8 +110,8 @@ public abstract class SearchResultPanel extends Panel {
 		String script = String.format(""
 				+ "$('#%s').find('.selectable').removeClass('active');"
 				+ "$('#%s').addClass('active');"
-				+ "gitplex.repofile.scrollSearchResult();", 
-				getMarkupId(), activeLinkId);
+				+ "gitplex.blobSearchResult.scrollIfNecessary('%s');", 
+				getMarkupId(), activeLinkId, getMarkupId());
 		target.appendJavaScript(script);
 		
 		target.add(prevMatchLink);
@@ -168,7 +171,7 @@ public abstract class SearchResultPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String message = "too many matches, displaying " + QUERY_ENTRIES + " of them";
+		String message = "too many matches, displaying " + SearchResultPanel.QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
 		add(prevMatchLink = new AjaxLink<Void>("prevMatch") {
@@ -446,10 +449,15 @@ public abstract class SearchResultPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 
+				response.render(JavaScriptHeaderItem.forReference(
+						new JavaScriptResourceReference(SearchResultPanel.class, "search-result.js")));
+				response.render(CssHeaderItem.forReference(
+						new CssResourceReference(SearchResultPanel.class, "search-result.css")));
+				
 				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 				
 				String script = String.format(""
-						+ "var $body = $('#%s>.body');"
+						+ "var $body = $('#%s>.search-result>.body');"
 						+ "var callback = %s;"
 						+ "$body.bind('keydown', 'up', function(e) {e.preventDefault();callback('up');});"
 						+ "$body.bind('keydown', 'down', function(e) {e.preventDefault();callback('down');});", 

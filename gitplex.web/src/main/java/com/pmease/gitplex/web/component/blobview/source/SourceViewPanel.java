@@ -53,10 +53,10 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
+import com.pmease.gitplex.web.component.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
-import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")

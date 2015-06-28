@@ -51,6 +51,7 @@ import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.blobsearch.advanced.AdvancedSearchPanel;
 import com.pmease.gitplex.web.component.blobsearch.instant.InstantSearchPanel;
+import com.pmease.gitplex.web.component.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
@@ -476,7 +477,7 @@ public class RepoFilePage extends RepositoryPage {
 		target.add(searchResult);
 		target.appendJavaScript(""
 				+ "$('#repo-file>.search-result').show(); "
-				+ "$('#repo-file>.search-result>div>.body').focus(); "
+				+ "$('#repo-file .search-result>.body').focus(); "
 				+ "$(window).resize();");
 	}
 	

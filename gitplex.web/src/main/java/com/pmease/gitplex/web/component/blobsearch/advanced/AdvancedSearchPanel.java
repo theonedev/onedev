@@ -53,7 +53,7 @@ import com.pmease.gitplex.search.query.FileQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
-import com.pmease.gitplex.web.page.repository.file.SearchResultPanel;
+import com.pmease.gitplex.web.component.blobsearch.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class AdvancedSearchPanel extends Panel {

@@ -34,6 +34,7 @@ import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
@@ -130,6 +131,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     private transient Map<String, Commit> commitCache = new HashMap<>();
     
     private transient Map<String, Optional<ObjectId>> objectIdCache = new HashMap<>();
+    
+    private transient Map<String, Map<String, Ref>> refsCache = new HashMap<>();
     
     private transient Branch defaultBranch;
     
@@ -614,6 +617,19 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 
+	public Map<String, Ref> getRefs(String prefix) {
+		Map<String, Ref> cached = refsCache.get(prefix);
+		if (cached == null) {
+			try (FileRepository jgitRepo = openAsJGitRepo()) {
+				cached = jgitRepo.getRefDatabase().getRefs(prefix); 
+				refsCache.put(prefix, cached);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return cached;
+	}
+	
 	public Map<String, String> getSubmodules(String revision) {
 		Map<String, String> submodules = new HashMap<>();
 		

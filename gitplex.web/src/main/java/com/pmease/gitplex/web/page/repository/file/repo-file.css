@@ -88,7 +88,6 @@
 	height: 22px;
 	font-family: monospace;
 }
-
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;
@@ -98,63 +97,4 @@
     background: #EEE url("hgrabber.gif") no-repeat scroll center top;
     cursor: n-resize;
     height: 4px;
-}
-#repo-file>.search-result>div>.head {
-	padding: 4px 10px;
-	font-size: 16px;
-	border-bottom: 1px solid #DDD;
-	background: white;
-}
-#repo-file>.search-result>div>.head .actions {
-	margin-left: 16px;
-}
-#repo-file>.search-result>div>.head .warning {
-	margin-left: 8px;
-	font-size: 13px;
-	vertical-align: middle;
-	color: #666;
-}
-#repo-file>.search-result>div>.head a {
-	color: #666;
-}
-#repo-file>.search-result>div>.head em {
-	margin-right: 8px;
-}
-#repo-file>.search-result>div>.head em i {
-	color: #999;
-}
-
-#repo-file>.search-result>div>.body {
-	overflow: auto;
-	padding: 0 10px;
-	margin-bottom: 0;
-}
-#repo-file>.search-result>div>.body>li {
-	border: none; 
-	white-space: nowrap;
-}
-#repo-file>.search-result>div>.body>li .expand {
-	margin-right: -4px;
-}
-#repo-file>.search-result>div>.body>li a {
-	color: #333;
-}
-#repo-file>.search-result>div>.body>li a.selectable {
-	display: inline-block;
-}
-#repo-file>.search-result>div>.body a.selectable.active span {
-	background-color: inherit !important;
-}
-#repo-file>.search-result>div>.body>li>ul {
-	margin-left: 34px;
-}
-#repo-file>.search-result>div>.body>li .fa-none {
-	color: white;
-}
-#repo-file>.search-result>div>.body>li .scope {
-	color: #666; 
-	font-size: 12px;
-}
-#repo-file>.search-result>div>.body>li.no-matching-result {
-	margin-top: 10px;
 }

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.file;
+package com.pmease.gitplex.web.component.blobsearch.result;
 
 import java.io.Serializable;
 import java.util.List;

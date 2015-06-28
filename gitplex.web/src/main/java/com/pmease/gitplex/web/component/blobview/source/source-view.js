@@ -90,6 +90,9 @@ gitplex.sourceview = {
 				        }
 					}
 				};
+				if (pmease.commons.isDevice())
+					options.cursorBlinkRate = -1;
+
 				cm = CodeMirror($code[0], options);
 				
 			    var modeInfo = CodeMirror.findModeByFileName(filePath);

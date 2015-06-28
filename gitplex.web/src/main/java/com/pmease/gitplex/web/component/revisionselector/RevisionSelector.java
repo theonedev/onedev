@@ -126,15 +126,11 @@ public abstract class RevisionSelector extends Panel {
 			private List<String> findRefs() {
 				List<String> refs = new ArrayList<>();
 				
-				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
-					if (branchesActive)
-						refs.addAll(jgitRepo.getRefDatabase().getRefs(Git.REFS_HEADS).keySet());
-					else
-						refs.addAll(jgitRepo.getRefDatabase().getRefs(Git.REFS_TAGS).keySet());
-					Collections.sort(refs);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				if (branchesActive)
+					refs.addAll(repoModel.getObject().getRefs(Git.REFS_HEADS).keySet());
+				else
+					refs.addAll(repoModel.getObject().getRefs(Git.REFS_TAGS).keySet());
+				Collections.sort(refs);
 				return refs;
 			}
 			

@@ -20,7 +20,10 @@
 .cm-s-eclipse span.cm-meta {
 	color: #888;
 }
-
+.cm-s-eclipse .CodeMirror-matchingbracket {
+	outline: none;
+	background: #69B7F7;
+}
 .CodeMirror-tokentooltip {
 	background-color: infobackground; 
 	border: 1px solid black;

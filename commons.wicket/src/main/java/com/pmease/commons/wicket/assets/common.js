@@ -850,7 +850,13 @@ pmease.commons = {
 				return undefined;
 		}
 	},
-	
+	isDevice: function() {
+		var ua = navigator.userAgent.toLowerCase();
+		return ua.indexOf("android") != -1 
+				|| ua.indexOf("iphone") != -1 
+				|| ua.indexOf("ipad") != -1 
+				|| ua.indexOf("windows phone") != -1; 
+	}
 };
 
 $(function() {

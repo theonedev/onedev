@@ -1,4 +1,4 @@
-gitplex.instantsearch = {
+gitplex.blobInstantSearch = {
 	init: function(inputId, dropdownId, callback) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
