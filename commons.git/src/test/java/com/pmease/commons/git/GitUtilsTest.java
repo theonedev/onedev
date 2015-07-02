@@ -84,13 +84,15 @@ public class GitUtilsTest extends AbstractGitTest {
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
 			
-			try {
-				GitUtils.commitFile(repo, "refs/heads/master", 
-						oldCommitId, oldCommitId, person, 
-						"test delete", "/server/src/com/example/a//c.java", null);
-				assertTrue("An ObjectNotFoundException should be thrown", false);
-			} catch(ObjectNotFoundException e) {
-				
+			ObjectId newCommitId = GitUtils.commitFile(repo, refName, oldCommitId, oldCommitId, 
+					person, "test delete", "/server/src/com/example/c//c.java", null);
+			
+			try (RevWalk revWalk = new RevWalk(repo)) {
+				RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
+				assertNotNull(TreeWalk.forPath(repo, "server/src/com/example/a/a.java", revTree));
+				assertNotNull(TreeWalk.forPath(repo, "server/src/com/example/b/b.java", revTree));
+				assertNotNull(TreeWalk.forPath(repo, "client/a.java", revTree));
+				assertNotNull(TreeWalk.forPath(repo, "client/b.java", revTree));
 			}
 		}
 	}

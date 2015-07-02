@@ -203,9 +203,7 @@ public class GitUtils {
 					appended = true;
 				}
 			}
-			if (!found) {
-				if (content == null)
-					throw new ObjectNotFoundException("Unable to find blob: " + path);
+			if (!found && content != null) {
 				List<String> splitted = Splitter.on('/').splitToList(path);
 				
 				ObjectId childId = null;
