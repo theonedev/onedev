@@ -8,7 +8,7 @@ public class SymbolLinkRenderer implements BlobRenderer {
 
 	@Override
 	public BlobViewPanel render(String panelId, BlobViewContext context) {
-		if (context.getBlobIdent().isSymbolLink())
+		if (context.getState().file.isSymbolLink())
 			return new SymbolLinkPanel(panelId, context);
 		else
 			return null;

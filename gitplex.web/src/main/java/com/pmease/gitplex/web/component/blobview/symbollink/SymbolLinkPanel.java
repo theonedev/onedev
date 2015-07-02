@@ -34,7 +34,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		super.onInitialize();
 
 		String targetPath = FilenameUtils.normalize(
-				Paths.get(context.getBlobIdent().path).resolveSibling(
+				Paths.get(context.getState().file.path).resolveSibling(
 						context.getBlob().getText().getContent()).toString(), true);
 		if (targetPath != null && (targetPath.startsWith("/") || new File(targetPath).isAbsolute())) 
 			targetPath = null;
@@ -42,7 +42,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		if (targetPath != null) {
 			try (	FileRepository jgitRepo = context.getRepository().openAsJGitRepo(); 
 					RevWalk revWalk = new RevWalk(jgitRepo)) {
-				ObjectId commitId = context.getRepository().getObjectId(context.getBlobIdent().revision, true);
+				ObjectId commitId = context.getRepository().getObjectId(context.getState().file.revision, true);
 				RevTree revTree = revWalk.parseCommit(commitId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, targetPath, revTree);
 				if (treeWalk == null)
@@ -64,7 +64,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			link.setEnabled(false);
 		} else {
 			link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
-					RepoFilePage.paramsOf(context.getRepository(), context.getBlobIdent().revision, targetPath));
+					RepoFilePage.paramsOf(context.getRepository(), context.getState().file.revision, targetPath));
 		} 
 		link.add(new Label("label", context.getBlob().getText().getContent()));
 		add(link);

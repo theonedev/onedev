@@ -72,6 +72,8 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private static final String PARAM_BLAME = "blame";
 	
+	private static final String PARAM_ACTION = "action";
+	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
@@ -82,12 +84,8 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private static final String SEARCH_RESULD_ID = "searchResult";
 
-	private BlobIdent file = new BlobIdent();
-	
-	private TokenPosition tokenPos;
-	
-	private boolean blame;
-	
+	private HistoryState state = new HistoryState();
+
 	private Component revisionSelector;
 	
 	private Component fileNavigator;
@@ -107,32 +105,36 @@ public class RepoFilePage extends RepositoryPage {
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 		
 		trait.repoId = getRepository().getId();
-		file.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
-		if (file.revision == null)
-			file.revision = getRepository().getDefaultBranch().getName();
-		trait.revision = file.revision;
+		state.file.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+		if (state.file.revision == null)
+			state.file.revision = getRepository().getDefaultBranch().getName();
+		trait.revision = state.file.revision;
 		
-		file.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
-		if (file.path != null) {
+		state.file.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
+		if (state.file.path != null) {
 			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo)) {
 				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
+				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, state.file.path, revTree);
 				if (treeWalk == null) {
-					throw new ObjectNotFoundException("Unable to find blob path '" + file.path
-							+ "' in revision '" + file.revision + "'");
+					throw new ObjectNotFoundException("Unable to find blob path '" + state.file.path
+							+ "' in revision '" + state.file.revision + "'");
 				}
-				file.mode = treeWalk.getRawMode(0);
+				state.file.mode = treeWalk.getRawMode(0);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
 		
-		blame = params.get(PARAM_BLAME).toBoolean(false);
+		state.blame = params.get(PARAM_BLAME).toBoolean(false);
+		
+		String actionName = params.get(PARAM_ACTION).toString();
+		if (actionName != null) {
+		}
 	}
 	
 	private ObjectId getCommitId() {
-		return getRepository().getObjectId(file.revision, true);
+		return getRepository().getObjectId(state.file.revision, true);
 	}
 
 	@Override
@@ -147,16 +149,16 @@ public class RepoFilePage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				return file.revision;
+				return state.file.revision;
 			}
 			
 		}) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				file = new BlobIdent(file.revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
-				tokenPos = hit.getTokenPos();
-				blame = false;
+				state.file = new BlobIdent(state.file.revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
+				state.tokenPos = hit.getTokenPos();
+				state.blame = false;
 				
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -179,7 +181,7 @@ public class RepoFilePage extends RepositoryPage {
 
 					@Override
 					public String getObject() {
-						return file.revision;
+						return state.file.revision;
 					}
 					
 				}) {
@@ -197,7 +199,7 @@ public class RepoFilePage extends RepositoryPage {
 
 					@Override
 					protected BlobIdent getCurrentBlob() {
-						return file;
+						return state.file;
 					}
 					
 				};
@@ -221,12 +223,12 @@ public class RepoFilePage extends RepositoryPage {
 				super.onConfigure();
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				if (!indexManager.isIndexed(getRepository(), file.revision)) {
+				if (!indexManager.isIndexed(getRepository(), state.file.revision)) {
 					GitPlex.getInstance(UnitOfWork.class).asyncCall(new Runnable() {
 
 						@Override
 						public void run() {
-							GitPlex.getInstance(IndexManager.class).index(getRepository(), file.revision);
+							GitPlex.getInstance(IndexManager.class).index(getRepository(), state.file.revision);
 						}
 						
 					});
@@ -258,25 +260,25 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void newRevisionSelector(AjaxRequestTarget target) {
-		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, file.revision) {
+		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, state.file.revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				file.revision = revision;
+				state.file.revision = revision;
 				trait.revision = revision;
-				if (file.path != null) {
+				if (state.file.path != null) {
 					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 							RevWalk revWalk = new RevWalk(jgitRepo)) {
 						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, state.file.path, revTree);
 						if (treeWalk == null)
-							file.path = null;
+							state.file.path = null;
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
-				tokenPos = null;
-				blame = false;
+				state.tokenPos = null;
+				state.blame = false;
 
 				target.add(revisionIndexing);
 				newRevisionSelector(target);
@@ -297,13 +299,13 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void newFileNavigator(AjaxRequestTarget target) {
-		fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, file) {
+		fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, state.file) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
-				RepoFilePage.this.file = file;
-				tokenPos = null;
-				blame = false;
+				state.file = file;
+				state.tokenPos = null;
+				state.blame = false;
 
 				newFileNavigator(target);
 				newFileViewer(target);
@@ -321,14 +323,14 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void newFileViewer(AjaxRequestTarget target) {
-		if (file.path == null || file.isTree()) {
-			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, file) {
+		if (state.file.path == null || state.file.isTree()) {
+			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, state.file) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
-					RepoFilePage.this.file = file;
-					tokenPos = null;
-					blame = false;
+					state.file = file;
+					state.tokenPos = null;
+					state.blame = false;
 					
 					newFileViewer(target);
 					newFileNavigator(target);
@@ -338,7 +340,7 @@ public class RepoFilePage extends RepositoryPage {
 				
 			};
 		} else {
-			BlobViewContext context = new BlobViewContext(new BlobIdent(file)) {
+			BlobViewContext context = new BlobViewContext(new HistoryState(state)) {
 
 				@Override
 				public Repository getRepository() {
@@ -347,10 +349,9 @@ public class RepoFilePage extends RepositoryPage {
 
 				@Override
 				public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
-					RepoFilePage.this.file = new BlobIdent(file.revision, blobIdent.path, 
-							FileMode.REGULAR_FILE.getBits()); 
-					RepoFilePage.this.tokenPos = tokenPos;
-					blame = false;
+					state.file = blobIdent; 
+					state.tokenPos = tokenPos;
+					state.blame = false;
 					
 					newFileNavigator(target);
 					newFileViewer(target);
@@ -365,13 +366,11 @@ public class RepoFilePage extends RepositoryPage {
 
 				@Override
 				public void onBlameChange(AjaxRequestTarget target) {
-					blame = !blame;
+					state.blame = getState().blame;
 					
 					if (fileViewer instanceof SourceViewPanel) {
 						SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-						BlobViewContext context = sourceViewer.getContext();
-						context.setBlame(blame);
-						if (blame || tokenPos != null) {
+						if (state.blame || state.tokenPos != null) {
 							sourceViewer.onBlameChange(target);
 						} else {
 							BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
@@ -390,10 +389,8 @@ public class RepoFilePage extends RepositoryPage {
 
 					pushState(target);
 				}
-				
+
 			};
-			context.setTokenPosition(tokenPos);
-			context.setBlame(blame);
 			
 			fileViewer = context.render(FILE_VIEWER_ID);
 		}
@@ -408,7 +405,7 @@ public class RepoFilePage extends RepositoryPage {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				return new LastCommitPanel(markupId, repoModel, file);
+				return new LastCommitPanel(markupId, repoModel, state.file);
 			}
 		};
 		
@@ -425,12 +422,8 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), file.revision, file.path, blame);
+		PageParameters params = paramsOf(getRepository(), state);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
-		HistoryData state = new HistoryData();
-		state.file = file;
-		state.tokenPos = tokenPos;
-		state.blame = blame;
 		pushState(target, url.toString(), state);
 	}
 
@@ -447,27 +440,26 @@ public class RepoFilePage extends RepositoryPage {
 				new CssResourceReference(RepoFilePage.class, "repo-file.css")));
 	}
 
-	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
-		return paramsOf(repository, revision, path, false);
-	}
-	
-	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path, boolean blame) {
-		PageParameters params = paramsOf(repository);
-		if (revision != null)
-			params.set(PARAM_REVISION, revision);
-		if (path != null)
-			params.set(PARAM_PATH, path);
-		if (blame)
-			params.set(PARAM_BLAME, blame);
-		return params;
-	}
-	
 	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
-		return paramsOf(repository, blobIdent, false);
+		return paramsOf(repository, blobIdent.revision, blobIdent.path);
 	}
 	
-	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent, boolean blame) {
-		return paramsOf(repository, blobIdent.revision, blobIdent.path, blame);
+	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
+		HistoryState state = new HistoryState();
+		state.file.revision = revision;
+		state.file.path = path;
+		return paramsOf(repository, state);
+	}
+	
+	public static PageParameters paramsOf(Repository repository, HistoryState state) {
+		PageParameters params = paramsOf(repository);
+		if (state.file.revision != null)
+			params.set(PARAM_REVISION, state.file.revision);
+		if (state.file.path != null)
+			params.set(PARAM_PATH, state.file.path);
+		if (state.blame)
+			params.set(PARAM_BLAME, state.blame);
+		return params;
 	}
 	
 	private void renderSearchResult(AjaxRequestTarget target, List<QueryHit> hits) {
@@ -486,17 +478,17 @@ public class RepoFilePage extends RepositoryPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				tokenPos = hit.getTokenPos();
-				if (hit.getBlobPath().equals(file.path) && fileViewer instanceof SourceViewPanel) {
+				state.tokenPos = hit.getTokenPos();
+				if (hit.getBlobPath().equals(state.file.path) && fileViewer instanceof SourceViewPanel) {
 					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
 					BlobViewContext context = sourceViewer.getContext();
-					context.setTokenPosition(tokenPos);
-					if (tokenPos != null || blame) {
-						sourceViewer.highlightToken(target, tokenPos);
+					context.getState().tokenPos = state.tokenPos;
+					if (state.tokenPos != null || state.blame) {
+						sourceViewer.highlightToken(target, state.tokenPos);
 					} else {
 						BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
 						if (blobViewer instanceof SourceViewPanel) {
-							sourceViewer.highlightToken(target, tokenPos);
+							sourceViewer.highlightToken(target, state.tokenPos);
 						} else {
 							fileViewer.replaceWith(blobViewer);
 							fileViewer = blobViewer;
@@ -505,9 +497,9 @@ public class RepoFilePage extends RepositoryPage {
 						}
 					}
 				} else {
-					blame = false;
-					file.path = hit.getBlobPath();
-					file.mode = FileMode.REGULAR_FILE.getBits();
+					state.blame = false;
+					state.file.path = hit.getBlobPath();
+					state.file.mode = FileMode.REGULAR_FILE.getBits();
 					newFileNavigator(target);
 					newFileViewer(target);
 				}
@@ -527,13 +519,10 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		HistoryData historyData = (HistoryData) data;
-		file = historyData.file;
-		tokenPos = historyData.tokenPos;
-		blame = historyData.blame;
+	protected void onPopState(AjaxRequestTarget target, Serializable stateData) {
+		state = (HistoryState) stateData;
 		
-		trait.revision = file.revision;
+		trait.revision = state.file.revision;
 
 		target.add(revisionIndexing);
 		newRevisionSelector(target);
@@ -555,15 +544,6 @@ public class RepoFilePage extends RepositoryPage {
 		    return Objects.equal(repoId, other.repoId) && Objects.equal(revision, other.revision);
 		}
 		
-	}
-	
-	private static class HistoryData implements Serializable {
-
-		BlobIdent file = new BlobIdent();
-		
-		TokenPosition tokenPos;
-		
-		boolean blame;
 	}
 	
 	public static class IndexedListener implements IndexListener {

@@ -23,7 +23,8 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.addcommit.AddCommitPanel;
+import com.pmease.gitplex.web.component.savechange.SaveChangePanel;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -37,12 +38,12 @@ public abstract class BlobViewPanel extends Panel {
 	public BlobViewPanel(String id, BlobViewContext context) {
 		super(id);
 		
-		Preconditions.checkArgument(context.getBlobIdent().revision != null 
-				&& context.getBlobIdent().path != null 
-				&& context.getBlobIdent().mode != null);
+		HistoryState state = context.getState();
+		Preconditions.checkArgument(state.file.revision != null 
+				&& state.file.path != null && state.file.mode != null);
 		
 		this.context = context;
-		commitId = context.getRepository().getObjectId(context.getBlobIdent().revision, true);
+		commitId = context.getRepository().getObjectId(state.file.revision, true);
 	}
 	
 	@Override
@@ -88,7 +89,7 @@ public abstract class BlobViewPanel extends Panel {
 		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getBlob().getSize())));
 
 		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 
-				BlobResource.paramsOf(context.getRepository(), context.getBlobIdent())));
+				BlobResource.paramsOf(context.getRepository(), context.getState().file)));
 		
 		add(new AjaxLink<Void>("blame") {
 
@@ -100,7 +101,7 @@ public abstract class BlobViewPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						if (context.isBlame())
+						if (context.getState().blame)
 							return " active";
 						else
 							return " ";
@@ -113,6 +114,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				context.getState().blame = !context.getState().blame;
 				context.onBlameChange(target);
 				
 				// this blob view panel might be replaced with another panel
@@ -146,7 +148,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
+				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getState().file.revision))
 					tag.put("title", "Must on a branch to change or propose change of this file");
 			}
 			
@@ -159,7 +161,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
+				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getState().file.revision))
 					tag.put("disabled", "disabled");
 			}
 			
@@ -175,7 +177,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
+				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getState().file.revision))
 					tag.put("disabled", "disabled");
 			}
 
@@ -191,11 +193,10 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 				};
-				AddCommitPanel addCommitPanel = new AddCommitPanel(
-						panelId, repoModel, context.getBlobIdent(), commitId, null);
-				addCommitPanel.setOutputMarkupId(true);
-				BlobViewPanel.this.replaceWith(addCommitPanel);
-				target.add(addCommitPanel);
+				SaveChangePanel saveChangePanel = new SaveChangePanel(panelId, 
+						repoModel, context.getState().file, commitId, null);
+				BlobViewPanel.this.replaceWith(saveChangePanel);
+				target.add(saveChangePanel);
 			}
 
 		});

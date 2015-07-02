@@ -8,7 +8,6 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
 	}
 	
 }

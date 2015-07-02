@@ -8,9 +8,9 @@ public class SourceRenderer implements BlobRenderer {
 
 	@Override
 	public BlobViewPanel render(String panelId, BlobViewContext context) {
-		if (context.getBlobIdent().isFile() 
+		if (context.getState().file.isFile() 
 				&& context.getBlob().getText() != null 
-				&& !context.getBlobIdent().path.endsWith(".md")) {
+				&& !context.getState().file.path.endsWith(".md")) {
 			return new SourceViewPanel(panelId, context);
 		} else {
 			return null;

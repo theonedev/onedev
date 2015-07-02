@@ -3,8 +3,6 @@ package com.pmease.gitplex.web.component.blobview;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.git.Blob;
@@ -13,57 +11,32 @@ import com.pmease.commons.lang.TokenPosition;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 
 public abstract class BlobViewContext implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	/*
-	 * Store blobIdent in view context so that we can compare it with 
-	 * selected file to avoid re-rendering source view if file is not 
-	 * changed 
-	 */
-	private final BlobIdent blobIdent;
+	private final HistoryState state;
 	
-	private TokenPosition tokenPosition;
-	
-	private boolean blame;
-	
-	public BlobViewContext(BlobIdent blobIdent) {
-		this.blobIdent = blobIdent;
+	public BlobViewContext(HistoryState state) {
+		this.state = state;
 	}
 	
 	public abstract Repository getRepository();
 	
-	@Nullable
-	public TokenPosition getTokenPosition() {
-		return tokenPosition;
-	}
-
-	public void setTokenPosition(@Nullable TokenPosition tokenPosition) {
-		this.tokenPosition = tokenPosition;
-	}
-
-	public boolean isBlame() {
-		return blame;
-	}
-
-	public void setBlame(boolean blame) {
-		this.blame = blame;
-	}
-
 	public abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos);
 	
 	public abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
 	public abstract void onBlameChange(AjaxRequestTarget target);
-
-	public BlobIdent getBlobIdent() {
-		return blobIdent;
+	
+	public HistoryState getState() {
+		return state;
 	}
 	
 	public Blob getBlob() {
-		return getRepository().getBlob(blobIdent);
+		return getRepository().getBlob(state.file);
 	}
 	
 	public BlobViewPanel render(String panelId) {

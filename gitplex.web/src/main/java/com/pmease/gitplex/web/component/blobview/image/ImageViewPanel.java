@@ -22,7 +22,7 @@ public class ImageViewPanel extends BlobViewPanel {
 		super.onInitialize();
 		
 		add(new Image("img", new BlobResourceReference(), 
-				BlobResource.paramsOf(context.getRepository(), context.getBlobIdent())));
+				BlobResource.paramsOf(context.getRepository(), context.getState().file)));
 	}
 
 	@Override

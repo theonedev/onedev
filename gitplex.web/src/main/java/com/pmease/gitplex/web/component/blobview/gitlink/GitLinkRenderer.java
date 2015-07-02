@@ -8,7 +8,7 @@ public class GitLinkRenderer implements BlobRenderer {
 
 	@Override
 	public BlobViewPanel render(String panelId, BlobViewContext context) {
-		if (context.getBlobIdent().isGitLink())
+		if (context.getState().file.isGitLink())
 			return new GitLinkPanel(panelId, context);
 		else
 			return null;

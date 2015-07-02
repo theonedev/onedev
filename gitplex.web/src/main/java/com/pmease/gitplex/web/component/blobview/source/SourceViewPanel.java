@@ -83,12 +83,12 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		Preconditions.checkArgument(context.getBlob().getText() != null);
 		
-		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getBlobIdent().path);
+		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getState().file.path);
 		if (extractor != null) {
 			try {
 				symbols.addAll(extractor.extract(context.getBlob().getText().getContent()));
 			} catch (ExtractException e) {
-				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
+				logger.debug("Error extracting symbols from blob: " + context.getState().file, e);
 			}
 		}
 	}
@@ -164,7 +164,7 @@ public class SourceViewPanel extends BlobViewPanel {
 								codeContainer.getMarkupId());
 						target.prependJavaScript(script);
 						BlobIdent blobIdent = new BlobIdent(
-								context.getBlobIdent().revision, 
+								context.getState().file.revision, 
 								hit.getBlobPath(), 
 								FileMode.REGULAR_FILE.getBits());
 						context.onSelect(target, blobIdent, hit.getTokenPos());
@@ -202,7 +202,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(context.getRepository(), 
-									context.getBlobIdent().revision, query);
+									context.getState().file.revision, query);
 							String script = String.format(
 									"$('#%s .CodeMirror')[0].CodeMirror.hideTokenHover();", 
 									codeContainer.getMarkupId());
@@ -235,11 +235,11 @@ public class SourceViewPanel extends BlobViewPanel {
 				try {
 					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(context.getRepository(), context.getBlobIdent().revision, query);
+					symbolHits = searchManager.search(context.getRepository(), context.getState().file.revision, query);
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
 						symbolHits.addAll(searchManager.search(context.getRepository(), 
-								context.getBlobIdent().revision, query));
+								context.getState().file.revision, query));
 					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
@@ -264,7 +264,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				
 				String highlightToken;
 				try {
-					highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPosition());
+					highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getState().tokenPos);
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
 				} 
@@ -272,7 +272,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s);", 
 						codeContainer.getMarkupId(), 
 						StringEscapeUtils.escapeEcmaScript(context.getBlob().getText().getContent()),
-						context.getBlobIdent().path, 
+						context.getState().file.path, 
 						highlightToken,
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")), 
@@ -292,12 +292,12 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 
 	private String getBlameCommits() {
-		if (context.isBlame()) {
+		if (context.getState().blame) {
 			List<BlameCommit> commits = new ArrayList<>();
 			
-			String commitHash = context.getRepository().getObjectId(context.getBlobIdent().revision, true).name();
+			String commitHash = context.getRepository().getObjectId(context.getState().file.revision, true).name();
 			
-			for (Blame blame: context.getRepository().git().blame(commitHash, context.getBlobIdent().path).values()) {
+			for (Blame blame: context.getRepository().git().blame(commitHash, context.getState().file.path).values()) {
 				BlameCommit commit = new BlameCommit();
 				commit.authorDate = DateUtils.formatDate(blame.getCommit().getAuthor().getWhen());
 				commit.authorName = StringEscapeUtils.escapeHtml4(blame.getCommit().getAuthor().getName());

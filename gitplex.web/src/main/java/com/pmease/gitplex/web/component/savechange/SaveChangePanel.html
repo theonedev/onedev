@@ -1,0 +1,20 @@
+<wicket:panel>
+	<div class="save-change autofit">
+		<div class="head">
+			Add New Commit
+		</div>
+		<div class="body">
+			<form wicket:id="form">			
+				<div class="form-group">
+					<input wicket:id="summaryCommitMessage" class="form-control"></input>
+				</div>
+				<div class="form-group">
+					<textarea wicket:id="detailCommitMessage" class="form-control" rows="10" placeholder="Optional extended description"></textarea>
+				</div>
+				<div class="actions">
+					<input wicket:id="save" type="submit" class="btn btn-primary" value="Commit"></input>
+				</div>
+			</form>
+		</div>
+	</div>
+</wicket:panel>

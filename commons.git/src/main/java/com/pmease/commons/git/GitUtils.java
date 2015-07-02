@@ -1,5 +1,6 @@
 package com.pmease.commons.git;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,8 +10,19 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.CommitBuilder;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectInserter;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TreeFormatter;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.SystemReader;
 
 import com.google.common.base.Joiner;
@@ -157,6 +169,141 @@ public class GitUtils {
 
 	public static @Nullable String normalizePath(@Nullable String path) {
 		return joinPath(splitPath(path));
+	}
+
+	private static ObjectId insertTree(RevTree revTree, TreeWalk treeWalk, ObjectInserter inserter, 
+			String path, byte[] content) {
+        try {
+	        TreeFormatter formatter = new TreeFormatter();
+	        boolean appended = false;
+    		boolean found = false;
+			while (treeWalk.next()) {
+				String name = treeWalk.getNameString();
+				if (name.equals(path)) {
+					if (content != null) {
+						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, content);
+						formatter.append(name, FileMode.REGULAR_FILE, blobId);
+						appended = true;
+					}
+					found = true;
+				} else if (path.startsWith(name + "/")) {
+					TreeWalk subtreeWalk = TreeWalk.forPath(treeWalk.getObjectReader(), treeWalk.getPathString(), revTree);
+					Preconditions.checkNotNull(subtreeWalk);
+					subtreeWalk.enterSubtree();
+					String subpath = path.substring(name.length()+1);
+					ObjectId subtreeId = insertTree(revTree, subtreeWalk, inserter, subpath, content);
+					if (subtreeId != null) { 
+						formatter.append(name, treeWalk.getFileMode(0), subtreeId);
+						appended = true;
+					}
+					if (subtreeId == null || !subtreeId.equals(treeWalk.getObjectId(0)))
+						found = true;
+				} else {
+					formatter.append(name, treeWalk.getFileMode(0), treeWalk.getObjectId(0));
+					appended = true;
+				}
+			}
+			if (!found) {
+				if (content == null)
+					throw new ObjectNotFoundException("Unable to find blob: " + path);
+				List<String> splitted = Splitter.on('/').splitToList(path);
+				
+				ObjectId childId = null;
+				FileMode childMode = null;
+				String childName = null;
+				
+				for (int i=splitted.size()-1; i>=0; i--) {
+					if (childId == null) {
+						childName = splitted.get(i);
+						childId = inserter.insert(Constants.OBJ_BLOB, content);
+						childMode = FileMode.REGULAR_FILE;
+					} else {
+						TreeFormatter childFormatter = new TreeFormatter();
+						childFormatter.append(childName, childMode, childId);
+						childName = splitted.get(i);
+						childId = inserter.insert(childFormatter);
+						childMode = FileMode.TREE;
+					}
+				}
+
+				Preconditions.checkState(childId!=null && childMode != null && childName != null);
+				formatter.append(childName, childMode, childId);
+				appended = true;
+			}
+			if (appended)
+				return inserter.insert(formatter);
+			else
+				return null;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Commit specified file into specified repository.
+	 * 
+	 * @param repo 
+	 * 			repository to make the new commit
+	 * @param refName
+	 * 			ref name to associate the new commit with
+	 * @param expectedOldCommitId
+	 * 			expected old commit id of above ref, use <tt>null</tt> to expect a non-existent ref
+	 * @param parentCommitId
+	 * 			parent commit id of the new commit
+	 * @param authorAndCommitter
+	 * 			author and committer person ident for the new commit
+	 * @param commitMessage
+	 * 			commit message for the new commit
+	 * @param path
+	 * 			path of the file
+	 * @param content
+	 * 			content of the file, use <tt>null</tt> to delete the file
+	 * @return 
+	 * 			id of new commit
+	 * @throws 
+	 * 			ObsoleteOldCommitException if expected old commit id of the ref does not equal to 
+	 * 			expectedOldCommitId, or if expectedOldCommitId is specified as <tt>null</tt> and 
+	 * 			ref exists  
+	 * 			 
+	 */
+	public static ObjectId commitFile(Repository repo, String refName, 
+			@Nullable ObjectId expectedOldCommitId, ObjectId parentCommitId, 
+			PersonIdent authorAndCommitter, String commitMessage, 
+			String path, byte[] content) {
+		try (	RevWalk revWalk = new RevWalk(repo); 
+				TreeWalk treeWalk = new TreeWalk(repo);
+				ObjectInserter inserter = repo.newObjectInserter();) {
+
+			path = normalizePath(path);
+			
+			RevTree revTree = revWalk.parseCommit(parentCommitId).getTree();
+			treeWalk.addTree(revTree);
+	        CommitBuilder commit = new CommitBuilder();
+	        commit.setTreeId(insertTree(revTree, treeWalk, inserter, path, content));
+	        commit.setAuthor(authorAndCommitter);
+	        commit.setCommitter(authorAndCommitter);
+	        commit.setParentId(parentCommitId);
+	        commit.setMessage(commitMessage);
+	        
+	        ObjectId commitId = inserter.insert(commit);
+	        inserter.flush();
+	        
+	        RefUpdate ru = repo.updateRef(refName);
+	        ru.setRefLogIdent(authorAndCommitter);
+	        ru.setNewObjectId(commitId);
+	        ru.setExpectedOldObjectId(expectedOldCommitId);
+	        RefUpdate.Result result = ru.update();
+	        if (result == RefUpdate.Result.LOCK_FAILURE 
+	        		&& !Objects.equal(expectedOldCommitId, ru.getOldObjectId())) {
+	        	throw new ObsoleteOldCommitException(ru.getOldObjectId());
+	        } else if (result != RefUpdate.Result.FAST_FORWARD) {
+	        	throw new RefUpdateException(result);
+	        } else {
+	        	return commitId;
+	        }
+		} catch (RevisionSyntaxException | IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }
