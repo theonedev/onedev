@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -19,18 +20,25 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectInserter;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.ObsoleteOldCommitException;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
 public class SaveChangePanel extends Panel {
 
 	private IModel<Repository> repoModel;
+	
+	private BlobIdent blobIdent;
 	
 	private ObjectId parentCommitId;
 	
@@ -45,6 +53,7 @@ public class SaveChangePanel extends Panel {
 		super(id);
 	
 		this.repoModel = repoModel;
+		this.blobIdent = blobIdent;
 		this.parentCommitId = parentCommitId;
 		
 		if (content != null) {
@@ -74,9 +83,17 @@ public class SaveChangePanel extends Panel {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();
-						ObjectInserter inserter = jgitRepo.newObjectInserter();) {
-
+				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
+					String commitMessage = summaryCommitMessage;
+					if (StringUtils.isBlank(commitMessage))
+						commitMessage = defaultCommitMessage;
+					if (StringUtils.isNotBlank(detailCommitMessage))
+						commitMessage += "\n\n" + detailCommitMessage;
+					User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
+					GitUtils.commitFile(jgitRepo, blobIdent.revision, parentCommitId, parentCommitId, 
+							user.asPerson(), commitMessage, blobIdent.path, null);
+				} catch (ObsoleteOldCommitException e) {
+					
 				}
 			}
 			
