@@ -22,7 +22,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -38,14 +37,13 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 
 @SuppressWarnings("serial")
-public class SaveChangePanel extends Panel {
+public abstract class SaveChangePanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final BlobViewContext context;
+	private final BlobIdent blobIdent;
 	
 	private ObjectId prevCommitId;
 	
@@ -59,16 +57,15 @@ public class SaveChangePanel extends Panel {
 	
 	private byte[] content;
 	
-	public SaveChangePanel(String id, IModel<Repository> repoModel, BlobViewContext context, 
+	public SaveChangePanel(String id, IModel<Repository> repoModel, BlobIdent blobIdent, 
 			ObjectId prevCommitId, @Nullable byte[] content) {
 		super(id);
 	
 		this.repoModel = repoModel;
-		this.context = context;
+		this.blobIdent = blobIdent;
 		this.prevCommitId = prevCommitId;
 		this.content = content;
 		
-		BlobIdent blobIdent = context.getState().file;
 		if (content != null) {
 			try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo)) {
@@ -163,7 +160,6 @@ public class SaveChangePanel extends Panel {
 						commitMessage += "\n\n" + detailCommitMessage;
 					User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
 
-					BlobIdent blobIdent = context.getState().file;
 					String refName = blobIdent.revision;
 					if (!refName.startsWith("refs/"))
 						refName = Git.REFS_HEADS + refName;
@@ -196,25 +192,8 @@ public class SaveChangePanel extends Panel {
 							}
 						}
 					}
-					if (newCommitId != null) {
-						repoModel.getObject().cacheObjectId(blobIdent.revision, newCommitId);
-						try (RevWalk revWalk = new RevWalk(jgitRepo)) {
-							RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
-							String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
-							while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
-								if (parentPath.contains("/")) {
-									parentPath = StringUtils.substringBeforeLast(parentPath, "/");
-								} else {
-									parentPath = null;
-									break;
-								}
-							}
-							blobIdent = new BlobIdent(blobIdent.revision, parentPath, FileMode.TREE.getBits());
-							context.onSelect(target, blobIdent, null);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
+					if (newCommitId != null)
+						onCommitted(target, newCommitId);
 				}
 			}
 			
@@ -224,7 +203,7 @@ public class SaveChangePanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				context.onSelect(target, context.getState().file, null);
+				onCancel(target);
 			}
 			
 		});
@@ -242,6 +221,10 @@ public class SaveChangePanel extends Panel {
 				new CssResourceReference(SaveChangePanel.class, "save-change.css")));
 		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.saveChange.init('%s');", getMarkupId())));
 	}
+	
+	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);
+	
+	protected abstract void onCancel(AjaxRequestTarget target);
 	
 	@Override
 	protected void onDetach() {

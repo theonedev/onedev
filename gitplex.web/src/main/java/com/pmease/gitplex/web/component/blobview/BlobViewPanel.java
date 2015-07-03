@@ -1,6 +1,9 @@
 package com.pmease.gitplex.web.component.blobview;
 
+import java.io.IOException;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -17,9 +20,15 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
@@ -194,7 +203,41 @@ public abstract class BlobViewPanel extends Panel {
 				ObjectId commitId = context.getRepository().getObjectId(
 						context.getState().file.revision, true);
 				
-				SaveChangePanel saveChangePanel = new SaveChangePanel(panelId, repoModel, context, commitId, null);
+				final BlobIdent blobIdent = context.getState().file;
+				SaveChangePanel saveChangePanel = new SaveChangePanel(panelId, repoModel, blobIdent, commitId, null) {
+
+					@Override
+					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+						Repository repo = context.getRepository();
+						repo.cacheObjectId(blobIdent.revision, newCommitId);
+						try (	FileRepository jgitRepo = repo.openAsJGitRepo();
+								RevWalk revWalk = new RevWalk(jgitRepo)) {
+							RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
+							String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
+							while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
+								if (parentPath.contains("/")) {
+									parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+								} else {
+									parentPath = null;
+									break;
+								}
+							}
+							BlobIdent parentBlobIdent = new BlobIdent(blobIdent.revision, parentPath, FileMode.TREE.getBits());
+							context.onSelect(target, parentBlobIdent, null);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						BlobViewPanel blobViewPanel = context.render(getId());
+						replaceWith(blobViewPanel);
+						target.add(blobViewPanel);
+						target.appendJavaScript("$(window).resize();");
+					}
+					
+				};
 				BlobViewPanel.this.replaceWith(saveChangePanel);
 				target.add(saveChangePanel);
 			}
