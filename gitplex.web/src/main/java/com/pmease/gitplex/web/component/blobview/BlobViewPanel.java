@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.blobview;
 
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -17,9 +19,12 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
@@ -33,8 +38,6 @@ public abstract class BlobViewPanel extends Panel {
 
 	protected final BlobViewContext context;
 	
-	private final ObjectId commitId;
-	
 	public BlobViewPanel(String id, BlobViewContext context) {
 		super(id);
 		
@@ -43,7 +46,6 @@ public abstract class BlobViewPanel extends Panel {
 				&& state.file.path != null && state.file.mode != null);
 		
 		this.context = context;
-		commitId = context.getRepository().getObjectId(state.file.revision, true);
 	}
 	
 	@Override
@@ -193,8 +195,23 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 				};
+				
+				ObjectId commitId = context.getRepository().getObjectId(
+						context.getState().file.revision, true);
+				
 				SaveChangePanel saveChangePanel = new SaveChangePanel(panelId, 
-						repoModel, context.getState().file, commitId, null);
+						repoModel, context.getState().file, commitId, null) {
+
+					@Override
+					protected void onSaved(AjaxRequestTarget target) {
+						String path = context.getState().file.path;
+						try (	FileRepository jgitRepo = context.getRepository().openAsJGitRepo();
+								RevWalk revWalk = new RevWalk(jgitRepo);) {
+							
+						}
+					}
+					
+				};
 				BlobViewPanel.this.replaceWith(saveChangePanel);
 				target.add(saveChangePanel);
 			}

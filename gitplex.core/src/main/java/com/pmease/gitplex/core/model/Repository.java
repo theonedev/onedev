@@ -501,6 +501,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return optional.orNull();
 	}
 	
+	public void cacheObjectId(String revision, ObjectId objectId) {
+		objectIdCache.put(revision, Optional.of(objectId));
+	}
+	
 	public List<Change> getChanges(String fromCommit, String toCommit) {
 		CommitRange range = new CommitRange(fromCommit, toCommit);
 		List<Change> changes = changesCache.get(range);

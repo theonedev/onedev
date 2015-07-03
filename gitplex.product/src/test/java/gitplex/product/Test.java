@@ -15,14 +15,15 @@ public class Test {
 
 	@org.junit.Test
 	public void test() throws IOException, RevisionSyntaxException, GitAPIException {
-		try (	Repository repo = new FileRepository(new File("w:\\android\\.git"));
+		try (	Repository repo = new FileRepository(new File("w:\\temp\\repo\\.git"));
 				RevWalk revWalk = new RevWalk(repo)) {
-			RevTree revTree = revWalk.parseCommit(repo.resolve("master")).getTree();
+			RevTree prevTree = revWalk.parseCommit(repo.resolve("master~1")).getTree();
+			RevTree currentTree = revWalk.parseCommit(repo.resolve("master")).getTree();
 			
-			TreeWalk treeWalk = TreeWalk.forPath(repo, "tools", revTree);
-			
-			String path = "a";
-			System.out.println(treeWalk.isPathPrefix(path.getBytes(), path.length()));
+			TreeWalk treeWalk = TreeWalk.forPath(repo, "dir/file", prevTree.getId(), currentTree.getId());
+
+			System.out.println(treeWalk.getObjectId(0));
+			System.out.println(treeWalk.getObjectId(1));
 		}
 		
 	}
