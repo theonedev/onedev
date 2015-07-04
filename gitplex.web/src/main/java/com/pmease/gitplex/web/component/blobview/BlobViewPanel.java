@@ -32,7 +32,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.savechange.SaveChangePanel;
+import com.pmease.gitplex.web.component.editsave.EditSavePanel;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
@@ -204,7 +204,7 @@ public abstract class BlobViewPanel extends Panel {
 						context.getState().file.revision, true);
 				
 				final BlobIdent blobIdent = context.getState().file;
-				SaveChangePanel saveChangePanel = new SaveChangePanel(panelId, repoModel, blobIdent, commitId, null) {
+				EditSavePanel saveChangePanel = new EditSavePanel(panelId, repoModel, blobIdent, commitId, null) {
 
 					@Override
 					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {

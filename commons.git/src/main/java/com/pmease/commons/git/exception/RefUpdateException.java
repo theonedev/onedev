@@ -1,4 +1,4 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.exception;
 
 import org.eclipse.jgit.lib.RefUpdate;
 

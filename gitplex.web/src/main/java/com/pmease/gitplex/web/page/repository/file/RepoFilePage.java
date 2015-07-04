@@ -36,7 +36,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Objects;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.ObjectNotFoundException;
+import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.lang.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
@@ -117,7 +117,7 @@ public class RepoFilePage extends RepositoryPage {
 				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, state.file.path, revTree);
 				if (treeWalk == null) {
-					throw new ObjectNotFoundException("Unable to find blob path '" + state.file.path
+					throw new ObjectNotExistException("Unable to find blob path '" + state.file.path
 							+ "' in revision '" + state.file.revision + "'");
 				}
 				state.file.mode = treeWalk.getRawMode(0);

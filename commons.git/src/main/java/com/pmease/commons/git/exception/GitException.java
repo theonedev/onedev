@@ -1,4 +1,4 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.exception;
 
 public class GitException extends RuntimeException {
 

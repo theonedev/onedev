@@ -57,8 +57,8 @@ import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.ObjectNotFoundException;
 import com.pmease.commons.git.Submodule;
+import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
@@ -387,7 +387,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * @return
 	 * 			blob of specified blob ident
 	 * @throws
-	 * 			ObjectNotFoundException if blob of specified ident can not be found in repository 
+	 * 			ObjectNotExistException if blob of specified ident can not be found in repository 
 	 * 			
 	 */
 	public Blob getBlob(BlobIdent ident) {
@@ -404,7 +404,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 					if (ident.isGitLink()) {
 						String url = getSubmodules(ident.revision).get(ident.path);
 						if (url == null)
-							throw new ObjectNotFoundException("Unable to find submodule '" + ident.path + "' in .gitmodules");
+							throw new ObjectNotExistException("Unable to find submodule '" + ident.path + "' in .gitmodules");
 						String hash = treeWalk.getObjectId(0).name();
 						blob = new Blob(ident, new Submodule(url, hash).toString().getBytes());
 					} else {
@@ -422,7 +422,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 					}
 					blobCache.put(ident, blob);
 				} else {
-					throw new ObjectNotFoundException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
+					throw new ObjectNotExistException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -440,7 +440,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 				return objectLoader.openStream();
 			} else {
-				throw new ObjectNotFoundException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
+				throw new ObjectNotExistException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -497,7 +497,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			}
 		}
 		if (mustExist && !optional.isPresent())
-			throw new ObjectNotFoundException("Unable to find revision '" + revision + "'");
+			throw new ObjectNotExistException("Unable to find revision '" + revision + "'");
 		return optional.orNull();
 	}
 	

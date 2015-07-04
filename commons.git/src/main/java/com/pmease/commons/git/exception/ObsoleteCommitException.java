@@ -1,16 +1,16 @@
-package com.pmease.commons.git;
+package com.pmease.commons.git.exception;
 
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-public class ObsoleteOldCommitException extends GitException {
+public class ObsoleteCommitException extends GitException {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final ObjectId oldCommitId;
 	
-	public ObsoleteOldCommitException(@Nullable ObjectId oldCommitId) {
+	public ObsoleteCommitException(@Nullable ObjectId oldCommitId) {
 		this.oldCommitId = oldCommitId;
 	}
 
