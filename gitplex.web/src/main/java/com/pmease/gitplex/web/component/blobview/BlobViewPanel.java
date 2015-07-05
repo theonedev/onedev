@@ -18,7 +18,6 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
@@ -30,10 +29,10 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.FileEdit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.editsave.CancelListener;
 import com.pmease.gitplex.web.component.editsave.EditSavePanel;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.resource.BlobResource;
@@ -207,8 +206,29 @@ public abstract class BlobViewPanel extends Panel {
 				
 				final BlobIdent file = context.getState().file;
 				String refName = Git.REFS_HEADS + file.revision;
+				String parentPath;
+				String oldName;
+				if (file.path.contains("/")) {
+					parentPath = StringUtils.substringBeforeLast(file.path, "/");
+					oldName = StringUtils.substringAfterLast(file.path, "/");
+				} else {
+					parentPath = null;
+					oldName = file.path;
+				}
+				
+				CancelListener cancelListener = new CancelListener() {
+
+					@Override
+					public void onCancel(AjaxRequestTarget target) {
+						BlobViewPanel blobViewPanel = context.render(getId());
+						replaceWith(blobViewPanel);
+						target.add(blobViewPanel);
+						target.appendJavaScript("$(window).resize();");
+					}
+					
+				};
 				EditSavePanel saveChangePanel = new EditSavePanel(panelId, repoModel, refName, 
-						file.path, Model.of((FileEdit.File)null), commitId) {
+						parentPath, oldName, null, commitId, cancelListener) {
 
 					@Override
 					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -231,14 +251,6 @@ public abstract class BlobViewPanel extends Panel {
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						BlobViewPanel blobViewPanel = context.render(getId());
-						replaceWith(blobViewPanel);
-						target.add(blobViewPanel);
-						target.appendJavaScript("$(window).resize();");
 					}
 					
 				};

@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.component.editsave;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -43,40 +45,55 @@ public abstract class EditSavePanel extends Panel {
 	
 	private final String refName;
 	
-	private final String oldPath;
+	private final String parentPath;
 	
-	private final IModel<FileEdit.File> newFileModel;
+	private final String oldName;
+	
+	private final IModel<byte[]> contentModel;
+	
+	private final CancelListener cancelListener;
 	
 	private ObjectId prevCommitId;
 	
 	private ObjectId currentCommitId;
+	
+	private String newName;
 	
 	private String summaryCommitMessage;
 	
 	private String detailCommitMessage;
 	
 	public EditSavePanel(String id, IModel<Repository> repoModel, String refName, 
-			String oldPath, IModel<FileEdit.File> newFileModel, ObjectId prevCommitId) {
+			@Nullable String parentPath, @Nullable String oldName, 
+			@Nullable IModel<byte[]> contentModel, ObjectId prevCommitId, 
+			@Nullable CancelListener cancelListener) {
 		super(id);
 	
 		this.repoModel = repoModel;
 		this.refName = refName;
-		this.oldPath = oldPath;
-		this.newFileModel = newFileModel;
+		this.parentPath = parentPath!=null?parentPath:"";
+		this.oldName = oldName;
+		this.contentModel = contentModel;
+		this.cancelListener = cancelListener;
 		this.prevCommitId = prevCommitId;
+		
+		newName = oldName;
 	}
 
 	private String getDefaultCommitMessage() {
-		FileEdit.File newFile = newFileModel.getObject();
-		if (newFile != null) {
-			if (newFile.getPath().equals(oldPath))
-				return "Edit " + oldPath;
-			else if (oldPath != null)
-				return "Rename " + oldPath;
-			else
-				return "Add " + newFile.getPath();
+		if (contentModel != null) {
+			if (oldName != null) {
+				if (oldName.equals(newName))
+					return "Edit " + oldName;
+				else
+					return "Rename " + oldName;
+			} else if (newName != null) {
+				return "Add " + newName;
+			} else {
+				return "Add new file";
+			}
 		} else {
-			return "Delete " + oldPath;
+			return "Delete " + oldName;
 		}
 	}
 	
@@ -162,7 +179,23 @@ public abstract class EditSavePanel extends Panel {
 						commitMessage += "\n\n" + detailCommitMessage;
 					User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
 
-					FileEdit edit = new FileEdit(oldPath, newFileModel.getObject());
+					String oldPath;
+					if (oldName != null)
+						oldPath = parentPath + "/" + oldName;
+					else
+						oldPath = null;
+					
+					String newPath;
+					byte[] content;
+					if (contentModel != null) {
+						newPath = parentPath + "/" + newName;
+						content = contentModel.getObject();
+					} else {
+						newPath = null;
+						content = null;
+					}
+
+					FileEdit edit = new FileEdit(oldPath, newPath, content);
 					ObjectId newCommitId = null;
 					while(newCommitId == null) {
 						try {
@@ -184,8 +217,8 @@ public abstract class EditSavePanel extends Panel {
 										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
 												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
 											if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-												if (edit.getNewFile() != null) {
-													edit = new FileEdit(null, edit.getNewFile());
+												if (edit.getNewPath() != null) {
+													edit = new FileEdit(null, edit.getNewPath(), edit.getContent());
 													hasChangesContainer.setVisibilityAllowed(true);
 													target.add(hasChangesContainer);
 													break;
@@ -201,8 +234,8 @@ public abstract class EditSavePanel extends Panel {
 										}
 									}
 								}
-								if (edit.getNewFile() != null && !edit.getNewFile().getPath().equals(edit.getOldPath())) { 
-									TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getNewFile().getPath(), 
+								if (edit.getNewPath() != null && !edit.getNewPath().equals(edit.getOldPath())) { 
+									TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getNewPath(), 
 											prevCommit.getTree().getId(), currentCommit.getTree().getId());
 									if (treeWalk != null) {
 										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
@@ -235,8 +268,14 @@ public abstract class EditSavePanel extends Panel {
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(cancelListener != null);
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onCancel(target);
+				cancelListener.onCancel(target);
 			}
 			
 		});
@@ -257,12 +296,11 @@ public abstract class EditSavePanel extends Panel {
 	
 	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);
 	
-	protected abstract void onCancel(AjaxRequestTarget target);
-	
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		newFileModel.detach();
+		if (contentModel != null)
+			contentModel.detach();	
 		
 		super.onDetach();
 	}

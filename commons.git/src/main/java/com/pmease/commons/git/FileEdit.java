@@ -36,22 +36,29 @@ public class FileEdit implements Serializable {
 
 	private final String oldPath;
 	
-	private final File newFile;
+	private final String newPath;
 	
-	public FileEdit(@Nullable String oldPath, @Nullable File newFile) {
+	private final byte[] content;
+	
+	public FileEdit(@Nullable String oldPath, @Nullable String newPath, byte[] content) {
 		this.oldPath = GitUtils.normalizePath(oldPath);
-		this.newFile = newFile;
+		this.newPath= GitUtils.normalizePath(newPath);
+		this.content = content;
 
-		Preconditions.checkArgument(this.oldPath != null || this.newFile != null, 
-				"Either oldPath or newFile should be defined");
+		Preconditions.checkArgument(this.oldPath != null || this.newPath != null, 
+				"Either oldPath or newPath should be defined");
 	}
 
 	public String getOldPath() {
 		return oldPath;
 	}
 
-	public File getNewFile() {
-		return newFile;
+	public String getNewPath() {
+		return newPath;
+	}
+
+	public byte[] getContent() {
+		return content;
 	}
 
 	private ObjectId insertTree(RevTree revTree, TreeWalk treeWalk, ObjectInserter inserter, 
@@ -69,7 +76,7 @@ public class FileEdit implements Serializable {
 					oldPathFound = true;
 					if (name.equals(currentNewPath)) {
 						newPathFound = true;
-						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
+						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, content);
 						formatter.append(name, FileMode.REGULAR_FILE, blobId);
 						appended = true;
 					}
@@ -127,7 +134,7 @@ public class FileEdit implements Serializable {
 				for (int i=splitted.size()-1; i>=0; i--) {
 					if (childId == null) {
 						childName = splitted.get(i);
-						childId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
+						childId = inserter.insert(Constants.OBJ_BLOB, content);
 						childMode = FileMode.REGULAR_FILE;
 					} else {
 						TreeFormatter childFormatter = new TreeFormatter();
@@ -190,11 +197,6 @@ public class FileEdit implements Serializable {
 			treeWalk.addTree(revTree);
 	        CommitBuilder commit = new CommitBuilder();
 	        
-	        String newPath;
-	        if (newFile != null)
-	        	newPath = newFile.getPath();
-	        else
-	        	newPath = null;
 	        commit.setTreeId(insertTree(revTree, treeWalk, inserter, oldPath, newPath));
 	        commit.setAuthor(authorAndCommitter);
 	        commit.setCommitter(authorAndCommitter);
