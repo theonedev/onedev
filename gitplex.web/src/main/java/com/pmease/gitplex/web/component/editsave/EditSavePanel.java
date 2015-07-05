@@ -29,6 +29,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.FileEdit;
+import com.pmease.commons.git.ParentPathAndName;
 import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
@@ -45,11 +46,9 @@ public abstract class EditSavePanel extends Panel {
 	
 	private final String refName;
 	
-	private final String parentPath;
+	private final ParentPathAndName parentPathAndName;
 	
-	private final String oldName;
-	
-	private final IModel<byte[]> contentModel;
+	private final IModel<String> contentModel;
 	
 	private final CancelListener cancelListener;
 	
@@ -64,36 +63,35 @@ public abstract class EditSavePanel extends Panel {
 	private String detailCommitMessage;
 	
 	public EditSavePanel(String id, IModel<Repository> repoModel, String refName, 
-			@Nullable String parentPath, @Nullable String oldName, 
-			@Nullable IModel<byte[]> contentModel, ObjectId prevCommitId, 
-			@Nullable CancelListener cancelListener) {
+			ParentPathAndName parentPathAndName, @Nullable IModel<String> contentModel, 
+			ObjectId prevCommitId, @Nullable CancelListener cancelListener) {
 		super(id);
 	
 		this.repoModel = repoModel;
 		this.refName = refName;
-		this.parentPath = parentPath!=null?parentPath:"";
-		this.oldName = oldName;
+		this.parentPathAndName = parentPathAndName;
 		this.contentModel = contentModel;
 		this.cancelListener = cancelListener;
 		this.prevCommitId = prevCommitId;
 		
-		newName = oldName;
+		newName = parentPathAndName.getName();
 	}
 
 	private String getDefaultCommitMessage() {
+		String name = parentPathAndName.getName();
 		if (contentModel != null) {
-			if (oldName != null) {
-				if (oldName.equals(newName))
-					return "Edit " + oldName;
+			if (name != null) {
+				if (name.equals(newName))
+					return "Edit " + name;
 				else
-					return "Rename " + oldName;
+					return "Rename " + name;
 			} else if (newName != null) {
 				return "Add " + newName;
 			} else {
 				return "Add new file";
 			}
 		} else {
-			return "Delete " + oldName;
+			return "Delete " + name;
 		}
 	}
 	
@@ -102,7 +100,9 @@ public abstract class EditSavePanel extends Panel {
 		super.onInitialize();
 		
 		final FeedbackPanel feedback = new FeedbackPanel("feedback", this);
-		
+		feedback.setOutputMarkupPlaceholderTag(true);
+		add(feedback);
+				
 		final WebMarkupContainer hasChangesContainer = new WebMarkupContainer("hasChanges");
 		hasChangesContainer.setVisibilityAllowed(false);
 		hasChangesContainer.setOutputMarkupPlaceholderTag(true);
@@ -117,10 +117,34 @@ public abstract class EditSavePanel extends Panel {
 		
 		Form<?> form = new Form<Void>("form");
 		add(form);
-		
-		feedback.setOutputMarkupPlaceholderTag(true);
-		add(feedback);
+
+		form.add(new TextField<String>("fileName", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return newName;
+			}
+
+			@Override
+			public void setObject(String object) {
+				newName = object;
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
 				
+				setVisible(contentModel != null);
+			}
+			
+		});
+		
 		form.add(new TextField<String>("summaryCommitMessage", new IModel<String>() {
 
 			@Override
@@ -170,6 +194,12 @@ public abstract class EditSavePanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+
+				if (contentModel != null && StringUtils.isBlank(newName)) {
+					EditSavePanel.this.error("Please specify file name.");
+					target.add(feedback);
+					return;
+				}
 				
 				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
 					String commitMessage = summaryCommitMessage;
@@ -179,23 +209,19 @@ public abstract class EditSavePanel extends Panel {
 						commitMessage += "\n\n" + detailCommitMessage;
 					User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
 
-					String oldPath;
-					if (oldName != null)
-						oldPath = parentPath + "/" + oldName;
-					else
-						oldPath = null;
+					String path = parentPathAndName.getPath();
 					
 					String newPath;
-					byte[] content;
+					String content;
 					if (contentModel != null) {
-						newPath = parentPath + "/" + newName;
+						newPath = parentPathAndName.getPath(newName);
 						content = contentModel.getObject();
 					} else {
 						newPath = null;
 						content = null;
 					}
 
-					FileEdit edit = new FileEdit(oldPath, newPath, content);
+					FileEdit edit = new FileEdit(path, newPath, content);
 					ObjectId newCommitId = null;
 					while(newCommitId == null) {
 						try {
@@ -253,9 +279,11 @@ public abstract class EditSavePanel extends Panel {
 						} catch (ObjectAlreadyExistException e) {
 							EditSavePanel.this.error("A file with same name already exists. "
 									+ "Please choose a different name and try again.");
+							target.add(feedback);
 						} catch (NotTreeException e) {
 							EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
 									+ "Choose a new path and try again..");
+							target.add(feedback);
 						}
 					}
 					if (newCommitId != null)
@@ -283,6 +311,10 @@ public abstract class EditSavePanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
+	public String getNewName() {
+		return newName;
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

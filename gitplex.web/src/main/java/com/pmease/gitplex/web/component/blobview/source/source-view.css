@@ -23,12 +23,6 @@
 	line-height: 1.6;
 }
 
-.CodeMirror {
-	font-size: 13px;
-}
-.CodeMirror-gutters {
-	background: white;
-}
 .CodeMirror-annotations {
 	width: 240px;
 }

@@ -9,11 +9,19 @@
 				<a wicket:id="changes">See what changed.</a>
 			</div>
 			<form wicket:id="form">			
+				<wicket:enclosure child="fileName">
 				<div class="form-group">
+					<label>File Name</label>
+					<input wicket:id="fileName" class="form-control"></input>
+				</div>
+				</wicket:enclosure>
+				<div class="form-group">
+					<label>Summary Commit Message</label>
 					<input wicket:id="summaryCommitMessage" class="form-control"></input>
 				</div>
 				<div class="form-group">
-					<textarea wicket:id="detailCommitMessage" class="form-control" rows="10" placeholder="Optional extended description"></textarea>
+					<label>Detail Commit Message</label>
+					<textarea wicket:id="detailCommitMessage" class="form-control" rows="10"></textarea>
 				</div>
 				<div class="actions">
 					<input wicket:id="save" type="submit" class="btn btn-primary" value="Commit"></input>

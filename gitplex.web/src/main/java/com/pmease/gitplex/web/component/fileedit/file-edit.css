@@ -1,0 +1,3 @@
+.file-edit>.body>.preview, .file-edit>.body>.save {
+	display: none;
+}  

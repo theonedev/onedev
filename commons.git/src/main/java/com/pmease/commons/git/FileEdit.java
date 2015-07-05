@@ -20,6 +20,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -38,9 +39,9 @@ public class FileEdit implements Serializable {
 	
 	private final String newPath;
 	
-	private final byte[] content;
+	private final String content;
 	
-	public FileEdit(@Nullable String oldPath, @Nullable String newPath, byte[] content) {
+	public FileEdit(@Nullable String oldPath, @Nullable String newPath, String content) {
 		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.newPath= GitUtils.normalizePath(newPath);
 		this.content = content;
@@ -57,7 +58,7 @@ public class FileEdit implements Serializable {
 		return newPath;
 	}
 
-	public byte[] getContent() {
+	public String getContent() {
 		return content;
 	}
 
@@ -76,7 +77,7 @@ public class FileEdit implements Serializable {
 					oldPathFound = true;
 					if (name.equals(currentNewPath)) {
 						newPathFound = true;
-						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, content);
+						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, content.getBytes(Charsets.UTF_8));
 						formatter.append(name, FileMode.REGULAR_FILE, blobId);
 						appended = true;
 					}
@@ -134,7 +135,7 @@ public class FileEdit implements Serializable {
 				for (int i=splitted.size()-1; i>=0; i--) {
 					if (childId == null) {
 						childName = splitted.get(i);
-						childId = inserter.insert(Constants.OBJ_BLOB, content);
+						childId = inserter.insert(Constants.OBJ_BLOB, content.getBytes(Charsets.UTF_8));
 						childMode = FileMode.REGULAR_FILE;
 					} else {
 						TreeFormatter childFormatter = new TreeFormatter();

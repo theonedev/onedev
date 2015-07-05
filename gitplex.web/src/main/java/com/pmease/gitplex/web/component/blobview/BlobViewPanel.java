@@ -30,10 +30,12 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.ParentPathAndName;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.editsave.CancelListener;
 import com.pmease.gitplex.web.component.editsave.EditSavePanel;
+import com.pmease.gitplex.web.component.fileedit.FileEditPanel;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
@@ -165,15 +167,64 @@ public abstract class BlobViewPanel extends Panel {
 		changeActions.add(new AjaxLink<Void>("edit") {
 
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(context.getBlob().getText() != null);
+			}
+
+			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
 				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getState().file.revision))
 					tag.put("disabled", "disabled");
 			}
-			
+
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				BlobViewPanel blobViewPanel = BlobViewPanel.this;
+				String panelId = blobViewPanel.getId();
+				IModel<Repository> repoModel = new AbstractReadOnlyModel<Repository>() {
+
+					@Override
+					public Repository getObject() {
+						return context.getRepository();
+					}
+					
+				};
+				
+				ObjectId commitId = context.getRepository().getObjectId(
+						context.getState().file.revision, true);
+				
+				final BlobIdent file = context.getState().file;
+				String refName = Git.REFS_HEADS + file.revision;
+				final ParentPathAndName parentPathAndName = new ParentPathAndName(file.path);
+				
+				FileEditPanel fileEditPanel = new FileEditPanel(panelId, repoModel, refName, 
+						parentPathAndName, context.getBlob().getText().getContent(), commitId) {
+
+					@Override
+					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId, String newName) {
+						Repository repo = context.getRepository();
+						repo.cacheObjectId(file.revision, newCommitId);
+						
+						if (newName.equals(parentPathAndName.getName())) {
+							viewBlob(target);
+						} else {
+							String newPath = parentPathAndName.getPath(newName);
+							context.onSelect(target, new BlobIdent(file.revision, newPath, file.mode), null);
+						}
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						viewBlob(target);
+					}
+					
+				};
+				blobViewPanel.replaceWith(fileEditPanel);
+				target.add(fileEditPanel);
 			}
 			
 		});
@@ -206,29 +257,19 @@ public abstract class BlobViewPanel extends Panel {
 				
 				final BlobIdent file = context.getState().file;
 				String refName = Git.REFS_HEADS + file.revision;
-				String parentPath;
-				String oldName;
-				if (file.path.contains("/")) {
-					parentPath = StringUtils.substringBeforeLast(file.path, "/");
-					oldName = StringUtils.substringAfterLast(file.path, "/");
-				} else {
-					parentPath = null;
-					oldName = file.path;
-				}
+
+				final ParentPathAndName parentPathAndName = new ParentPathAndName(file.path);
 				
 				CancelListener cancelListener = new CancelListener() {
 
 					@Override
 					public void onCancel(AjaxRequestTarget target) {
-						BlobViewPanel blobViewPanel = context.render(getId());
-						replaceWith(blobViewPanel);
-						target.add(blobViewPanel);
-						target.appendJavaScript("$(window).resize();");
+						viewBlob(target);
 					}
 					
 				};
 				EditSavePanel saveChangePanel = new EditSavePanel(panelId, repoModel, refName, 
-						parentPath, oldName, null, commitId, cancelListener) {
+						parentPathAndName, null, commitId, cancelListener) {
 
 					@Override
 					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -254,13 +295,20 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 				};
-				BlobViewPanel.this.replaceWith(saveChangePanel);
+				blobViewPanel.replaceWith(saveChangePanel);
 				target.add(saveChangePanel);
 			}
 
 		});
 
 		setOutputMarkupId(true);
+	}
+	
+	private void viewBlob(AjaxRequestTarget target) {
+		BlobViewPanel blobViewPanel = context.render(getId());
+		replaceWith(blobViewPanel);
+		target.add(blobViewPanel);
+		target.appendJavaScript("$(window).resize();");
 	}
 
 	protected WebMarkupContainer newCustomActions(String id) {
