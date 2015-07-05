@@ -36,33 +36,26 @@ public class FileEdit implements Serializable {
 
 	private final String oldPath;
 	
-	private final String newPath;
+	private final File newFile;
 	
-	private final byte[] content;
-	
-	public FileEdit(@Nullable String oldPath, @Nullable String newPath, byte[] content) {
+	public FileEdit(@Nullable String oldPath, @Nullable File newFile) {
 		this.oldPath = GitUtils.normalizePath(oldPath);
-		this.newPath = GitUtils.normalizePath(newPath);
-		Preconditions.checkArgument(this.oldPath != null || this.newPath != null, 
-				"Either oldPath or newPath should be defined");
-		
-		this.content = content;
+		this.newFile = newFile;
+
+		Preconditions.checkArgument(this.oldPath != null || this.newFile != null, 
+				"Either oldPath or newFile should be defined");
 	}
 
 	public String getOldPath() {
 		return oldPath;
 	}
 
-	public String getNewPath() {
-		return newPath;
-	}
-
-	public byte[] getContent() {
-		return content;
+	public File getNewFile() {
+		return newFile;
 	}
 
 	private ObjectId insertTree(RevTree revTree, TreeWalk treeWalk, ObjectInserter inserter, 
-			@Nullable String currentOldPath, @Nullable String currentNewPath, byte[] content) {
+			@Nullable String currentOldPath, @Nullable String currentNewPath) {
         try {
 	        TreeFormatter formatter = new TreeFormatter();
 	        boolean appended = false;
@@ -76,7 +69,7 @@ public class FileEdit implements Serializable {
 					oldPathFound = true;
 					if (name.equals(currentNewPath)) {
 						newPathFound = true;
-						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, content);
+						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
 						formatter.append(name, FileMode.REGULAR_FILE, blobId);
 						appended = true;
 					}
@@ -95,7 +88,8 @@ public class FileEdit implements Serializable {
 					} else {
 						childNewPath = null;
 					}
-					ObjectId childTreeId = insertTree(revTree, childTreeWalk, inserter, childOldPath, childNewPath, content);
+					ObjectId childTreeId = insertTree(revTree, childTreeWalk, inserter, 
+							childOldPath, childNewPath);
 					if (childTreeId != null) { 
 						formatter.append(name, FileMode.TREE, childTreeId);
 						appended = true;
@@ -104,11 +98,12 @@ public class FileEdit implements Serializable {
 					if ((treeWalk.getFileMode(0).getBits() & FileMode.TYPE_TREE) == 0)
 						throw new NotTreeException("Path does not represent a tree: " + treeWalk.getPathString());
 					newPathFound = true;
-					TreeWalk childTreeWalk = TreeWalk.forPath(treeWalk.getObjectReader(), treeWalk.getPathString(), revTree);
+					TreeWalk childTreeWalk = TreeWalk.forPath(treeWalk.getObjectReader(), 
+							treeWalk.getPathString(), revTree);
 					Preconditions.checkNotNull(childTreeWalk);
 					childTreeWalk.enterSubtree();
 					String childNewPath = currentNewPath.substring(name.length()+1);
-					ObjectId childTreeId = insertTree(revTree, childTreeWalk, inserter, null, childNewPath, content);
+					ObjectId childTreeId = insertTree(revTree, childTreeWalk, inserter, null, childNewPath);
 					if (childTreeId != null) { 
 						formatter.append(name, treeWalk.getFileMode(0), childTreeId);
 						appended = true;
@@ -132,7 +127,7 @@ public class FileEdit implements Serializable {
 				for (int i=splitted.size()-1; i>=0; i--) {
 					if (childId == null) {
 						childName = splitted.get(i);
-						childId = inserter.insert(Constants.OBJ_BLOB, content);
+						childId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
 						childMode = FileMode.REGULAR_FILE;
 					} else {
 						TreeFormatter childFormatter = new TreeFormatter();
@@ -194,7 +189,13 @@ public class FileEdit implements Serializable {
 			RevTree revTree = revWalk.parseCommit(parentCommitId).getTree();
 			treeWalk.addTree(revTree);
 	        CommitBuilder commit = new CommitBuilder();
-	        commit.setTreeId(insertTree(revTree, treeWalk, inserter, oldPath, newPath, content));
+	        
+	        String newPath;
+	        if (newFile != null)
+	        	newPath = newFile.getPath();
+	        else
+	        	newPath = null;
+	        commit.setTreeId(insertTree(revTree, treeWalk, inserter, oldPath, newPath));
 	        commit.setAuthor(authorAndCommitter);
 	        commit.setCommitter(authorAndCommitter);
 	        commit.setParentId(parentCommitId);
@@ -219,5 +220,28 @@ public class FileEdit implements Serializable {
 		} catch (RevisionSyntaxException | IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public static class File implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final String path;
+		
+		private final byte[] content;
+		
+		public File(String path, byte[] content) {
+			this.path = Preconditions.checkNotNull(GitUtils.normalizePath(path));
+			this.content = content;
+		}
+
+		public String getPath() {
+			return path;
+		}
+
+		public byte[] getContent() {
+			return content;
+		}
+		
 	}
 }

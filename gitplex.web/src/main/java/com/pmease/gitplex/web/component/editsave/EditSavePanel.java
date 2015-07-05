@@ -41,9 +41,11 @@ public abstract class EditSavePanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<String> refModel;
+	private final String refName;
 	
-	private final IModel<FileEdit> editModel;
+	private final String oldPath;
+	
+	private final IModel<FileEdit.File> newFileModel;
 	
 	private ObjectId prevCommitId;
 	
@@ -53,27 +55,28 @@ public abstract class EditSavePanel extends Panel {
 	
 	private String detailCommitMessage;
 	
-	public EditSavePanel(String id, IModel<Repository> repoModel, IModel<String> refModel, 
-			IModel<FileEdit> editModel, ObjectId prevCommitId) {
+	public EditSavePanel(String id, IModel<Repository> repoModel, String refName, 
+			String oldPath, IModel<FileEdit.File> newFileModel, ObjectId prevCommitId) {
 		super(id);
 	
 		this.repoModel = repoModel;
-		this.refModel = refModel;
-		this.editModel = editModel;
+		this.refName = refName;
+		this.oldPath = oldPath;
+		this.newFileModel = newFileModel;
 		this.prevCommitId = prevCommitId;
 	}
 
 	private String getDefaultCommitMessage() {
-		FileEdit edit = editModel.getObject();
-		if (edit.getNewPath() != null) {
-			if (edit.getNewPath().equals(edit.getOldPath()))
-				return "Edit " + edit.getOldPath();
-			else if (edit.getOldPath() != null)
-				return "Rename " + edit.getOldPath();
+		FileEdit.File newFile = newFileModel.getObject();
+		if (newFile != null) {
+			if (newFile.getPath().equals(oldPath))
+				return "Edit " + oldPath;
+			else if (oldPath != null)
+				return "Rename " + oldPath;
 			else
-				return "Add " + edit.getNewPath();
+				return "Add " + newFile.getPath();
 		} else {
-			return "Delete " + edit.getOldPath();
+			return "Delete " + oldPath;
 		}
 	}
 	
@@ -159,11 +162,11 @@ public abstract class EditSavePanel extends Panel {
 						commitMessage += "\n\n" + detailCommitMessage;
 					User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
 
-					FileEdit edit = editModel.getObject();
+					FileEdit edit = new FileEdit(oldPath, newFileModel.getObject());
 					ObjectId newCommitId = null;
 					while(newCommitId == null) {
 						try {
-							newCommitId = edit.commit(jgitRepo, refModel.getObject(), 
+							newCommitId = edit.commit(jgitRepo, refName, 
 									prevCommitId, prevCommitId, user.asPerson(), commitMessage);
 						} catch (ObsoleteCommitException e) {
 							currentCommitId = e.getOldCommitId();
@@ -180,34 +183,37 @@ public abstract class EditSavePanel extends Panel {
 									if (treeWalk != null) {
 										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
 												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
-											hasChangesContainer.setVisibilityAllowed(true);
 											if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-												if (edit.getNewPath() != null) {
-													edit = new FileEdit(null, edit.getNewPath(), edit.getContent());
+												if (edit.getNewFile() != null) {
+													edit = new FileEdit(null, edit.getNewFile());
+													hasChangesContainer.setVisibilityAllowed(true);
+													target.add(hasChangesContainer);
+													break;
 												} else {
 													newCommitId = currentCommitId;
 													break;
 												}
+											} else {
+												hasChangesContainer.setVisibilityAllowed(true);
+												target.add(hasChangesContainer);
+												break;
 											}
 										}
 									}
 								}
-								if (edit.getNewPath() != null && !edit.getNewPath().equals(edit.getOldPath())) { 
-									TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getNewPath(), 
+								if (edit.getNewFile() != null && !edit.getNewFile().getPath().equals(edit.getOldPath())) { 
+									TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getNewFile().getPath(), 
 											prevCommit.getTree().getId(), currentCommit.getTree().getId());
 									if (treeWalk != null) {
 										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
 												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
 											hasChangesContainer.setVisibilityAllowed(true);
+											target.add(hasChangesContainer);
+											break;
 										}
 									}
 								} 
 
-								if (hasChangesContainer.isVisibilityAllowed()) {
-									target.add(hasChangesContainer);
-									break;
-								}
-								
 							} catch (IOException e2) {
 								throw new RuntimeException(e2);
 							}
@@ -256,8 +262,7 @@ public abstract class EditSavePanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		refModel.detach();
-		editModel.detach();
+		newFileModel.detach();
 		
 		super.onDetach();
 	}

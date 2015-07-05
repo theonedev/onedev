@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
@@ -29,6 +30,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.FileEdit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
@@ -203,17 +205,19 @@ public abstract class BlobViewPanel extends Panel {
 				ObjectId commitId = context.getRepository().getObjectId(
 						context.getState().file.revision, true);
 				
-				final BlobIdent blobIdent = context.getState().file;
-				EditSavePanel saveChangePanel = new EditSavePanel(panelId, repoModel, blobIdent, commitId, null) {
+				final BlobIdent file = context.getState().file;
+				String refName = Git.REFS_HEADS + file.revision;
+				EditSavePanel saveChangePanel = new EditSavePanel(panelId, repoModel, refName, 
+						file.path, Model.of((FileEdit.File)null), commitId) {
 
 					@Override
 					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
 						Repository repo = context.getRepository();
-						repo.cacheObjectId(blobIdent.revision, newCommitId);
+						repo.cacheObjectId(file.revision, newCommitId);
 						try (	FileRepository jgitRepo = repo.openAsJGitRepo();
 								RevWalk revWalk = new RevWalk(jgitRepo)) {
 							RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
-							String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
+							String parentPath = StringUtils.substringBeforeLast(file.path, "/");
 							while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
 								if (parentPath.contains("/")) {
 									parentPath = StringUtils.substringBeforeLast(parentPath, "/");
@@ -222,7 +226,7 @@ public abstract class BlobViewPanel extends Panel {
 									break;
 								}
 							}
-							BlobIdent parentBlobIdent = new BlobIdent(blobIdent.revision, parentPath, FileMode.TREE.getBits());
+							BlobIdent parentBlobIdent = new BlobIdent(file.revision, parentPath, FileMode.TREE.getBits());
 							context.onSelect(target, parentBlobIdent, null);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
