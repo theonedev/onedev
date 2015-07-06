@@ -295,9 +295,11 @@ public abstract class FileNavigator extends Panel {
 				}
 				
 			});
+		} else {
+			lastSegment = new Fragment(LAST_SEGMENT_ID, "blobNameFrag", this);
+			lastSegment.add(new Label("label", StringUtils.substringAfterLast(file.path, "/")));
 		}
 		add(lastSegment);
-		
 		
 		setOutputMarkupId(true);
 	}
