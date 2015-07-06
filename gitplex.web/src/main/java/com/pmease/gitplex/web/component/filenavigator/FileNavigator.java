@@ -45,6 +45,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.ConfirmLeaveAjaxLink;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.blobview.BlobNameChangeCallback;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -103,7 +104,7 @@ public abstract class FileNavigator extends Panel {
 			@Override
 			protected void populateItem(final ListItem<BlobIdent> item) {
 				final BlobIdent blobIdent = item.getModelObject();
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				AjaxLink<Void> link = new ConfirmLeaveAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -219,7 +220,7 @@ public abstract class FileNavigator extends Panel {
 								icon.add(AttributeModifier.append("class", iconClass));
 								fragment.add(icon);
 								
-								AjaxLink<Void> link = new AjaxLink<Void>("link") {
+								AjaxLink<Void> link = new ConfirmLeaveAjaxLink<Void>("link") {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {

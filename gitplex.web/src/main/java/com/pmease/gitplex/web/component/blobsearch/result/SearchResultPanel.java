@@ -34,6 +34,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.component.ConfirmLeaveAjaxLink;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
@@ -174,7 +175,7 @@ public abstract class SearchResultPanel extends Panel {
 		String message = "too many matches, displaying " + SearchResultPanel.QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
-		add(prevMatchLink = new AjaxLink<Void>("prevMatch") {
+		add(prevMatchLink = new ConfirmLeaveAjaxLink<Void>("prevMatch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -191,7 +192,7 @@ public abstract class SearchResultPanel extends Panel {
 		});
 		prevMatchLink.setOutputMarkupId(true);
 		
-		add(nextMatchLink = new AjaxLink<Void>("nextMatch") {
+		add(nextMatchLink = new ConfirmLeaveAjaxLink<Void>("nextMatch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -328,7 +329,7 @@ public abstract class SearchResultPanel extends Panel {
 					
 				});
 				
-				blobItem.add(new AjaxLink<Void>("blobLink") {
+				blobItem.add(new ConfirmLeaveAjaxLink<Void>("blobLink") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -374,7 +375,7 @@ public abstract class SearchResultPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<QueryHit> hitItem) {
 						final QueryHit hit = hitItem.getModelObject();
-						hitItem.add(new AjaxLink<Void>("hitLink") {
+						hitItem.add(new ConfirmLeaveAjaxLink<Void>("hitLink") {
 
 							@Override
 							protected void onInitialize() {
@@ -459,8 +460,8 @@ public abstract class SearchResultPanel extends Panel {
 				String script = String.format(""
 						+ "var $body = $('#%s>.search-result>.body');"
 						+ "var callback = %s;"
-						+ "$body.bind('keydown', 'up', function(e) {e.preventDefault();callback('up');});"
-						+ "$body.bind('keydown', 'down', function(e) {e.preventDefault();callback('down');});", 
+						+ "$body.bind('keydown', 'up', function(e) {e.preventDefault(); if (pmease.commons.form.confirmLeave()) callback('up');});"
+						+ "$body.bind('keydown', 'down', function(e) {e.preventDefault(); if (pmease.commons.form.confirmLeave()) callback('down');});", 
 						getMarkupId(), getCallbackFunction(CallbackParameter.explicit("key")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}

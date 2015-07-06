@@ -484,6 +484,12 @@ pmease.commons = {
 			});
 			
 		},
+		confirmLeave: function() {
+			if ($("form.leave-confirm.dirty").length != 0) 
+				return confirm("There are unsaved changes, do you want to discard and continue?");
+			else
+				return true;
+		}
 	},
 	
 	setupAjaxLoadingIndicator: function() {

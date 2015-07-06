@@ -38,6 +38,7 @@ import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.ConfirmLeaveAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
@@ -121,7 +122,7 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new AjaxLink<Void>("link") {
+						AjaxLink<Void> link = new ConfirmLeaveAjaxLink<Void>("link") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
@@ -229,7 +230,7 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new AjaxLink<Void>("link") {
+						AjaxLink<Void> link = new ConfirmLeaveAjaxLink<Void>("link") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {

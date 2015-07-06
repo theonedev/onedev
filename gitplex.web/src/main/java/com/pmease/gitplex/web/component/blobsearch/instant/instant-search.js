@@ -24,7 +24,8 @@ gitplex.blobInstantSearch = {
 			$input.hide();
 		});
 		$input.bind("keydown", "return", function() {
-			callback("return");
+			if (pmease.commons.form.confirmLeave())
+				callback("return");
 		});
 		$dropdown.bind("keydown", "return", function() {
 			callback("return");
