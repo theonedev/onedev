@@ -29,7 +29,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.FileEdit;
-import com.pmease.commons.git.ParentPathAndName;
+import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
@@ -46,9 +46,9 @@ public abstract class EditSavePanel extends Panel {
 	
 	private final String refName;
 	
-	private final ParentPathAndName parentPathAndName;
+	private final String oldPath;
 	
-	private final IModel<String> contentModel;
+	private final IModel<PathAndContent> newFileModel;
 	
 	private final CancelListener cancelListener;
 	
@@ -56,43 +56,54 @@ public abstract class EditSavePanel extends Panel {
 	
 	private ObjectId currentCommitId;
 	
-	private String newName;
-	
 	private String summaryCommitMessage;
 	
 	private String detailCommitMessage;
 	
 	public EditSavePanel(String id, IModel<Repository> repoModel, String refName, 
-			ParentPathAndName parentPathAndName, @Nullable IModel<String> contentModel, 
+			@Nullable String oldPath, @Nullable IModel<PathAndContent> newFileModel, 
 			ObjectId prevCommitId, @Nullable CancelListener cancelListener) {
 		super(id);
 	
 		this.repoModel = repoModel;
 		this.refName = refName;
-		this.parentPathAndName = parentPathAndName;
-		this.contentModel = contentModel;
+		this.oldPath = oldPath;
+		this.newFileModel = newFileModel;
 		this.cancelListener = cancelListener;
 		this.prevCommitId = prevCommitId;
-		
-		newName = parentPathAndName.getName();
 	}
 
 	private String getDefaultCommitMessage() {
-		String name = parentPathAndName.getName();
-		if (contentModel != null) {
-			if (name != null) {
-				if (name.equals(newName))
-					return "Edit " + name;
-				else
-					return "Rename " + name;
-			} else if (newName != null) {
-				return "Add " + newName;
-			} else {
-				return "Add new file";
-			}
+		String oldName;
+		if (oldPath != null && oldPath.contains("/"))
+			oldName = StringUtils.substringAfterLast(oldPath, "/");
+		else
+			oldName = oldPath;
+		
+		PathAndContent newFile = getNewFile();
+		if (newFile == null) { 
+			return "Delete " + oldName;
 		} else {
-			return "Delete " + name;
+			String newPath = newFile.getPath();
+
+			String newName;
+			if (newPath != null && newPath.contains("/"))
+				newName = StringUtils.substringAfterLast(newPath, "/");
+			else
+				newName = newPath;
+			
+			if (oldPath == null) {
+				if (newName != null)
+					return "Add " + newName;
+				else
+					return "Add new file";
+			} else if (oldPath.equals(newPath)) {
+				return "Edit " + oldPath;
+			} else {
+				return "Rename " + oldPath;
+			}
 		}
+			
 	}
 	
 	@Override
@@ -118,33 +129,6 @@ public abstract class EditSavePanel extends Panel {
 		Form<?> form = new Form<Void>("form");
 		add(form);
 
-		form.add(new TextField<String>("fileName", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return newName;
-			}
-
-			@Override
-			public void setObject(String object) {
-				newName = object;
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(contentModel != null);
-			}
-			
-		});
-		
 		form.add(new TextField<String>("summaryCommitMessage", new IModel<String>() {
 
 			@Override
@@ -195,7 +179,7 @@ public abstract class EditSavePanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				if (contentModel != null && StringUtils.isBlank(newName)) {
+				if (newFileModel != null && StringUtils.isBlank(newFileModel.getObject().getPath())) {
 					EditSavePanel.this.error("Please specify file name.");
 					target.add(feedback);
 					return;
@@ -209,19 +193,7 @@ public abstract class EditSavePanel extends Panel {
 						commitMessage += "\n\n" + detailCommitMessage;
 					User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
 
-					String path = parentPathAndName.getPath();
-					
-					String newPath;
-					String content;
-					if (contentModel != null) {
-						newPath = parentPathAndName.getPath(newName);
-						content = contentModel.getObject();
-					} else {
-						newPath = null;
-						content = null;
-					}
-
-					FileEdit edit = new FileEdit(path, newPath, content);
+					FileEdit edit = new FileEdit(oldPath, getNewFile());
 					ObjectId newCommitId = null;
 					while(newCommitId == null) {
 						try {
@@ -243,8 +215,8 @@ public abstract class EditSavePanel extends Panel {
 										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
 												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
 											if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-												if (edit.getNewPath() != null) {
-													edit = new FileEdit(null, edit.getNewPath(), edit.getContent());
+												if (edit.getNewFile() != null) {
+													edit = new FileEdit(null, edit.getNewFile());
 													hasChangesContainer.setVisibilityAllowed(true);
 													target.add(hasChangesContainer);
 													break;
@@ -260,8 +232,8 @@ public abstract class EditSavePanel extends Panel {
 										}
 									}
 								}
-								if (edit.getNewPath() != null && !edit.getNewPath().equals(edit.getOldPath())) { 
-									TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getNewPath(), 
+								if (edit.getNewFile() != null && !edit.getNewFile().getPath().equals(edit.getOldPath())) { 
+									TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getNewFile().getPath(), 
 											prevCommit.getTree().getId(), currentCommit.getTree().getId());
 									if (treeWalk != null) {
 										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
@@ -311,8 +283,12 @@ public abstract class EditSavePanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	public String getNewName() {
-		return newName;
+	@Nullable
+	private PathAndContent getNewFile() {
+		if (newFileModel != null)
+			return newFileModel.getObject();
+		else
+			return null;
 	}
 	
 	@Override
@@ -331,8 +307,8 @@ public abstract class EditSavePanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		if (contentModel != null)
-			contentModel.detach();	
+		if (newFileModel != null)
+			newFileModel.detach();	
 		
 		super.onDetach();
 	}
