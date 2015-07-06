@@ -1,13 +1,23 @@
 <wicket:panel>
 	<div class="file-navigator clearfix">
-		<div wicket:id="paths" class="pull-left clearfix">
+		<div wicket:id="treeSegments" class="pull-left clearfix">
 			<a wicket:id="link" class="pull-left"><span wicket:id="label"></span></a>
 			<!-- below separator makes slash appearing in path when the path is copied -->
-			<span wicket:id="separator" style="position:absolute; top: -10000px;">/</span>
+			<span style="position:absolute; top: -10000px;">/</span>
 			<a wicket:id="subtreeDropdownTrigger" class="subtree-dropdown-trigger pull-left"></a>
 			<div wicket:id="subtreeDropdown" class="subtree-dropdown"></div>
 		</div>
+		<div wicket:id="lastSegment" class="pull-left"></div>
 	</div>
+	<wicket:fragment wicket:id="blobNameFrag">
+		<a wicket:id="link" class="pull-left"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="nameEditFrag">
+		<input wicket:id="path" type="text" class="form-control input-sm"></input>		
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addFileFrag">
+		<a wicket:id="addFile"><i class="fa fa-plus"></i></a>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="treeNodeFrag">
 		<i wicket:id="icon"></i> <a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>

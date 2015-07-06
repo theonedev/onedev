@@ -1,5 +1,5 @@
 gitplex.fileEdit = {
-	init: function(containerId, fileContent, previewCallback, saveCallback) {
+	init: function(containerId, filePath, fileContent, previewCallback, saveCallback) {
 		var $container = $("#" + containerId);
 		var $code = $container.find(">file-edit>.body>.edit");
 		var cm = CodeMirror($code[0], {
@@ -15,16 +15,8 @@ gitplex.fileEdit = {
 			highlightIdentifiers: {delay: 500}
 		});
 		
-	    var modeInfo = CodeMirror.findModeByFileName(filePath);
-	    if (modeInfo) {
-	    	// specify mode via mime does not work for gfm (github flavored markdown)
-	    	if (modeInfo.mode === "gfm")
-	    		cm.setOption("mode", "gfm");
-	    	else
-	    		cm.setOption("mode", modeInfo.mime);
-			CodeMirror.autoLoadMode(cm, modeInfo.mode);
-	    }
-	    
+		setMode(cm, filePath);
+		
 	    $container.find(">file-edit>.head>.edit").click(function() {
 			$container.find(">.file-edit>.body>.preview").hide();
 			$container.find(">.file-edit>.body>.save").hide();
@@ -48,5 +40,19 @@ gitplex.fileEdit = {
 		$container.find(">.file-edit>.body>.edit").hide();
 		$container.find(">.file-edit>.body>.save").hide();
 		$container.find(">.file-edit>.body>.preview").show();
+	},
+	setMode: function(cm, filePath) {
+		if (typeof cm === "string") 
+			cm = $("#"+ cm + ">.file-edit>.body>.edit>.CodeMirror")[0].CodeMirror;		
+
+	    var modeInfo = CodeMirror.findModeByFileName(filePath);
+	    if (modeInfo) {
+	    	// specify mode via mime does not work for gfm (github flavored markdown)
+	    	if (modeInfo.mode === "gfm")
+	    		cm.setOption("mode", "gfm");
+	    	else
+	    		cm.setOption("mode", modeInfo.mime);
+			CodeMirror.autoLoadMode(cm, modeInfo.mode);
+	    }
 	}
 }

@@ -31,6 +31,10 @@ public abstract class BlobViewContext implements Serializable {
 	
 	public abstract void onBlameChange(AjaxRequestTarget target);
 	
+	public abstract void onEdit(AjaxRequestTarget target, BlobNameChangeCallback callback);
+	
+	public abstract void onEditDone(AjaxRequestTarget target);
+	
 	public HistoryState getState() {
 		return state;
 	}

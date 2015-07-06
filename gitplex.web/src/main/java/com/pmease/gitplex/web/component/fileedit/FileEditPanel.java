@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.fileedit;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -19,7 +21,8 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.pmease.commons.git.ParentPathAndName;
+import com.google.common.base.Charsets;
+import com.pmease.commons.git.PathAndContent;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.editsave.EditSavePanel;
 
@@ -30,24 +33,28 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final String refName;
 
-	private final ParentPathAndName parentPathAndName; 
+	private final String oldPath; 
+
+	private String content;
+
+	private String newPath;
 	
 	private final ObjectId prevCommitId;
-	
-	private String content;
 	
 	private AbstractDefaultAjaxBehavior previewBehavior;
 	
 	private AbstractDefaultAjaxBehavior saveBehavior;
 	
 	public FileEditPanel(String id, IModel<Repository> repoModel, String refName, 
-			ParentPathAndName parentPathAndName, String content, ObjectId prevCommitId) {
+			@Nullable String oldPath, String content, ObjectId prevCommitId) {
 		super(id);
 		this.repoModel = repoModel;
 		this.refName = refName;
-		this.parentPathAndName = parentPathAndName;
+		this.oldPath = oldPath;
 		this.content = content;
 		this.prevCommitId = prevCommitId;
+		
+		newPath = oldPath;
 	}
 
 	@Override
@@ -89,19 +96,19 @@ public abstract class FileEditPanel extends Panel {
 		
 		add(new WebMarkupContainer("preview"));
 		
-		IModel<String> contentModel = new AbstractReadOnlyModel<String>() {
+		IModel<PathAndContent> newFileModel = new AbstractReadOnlyModel<PathAndContent>() {
 
 			@Override
-			public String getObject() {
-				return content;
+			public PathAndContent getObject() {
+				return new PathAndContent(newPath, content.getBytes(Charsets.UTF_8));
 			}
 			
 		};
-		add(new EditSavePanel("save", repoModel, refName, parentPathAndName, contentModel, prevCommitId, null) {
+		add(new EditSavePanel("save", repoModel, refName, oldPath, newFileModel, prevCommitId, null) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				FileEditPanel.this.onCommitted(target, newCommitId, getNewName());
+				FileEditPanel.this.onCommitted(target, newCommitId);
 			}
 			
 		});
@@ -118,21 +125,35 @@ public abstract class FileEditPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(FileEditPanel.class, "file-edit.css")));
 		
-		String script = String.format("gitplex.fileEdit.init('%s', '%s', %s, %s);", 
-				getMarkupId(), StringEscapeUtils.escapeEcmaScript(content), 
+		String script = String.format("gitplex.fileEdit.init('%s', '%s', '%s', %s, %s);", 
+				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
+	private String getNewPathParam() {
+		if (newPath != null)
+			return StringEscapeUtils.escapeEcmaScript(newPath);
+		else
+			return "unknown.txt";
+	}
+	
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-
+		
 		super.onDetach();
 	}
+	
+	public void onNewPathChange(AjaxRequestTarget target, String newPath) {
+		this.newPath = newPath;
+		
+		target.appendJavaScript(String.format("gitplex.fileEdit.setMode('%s', '%s');", 
+				getMarkupId(), getNewPathParam()));
+	}
 
-	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId, String newName);
+	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 }

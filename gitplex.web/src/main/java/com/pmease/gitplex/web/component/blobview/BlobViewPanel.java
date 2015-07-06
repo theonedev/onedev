@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.component.blobview;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +31,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.ParentPathAndName;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.editsave.CancelListener;
@@ -199,20 +200,35 @@ public abstract class BlobViewPanel extends Panel {
 				
 				final BlobIdent file = context.getState().file;
 				String refName = Git.REFS_HEADS + file.revision;
-				final ParentPathAndName parentPathAndName = new ParentPathAndName(file.path);
 				
-				FileEditPanel fileEditPanel = new FileEditPanel(panelId, repoModel, refName, 
-						parentPathAndName, context.getBlob().getText().getContent(), commitId) {
+				final AtomicReference<String> newPathRef = new AtomicReference<>();
+				final BlobNameChangeCallback callback = new BlobNameChangeCallback() {
 
 					@Override
-					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId, String newName) {
+					public void onChange(AjaxRequestTarget target, String blobName) {
+						String newPath;
+						if (file.path.contains("/"))
+							newPath = StringUtils.substringBeforeLast(file.path, "/") + "/" + blobName;
+						else
+							newPath = blobName;
+						newPathRef.set(GitUtils.normalizePath(newPath));
+					}
+					
+				};
+				context.onEdit(target, callback);
+				FileEditPanel fileEditPanel = new FileEditPanel(panelId, repoModel, refName, 
+						file.path, context.getBlob().getText().getContent(), commitId) {
+
+					@Override
+					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
 						Repository repo = context.getRepository();
 						repo.cacheObjectId(file.revision, newCommitId);
 						
-						if (newName.equals(parentPathAndName.getName())) {
+						String newPath = newPathRef.get();
+						if (file.path.equals(newPath)) {
 							viewBlob(target);
-						} else {
-							String newPath = parentPathAndName.getPath(newName);
+							context.onEditDone(target);
+						} else { 
 							context.onSelect(target, new BlobIdent(file.revision, newPath, file.mode), null);
 						}
 					}
@@ -220,6 +236,7 @@ public abstract class BlobViewPanel extends Panel {
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
 						viewBlob(target);
+						context.onEditDone(target);
 					}
 					
 				};
@@ -258,8 +275,6 @@ public abstract class BlobViewPanel extends Panel {
 				final BlobIdent file = context.getState().file;
 				String refName = Git.REFS_HEADS + file.revision;
 
-				final ParentPathAndName parentPathAndName = new ParentPathAndName(file.path);
-				
 				CancelListener cancelListener = new CancelListener() {
 
 					@Override
@@ -269,7 +284,7 @@ public abstract class BlobViewPanel extends Panel {
 					
 				};
 				EditSavePanel saveChangePanel = new EditSavePanel(panelId, repoModel, refName, 
-						parentPathAndName, null, commitId, cancelListener) {
+						file.path, null, commitId, cancelListener) {
 
 					@Override
 					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {

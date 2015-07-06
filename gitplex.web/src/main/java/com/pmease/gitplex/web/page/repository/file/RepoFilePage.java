@@ -52,6 +52,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.blobsearch.advanced.AdvancedSearchPanel;
 import com.pmease.gitplex.web.component.blobsearch.instant.InstantSearchPanel;
 import com.pmease.gitplex.web.component.blobsearch.result.SearchResultPanel;
+import com.pmease.gitplex.web.component.blobview.BlobNameChangeCallback;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
@@ -142,7 +143,7 @@ public class RepoFilePage extends RepositoryPage {
 		super.onInitialize();
 		
 		newRevisionSelector(null);
-		newFileNavigator(null);
+		newFileNavigator(null, null);
 		newFileViewer(null);
 		
 		add(new InstantSearchPanel("instantSearch", repoModel, new AbstractReadOnlyModel<String>() {
@@ -160,7 +161,7 @@ public class RepoFilePage extends RepositoryPage {
 				state.tokenPos = hit.getTokenPos();
 				state.blame = false;
 				
-				newFileNavigator(target);
+				newFileNavigator(target, null);
 				newFileViewer(target);
 				
 				pushState(target);
@@ -259,7 +260,7 @@ public class RepoFilePage extends RepositoryPage {
 		
 	}
 	
-	private void newRevisionSelector(AjaxRequestTarget target) {
+	private void newRevisionSelector(@Nullable AjaxRequestTarget target) {
 		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, state.file.revision) {
 
 			@Override
@@ -282,7 +283,7 @@ public class RepoFilePage extends RepositoryPage {
 
 				target.add(revisionIndexing);
 				newRevisionSelector(target);
-				newFileNavigator(target);
+				newFileNavigator(target, null);
 				newFileViewer(target);
 				
 				pushState(target);
@@ -298,8 +299,8 @@ public class RepoFilePage extends RepositoryPage {
 		}
 	}
 	
-	private void newFileNavigator(AjaxRequestTarget target) {
-		fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, state.file) {
+	private void newFileNavigator(@Nullable AjaxRequestTarget target, @Nullable BlobNameChangeCallback callback) {
+		fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, state.file, callback) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
@@ -307,7 +308,7 @@ public class RepoFilePage extends RepositoryPage {
 				state.tokenPos = null;
 				state.blame = false;
 
-				newFileNavigator(target);
+				newFileNavigator(target, null);
 				newFileViewer(target);
 				
 				pushState(target);
@@ -322,7 +323,7 @@ public class RepoFilePage extends RepositoryPage {
 		}
 	}
 	
-	private void newFileViewer(AjaxRequestTarget target) {
+	private void newFileViewer(@Nullable AjaxRequestTarget target) {
 		if (state.file.path == null || state.file.isTree()) {
 			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, state.file) {
 
@@ -333,7 +334,7 @@ public class RepoFilePage extends RepositoryPage {
 					state.blame = false;
 					
 					newFileViewer(target);
-					newFileNavigator(target);
+					newFileNavigator(target, null);
 					
 					pushState(target);
 				}
@@ -353,7 +354,7 @@ public class RepoFilePage extends RepositoryPage {
 					state.tokenPos = tokenPos;
 					state.blame = false;
 					
-					newFileNavigator(target);
+					newFileNavigator(target, null);
 					newFileViewer(target);
 					
 					pushState(target);
@@ -388,6 +389,16 @@ public class RepoFilePage extends RepositoryPage {
 					}
 
 					pushState(target);
+				}
+
+				@Override
+				public void onEdit(AjaxRequestTarget target, BlobNameChangeCallback callback) {
+					newFileNavigator(target, callback);
+				}
+
+				@Override
+				public void onEditDone(AjaxRequestTarget target) {
+					newFileNavigator(target, null);
 				}
 
 			};
@@ -500,7 +511,7 @@ public class RepoFilePage extends RepositoryPage {
 					state.blame = false;
 					state.file.path = hit.getBlobPath();
 					state.file.mode = FileMode.REGULAR_FILE.getBits();
-					newFileNavigator(target);
+					newFileNavigator(target, null);
 					newFileViewer(target);
 				}
 				pushState(target);
@@ -526,7 +537,7 @@ public class RepoFilePage extends RepositoryPage {
 
 		target.add(revisionIndexing);
 		newRevisionSelector(target);
-		newFileNavigator(target);
+		newFileNavigator(target, null);
 		newFileViewer(target);
 	}
 	

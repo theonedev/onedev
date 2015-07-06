@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,6 +20,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -41,47 +44,54 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.blobview.BlobNameChangeCallback;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class FileNavigator extends Panel {
 
+	private final static String LAST_SEGMENT_ID = "lastSegment";
+	
 	private final IModel<Repository> repoModel;
 	
 	private final BlobIdent file;
 	
-	public FileNavigator(String id, IModel<Repository> repoModel, BlobIdent file) {
+	private final BlobNameChangeCallback callback;
+	
+	public FileNavigator(String id, IModel<Repository> repoModel, BlobIdent file, 
+			@Nullable BlobNameChangeCallback callback) {
 		super(id);
 
 		this.repoModel = repoModel;
 		this.file = file;
+		this.callback = callback;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ListView<BlobIdent>("paths", new LoadableDetachableModel<List<BlobIdent>>() {
+		add(new ListView<BlobIdent>("treeSegments", new LoadableDetachableModel<List<BlobIdent>>() {
 
 			@Override
 			protected List<BlobIdent> load() {
-				List<BlobIdent> paths = new ArrayList<>();
-				paths.add(new BlobIdent(file.revision, null, FileMode.TREE.getBits()));
+				List<BlobIdent> treeSegments = new ArrayList<>();
+				treeSegments.add(new BlobIdent(file.revision, null, FileMode.TREE.getBits()));
 				
 				if (file.path != null) {
 					List<String> segments = Splitter.on('/').omitEmptyStrings().splitToList(file.path);
 					
 					for (int i=0; i<segments.size(); i++) { 
-						BlobIdent parent = paths.get(paths.size()-1);
-						int mode = (i==segments.size()-1?file.mode:FileMode.TREE.getBits());
-						if (parent.path != null)
-							paths.add(new BlobIdent(file.revision, parent.path + "/" + segments.get(i), mode));
-						else
-							paths.add(new BlobIdent(file.revision, segments.get(i), mode));
+						BlobIdent parent = treeSegments.get(treeSegments.size()-1);
+						int treeMode = FileMode.TREE.getBits();
+						if (i<segments.size()-1 || file.mode == treeMode) {
+							String treePath = parent.path + "/" + segments.get(i);
+							treeSegments.add(new BlobIdent(file.revision, treePath, treeMode));
+						}
 					}
 				}
 				
-				return paths;
+				return treeSegments;
 			}
 			
 		}) {
@@ -117,29 +127,7 @@ public abstract class FileNavigator extends Panel {
 				
 				item.add(link);
 				
-				item.add(new WebMarkupContainer("separator") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(item.getIndex() != item.getParent().size()-1);
-					}
-					
-				});
-				
 				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
-				
-				if (blobIdent.path != null && item.getIndex() == size()-1) {
-					try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
-							RevWalk revWalk = new RevWalk(jgitRepo)) {
-						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
-						if (!treeWalk.isSubtree())
-							subtreeDropdownTrigger.setVisible(false);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
 				
 				DropdownPanel subtreeDropdown = new DropdownPanel("subtreeDropdown", true) {
 
@@ -263,6 +251,14 @@ public abstract class FileNavigator extends Panel {
 			}
 			
 		});
+		
+		WebMarkupContainer lastSegment;
+		if (callback != null) {
+			lastSegment = new Fragment(LAST_SEGMENT_ID, "nameEditFrag", this);
+			lastSegment.add(new TextField<String>("name"));
+		} 
+		add(lastSegment);
+		
 		
 		setOutputMarkupId(true);
 	}
