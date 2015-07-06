@@ -2,7 +2,7 @@ gitplex.editSave = {
 	init: function(containerId) {
 		var $editSave = $("#" + containerId + ">.edit-save");
 		$editSave.scroll(function() {
-	    	pmease.commons.history.setScrollPos({left: $body.scrollLeft(), top: $body.scrollTop()});
+	    	pmease.commons.history.setScrollPos({left: $editSave.scrollLeft(), top: $editSave.scrollTop()});
 		});
 
 		gitplex.expandable.getScrollTop = function() {
@@ -25,5 +25,8 @@ gitplex.editSave = {
 		});
 		
 		$(window).resize();
+	},
+	updateDefaultCommitMessage: function(containerId, placeholder) {
+		$("#" + containerId + " .summary-commit-message").attr("placeholder", placeholder);
 	}
 }

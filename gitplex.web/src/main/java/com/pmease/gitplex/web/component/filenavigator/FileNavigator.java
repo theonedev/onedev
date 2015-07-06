@@ -87,7 +87,9 @@ public abstract class FileNavigator extends Panel {
 						BlobIdent parent = treeSegments.get(treeSegments.size()-1);
 						int treeMode = FileMode.TREE.getBits();
 						if (i<segments.size()-1 || file.mode == treeMode) {
-							String treePath = parent.path + "/" + segments.get(i);
+							String treePath = segments.get(i);
+							if (parent.path != null)
+								treePath = parent.path + "/" + treePath;
 							treeSegments.add(new BlobIdent(file.revision, treePath, treeMode));
 						}
 					}
@@ -116,7 +118,7 @@ public abstract class FileNavigator extends Panel {
 					}
 					
 				};
-				link.setEnabled(item.getIndex() != getViewSize()-1);
+				link.setEnabled(!file.isTree() || item.getIndex() != getViewSize()-1);
 				
 				if (blobIdent.path != null) {
 					if (blobIdent.path.indexOf('/') != -1)
@@ -257,7 +259,16 @@ public abstract class FileNavigator extends Panel {
 		WebMarkupContainer lastSegment;
 		if (callback != null) {
 			lastSegment = new Fragment(LAST_SEGMENT_ID, "nameEditFrag", this);
-			final TextField<String> nameInput = new TextField<String>("name");
+			
+			String name;
+			if (file.isTree())
+				name = null;
+			else if (file.path.contains("/"))
+				name = StringUtils.substringAfterLast(file.path, "/");
+			else
+				name = file.path;
+			
+			final TextField<String> nameInput = new TextField<String>("name", Model.of(name));
 			lastSegment.add(nameInput);
 			nameInput.add(new OnChangeAjaxBehavior() {
 
@@ -282,22 +293,25 @@ public abstract class FileNavigator extends Panel {
 			lastSegment.add(new AjaxLink<Void>("addFile") {
 
 				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					
+					setEnabled(repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision));
+				}
+
+				@Override
 				public void onClick(AjaxRequestTarget target) {
 					
-				}
-				
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					
-					if (!repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision))
-						tag.put("disabled", "disabled");
 				}
 				
 			});
 		} else {
 			lastSegment = new Fragment(LAST_SEGMENT_ID, "blobNameFrag", this);
-			lastSegment.add(new Label("label", StringUtils.substringAfterLast(file.path, "/")));
+			
+			String blobName = file.path;
+			if (blobName.contains("/"))
+				blobName = StringUtils.substringAfterLast(blobName, "/");
+			lastSegment.add(new Label("label", blobName));
 		}
 		add(lastSegment);
 		

@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -45,6 +46,8 @@ import com.pmease.gitplex.web.resource.BlobResourceReference;
 public abstract class BlobViewPanel extends Panel {
 
 	protected final BlobViewContext context;
+	
+	private Component editPanel;
 	
 	public BlobViewPanel(String id, BlobViewContext context) {
 		super(id);
@@ -202,6 +205,31 @@ public abstract class BlobViewPanel extends Panel {
 				String refName = Git.REFS_HEADS + file.revision;
 				
 				final AtomicReference<String> newPathRef = new AtomicReference<>();
+				
+				editPanel = new FileEditPanel(panelId, repoModel, refName, 
+						file.path, context.getBlob().getText().getContent(), commitId) {
+
+					@Override
+					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+						Repository repo = context.getRepository();
+						repo.cacheObjectId(file.revision, newCommitId);
+						
+						String newPath = newPathRef.get();
+						if (file.path.equals(newPath)) {
+							restoreViewPanel(target);
+							context.onEditDone(target);
+						} else { 
+							context.onSelect(target, new BlobIdent(file.revision, newPath, file.mode), null);
+						}
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						restoreViewPanel(target);
+						context.onEditDone(target);
+					}
+					
+				};
 				final BlobNameChangeCallback callback = new BlobNameChangeCallback() {
 
 					@Override
@@ -212,36 +240,13 @@ public abstract class BlobViewPanel extends Panel {
 						else
 							newPath = blobName;
 						newPathRef.set(GitUtils.normalizePath(newPath));
+						((FileEditPanel)editPanel).onNewPathChange(target, newPathRef.get());
 					}
 					
 				};
 				context.onEdit(target, callback);
-				FileEditPanel fileEditPanel = new FileEditPanel(panelId, repoModel, refName, 
-						file.path, context.getBlob().getText().getContent(), commitId) {
-
-					@Override
-					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-						Repository repo = context.getRepository();
-						repo.cacheObjectId(file.revision, newCommitId);
-						
-						String newPath = newPathRef.get();
-						if (file.path.equals(newPath)) {
-							viewBlob(target);
-							context.onEditDone(target);
-						} else { 
-							context.onSelect(target, new BlobIdent(file.revision, newPath, file.mode), null);
-						}
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						viewBlob(target);
-						context.onEditDone(target);
-					}
-					
-				};
-				blobViewPanel.replaceWith(fileEditPanel);
-				target.add(fileEditPanel);
+				blobViewPanel.replaceWith(editPanel);
+				target.add(editPanel);
 			}
 			
 		});
@@ -279,12 +284,12 @@ public abstract class BlobViewPanel extends Panel {
 
 					@Override
 					public void onCancel(AjaxRequestTarget target) {
-						viewBlob(target);
+						restoreViewPanel(target);
 					}
 					
 				};
-				EditSavePanel saveChangePanel = new EditSavePanel(panelId, repoModel, refName, 
-						file.path, null, commitId, cancelListener) {
+				editPanel = new EditSavePanel(panelId, repoModel, refName, file.path, 
+						null, commitId, cancelListener) {
 
 					@Override
 					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -310,8 +315,8 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 				};
-				blobViewPanel.replaceWith(saveChangePanel);
-				target.add(saveChangePanel);
+				blobViewPanel.replaceWith(editPanel);
+				target.add(editPanel);
 			}
 
 		});
@@ -319,11 +324,14 @@ public abstract class BlobViewPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private void viewBlob(AjaxRequestTarget target) {
-		BlobViewPanel blobViewPanel = context.render(getId());
-		replaceWith(blobViewPanel);
-		target.add(blobViewPanel);
-		target.appendJavaScript("$(window).resize();");
+	private void restoreViewPanel(AjaxRequestTarget target) {
+		if (editPanel != null) {
+			BlobViewPanel blobViewPanel = context.render(getId());
+			editPanel.replaceWith(blobViewPanel);
+			target.add(blobViewPanel);
+			target.appendJavaScript("$(window).resize();");
+			editPanel = null;
+		}
 	}
 
 	protected WebMarkupContainer newCustomActions(String id) {

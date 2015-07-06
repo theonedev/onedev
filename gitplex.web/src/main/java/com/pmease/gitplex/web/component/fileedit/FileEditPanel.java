@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -45,6 +47,8 @@ public abstract class FileEditPanel extends Panel {
 	
 	private AbstractDefaultAjaxBehavior saveBehavior;
 	
+	private EditSavePanel editSavePanel;
+	
 	public FileEditPanel(String id, IModel<Repository> repoModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId) {
 		super(id);
@@ -64,6 +68,12 @@ public abstract class FileEditPanel extends Panel {
 		previewBehavior = new AbstractDefaultAjaxBehavior() {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setMethod(Method.POST);
+			}
+
+			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				content = params.getParameterValue("content").toString();
@@ -74,6 +84,12 @@ public abstract class FileEditPanel extends Panel {
 		add(new WebMarkupContainer("previewLink").add(previewBehavior));
 		
 		saveBehavior = new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setMethod(Method.POST);
+			}
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -104,7 +120,7 @@ public abstract class FileEditPanel extends Panel {
 			}
 			
 		};
-		add(new EditSavePanel("save", repoModel, refName, oldPath, newFileModel, prevCommitId, null) {
+		add(editSavePanel = new EditSavePanel("save", repoModel, refName, oldPath, newFileModel, prevCommitId, null) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -149,6 +165,7 @@ public abstract class FileEditPanel extends Panel {
 	public void onNewPathChange(AjaxRequestTarget target, String newPath) {
 		this.newPath = newPath;
 		
+		editSavePanel.onNewPathChange(target);
 		target.appendJavaScript(String.format("gitplex.fileEdit.setMode('%s', '%s');", 
 				getMarkupId(), getNewPathParam()));
 	}

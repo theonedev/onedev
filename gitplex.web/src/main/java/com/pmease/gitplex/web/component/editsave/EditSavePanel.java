@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -303,6 +304,11 @@ public abstract class EditSavePanel extends Panel {
 	}
 	
 	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);
+	
+	public void onNewPathChange(AjaxRequestTarget target) {
+		target.appendJavaScript(String.format("gitplex.editSave.updateDefaultCommitMessage('%s', '%s');", 
+				getMarkupId(), StringEscapeUtils.escapeEcmaScript(getDefaultCommitMessage())));
+	}
 	
 	@Override
 	protected void onDetach() {

@@ -73,8 +73,6 @@ public class RepoFilePage extends RepositoryPage {
 	
 	private static final String PARAM_BLAME = "blame";
 	
-	private static final String PARAM_ACTION = "action";
-	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
@@ -125,13 +123,11 @@ public class RepoFilePage extends RepositoryPage {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+		} else {
+			state.file.mode = FileMode.TREE.getBits();
 		}
 		
 		state.blame = params.get(PARAM_BLAME).toBoolean(false);
-		
-		String actionName = params.get(PARAM_ACTION).toString();
-		if (actionName != null) {
-		}
 	}
 	
 	private ObjectId getCommitId() {
