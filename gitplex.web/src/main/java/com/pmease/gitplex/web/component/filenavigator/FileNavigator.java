@@ -41,6 +41,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -266,7 +267,35 @@ public abstract class FileNavigator extends Panel {
 				}
 				
 			});
-		} 
+		} else if (file.isTree()) {
+			lastSegment = new Fragment(LAST_SEGMENT_ID, "addFileFrag", this) {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					
+					if (!repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision))
+						tag.put("title", "Must on a branch to add or propose add of a file");
+				}
+				
+			};
+			lastSegment.add(new AjaxLink<Void>("addFile") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					
+				}
+				
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					
+					if (!repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision))
+						tag.put("disabled", "disabled");
+				}
+				
+			});
+		}
 		add(lastSegment);
 		
 		
