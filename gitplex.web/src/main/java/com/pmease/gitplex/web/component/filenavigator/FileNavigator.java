@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
@@ -255,7 +256,16 @@ public abstract class FileNavigator extends Panel {
 		WebMarkupContainer lastSegment;
 		if (callback != null) {
 			lastSegment = new Fragment(LAST_SEGMENT_ID, "nameEditFrag", this);
-			lastSegment.add(new TextField<String>("name"));
+			final TextField<String> nameInput = new TextField<String>("name");
+			lastSegment.add(nameInput);
+			nameInput.add(new OnChangeAjaxBehavior() {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					callback.onChange(target, nameInput.getInput());
+				}
+				
+			});
 		} 
 		add(lastSegment);
 		
