@@ -2,27 +2,34 @@ package com.pmease.commons.git;
 
 import java.io.Serializable;
 
-import com.google.common.base.Preconditions;
+public interface PathAndContent extends Serializable {
 
-public class PathAndContent implements Serializable {
+	String getPath();
 
-	private static final long serialVersionUID = 1L;
+	byte[] getContent();
 	
-	private final String path;
-	
-	private final byte[] content;
+	public static class Immutable implements PathAndContent {
 
-	public PathAndContent(String path, byte[] content) {
-		this.path = Preconditions.checkNotNull(GitUtils.normalizePath(path));
-		this.content = content;
-	}
+		private static final long serialVersionUID = 1L;
 
-	public String getPath() {
-		return path;
-	}
+		private final String path;
+		
+		private final byte[] content;
+		
+		public Immutable(String path, byte[] content) {
+			this.path = path;
+			this.content = content;
+		}
+		
+		@Override
+		public String getPath() {
+			return path;
+		}
 
-	public byte[] getContent() {
-		return content;
+		@Override
+		public byte[] getContent() {
+			return content;
+		}
+		
 	}
-	
 }

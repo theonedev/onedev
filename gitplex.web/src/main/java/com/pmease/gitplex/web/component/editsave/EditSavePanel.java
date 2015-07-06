@@ -49,7 +49,7 @@ public abstract class EditSavePanel extends Panel {
 	
 	private final String oldPath;
 	
-	private final IModel<PathAndContent> newFileModel;
+	private final PathAndContent newFile;
 	
 	private final CancelListener cancelListener;
 	
@@ -62,14 +62,14 @@ public abstract class EditSavePanel extends Panel {
 	private String detailCommitMessage;
 	
 	public EditSavePanel(String id, IModel<Repository> repoModel, String refName, 
-			@Nullable String oldPath, @Nullable IModel<PathAndContent> newFileModel, 
+			@Nullable String oldPath, @Nullable PathAndContent newFile, 
 			ObjectId prevCommitId, @Nullable CancelListener cancelListener) {
 		super(id);
 	
 		this.repoModel = repoModel;
 		this.refName = refName;
 		this.oldPath = oldPath;
-		this.newFileModel = newFileModel;
+		this.newFile = newFile;
 		this.cancelListener = cancelListener;
 		this.prevCommitId = prevCommitId;
 	}
@@ -81,7 +81,6 @@ public abstract class EditSavePanel extends Panel {
 		else
 			oldName = oldPath;
 		
-		PathAndContent newFile = getNewFile();
 		if (newFile == null) { 
 			return "Delete " + oldName;
 		} else {
@@ -180,7 +179,7 @@ public abstract class EditSavePanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				if (newFileModel != null && StringUtils.isBlank(newFileModel.getObject().getPath())) {
+				if (newFile != null && StringUtils.isBlank(newFile.getPath())) {
 					EditSavePanel.this.error("Please specify file name.");
 					target.add(feedback);
 					return;
@@ -194,7 +193,7 @@ public abstract class EditSavePanel extends Panel {
 						commitMessage += "\n\n" + detailCommitMessage;
 					User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
 
-					FileEdit edit = new FileEdit(oldPath, getNewFile());
+					FileEdit edit = new FileEdit(oldPath, newFile);
 					ObjectId newCommitId = null;
 					while(newCommitId == null) {
 						try {
@@ -284,14 +283,6 @@ public abstract class EditSavePanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	@Nullable
-	private PathAndContent getNewFile() {
-		if (newFileModel != null)
-			return newFileModel.getObject();
-		else
-			return null;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -313,8 +304,6 @@ public abstract class EditSavePanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		if (newFileModel != null)
-			newFileModel.detach();	
 		
 		super.onDetach();
 	}

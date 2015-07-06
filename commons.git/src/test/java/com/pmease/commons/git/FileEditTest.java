@@ -95,7 +95,7 @@ public class FileEditTest extends AbstractGitTest {
 			PersonIdent person = new PersonIdent(repo);
 
 			FileEdit edit = new FileEdit("server/src/com/example/a/a.java", 
-					new PathAndContent("client/c.java", "a".getBytes()));
+					new PathAndContent.Immutable("client/c.java", "a".getBytes()));
 			ObjectId newCommitId = edit.commit(repo, refName, oldCommitId, oldCommitId, person, "test rename");
 			try (RevWalk revWalk = new RevWalk(repo)) {
 				RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
@@ -125,7 +125,7 @@ public class FileEditTest extends AbstractGitTest {
 			PersonIdent person = new PersonIdent(repo);
 			
 			FileEdit edit = new FileEdit("server/src/com/example/a", 
-					new PathAndContent("client/c.java", "a".getBytes()));
+					new PathAndContent.Immutable("client/c.java", "a".getBytes()));
 			try {
 				edit.commit(repo, refName, oldCommitId, oldCommitId, person, "test rename tree");
 				assertTrue("A NotFileException should be thrown", false);
@@ -151,7 +151,7 @@ public class FileEditTest extends AbstractGitTest {
 			PersonIdent person = new PersonIdent(repo);
 			
 			FileEdit edit = new FileEdit("server/src/com/example/a/a.java", 
-					new PathAndContent("client/a.java/a.java", "a".getBytes()));
+					new PathAndContent.Immutable("client/a.java/a.java", "a".getBytes()));
 			try {
 				edit.commit(repo, refName, oldCommitId, oldCommitId, person, "test rename tree");
 				assertTrue("A NotTreeException should be thrown", false);
@@ -176,7 +176,7 @@ public class FileEditTest extends AbstractGitTest {
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
 			
-			FileEdit edit = new FileEdit(null, new PathAndContent("/server/src/com/example/c/c.java", "c".getBytes()));
+			FileEdit edit = new FileEdit(null, new PathAndContent.Immutable("/server/src/com/example/c/c.java", "c".getBytes()));
 			ObjectId newCommitId = edit.commit(repo, refName, oldCommitId, oldCommitId, person, "test add");
 			
 			try (RevWalk revWalk = new RevWalk(repo)) {
@@ -189,7 +189,7 @@ public class FileEditTest extends AbstractGitTest {
 			}
 			
 			oldCommitId = newCommitId;
-			edit = new FileEdit(null, new PathAndContent("/common/common.java", "common".getBytes()));
+			edit = new FileEdit(null, new PathAndContent.Immutable("/common/common.java", "common".getBytes()));
 			newCommitId = edit.commit(repo, refName, oldCommitId, oldCommitId, person, "test add");
 			
 			try (RevWalk revWalk = new RevWalk(repo)) {
@@ -220,7 +220,7 @@ public class FileEditTest extends AbstractGitTest {
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
 			
-			FileEdit edit = new FileEdit(null, new PathAndContent("client/a.java", "a".getBytes()));
+			FileEdit edit = new FileEdit(null, new PathAndContent.Immutable("client/a.java", "a".getBytes()));
 			try {
 				edit.commit(repo, refName, oldCommitId, oldCommitId, person, "test rename tree");
 				assertTrue("An ObjectAlreadyExistException should be thrown", false);
@@ -242,7 +242,7 @@ public class FileEditTest extends AbstractGitTest {
 			
 			ObjectId newCommitId = repo.resolve(refName);
 
-			FileEdit edit = new FileEdit(null, new PathAndContent("/server/src/com/example/c/c.java", "c".getBytes()));
+			FileEdit edit = new FileEdit(null, new PathAndContent.Immutable("/server/src/com/example/c/c.java", "c".getBytes()));
 			try {
 				edit.commit(repo, refName, oldCommitId, oldCommitId, person, "test add");
 				assertTrue("An ObsoleteCommitException should be thrown", false);

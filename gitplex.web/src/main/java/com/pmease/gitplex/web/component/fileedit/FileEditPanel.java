@@ -15,7 +15,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -24,6 +23,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Charsets;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathAndContent;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.editsave.EditSavePanel;
@@ -54,11 +54,11 @@ public abstract class FileEditPanel extends Panel {
 		super(id);
 		this.repoModel = repoModel;
 		this.refName = refName;
-		this.oldPath = oldPath;
+		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.content = content;
 		this.prevCommitId = prevCommitId;
 		
-		newPath = oldPath;
+		newPath = this.oldPath;
 	}
 
 	@Override
@@ -112,15 +112,20 @@ public abstract class FileEditPanel extends Panel {
 		
 		add(new WebMarkupContainer("preview"));
 		
-		IModel<PathAndContent> newFileModel = new AbstractReadOnlyModel<PathAndContent>() {
+		PathAndContent newFile = new PathAndContent() {
 
 			@Override
-			public PathAndContent getObject() {
-				return new PathAndContent(newPath, content.getBytes(Charsets.UTF_8));
+			public String getPath() {
+				return newPath;
 			}
-			
+
+			@Override
+			public byte[] getContent() {
+				return content.getBytes(Charsets.UTF_8);
+			}
+
 		};
-		add(editSavePanel = new EditSavePanel("save", repoModel, refName, oldPath, newFileModel, prevCommitId, null) {
+		add(editSavePanel = new EditSavePanel("save", repoModel, refName, oldPath, newFile, prevCommitId, null) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -163,7 +168,7 @@ public abstract class FileEditPanel extends Panel {
 	}
 	
 	public void onNewPathChange(AjaxRequestTarget target, String newPath) {
-		this.newPath = newPath;
+		this.newPath = GitUtils.normalizePath(newPath);
 		
 		editSavePanel.onNewPathChange(target);
 		target.appendJavaScript(String.format("gitplex.fileEdit.setMode('%s', '%s');", 
