@@ -6,15 +6,15 @@ import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.model.IModel;
 
-public abstract class ConfirmLeaveAjaxLink<T> extends AjaxLink<T> {
+public abstract class DirtyAwareAjaxLink<T> extends AjaxLink<T> {
 
 	private static final long serialVersionUID = 1L;
 	
-	public ConfirmLeaveAjaxLink(final String id) {
+	public DirtyAwareAjaxLink(final String id) {
 		super(id);
 	}
 
-	public ConfirmLeaveAjaxLink(final String id, final IModel<T> model) {
+	public DirtyAwareAjaxLink(final String id, final IModel<T> model) {
 		super(id, model);
 	}
 

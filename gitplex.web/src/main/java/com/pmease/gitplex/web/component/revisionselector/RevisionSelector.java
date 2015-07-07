@@ -43,7 +43,7 @@ import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.component.ConfirmLeaveAjaxLink;
+import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -286,7 +286,7 @@ public abstract class RevisionSelector extends Panel {
 
 			@Override
 			protected void populateItem(final ListItem<String> item) {
-				AjaxLink<Void> link = new ConfirmLeaveAjaxLink<Void>("link") {
+				AjaxLink<Void> link = new DirtyAwareAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {

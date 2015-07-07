@@ -53,7 +53,7 @@ import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.commons.util.diff.Token;
 import com.pmease.commons.util.diff.WordSplitter;
-import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
+import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -533,7 +533,7 @@ public class TextDiffPanel extends Panel {
 				target.appendJavaScript(String.format("gitplex.comments.cancelAdd(%d);", index));
 			}
 			
-		}.add(new AllowLeaveBehavior()));
+		}.add(new DirtyIgnoreBehavior()));
 		
 		form.add(new AjaxSubmitLink("save") {
 
@@ -581,7 +581,7 @@ public class TextDiffPanel extends Panel {
 					target.add(head);
 			}
 
-		}.add(new AllowLeaveBehavior()));
+		}.add(new DirtyIgnoreBehavior()));
 		add(form);
 		
 		add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {

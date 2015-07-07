@@ -55,7 +55,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
-import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
+import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
@@ -632,7 +632,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new AllowLeaveBehavior());
+				add(new DirtyIgnoreBehavior());
 			}
 
 			@Override

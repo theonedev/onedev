@@ -8,7 +8,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -25,6 +24,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Charsets;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathAndContent;
+import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.editsave.EditSavePanel;
 
@@ -101,7 +101,7 @@ public abstract class FileEditPanel extends Panel {
 		};
 		add(new WebMarkupContainer("saveLink").add(saveBehavior));
 		
-		add(new AjaxLink<Void>("cancelLink") {
+		add(new DirtyAwareAjaxLink<Void>("cancelLink") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {

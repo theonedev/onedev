@@ -27,7 +27,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.loader.InheritableThreadLocalData;
-import com.pmease.commons.wicket.behavior.AllowLeaveBehavior;
+import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
@@ -319,7 +319,7 @@ public class CommentPanel extends Panel {
 						target.add(form);
 					}
 					
-				}.add(new AllowLeaveBehavior()));
+				}.add(new DirtyIgnoreBehavior()));
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
@@ -330,7 +330,7 @@ public class CommentPanel extends Panel {
 						target.add(addReplyRow);
 					}
 					
-				}.add(new AllowLeaveBehavior()));
+				}.add(new DirtyIgnoreBehavior()));
 
 				CommentPanel.this.replace(row);
 				target.add(row);

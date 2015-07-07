@@ -34,7 +34,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.component.ConfirmLeaveAjaxLink;
+import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
@@ -175,7 +175,7 @@ public abstract class SearchResultPanel extends Panel {
 		String message = "too many matches, displaying " + SearchResultPanel.QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
-		add(prevMatchLink = new ConfirmLeaveAjaxLink<Void>("prevMatch") {
+		add(prevMatchLink = new DirtyAwareAjaxLink<Void>("prevMatch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -192,7 +192,7 @@ public abstract class SearchResultPanel extends Panel {
 		});
 		prevMatchLink.setOutputMarkupId(true);
 		
-		add(nextMatchLink = new ConfirmLeaveAjaxLink<Void>("nextMatch") {
+		add(nextMatchLink = new DirtyAwareAjaxLink<Void>("nextMatch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -329,7 +329,7 @@ public abstract class SearchResultPanel extends Panel {
 					
 				});
 				
-				blobItem.add(new ConfirmLeaveAjaxLink<Void>("blobLink") {
+				blobItem.add(new DirtyAwareAjaxLink<Void>("blobLink") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -375,7 +375,7 @@ public abstract class SearchResultPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<QueryHit> hitItem) {
 						final QueryHit hit = hitItem.getModelObject();
-						hitItem.add(new ConfirmLeaveAjaxLink<Void>("hitLink") {
+						hitItem.add(new DirtyAwareAjaxLink<Void>("hitLink") {
 
 							@Override
 							protected void onInitialize() {

@@ -9,7 +9,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
 @SuppressWarnings("serial")
-public class AllowLeaveBehavior extends Behavior {
+public class DirtyIgnoreBehavior extends Behavior {
 	
 	private boolean decorated;
 	
