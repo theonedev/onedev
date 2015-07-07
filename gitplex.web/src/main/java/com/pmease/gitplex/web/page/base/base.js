@@ -141,13 +141,16 @@ var gitplex = {
 				var $hideable = $(".hideable");
 				if ($hideable.is(":visible")) {
 					var height = 0;
+					var topHeight = 0;
 					$hideable.each(function() {
+						if ($(this).hasClass("top"))
+							topHeight += $(this).outerHeight();
 						height += $(this).outerHeight();
 					});
 					if (scrollTop>height+10) {
 						$hideable.hide();
 						$(window).resize();
-						gitplex.expandable.setScrollTop(scrollTop-height);
+						gitplex.expandable.setScrollTop(scrollTop-topHeight);
 					}
 				} else if (scrollTop < 5) {
 					$hideable.show();
