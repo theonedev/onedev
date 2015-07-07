@@ -24,6 +24,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Charsets;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathAndContent;
+import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
+import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.editsave.EditSavePanel;
@@ -141,6 +143,9 @@ public abstract class FileEditPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
+		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(ClosestDescendantResourceReference.INSTANCE));
+		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(FileEditPanel.class, "file-edit.js")));
 		response.render(CssHeaderItem.forReference(

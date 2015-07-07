@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -111,7 +112,7 @@ public abstract class EditSavePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final FeedbackPanel feedback = new FeedbackPanel("feedback", this);
+		final FeedbackPanel feedback = new FeedbackPanel("feedback", this).hideAfter(Duration.seconds(5));
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 				
@@ -253,10 +254,12 @@ public abstract class EditSavePanel extends Panel {
 							EditSavePanel.this.error("A file with same name already exists. "
 									+ "Please choose a different name and try again.");
 							target.add(feedback);
+							break;
 						} catch (NotTreeException e) {
 							EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
 									+ "Choose a new path and try again..");
 							target.add(feedback);
+							break;
 						}
 					}
 					if (newCommitId != null)

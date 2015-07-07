@@ -190,7 +190,8 @@ public class FileEdit implements Serializable {
 			treeWalk.addTree(revTree);
 	        CommitBuilder commit = new CommitBuilder();
 	        
-	        commit.setTreeId(insertTree(revTree, treeWalk, inserter, oldPath, newFile.getPath()));
+	        commit.setTreeId(insertTree(revTree, treeWalk, inserter, oldPath, 
+	        		newFile!=null?newFile.getPath():null));
 	        commit.setAuthor(authorAndCommitter);
 	        commit.setCommitter(authorAndCommitter);
 	        commit.setParentId(parentCommitId);

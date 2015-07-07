@@ -3,9 +3,11 @@ package com.pmease.gitplex.web.page.repository.file;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -35,6 +37,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.UnitOfWork;
@@ -56,6 +59,9 @@ import com.pmease.gitplex.web.component.blobview.BlobNameChangeCallback;
 import com.pmease.gitplex.web.component.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.blobview.source.SourceViewPanel;
+import com.pmease.gitplex.web.component.editsave.CancelListener;
+import com.pmease.gitplex.web.component.editsave.EditSavePanel;
+import com.pmease.gitplex.web.component.fileedit.FileEditPanel;
 import com.pmease.gitplex.web.component.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
@@ -140,6 +146,7 @@ public class RepoFilePage extends RepositoryPage {
 		
 		newRevisionSelector(null);
 		newFileNavigator(null, null);
+		newLastCommit(null);
 		newFileViewer(null);
 		
 		add(new InstantSearchPanel("instantSearch", repoModel, new AbstractReadOnlyModel<String>() {
@@ -153,14 +160,9 @@ public class RepoFilePage extends RepositoryPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				state.file = new BlobIdent(state.file.revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits()); 
-				state.tokenPos = hit.getTokenPos();
-				state.blame = false;
-				
-				newFileNavigator(target, null);
-				newFileViewer(target);
-				
-				pushState(target);
+				BlobIdent blobIdent = new BlobIdent(state.file.revision, hit.getBlobPath(), 
+						FileMode.REGULAR_FILE.getBits()); 
+				RepoFilePage.this.onSelect(target, blobIdent, hit.getTokenPos());
 			}
 			
 			@Override
@@ -261,28 +263,30 @@ public class RepoFilePage extends RepositoryPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				state.file.revision = revision;
+				BlobIdent blobIdent = new BlobIdent();
+				blobIdent.revision = revision;
+				blobIdent.mode = FileMode.TREE.getBits();
+				
 				trait.revision = revision;
+				
 				if (state.file.path != null) {
 					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 							RevWalk revWalk = new RevWalk(jgitRepo)) {
 						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, state.file.path, revTree);
-						if (treeWalk == null)
-							state.file.path = null;
+						if (treeWalk != null) {
+							blobIdent.path = state.file.path;
+							blobIdent.mode = treeWalk.getRawMode(0);
+						}
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
-				state.tokenPos = null;
-				state.blame = false;
 
 				target.add(revisionIndexing);
 				newRevisionSelector(target);
-				newFileNavigator(target, null);
-				newFileViewer(target);
-				
-				pushState(target);
+
+				RepoFilePage.this.onSelect(target, blobIdent, null);
 			}
 
 		};
@@ -300,14 +304,12 @@ public class RepoFilePage extends RepositoryPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
-				state.file = file;
-				state.tokenPos = null;
-				state.blame = false;
+				RepoFilePage.this.onSelect(target, file, null);
+			}
 
-				newFileNavigator(target, null);
-				newFileViewer(target);
-				
-				pushState(target);
+			@Override
+			protected void onNewFile(AjaxRequestTarget target) {
+				onAddOrEditFile(target);
 			}
 			
 		};
@@ -319,88 +321,177 @@ public class RepoFilePage extends RepositoryPage {
 		}
 	}
 	
-	private void newFileViewer(@Nullable AjaxRequestTarget target) {
-		if (state.file.path == null || state.file.isTree()) {
-			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, state.file) {
+	private void onAddOrEditFile(AjaxRequestTarget target) {
+		ObjectId commitId = getRepository().getObjectId(state.file.revision, true);
+		
+		String refName = Git.REFS_HEADS + state.file.revision;
+		
+		final AtomicReference<String> newPathRef = new AtomicReference<>(state.file.isTree()?null:state.file.path);
+		
+		fileViewer = new FileEditPanel(
+				FILE_VIEWER_ID, repoModel, refName, 
+				state.file.isTree()?null:state.file.path, 
+				state.file.isTree()?"":getRepository().getBlob(state.file).getText().getContent(), 
+				commitId) {
 
-				@Override
-				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
-					state.file = file;
-					state.tokenPos = null;
-					state.blame = false;
-					
-					newFileViewer(target);
-					newFileNavigator(target, null);
-					
-					pushState(target);
+			@Override
+			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+				getRepository().cacheObjectId(state.file.revision, newCommitId);
+				BlobIdent blobIdent = new BlobIdent(
+						state.file.revision, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
+				onSelect(target, blobIdent, null);
+			}
+
+			@Override
+			protected void onCancel(AjaxRequestTarget target) {
+				lastCommit.setVisibilityAllowed(true);
+				target.add(lastCommit);
+				newFileViewer(target);
+				newFileNavigator(target, null);
+			}
+			
+		};
+		final BlobNameChangeCallback callback = new BlobNameChangeCallback() {
+
+			@Override
+			public void onChange(AjaxRequestTarget target, String blobName) {
+				String newPath;
+				if (state.file.isTree()) {
+					if (state.file.path != null)
+						newPath = state.file.path + "/" + blobName;
+					else
+						newPath = blobName;
+				} else {
+					if (state.file.path.contains("/"))
+						newPath = StringUtils.substringBeforeLast(state.file.path, "/") + "/" + blobName;
+					else
+						newPath = blobName;
 				}
+				newPathRef.set(GitUtils.normalizePath(newPath));
+				((FileEditPanel)fileViewer).onNewPathChange(target, newPathRef.get());
+			}
+			
+		};
+		replace(fileViewer);
+		target.add(fileViewer);
+		lastCommit.setVisibilityAllowed(false);
+		target.add(lastCommit);
+		newFileNavigator(target, callback);
+	}
+	
+	private void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
+		state.file = blobIdent; 
+		state.tokenPos = tokenPos;
+		state.blame = false;
+		
+		newFileNavigator(target, null);
+		newLastCommit(target);
+		newFileViewer(target);
+		
+		pushState(target);
+	}
+	
+	private BlobViewContext newBlobViewContext() {
+		return new BlobViewContext(new HistoryState(state)) {
+
+			@Override
+			public Repository getRepository() {
+				return RepoFilePage.this.getRepository();
+			}
+
+			@Override
+			public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
+				RepoFilePage.this.onSelect(target, blobIdent, tokenPos);
+			}
+
+			@Override
+			public void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
+				renderSearchResult(target, hits);
+			}
+
+			@Override
+			public void onBlameChange(AjaxRequestTarget target) {
+				state.blame = getState().blame;
 				
-			};
-		} else {
-			BlobViewContext context = new BlobViewContext(new HistoryState(state)) {
-
-				@Override
-				public Repository getRepository() {
-					return RepoFilePage.this.getRepository();
-				}
-
-				@Override
-				public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
-					state.file = blobIdent; 
-					state.tokenPos = tokenPos;
-					state.blame = false;
-					
-					newFileNavigator(target, null);
-					newFileViewer(target);
-					
-					pushState(target);
-				}
-
-				@Override
-				public void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
-					renderSearchResult(target, hits);
-				}
-
-				@Override
-				public void onBlameChange(AjaxRequestTarget target) {
-					state.blame = getState().blame;
-					
-					if (fileViewer instanceof SourceViewPanel) {
-						SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-						if (state.blame || state.tokenPos != null) {
+				if (fileViewer instanceof SourceViewPanel) {
+					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
+					if (state.blame || state.tokenPos != null) {
+						sourceViewer.onBlameChange(target);
+					} else {
+						BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
+						if (blobViewer instanceof SourceViewPanel) {
 							sourceViewer.onBlameChange(target);
 						} else {
-							BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
-							if (blobViewer instanceof SourceViewPanel) {
-								sourceViewer.onBlameChange(target);
-							} else {
-								fileViewer.replaceWith(blobViewer);
-								fileViewer = blobViewer;
-								target.add(fileViewer);
-								target.appendJavaScript("$(window).resize();");
-							}
+							fileViewer.replaceWith(blobViewer);
+							fileViewer = blobViewer;
+							target.add(fileViewer);
+							target.appendJavaScript("$(window).resize();");
 						}
-					} else {
+					}
+				} else {
+					newFileViewer(target);
+				}
+
+				pushState(target);
+			}
+
+			@Override
+			public void onEdit(AjaxRequestTarget target) {
+				onAddOrEditFile(target);
+			}
+
+			@Override
+			public void onDelete(AjaxRequestTarget target) {
+				ObjectId commitId = getRepository().getObjectId(getState().file.revision, true);
+				
+				String refName = Git.REFS_HEADS + state.file.revision;
+
+				CancelListener cancelListener = new CancelListener() {
+
+					@Override
+					public void onCancel(AjaxRequestTarget target) {
+						lastCommit.setVisibilityAllowed(true);
+						target.add(lastCommit);
 						newFileViewer(target);
 					}
+					
+				};
+				fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, state.file.path, 
+						null, commitId, cancelListener) {
 
-					pushState(target);
-				}
+					@Override
+					protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+						getRepository().cacheObjectId(state.file.revision, newCommitId);
+						try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+								RevWalk revWalk = new RevWalk(jgitRepo)) {
+							RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
+							String parentPath = StringUtils.substringBeforeLast(state.file.path, "/");
+							while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
+								if (parentPath.contains("/")) {
+									parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+								} else {
+									parentPath = null;
+									break;
+								}
+							}
+							BlobIdent parentBlobIdent = new BlobIdent(state.file.revision, parentPath, FileMode.TREE.getBits());
+							onSelect(target, parentBlobIdent, null);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+					
+				};
+				lastCommit.setVisibilityAllowed(false);
+				target.add(lastCommit);
+				replace(fileViewer);
+				target.add(fileViewer);
+			}
 
-				@Override
-				public void onEdit(AjaxRequestTarget target, BlobNameChangeCallback callback) {
-					newFileNavigator(target, callback);
-				}
+		};		
+	}
 
-				@Override
-				public void onEditDone(AjaxRequestTarget target) {
-					newFileNavigator(target, null);
-				}
-
-			};
-			
-			fileViewer = context.render(FILE_VIEWER_ID);
-		}
+	private void newLastCommit(@Nullable AjaxRequestTarget target) {
 		lastCommit = new AjaxLazyLoadPanel(LAST_COMMIT_ID) {
 			
 			@Override
@@ -415,16 +506,35 @@ public class RepoFilePage extends RepositoryPage {
 				return new LastCommitPanel(markupId, repoModel, state.file);
 			}
 		};
+		lastCommit.setOutputMarkupPlaceholderTag(true);
+		if (target != null) {
+			replace(lastCommit);
+			target.add(lastCommit);
+		} else {
+			add(lastCommit);
+		}
+	}
+	
+	private void newFileViewer(@Nullable AjaxRequestTarget target) {
+		if (state.file.path == null || state.file.isTree()) {
+			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, state.file) {
+
+				@Override
+				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
+					RepoFilePage.this.onSelect(target, file, null);
+				}
+				
+			};
+		} else {
+			fileViewer = newBlobViewContext().render(FILE_VIEWER_ID);
+		}
 		
 		if (target != null) {
 			replace(fileViewer);
 			target.add(fileViewer);
-			replace(lastCommit);
-			target.add(lastCommit);
 			target.appendJavaScript("$(window).resize();");
 		} else {
 			add(fileViewer);
-			add(lastCommit);
 		}
 	}
 	
@@ -485,8 +595,8 @@ public class RepoFilePage extends RepositoryPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				state.tokenPos = hit.getTokenPos();
 				if (hit.getBlobPath().equals(state.file.path) && fileViewer instanceof SourceViewPanel) {
+					state.tokenPos = hit.getTokenPos();
 					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
 					BlobViewContext context = sourceViewer.getContext();
 					context.getState().tokenPos = state.tokenPos;
@@ -503,14 +613,12 @@ public class RepoFilePage extends RepositoryPage {
 							target.appendJavaScript("$(window).resize();");
 						}
 					}
+					pushState(target);
 				} else {
-					state.blame = false;
-					state.file.path = hit.getBlobPath();
-					state.file.mode = FileMode.REGULAR_FILE.getBits();
-					newFileNavigator(target, null);
-					newFileViewer(target);
+					BlobIdent blobIdent = new BlobIdent(state.file.revision, hit.getBlobPath(), 
+							FileMode.REGULAR_FILE.getBits());
+					RepoFilePage.this.onSelect(target, blobIdent, hit.getTokenPos());
 				}
-				pushState(target);
 			}
 
 			@Override
@@ -534,6 +642,7 @@ public class RepoFilePage extends RepositoryPage {
 		target.add(revisionIndexing);
 		newRevisionSelector(target);
 		newFileNavigator(target, null);
+		newLastCommit(target);
 		newFileViewer(target);
 	}
 	

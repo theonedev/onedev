@@ -124,6 +124,7 @@ gitplex.sourceview = {
 				    	gitplex.sourceview.blame(cm, blameCommits);
 			    	}, 10);
 			    }
+			    cm.focus();
 			} 
 			if (cm.getOption("fullScreen"))
 				cm.setOption("fullScreen", false);

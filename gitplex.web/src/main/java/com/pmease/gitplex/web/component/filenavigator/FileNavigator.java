@@ -19,6 +19,7 @@ import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -263,7 +264,7 @@ public abstract class FileNavigator extends Panel {
 			
 			String name;
 			if (file.isTree())
-				name = null;
+				name = "";
 			else if (file.path.contains("/"))
 				name = StringUtils.substringAfterLast(file.path, "/");
 			else
@@ -302,7 +303,7 @@ public abstract class FileNavigator extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					
+					onNewFile(target);
 				}
 				
 			});
@@ -323,6 +324,14 @@ public abstract class FileNavigator extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(FileNavigator.class, "file-navigator.css")));
+		
+		if (file.isTree()) {
+			String script = String.format("$('#%s input[type=text]').focus();", getMarkupId());
+			response.render(OnDomReadyHeaderItem.forScript(script));
+		}
+		
+		String script = String.format("$('#%s form').submit(false);", getMarkupId());
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	private ObjectId getCommitId() {
@@ -330,6 +339,8 @@ public abstract class FileNavigator extends Panel {
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
+	
+	protected abstract void onNewFile(AjaxRequestTarget target);
 	
 	private List<BlobIdent> getChildren(BlobIdent blobIdent) {
 		try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 

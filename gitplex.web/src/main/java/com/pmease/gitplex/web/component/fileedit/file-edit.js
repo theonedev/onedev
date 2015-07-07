@@ -1,7 +1,7 @@
 gitplex.fileEdit = {
 	init: function(containerId, filePath, fileContent, previewCallback, saveCallback) {
 		var $container = $("#" + containerId);
-		var $code = $container.find(">.file-edit>.body>div.edit");
+		var $code = $container.find(">.file-edit>.body>.edit");
 		var cm = CodeMirror($code[0], {
 			value: fileContent, 
 			theme: "eclipse",
@@ -16,15 +16,16 @@ gitplex.fileEdit = {
 		});
 		
 		cm.on("change", function() {
-			$container.find(">.file-edit>.body>form.edit").addClass("dirty");
+			$container.find(">.file-edit>.body>.edit").addClass("dirty");
 		});
+		cm.focus();
 		
 		gitplex.fileEdit.setMode(cm, filePath);
 		
-	    $container.find(">.file-edit>.head>div.edit").click(function() {
+	    $container.find(">.file-edit>.head>.edit").click(function() {
 			$container.find(">.file-edit>.body>.preview").hide();
 			$container.find(">.file-edit>.body>.save").hide();
-			$container.find(">.file-edit>.body>div.edit").show();
+			$container.find(">.file-edit>.body>.edit").show();
 	    });
 	    $container.find(">.file-edit>.head>.preview").click(function() {
 	    	previewCallback(cm.getValue());
@@ -32,22 +33,23 @@ gitplex.fileEdit = {
 	    $container.find(">.file-edit>.head>.save").click(function() {
 	    	saveCallback(cm.getValue());
 	    });
+	    $container.find("form.edit").submit(false);
 	},
 	save: function(containerId) {
 		var $container = $("#" + containerId);
-		$container.find(">.file-edit>.body>div.edit").hide();
+		$container.find(">.file-edit>.body>.edit").hide();
 		$container.find(">.file-edit>.body>.preview").hide();
 		$container.find(">.file-edit>.body>.save").show();
 	},
 	preview: function(containerId) {
 		var $container = $("#" + containerId);
-		$container.find(">.file-edit>.body>div.edit").hide();
+		$container.find(">.file-edit>.body>.edit").hide();
 		$container.find(">.file-edit>.body>.save").hide();
 		$container.find(">.file-edit>.body>.preview").show();
 	},
 	setMode: function(cm, filePath) {
 		if (typeof cm === "string") 
-			cm = $("#"+ cm + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
+			cm = $("#"+ cm + ">.file-edit>.body>.edit>.CodeMirror")[0].CodeMirror;		
 
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);
 	    if (modeInfo) {
