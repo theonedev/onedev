@@ -34,6 +34,7 @@ import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
+import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -98,9 +99,9 @@ public abstract class EditSavePanel extends Panel {
 				else
 					return "Add new file";
 			} else if (oldPath.equals(newPath)) {
-				return "Edit " + oldPath;
+				return "Edit " + oldName;
 			} else {
-				return "Rename " + oldPath;
+				return "Rename " + oldName;
 			}
 		}
 			
@@ -263,7 +264,7 @@ public abstract class EditSavePanel extends Panel {
 				}
 			}
 			
-		});
+		}.add(new DirtyIgnoreBehavior()));
 		
 		form.add(new AjaxLink<Void>("cancel") {
 

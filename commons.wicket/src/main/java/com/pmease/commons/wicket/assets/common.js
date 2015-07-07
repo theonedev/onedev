@@ -438,7 +438,7 @@ pmease.commons = {
 				$trigger.unbind('click');
 
 				$trigger.click(function(event){
-					$trigger.closest("form").removeClass("dirty");
+					$("form.leave-confirm").removeClass("dirty");
 					previousClick(event);
 				});
 			});
@@ -836,18 +836,36 @@ pmease.commons = {
 			// infinitely  
 			setTimeout(function() {
 				window.onpopstate = function(event) {
-					if (!event.state || !event.state.data)
-						location.reload();
-					else 
-						callback(event.state.data);
+					if (pmease.commons.form.confirmLeave()) {
+						if (!event.state || !event.state.data)
+							location.reload();
+						else 
+							callback(event.state.data);
+						pmease.commons.history.current = {
+							state: event.state,
+							url: window.location.href
+						};
+					} else {
+						history.pushState(pmease.commons.history.current.state, '' , 
+								pmease.commons.history.current.url);
+					}
 				};
 			}, 100);
+			
+			pmease.commons.history.current = {
+				url: window.location.href	
+			};
 		},
 		setScrollPos: function(scrollPos) {
 			var state = history.state;
 			if (!state)
 				state = {};
-			history.replaceState({scrollPos: scrollPos, data: state.data}, '', window.location.href );
+			var newState = {scrollPos: scrollPos, data: state.data};
+			history.replaceState(newState, '', window.location.href );
+			pmease.commons.history.current = {
+				state: newState,
+				url: window.location.href
+			};
 		}, 
 		getScrollPos: function() {
 			if (history.state && history.state.scrollPos)

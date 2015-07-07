@@ -47,7 +47,7 @@ public class DirtyIgnoreBehavior extends Behavior {
 							}
 			
 							String decoratedScript = String.format(
-									"$(this).closest('form').removeClass('dirty'); %s", script);
+									"$('form.leave-confirm').removeClass('dirty'); %s", script);
 							tag.put("onclick", decoratedScript);
 						}
 					}

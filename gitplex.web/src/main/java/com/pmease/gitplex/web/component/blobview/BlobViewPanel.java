@@ -204,7 +204,7 @@ public abstract class BlobViewPanel extends Panel {
 				final BlobIdent file = context.getState().file;
 				String refName = Git.REFS_HEADS + file.revision;
 				
-				final AtomicReference<String> newPathRef = new AtomicReference<>();
+				final AtomicReference<String> newPathRef = new AtomicReference<>(file.path);
 				
 				editPanel = new FileEditPanel(panelId, repoModel, refName, 
 						file.path, context.getBlob().getText().getContent(), commitId) {
