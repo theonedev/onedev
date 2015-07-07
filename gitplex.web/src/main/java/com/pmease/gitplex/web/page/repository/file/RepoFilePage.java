@@ -283,10 +283,9 @@ public class RepoFilePage extends RepositoryPage {
 					}
 				}
 
-				target.add(revisionIndexing);
-				newRevisionSelector(target);
-
 				RepoFilePage.this.onSelect(target, blobIdent, null);
+				newRevisionSelector(target);
+				target.add(revisionIndexing);
 			}
 
 		};

@@ -281,17 +281,7 @@ public abstract class FileNavigator extends Panel {
 				
 			});
 		} else if (file.isTree()) {
-			lastSegment = new Fragment(LAST_SEGMENT_ID, "addFileFrag", this) {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					
-					if (!repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision))
-						tag.put("title", "Must on a branch to add or propose add of a file");
-				}
-				
-			};
+			lastSegment = new Fragment(LAST_SEGMENT_ID, "addFileFrag", this);
 			lastSegment.add(new AjaxLink<Void>("addFile") {
 
 				@Override
@@ -301,6 +291,16 @@ public abstract class FileNavigator extends Panel {
 					setEnabled(repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision));
 				}
 
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					
+					if (!repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision))
+						tag.put("title", "Must on a branch to add or propose add of a file");
+					else
+						tag.put("title", "Create new file here");
+				}
+				
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					onNewFile(target);
