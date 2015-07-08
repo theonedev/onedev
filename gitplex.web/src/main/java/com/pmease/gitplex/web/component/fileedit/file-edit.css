@@ -1,21 +1,35 @@
 .file-edit>.head {
 	border-bottom: 1px solid #BBB;
+	height: 36px;
+	background: #F2F2F2;
 }
 .file-edit>.head a.tab {
-	display: inline-block;
-	height: 35px;
 	color: #666;
-	padding: 6px 12px;
+	margin-top: 6px;
+	padding: 4px 12px;
 	text-decoration: none;
 }
+.file-edit>.head a.edit {
+	margin-left: 12px;
+}
 .file-edit>.head a.active.tab {
-	background: #E8E8E8;
+	background: white;
+	border: 1px solid #BBB;
+	border-radius: 4px 4px 0 0;
+	border-bottom: 1px solid white;
 	font-weight: bold;
 	color: #333;
 }
 .file-edit>.head a.cancel {
-	margin: 6px 12px;
+	margin-top: 10px;
+	margin-left: 12px;
+}
+.file-edit>.body {
+	overflow: auto;
 }
 .file-edit>.body>.preview, .file-edit>.body>.save {
 	display: none;
 }  
+.file-edit>.body>.save>.edit-save {
+	overflow: hidden;	
+}

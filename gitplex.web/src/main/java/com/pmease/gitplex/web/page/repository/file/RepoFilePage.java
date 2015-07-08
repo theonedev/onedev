@@ -376,6 +376,8 @@ public class RepoFilePage extends RepositoryPage {
 		lastCommit.setVisibilityAllowed(false);
 		target.add(lastCommit);
 		newFileNavigator(target, callback);
+		
+		target.appendJavaScript("$(window).resize();");
 	}
 	
 	private void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {

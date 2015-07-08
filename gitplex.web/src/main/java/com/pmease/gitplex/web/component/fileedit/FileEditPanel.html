@@ -1,13 +1,17 @@
 <wicket:panel>
-	<div class="file-edit">
+	<div class="file-edit autofit">
 		<div class="head clearfix">
-			<a class="active tab edit pull-left"><i class="fa fa-pencil"></i> Edit</a>
-			<a wicket:id="previewLink" class="tab preview pull-left"><i class="fa fa-eye"></i> Preview</a>
+			<a class="active tab edit pull-left"><i class="fa fa-pencil"></i> Edit file</a>
+			<a wicket:id="previewLink" class="tab preview pull-left"><i class="fa fa-eye"></i> Preview changes</a>
 			<a wicket:id="saveLink" class="tab save pull-left"><i class="fa fa-floppy-o"></i> Save</a>
 			<a wicket:id="cancelLink" class="cancel pull-left">Cancel</a>
 		</div>
 		<div class="body">
-			<form class="edit leave-confirm"></form>
+			<!-- below form is for dirty checking purpose and we can not use it as containing
+			element of codemirror as otherwise the dirty flag will be cleared by codemirror 
+			upon changing -->
+			<form class="edit leave-confirm hidden"></form>
+			<div class="edit"></div>
 			<div wicket:id="preview" class="preview">TBD</div>
 			<div wicket:id="save" class="save"></div>
 		</div>

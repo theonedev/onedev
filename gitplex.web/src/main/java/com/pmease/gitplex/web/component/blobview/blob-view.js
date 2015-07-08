@@ -20,7 +20,7 @@ gitplex.blobView = function(containerId) {
 		
 		height = $blobView.height()-$head.outerHeight();
 		$body.outerWidth(width).outerHeight(height);
-		$body.closestDescendant(".autofit").trigger("autofit", [$body.width(), $body.height()]);
+		$body.closestDescendant(".autofit:visible").trigger("autofit", [$body.width(), $body.height()]);
 
 		var scrollPos = pmease.commons.history.getScrollPos();
 		if (scrollPos) {

@@ -14,6 +14,8 @@ gitplex.editSave = {
 
 		$editSave.on("autofit", function(event, width, height) {
 			event.stopPropagation();
+			
+			$editSave.closest(".body").css("overflow", "hidden");
 			$editSave.outerWidth(width);
 			$editSave.outerHeight(height);
 			
