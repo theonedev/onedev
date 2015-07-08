@@ -1,3 +1,21 @@
+.file-edit>.head {
+	border-bottom: 1px solid #BBB;
+}
+.file-edit>.head a.tab {
+	display: inline-block;
+	height: 35px;
+	color: #666;
+	padding: 6px 12px;
+	text-decoration: none;
+}
+.file-edit>.head a.active.tab {
+	background: #E8E8E8;
+	font-weight: bold;
+	color: #333;
+}
+.file-edit>.head a.cancel {
+	margin: 6px 12px;
+}
 .file-edit>.body>.preview, .file-edit>.body>.save {
 	display: none;
 }  

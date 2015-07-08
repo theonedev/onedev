@@ -22,16 +22,22 @@ gitplex.fileEdit = {
 		
 		gitplex.fileEdit.setMode(cm, filePath);
 		
-	    $container.find(">.file-edit>.head>.edit").click(function() {
+	    $container.find(">.file-edit>.head a.edit").click(function() {
+	    	$container.find(">.file-edit>.head a.tab").removeClass("active");
+	    	$(this).addClass("active");
 			$container.find(">.file-edit>.body>.preview").hide();
 			$container.find(">.file-edit>.body>.save").hide();
 			$container.find(">.file-edit>.body>.edit").show();
 	    });
-	    $container.find(">.file-edit>.head>.preview").click(function() {
+	    $container.find(">.file-edit>.head a.preview").click(function() {
 	    	previewCallback(cm.getValue());
+	    	$container.find(">.file-edit>.head a.tab").removeClass("active");
+	    	$(this).addClass("active");
 	    });
-	    $container.find(">.file-edit>.head>.save").click(function() {
+	    $container.find(">.file-edit>.head a.save").click(function() {
 	    	saveCallback(cm.getValue());
+	    	$container.find(">.file-edit>.head a.tab").removeClass("active");
+	    	$(this).addClass("active");
 	    });
 	    $container.find("form.edit").submit(false);
 	},
