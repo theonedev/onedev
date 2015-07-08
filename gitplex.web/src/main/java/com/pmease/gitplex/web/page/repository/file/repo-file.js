@@ -31,12 +31,25 @@ $(window).load(function() {
 		
 		var $fileNavigator = $head.find(">.file-navigator");
 		if ($fileNavigator.length != 0) {
-			if ($fileNavigator.outerWidth() > maxWidth || $fileNavigator.outerHeight() > maxHeight)
+			if ($fileNavigator.outerWidth() > maxWidth || $fileNavigator.outerHeight() > maxHeight) {
 				$("#repo-file>.file-navigator").show().append($fileNavigator);
+				$fileNavigator.find("input.name")
+						.css("border-top", "1px solid #BBB")
+						.css("border-bottom", "1px solid #BBB")
+						.css("height", "28px")
+						.css("margin-top", "-2px")
+						.css("border-radius", "3px");
+			}
 		} else {
 			$fileNavigator = $("#repo-file>.file-navigator>div");
 			if ($fileNavigator.outerWidth() <= maxWidth && $fileNavigator.outerHeight() <= maxHeight) {
 				$fileNavigator.insertAfter($revisionSelector);
+				$fileNavigator.find("input.name")
+						.css("border-top-style", "none")
+						.css("border-bottom-style", "none")
+						.css("height", "30px")
+						.css("margin-top", "-4px")
+						.css("border-radius", "0");
 				$("#repo-file>.file-navigator").hide();
 			}
 		}

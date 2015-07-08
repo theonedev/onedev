@@ -18,6 +18,21 @@
 #repo-file>.head>.revision-selector>a, #repo-file>.head>.file-navigator, #repo-file>.file-navigator>div {
 	padding: 5px 8px;
 }
+#repo-file .file-navigator .last-segment {
+	height: 20px;
+	margin-left: 2px;
+	margin-top: -1px;
+}
+#repo-file .file-navigator input.name {
+	height: 30px;
+	border: 1px solid #BBB;
+	border-top: none;
+	border-bottom: none;
+	border-radius: 0;
+	font-size: 14px;
+	margin-top: -4px;
+	padding-left: 0px 8px;
+}
 #repo-file>.head>.search {
 	position: absolute;
 	margin-top: 5px;
@@ -28,7 +43,6 @@
 	margin: 0 8px;
 }
 #repo-file>.head>.search input {
-	box-shadow: none;
 	border-radius: 0;
 	border-color: #BBB;
 	height: 30px;
