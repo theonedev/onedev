@@ -10,20 +10,25 @@ public abstract class RunTaskBehavior extends AbstractDefaultAjaxBehavior {
 	protected void respond(AjaxRequestTarget target) {
 		target.prependJavaScript(String.format(""
 				+ "var $button = $('#%s');"
+				+ "if ($button.length != 0) {"
 				+ "$button.removeAttr('disabled');"
 				+ "$button.val($button[0].prevValue);"
-				+ "$button.html($button[0].prevHtml);",
+				+ "$button.html($button[0].prevHtml);"
+				+ "}",
 				getComponent().getMarkupId()));
 		runTask(target);
 	}
 
 	public void requestRun(AjaxRequestTarget target) {
-		target.appendJavaScript(String.format("var $button = $('#%s');"
+		target.appendJavaScript(String.format(""
+				+ "var $button = $('#%s');"
+				+ "if ($button.length != 0) {"
 				+ "$button.attr('disabled', 'disabled');"
 				+ "$button[0].prevValue = $button.val();"
 				+ "$button[0].prevHtml = $button.html();"
 				+ "$button.val($button.val() + ' in progress...');"
-				+ "$button.html($button.html() + ' in progress...');",
+				+ "$button.html($button.html() + ' in progress...');"
+				+ "}",
 				getComponent().getMarkupId()));
 		target.appendJavaScript(getCallbackScript());
 	}

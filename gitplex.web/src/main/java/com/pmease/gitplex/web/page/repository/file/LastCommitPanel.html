@@ -1,9 +1,10 @@
 <wicket:panel>
-	<div class="clearfix">
+	<div class="last-commit clearfix">
 		<span wicket:id="author" class="author pull-left"></span>
 		<span wicket:id="date" class="date pull-left"></span>
 		<span wicket:id="message" class="message pull-left"></span>
 		<input wicket:id="hash" class="hash pull-right" readonly="readonly" 
 				onfocus="var $this=$(this);setTimeout(function(){$this.select();}, 100);"></input>
 	</div>
+	<div class="message clearfix"></div>
 </wicket:panel>

@@ -23,10 +23,17 @@ $(window).load(function() {
 	
 	$(window).resize(function(e) {
 		e.stopPropagation();
-		
+
 		var $head = $("#repo-file>.head");
 		var $revisionSelector = $head.find(">.revision-selector");
-		var maxWidth = $head.width() - $revisionSelector.outerWidth() - 60;
+				
+		// we should simply call $head.width() here, but the value is incorrect after maximize and restore
+		// window in IE and Chrome (maybe due to use of table in sidebar?), so we go with the complicate 
+		// approach of calculating the head width
+		var headWidth = $("#repository").width() - $("#repository>.body>.sidebar>table>tbody>tr>td.nav").outerWidth();
+		
+		// below code moves file navigator to bottom if it is too wide
+		var maxWidth = headWidth - $revisionSelector.outerWidth() - 60;
 		var maxHeight = $head.height();
 
 		var $fileNavigator = $head.find(">.file-navigator");
@@ -38,6 +45,29 @@ $(window).load(function() {
 			if ($fileNavigator.outerWidth() <= maxWidth && $fileNavigator.outerHeight() <= maxHeight) {
 				$fileNavigator.insertAfter($revisionSelector);
 				$("#repo-file>.file-navigator").hide();
+			}
+		}
+		
+		// below code moves last commit message to bottom if it is too wide
+		var $lastCommit = $("#repo-file>.last-commit");
+		if ($lastCommit.length != 0) {
+			// why calculate width this way, see above comment when handling file navigator 
+			maxWidth = headWidth - ($lastCommit.outerWidth()-$lastCommit.width()) 
+					- $lastCommit.find(".author").outerWidth(true) 
+					- $lastCommit.find(".date").outerWidth(true)
+					- $lastCommit.find(".hash").outerWidth(true);
+			console.log($lastCommit.find(".date").outerWidth(true));
+			maxHeight = $lastCommit.find(".author").outerHeight();
+			var $message = $lastCommit.find(".last-commit>span.message");
+			if ($message.length != 0) {
+				if ($message.outerWidth(true) > maxWidth || $message.outerHeight() > maxHeight)
+					$lastCommit.find("div.message").show().append($message);
+			} else {
+				$message = $lastCommit.find("div.message>span");
+				if ($message.outerWidth(true) <= maxWidth && $message.outerHeight() <= maxHeight) {
+					$message.insertAfter($lastCommit.find(".date"));
+					$lastCommit.find("div.message").hide();
+				}
 			}
 		}
 		

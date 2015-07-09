@@ -518,7 +518,7 @@ pmease.commons = {
 	}, 
 		
 	setupDropdownAndModel: function() {
-		$(document).mousedown(function(event) {
+		$(document).bind("mousedown touchstart", function(event) {
 			var source = $(event.target);
 			if (!source.closest(".dropdown-trigger")[0])
 				pmease.commons.dropdown.hideExcept(source);
