@@ -503,6 +503,12 @@ public class RepoFilePage extends RepositoryPage {
 			}
 
 			@Override
+			protected void onComponentLoaded(Component component, AjaxRequestTarget target) {
+				super.onComponentLoaded(component, target);
+				target.appendJavaScript("$(window).resize();");
+			}
+
+			@Override
 			public Component getLazyLoadComponent(String markupId) {
 				return new LastCommitPanel(markupId, repoModel, state.file);
 			}

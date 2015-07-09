@@ -23,7 +23,7 @@ $(window).load(function() {
 	
 	$(window).resize(function(e) {
 		e.stopPropagation();
-
+		
 		var $head = $("#repo-file>.head");
 		var $revisionSelector = $head.find(">.revision-selector");
 				
@@ -56,7 +56,6 @@ $(window).load(function() {
 					- $lastCommit.find(".author").outerWidth(true) 
 					- $lastCommit.find(".date").outerWidth(true)
 					- $lastCommit.find(".hash").outerWidth(true);
-			console.log($lastCommit.find(".date").outerWidth(true));
 			maxHeight = $lastCommit.find(".author").outerHeight();
 			var $message = $lastCommit.find(".last-commit>span.message");
 			if ($message.length != 0) {
