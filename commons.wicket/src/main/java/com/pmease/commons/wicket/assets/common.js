@@ -860,7 +860,18 @@ pmease.commons = {
 			var state = history.state;
 			if (!state)
 				state = {};
-			var newState = {scrollPos: scrollPos, data: state.data};
+			var newState = {scrollPos: scrollPos, cursor: state.cursor, data: state.data};
+			history.replaceState(newState, '', window.location.href );
+			pmease.commons.history.current = {
+				state: newState,
+				url: window.location.href
+			};
+		}, 
+		setCursor: function(cursor) {
+			var state = history.state;
+			if (!state)
+				state = {};
+			var newState = {cursor: cursor, scrollPos: state.scrollPos, data: state.data};
 			history.replaceState(newState, '', window.location.href );
 			pmease.commons.history.current = {
 				state: newState,
@@ -870,6 +881,12 @@ pmease.commons = {
 		getScrollPos: function() {
 			if (history.state && history.state.scrollPos)
 				return history.state.scrollPos;
+			else
+				return undefined;
+		},
+		getCursor: function() {
+			if (history.state && history.state.cursor)
+				return history.state.cursor;
 			else
 				return undefined;
 		}

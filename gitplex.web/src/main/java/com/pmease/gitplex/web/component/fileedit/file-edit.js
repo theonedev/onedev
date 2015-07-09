@@ -27,10 +27,16 @@ gitplex.fileEdit = {
 	    	var scrollInfo = cm.getScrollInfo();
 	    	pmease.commons.history.setScrollPos({left: scrollInfo.left, top: scrollInfo.top});
 	    });
-	    
 	    var scrollPos = pmease.commons.history.getScrollPos();
 	    if (scrollPos)
 	    	cm.scrollTo(scrollPos.left, scrollPos.top);
+	    
+	    cm.on("cursorActivity", function() {
+	    	pmease.commons.history.setCursor(cm.getCursor());
+	    });
+	    var cursor = pmease.commons.history.getCursor();
+	    if (cursor)
+	    	cm.setCursor(cursor);
 	    
 		gitplex.fileEdit.setMode(cm, filePath);
 		

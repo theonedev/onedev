@@ -105,17 +105,23 @@ gitplex.sourceview = {
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
 
+			    if (tokenPos)
+			    	gitplex.sourceview.highlightToken(cm, tokenPos);
+
 			    cm.on("scroll", function() {
 			    	var scrollInfo = cm.getScrollInfo();
 			    	pmease.commons.history.setScrollPos({left: scrollInfo.left, top: scrollInfo.top});
 			    });
-			    
-			    if (tokenPos)
-			    	gitplex.sourceview.highlightToken(cm, tokenPos);
-
 			    var scrollPos = pmease.commons.history.getScrollPos();
 			    if (scrollPos)
 			    	cm.scrollTo(scrollPos.left, scrollPos.top);
+			    
+			    cm.on("cursorActivity", function() {
+			    	pmease.commons.history.setCursor(cm.getCursor());
+			    });
+			    var cursor = pmease.commons.history.getCursor();
+			    if (cursor)
+			    	cm.setCursor(cursor);
 			    
 			    if (blameCommits) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
