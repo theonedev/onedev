@@ -35,24 +35,16 @@ gitplex.fileEdit = {
 		gitplex.fileEdit.setMode(cm, filePath);
 		
 	    $head.find("a.edit").click(function() {
-	    	$head.find("a.tab").removeClass("active");
-	    	$(this).addClass("active");
-			$body.find(".preview").hide();
-			$body.find(".save").hide();
-			$edit.show();
-			$(window).resize();
+	    	gitplex.fileEdit.selectTab($(this));
 	    });
 	    $head.find("a.preview").click(function() {
 	    	previewCallback(cm.getValue());
 	    });
 	    $head.find("a.save").click(function() {
 	    	saveCallback(cm.getValue());
-	    	$head.find("a.tab").removeClass("active");
-	    	$(this).addClass("active");
 	    });
 	    
 		$fileEdit.on("autofit", function(event, width, height) {
-			console.log("autofit");
 			event.stopPropagation();
 			$fileEdit.outerWidth(width);
 			$fileEdit.outerHeight(height);
@@ -86,26 +78,10 @@ gitplex.fileEdit = {
 		
 	},
 	save: function(containerId) {
-		var $container = $("#" + containerId);
-		
-		$container.find(">.file-edit>.head a.tab").removeClass("active");
-    	$container.find(">.file-edit>.head a.save").addClass("active");
-    	
-		$container.find(">.file-edit>.body>div.edit").hide();
-		$container.find(">.file-edit>.body>.preview").hide();
-		$container.find(">.file-edit>.body>.save").show();
-		$(window).resize();
+		gitplex.fileEdit.selectTab($("#" + containerId + ">.file-edit>.head>.save"));
 	},
 	preview: function(containerId) {
-		var $container = $("#" + containerId);
-    	
-		$container.find(">.file-edit>.head a.tab").removeClass("active");
-    	$container.find(">.file-edit>.head a.preview").addClass("active");
-    	
-		$container.find(">.file-edit>.body>div.edit").hide();
-		$container.find(">.file-edit>.body>.save").hide();
-		$container.find(">.file-edit>.body>.preview").show();
-		$(window).resize();
+		gitplex.fileEdit.selectTab($("#" + containerId + ">.file-edit>.head>.preview"));
 	},
 	setMode: function(cm, filePath) {
 		if (typeof cm === "string") 
@@ -120,5 +96,26 @@ gitplex.fileEdit = {
 	    		cm.setOption("mode", modeInfo.mime);
 			CodeMirror.autoLoadMode(cm, modeInfo.mode);
 	    }
+	},
+	selectTab: function($tab) {
+    	var $active = $tab.parent().find("a.tab.active");
+    	$active[0].hideableVisible = $(".hideable").is(":visible");
+    	$active.removeClass("active");
+    	$tab.addClass("active");
+    	if ($tab[0].hideableVisible != undefined) {
+    		if ($tab[0].hideableVisible)
+    			$(".hideable").show();
+    		else
+    			$(".hideable").hide();
+    	}
+    	var $body = $tab.closest(".file-edit").find(">.body");
+		$body.find(">div").hide();
+		if ($tab.hasClass("edit")) 
+			$body.find(">div.edit").show().find(">.CodeMirror")[0].CodeMirror.focus();
+		else if ($tab.hasClass("preview"))
+			$body.find(">div.preview").show();
+		else
+			$body.find(">div.save").show();
+		$(window).resize();
 	}
 }

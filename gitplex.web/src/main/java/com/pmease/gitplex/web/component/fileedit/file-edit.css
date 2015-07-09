@@ -5,7 +5,7 @@
 }
 .file-edit>.head a.tab {
 	color: #666;
-	margin-top: 6px;
+	margin-top: 7px;
 	padding: 4px 12px;
 	text-decoration: none;
 }
@@ -21,11 +21,11 @@
 	color: #333;
 }
 .file-edit>.head a.cancel {
-	margin-top: 10px;
+	margin-top: 11px;
 	margin-left: 12px;
 }
 .file-edit>.body {
-	overflow: auto;
+	overflow: hidden;
 }
 .file-edit>.body>.preview, .file-edit>.body>.save {
 	display: none;

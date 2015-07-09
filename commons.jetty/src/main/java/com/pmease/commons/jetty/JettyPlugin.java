@@ -20,6 +20,8 @@ import com.pmease.commons.loader.AbstractPlugin;
 
 public class JettyPlugin extends AbstractPlugin {
 	
+	private static final int MAX_CONTENT_SIZE = 5000000;
+	
 	private Server server;
 	
 	private ServletContextHandler contextHandler;
@@ -71,6 +73,7 @@ public class JettyPlugin extends AbstractPlugin {
 		server = new Server();
 
         contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        contextHandler.setMaxFormContentSize(MAX_CONTENT_SIZE);
 
         contextHandler.setClassLoader(JettyPlugin.class.getClassLoader());
         
