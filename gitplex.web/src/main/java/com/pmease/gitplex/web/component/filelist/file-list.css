@@ -45,6 +45,12 @@
 	font-weight: bold;	
 	border-bottom: 1px solid #BBB;
 }
+.file-list>.readme>.head img {
+	width: 16px;
+	height: 16px;
+	vertical-align: top;
+	margin-right: 4px;
+}
 .file-list>.readme>.body {
 	padding: 20px;
 }
