@@ -376,7 +376,6 @@ public class RepoFilePage extends RepositoryPage {
 		lastCommit.setVisibilityAllowed(false);
 		target.add(lastCommit);
 		newFileNavigator(target, callback);
-		
 		target.appendJavaScript("$(window).resize();");
 	}
 	
@@ -487,6 +486,7 @@ public class RepoFilePage extends RepositoryPage {
 				target.add(lastCommit);
 				replace(fileViewer);
 				target.add(fileViewer);
+				target.appendJavaScript("$(window).resize();");
 			}
 
 		};		

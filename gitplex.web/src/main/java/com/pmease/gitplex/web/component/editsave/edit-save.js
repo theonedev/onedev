@@ -25,8 +25,6 @@ gitplex.editSave = {
 				$editSave.scrollTop(scrollPos.top);
 			}
 		});
-		
-		$(window).resize();
 	},
 	updateDefaultCommitMessage: function(containerId, placeholder) {
 		$("#" + containerId + " .summary-commit-message").attr("placeholder", placeholder);

@@ -59,7 +59,7 @@ gitplex.sourceview = {
 			if (!cm) {
 				var options = {
 					value: fileContent, 
-					readOnly: true,
+					readOnly: pmease.commons.isDevice()?"nocursor":true,
 					theme: "eclipse",
 					lineNumbers: true,
 					lineWrapping: true,
@@ -90,8 +90,6 @@ gitplex.sourceview = {
 				        }
 					}
 				};
-				if (pmease.commons.isDevice())
-					options.cursorBlinkRate = -1;
 
 				cm = CodeMirror($code[0], options);
 				

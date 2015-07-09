@@ -21,18 +21,26 @@
 #repo-file .file-navigator .last-segment {
 	height: 20px;
 	margin-left: 2px;
-	margin-top: -1px;
 }
-#repo-file .file-navigator input.name {
+#repo-file>.head>.file-navigator input.name {
 	height: 30px;
 	border: 1px solid #BBB;
 	border-top: none;
 	border-bottom: none;
 	border-radius: 0;
-	font-size: 14px;
-	margin-top: -4px;
+	margin-top: -5px;
 	padding-left: 0px 8px;
+	width: 160px;
 }
+#repo-file>.file-navigator input.name {
+	border-top: 1px solid #BBB;
+	border-bottom: 1px solid #BBB;
+	height: 26px;
+	margin-top: -1px;
+	border-radius: 3px;
+	width: 160px;
+}					
+	
 #repo-file>.head>.search {
 	position: absolute;
 	margin-top: 5px;

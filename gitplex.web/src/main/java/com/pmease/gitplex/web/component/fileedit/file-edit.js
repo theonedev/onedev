@@ -15,7 +15,16 @@ gitplex.fileEdit = {
 			foldGutter: true,
 			matchBrackets: true,
 			scrollbarStyle: "simple",
-			highlightIdentifiers: {delay: 500}
+			highlightIdentifiers: {delay: 500},
+			extraKeys: {
+				"F11": function(cm) {
+					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+				},
+				"Esc": function(cm) {
+					if (cm.getOption("fullScreen"))
+						cm.setOption("fullScreen", false);
+		        }
+			}
 		});
 		
 		cm.on("change", function() {
@@ -62,6 +71,8 @@ gitplex.fileEdit = {
 				$body.css("overflow", "hidden");
 				$edit.outerHeight($body.height());
 				$edit.outerWidth($body.width());
+				if (cm.getOption("fullScreen"))
+					cm.setOption("fullScreen", false);
 				cm.setSize($edit.width(), $edit.height());
 			} else {
 				$body.css("overflow", "auto");
