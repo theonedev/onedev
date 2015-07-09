@@ -3,11 +3,7 @@ $(function() {
 	
 	function enableTooltip() {
 		$nav.find("li a").each(function() {
-			$(this).tooltip({
-				title: $(this).find(".text").text(), 
-				placement: "right",
-				delay: 300
-			});
+			$(this).attr("title", $(this).find(".text").text());
 		});
 	}
 	
@@ -24,7 +20,7 @@ $(function() {
 			enableTooltip();
 		} else {
 			Cookies.set(cookieKey, "no", {expires: Infinity});
-			$nav.find("li a").tooltip("destroy");
+			$nav.find("li a").removeAttr("title");
 		}
 		$(window).resize();
 	});

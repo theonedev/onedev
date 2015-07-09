@@ -19,6 +19,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -32,16 +33,80 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class FileListPanel extends Panel {
 
+	private static final String README_NAME = "readme.md";
+	
 	private final IModel<Repository> repoModel;
 	
 	private final BlobIdent directory;
+	
+	private final IModel<List<BlobIdent>> childrenModel = new LoadableDetachableModel<List<BlobIdent>>() {
+
+		@Override
+		protected List<BlobIdent> load() {
+			try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
+					RevWalk revWalk = new RevWalk(jgitRepo)) {
+				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
+				TreeWalk treeWalk;
+				if (directory.path != null) {
+					treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, directory.path, revTree));
+					treeWalk.enterSubtree();
+				} else {
+					treeWalk = new TreeWalk(jgitRepo);
+					treeWalk.addTree(revTree);
+				}
+				List<BlobIdent> children = new ArrayList<>();
+				while (treeWalk.next())
+					children.add(new BlobIdent(directory.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
+				for (int i=0; i<children.size(); i++) {
+					BlobIdent child = children.get(i);
+					while (child.isTree()) {
+						treeWalk = TreeWalk.forPath(jgitRepo, child.path, revTree);
+						Preconditions.checkNotNull(treeWalk);
+						treeWalk.enterSubtree();
+						if (treeWalk.next()) {
+							BlobIdent grandChild = new BlobIdent(directory.revision, 
+									treeWalk.getPathString(), treeWalk.getRawMode(0));
+							if (treeWalk.next()) 
+								break;
+							else
+								child = grandChild;
+						} else {
+							break;
+						}
+					}
+					children.set(i, child);
+				}
+				
+				Collections.sort(children);
+				return children;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} 
+		}
+		
+	};
+	
+	private final IModel<BlobIdent> readmeModel = new LoadableDetachableModel<BlobIdent>() {
+
+		@Override
+		protected BlobIdent load() {
+			for (BlobIdent blobIdent: childrenModel.getObject()) {
+				if (blobIdent.getName().toLowerCase().equals(README_NAME))
+					return blobIdent;
+			}
+			return null;
+		}
+		
+	};
 	
 	public FileListPanel(String id, IModel<Repository> repoModel, BlobIdent directory) {
 		super(id);
@@ -93,52 +158,7 @@ public abstract class FileListPanel extends Panel {
 		});
 		add(parent);
 		
-		add(new ListView<BlobIdent>("children", new LoadableDetachableModel<List<BlobIdent>>() {
-
-			@Override
-			protected List<BlobIdent> load() {
-				try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
-						RevWalk revWalk = new RevWalk(jgitRepo)) {
-					RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-					TreeWalk treeWalk;
-					if (directory.path != null) {
-						treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, directory.path, revTree));
-						treeWalk.enterSubtree();
-					} else {
-						treeWalk = new TreeWalk(jgitRepo);
-						treeWalk.addTree(revTree);
-					}
-					List<BlobIdent> children = new ArrayList<>();
-					while (treeWalk.next())
-						children.add(new BlobIdent(directory.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
-					for (int i=0; i<children.size(); i++) {
-						BlobIdent child = children.get(i);
-						while (child.isTree()) {
-							treeWalk = TreeWalk.forPath(jgitRepo, child.path, revTree);
-							Preconditions.checkNotNull(treeWalk);
-							treeWalk.enterSubtree();
-							if (treeWalk.next()) {
-								BlobIdent grandChild = new BlobIdent(directory.revision, 
-										treeWalk.getPathString(), treeWalk.getRawMode(0));
-								if (treeWalk.next()) 
-									break;
-								else
-									child = grandChild;
-							} else {
-								break;
-							}
-						}
-						children.set(i, child);
-					}
-					
-					Collections.sort(children);
-					return children;
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} 
-			}
-			
-		}) {
+		add(new ListView<BlobIdent>("children", childrenModel) {
 
 			@Override
 			protected void populateItem(ListItem<BlobIdent> item) {
@@ -189,6 +209,39 @@ public abstract class FileListPanel extends Panel {
 			
 		});
 		
+		WebMarkupContainer readmeContainer = new WebMarkupContainer("readme") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(readmeModel.getObject() != null);
+			}
+			
+		};
+		readmeContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return readmeModel.getObject().getName();
+			}
+			
+		}));
+		readmeContainer.add(new MarkdownPanel("body", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				Blob blob = repoModel.getObject().getBlob(readmeModel.getObject());
+				Blob.Text text = blob.getText();
+				if (text != null)
+					return text.getContent();
+				else
+					return "This seems like a binary file!";
+			}
+			
+		}));
+		add(readmeContainer);
+		
 		setOutputMarkupId(true);
 	}
 	
@@ -215,6 +268,8 @@ public abstract class FileListPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
+		childrenModel.detach();
+		readmeModel.detach();		
 		repoModel.detach();
 		
 		super.onDetach();

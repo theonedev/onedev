@@ -31,7 +31,7 @@ import com.pmease.commons.git.command.AdvertiseReceiveRefsCommand;
 import com.pmease.commons.git.command.AdvertiseUploadRefsCommand;
 import com.pmease.commons.git.command.ReceiveCommand;
 import com.pmease.commons.git.command.UploadCommand;
-import com.pmease.commons.util.GeneralException;
+import com.pmease.commons.git.exception.GitException;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.setting.ServerConfig;
@@ -77,7 +77,7 @@ public class GitFilter implements Filter {
 		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
 			String url = request.getRequestURL().toString();
 			String urlRoot = url.substring(0, url.length()-getPathInfo(request).length());
-			throw new GeneralException(String.format("Expecting url of format %s<owner name>/<repository name>", urlRoot));
+			throw new GitException(String.format("Expecting url of format %s<owner name>/<repository name>", urlRoot));
 		} 
 		
 		if (repositoryName.endsWith(".git"))
@@ -85,7 +85,7 @@ public class GitFilter implements Filter {
 		
 		Repository repository = repositoryManager.findBy(ownerName, repositoryName);
 		if (repository == null) {
-			throw new GeneralException(String.format("Unable to find repository %s owned by %s.", repositoryName, ownerName));
+			throw new GitException(String.format("Unable to find repository %s owned by %s.", repositoryName, ownerName));
 		}
 		
 		return repository;
@@ -115,9 +115,9 @@ public class GitFilter implements Filter {
         else 
             serverUrl = "https://localhost:" + serverConfig.getSslConfig().getPort();
 
-		environments.put("GITOP_URL", serverUrl);
-		environments.put("GITOP_USER_ID", User.getCurrentId().toString());
-		environments.put("GITOP_REPOSITORY_ID", repository.getId().toString());
+		environments.put("GITPLEX_URL", serverUrl);
+		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
+		environments.put("GITPLEX_REPOSITORY_ID", repository.getId().toString());
 		File gitDir = storageManager.getRepoDir(repository);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
@@ -183,16 +183,16 @@ public class GitFilter implements Filter {
 				if (gitPlex.isReady())
 					processRefs(httpRequest, httpResponse);
 				else
-					throw new GeneralException("Server is not ready");
+					throw new GitException("Server is not ready");
 			} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
 				if (gitPlex.isReady())
 					processPacks(httpRequest, httpResponse);
 				else
-					throw new GeneralException("Server is not ready");
+					throw new GitException("Server is not ready");
 			} else {
 				chain.doFilter(request, response);
 			}
-		} catch (GeneralException e) {
+		} catch (GitException e) {
 			logger.error("Error serving git request", e);
 			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		}

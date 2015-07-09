@@ -36,3 +36,15 @@
 .file-list>table tr.parent td a span {
 	font-size: 18px;
 }
+.file-list>.readme {
+	border-top: 1px solid #BBB;
+}
+.file-list>.readme>.head {
+	padding: 6px 12px;
+	background: #EEE;
+	font-weight: bold;	
+	border-bottom: 1px solid #BBB;
+}
+.file-list>.readme>.body {
+	padding: 20px;
+}

@@ -1,6 +1,6 @@
 <wicket:panel>
 	<div class="file-list autofit">
-		<table>
+		<table class="files">
 			<tr wicket:id="parent" class="parent">
 				<td colspan="3">
 					<a wicket:id="link"><i class="fa fa-level-up"></i> <span>..</span></a>
@@ -16,5 +16,11 @@
 				<td class="last-commit message"></td>
 			</tr>
 		</table>
+		<div wicket:id="readme" class="readme">
+			<div class="head">
+				<i class="fa fa-file-text-o"></i> <span wicket:id="title"></span>
+			</div>
+			<div wicket:id="body" class="body"></div>
+		</div>
 	</div>
 </wicket:panel>
