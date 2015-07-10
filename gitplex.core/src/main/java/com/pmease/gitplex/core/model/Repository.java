@@ -284,7 +284,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
         
         try {
 			String content = FileUtils.readFileToString(updateHook);
-			return content.contains("GITOP_USER_ID");
+			return content.contains("GITPLEX_USER_ID");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

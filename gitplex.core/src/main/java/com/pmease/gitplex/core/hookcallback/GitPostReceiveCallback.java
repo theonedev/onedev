@@ -118,7 +118,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 					repository.git().updateDefaultBranch(branchName);
 					branch.setDefault(true);
 				}
-				dao.persist(branch);
+				branchManager.save(branch);
 			} else if (newCommitHash.equals(GitUtils.NULL_SHA1)) {
 				Branch branch = branchManager.findBy(repository, branchName);
 				Preconditions.checkNotNull(branch);
@@ -147,7 +147,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 						for (RepositoryListener listener: listenersProvider.get())
 							listener.commitReceived(repository, newCommitHash);
 					} catch (Exception e) {
-						logger.error("Error indexing repository '" + repository + "'", e);
+						logger.error("Error notifying commit of repository '" + repository + "'", e);
 					}
 				}
 				
