@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail;
 
 import java.util.ArrayList;
 import java.util.Arrays;

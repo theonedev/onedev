@@ -52,7 +52,7 @@ class DisplayOption implements Serializable {
 
 	public EntityCriteria<PullRequest> getCriteria(Repository repository, boolean withOrderBy) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.createCriteria("target").add(Restrictions.eq("repository", repository));
+		criteria.add(Restrictions.eq("targetRepo", repository));
 		if (open) {
 			criteria.add(PullRequest.CriterionHelper.ofOpen());
 		} else {

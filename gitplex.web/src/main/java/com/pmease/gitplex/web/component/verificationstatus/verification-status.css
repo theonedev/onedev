@@ -1,0 +1,27 @@
+.verification-status {
+	cursor: pointer;
+}
+
+table.verifications td {
+	vertical-align: top; 
+	white-space: nowrap; 
+	color: #444;
+}
+table.verifications {
+	margin-bottom: 1px;
+}
+table.verifications .fa {
+	display: none;
+}
+table.verifications tr.passed .fa-check {
+	display: inline; 
+	color: #5CB85C;
+}
+table.verifications tr.not-passed .fa-times {
+	display: inline; 
+	color: #D9534F;
+}
+table.verifications tr.ongoing .fa-cog {
+	display: inline; 
+	color: #F0AD4E;
+}

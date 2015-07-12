@@ -37,7 +37,7 @@ import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.pullrequest.RequestComparePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestComparePage;
 
 @SuppressWarnings("serial")
 public class InlineCommentActivityPanel extends Panel {

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest;
+package com.pmease.gitplex.web.component.requeststatus;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;

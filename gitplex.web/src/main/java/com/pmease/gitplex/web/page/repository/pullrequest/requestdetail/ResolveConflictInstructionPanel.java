@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail;
 
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;

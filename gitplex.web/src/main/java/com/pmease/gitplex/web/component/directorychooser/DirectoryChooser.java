@@ -9,9 +9,12 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.Git;
@@ -94,6 +97,14 @@ public abstract class DirectoryChooser extends Panel {
 			}
 			
 		});
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(DirectoryChooser.class, "directory-chooser.css")));
 	}
 
 	public RepoAndBranch getRepoAndBranch() {

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest;
+package com.pmease.gitplex.web.page.repository.pullrequest.newrequest;
 
 import static com.pmease.gitplex.core.model.PullRequest.Status.INTEGRATED;
 import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_UPDATE;
@@ -12,6 +12,8 @@ import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -27,6 +29,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Change;
@@ -63,6 +66,8 @@ import com.pmease.gitplex.web.component.pullrequest.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestOverviewPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
@@ -546,6 +551,12 @@ public class NewRequestPage extends RepositoryPage {
 		});
 		
 		return fragment;
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(NewRequestPage.class, "new-request.css")));
 	}
 
 	@Override

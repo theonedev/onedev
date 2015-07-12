@@ -1,0 +1,9 @@
+.directory-chooser {
+	max-height: 650px; 
+	overflow: auto; 
+	padding: 12px 24px 12px 12px;
+}
+.directory-chooser .title {
+	font-weight: bold; 
+	border-bottom: 1px solid #888;
+}

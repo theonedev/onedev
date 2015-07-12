@@ -40,8 +40,10 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.RequestLink;
+import com.pmease.gitplex.web.component.requeststatus.RequestStatusPanel;
 import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
 
 @SuppressWarnings("serial")
 public class RequestListPanel extends Panel {

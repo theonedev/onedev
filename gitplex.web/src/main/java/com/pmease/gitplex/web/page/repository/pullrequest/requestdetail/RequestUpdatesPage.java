@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,6 +39,7 @@ import com.pmease.gitplex.web.component.commitmessage.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.label.AgeLabel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
+import com.pmease.gitplex.web.component.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
