@@ -16,17 +16,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
-import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -36,22 +32,13 @@ public class GitPostReceiveCallback extends HttpServlet {
 
     public static final String PATH = "/git-postreceive-callback";
     
-    private static final Logger logger = LoggerFactory.getLogger(GitPostReceiveCallback.class);
-    
     private final Dao dao;
-    
-    private final BranchManager branchManager;
-    
-    private final UnitOfWork unitOfWork;
     
     private final Provider<Set<RepositoryListener>> listenersProvider;
     
     @Inject
-    public GitPostReceiveCallback(Dao dao, BranchManager branchManager, UnitOfWork unitOfWork, 
-    		Provider<Set<RepositoryListener>> listenersProvider) {
+    public GitPostReceiveCallback(Dao dao, Provider<Set<RepositoryListener>> listenersProvider) {
     	this.dao = dao;
-        this.branchManager = branchManager;
-        this.unitOfWork = unitOfWork;
         this.listenersProvider = listenersProvider;
     }
 
@@ -93,9 +80,19 @@ public class GitPostReceiveCallback extends HttpServlet {
         	String newCommitHash = StringUtils.reverse(fields.get(pos));
         	pos++;
         	String field = fields.get(pos);
-        	String oldCommitHash = StringUtils.reverse(field.substring(0, 40));
-        	onRefUpdated(repository, refName, oldCommitHash, newCommitHash);
+//        	String oldCommitHash = StringUtils.reverse(field.substring(0, 40));
         	
+    		String branch = GitUtils.ref2branch(refName);
+    		if (branch != null) {
+            	if (!newCommitHash.equals(GitUtils.NULL_SHA1))
+            		repository.cacheObjectId(branch, ObjectId.fromString(newCommitHash));
+            	else
+            		repository.cacheObjectId(branch, null);
+    		}
+        	
+    		for (RepositoryListener listener: listenersProvider.get())
+    			listener.onRefUpdate(repository, refName, newCommitHash);
+    		
         	field = field.substring(40);
         	if (field.length() == 0)
         		break;
@@ -105,53 +102,4 @@ public class GitPostReceiveCallback extends HttpServlet {
     	
 	}
 
-    private void onRefUpdated(Repository repository, String refName, String oldCommitHash, final String newCommitHash) {
-		String branchName = Branch.parseName(refName);
-		if (branchName != null) {
-			if (oldCommitHash.equals(GitUtils.NULL_SHA1)) {
-				Branch branch = new Branch();
-				branch.setRepository(repository);
-				branch.setName(branchName);
-				branch.setHeadCommitHash(newCommitHash);
-				repository.getBranches().add(branch);
-				if (repository.getBranches().size() == 1) { 
-					repository.git().updateDefaultBranch(branchName);
-					branch.setDefault(true);
-				}
-				branchManager.save(branch);
-			} else if (newCommitHash.equals(GitUtils.NULL_SHA1)) {
-				Branch branch = branchManager.findBy(repository, branchName);
-				Preconditions.checkNotNull(branch);
-
-				repository.getBranches().remove(branch);
-				branchManager.delete(branch);
-				if (repository.git().resolveDefaultBranch().equals(branchName) && !repository.getBranches().isEmpty()) 
-						repository.git().updateDefaultBranch(repository.getBranches().iterator().next().getName());
-			} else {
-				Branch branch = branchManager.findBy(repository, branchName);
-				Preconditions.checkNotNull(branch);
-
-				branch.setHeadCommitHash(newCommitHash);
-				branchManager.save(branch);
-			}
-		}
-		
-		if (!newCommitHash.equals(GitUtils.NULL_SHA1)) {
-			final Long repositoryId = repository.getId();
-			unitOfWork.asyncCall(new Runnable() {
-
-				@Override
-				public void run() {			
-					Repository repository = dao.load(Repository.class, repositoryId);
-					try {
-						for (RepositoryListener listener: listenersProvider.get())
-							listener.commitReceived(repository, newCommitHash);
-					} catch (Exception e) {
-						logger.error("Error notifying commit of repository '" + repository + "'", e);
-					}
-				}
-				
-			});
-		}
-    }
 }

@@ -12,7 +12,6 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -40,17 +39,17 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public CheckResult checkFile(User user, Branch branch, String file) {
+	public CheckResult checkFile(User user, Repository repository, String branch, String file) {
 		if (isEnabled())
-			return doCheckFile(user, branch, file);
+			return doCheckFile(user, repository, branch, file);
 		else
 			return ignored();
 	}
 	
 	@Override
-	public CheckResult checkCommit(User user, Branch branch, String commit) {
+	public CheckResult checkCommit(User user, Repository repository, String branch, String commit) {
 		if (isEnabled())
-			return doCheckCommit(user, branch, commit);
+			return doCheckCommit(user, repository, branch, commit);
 		else
 			return ignored();
 	}
@@ -86,7 +85,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(User user, Branch branch, String file);
+	protected abstract CheckResult doCheckFile(User user, Repository repository, String branch, String file);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch, without considering enable flag.
@@ -100,7 +99,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckCommit(User user, Branch branch, String commit);
+	protected abstract CheckResult doCheckCommit(User user, Repository repository, String branch, String commit);
 
 	/**
 	 * Check if specified user can create/delete specified reference in specified repository, 

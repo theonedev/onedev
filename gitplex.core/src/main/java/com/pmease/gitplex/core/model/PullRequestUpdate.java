@@ -13,12 +13,14 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
@@ -39,16 +41,14 @@ public class PullRequestUpdate extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	@ManyToOne
-	private User user;
-	
 	@Column(nullable=false)
 	private String headCommitHash;
 
 	@Column(nullable=false)
 	private Date date;
 	
-	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="update")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Review> reviews = new ArrayList<Review>();
 	
 	private transient List<Commit> commits;
@@ -61,14 +61,6 @@ public class PullRequestUpdate extends AbstractEntity {
 
 	public void setRequest(PullRequest request) {
 		this.request = request;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
 	}
 
 	public String getHeadCommitHash() {
@@ -116,7 +108,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 
 	public void deleteRefs() {
-		Git git = getRequest().getTarget().getRepository().git();
+		Git git = getRequest().getTargetRepo().git();
 		git.deleteRef(getHeadRef(), null, null);
 	}	
 	
@@ -160,13 +152,13 @@ public class PullRequestUpdate extends AbstractEntity {
 				public CachedInfo call() throws Exception {
 					CachedInfo cachedInfo = new CachedInfo();
 
-					Git git = getRequest().getTarget().getRepository().git();
+					Git git = getRequest().getTargetRepo().git();
 					List<Commit> log = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0);
 					if (log.isEmpty())
-						log = Lists.newArrayList(getRequest().getTarget().getRepository().getCommit(getHeadCommitHash()));
+						log = Lists.newArrayList(getRequest().getTargetRepo().getCommit(getHeadCommitHash()));
 					cachedInfo.setLogCommits(log);
 					
-					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHeadCommitHash());
+					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHead());
 
 					if (git.isAncestor(getBaseCommitHash(), mergeBase)) { 
 						cachedInfo.setChangedFiles(git.listChangedFiles(mergeBase, getHeadCommitHash(), null));					
@@ -186,7 +178,7 @@ public class PullRequestUpdate extends AbstractEntity {
 							 * This way changed files of this update will exclude merged changes 
 							 * from target branch if there is any.  
 							 */
-							String branchName = getRequest().getTarget().getName();
+							String branchName = getRequest().getTargetBranch();
 							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
 							tempGit.updateRef("HEAD", mergeBase, null, null);
 							tempGit.reset(null, null);
@@ -264,7 +256,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				mergedCommits.put(commit.getHash(), scoredCommit);
 			}
 
-			headCommit = mergedCommits.get(getRequest().getTarget().getHeadCommitHash());
+			headCommit = mergedCommits.get(getRequest().getTarget().getHead());
 			if (headCommit != null) {
 				headCommit.setScore(0);
 				updateAffinityScores(mergedCommits, headCommit);
@@ -276,7 +268,7 @@ public class PullRequestUpdate extends AbstractEntity {
 					commits.add(commit.getCommit());
 			}
 			
-			getRequest().getTarget().getRepository().cacheCommits(commits);
+			getRequest().getTargetRepo().cacheCommits(commits);
 			
 			Collections.reverse(commits);
 		}

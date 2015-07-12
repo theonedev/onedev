@@ -5,7 +5,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.util.pattern.WildcardUtils;
-import com.pmease.gitplex.core.model.Branch;
 
 @SuppressWarnings("serial")
 @Editable(order=200, name="Specify Branch Patterns")
@@ -26,13 +25,8 @@ public class MatchLocalBranchesByPatterns implements LocalBranchMatcher {
 	}
 
 	@Override
-	public Object trim(Object context) {
-		return this;
-	}
-
-	@Override
-	public boolean matches(Branch branch) {
-		return WildcardUtils.matchPath(getBranchPatterns(), branch.getName());
+	public boolean matches(String branch) {
+		return WildcardUtils.matchPath(getBranchPatterns(), branch);
 	}
 
 }

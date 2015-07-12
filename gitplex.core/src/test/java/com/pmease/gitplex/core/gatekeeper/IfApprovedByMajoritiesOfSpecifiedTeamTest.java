@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.gatekeeper;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -12,7 +13,6 @@ import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
@@ -31,15 +31,6 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		super.setup();
 		
 		Mockito.when(AppLoader.getInstance(Dao.class)).thenReturn(dao);
-		Branch branch1 = new Branch();
-		branch1.setId(1L);
-		branch1.setName("branch1");
-		Mockito.when(dao.load(Branch.class, 1L)).thenReturn(branch1);
-		
-		Branch branch2 = new Branch();
-		branch2.setId(2L);
-		branch2.setName("branch2");
-		Mockito.when(dao.load(Branch.class, 2L)).thenReturn(branch2);
 		
 		Team team = new Team();
 		team.setName("team");
@@ -73,9 +64,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		
 		User user1 = new User();
 		user1.setId(1L);
-		Branch branch1 = new Branch();
-		branch1.setId(1L);
-		Assert.assertTrue(gateKeeper.checkFile(user1, branch1, "src/file").isPending());
+		Assert.assertTrue(gateKeeper.checkFile(user1, new Repository(), "branch1", "src/file").isPending());
 	}
 
 	@SuppressWarnings("serial")
@@ -90,34 +79,35 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		IfApprovedByMajoritiesOfSpecifiedTeam gateKeeper = new IfApprovedByMajoritiesOfSpecifiedTeam();
 		gateKeeper.setTeamId(1L);
 
+		Repository targetRepo = new Repository() {
+
+			@Override
+			public Git git() {
+				return git;
+			}
+			
+		};
+		targetRepo.setId(1L);
+		targetRepo.setOwner(new User());
+		targetRepo.getOwner().setId(1L);
+		targetRepo.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
+		
 		PullRequest request = new PullRequest();
 		request.setId(1L);
-		request.setTarget(new Branch());
-		request.getTarget().setName("master");
-		request.getTarget().setHeadCommitHash(git.parseRevision("master", true));
-		request.getTarget().setRepository(new Repository() {
-
-			@Override
-			public Git git() {
-				return git;
-			}
-			
-		});
-		request.getTarget().getRepository().setId(1L);
-		request.getTarget().getRepository().setOwner(new User());
-		request.getTarget().getRepository().getOwner().setId(1L);
+		request.setTargetRepo(targetRepo);
+		request.setTargetBranch("master");
 		
-		request.setSource(new Branch());
-		request.getSource().setName("dev");
-		request.getSource().setHeadCommitHash(git.parseRevision("dev", true));
-		request.getSource().setRepository(new Repository() {
-
+		Repository sourceRepo = new Repository() {
+			
 			@Override
 			public Git git() {
 				return git;
 			}
 			
-		});
+		};
+		sourceRepo.cacheObjectId("dev", ObjectId.fromString(git.parseRevision("dev", true)));
+		request.setSourceRepo(sourceRepo);
+		request.setSourceBranch("dev");
 		
 		request.setSubmitter(new User());
 		request.getSubmitter().setId(2L);

@@ -26,7 +26,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -41,12 +40,9 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
@@ -54,7 +50,7 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.PullRequestWatch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
@@ -414,20 +410,29 @@ public class RequestOverviewPage extends RequestDetailPage {
 		WebMarkupContainer basicInfoContainer = new WebMarkupContainer("basicInfo");
 		basicInfoContainer.add(new AvatarByUser("submitter", new UserModel(request.getSubmitter()), true));
 		
-		basicInfoContainer.add(new BranchLink("target", new EntityModel<Branch>(request.getTarget())));
-		basicInfoContainer.add(new BranchLink("sourceLink", new AbstractReadOnlyModel<Branch>() {
+		basicInfoContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
 
 			@Override
-			public Branch getObject() {
-				return getPullRequest().getSource();
+			protected RepoAndBranch load() {
+				return getPullRequest().getTarget();
 			}
 			
+		}));
+		basicInfoContainer.add(new BranchLink("sourceLink", new LoadableDetachableModel<RepoAndBranch>() {
+
+			@Override
+			protected RepoAndBranch load() {
+				return getPullRequest().getSource();	
+			}
+
 		}) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getSource() != null);
+				
+				PullRequest request = getPullRequest();
+				setVisible(request.getSourceRepo() != null && request.getSource().getHead(false) != null);
 			}
 			
 		});
@@ -436,12 +441,14 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected String load() {
 				PullRequest request = getPullRequest();
-				String branchName = Branch.getNameByFQN(request.getSourceFQN());
-				String repoFQN = Branch.getRepositoryFQNByFQN(request.getSourceFQN());
-				if (repoFQN.equals(request.getTarget().getRepository().getFQN())) 
-					return branchName + " (removed)";
-				else
-					return request.getSourceFQN() + " (removed)";
+				if (request.getSourceRepo() != null) {
+					if (request.getSourceRepo().equals(request.getTargetRepo()))
+						return request.getSourceBranch() + " (removed)";
+					else
+						return request.getSource().getFQN() + " (removed)";
+				} else {
+					return "unknown repository";
+				}
 			}
 			
 		}) {
@@ -449,7 +456,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getSource() == null);
+				
+				PullRequest request = getPullRequest();
+				setVisible(request.getSourceRepo() == null || request.getSource().getHead(false) == null);
 			}
 			
 		});
@@ -462,28 +471,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 				PullRequest request = requestModel.getObject();
 
-				if (request.getSource() != null || request.getSourceFQN() == null 
-						|| !SecurityUtils.canModify(request)) {
-					setVisible(false);
-				} else {
-					String repositoryFQN = Branch.getRepositoryFQNByFQN(request.getSourceFQN());
-					Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(repositoryFQN);
-					if (repository == null) {
-						setVisible(false);
-					} else {
-						String branchName = Branch.getNameByFQN(request.getSourceFQN());
-						Branch branch = GitPlex.getInstance(BranchManager.class).findBy(repository, branchName);
-						if (branch == null)
-							setVisible(SecurityUtils.canCreate(repository, branchName));
-						else
-							setVisible(true);
-					}
-				}
+				setVisible(request.getSourceRepo() != null && request.getSource().getHead(false) == null 
+						&& SecurityUtils.canModify(request) && SecurityUtils.canCreate(request.getSource()));
 			}
 
 			@Override
 			public void onClick() {
-				GitPlex.getInstance(PullRequestManager.class).restoreSource(requestModel.getObject());
+				GitPlex.getInstance(PullRequestManager.class).restoreSourceBranch(requestModel.getObject());
 			}
 			
 		});

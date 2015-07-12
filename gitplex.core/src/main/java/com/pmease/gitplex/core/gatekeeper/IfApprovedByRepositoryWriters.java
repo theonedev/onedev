@@ -7,7 +7,6 @@ import javax.validation.constraints.Min;
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
@@ -36,7 +35,7 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
 		Collection<User> authorizedUsers = SecurityUtils.findUsersCan(
-				request.getTarget().getRepository(), RepositoryOperation.PUSH);
+				request.getTargetRepo(), RepositoryOperation.PUSH);
 
         int approvals = 0;
         int pendings = 0;
@@ -85,13 +84,13 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return check(user, branch.getRepository());
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		return check(user, repository);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return check(user, branch.getRepository());
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		return check(user, repository);
 	}
 
 	@Override

@@ -43,63 +43,63 @@ class ResolveConflictInstructionPanel extends Panel {
 		if (strategy == MERGE_WITH_SQUASH || strategy == REBASE_SOURCE_ONTO_TARGET) {
 			fragment = new Fragment("content", "rebaseInSourceFrag", this);
 			fragment.add(new Label("srcRepoName", request.getSource().getRepository()));
-			fragment.add(new Label("srcBranchNameForCheckout", request.getSource().getName()));
-			fragment.add(new Label("srcBranchNameForPush", request.getSource().getName()));
+			fragment.add(new Label("srcBranchNameForCheckout", request.getSourceBranch()));
+			fragment.add(new Label("srcBranchNameForPush", request.getSourceBranch()));
 			WebMarkupContainer sameRepoContainer = new WebMarkupContainer("sameRepo");
-			sameRepoContainer.add(new Label("destBranchName", request.getTarget().getName()));
+			sameRepoContainer.add(new Label("destBranchName", request.getTargetBranch()));
 			sameRepoContainer.setVisible(sameRepo);
 			fragment.add(sameRepoContainer);
 			WebMarkupContainer differentRepoContainer = new WebMarkupContainer("differentRepo");
 			differentRepoContainer.add(new Label("destRepoUrl", request.getTarget().getRepository().getUrl()));
-			differentRepoContainer.add(new Label("destBranchName", request.getTarget().getName()));
+			differentRepoContainer.add(new Label("destBranchName", request.getTargetBranch()));
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		} else if (strategy == REBASE_TARGET_ONTO_SOURCE) {
 			fragment = new Fragment("content", "rebaseInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getRepository()));
-			fragment.add(new Label("destBranchNameForCheckout", request.getTarget().getName()));
-			fragment.add(new Label("destBranchNameForPush", request.getTarget().getName()));
+			fragment.add(new Label("destBranchNameForCheckout", request.getTargetBranch()));
+			fragment.add(new Label("destBranchNameForPush", request.getTargetBranch()));
 			WebMarkupContainer sameRepoContainer = new WebMarkupContainer("sameRepo");
-			sameRepoContainer.add(new Label("srcBranchName", request.getSource().getName()));
+			sameRepoContainer.add(new Label("srcBranchName", request.getSourceBranch()));
 			sameRepoContainer.setVisible(sameRepo);
 			fragment.add(sameRepoContainer);
 			WebMarkupContainer differentRepoContainer = new WebMarkupContainer("differentRepo");
 			differentRepoContainer.add(new Label("srcRepoUrl", request.getSource().getRepository().getUrl()));
-			differentRepoContainer.add(new Label("srcBranchName", request.getSource().getName()));
+			differentRepoContainer.add(new Label("srcBranchName", request.getSourceBranch()));
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		} else if (user != null 
 						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(targetRepo))
-						&& targetRepo.getGateKeeper().checkCommit(user, request.getTarget(), sourceHead).allowIntegration()) {
+						&& targetRepo.getGateKeeper().checkCommit(user, request.getTargetRepo(), request.getTargetBranch(), sourceHead).allowIntegration()) {
 			fragment = new Fragment("content", "mergeInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getRepository()));
-			fragment.add(new Label("destBranchNameForCheckout", request.getTarget().getName()));
-			fragment.add(new Label("destBranchNameForPush", request.getTarget().getName()));
+			fragment.add(new Label("destBranchNameForCheckout", request.getTargetBranch()));
+			fragment.add(new Label("destBranchNameForPush", request.getTargetBranch()));
 			WebMarkupContainer sameRepoContainer = new WebMarkupContainer("sameRepo");
 			sameRepoContainer.add(new Label("ffOption", strategy==MERGE_ALWAYS?"--no-ff":""));
-			sameRepoContainer.add(new Label("srcBranchName", request.getSource().getName()));
+			sameRepoContainer.add(new Label("srcBranchName", request.getSourceBranch()));
 			sameRepoContainer.setVisible(sameRepo);
 			fragment.add(sameRepoContainer);
 			WebMarkupContainer differentRepoContainer = new WebMarkupContainer("differentRepo");
 			differentRepoContainer.add(new Label("ffOption", strategy==MERGE_ALWAYS?"--no-ff":""));
 			differentRepoContainer.add(new Label("srcRepoUrl", request.getSource().getRepository().getUrl()));
-			differentRepoContainer.add(new Label("srcBranchName", request.getSource().getName()));
+			differentRepoContainer.add(new Label("srcBranchName", request.getSourceBranch()));
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		} else {
 			fragment = new Fragment("content", "mergeInSourceFrag", this);
 			fragment.add(new Label("srcRepoName", request.getSource().getRepository()));
-			fragment.add(new Label("srcBranchNameForCheckout", request.getSource().getName()));
-			fragment.add(new Label("srcBranchNameForPush", request.getSource().getName()));
+			fragment.add(new Label("srcBranchNameForCheckout", request.getSourceBranch()));
+			fragment.add(new Label("srcBranchNameForPush", request.getSourceBranch()));
 			WebMarkupContainer sameRepoContainer = new WebMarkupContainer("sameRepo");
 			sameRepoContainer.add(new Label("ffOption", strategy==MERGE_ALWAYS?"--no-ff":""));
-			sameRepoContainer.add(new Label("destBranchName", request.getTarget().getName()));
+			sameRepoContainer.add(new Label("destBranchName", request.getTargetBranch()));
 			sameRepoContainer.setVisible(sameRepo);
 			fragment.add(sameRepoContainer);
 			WebMarkupContainer differentRepoContainer = new WebMarkupContainer("differentRepo");
 			differentRepoContainer.add(new Label("ffOption", strategy==MERGE_ALWAYS?"--no-ff":""));
 			differentRepoContainer.add(new Label("destRepoUrl", request.getTarget().getRepository().getUrl()));
-			differentRepoContainer.add(new Label("destBranchName", request.getTarget().getName()));
+			differentRepoContainer.add(new Label("destBranchName", request.getTargetBranch()));
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		}

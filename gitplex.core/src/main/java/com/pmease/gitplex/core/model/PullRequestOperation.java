@@ -16,7 +16,7 @@ public enum PullRequestOperation {
 		@Override
 		public boolean canOperate(PullRequest request) {
 			if (!SecurityUtils.getSubject().isPermitted(
-					ObjectPermission.ofRepoPush(request.getTarget().getRepository()))) {
+					ObjectPermission.ofRepoPush(request.getTargetRepo()))) {
 				return false;
 			} else {
 				return GitPlex.getInstance(PullRequestManager.class).canIntegrate(request);
@@ -82,16 +82,18 @@ public enum PullRequestOperation {
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			if (request.isOpen() 
 					|| !SecurityUtils.canModify(request)
-					|| request.getSource() == null 
+					|| request.getTarget().getHead(false) == null
+					|| request.getSourceRepo() == null 
+					|| request.getSource().getHead(false) == null
 					|| pullRequestManager.findOpen(request.getTarget(), request.getSource()) != null) {
 				return false;
 			}
 			
 			// now check if source branch is integrated into target branch
-			Git git = request.getTarget().getRepository().git();
-			String sourceHead = request.getSource().getHeadCommitHash();
+			Git git = request.getTargetRepo().git();
+			String sourceHead = request.getSource().getHead();
 			return git.parseRevision(sourceHead, false) == null 
-					|| !git.isAncestor(sourceHead, request.getTarget().getHeadCommitHash());
+					|| !git.isAncestor(sourceHead, request.getTarget().getHead());
 		}
 
 		@Override

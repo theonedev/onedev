@@ -10,8 +10,8 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Team;
@@ -31,7 +31,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canModify(PullRequest request) {
-		Repository repository = request.getTarget().getRepository();
+		Repository repository = request.getTargetRepo();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository))) {
 			return true;
 		} else {
@@ -42,7 +42,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Review review) {
-		Repository repository = review.getUpdate().getRequest().getTarget().getRepository();
+		Repository repository = review.getUpdate().getRequest().getTargetRepo();
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository))) {
 			return true;
 		} else {
@@ -64,19 +64,26 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 
-	public static boolean canCreate(Repository repository, String branchName) {
+	public static boolean canCreate(RepoAndBranch repoAndBranch) {
+		return canCreate(repoAndBranch.getRepository(), repoAndBranch.getBranch());
+	}
+	
+	public static boolean canCreate(Repository repository, String branch) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
-				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branchName).isPassed();
+				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch).isPassed();
 	}
 
-	public static boolean canModify(Branch branch) {
+	public static boolean canModify(RepoAndBranch repoAndBranch) {
+		return canModify(repoAndBranch.getRepository(), repoAndBranch.getBranch());
+	}
+	
+	public static boolean canModify(Repository repository, String branch) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-		Repository repository = branch.getRepository();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
-				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch.getName()).isPassed();
+				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch).isPassed();
 	}
 
 	public static boolean canManage(User account) {

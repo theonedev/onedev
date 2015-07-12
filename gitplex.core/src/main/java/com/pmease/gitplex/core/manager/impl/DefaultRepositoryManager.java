@@ -3,10 +3,7 @@ package com.pmease.gitplex.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -16,13 +13,13 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
@@ -33,11 +30,9 @@ import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
-import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -50,8 +45,6 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
 	
 	private final Provider<Set<RepositoryListener>> listenersProvider;
 	
-    private final BranchManager branchManager;
-    
     private final StorageManager storageManager;
     
     private final UserManager userManager;
@@ -65,11 +58,9 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     
     @Inject
-    public DefaultRepositoryManager(Dao dao, BranchManager branchManager, 
-    		UserManager userManager, StorageManager storageManager, 
+    public DefaultRepositoryManager(Dao dao, UserManager userManager, StorageManager storageManager, 
     		Provider<Set<RepositoryListener>> listenersProvider) {
     	this.dao = dao;
-        this.branchManager = branchManager;
         this.storageManager = storageManager;
         this.userManager = userManager;
         this.listenersProvider = listenersProvider;
@@ -114,13 +105,12 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
     @Transactional
     @Override
     public void delete(final Repository repository) {
-    	for (Branch branch: repository.getBranches())
-	    	branchManager.delete(branch);
-    	
-    	for (Repository each: repository.getForks()) {
-    		each.setForkedFrom(null);
-    		save(each);
-    	}
+		for (RepositoryListener listener: listenersProvider.get())
+			listener.beforeDelete(repository);
+		
+    	Query query = dao.getSession().createQuery("update Repository set forkedFrom=null where forkedFrom=:forkedFrom");
+    	query.setParameter("forkedFrom", repository);
+    	query.executeUpdate();
     	
         dao.remove(repository);
 
@@ -141,7 +131,7 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
 		});
 		
 		for (RepositoryListener listener: listenersProvider.get())
-			listener.repositoryRemoved(repository);
+			listener.afterDelete(repository);
     }
 
     @Sessional
@@ -259,52 +249,6 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
             gitPostReceiveHookFile.setExecutable(true);
         }
 		
-		logger.debug("Syncing branches of repository '{}'...", repository);
-
-		Map<String, Branch> branchesInDB = new HashMap<String, Branch>();
-		Map<String, BriefCommit> branchesInGit = repository.git().listHeadCommits();
-		for (Iterator<Branch> it = repository.getBranches().iterator(); it.hasNext();) {
-			Branch branch = it.next();
-			if (branchesInGit.containsKey(branch.getName())) {
-				branchesInDB.put(branch.getName(), branch);
-			} else {
-				branchManager.delete(branch);
-				it.remove();
-			}
-		}
-		
-		for (Map.Entry<String, BriefCommit> entry: branchesInGit.entrySet()) {
-			Branch branch = branchesInDB.get(entry.getKey());
-			if (branch == null) {
-				branch = new Branch();
-				branch.setName(entry.getKey());
-				branch.setHeadCommitHash(entry.getValue().getHash());
-				branch.setRepository(repository);
-				repository.getBranches().add(branch);
-				branchManager.save(branch);
-			} else if (!branch.getHeadCommitHash().equals(entry.getValue().getHash()))	 {
-				branch.setHeadCommitHash(entry.getValue().getHash());
-				branchManager.save(branch);
-			}
-		}
-		
-		String defaultBranchName = repository.git().resolveDefaultBranch();
-		if (!branchesInGit.isEmpty() && !branchesInGit.containsKey(defaultBranchName)) {
-			defaultBranchName = branchesInGit.keySet().iterator().next();
-			repository.git().updateDefaultBranch(defaultBranchName);
-		}
-		
-		for (Branch branch: repository.getBranches()) {
-			if (branch.getName().equals(defaultBranchName)) {
-				if (!branch.isDefault()) {
-					branch.setDefault(true);
-					branchManager.save(branch);
-				}
-			} else if (branch.isDefault()) {
-				branch.setDefault(false);
-				branchManager.save(branch);
-			}
-		}
 	}
 
 	@Sessional

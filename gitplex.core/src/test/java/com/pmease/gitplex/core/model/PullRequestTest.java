@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.model;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -21,10 +22,8 @@ public class PullRequestTest extends AbstractGitTest {
     @Test
     public void shouldReturnAllUpdatesAsEffectiveIfTheyAreFastForward() {
         PullRequest request = new PullRequest();
-        Branch target = new Branch();
-        target.setName("master");
-        target.setRepository(repository);
-        request.setTarget(target);
+        request.setTargetRepo(repository);
+        request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "commit");
         
@@ -32,7 +31,7 @@ public class PullRequestTest extends AbstractGitTest {
 
         addFileAndCommit("b", "", "commit");
 
-        target.setHeadCommitHash(git.parseRevision("master", true));
+        repository.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
         
         request.setBaseCommitHash(git.parseRevision("master", true));
 
@@ -58,10 +57,8 @@ public class PullRequestTest extends AbstractGitTest {
     @Test
     public void shouldReturnLatestUpdateAsEffectiveIfAllOthersHaveBeenMerged() {
         PullRequest request = new PullRequest();
-        Branch target = new Branch();
-        target.setName("master");
-        target.setRepository(repository);
-        request.setTarget(target);
+        request.setTargetRepo(repository);
+        request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "master:1");
         
@@ -96,7 +93,7 @@ public class PullRequestTest extends AbstractGitTest {
         
         git.merge(secondRef, null, null, null, null);
 
-        target.setHeadCommitHash(git.parseRevision("master", true));
+        repository.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
 
         Assert.assertEquals(1, request.getEffectiveUpdates().size());
         Assert.assertEquals(2L, request.getEffectiveUpdates().get(0).getId().longValue());

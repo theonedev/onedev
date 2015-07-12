@@ -8,7 +8,6 @@ import javax.validation.constraints.Min;
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -130,12 +129,12 @@ public class IfGetMinScoreFromSpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
 		return check(user);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
 		return check(user);
 	}
 

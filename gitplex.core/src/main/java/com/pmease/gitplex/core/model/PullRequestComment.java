@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -17,6 +16,8 @@ import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
@@ -51,7 +52,8 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	
 	private boolean resolved;
 	
-	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="comment")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestCommentReply> replies = new ArrayList<>();
 	
 	@Embedded
@@ -103,7 +105,7 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 
 	@Override
 	public Repository getRepository() {
-		return request.getTarget().getRepository();
+		return request.getTargetRepo();
 	}
 
 	@Override

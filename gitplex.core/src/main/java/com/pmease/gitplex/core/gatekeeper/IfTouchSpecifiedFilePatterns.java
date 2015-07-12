@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
@@ -46,7 +45,7 @@ public class IfTouchSpecifiedFilePatterns extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
 		if (file == null)
 			return passed(new ArrayList<String>());
 		else if (WildcardUtils.matchPath(filePatterns, file)) 
@@ -56,8 +55,8 @@ public class IfTouchSpecifiedFilePatterns extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		for (String file: branch.getRepository().git().listChangedFiles(branch.getHeadCommitHash(), commit, null)) {
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		for (String file: repository.git().listChangedFiles(repository.getObjectId(branch).name(), commit, null)) {
 			if (WildcardUtils.matchPath(filePatterns, file))
 					return passed(Lists.newArrayList("Touched files match patterns '" + filePatterns + "'."));
 		}

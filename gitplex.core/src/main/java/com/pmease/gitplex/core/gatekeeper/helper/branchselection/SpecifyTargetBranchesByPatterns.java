@@ -27,11 +27,6 @@ public class SpecifyTargetBranchesByPatterns implements TargetBranchSelection {
 	}
 
 	@Override
-	public Object trim(Object context) {
-		return this;
-	}
-
-	@Override
 	public GateKeeper getGateKeeper() {
 		IfSubmitToSpecifiedBranchPatterns gateKeeper = new IfSubmitToSpecifiedBranchPatterns();
 		gateKeeper.setBranchPatterns(branchPatterns);

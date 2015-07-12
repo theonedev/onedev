@@ -159,4 +159,25 @@ public class GitUtils {
 		return joinPath(splitPath(path));
 	}
 
+	
+	/**
+     * Convert a git reference name to branch name.
+     * 
+     * @param refName
+     *			name of the git reference 	
+     * @return
+     * 			name of the branch, or <tt>null</tt> if specified ref
+     * 			does not represent a branch
+     */ 
+    public static @Nullable String ref2branch(String refName) {
+		if (refName.startsWith(Git.REFS_HEADS)) 
+			return refName.substring(Git.REFS_HEADS.length());
+		else
+			return null;
+    }
+    
+    public static String branch2ref(String branch) {
+    	return Git.REFS_HEADS + branch; 
+    }    
+    
 }

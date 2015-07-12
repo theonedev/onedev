@@ -16,13 +16,13 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.TreeNode;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 
 @SuppressWarnings("serial")
 public abstract class DirectoryChooser extends Panel {
 
-	public DirectoryChooser(String id, IModel<Branch> branchModel) {
-		super(id, branchModel);
+	public DirectoryChooser(String id, IModel<RepoAndBranch> repoAndBranchModel) {
+		super(id, repoAndBranchModel);
 	}
 
 	@Override
@@ -37,9 +37,9 @@ public abstract class DirectoryChooser extends Panel {
 
 			@Override
 			public Iterator<? extends TreeNode> getRoots() {
-				if (getBranch() != null) {
-					Git git = getBranch().getRepository().git();
-					List<TreeNode> roots = git.listTree(getBranch().getName(), null);
+				if (getRepoAndBranch() != null) {
+					Git git = getRepoAndBranch().getRepository().git();
+					List<TreeNode> roots = git.listTree(getRepoAndBranch().getBranch(), null);
 					if (roots != null) {
 						for (Iterator<TreeNode> it = roots.iterator(); it.hasNext();) {
 							if (it.next().getMode() != FileMode.TYPE_TREE)
@@ -61,7 +61,7 @@ public abstract class DirectoryChooser extends Panel {
 
 			@Override
 			public Iterator<? extends TreeNode> getChildren(TreeNode node) {
-				List<TreeNode> children = getBranch().getRepository().git().listTree(getBranch().getName(), node.getPath() + "/");
+				List<TreeNode> children = getRepoAndBranch().getRepository().git().listTree(getRepoAndBranch().getBranch(), node.getPath() + "/");
 				for (Iterator<TreeNode> it = children.iterator(); it.hasNext();) {
 					if (it.next().getMode() != FileMode.TYPE_TREE)
 						it.remove();
@@ -96,8 +96,8 @@ public abstract class DirectoryChooser extends Panel {
 		});
 	}
 
-	public Branch getBranch() {
-		return (Branch) getDefaultModelObject();
+	public RepoAndBranch getRepoAndBranch() {
+		return (RepoAndBranch) getDefaultModelObject();
 	}
 
 	protected abstract MarkupContainer newLinkComponent(String id, IModel<TreeNode> node);

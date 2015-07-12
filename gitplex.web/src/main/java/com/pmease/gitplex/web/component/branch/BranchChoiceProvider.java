@@ -1,28 +1,24 @@
 package com.pmease.gitplex.web.component.branch;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.google.common.collect.Lists;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
-public class BranchChoiceProvider extends ChoiceProvider<Branch> {
+public class BranchChoiceProvider extends ChoiceProvider<RepoAndBranch> {
 
 	private IModel<Repository> repoModel;
 
@@ -31,40 +27,44 @@ public class BranchChoiceProvider extends ChoiceProvider<Branch> {
 	}
 
 	@Override
-	public void query(String term, int page, Response<Branch> response) {
-		EntityCriteria<Branch> criteria = EntityCriteria.of(Branch.class);
-		criteria.add(Restrictions.eq("repository", repoModel.getObject()));
+	public void query(String term, int page, Response<RepoAndBranch> response) {
+		term = term.toLowerCase();
+		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+		Repository repository = repoModel.getObject();
+		for (String branch: repository.getBranches()) {
+			if (branch.toLowerCase().startsWith(term))
+				repoAndBranches.add(new RepoAndBranch(repository, branch));
+		}
 		
-		criteria.add(Restrictions.ilike("name", term, MatchMode.START));
-		criteria.addOrder(Order.asc("name"));
-		int first = page * Constants.DEFAULT_PAGE_SIZE;
+		Collections.sort(repoAndBranches, new Comparator<RepoAndBranch>() {
 
-		List<Branch> branches = GitPlex.getInstance(Dao.class).query(criteria, first, Constants.DEFAULT_PAGE_SIZE+1);
-		if (branches.size() > Constants.DEFAULT_PAGE_SIZE) {
-			branches.remove(branches.size()-1);
-			response.addAll(branches);
-			response.setHasMore(true);
-		} else {
-			response.addAll(branches);
-			response.setHasMore(false);
-		}
+			@Override
+			public int compare(RepoAndBranch o1, RepoAndBranch o2) {
+				return o1.getBranch().compareTo(o2.getBranch());
+			}
+			
+		});
+
+		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
+		int last = first + Constants.DEFAULT_SELECT2_PAGE_SIZE;
+		response.setHasMore(last<repoAndBranches.size());
+		if (last > repoAndBranches.size())
+			last = repoAndBranches.size();
+		response.addAll(repoAndBranches.subList(first, last));
 	}
 
 	@Override
-	public void toJson(Branch choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
+	public void toJson(RepoAndBranch choice, JSONWriter writer) throws JSONException {
+		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getBranch()));
 	}
 
 	@Override
-	public Collection<Branch> toChoices(Collection<String> ids) {
-		List<Branch> branches = Lists.newArrayList();
-		Dao dao = GitPlex.getInstance(Dao.class);
-		for (String each : ids) {
-			Long id = Long.valueOf(each);
-			branches.add(dao.load(Branch.class, id));
-		}
+	public Collection<RepoAndBranch> toChoices(Collection<String> ids) {
+		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+		for (String each : ids)
+			repoAndBranches.add(new RepoAndBranch(each));
 
-		return branches;
+		return repoAndBranches;
 	}
 
 	@Override

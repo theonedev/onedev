@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -18,13 +19,24 @@ public class BranchWatch extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Branch branch;
+	private Repository repository;
 	
-	public Branch getBranch() {
+	@Column(nullable=false)
+	private String branch;
+
+	public Repository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(Repository repository) {
+		this.repository = repository;
+	}
+
+	public String getBranch() {
 		return branch;
 	}
 
-	public void setBranch(Branch branch) {
+	public void setBranch(String branch) {
 		this.branch = branch;
 	}
 

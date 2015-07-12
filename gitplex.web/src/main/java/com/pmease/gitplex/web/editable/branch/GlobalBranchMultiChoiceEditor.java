@@ -9,20 +9,18 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.web.component.branch.GlobalBranchMultiChoice;
 
 @SuppressWarnings("serial")
-public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
+public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBranch>> {
 	
 	private GlobalBranchMultiChoice input;
 	
-	public GlobalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Long>> propertyModel) {
+	public GlobalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<RepoAndBranch>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -30,16 +28,13 @@ public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new GlobalBranchMultiChoice("input", new LoadableDetachableModel<Collection<Branch>>() {
+		input = new GlobalBranchMultiChoice("input", new LoadableDetachableModel<Collection<RepoAndBranch>>() {
 
 			@Override
-			protected Collection<Branch> load() {
-		    	List<Branch> branches = new ArrayList<>();
-				if (getModelObject() != null) {
-					Dao dao = GitPlex.getInstance(Dao.class);
-					for (Long branchId: getModelObject()) 
-						branches.add(dao.load(Branch.class, branchId));
-				}
+			protected Collection<RepoAndBranch> load() {
+		    	List<RepoAndBranch> branches = new ArrayList<>();
+				if (getModelObject() != null)
+					branches.addAll(getModelObject());
 				
 				return branches;
 			}
@@ -55,14 +50,14 @@ public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	}
 
 	@Override
-	protected List<Long> convertInputToValue() throws ConversionException {
-		List<Long> branchIds = new ArrayList<>();
-		Collection<Branch> branches = input.getConvertedInput();
-		if (branches != null) {
-			for (Branch branch: branches)
-				branchIds.add(branch.getId());
-		} 
-		return branchIds;
+	protected List<RepoAndBranch> convertInputToValue() throws ConversionException {
+		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+		
+		Collection<RepoAndBranch> convertedInput = input.getConvertedInput();
+		if (convertedInput != null)
+			repoAndBranches.addAll(convertedInput);
+		
+		return repoAndBranches;
 	}
 
 }

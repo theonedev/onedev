@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
@@ -17,7 +16,7 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-        User repoOwner = request.getTarget().getRepository().getOwner();
+        User repoOwner = request.getTargetRepo().getOwner();
 
         Review.Result result = repoOwner.checkReviewSince(request.getReferentialUpdate());
 
@@ -39,13 +38,13 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return check(user, branch.getRepository());
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		return check(user, repository);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return check(user, branch.getRepository());
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		return check(user, repository);
 	}
 
 	@Override

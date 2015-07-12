@@ -23,7 +23,6 @@ import com.pmease.commons.wicket.component.datatable.DefaultDataTable;
 import com.pmease.commons.wicket.component.datatable.EntityDataProvider;
 import com.pmease.commons.wicket.component.datatable.SelectionColumn;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestNotification;
 import com.pmease.gitplex.web.Constants;
@@ -91,7 +90,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 					Item<ICellPopulator<PullRequestNotification>> cellItem,
 					String componentId, IModel<PullRequestNotification> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
-				cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(request.getTarget())) {
+				cellItem.add(new BranchLink(componentId, Model.of(request.getTarget())) {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -111,7 +110,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 					String componentId, IModel<PullRequestNotification> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
 				if (request.getSource() != null) {
-					cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(request.getSource())) {
+					cellItem.add(new BranchLink(componentId, Model.of(request.getSource())) {
 	
 						@Override
 						protected void onComponentTag(ComponentTag tag) {
@@ -121,7 +120,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 						
 					});
 				} else {
-					cellItem.add(new Label(componentId, request.getSourceFQN()));
+					cellItem.add(new Label(componentId, request.getSource().getFQN()));
 				}
 			}
 			

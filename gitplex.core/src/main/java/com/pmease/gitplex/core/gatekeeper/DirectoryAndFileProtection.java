@@ -16,9 +16,8 @@ import com.pmease.gitplex.core.gatekeeper.helper.branchselection.TargetBranchSel
 import com.pmease.gitplex.core.gatekeeper.helper.pathselection.SpecifyTargetPathsByDirectories;
 import com.pmease.gitplex.core.gatekeeper.helper.pathselection.TargetPathSelection;
 import com.pmease.gitplex.core.manager.TeamManager;
-import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 
@@ -72,9 +71,6 @@ public class DirectoryAndFileProtection extends AbstractGateKeeper {
 
 	@Override
 	protected GateKeeper trim(Repository repository) {
-		if (branchSelection.trim(repository) == null)
-			return null;
-		
 		GitPlex.getInstance(TeamManager.class).trim(teamIds);
 		if (teamIds.isEmpty())
 			return null;
@@ -116,13 +112,13 @@ public class DirectoryAndFileProtection extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return getGateKeeper().checkFile(user, branch, file);
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		return getGateKeeper().checkFile(user, repository, branch, file);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return getGateKeeper().checkCommit(user, branch, commit);
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		return getGateKeeper().checkCommit(user, repository, branch, commit);
 	}
 
 	@Override

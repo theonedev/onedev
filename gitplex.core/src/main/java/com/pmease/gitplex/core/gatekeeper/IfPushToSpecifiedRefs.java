@@ -4,9 +4,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -36,17 +36,17 @@ public class IfPushToSpecifiedRefs extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		return doCheckRef(request.getSubmitter(), request.getTarget().getRepository(), request.getTarget().getHeadRef());
+		return doCheckRef(request.getSubmitter(), request.getTargetRepo(), request.getTargetRef());
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return doCheckRef(user, branch.getRepository(), branch.getHeadRef());
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		return doCheckRef(user, repository, GitUtils.branch2ref(branch));
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return doCheckRef(user, branch.getRepository(), branch.getHeadRef());
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		return doCheckRef(user, repository, GitUtils.branch2ref(branch));
 	}
 
 	@Override

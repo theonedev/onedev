@@ -10,22 +10,20 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branch.AffinalBranchMultiChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
+public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBranch>> {
 	
 	private AffinalBranchMultiChoice input;
 	
-	public AffinalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Long>> propertyModel) {
+	public AffinalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<RepoAndBranch>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -46,14 +44,11 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 
 			@Override
 			protected Object load() {
-		    	List<Branch> branches = new ArrayList<>();
-				if (getModelObject() != null) {
-					Dao dao = GitPlex.getInstance(Dao.class);
-					for (Long branchId: getModelObject()) 
-						branches.add(dao.load(Branch.class, branchId));
-				}
-				
-				return branches;
+				List<RepoAndBranch> repoAndBranches = getModelObject();
+				if (repoAndBranches != null)
+					return repoAndBranches;
+				else
+					return new ArrayList<>();
 			}
     		
     	});
@@ -67,14 +62,12 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	}
 
 	@Override
-	protected List<Long> convertInputToValue() throws ConversionException {
-		List<Long> branchIds = new ArrayList<>();
-		Collection<Branch> branches = input.getConvertedInput();
-		if (branches != null) {
-			for (Branch branch: branches)
-				branchIds.add(branch.getId());
-		} 
-		return branchIds;
+	protected List<RepoAndBranch> convertInputToValue() throws ConversionException {
+		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+		Collection<RepoAndBranch> convertedInput = input.getConvertedInput();
+		if (convertedInput != null) 
+			repoAndBranches.addAll(convertedInput);
+		return repoAndBranches;
 	}
 
 }

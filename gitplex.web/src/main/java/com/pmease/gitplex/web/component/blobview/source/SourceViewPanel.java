@@ -295,7 +295,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		if (context.getState().blame) {
 			List<BlameCommit> commits = new ArrayList<>();
 			
-			String commitHash = context.getRepository().getObjectId(context.getState().file.revision, true).name();
+			String commitHash = context.getRepository().getObjectId(context.getState().file.revision).name();
 			
 			for (Blame blame: context.getRepository().git().blame(commitHash, context.getState().file.path).values()) {
 				BlameCommit commit = new BlameCommit();

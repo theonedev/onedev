@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.util.pattern.WildcardUtils;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
 @Editable(order=200, name="Specify Branch Patterns")
@@ -33,8 +33,8 @@ public class MatchGlobalBranchesByPatterns implements GlobalBranchMatcher {
 	}
 
 	@Override
-	public boolean matches(Branch branch) {
-		return WildcardUtils.matchPath(getBranchPatterns(), branch.getFQN());
+	public boolean matches(Repository repository, String branch) {
+		return WildcardUtils.matchPath(getBranchPatterns(), repository.getBranchFQN(branch));
 	}
 
 }

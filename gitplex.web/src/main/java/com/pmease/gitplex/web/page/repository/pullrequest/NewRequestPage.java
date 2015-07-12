@@ -33,7 +33,6 @@ import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
@@ -44,12 +43,12 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
@@ -75,7 +74,7 @@ public class NewRequestPage extends RepositoryPage {
 	
 	private PullRequest pullRequest;
 	
-	public static PageParameters paramsOf(Repository repository, Branch source, Branch target) {
+	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
 		PageParameters params = paramsOf(repository);
 		params.set("source", source.getId());
 		params.set("target", target.getId());
@@ -88,28 +87,26 @@ public class NewRequestPage extends RepositoryPage {
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 
-		Dao dao = AppLoader.getInstance(Dao.class);
-		
-		RepositoryPage page = (RepositoryPage) getPage();
-
-		Branch target, source = null;
+		RepoAndBranch target, source = null;
 		if (params.get("target").toString() != null) {
-			target = dao.load(Branch.class, params.get("target").toLongObject());
+			target = new RepoAndBranch(params.get("target").toString());
 		} else {
-			if (page.getRepository().getForkedFrom() != null)
-				target = page.getRepository().getForkedFrom().getDefaultBranch();
-			else
-				target = page.getRepository().getDefaultBranch();
+			if (getRepository().getForkedFrom() != null) {
+				target = new RepoAndBranch(getRepository().getForkedFrom(), 
+						getRepository().getForkedFrom().getDefaultBranch());
+			} else {
+				target = new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
+			}
 		}
 		if (params.get("source").toString() != null) {
-			source = dao.load(Branch.class, params.get("source").toLongObject());
+			source = new RepoAndBranch(params.get("source").toString());
 		} else {
-			if (page.getRepository().getForkedFrom() != null) {
-				source = page.getRepository().getDefaultBranch();
+			if (getRepository().getForkedFrom() != null) {
+				source = new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			} else {
-				for (Branch each: page.getRepository().getBranches()) {
-					if (!each.equals(target)) {
-						source = each;
+				for (String each: getRepository().getBranches()) {
+					if (!each.equals(target.getBranch())) {
+						source = new RepoAndBranch(getRepository(), each);
 						break;
 					}
 				}
@@ -133,7 +130,7 @@ public class NewRequestPage extends RepositoryPage {
 			PullRequestUpdate update = new PullRequestUpdate();
 			pullRequest.addUpdate(update);
 			update.setRequest(pullRequest);
-			update.setHeadCommitHash(source.getHeadCommitHash());
+			update.setHeadCommitHash(source.getHead());
 			pullRequest.setLastEventDate(new Date());
 			
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
@@ -149,20 +146,20 @@ public class NewRequestPage extends RepositoryPage {
 
 			if (target.getRepository().equals(source.getRepository())) {
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(
-						target.getHeadCommitHash(), source.getHeadCommitHash()));			
-				if (target.getRepository().git().isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash())) 
+						target.getHead(), source.getHead()));			
+				if (target.getRepository().git().isAncestor(source.getHead(), target.getHead())) 
 					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
 			} else {
 				Git sandbox = new Git(FileUtils.createTempDir());
 				pullRequest.setSandbox(sandbox);
-				sandbox.clone(target.getRepository().git(), false, true, true, pullRequest.getTarget().getName());
+				sandbox.clone(target.getRepository().git(), false, true, true, pullRequest.getTarget().getBranch());
 				sandbox.reset(null, null);
 
-				sandbox.fetch(source.getRepository().git(), source.getName());
+				sandbox.fetch(source.getRepository().git(), source.getBranch());
 				
-				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash()));			
+				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHead(), source.getHead()));			
 
-				if (sandbox.isAncestor(source.getHeadCommitHash(), target.getHeadCommitHash()))
+				if (sandbox.isAncestor(source.getHead(), target.getHead()))
 					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
 			}
 		}
@@ -398,10 +395,10 @@ public class NewRequestPage extends RepositoryPage {
 				super.onSubmit();
 
 				Dao dao = GitPlex.getInstance(Dao.class);
-				Branch target = dao.load(Branch.class, pullRequest.getTarget().getId());
-				Branch source = dao.load(Branch.class, pullRequest.getSource().getId());
-				if (!target.getHeadCommitHash().equals(pullRequest.getTarget().getHeadCommitHash()) 
-						|| !source.getHeadCommitHash().equals(pullRequest.getSource().getHeadCommitHash())) {
+				RepoAndBranch target = pullRequest.getTarget();
+				RepoAndBranch source = pullRequest.getSource();
+				if (!target.getHead().equals(pullRequest.getTarget().getHead()) 
+						|| !source.getHead().equals(pullRequest.getSource().getHead())) {
 					getSession().warn("Either target branch or source branch has new commits just now, please re-check.");
 					setResponsePage(NewRequestPage.class, paramsOf(getRepository(), source, target));
 				} else {
@@ -436,7 +433,7 @@ public class NewRequestPage extends RepositoryPage {
 					if (commits.size() == 1)
 						pullRequest.setTitle(commits.get(0).getSubject());
 					else
-						pullRequest.setTitle(pullRequest.getSource().getName());
+						pullRequest.setTitle(pullRequest.getSource().getBranch());
 				}
 				return pullRequest.getTitle();
 			}

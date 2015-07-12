@@ -7,19 +7,19 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
 public class BranchLink extends Panel {
 
-	public BranchLink(String id, IModel<Branch> model) {
+	public BranchLink(String id, IModel<RepoAndBranch> model) {
 		super(id, model);
 	}
 
-	private Branch getBranch() {
-		return (Branch) getDefaultModelObject();
+	private RepoAndBranch getRepoAndBranch() {
+		return (RepoAndBranch) getDefaultModelObject();
 	}
 	
 	@Override
@@ -36,7 +36,7 @@ public class BranchLink extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(SecurityUtils.getSubject().isPermitted(
-						ObjectPermission.ofRepoPull(getBranch().getRepository())));
+						ObjectPermission.ofRepoPull(getRepoAndBranch().getRepository())));
 			}
 			
 		};
@@ -48,12 +48,12 @@ public class BranchLink extends Panel {
 			public String getObject() {
 				if (getPage() instanceof RepositoryPage) {
 					RepositoryPage page = (RepositoryPage) getPage();
-					if (page.getRepository().equals(getBranch().getRepository())) 
-						return getBranch().getName();
+					if (page.getRepository().equals(getRepoAndBranch().getRepository())) 
+						return getRepoAndBranch().getBranch();
 					else 
-						return getBranch().getFQN();
+						return getRepoAndBranch().getFQN();
 				} else {
-					return getBranch().getFQN();
+					return getRepoAndBranch().getFQN();
 				}
 			}
 			

@@ -5,13 +5,13 @@ import java.util.Collection;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 
 @SuppressWarnings("serial")
-public class BranchMultiChoice extends Select2MultiChoice<Branch> {
+public class BranchMultiChoice extends Select2MultiChoice<RepoAndBranch> {
 
-	public BranchMultiChoice(String id, IModel<Collection<Branch>> model, ChoiceProvider<Branch> provider) {
+	public BranchMultiChoice(String id, IModel<Collection<RepoAndBranch>> model, ChoiceProvider<RepoAndBranch> provider) {
 		super(id, model, provider);
 	}
 

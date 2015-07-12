@@ -7,22 +7,23 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.pmease.gitplex.core.listeners.ConfigListener;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 
 public interface PullRequestManager extends ConfigListener {
     
-    @Nullable PullRequest findOpen(Branch target, Branch source);
+    @Nullable 
+    PullRequest findOpen(RepoAndBranch target, RepoAndBranch source);
     
-    Collection<PullRequest> findOpenTo(Branch target, Repository source);
+    Collection<PullRequest> queryOpenTo(RepoAndBranch target, @Nullable Repository sourceRepo);
 
-    Collection<PullRequest> findOpenFrom(Branch source, Repository target);
+    Collection<PullRequest> queryOpenFrom(RepoAndBranch source, @Nullable Repository targetRepo);
    
-    Collection<PullRequest> findOpen(Branch sourceOrTarget);
-
+    Collection<PullRequest> queryOpen(RepoAndBranch sourceOrTarget);
+    
     boolean canIntegrate(PullRequest request);
     
     /**
@@ -71,7 +72,7 @@ public interface PullRequestManager extends ConfigListener {
     
 	List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request);
 
-	void restoreSource(PullRequest request);
+	void restoreSourceBranch(PullRequest request);
 	
 	/**
 	 * Get last visit date of specified pull request for current user.

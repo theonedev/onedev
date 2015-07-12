@@ -263,7 +263,7 @@ public abstract class FileListPanel extends Panel {
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent file);
 	
 	private ObjectId getCommitId() {
-		return repoModel.getObject().getObjectId(directory.revision, true);
+		return repoModel.getObject().getObjectId(directory.revision);
 	}
 
 	@Override

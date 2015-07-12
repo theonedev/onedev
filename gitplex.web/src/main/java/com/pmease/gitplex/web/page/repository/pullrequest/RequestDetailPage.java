@@ -68,8 +68,7 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
@@ -79,6 +78,7 @@ import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
@@ -394,7 +394,7 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				IntegrationPreview preview = request.getIntegrationPreview();
 				
 				PageParameters params = RequestComparePage.paramsOf(
-						request, request.getTarget().getHeadCommitHash(), 
+						request, request.getTarget().getHead(), 
 						preview!=null?preview.getIntegrated():null, null);
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params) {
@@ -598,9 +598,9 @@ public abstract class RequestDetailPage extends RepositoryPage {
 		final FormComponent<String> noteInput;
 		final FormComponent<Boolean> deleteSourceCheck = new CheckBox("deleteSource", Model.of(false));
 
-		Branch source = request.getSource();
+		RepoAndBranch source = request.getSource();
 		Preconditions.checkNotNull(source);
-		if (operation != INTEGRATE || source.isDefault() || !SecurityUtils.canModify(source)) 
+		if (operation != INTEGRATE || source.isDefault() || !SecurityUtils.canModify(source.getRepository(), source.getBranch())) 
 			deleteSourceCheck.setVisible(false);
 		
 		form.add(deleteSourceCheck);
@@ -646,17 +646,11 @@ public abstract class RequestDetailPage extends RepositoryPage {
 				try {
 					operation.operate(request, noteInput.getModelObject());
 					if (deleteSourceCheck.getModelObject()) {
-						boolean hasOpen = false;
-						for (PullRequest each: request.getSource().getIncomingRequests()) {
-							if (each.isOpen()) {
-								hasOpen = true;
-								break;
-							}
-						}
-						if (hasOpen)
+						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+						if (!pullRequestManager.queryOpenTo(request.getSource(), null).isEmpty()) 
 							Session.get().warn("Source branch is not deleted as there are pull requests opening against it.");
-						else
-							GitPlex.getInstance(BranchManager.class).delete(request.getSource());
+						else 
+							request.getSource().delete();
 					}
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {
@@ -776,11 +770,18 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			
 		};
 		integratedNoteContainer.add(squashedContainer);
-		squashedContainer.add(new BranchLink("target", new EntityModel<Branch>(getPullRequest().getTarget())));
-		squashedContainer.add(new BranchLink("source", new AbstractReadOnlyModel<Branch>() {
+		squashedContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
 
 			@Override
-			public Branch getObject() {
+			protected RepoAndBranch load() {
+				return getPullRequest().getTarget();
+			}
+			
+		}));
+		squashedContainer.add(new BranchLink("source", new LoadableDetachableModel<RepoAndBranch>() {
+
+			@Override
+			protected RepoAndBranch load() {
 				return getPullRequest().getSource();
 			}
 			
@@ -809,11 +810,18 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			
 		};
 		integratedNoteContainer.add(sourceRebasedContainer);
-		sourceRebasedContainer.add(new BranchLink("target", new EntityModel<Branch>(getPullRequest().getTarget())));
-		sourceRebasedContainer.add(new BranchLink("source", new AbstractReadOnlyModel<Branch>() {
+		sourceRebasedContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
 
 			@Override
-			public Branch getObject() {
+			protected RepoAndBranch load() {
+				return getPullRequest().getTarget();
+			}
+			
+		}));
+		sourceRebasedContainer.add(new BranchLink("source", new LoadableDetachableModel<RepoAndBranch>() {
+
+			@Override
+			protected RepoAndBranch load() {
 				return getPullRequest().getSource();
 			}
 			
@@ -842,7 +850,14 @@ public abstract class RequestDetailPage extends RepositoryPage {
 			
 		};
 		integratedNoteContainer.add(targetRebasedContainer);
-		targetRebasedContainer.add(new BranchLink("target", new EntityModel<Branch>(getPullRequest().getTarget())));
+		targetRebasedContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
+
+			@Override
+			protected RepoAndBranch load() {
+				return getPullRequest().getTarget();
+			}
+			
+		}));
 		
 		return integratedNoteContainer;
 	}

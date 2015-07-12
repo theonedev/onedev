@@ -20,8 +20,8 @@ import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.listeners.ConfigListener;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
-import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
@@ -41,7 +41,6 @@ import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
-import com.pmease.gitplex.core.manager.impl.DefaultBranchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
@@ -139,7 +138,6 @@ public class CoreModule extends AbstractPluginModule {
 		 */
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(AuthorizationManager.class).to(DefaultAuthorizationManager.class);
-		bind(BranchManager.class).to(DefaultBranchManager.class);
 		bind(ConfigManager.class).to(DefaultConfigManager.class);
 		bind(DataManager.class).to(DefaultDataManager.class);
 		bind(PullRequestCommentManager.class).to(DefaultPullRequestCommentManager.class);
@@ -159,11 +157,11 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestNotificationManager.class).to(DefaultPullRequestNotificationManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
-		
+
+		contribute(RepositoryListener.class, DefaultPullRequestManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
 		contribute(ConfigListener.class, DefaultPullRequestManager.class);
-		contribute(LifecycleListener.class, DefaultBranchManager.class);
 		contribute(LifecycleListener.class, DefaultPullRequestManager.class);
 		contribute(LifecycleListener.class, DefaultUserManager.class);
 		contribute(LifecycleListener.class, DefaultRepositoryManager.class);

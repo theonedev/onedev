@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -45,6 +44,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Optional;
@@ -57,6 +58,7 @@ import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.Submodule;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -68,7 +70,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
@@ -113,11 +115,16 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@Column(nullable=false)
 	private Date createdAt = new Date();
 
-	@OneToMany(mappedBy="repository", cascade=CascadeType.REMOVE)
-	private Collection<Authorization> authorizations = new ArrayList<>();
-
+	@OneToMany(mappedBy="targetRepo")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<PullRequest> incomingRequests = new ArrayList<>();
+	
+	@OneToMany(mappedBy="sourceRepo")
+	private Collection<PullRequest> outgoingRequests = new ArrayList<>();
+	
 	@OneToMany(mappedBy="repository")
-    private Collection<Branch> branches = new ArrayList<>();
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<Authorization> authorizations = new ArrayList<>();
 
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Repository> forks = new ArrayList<>();
@@ -134,7 +141,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Map<String, Map<String, Ref>> refsCache = new HashMap<>();
     
-    private transient Branch defaultBranch;
+    private transient Collection<String> branches;
+    
+    private transient String defaultBranch;
     
 	public User getOwner() {
 		return owner;
@@ -198,6 +207,22 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return getOwner();
 	}
 
+	public Collection<PullRequest> getIncomingRequests() {
+		return incomingRequests;
+	}
+
+	public void setIncomingRequests(Collection<PullRequest> incomingRequests) {
+		this.incomingRequests = incomingRequests;
+	}
+
+	public Collection<PullRequest> getOutgoingRequests() {
+		return outgoingRequests;
+	}
+
+	public void setOutgoingRequests(Collection<PullRequest> outgoingRequests) {
+		this.outgoingRequests = outgoingRequests;
+	}
+
 	public Collection<Authorization> getAuthorizations() {
 		return authorizations;
 	}
@@ -222,21 +247,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.forks = forks;
 	}
 
-	/**
-	 * Get branches for this repository from database. The result might be 
-	 * different from actual branches in repository. To get actual 
-	 * branches in repository, call {@link BranchManager#listBranches(Repository)} 
-	 * instead.
-	 * 
-	 * @return
-	 *         collection of branches available in database for this repository 
-	 */
-	public Collection<Branch> getBranches() {
+	public Collection<String> getBranches() {
+		if (branches == null)
+			branches = git().listBranches();
         return branches;
-    }
-
-    public void setBranches(Collection<Branch> branches) {
-        this.branches = branches;
     }
 
     @Override
@@ -358,16 +372,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return GitPlex.getInstance().guessServerUrl() + "/" + getFQN();
 	}
 	
-	public Branch getDefaultBranch() {
-		if (defaultBranch == null) {
-			for (Branch branch: getBranches()) {
-				if (branch.isDefault()) {
-					defaultBranch = branch;
-					break;
-				}
-			}
-			Preconditions.checkNotNull(defaultBranch);
-		}
+	public String getDefaultBranch() {
+		if (defaultBranch == null)
+			defaultBranch = git().resolveDefaultBranch();
 		return defaultBranch;
 	}
 	
@@ -375,7 +382,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		if (revision != null)
 			return revision;
 		else
-			return getDefaultBranch().getName();
+			return getDefaultBranch();
 	}
 	
 	/**
@@ -397,7 +404,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		Blob blob = blobCache.get(ident);
 		if (blob == null) {
 			try (FileRepository jgitRepo = openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)) {
-				ObjectId commitId = getObjectId(ident.revision, true);
+				ObjectId commitId = getObjectId(ident.revision);
 				RevTree revTree = revWalk.parseCommit(commitId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
 				if (treeWalk != null) {
@@ -433,7 +440,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	public InputStream getInputStream(BlobIdent ident) {
 		try (FileRepository jgitRepo = openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)) {
-			ObjectId commitId = getObjectId(ident.revision, true);
+			ObjectId commitId = getObjectId(ident.revision);
 			RevTree revTree = revWalk.parseCommit(commitId).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
 			if (treeWalk != null) {
@@ -501,8 +508,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return optional.orNull();
 	}
 	
-	public void cacheObjectId(String revision, ObjectId objectId) {
-		objectIdCache.put(revision, Optional.of(objectId));
+	public ObjectId getObjectId(String revision) {
+		return getObjectId(revision, true);
+	}
+	
+	public void cacheObjectId(String revision, @Nullable ObjectId objectId) {
+		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 	
 	public List<Change> getChanges(String fromCommit, String toCommit) {
@@ -597,7 +608,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			cache = null;
 		}
 
-		final AnyObjectId commitId = getObjectId(revision, true);
+		final AnyObjectId commitId = getObjectId(revision);
 		
 		try (FileRepository jgitRepo = openAsJGitRepo()) {
 			long time = System.currentTimeMillis();
@@ -660,4 +671,15 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		
 		return submodules;
 	}
+
+    public String getBranchFQN(String branch) {
+    	return getFQN() + ":" + branch;
+    }
+
+    public void deleteBranch(String branch) {
+		git().deleteBranch(branch);
+		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+			listener.onRefUpdate(this, GitUtils.branch2ref(branch), null);
+    }
+    
 }

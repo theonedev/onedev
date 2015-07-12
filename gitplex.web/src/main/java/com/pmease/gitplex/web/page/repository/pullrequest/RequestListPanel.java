@@ -34,14 +34,13 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.RequestLink;
 import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
-import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
@@ -268,8 +267,15 @@ public class RequestListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
-					String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(rowModel.getObject().getTarget())));
+					String componentId, final IModel<PullRequest> rowModel) {
+				cellItem.add(new BranchLink(componentId, new LoadableDetachableModel<RepoAndBranch>() {
+
+					@Override
+					protected RepoAndBranch load() {
+						return rowModel.getObject().getTarget();
+					}
+					
+				}));
 			}
 			
 		});
@@ -277,12 +283,20 @@ public class RequestListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
-					String componentId, IModel<PullRequest> rowModel) {
+					String componentId, final IModel<PullRequest> rowModel) {
 				PullRequest request = rowModel.getObject();
-				if (request.getSource() != null)
-					cellItem.add(new BranchLink(componentId, new EntityModel<Branch>(request.getSource())));
-				else
-					cellItem.add(new Label(componentId, request.getSourceFQN()));
+				if (request.getSourceRepo() != null) {
+					cellItem.add(new BranchLink(componentId, new LoadableDetachableModel<RepoAndBranch>(){
+
+						@Override
+						protected RepoAndBranch load() {
+							return rowModel.getObject().getSource();
+						}
+						
+					}));
+				} else {
+					cellItem.add(new Label(componentId, "unknown repository"));
+				}
 			}
 			
 		});

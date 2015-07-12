@@ -97,7 +97,7 @@ public class Git implements Serializable {
 			throw new GeneralException(String.format("Branch %s already exists.", branchName));
 
 		new UpdateRefCommand(repoDir).refName(Git.REFS_HEADS + branchName).revision(commitHash)
-				.call();
+				.oldRevision(GitUtils.NULL_SHA1).call();
 		
 		return this;
 	}

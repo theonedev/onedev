@@ -49,14 +49,14 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 		FileUtils.cleanDir(storageManager.getCacheDir(update));
 
 		PullRequest request = update.getRequest();
-		String sourceHead = request.getSource().getHeadCommitHash();
+		String sourceHead = request.getSource().getHead();
 
-		if (!request.getTarget().getRepository().equals(request.getSource().getRepository())) {
-			request.getTarget().getRepository().git().fetch(
-					request.getSource().getRepository().git(), 
-					"+" + request.getSource().getHeadRef() + ":" + update.getHeadRef()); 
+		if (!request.getTargetRepo().equals(request.getSourceRepo())) {
+			request.getTargetRepo().git().fetch(
+					request.getSourceRepo().git(), 
+					"+" + request.getSourceRef() + ":" + update.getHeadRef()); 
 		} else {
-			request.getTarget().getRepository().git().updateRef(update.getHeadRef(), 
+			request.getTargetRepo().git().updateRef(update.getHeadRef(), 
 					sourceHead, null, null);
 		}
 		

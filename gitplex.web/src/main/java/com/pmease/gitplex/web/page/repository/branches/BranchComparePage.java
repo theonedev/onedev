@@ -18,7 +18,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -27,8 +26,8 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branch.BranchLink;
@@ -42,9 +41,9 @@ import com.pmease.gitplex.web.page.repository.pullrequest.RequestOverviewPage;
 @SuppressWarnings("serial")
 public class BranchComparePage extends RepositoryPage {
 
-	private final IModel<Branch> targetModel;
+	private final IModel<RepoAndBranch> targetModel;
 	
-	private final IModel<Branch> sourceModel;
+	private final IModel<RepoAndBranch> sourceModel;
 	
 	private IModel<List<Commit>> commitsModel;
 	
@@ -52,11 +51,11 @@ public class BranchComparePage extends RepositoryPage {
 	
 	private IModel<String> mergeBaseModel;
 	
-	private Long targetId;
+	private String targetId;
 	
-	private Long sourceId;
+	private String sourceId;
 	
-	public static PageParameters paramsOf(Repository repository, Branch source, Branch target) {
+	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
 		PageParameters params = paramsOf(repository);
 		params.set("source", source.getId());
 		params.set("target", target.getId());
@@ -69,21 +68,20 @@ public class BranchComparePage extends RepositoryPage {
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 
-		targetModel = new IModel<Branch>() {
+		targetModel = new IModel<RepoAndBranch>() {
 
 			@Override
-			public Branch getObject() {
-				Dao dao = GitPlex.getInstance(Dao.class);
+			public RepoAndBranch getObject() {
 				if (targetId != null) 
-					return dao.load(Branch.class, targetId);
+					return new RepoAndBranch(targetId);
 				else if (params.get("target").toString() != null) 
-					return dao.load(Branch.class, params.get("target").toLongObject());
+					return new RepoAndBranch(params.get("target").toString());
 				else 
-					return getRepository().getDefaultBranch();
+					return new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			}
 
 			@Override
-			public void setObject(Branch object) {
+			public void setObject(RepoAndBranch object) {
 				targetId = object.getId();
 			}
 
@@ -93,21 +91,20 @@ public class BranchComparePage extends RepositoryPage {
 			
 		};
 		
-		sourceModel = new IModel<Branch>() {
+		sourceModel = new IModel<RepoAndBranch>() {
 
 			@Override
-			public Branch getObject() {
-				Dao dao = GitPlex.getInstance(Dao.class);
+			public RepoAndBranch getObject() {
 				if (sourceId != null) 
-					return dao.load(Branch.class, sourceId);
+					return new RepoAndBranch(sourceId);
 				else if (params.get("source").toString() != null) 
-					return dao.load(Branch.class, params.get("source").toLongObject());
+					return new RepoAndBranch(params.get("source").toString());
 				else 
-					return getRepository().getDefaultBranch();
+					return new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			}
 
 			@Override
-			public void setObject(Branch object) {
+			public void setObject(RepoAndBranch object) {
 				sourceId = object.getId();
 			}
 
@@ -131,21 +128,21 @@ public class BranchComparePage extends RepositoryPage {
 
 			@Override
 			protected String load() {
-				Branch target = targetModel.getObject();
-				Branch source = sourceModel.getObject();
+				RepoAndBranch target = targetModel.getObject();
+				RepoAndBranch source = sourceModel.getObject();
 				if (!target.getRepository().equals(source.getRepository())) {
 					Git sandbox = new Git(FileUtils.createTempDir());
 					try {
-						sandbox.clone(target.getRepository().git(), false, true, true, target.getName());
+						sandbox.clone(target.getRepository().git(), false, true, true, target.getBranch());
 						sandbox.reset(null, null);
-						sandbox.fetch(source.getRepository().git(), source.getName());
-						return sandbox.calcMergeBase(target.getHeadCommitHash(), source.getHeadCommitHash());
+						sandbox.fetch(source.getRepository().git(), source.getBranch());
+						return sandbox.calcMergeBase(target.getHead(), source.getHead());
 					} finally {
 						FileUtils.deleteDir(sandbox.repoDir());
 					}
 				} else {
 					return target.getRepository().git().calcMergeBase(
-							target.getHeadCommitHash(), source.getHeadCommitHash());					
+							target.getHead(), source.getHead());					
 				}
 			}
 			
@@ -155,8 +152,8 @@ public class BranchComparePage extends RepositoryPage {
 
 			@Override
 			protected List<Commit> load() {
-				Branch source = sourceModel.getObject();
-				return source.getRepository().git().log(mergeBaseModel.getObject(), source.getHeadCommitHash(), null, 0, 0);
+				RepoAndBranch source = sourceModel.getObject();
+				return source.getRepository().git().log(mergeBaseModel.getObject(), source.getHead(), null, 0, 0);
 			}
 			
 		};
@@ -208,8 +205,8 @@ public class BranchComparePage extends RepositoryPage {
 
 			@Override
 			public void onClick() {
-				Branch target = targetModel.getObject();
-				Branch source = sourceModel.getObject();
+				RepoAndBranch target = targetModel.getObject();
+				RepoAndBranch source = sourceModel.getObject();
 				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(target.getRepository(), source, target));
 			}
 
@@ -284,7 +281,7 @@ public class BranchComparePage extends RepositoryPage {
 				super.onConfigure();
 				
 				setVisible(!targetModel.getObject().equals(sourceModel.getObject()) 
-						&& mergeBaseModel.getObject().equals(sourceModel.getObject().getHeadCommitHash()));
+						&& mergeBaseModel.getObject().equals(sourceModel.getObject().getHead()));
 			}
 
 			@Override
@@ -340,7 +337,7 @@ public class BranchComparePage extends RepositoryPage {
 	
 	private Component newChangedFilesPanel() {
 		return new CompareResultPanel("tabPanel", repoModel, mergeBaseModel.getObject(), 
-				sourceModel.getObject().getHeadCommitHash(), null) {
+				sourceModel.getObject().getHead(), null) {
 			
 			@Override
 			protected void onSelection(AjaxRequestTarget target, Change change) {

@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,6 +14,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
@@ -44,10 +45,12 @@ public class Team extends AbstractEntity {
 	@Column(nullable=false)
 	private RepositoryOperation authorizedOperation = RepositoryOperation.NO_ACCESS;
 	
-	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="team")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Membership> memberships = new ArrayList<Membership>();
 	
-	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="team")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
 	public User getOwner() {

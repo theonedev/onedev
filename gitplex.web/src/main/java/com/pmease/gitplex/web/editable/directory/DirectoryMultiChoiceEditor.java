@@ -23,7 +23,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.web.component.directorychooser.DirectoryChooser;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
@@ -54,10 +54,10 @@ public class DirectoryMultiChoiceEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected Component newContent(String id) {
 				RepositoryPage page = (RepositoryPage) getPage();
-				Branch defaultBranch = page.getRepository().getDefaultBranch();
+				String defaultBranch = page.getRepository().getDefaultBranch();
 				
 				if (defaultBranch != null) {
-					return new DirectoryChooser(id, Model.of(defaultBranch)) {
+					return new DirectoryChooser(id, Model.of(new RepoAndBranch(page.getRepository(), defaultBranch))) {
 	
 						@Override
 						protected MarkupContainer newLinkComponent(String id, IModel<TreeNode> node) {

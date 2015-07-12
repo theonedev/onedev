@@ -8,35 +8,34 @@ import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitName;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.editable.BranchChoice.Scope;
-import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
+import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
 @Editable(name="Specify Branch Names", order=100)
-public class MatchGlobalBranchesByIds implements GlobalBranchMatcher {
+public class MatchGlobalBranchesByNames implements GlobalBranchMatcher {
 
-	private List<Long> branchIds = new ArrayList<>();
+	private List<RepoAndBranch> repoAndBranches = new ArrayList<>();
 	
 	@Editable(name="Branch Names")
 	@BranchChoice(Scope.GLOBAL)
 	@OmitName
 	@NotNull
 	@Size(min=1, message="At least one branch has to be selected.")
-	public List<Long> getBranchIds() {
-		return branchIds;
+	public List<RepoAndBranch> getRepoAndBranches() {
+		return repoAndBranches;
 	}
 
-	public void setBranchIds(List<Long> branchIds) {
-		this.branchIds = branchIds;
+	public void setRepoAndBranches(List<RepoAndBranch> repoAndBranches) {
+		this.repoAndBranches = repoAndBranches;
 	}
 
 	@Override
-	public boolean matches(Branch branch) {
-		for (Long branchId: getBranchIds()) {
-			if (branchId.equals(branch.getId()))
+	public boolean matches(Repository repository, String branch) {
+		for (RepoAndBranch each: getRepoAndBranches()) {
+			if (each.getRepoId().equals(repository.getId()) && each.getBranch().equals(branch))
 				return true;
 		}
 		return false;
@@ -44,11 +43,11 @@ public class MatchGlobalBranchesByIds implements GlobalBranchMatcher {
 
 	@Override
 	public Object trim(Object context) {
-		GitPlex.getInstance(BranchManager.class).trim(branchIds);
-		if (branchIds.isEmpty())
-			return null;
-		else
+		RepoAndBranch.trim(repoAndBranches);
+		if (!repoAndBranches.isEmpty())
 			return this;
+		else
+			return null;
 	}
 
 }

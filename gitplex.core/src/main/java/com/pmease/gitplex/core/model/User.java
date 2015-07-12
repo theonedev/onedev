@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -12,6 +11,8 @@ import javax.persistence.OneToMany;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -41,40 +42,50 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	private int reviewEffort;
 	
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner")
 	private Collection<Repository> repositories = new ArrayList<>();
 
-	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="owner")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Team> teams = new ArrayList<Team>();
 	
 	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
 
-	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="reviewer")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Review> reviews = new ArrayList<Review>();
 	
-	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="reviewer")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestComment> requestComments = new ArrayList<>();
 
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestCommentReply> requestCommentReplies = new ArrayList<>();
 	
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<BranchWatch> branchWatches = new ArrayList<>();
 
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
 
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
 
     @Editable(order=100)

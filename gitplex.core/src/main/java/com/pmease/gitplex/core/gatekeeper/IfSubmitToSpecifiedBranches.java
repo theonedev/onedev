@@ -6,17 +6,13 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.google.common.collect.Lists;
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.manager.BranchManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -26,68 +22,54 @@ import com.pmease.gitplex.core.model.User;
 		"This gate keeper will be passed if the commit is submitted to specified branches.")
 public class IfSubmitToSpecifiedBranches extends AbstractGateKeeper {
 
-	private List<Long> branchIds = new ArrayList<>();
+	private List<String> branches = new ArrayList<>();
 	
 	@Editable(name="Branches", description="Select branches to check.")
 	@BranchChoice
 	@NotNull
 	@Size(min=1)
-	public List<Long> getBranchIds() {
-		return branchIds;
+	public List<String> getBranches() {
+		return branches;
 	}
 
-	public void setBranchIds(List<Long> branchIds) {
-		this.branchIds = branchIds;
+	public void setBranches(List<String> branches) {
+		this.branches = branches;
 	}
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		return checkBranch(request.getTarget().getName());
+		return checkBranch(request.getTargetRepo(), request.getTargetBranch());
 	}
 
-	@Override
-	protected GateKeeper trim(Repository repository) {
-		GitPlex.getInstance(BranchManager.class).trim(branchIds);
-		if (branchIds.isEmpty())
-			return null;
-		else
-			return this;
-	}
-
-	private CheckResult checkBranch(String branchName) {
-		List<String> branchNames = new ArrayList<>();
-		Dao dao = GitPlex.getInstance(Dao.class);
-		for (Long branchId: branchIds)
-			branchNames.add(dao.load(Branch.class, branchId).getName());
-		
-		if (branchIds.size() > 1) {
-			if (branchNames.contains(branchName))
-				return passed(Lists.newArrayList("Target branch is one of '" + StringUtils.join(branchNames, ", ") + "'."));
+	private CheckResult checkBranch(Repository repository, String branch) {
+		if (branches.size() > 1) {
+			if (branches.contains(branch))
+				return passed(Lists.newArrayList("Target branch is one of '" + StringUtils.join(branches, ", ") + "'."));
 			else
-				return failed(Lists.newArrayList("Target branch is not any one of '" + StringUtils.join(branchNames, ", ") + "'."));
+				return failed(Lists.newArrayList("Target branch is not any one of '" + StringUtils.join(branches, ", ") + "'."));
 		} else {
-			if (branchNames.contains(branchName))
-				return passed(Lists.newArrayList("Target branch is '" + branchNames.get(0) + "'."));
+			if (branches.contains(branch))
+				return passed(Lists.newArrayList("Target branch is '" + branches.get(0) + "'."));
 			else
-				return failed(Lists.newArrayList("Target branch is not '" + branchNames.get(0) + "'."));
+				return failed(Lists.newArrayList("Target branch is not '" + branches.get(0) + "'."));
 		}
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return checkBranch(branch.getName());
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		return checkBranch(repository, branch);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return checkBranch(branch.getName());
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		return checkBranch(repository, branch);
 	}
 
 	@Override
 	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		String branchName = Branch.parseName(refName);
-		if (branchName != null)
-			return checkBranch(branchName);
+		String branch = GitUtils.ref2branch(refName);
+		if (branch != null)
+			return checkBranch(repository, branch);
 		else 
 			return ignored();
 	}

@@ -26,6 +26,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
+import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -49,15 +50,19 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 	
 	private final UserManager userManager;
 	
+	private final BranchWatchManager branchWatchManager;
+	
 	private final MailManager mailManager;
 	
 	private final UrlManager urlManager;
 	
 	@Inject
-	public DefaultPullRequestWatchManager(Dao dao, UserManager userManager, MailManager mailManager, 
+	public DefaultPullRequestWatchManager(Dao dao, UserManager userManager, 
+			BranchWatchManager branchWatchManager, MailManager mailManager, 
 			UrlManager urlManager) {
 		this.dao = dao;
 		this.userManager = userManager;
+		this.branchWatchManager = branchWatchManager;
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 	}
@@ -65,7 +70,7 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 	@Transactional
 	@Override
 	public void onOpened(PullRequest request) {
-		for (BranchWatch branchWatch: request.getTarget().getWatches()) {
+		for (BranchWatch branchWatch: branchWatchManager.findBy(request.getTargetRepo(), request.getTargetBranch())) {
 			watch(request, branchWatch.getUser(), 
 					"You are set to watch this pull request as you are watching the target branch.");
 		}
@@ -84,11 +89,6 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 
 	@Transactional
 	private void addParticipantsToWatchList(PullRequestUpdate update) {
-		if (update.getUser() != null) {
-			watch(update.getRequest(), update.getUser(), 
-					"You are set to watch this pull request as you updated it.");
-		}
-		
 		// we use a name-email pair to filter off duplicate person as equals method of PersonIdent also takes 
 		// "when" field into account
 		Set<Pair<String, String>> nameEmailPairs = new HashSet<>();
@@ -121,10 +121,7 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 	public void onUpdated(PullRequestUpdate update) {
 		addParticipantsToWatchList(update);
 
-		if (update.getUser() != null)
-			notify(update.getRequest(), Sets.newHashSet(update.getUser()), UPDATED);
-		else
-			notify(update.getRequest(), new HashSet<User>(), UPDATED);
+		notify(update.getRequest(), new HashSet<User>(), UPDATED);
 	}
 
 	@Transactional

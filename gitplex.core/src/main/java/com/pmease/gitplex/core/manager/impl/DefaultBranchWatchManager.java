@@ -30,7 +30,15 @@ public class DefaultBranchWatchManager implements BranchWatchManager {
 	public Collection<BranchWatch> findBy(User user, Repository repository) {
 		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
 		criteria.add(Restrictions.eq("user", user));
-		criteria.createCriteria("branch").add(Restrictions.eq("repository", repository));
+		criteria.add(Restrictions.eq("repository", repository));
+		return dao.query(criteria);
+	}
+
+	@Override
+	public Collection<BranchWatch> findBy(Repository repository, String branch) {
+		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
+		criteria.add(Restrictions.eq("repository", repository));
+		criteria.add(Restrictions.eq("branch", branch));
 		return dao.query(criteria);
 	}
 

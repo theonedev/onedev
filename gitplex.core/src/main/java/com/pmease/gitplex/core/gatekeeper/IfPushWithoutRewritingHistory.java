@@ -3,9 +3,8 @@ package com.pmease.gitplex.core.gatekeeper;
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @Editable(order=100, icon="fa-ext fa-repo-lock", description="This gate keeper will be passed if the push "
@@ -21,13 +20,13 @@ public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
 		return ignored();
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		if (branch.getRepository().git().isAncestor(branch.getHeadCommitHash(), commit))
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		if (repository.git().isAncestor(repository.getObjectId(branch).name(), commit))
 			return passed(Lists.newArrayList("Push operation does not rewrite history."));
 		else
 			return failed(Lists.newArrayList("Push operation rewrites history."));

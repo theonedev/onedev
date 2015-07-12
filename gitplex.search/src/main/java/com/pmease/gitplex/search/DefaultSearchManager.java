@@ -79,7 +79,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	@Override
 	public List<QueryHit> search(Repository repository, String revision, final BlobQuery query) 
 			throws InterruptedException {
-		AnyObjectId commitId = repository.getObjectId(revision, true);
+		AnyObjectId commitId = repository.getObjectId(revision);
 		
 		final List<QueryHit> hits = new ArrayList<>();
 

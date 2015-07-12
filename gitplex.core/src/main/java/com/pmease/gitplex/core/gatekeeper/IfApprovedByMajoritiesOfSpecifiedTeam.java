@@ -2,12 +2,11 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
-import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -36,8 +35,8 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		CheckResult result = getGateKeeper().checkFile(user, branch, file);
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		CheckResult result = getGateKeeper().checkFile(user, repository, branch, file);
 		
 		if (result instanceof Passed)
 			result = passed(Lists.newArrayList("Approved by majorities of team '" + getTeam().getName() + "'."));
@@ -48,8 +47,8 @@ public class IfApprovedByMajoritiesOfSpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		CheckResult result = getGateKeeper().checkCommit(user, branch, commit);
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		CheckResult result = getGateKeeper().checkCommit(user, repository, branch, commit);
 		
 		if (result instanceof Passed)
 			result = passed(Lists.newArrayList("Approved by majorities of team '" + getTeam().getName() + "'."));

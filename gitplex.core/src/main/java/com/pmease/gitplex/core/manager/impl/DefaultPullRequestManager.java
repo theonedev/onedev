@@ -22,12 +22,16 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jetty.util.ConcurrentHashSet;
+import org.eclipse.jgit.lib.ObjectId;
+import org.hibernate.Query;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -36,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
@@ -44,21 +49,18 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
-import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.core.model.IntegrationPreview;
@@ -69,12 +71,13 @@ import com.pmease.gitplex.core.model.PullRequestActivity;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultPullRequestManager implements PullRequestManager, LifecycleListener {
+public class DefaultPullRequestManager implements PullRequestManager, RepositoryListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
@@ -85,8 +88,6 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
 	private final PullRequestCommentManager pullRequestCommentManager;
-	
-	private final BranchManager branchManager;
 	
 	private final UserManager userManager;
 	
@@ -116,14 +117,13 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
-			BranchManager branchManager, StorageManager storageManager, 
-			ReviewInvitationManager reviewInvitationManager, UserManager userManager,
-			PullRequestNotificationManager notificationManager, ConfigManager configManager,
-			PullRequestCommentManager pullRequestCommentManager, MarkdownManager markdownManager,
-			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
+			StorageManager storageManager, ReviewInvitationManager reviewInvitationManager, 
+			UserManager userManager, PullRequestNotificationManager notificationManager, 
+			ConfigManager configManager, PullRequestCommentManager pullRequestCommentManager, 
+			MarkdownManager markdownManager, UnitOfWork unitOfWork, 
+			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.branchManager = branchManager;
 		this.storageManager = storageManager;
 		this.reviewInvitationManager = reviewInvitationManager;
 		this.pullRequestCommentManager = pullRequestCommentManager;
@@ -132,15 +132,6 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 		this.configManager = configManager;
 		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
-	}
-
-	@Sessional
-	@Override
-	public PullRequest findOpen(Branch target, Branch source) {
-		return dao.find(EntityCriteria.of(PullRequest.class)
-				.add(ofTarget(target))
-				.add(ofSource(source))
-				.add(ofOpen()));
 	}
 
 	@Transactional
@@ -160,37 +151,16 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 		request.deleteRefs();
 	}
 
-	@Sessional
-	@Override
-	public Collection<PullRequest> findOpen(Branch sourceOrTarget) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(ofOpen());
-		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
-		return dao.query(criteria);
-	}
-
 	@Transactional
 	@Override
-	public void restoreSource(PullRequest request) {
-		Preconditions.checkState(request.getSourceFQN() != null && request.getSource() == null && !request.isOpen());
+	public void restoreSourceBranch(PullRequest request) {
+		Preconditions.checkState(!request.isOpen() && request.getSourceRepo() != null);
 
-		String repositoryFQN = Branch.getRepositoryFQNByFQN(request.getSourceFQN());
-		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(repositoryFQN);
-		if (repository == null)
-			throw new RuntimeException("Unable to find repository: " + repositoryFQN);
-		String branchName = Branch.getNameByFQN(request.getSourceFQN());
-		Branch branch = GitPlex.getInstance(BranchManager.class).findBy(repository, branchName);
-		if (branch == null) {
-			branch = new Branch();
-			branch.setRepository(repository);
-			branch.setName(branchName);
-			branch.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
-			branchManager.save(branch);
-			repository.git().createBranch(branch.getName(), branch.getHeadCommitHash());
+		if (request.getSource().getHead(false) == null) {
+			request.getSourceRepo().git().createBranch(
+					request.getSourceBranch(), 
+					request.getLatestUpdate().getHeadCommitHash());
 		}
-		
-		request.setSource(branch);
-		dao.persist(request);
 	}
 
 	@Transactional
@@ -271,14 +241,15 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 		
 		User user = userManager.getCurrent();
 
-		Git git = request.getTarget().getRepository().git();
+		Repository targetRepo = request.getTargetRepo();
+		Git git = targetRepo.git();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		if ((strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY || strategy == MERGE_WITH_SQUASH) 
 				&& !preview.getIntegrated().equals(preview.getRequestHead()) && comment != null) {
 			File tempDir = FileUtils.createTempDir();
 			try {
 				Git tempGit = new Git(tempDir);
-				tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, request.getTarget().getName());
+				tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, request.getTargetBranch());
 				tempGit.updateRef("HEAD", preview.getIntegrated(), null, null);
 				tempGit.reset(null, null);
 				
@@ -291,16 +262,19 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 			}
 		}
 		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
-			Git sourceGit = request.getSource().getRepository().git();
-			sourceGit.updateRef(request.getSource().getHeadRef(), integrated, preview.getRequestHead(), 
+			Repository sourceRepo = request.getSourceRepo();
+			Git sourceGit = sourceRepo.git();
+			String sourceRef = request.getSourceRef();
+			sourceGit.updateRef(sourceRef, integrated, preview.getRequestHead(), 
 					"Pull request #" + request.getId());
-			request.getSource().setHeadCommitHash(integrated);
-			branchManager.save(request.getSource());
+			sourceRepo.cacheObjectId(request.getSourceBranch(), ObjectId.fromString(integrated));
+			onRefUpdate(sourceRepo, sourceRef, integrated);
 		}
-		git.updateRef(request.getTarget().getHeadRef(), integrated, 
-				preview.getTargetHead(), "Pull request #" + request.getId());
-		request.getTarget().setHeadCommitHash(integrated);
-		branchManager.save(request.getTarget());
+		
+		String targetRef = request.getTargetRef();
+		git.updateRef(targetRef, integrated, preview.getTargetHead(), "Pull request #" + request.getId());
+		targetRepo.cacheObjectId(request.getTargetBranch(), ObjectId.fromString(integrated));
+		onRefUpdate(targetRepo, targetRef, integrated);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
@@ -372,9 +346,9 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 	@Override
 	public List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request) {
 		List<IntegrationStrategy> strategies = null;
-		for (IntegrationPolicy policy: request.getTarget().getRepository().getIntegrationPolicies()) {
-			if (policy.getTargetBranches().matches(request.getTarget()) 
-					&& policy.getSourceBranches().matches(request.getSource())) {
+		for (IntegrationPolicy policy: request.getTargetRepo().getIntegrationPolicies()) {
+			if (policy.getTargetBranches().matches(request.getTargetBranch()) 
+					&& policy.getSourceBranches().matches(request.getSourceRepo(), request.getSourceBranch())) {
 				strategies = policy.getIntegrationStrategies();
 				break;
 			}
@@ -405,8 +379,8 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 
 	@Transactional
 	private void closeIfMerged(PullRequest request) {
-		Git git = request.getTarget().getRepository().git();
-		if (git.isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHeadCommitHash())) {
+		Git git = request.getTargetRepo().git();
+		if (git.isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHead())) {
 			PullRequestActivity activity = new PullRequestActivity();
 			activity.setRequest(request);
 			activity.setAction(PullRequestActivity.Action.INTEGRATE);
@@ -427,14 +401,13 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 	@Transactional
 	@Override
 	public void onSourceBranchUpdate(PullRequest request, boolean notify) {
-		if (request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getHeadCommitHash()))
+		if (request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getHead()))
 			return;
 		
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setRequest(request);
 		update.setDate(new Date());
-		update.setHeadCommitHash(request.getSource().getHeadCommitHash());
-		update.setUser(request.getSource().getLastUpdater());
+		update.setHeadCommitHash(request.getSource().getHead());
 		
 		request.addUpdate(update);
 		pullRequestUpdateManager.save(update, notify);
@@ -505,26 +478,6 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 		}
 	}
 
-	@Sessional
-	@Override
-	public Collection<PullRequest> findOpenTo(Branch target, Repository source) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(Restrictions.eq("target", target));
-		criteria.add(Restrictions.isNull("closeStatus"));
-		criteria.createCriteria("source").add(Restrictions.eq("repository", source));
-		return dao.query(criteria);
-	}
-	
-	@Sessional
-	@Override
-	public Collection<PullRequest> findOpenFrom(Branch source, Repository target) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(Restrictions.eq("source", source));
-		criteria.add(Restrictions.isNull("closeStatus"));
-		criteria.createCriteria("target").add(Restrictions.eq("repository", target));
-		return dao.query(criteria);
-	}
-
 	private int getIntegrationPreviewWorkers() {
 		Integer workers = configManager.getQosSetting().getIntegrationPreviewWorkers();
 		if (workers == null)
@@ -573,9 +526,9 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 						IntegrationPreview preview = request.getLastIntegrationPreview();
 						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
-							String targetHead = request.getTarget().getHeadCommitHash();
-							Git git = request.getTarget().getRepository().git();
-							preview = new IntegrationPreview(request.getTarget().getHeadCommitHash(), 
+							String targetHead = request.getTarget().getHead();
+							Git git = request.getTargetRepo().git();
+							preview = new IntegrationPreview(targetHead, 
 									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
 							request.setLastIntegrationPreview(preview);
 							String integrateRef = request.getIntegrateRef();
@@ -589,7 +542,7 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 								try {
 									Git tempGit = new Git(tempDir);
 									tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, 
-											request.getTarget().getName());
+											request.getTargetBranch());
 									
 									String integrated;
 
@@ -704,6 +657,113 @@ public class DefaultPullRequestManager implements PullRequestManager, LifecycleL
 	public void systemStopped() {
 		if (integrationPreviewExecutor != null)
 			integrationPreviewExecutor.shutdown();
+	}
+
+	@Transactional
+	@Override
+	public void beforeDelete(Repository repository) {
+    	for (PullRequest request: repository.getOutgoingRequests()) {
+    		if (!request.getTargetRepo().equals(repository) && request.isOpen())
+        		discard(request, "Source repository is deleted.");
+    	}
+    	
+    	Query query = dao.getSession().createQuery("update PullRequest set sourceRepo=null where "
+    			+ "sourceRepo = :repo and targetRepo != :repo");
+    	query.setParameter("repo", repository);
+    	query.executeUpdate();
+	}
+
+	@Override
+	public void afterDelete(Repository repository) {
+	}
+	
+	@Transactional
+	@Override
+	public void onRefUpdate(Repository repository, String refName, @Nullable String newCommitHash) {
+		final String branch = GitUtils.ref2branch(refName);
+		if (branch != null) {
+			RepoAndBranch repoAndBranch = new RepoAndBranch(repository, branch);
+			if (newCommitHash != null) {
+				/**
+				 * Source branch update is key to the logic as it has to create 
+				 * pull request update, so we should not postpone it to be executed
+				 * in a executor service like target branch update below
+				 */
+				Criterion criterion = Restrictions.and(ofOpen(), ofSource(repoAndBranch));
+				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion)))
+					onSourceBranchUpdate(request, true);
+				
+				final Long repoId = repository.getId();
+				dao.afterCommit(new Runnable() {
+
+					@Override
+					public void run() {
+						unitOfWork.asyncCall(new Runnable() {
+
+							@Override
+							public void run() {
+								RepoAndBranch repoAndBranch = new RepoAndBranch(repoId, branch);								
+								Criterion criterion = Restrictions.and(ofOpen(), ofTarget(repoAndBranch));
+								for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) 
+									onTargetBranchUpdate(request);
+							}
+							
+						});
+					}
+					
+				});
+			} else {
+				Criterion criterion = Restrictions.and(
+						ofOpen(), 
+						Restrictions.or(ofSource(repoAndBranch), ofTarget(repoAndBranch)));
+				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) {
+					if (request.getTargetRepo().equals(repository) && request.getTargetBranch().equals(branch)) 
+						discard(request, "Target branch is deleted.");
+					else
+						discard(request, "Source branch is deleted.");
+				}
+			}
+		}
+	}
+
+	@Sessional
+	@Override
+	public PullRequest findOpen(RepoAndBranch target, RepoAndBranch source) {
+		return dao.find(EntityCriteria.of(PullRequest.class)
+				.add(ofTarget(target)).add(ofSource(source)).add(ofOpen()));
+	}
+
+	@Sessional
+	@Override
+	public Collection<PullRequest> queryOpenTo(RepoAndBranch target, @Nullable Repository sourceRepo) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofTarget(target));
+
+		if (sourceRepo != null)
+			criteria.add(Restrictions.eq("sourceRepo", sourceRepo));
+		criteria.add(ofOpen());
+		return dao.query(criteria);
+	}
+
+	@Sessional
+	@Override
+	public Collection<PullRequest> queryOpenFrom(RepoAndBranch source, @Nullable Repository targetRepo) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofSource(source));
+		
+		if (targetRepo != null)
+			criteria.add(Restrictions.eq("targetRepo", targetRepo));
+		criteria.add(ofOpen());
+		return dao.query(criteria);
+	}
+
+	@Sessional
+	@Override
+	public Collection<PullRequest> queryOpen(RepoAndBranch sourceOrTarget) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofOpen());
+		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
+		return dao.query(criteria);
 	}
 
 }

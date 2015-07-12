@@ -8,11 +8,12 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.branch.BranchLink;
 import com.pmease.gitplex.web.component.label.AgeLabel;
@@ -68,19 +69,19 @@ public class RequestSummaryPanel extends Panel {
 		
 		add(new UserLink("user", Model.of(getPullRequest().getSubmitter()), AvatarMode.NAME_AND_AVATAR));
 		
-		add(new BranchLink("target", new AbstractReadOnlyModel<Branch>() {
+		add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
 
 			@Override
-			public Branch getObject() {
+			protected RepoAndBranch load() {
 				return getPullRequest().getTarget();
 			}
 			
 		}));
 
-		add(new BranchLink("source", new AbstractReadOnlyModel<Branch>() {
+		add(new BranchLink("source", new LoadableDetachableModel<RepoAndBranch>() {
 
 			@Override
-			public Branch getObject() {
+			protected RepoAndBranch load() {
 				return getPullRequest().getSource();
 			}
 			

@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.editable.branch;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,23 +10,21 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branch.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branch.BranchMultiChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
+public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBranch>> {
 	
 	private BranchMultiChoice input;
 	
-	public LocalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Long>> propertyModel) {
+	public LocalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<RepoAndBranch>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -46,14 +43,11 @@ public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
     		
     	});
 
-    	List<Branch> branches = new ArrayList<>();
-		if (getModelObject() != null) {
-			Dao dao = GitPlex.getInstance(Dao.class);
-			for (Long branchId: getModelObject()) 
-				branches.add(dao.load(Branch.class, branchId));
-		}
+    	ArrayList<RepoAndBranch> repoAndBranches = new ArrayList<>();
+		if (getModelObject() != null) 
+			repoAndBranches.addAll(getModelObject());
 		
-		input = new BranchMultiChoice("input", new Model((Serializable)branches), branchProvider);
+		input = new BranchMultiChoice("input", new Model(repoAndBranches), branchProvider);
         
         add(input);
 	}
@@ -64,14 +58,12 @@ public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	}
 
 	@Override
-	protected List<Long> convertInputToValue() throws ConversionException {
-		List<Long> branchIds = new ArrayList<>();
-		Collection<Branch> branches = input.getConvertedInput();
-		if (branches != null) {
-			for (Branch branch: branches)
-				branchIds.add(branch.getId());
-		} 
-		return branchIds;
+	protected List<RepoAndBranch> convertInputToValue() throws ConversionException {
+		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+		Collection<RepoAndBranch> convertedInput = input.getConvertedInput();
+		if (convertedInput != null)
+			repoAndBranches.addAll(convertedInput);
+		return repoAndBranches;
 	}
 
 }

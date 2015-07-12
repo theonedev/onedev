@@ -33,5 +33,4 @@ public interface RepositoryManager {
 	void save(Repository repository);
 	
 	void delete(Repository repository);
-	
 }

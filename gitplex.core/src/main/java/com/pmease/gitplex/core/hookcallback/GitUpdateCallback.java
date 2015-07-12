@@ -23,13 +23,10 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
-import com.pmease.gitplex.core.manager.BranchManager;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -44,14 +41,11 @@ public class GitUpdateCallback extends HttpServlet {
 
 	private final Dao dao;
 	
-	private final BranchManager branchManager;
-
 	private final UserManager userManager;
 	
 	@Inject
-	public GitUpdateCallback(Dao dao, BranchManager branchManager, UserManager userManager) {
+	public GitUpdateCallback(Dao dao, UserManager userManager) {
 		this.dao = dao;
-		this.branchManager = branchManager;
 		this.userManager = userManager;
 	}
 	
@@ -116,37 +110,24 @@ public class GitUpdateCallback extends HttpServlet {
 			if (!user.asSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository)))
 				error(output, "Only repository administrators can update gitplex refs.");
 		} else {
-			String branchName = Branch.parseName(refName);
-			if (branchName != null) { // push branch ref 
+			String branch = GitUtils.ref2branch(refName);
+			if (branch != null) { // push branch ref 
 				if (oldCommitHash.equals(GitUtils.NULL_SHA1)) { // create new branch
 					checkRef(user, repository, refName, output);
 				} else {
-					Branch branch = branchManager.findBy(repository, branchName);
-					Preconditions.checkNotNull(branch);
-
 					if (newCommitHash.equals(GitUtils.NULL_SHA1)) { // deleting a branch ref
 						GateKeeper gateKeeper = repository.getGateKeeper();
-						CheckResult checkResult = gateKeeper.checkFile(user, branch, null);
+						CheckResult checkResult = gateKeeper.checkFile(user, repository, branch, null);
 						
 						if (!(checkResult instanceof Passed)) {
 							List<String> messages = new ArrayList<>();
 							for (String each: checkResult.getReasons())
 								messages.add(each);
 							error(output, messages.toArray(new String[messages.size()]));
-						} else {
-							boolean hasOpen = false;
-							for (PullRequest each: branch.getIncomingRequests()) {
-								if (each.isOpen()) {
-									hasOpen = true;
-									break;
-								}
-							}
-							if (hasOpen)
-								error(output, "There are pull requests opening against this branch.");
 						}
 					} else {
 						GateKeeper gateKeeper = repository.getGateKeeper();
-						CheckResult checkResult = gateKeeper.checkCommit(user, branch, newCommitHash);
+						CheckResult checkResult = gateKeeper.checkCommit(user, repository, branch, newCommitHash);
 				
 						if (!(checkResult instanceof Passed)) {
 							List<String> messages = new ArrayList<>();

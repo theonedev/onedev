@@ -9,7 +9,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.editable.UserChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
@@ -67,12 +66,12 @@ public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
 		return check(user);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
 		return check(user);
 	}
 

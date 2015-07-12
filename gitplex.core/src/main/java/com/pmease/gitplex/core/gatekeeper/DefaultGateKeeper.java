@@ -2,7 +2,6 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -22,12 +21,12 @@ public class DefaultGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
 		return ignored();
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
 		return ignored();
 	}
 

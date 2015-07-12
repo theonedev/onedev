@@ -6,11 +6,10 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByIds;
+import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByNames;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.TargetBranchSelection;
-import com.pmease.gitplex.core.model.Branch;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
 @Editable(icon="fa-lock", order=300, category=GateKeeper.CATEGORY_COMMONLY_USED, 
@@ -19,7 +18,7 @@ import com.pmease.gitplex.core.model.User;
 @SuppressWarnings("serial")
 public class BuildVerificationOfBranch extends AbstractGateKeeper {
 
-	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByIds();
+	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByNames();
 	
 	private int buildCount = 1;
 	
@@ -40,10 +39,7 @@ public class BuildVerificationOfBranch extends AbstractGateKeeper {
 
 	@Override
 	protected GateKeeper trim(Repository repository) {
-		if (branchSelection.trim(repository) == null)
-			return null;
-		else
-			return this;
+		return this;
 	}
 
 	@Editable(order=100, description="For each specified branch, this specified number of builds has to be "
@@ -97,13 +93,13 @@ public class BuildVerificationOfBranch extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return getGateKeeper().checkFile(user, branch, file);
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		return getGateKeeper().checkFile(user, repository, branch, file);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return getGateKeeper().checkCommit(user, branch, commit);
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		return getGateKeeper().checkCommit(user, repository, branch, commit);
 	}
 
 	@Override

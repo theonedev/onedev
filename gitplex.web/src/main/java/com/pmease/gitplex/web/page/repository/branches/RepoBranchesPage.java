@@ -48,12 +48,11 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
-import com.pmease.gitplex.core.manager.BranchManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.BranchWatch;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
@@ -73,9 +72,9 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class RepoBranchesPage extends RepositoryPage {
 
-	private Long baseBranchId;
+	private String baseBranch;
 	
-	private PageableListView<Branch> branchesView;
+	private PageableListView<String> branchesView;
 	
 	private PagingNavigator pagingNavigator;
 	
@@ -101,16 +100,16 @@ public class RepoBranchesPage extends RepositoryPage {
 		@Override
 		protected Map<String, AheadBehind> load() {
 			List<String> compareHashes = new ArrayList<>(); 
-			List<Branch> branchesInView = branchesView.getModelObject();
+			List<String> branchesInView = branchesView.getModelObject();
 			for (long i=branchesView.getFirstItemOffset(); i<branchesInView.size(); i++) {
 				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
 					break;
-				Branch branch = branchesInView.get((int)i); 
+				String branch = branchesInView.get((int)i); 
 				if (!branch.equals(getBaseBranch()))
-					compareHashes.add(lastCommitsModel.getObject().get(branch.getName()).getHash());
+					compareHashes.add(lastCommitsModel.getObject().get(branch).getHash());
 			}
 			
-			String baseHash = lastCommitsModel.getObject().get(getBaseBranch().getName()).getHash();
+			String baseHash = lastCommitsModel.getObject().get(getBaseBranch()).getHash();
 			Map<String, AheadBehind> aheadBehinds = getRepository().git().getAheadBehinds(
 					baseHash, 
 					compareHashes.toArray(new String[compareHashes.size()]));
@@ -154,8 +153,10 @@ public class RepoBranchesPage extends RepositoryPage {
 		@Override
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
-			for (PullRequest request: GitPlex.getInstance(PullRequestManager.class).findOpenTo(getBaseBranch(), getRepository())) 
-				requests.put(request.getSource().getName(), request);
+			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+			RepoAndBranch repoAndBranch = new RepoAndBranch(getRepository(), getBaseBranch());
+			for (PullRequest request: pullRequestManager.queryOpenTo(repoAndBranch, getRepository())) 
+				requests.put(request.getSource().getBranch(), request);
 			return requests;
 		}
 		
@@ -167,8 +168,10 @@ public class RepoBranchesPage extends RepositoryPage {
 		@Override
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
-			for (PullRequest request: GitPlex.getInstance(PullRequestManager.class).findOpenFrom(getBaseBranch(), getRepository())) 
-				requests.put(request.getTarget().getName(), request);
+			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+			RepoAndBranch repoAndBranch = new RepoAndBranch(getRepository(), getBaseBranch());
+			for (PullRequest request: pullRequestManager.queryOpenFrom(repoAndBranch, getRepository())) 
+				requests.put(request.getTarget().getBranch(), request);
 			return requests;
 		}
 		
@@ -182,7 +185,7 @@ public class RepoBranchesPage extends RepositoryPage {
 			Map<String, BranchWatch> requestWatches = new HashMap<>();
 			for (BranchWatch watch: GitPlex.getInstance(BranchWatchManager.class).findBy(
 					Preconditions.checkNotNull(getCurrentUser()), getRepository()))
-				requestWatches.put(watch.getBranch().getName(), watch);
+				requestWatches.put(watch.getBranch(), watch);
 			return requestWatches;
 		}
 		
@@ -204,20 +207,20 @@ public class RepoBranchesPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BranchSingleChoice("baseBranch", new IModel<Branch>() {
+		add(new BranchSingleChoice("baseBranch", new IModel<RepoAndBranch>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Branch getObject() {
-				return getBaseBranch();
+			public RepoAndBranch getObject() {
+				return new RepoAndBranch(getRepository(), getBaseBranch());
 			}
 
 			@Override
-			public void setObject(Branch object) {
-				baseBranchId = object.getId();
+			public void setObject(RepoAndBranch object) {
+				baseBranch = object.getBranch();
 			}
 			
 		}, new BranchChoiceProvider(repoModel)).add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -236,33 +239,33 @@ public class RepoBranchesPage extends RepositoryPage {
 		branchesContainer.setOutputMarkupId(true);
 		add(branchesContainer);
 		
-		branchesContainer.add(branchesView = new PageableListView<Branch>("branches", new AbstractReadOnlyModel<List<Branch>>() {
+		branchesContainer.add(branchesView = new PageableListView<String>("branches", new AbstractReadOnlyModel<List<String>>() {
 
 			@Override
-			public List<Branch> getObject() {
-				List<Branch> branches = new ArrayList<>(getRepository().getBranches());
+			public List<String> getObject() {
+				List<String> branches = new ArrayList<>(getRepository().getBranches());
 				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<Branch> it = branches.iterator(); it.hasNext();) {
-						Branch branch = it.next();
-						if (!branch.getName().toLowerCase().contains(searchFor))
+					for (Iterator<String> it = branches.iterator(); it.hasNext();) {
+						String branch = it.next();
+						if (!branch.toLowerCase().contains(searchFor))
 							it.remove();
 					}
 				} else {
 					searchFor = null;
 				}
-				Collections.sort(branches, new Comparator<Branch>() {
+				Collections.sort(branches, new Comparator<String>() {
 
 					@Override
-					public int compare(Branch branch1, Branch branch2) {
-						if (branch1.isDefault()) {
+					public int compare(String branch1, String branch2) {
+						if (getRepository().getDefaultBranch().equals(branch1)) {
 							return -1;
-						} else if (branch2.isDefault()) {
+						} else if (getRepository().getDefaultBranch().equals(branch2)) {
 							return 1;
 						} else { 
-							BriefCommit commit1 = lastCommitsModel.getObject().get(branch1.getName());
-							BriefCommit commit2 = lastCommitsModel.getObject().get(branch2.getName());
+							BriefCommit commit1 = lastCommitsModel.getObject().get(branch1);
+							BriefCommit commit2 = lastCommitsModel.getObject().get(branch2);
 							Preconditions.checkState(commit1 != null && commit2 != null);
 							return commit2.getAuthor().getWhen().compareTo(commit1.getAuthor().getWhen());
 						}
@@ -275,16 +278,16 @@ public class RepoBranchesPage extends RepositoryPage {
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(final ListItem<Branch> item) {
-				final Branch branch = item.getModelObject();
+			protected void populateItem(final ListItem<String> item) {
+				final String branch = item.getModelObject();
 				
 				AbstractLink link = new BookmarkablePageLink<Void>("branchLink", 
 						RepoFilePage.class,
-						RepoFilePage.paramsOf(getRepository(), branch.getName(), null));
-				link.add(new Label("name", branch.getName()));
+						RepoFilePage.paramsOf(getRepository(), branch, null));
+				link.add(new Label("name", branch));
 				item.add(link);
 				
-				BriefCommit lastCommit = Preconditions.checkNotNull(lastCommitsModel.getObject().get(branch.getName()));
+				BriefCommit lastCommit = Preconditions.checkNotNull(lastCommitsModel.getObject().get(branch));
 
 				item.add(new AgeLabel("lastUpdateTime", Model.of(lastCommit.getAuthor().getWhen())));
 				item.add(new PersonLink("lastAuthor", Model.of(lastCommit.getAuthor()), AvatarMode.NAME));
@@ -294,12 +297,12 @@ public class RepoBranchesPage extends RepositoryPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(item.getModelObject().isDefault());
+						setVisible(getRepository().getDefaultBranch().equals(item.getModelObject()));
 					}
 					
 				});
 				
-				String branchHash = lastCommitsModel.getObject().get(branch.getName()).getHash();
+				String branchHash = lastCommitsModel.getObject().get(branch).getHash();
 				final AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(branchHash));
 				
 				item.add(new Link<Void>("behindLink") {
@@ -320,7 +323,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						if (behindOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null) { 
+						if (behindOpenRequestsModel.getObject().get(item.getModelObject()) != null) { 
 							tag.put("title", "" + ab.getBehind() + " commits behind of base branch, and there is an "
 									+ "open pull request fetching those commits");
 						} else {
@@ -330,13 +333,16 @@ public class RepoBranchesPage extends RepositoryPage {
 
 					@Override
 					public void onClick() {
-						Branch branch = item.getModelObject();
-						PullRequest request = behindOpenRequestsModel.getObject().get(branch.getName());
+						String branch = item.getModelObject();
+						PullRequest request = behindOpenRequestsModel.getObject().get(branch);
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							setResponsePage(BranchComparePage.class, 
-									BranchComparePage.paramsOf(getRepository(), getBaseBranch(), branch));
+							PageParameters params = BranchComparePage.paramsOf(
+									getRepository(),
+									new RepoAndBranch(getRepository(), getBaseBranch()), 
+									new RepoAndBranch(getRepository(), branch)); 
+							setResponsePage(BranchComparePage.class, params);
 						}
 					}
 					
@@ -346,7 +352,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						if (behindOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null)
+						if (behindOpenRequestsModel.getObject().get(item.getModelObject()) != null)
 							add(AttributeAppender.append("class", " request"));
 					}
 
@@ -377,7 +383,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						if (aheadOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null) { 
+						if (aheadOpenRequestsModel.getObject().get(item.getModelObject()) != null) { 
 							tag.put("title", "" + ab.getAhead() + " commits ahead of base branch, and there is an "
 									+ "open pull request sending these commits to base branch");
 						} else {
@@ -387,13 +393,16 @@ public class RepoBranchesPage extends RepositoryPage {
 
 					@Override
 					public void onClick() {
-						Branch branch = item.getModelObject();
-						PullRequest request = aheadOpenRequestsModel.getObject().get(branch.getName());
+						String branch = item.getModelObject();
+						PullRequest request = aheadOpenRequestsModel.getObject().get(branch);
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							setResponsePage(BranchComparePage.class, 
-									BranchComparePage.paramsOf(getRepository(), branch, getBaseBranch()));
+							PageParameters params = BranchComparePage.paramsOf(
+									getRepository(), 
+									new RepoAndBranch(getRepository(), branch), 
+									new RepoAndBranch(getRepository(), getBaseBranch()));
+							setResponsePage(BranchComparePage.class, params);
 						}
 					}
 					
@@ -403,7 +412,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						if (aheadOpenRequestsModel.getObject().get(item.getModelObject().getName()) != null)
+						if (aheadOpenRequestsModel.getObject().get(item.getModelObject()) != null)
 							add(AttributeAppender.append("class", " request"));
 					}
 
@@ -423,11 +432,11 @@ public class RepoBranchesPage extends RepositoryPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						String branchName = item.getModelObject().getName();
-						BranchWatch watch = branchWatchesModel.getObject().get(branchName);
+						String branch = item.getModelObject();
+						BranchWatch watch = branchWatchesModel.getObject().get(branch);
 						if (watch != null) {
 							GitPlex.getInstance(Dao.class).remove(watch);
-							branchWatchesModel.getObject().remove(branchName);
+							branchWatchesModel.getObject().remove(branch);
 						}
 						target.add(actionsContainer);
 					}
@@ -436,7 +445,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(getCurrentUser() != null 
-								&& branchWatchesModel.getObject().containsKey(item.getModelObject().getName()));
+								&& branchWatchesModel.getObject().containsKey(item.getModelObject()));
 					}
 
 				});
@@ -455,35 +464,33 @@ public class RepoBranchesPage extends RepositoryPage {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(getCurrentUser() != null 
-								&& !branchWatchesModel.getObject().containsKey(item.getModelObject().getName()));
+								&& !branchWatchesModel.getObject().containsKey(item.getModelObject()));
 					}
 
 				});
 
 				Link<Void> deleteLink;
-				final Long branchId = branch.getId();
 				actionsContainer.add(deleteLink = new Link<Void>("delete") {
 
 					@Override
 					public void onClick() {
-						Dao dao = GitPlex.getInstance(Dao.class);
-						GitPlex.getInstance(BranchManager.class).delete(dao.load(Branch.class, branchId));
+						getRepository().deleteBranch(branch);
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 
-						Branch branch = item.getModelObject();
-						if (!branch.isDefault() && SecurityUtils.canModify(branch)) {
+						String branch = item.getModelObject();
+						if (!getRepository().getDefaultBranch().equals(branch) && SecurityUtils.canModify(getRepository(), branch)) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getRepository().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkFile(currentUser, branch, null);
+								CheckResult checkResult = gateKeeper.checkFile(currentUser, getRepository(), branch, null);
 								if (checkResult instanceof Passed) {
 									setVisible(true);
-									PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch.getName());
-									PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch.getName());
+									PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
+									PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
 									setEnabled(aheadOpen == null && behindOpen == null);
 								} else {
 									setVisible(false);
@@ -498,8 +505,8 @@ public class RepoBranchesPage extends RepositoryPage {
 					
 				});
 				deleteLink.add(new ConfirmBehavior("Do you really want to delete this branch?"));				
-				PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch.getName());
-				PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch.getName());
+				PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
+				PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
 				if (aheadOpen != null || behindOpen != null) {
 					String hint = "This branch can not be deleted as there are <br>pull request opening against it."; 
 					deleteLink.add(new TooltipBehavior(Model.of(hint), new TooltipConfig().withPlacement(Placement.left)));
@@ -521,9 +528,9 @@ public class RepoBranchesPage extends RepositoryPage {
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
 	
-	private Branch getBaseBranch() {
-		if (baseBranchId != null)
-			return GitPlex.getInstance(Dao.class).load(Branch.class, baseBranchId);
+	private String getBaseBranch() {
+		if (baseBranch != null)
+			return baseBranch;
 		else
 			return getRepository().getDefaultBranch();
 	}

@@ -10,12 +10,12 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
 
 @SuppressWarnings("serial")
-public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Branch>> {
+public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<RepoAndBranch>> {
 
 	private Long repoId;
 	
@@ -31,8 +31,8 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Branc
 	 * @param branchesModel
 	 * 			model of selected branches
 	 */
-	public GlobalBranchMultiChoice(String id, IModel<Collection<Branch>> branchesModel) {
-		super(id, branchesModel);
+	public GlobalBranchMultiChoice(String id, IModel<Collection<RepoAndBranch>> repoAndBranchesModel) {
+		super(id, repoAndBranchesModel);
 		
 		repositoryModel = new IModel<Repository>() {
 
@@ -45,18 +45,18 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Branc
 				if (repoId != null) {
 					return GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
 				} else {
-					Collection<Branch> branches = getBranches();
-					if (branches == null || branches.isEmpty())
+					Collection<RepoAndBranch> repoAndBranches = getRepoAndBranches();
+					if (repoAndBranches == null || repoAndBranches.isEmpty())
 						return null;
 					else 
-						return branches.iterator().next().getRepository();
+						return repoAndBranches.iterator().next().getRepository();
 				}
 			}
 
 			@Override
 			public void setObject(Repository object) {
 				repoId = object.getId();
-				setBranches(new HashSet<Branch>());
+				setRepoAndBranches(new HashSet<RepoAndBranch>());
 			}
 			
 		};
@@ -95,12 +95,12 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Branc
 		});
 	}
 	
-	private Collection<Branch> getBranches() {
+	private Collection<RepoAndBranch> getRepoAndBranches() {
 		return getModelObject();
 	}
 
-	private void setBranches(Collection<Branch> branches) {
-		getModel().setObject(branches);
+	private void setRepoAndBranches(Collection<RepoAndBranch> repoAndBranches) {
+		getModel().setObject(repoAndBranches);
 	}
 
 	@Override

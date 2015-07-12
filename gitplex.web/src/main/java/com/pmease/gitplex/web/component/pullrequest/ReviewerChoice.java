@@ -36,7 +36,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		setVisible(request.isOpen() 
 				&& !request.getPotentialReviewers().isEmpty()
-				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTarget().getRepository()))));
+				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTargetRepo()))));
 	}
 
 	@Override

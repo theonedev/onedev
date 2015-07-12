@@ -42,7 +42,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		if (targetPath != null) {
 			try (	FileRepository jgitRepo = context.getRepository().openAsJGitRepo(); 
 					RevWalk revWalk = new RevWalk(jgitRepo)) {
-				ObjectId commitId = context.getRepository().getObjectId(context.getState().file.revision, true);
+				ObjectId commitId = context.getRepository().getObjectId(context.getState().file.revision);
 				RevTree revTree = revWalk.parseCommit(commitId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, targetPath, revTree);
 				if (treeWalk == null)

@@ -5,12 +5,12 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitplex.core.model.Branch;
+import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
 
 @SuppressWarnings("serial")
-public class GlobalBranchSingleChoice extends FormComponentPanel<Branch> {
+public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> {
 
 	private IModel<Repository> repositoryModel;
 	
@@ -24,7 +24,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<Branch> {
 	 * @param branchModel
 	 * 			model of selected branch
 	 */
-	public GlobalBranchSingleChoice(String id, IModel<Branch> branchModel) {
+	public GlobalBranchSingleChoice(String id, IModel<RepoAndBranch> branchModel) {
 		super(id, branchModel);
 		
 		repositoryModel = new IModel<Repository>() {
@@ -35,16 +35,16 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<Branch> {
 
 			@Override
 			public Repository getObject() {
-				Branch branch = getBranch();
-				if (branch != null) 
-					return branch.getRepository();
+				RepoAndBranch repoAndBranch = getRepoAndBranch();
+				if (repoAndBranch != null) 
+					return repoAndBranch.getRepository();
 				else 
 					return null;
 			}
 
 			@Override
 			public void setObject(Repository object) {
-				setBranch(object.getDefaultBranch());
+				setRepoAndBranch(new RepoAndBranch(object, object.getDefaultBranch()));
 			}
 			
 		};
@@ -82,12 +82,12 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<Branch> {
 		});
 	}
 	
-	private Branch getBranch() {
+	private RepoAndBranch getRepoAndBranch() {
 		return getModelObject();
 	}
 
-	private void setBranch(Branch branch) {
-		getModel().setObject(branch);
+	private void setRepoAndBranch(RepoAndBranch repoAndBranch) {
+		getModel().setObject(repoAndBranch);
 	}
 
 	@Override

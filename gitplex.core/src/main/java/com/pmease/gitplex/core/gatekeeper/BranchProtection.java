@@ -11,10 +11,9 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.editable.TeamChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByIds;
+import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByNames;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.TargetBranchSelection;
 import com.pmease.gitplex.core.manager.TeamManager;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
@@ -27,7 +26,7 @@ import com.pmease.gitplex.core.model.User;
 				+ "specified branches to specified teams.")
 public class BranchProtection extends AbstractGateKeeper {
 	
-	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByIds();
+	private TargetBranchSelection branchSelection = new SpecifyTargetBranchesByNames();
 	
 	private List<Long> teamIds = new ArrayList<>();
 	
@@ -56,9 +55,6 @@ public class BranchProtection extends AbstractGateKeeper {
 
 	@Override
 	protected GateKeeper trim(Repository repository) {
-		if (branchSelection.trim(repository) == null)
-			return null;
-		
 		GitPlex.getInstance(TeamManager.class).trim(teamIds);
 		if (teamIds.isEmpty())
 			return null;
@@ -90,13 +86,13 @@ public class BranchProtection extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
-		return getGateKeeper().checkFile(user, branch, file);
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+		return getGateKeeper().checkFile(user, repository, branch, file);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
-		return getGateKeeper().checkCommit(user, branch, commit);
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+		return getGateKeeper().checkCommit(user, repository, branch, commit);
 	}
 
 	@Override

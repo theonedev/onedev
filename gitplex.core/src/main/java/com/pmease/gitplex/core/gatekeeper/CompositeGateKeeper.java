@@ -1,7 +1,6 @@
 package com.pmease.gitplex.core.gatekeeper;
 
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
@@ -28,24 +27,24 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(final User user, final Branch branch, final String file) {
+	protected CheckResult doCheckFile(final User user, final Repository repository, final String branch, final String file) {
 		return aggregate(new Checker() {
 
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkFile(user, branch, file);
+				return gateKeeper.checkFile(user, repository, branch, file);
 			}
 			
 		});
 	}
 	
 	@Override
-	protected CheckResult doCheckCommit(final User user, final Branch branch, final String commit) {
+	protected CheckResult doCheckCommit(final User user, final Repository repository, final String branch, final String commit) {
 		return aggregate(new Checker() {
 
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkCommit(user, branch, commit);
+				return gateKeeper.checkCommit(user, repository, branch, commit);
 			}
 			
 		});

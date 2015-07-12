@@ -274,7 +274,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	@Override
 	protected void teardown() {
 		super.teardown();
-		indexManager.repositoryRemoved(repository);
+		indexManager.afterDelete(repository);
 	}
 
 }

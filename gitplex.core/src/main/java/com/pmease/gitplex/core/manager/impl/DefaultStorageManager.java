@@ -36,7 +36,7 @@ public class DefaultStorageManager implements StorageManager {
 
 	@Override
 	public File getCacheDir(PullRequest request) {
-		File repoCacheDir = getCacheDir(request.getTarget().getRepository());
+		File repoCacheDir = getCacheDir(request.getTargetRepo());
         return createIfNotExist(new File(repoCacheDir, "requests/" + request.getId()));
 	}
 

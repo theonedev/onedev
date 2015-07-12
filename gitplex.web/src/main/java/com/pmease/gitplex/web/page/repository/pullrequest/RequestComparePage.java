@@ -107,7 +107,7 @@ public class RequestComparePage extends RequestDetailPage {
 				choices.put(commit.getHash(), description);
 			}
 
-			String targetHead = request.getTarget().getHeadCommitHash();
+			String targetHead = request.getTarget().getHead();
 			if (!choices.containsKey(targetHead)) {
 				description = new CommitDescription(TARGET_BRANCH_HEAD, 
 						getRepository().getCommit(targetHead).getSubject());
@@ -296,7 +296,7 @@ public class RequestComparePage extends RequestDetailPage {
 							@Override
 							protected void onSelect() {
 								PageParameters params = paramsOf(getPullRequest(), 
-										getPullRequest().getTarget().getHeadCommitHash(), preview.getIntegrated(), file);
+										getPullRequest().getTarget().getHead(), preview.getIntegrated(), file);
 								setResponsePage(RequestComparePage.class, params);
 							}
 							

@@ -5,7 +5,6 @@ import java.io.Serializable;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Repository;
@@ -50,7 +49,7 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * @return
 	 * 			result of the check. 
 	 */
-	CheckResult checkFile(User user, Branch branch, String file);
+	CheckResult checkFile(User user, Repository repository, String branch, String file);
 	
 	/**
 	 * Check if specified user can push specified commit to specified branch.
@@ -64,7 +63,7 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkCommit(User user, Branch branch, String commit);
+	CheckResult checkCommit(User user, Repository repository, String branch, String commit);
 	
 	/**
 	 * Check if specified user can push specified reference to specified repository. 

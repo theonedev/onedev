@@ -3,12 +3,11 @@ package com.pmease.gitplex.core.gatekeeper;
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Branch;
 import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
+import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
 @Editable(order=600, icon="fa-group", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
@@ -28,12 +27,12 @@ public class IfNotDisapprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Branch branch, String file) {
+	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
 		return passed(Lists.newArrayList("Not disapproved by anyone from team '" + getTeam().getName() + "'."));
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Branch branch, String commit) {
+	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
 		return passed(Lists.newArrayList("Not disapproved by anyone from team '" + getTeam().getName() + "'."));
 	}
 

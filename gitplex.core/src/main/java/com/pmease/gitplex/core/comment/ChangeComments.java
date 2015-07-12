@@ -37,7 +37,7 @@ public class ChangeComments implements Serializable {
 		if (change.getNewPath() != null) {
 			int end = commits.indexOf(change.getNewRev());
 			Preconditions.checkState(end != -1);
-			if (!getContent(blobs, change.getNewBlobInfo(), request.getTarget().getRepository()).isEmpty()) {
+			if (!getContent(blobs, change.getNewBlobInfo(), request.getTargetRepo()).isEmpty()) {
 				for (int i=commits.size()-1; i>end; i--) {
 					String commit = commits.get(i);
 					Map<String, List<InlineComment>> commentsOnCommit = getCommentsOnCommit(comments, commit, request);
@@ -45,9 +45,9 @@ public class ChangeComments implements Serializable {
 					if (commentsOnFile != null) {
 						Preconditions.checkState(!commentsOnFile.isEmpty());
 						BlobIdent blobInfo = commentsOnFile.get(0).getBlobInfo();
-						List<String> fileContent = getContent(blobs, blobInfo, request.getTarget().getRepository());
+						List<String> fileContent = getContent(blobs, blobInfo, request.getTargetRepo());
 						if (!fileContent.isEmpty()) {
-							List<String> newContent = getContent(blobs, change.getNewBlobInfo(), request.getTarget().getRepository());
+							List<String> newContent = getContent(blobs, change.getNewBlobInfo(), request.getTargetRepo());
 							Map<Integer, Integer> lineMap = DiffUtils.mapLines(fileContent, newContent);
 							for (InlineComment comment: commentsOnFile) {
 								Integer line = lineMap.get(comment.getLine());
@@ -69,7 +69,7 @@ public class ChangeComments implements Serializable {
 		if (change.getOldPath() != null) { 
 			int begin = commits.indexOf(change.getOldRev());
 			Preconditions.checkState(begin != -1);
-			if (!getContent(blobs, change.getOldBlobInfo(), request.getTarget().getRepository()).isEmpty()
+			if (!getContent(blobs, change.getOldBlobInfo(), request.getTargetRepo()).isEmpty()
 					&& !change.getOldRev().equals(change.getNewRev())) {
 				List<InlineComment> commentsOnFile = getCommentsOnCommit(comments, change.getOldRev(), request).get(change.getOldPath());
 				if (commentsOnFile != null) {

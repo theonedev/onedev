@@ -112,7 +112,7 @@ public class RepoFilePage extends RepositoryPage {
 		trait.repoId = getRepository().getId();
 		state.file.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
 		if (state.file.revision == null)
-			state.file.revision = getRepository().getDefaultBranch().getName();
+			state.file.revision = getRepository().getDefaultBranch();
 		trait.revision = state.file.revision;
 		
 		state.file.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
@@ -137,7 +137,7 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private ObjectId getCommitId() {
-		return getRepository().getObjectId(state.file.revision, true);
+		return getRepository().getObjectId(state.file.revision);
 	}
 
 	@Override
@@ -321,7 +321,7 @@ public class RepoFilePage extends RepositoryPage {
 	}
 	
 	private void onAddOrEditFile(AjaxRequestTarget target) {
-		ObjectId commitId = getRepository().getObjectId(state.file.revision, true);
+		ObjectId commitId = getRepository().getObjectId(state.file.revision);
 		
 		String refName = Git.REFS_HEADS + state.file.revision;
 		
@@ -442,7 +442,7 @@ public class RepoFilePage extends RepositoryPage {
 
 			@Override
 			public void onDelete(AjaxRequestTarget target) {
-				ObjectId commitId = getRepository().getObjectId(getState().file.revision, true);
+				ObjectId commitId = getRepository().getObjectId(getState().file.revision);
 				
 				String refName = Git.REFS_HEADS + state.file.revision;
 

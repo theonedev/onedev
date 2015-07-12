@@ -1,12 +1,16 @@
 package com.pmease.gitplex.core.listeners;
 
+import javax.annotation.Nullable;
+
 import com.pmease.commons.loader.ExtensionPoint;
 import com.pmease.gitplex.core.model.Repository;
 
 @ExtensionPoint
 public interface RepositoryListener {
 	
-	void repositoryRemoved(Repository repository);
+	void beforeDelete(Repository repository);
 	
-	void commitReceived(Repository repository, String commitHash);
+	void afterDelete(Repository repository);
+	
+	void onRefUpdate(Repository repository, String refName, @Nullable String newCommitHash);
 }

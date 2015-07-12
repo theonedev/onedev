@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -23,6 +22,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -31,6 +32,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
@@ -144,13 +146,15 @@ public class PullRequest extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Branch target;
+	private Repository targetRepo;
+	
+	@Column(nullable=false)
+	private String targetBranch;
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	private Branch source;
+	private Repository sourceRepo;
 	
-	// record name of source branch so that we can restore it even after source branch is deleted
-	private String sourceFQN;
+	private String sourceBranch;
 	
 	@Column(nullable=false)
 	private String baseCommitHash;
@@ -176,28 +180,36 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable=false)
 	private IntegrationStrategy integrationStrategy;
 
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestVerification> verifications = new ArrayList<>();
 
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestActivity> activities = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestNotification> notifications = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestVisit> visits = new ArrayList<>();
 
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
 	private transient CheckResult checkResult;
@@ -270,47 +282,65 @@ public class PullRequest extends AbstractEntity {
 		this.assignee = assignee;
 	}
 
-	/**
-	 * Get target branch of this request.
-	 * 
-	 * @return
-	 * 			target branch of this request
-	 */
-	public Branch getTarget() {
-		return target;
+	public Repository getTargetRepo() {
+		return targetRepo;
+	}
+	
+	public RepoAndBranch getTarget() {
+		return new RepoAndBranch(getTargetRepo(), getTargetBranch());
+	}
+	
+	public void setTarget(RepoAndBranch target) {
+		setTargetRepo(target.getRepository());
+		setTargetBranch(target.getBranch());
+	}
+	
+	public void setSource(RepoAndBranch source) {
+		setSourceRepo(source.getRepository());
+		setSourceBranch(source.getBranch());
+	}
+	
+	public void setTargetRepo(Repository targetRepo) {
+		this.targetRepo = targetRepo;
 	}
 
-	public void setTarget(@Nullable Branch target) {
-		this.target = target;
+	public String getTargetBranch() {
+		return targetBranch;
 	}
 
-	/**
-	 * Get source branch of this request.
-	 * 
-	 * @return
-	 * 			source branch of this request, or <tt>null</tt> if source branch 
-	 * 			is deleted. In case of source branch being deleted, the pull request 
-	 * 			may still in opened state for review, but can not be updated with 
-	 * 			new commits
-	 */
-	@Nullable
-	public Branch getSource() {
-		return source;
-	}
-
-	public void setSource(@Nullable Branch source) {
-		this.source = source;
+	public void setTargetBranch(String targetBranch) {
+		this.targetBranch = targetBranch;
 	}
 
 	@Nullable
-	public String getSourceFQN() {
-		return sourceFQN;
+	public Repository getSourceRepo() {
+		return sourceRepo;
 	}
 
-	public void setSourceFQN(String sourceFQN) {
-		this.sourceFQN = sourceFQN;
+	public void setSourceRepo(Repository sourceRepo) {
+		this.sourceRepo = sourceRepo;
 	}
 
+	public String getSourceBranch() {
+		return sourceBranch;
+	}
+
+	public void setSourceBranch(String sourceBranch) {
+		this.sourceBranch = sourceBranch;
+	}
+
+	public RepoAndBranch getSource() {
+		return new RepoAndBranch(getSourceRepo(), getSourceBranch());
+	}
+	
+	public String getTargetRef() {
+		return GitUtils.branch2ref(getTargetBranch());
+	}
+	
+	public String getSourceRef() {
+		return GitUtils.branch2ref(getSourceBranch());
+	}
+	
 	public String getBaseCommitHash() {
 		return baseCommitHash;
 	}
@@ -320,12 +350,12 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public Commit getBaseCommit() {
-		return getTarget().getRepository().getCommit(getBaseCommitHash());
+		return getTargetRepo().getCommit(getBaseCommitHash());
 	}
 	
 	public Git git() {
 		if (sandbox == null)
-			return getTarget().getRepository().git();
+			return getTargetRepo().git();
 		else
 			return sandbox;
 	}
@@ -463,7 +493,7 @@ public class PullRequest extends AbstractEntity {
 	 */
 	public CheckResult getCheckResult() {
 		if (checkResult == null) 
-			checkResult = getTarget().getRepository().getGateKeeper().checkRequest(this);
+			checkResult = getTargetRepo().getGateKeeper().checkRequest(this);
 		return checkResult;
 	}
 	
@@ -526,10 +556,10 @@ public class PullRequest extends AbstractEntity {
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
-			Git git = getTarget().getRepository().git();
+			Git git = getTargetRepo().git();
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = getSortedUpdates().get(i);
-				if (!git.isAncestor(update.getHeadCommitHash(), getTarget().getHeadCommitHash()))
+				if (!git.isAncestor(update.getHeadCommitHash(), getTarget().getHead()))
 					effectiveUpdates.add(update);
 				else 
 					break;
@@ -554,8 +584,8 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public Collection<String> findTouchedFiles() {
-		Git git = getTarget().getRepository().git();
-		return git.listChangedFiles(getTarget().getHeadCommitHash(), getLatestUpdate().getHeadCommitHash(), null);
+		Git git = getTargetRepo().git();
+		return git.listChangedFiles(getTarget().getHead(), getLatestUpdate().getHeadCommitHash(), null);
 	}
 
 	@JsonView(ExternalView.class)
@@ -574,7 +604,7 @@ public class PullRequest extends AbstractEntity {
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
-		Git git = getTarget().getRepository().git();
+		Git git = getTargetRepo().git();
 		git.deleteRef(getBaseRef(), null, null);
 		git.deleteRef(getIntegrateRef(), null, null);
 	}
@@ -681,12 +711,16 @@ public class PullRequest extends AbstractEntity {
 			return Restrictions.isNotNull("closeStatus");
 		}
 		
-		public static Criterion ofTarget(Branch target) {
-			return Restrictions.eq("target", target);
+		public static Criterion ofTarget(RepoAndBranch target) {
+			return Restrictions.and(
+					Restrictions.eq("targetRepo", target.getRepository()),
+					Restrictions.eq("targetBranch", target.getBranch()));
 		}
 
-		public static Criterion ofSource(Branch source) {
-			return Restrictions.eq("source", source);
+		public static Criterion ofSource(RepoAndBranch source) {
+			return Restrictions.and(
+					Restrictions.eq("sourceRepo", source.getRepository()),
+					Restrictions.eq("sourceBranch", source.getBranch()));
 		}
 		
 		public static Criterion ofSubmitter(User submitter) {
@@ -728,8 +762,8 @@ public class PullRequest extends AbstractEntity {
 	public Set<String> getPendingCommits() {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
-			Repository repo = getTarget().getRepository();
-			for (Commit commit: repo.git().log(getTarget().getHeadCommitHash(), getLatestUpdate().getHeadCommitHash(), null, 0, 0))
+			Repository repo = getTargetRepo();
+			for (Commit commit: repo.git().log(getTarget().getHead(), getLatestUpdate().getHeadCommitHash(), null, 0, 0))
 				pendingCommits.add(commit.getHash());
 		}
 		return pendingCommits;
@@ -763,9 +797,8 @@ public class PullRequest extends AbstractEntity {
 		if (mergedCommits == null) {
 			mergedCommits = new HashSet<>();
 
-			Branch target = getTarget();
-			Repository repo = target.getRepository();
-			for (Commit commit: repo.git().log(getBaseCommitHash(), target.getHeadCommitHash(), null, 0, 0))
+			Repository repo = getTargetRepo();
+			for (Commit commit: repo.git().log(getBaseCommitHash(), getTarget().getHead(), null, 0, 0))
 				mergedCommits.add(commit);
 		}
 		return mergedCommits;
@@ -845,7 +878,7 @@ public class PullRequest extends AbstractEntity {
 			if (invitation.isPreferred())
 				alreadyInvited.add(invitation.getReviewer());
 		}
-		ObjectPermission readPerm = ObjectPermission.ofRepoPull(getTarget().getRepository());
+		ObjectPermission readPerm = ObjectPermission.ofRepoPull(getTargetRepo());
 		for (User user: GitPlex.getInstance(Dao.class).allOf(User.class)) {
 			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
 				reviewers.add(user);
@@ -872,7 +905,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public String getUrl() {
-		return GitPlex.getInstance().guessServerUrl() + "/" + getTarget().getRepository().getFQN() 
+		return GitPlex.getInstance().guessServerUrl() + "/" + getTargetRepo().getFQN() 
 				+ "/pull_requests/" + getId() + "/overview";
 	}
 	

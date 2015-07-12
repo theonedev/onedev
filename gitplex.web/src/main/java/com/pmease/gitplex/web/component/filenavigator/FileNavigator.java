@@ -335,7 +335,7 @@ public abstract class FileNavigator extends Panel {
 	}
 
 	private ObjectId getCommitId() {
-		return repoModel.getObject().getObjectId(file.revision, true);
+		return repoModel.getObject().getObjectId(file.revision);
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
