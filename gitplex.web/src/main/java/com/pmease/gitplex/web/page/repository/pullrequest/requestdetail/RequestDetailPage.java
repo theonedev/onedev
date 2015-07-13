@@ -86,16 +86,17 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.branch.BranchLink;
+import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.verificationstatus.VerificationStatusPanel;
+import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 
 @SuppressWarnings("serial")
-public abstract class RequestDetailPage extends RepositoryPage {
+public abstract class RequestDetailPage extends PullRequestPage {
 
 	protected IModel<PullRequest> requestModel;
 	

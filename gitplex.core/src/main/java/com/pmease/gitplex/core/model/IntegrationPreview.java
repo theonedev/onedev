@@ -79,7 +79,7 @@ public class IntegrationPreview implements Serializable {
 		if (getRequestHead().equals(request.getLatestUpdate().getHeadCommitHash())
 				&& getTargetHead().equals(request.getTarget().getHead())
 				&& getIntegrationStrategy() == request.getIntegrationStrategy()
-				&& (getIntegrated() == null || getIntegrated().equals(request.getTarget().getHead()))) {
+				&& (getIntegrated() == null || getIntegrated().equals(request.getTargetRepo().getObjectId(request.getIntegrateRef(), true).name()))) {
 			return false;
 		} else {
 			return true;

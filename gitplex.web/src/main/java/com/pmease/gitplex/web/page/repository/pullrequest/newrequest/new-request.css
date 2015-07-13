@@ -1,0 +1,83 @@
+#new-request {
+	padding: 20px 20px 0 20px;
+}
+#new-request>.head {
+	font-size: 18px;
+	margin-bottom: 20px;
+}
+#new-request>.body>div {
+	margin-bottom: 20px;
+}
+#new-request>.body>.branches {
+	margin-bottom: 20px;
+}
+#new-request>.body>.branches td {
+	vertical-align: top;
+}
+#new-request>.body>.branches td>div.title {
+	font-size: 18px; 
+	margin-bottom: 8px;
+}
+#new-request>.body>.branches td>div.branch {
+	background: #F2F2F2; 
+	border-radius: 4px; 
+	vertical-align: top;
+}
+#new-request>.body>.branches .actions {
+	width: 1%; 
+	background: none; 
+	padding: 77px 10px 0 10px;
+}
+
+#new-request>.body>.status .summary {
+	font-size: 16px; 
+	padding: 0; 
+	margin-bottom: 8px;
+}
+
+#new-request>.body>.status>.can-send form>table {
+	width: 100%;
+}
+#new-request>.body>.status>.can-send form>table td {
+	vertical-align: top; 
+	padding: 16px 0; 
+	border-top: 1px dashed #BBB; 
+	border-bottom: 1px dashed #BBB;
+}
+#new-request>.body>.status>.can-send form>table tr.description td {
+	padding-bottom: 8px;
+}
+#new-request>.body>.status>.can-send form>table td.name {
+	width: 120px; 
+	font-size: 18px; 
+	padding-right: 8px;
+}
+#new-request>.body>.status>.can-send form>table td.value {
+	padding-left: 8px;
+}
+#new-request>.body>.status>.can-send form>table {
+	margin-bottom: 16px;
+}
+#new-request>.body>.status>.can-send form>table .select2-container {
+	min-width: 250px;
+}
+#new-request>.body>.status>.can-send form>table td.name .required:BEFORE {
+	content: "*"; 
+	color: red;
+}
+#new-request>.body>.status>.can-send form>table .reviewers li {
+	margin-right: 10px;
+}
+#new-request>.body>.status>.can-send form>table .reviewers li a:hover {
+	text-decoration: none;
+}
+#new-request>.body>.status>.can-send form .feedbackPanelERROR>.alert {
+	margin-bottom: 0; margin-top: 16px;
+}
+#new-request>.body>.status>.can-send form .assignee .help-block {
+	margin-top: 12px;
+}
+#new-request>.body>.status>.can-send form .help-block {
+	margin-bottom: 0;
+}
+

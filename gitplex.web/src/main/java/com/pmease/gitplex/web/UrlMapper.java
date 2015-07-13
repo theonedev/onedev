@@ -31,10 +31,11 @@ import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.pullrequest.OpenRequestsPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestUpdatesPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.repository.setting.integrationpolicy.IntegrationPolicyPage;
@@ -149,14 +150,15 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("${user}/${repo}/branches", RepoBranchesPage.class));
 		add(new MountedMapper("${user}/${repo}/tags", RepoTagsPage.class));
 
-		add(new MountedMapper("${user}/${repo}/pull-requests", OpenRequestsPage.class));
-		add(new MountedMapper("${user}/${repo}/pull-requests/${request}", RequestOverviewPage.class));
+		add(new MountedMapper("${user}/${repo}/pulls", RequestListPage.class));
+		add(new MountedMapper("${user}/${repo}/pulls/new", NewRequestPage.class));
+		add(new MountedMapper("${user}/${repo}/pulls/${request}", RequestOverviewPage.class));
 		add(new MountedMapper(
-				"${user}/${repo}/pull-requests/${request}/overview", RequestOverviewPage.class));
+				"${user}/${repo}/pulls/${request}/overview", RequestOverviewPage.class));
 		add(new MountedMapper(
-				"${user}/${repo}/pull-requests/${request}/updates", RequestUpdatesPage.class));
+				"${user}/${repo}/pulls/${request}/updates", RequestUpdatesPage.class));
 		add(new MountedMapper(
-				"${user}/${repo}/pull-requests/${request}/compare", RequestComparePage.class));
+				"${user}/${repo}/pulls/${request}/compare", RequestComparePage.class));
 
 		add(new MountedMapper("${user}/${repo}/setting", GeneralSettingPage.class));
 		add(new MountedMapper("${user}/${repo}/setting/general", GeneralSettingPage.class));

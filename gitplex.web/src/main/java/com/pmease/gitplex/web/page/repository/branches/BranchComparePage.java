@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -14,6 +16,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
@@ -29,9 +32,9 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
-import com.pmease.gitplex.web.component.branch.BranchLink;
-import com.pmease.gitplex.web.component.diff.CompareResultPanel;
+import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
+import com.pmease.gitplex.web.component.branchlink.BranchLink;
+import com.pmease.gitplex.web.component.diff.compareresult.CompareResultPanel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
@@ -327,6 +330,8 @@ public class BranchComparePage extends RepositoryPage {
 			}
 
 		});
+
+		add(new WebMarkupContainer("tabPanel").setOutputMarkupId(true));
 		
 		add(new BackToTop("backToTop"));
 	}
@@ -335,6 +340,13 @@ public class BranchComparePage extends RepositoryPage {
 		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(BranchComparePage.class, "branch-compare.css")));
+	}
+
 	private Component newChangedFilesPanel() {
 		return new CompareResultPanel("tabPanel", repoModel, mergeBaseModel.getObject(), 
 				sourceModel.getObject().getHead(), null) {

@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.component.avatar.AvatarPicker;
+import com.pmease.gitplex.web.component.avatar.avatarpicker.AvatarPicker;
 
 @SuppressWarnings("serial")
 public class AvatarEditPage extends AccountSettingPage {

@@ -1,0 +1,18 @@
+.removeable-avatar {
+	position: relative;
+}
+.removeable-avatar img {
+	width: 32px; 
+	height: 32px;
+}
+.removeable-avatar i {
+	display: none; 
+	color: red; 
+	font-size: 30px; 
+	position: absolute; 
+	left: 4px; 
+	top: -6px;
+}
+a.removeable-avatar:hover i {
+	display: inline;
+}

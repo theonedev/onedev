@@ -11,7 +11,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
+import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")

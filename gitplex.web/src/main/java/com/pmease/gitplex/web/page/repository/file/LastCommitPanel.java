@@ -9,9 +9,9 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
-import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 class LastCommitPanel extends Panel {

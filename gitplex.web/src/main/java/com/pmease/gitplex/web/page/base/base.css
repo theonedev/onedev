@@ -78,13 +78,6 @@ li.selectable.active a, a.selectable.active {
 .changed-files li:before {font-family: "ponticons"; font-size: 17px;}
 .changed-files a {color: black;}
 
-/* COMPARE RESULT */
-.compare-result {width: 100%;}
-.compare-result>tbody>tr>td {border: 1px solid #DDD; vertical-align: top;}
-.compare-result>tbody>tr>td.nav {width: 20%; padding: 12px; white-space: nowrap;}
-.compare-result>tbody>tr>td.nav a.active {background: #0F89E7; color: white; border-radius: 2px; padding: 2px;}
-.compare-result>tbody>tr>td.content>div>div.error {padding: 20px; font-size: 24px; font-style: italic;}
-
 /* TEXT DIFF */
 .text-diff>.head {border: 1px solid #DDD; padding: 8px; z-index: 10; background: white;}
 .text-diff>.body {border: 1px solid #DDD; border-top: none;}
@@ -189,53 +182,6 @@ ul.threads li .markdown {color: #888; margin-top: 4px;}
 .repository-and-branch td {padding: 12px; white-space: nowrap;}
 .repository-and-branch td.name {text-align: right; padding-right: 0; font-size: 16px; width: 1%; padding-top: 16px;}
 .repository-and-branch .select2-choice {width: 100%;}
-
-/* REMOVEABLE AVATAR */
-.removeable-avatar {position: relative;}
-.removeable-avatar img {width: 32px; height: 32px;}
-.removeable-avatar i {display: none; color: red; font-size: 30px; 
-	position: absolute; left: 4px; top: -6px;}
-a.removeable-avatar:hover i {display: inline;}
-
-/* PULL REQUEST LIST PANEL */
-.request-list>.head {padding: 12px 10px !important; font-size: 16px;}
-.request-list>.head>div {margin-right: 20px;}
-.request-list>.head>div:last-child {margin-right: 0;}
-.request-list>.head .filters>div:first-child {margin-right: 8px;}
-.request-list table td {vertical-align: top; color: #666;}
-.request-list table td.narrow {width: 1%;}
-.request-list table .title {vertical-align: top; color: black; font-size: 16px; 
-	margin-bottom: 6px; font-weight: bold;}
-.request-list table .source>div {margin-right: 6px;}
-.request-list table thead .fa {cursor: pointer;}
-ul.status-help {margin: 16px; padding: 0; width: 400px; list-style: none;}
-ul.status-help .description {color: #444; margin: 4px 0 8px 0; border-bottom: 1px solid #DDD; 
-	padding-bottom: 4px; font-size: 14px;}
-ul.status-help li:last-child .description {border-bottom: none;}
-
-/* NEW PULL REQUEST AND BRANCH COMPARE PAGE */
-.branch-compare>.body>div {margin-bottom: 20px;}
-.branch-compare>.body>.branches {margin-bottom: 20px;}
-.branch-compare>.body>.branches td {vertical-align: top;}
-.branch-compare>.body>.branches td>div.title {font-size: 18px; margin-bottom: 8px;}
-.branch-compare>.body>.branches td>div.branch {background: #F2F2F2; border-radius: 4px; vertical-align: top;}
-.branch-compare>.body>.branches .actions {width: 1%; background: none; padding: 77px 10px 0 10px;}
-
-.branch-compare>.body>.status .summary {font-size: 16px; padding: 0; margin-bottom: 8px;}
-.new-request>.body>.status>.can-send form>table {width: 100%;}
-.new-request>.body>.status>.can-send form>table td {vertical-align: top; padding: 16px 0; 
-	border-top: 1px dashed #BBB; border-bottom: 1px dashed #BBB;}
-.new-request>.body>.status>.can-send form>table tr.description td {padding-bottom: 8px;}
-.new-request>.body>.status>.can-send form>table td.name {width: 120px; font-size: 18px; padding-right: 8px;}
-.new-request>.body>.status>.can-send form>table td.value {padding-left: 8px;}
-.new-request>.body>.status>.can-send form>table {margin-bottom: 16px;}
-.new-request>.body>.status>.can-send form>table .select2-container {min-width: 250px;}
-.new-request>.body>.status>.can-send form>table td.name .required:BEFORE {content: "*"; color: red;}
-.new-request>.body>.status>.can-send form>table .reviewers li {margin-right: 10px;}
-.new-request>.body>.status>.can-send form>table .reviewers li a:hover {text-decoration: none;}
-.new-request>.body>.status>.can-send form .feedbackPanelERROR>.alert {margin-bottom: 0; margin-top: 16px;}
-.new-request>.body>.status>.can-send form .assignee .help-block {margin-top: 12px;}
-.new-request>.body>.status>.can-send form .help-block {margin-bottom: 0;}
 
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}

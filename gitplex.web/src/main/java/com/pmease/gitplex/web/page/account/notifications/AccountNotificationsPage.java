@@ -26,11 +26,11 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestNotification;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.branch.BranchLink;
-import com.pmease.gitplex.web.component.pullrequest.RequestLink;
+import com.pmease.gitplex.web.DateUtils;
+import com.pmease.gitplex.web.component.branchlink.BranchLink;
+import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
-import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class AccountNotificationsPage extends AccountLayoutPage {

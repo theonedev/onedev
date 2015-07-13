@@ -56,10 +56,10 @@ import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.AgeLabel;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.branch.BranchChoiceProvider;
-import com.pmease.gitplex.web.component.branch.BranchSingleChoice;
-import com.pmease.gitplex.web.component.label.AgeLabel;
+import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
+import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -454,6 +454,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						BranchWatch watch = new BranchWatch();
+						watch.setRepository(getRepository());
 						watch.setBranch(item.getModelObject());
 						watch.setUser(getCurrentUser());
 						GitPlex.getInstance(Dao.class).persist(watch);

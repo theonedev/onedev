@@ -1,0 +1,24 @@
+.compare-result {
+	width: 100%;
+}
+.compare-result>tbody>tr>td {
+	border: 1px solid #DDD; 
+	border-top: none;
+	vertical-align: top;
+}
+.compare-result>tbody>tr>td.nav {
+	width: 20%; 
+	padding: 12px; 
+	white-space: nowrap;
+}
+.compare-result>tbody>tr>td.nav a.active {
+	background: #0F89E7; 
+	color: white; 
+	border-radius: 2px; 
+	padding: 2px;
+}
+.compare-result>tbody>tr>td.content>div>div.error {
+	padding: 20px; 
+	font-size: 24px; 
+	font-style: italic;
+}

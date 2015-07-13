@@ -10,8 +10,8 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.branch.BranchChoiceProvider;
-import com.pmease.gitplex.web.component.branch.BranchSingleChoice;
+import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
+import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")

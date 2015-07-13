@@ -56,28 +56,29 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.component.branch.AffinalBranchSingleChoice;
-import com.pmease.gitplex.web.component.branch.BranchLink;
+import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
+import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.diff.CompareResultPanel;
-import com.pmease.gitplex.web.component.pullrequest.AssigneeChoice;
-import com.pmease.gitplex.web.component.pullrequest.ReviewerAvatar;
-import com.pmease.gitplex.web.component.pullrequest.ReviewerChoice;
+import com.pmease.gitplex.web.component.diff.compareresult.CompareResultPanel;
+import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
+import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
+import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestOverviewPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends RepositoryPage {
+public class NewRequestPage extends PullRequestPage {
 
 	private AffinalBranchSingleChoice targetChoice, sourceChoice;
 	
 	private IModel<List<Commit>> commitsModel;
 	
-	private PullRequest pullRequest;
+	private IModel<PullRequest> requestModel;
 	
 	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
 		PageParameters params = paramsOf(repository);
@@ -124,7 +125,7 @@ public class NewRequestPage extends RepositoryPage {
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		
-		pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
+		PullRequest pullRequest = GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
 		
 		if (pullRequest == null) {
 			pullRequest = new PullRequest();
@@ -167,18 +168,34 @@ public class NewRequestPage extends RepositoryPage {
 				if (sandbox.isAncestor(source.getHead(), target.getHead()))
 					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
 			}
+			requestModel = Model.of(pullRequest);
+		} else {
+			final Long requestId = pullRequest.getId();
+			requestModel = new LoadableDetachableModel<PullRequest>() {
+
+				@Override
+				protected PullRequest load() {
+					return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
+				}
+				
+			};
+			requestModel.setObject(pullRequest);
 		}
 		
 		commitsModel = new LoadableDetachableModel<List<Commit>>() {
 
 			@Override
 			protected List<Commit> load() {
-				return pullRequest.git().log(pullRequest.getBaseCommitHash(), 
-						pullRequest.getLatestUpdate().getHeadCommitHash(), null, 0, 0);
+				return getPullRequest().git().log(getPullRequest().getBaseCommitHash(), 
+						getPullRequest().getLatestUpdate().getHeadCommitHash(), null, 0, 0);
 			}
 			
 		};
 		
+	}
+	
+	private PullRequest getPullRequest() {
+		return requestModel.getObject();
 	}
 	
 	@Override
@@ -198,7 +215,7 @@ public class NewRequestPage extends RepositoryPage {
 		};
 		
 		targetChoice = new AffinalBranchSingleChoice("target", currentRepositoryModel, 
-				Model.of(pullRequest.getTarget())) {
+				Model.of(getPullRequest().getTarget())) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
@@ -213,7 +230,7 @@ public class NewRequestPage extends RepositoryPage {
 		add(targetChoice);
 		
 		sourceChoice = new AffinalBranchSingleChoice("source", currentRepositoryModel, 
-				Model.of(pullRequest.getSource())) {
+				Model.of(getPullRequest().getSource())) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
@@ -233,19 +250,19 @@ public class NewRequestPage extends RepositoryPage {
 			public void onClick() {
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), pullRequest.getTarget(), pullRequest.getSource()));
+						paramsOf(getRepository(), getPullRequest().getTarget(), getPullRequest().getSource()));
 			}
 			
 		});
 		
 		Fragment fragment;
-		if (pullRequest.getId() != null) {
+		if (getPullRequest().getId() != null) {
 			fragment = newOpenedFrag();
-		} else if (pullRequest.getSource().equals(pullRequest.getTarget())) {
+		} else if (getPullRequest().getSource().equals(getPullRequest().getTarget())) {
 			fragment = newSameBranchFrag();
-		} else if (pullRequest.getStatus() == INTEGRATED) {
+		} else if (getPullRequest().getStatus() == INTEGRATED) {
 			fragment = newIntegratedFrag();
-		} else if (pullRequest.getStatus() == PENDING_UPDATE) {
+		} else if (getPullRequest().getStatus() == PENDING_UPDATE) {
 			fragment = newRejectedFrag();
 		} else {
 			fragment = newCanSendFrag();
@@ -282,7 +299,7 @@ public class NewRequestPage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(pullRequest.getStatus() != INTEGRATED);
+				setVisible(getPullRequest().getStatus() != INTEGRATED);
 			}
 			
 		});
@@ -297,8 +314,8 @@ public class NewRequestPage extends RepositoryPage {
 	}
 	
 	private Component newChangedFilesPanel() {
-		return new CompareResultPanel("tabPanel", repoModel, pullRequest.getBaseCommitHash(), 
-				pullRequest.getLatestUpdate().getHeadCommitHash(), null) {
+		return new CompareResultPanel("tabPanel", repoModel, getPullRequest().getBaseCommitHash(), 
+				getPullRequest().getLatestUpdate().getHeadCommitHash(), null) {
 			
 			@Override
 			protected void onSelection(AjaxRequestTarget target, Change change) {
@@ -308,6 +325,7 @@ public class NewRequestPage extends RepositoryPage {
 			protected InlineCommentSupport getInlineCommentSupport(Change change) {
 				return null;
 			}
+			
 		}.setOutputMarkupId(true);
 	}
 
@@ -322,14 +340,14 @@ public class NewRequestPage extends RepositoryPage {
 
 					@Override
 					public String getObject() {
-						return pullRequest.getId().toString();
+						return getPullRequest().getId().toString();
 					}
 				}));
 			}
 
 			@Override
 			public void onClick() {
-				PageParameters params = RequestDetailPage.paramsOf(pullRequest);
+				PageParameters params = RequestDetailPage.paramsOf(getPullRequest());
 				setResponsePage(RequestOverviewPage.class, params);
 			}
 			
@@ -339,7 +357,7 @@ public class NewRequestPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				return pullRequest.getTitle();
+				return getPullRequest().getTitle();
 			}
 		}));
 		
@@ -352,15 +370,15 @@ public class NewRequestPage extends RepositoryPage {
 	
 	private Fragment newIntegratedFrag() {
 		Fragment fragment = new Fragment("status", "integratedFrag", this);
-		fragment.add(new BranchLink("sourceBranch", Model.of(pullRequest.getSource())));
-		fragment.add(new BranchLink("targetBranch", Model.of(pullRequest.getTarget())));
+		fragment.add(new BranchLink("sourceBranch", Model.of(getPullRequest().getSource())));
+		fragment.add(new BranchLink("targetBranch", Model.of(getPullRequest().getTarget())));
 		fragment.add(new Link<Void>("swapBranches") {
 
 			@Override
 			public void onClick() {
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), pullRequest.getTarget(), pullRequest.getSource()));
+						paramsOf(getRepository(), getPullRequest().getTarget(), getPullRequest().getSource()));
 			}
 			
 		});
@@ -373,7 +391,7 @@ public class NewRequestPage extends RepositoryPage {
 
 			@Override
 			protected List<String> load() {
-				return pullRequest.getCheckResult().getReasons();
+				return getPullRequest().getCheckResult().getReasons();
 			}
 			
 		}) {
@@ -400,23 +418,23 @@ public class NewRequestPage extends RepositoryPage {
 				super.onSubmit();
 
 				Dao dao = GitPlex.getInstance(Dao.class);
-				RepoAndBranch target = pullRequest.getTarget();
-				RepoAndBranch source = pullRequest.getSource();
-				if (!target.getHead().equals(pullRequest.getTarget().getHead()) 
-						|| !source.getHead().equals(pullRequest.getSource().getHead())) {
+				RepoAndBranch target = getPullRequest().getTarget();
+				RepoAndBranch source = getPullRequest().getSource();
+				if (!target.getHead().equals(getPullRequest().getTarget().getHead()) 
+						|| !source.getHead().equals(getPullRequest().getSource().getHead())) {
 					getSession().warn("Either target branch or source branch has new commits just now, please re-check.");
 					setResponsePage(NewRequestPage.class, paramsOf(getRepository(), source, target));
 				} else {
-					pullRequest.setSource(source);
-					pullRequest.setTarget(target);
-					for (ReviewInvitation invitation: pullRequest.getReviewInvitations())
+					getPullRequest().setSource(source);
+					getPullRequest().setTarget(target);
+					for (ReviewInvitation invitation: getPullRequest().getReviewInvitations())
 						invitation.setReviewer(dao.load(User.class, invitation.getReviewer().getId()));
 					
-					pullRequest.setAssignee(dao.load(User.class, pullRequest.getAssignee().getId()));
+					getPullRequest().setAssignee(dao.load(User.class, getPullRequest().getAssignee().getId()));
 					
-					GitPlex.getInstance(PullRequestManager.class).open(pullRequest, new PageId(getPageId()));
+					GitPlex.getInstance(PullRequestManager.class).open(getPullRequest(), new PageId(getPageId()));
 					
-					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(pullRequest));
+					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
 				}
 			}
 			
@@ -432,20 +450,20 @@ public class NewRequestPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				if (pullRequest.getTitle() == null) {
+				if (getPullRequest().getTitle() == null) {
 					List<Commit> commits = commitsModel.getObject();
 					Preconditions.checkState(!commits.isEmpty());
 					if (commits.size() == 1)
-						pullRequest.setTitle(commits.get(0).getSubject());
+						getPullRequest().setTitle(commits.get(0).getSubject());
 					else
-						pullRequest.setTitle(pullRequest.getSource().getBranch());
+						getPullRequest().setTitle(getPullRequest().getSource().getBranch());
 				}
-				return pullRequest.getTitle();
+				return getPullRequest().getTitle();
 			}
 
 			@Override
 			public void setObject(String object) {
-				pullRequest.setTitle(object);
+				getPullRequest().setTitle(object);
 			}
 			
 		});
@@ -471,19 +489,19 @@ public class NewRequestPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				return pullRequest.getDescription();
+				return getPullRequest().getDescription();
 			}
 
 			@Override
 			public void setObject(String object) {
-				pullRequest.setDescription(object);
+				getPullRequest().setDescription(object);
 			}
 			
 		}));
 
 		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
 		form.add(assigneeContainer);
-		IModel<User> assigneeModel = new PropertyModel<>(pullRequest, "assignee");
+		IModel<User> assigneeModel = new PropertyModel<>(getPullRequest(), "assignee");
 		final AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", repoModel, assigneeModel);
 		assigneeChoice.setRequired(true);
 		assigneeContainer.add(assigneeChoice);
@@ -509,7 +527,7 @@ public class NewRequestPage extends RepositoryPage {
 		};
 		reviewersContainer.setOutputMarkupId(true);
 		form.add(reviewersContainer);
-		reviewersContainer.add(new ListView<ReviewInvitation>("reviewers", new ReviewersModel(Model.of(pullRequest))) {
+		reviewersContainer.add(new ListView<ReviewInvitation>("reviewers", new ReviewersModel(requestModel)) {
 
 			@Override
 			protected void populateItem(ListItem<ReviewInvitation> item) {
@@ -529,7 +547,7 @@ public class NewRequestPage extends RepositoryPage {
 			
 		});
 		
-		reviewersContainer.add(new ReviewerChoice("addReviewer", Model.of(pullRequest)) {
+		reviewersContainer.add(new ReviewerChoice("addReviewer", requestModel) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, User user) {
@@ -545,7 +563,7 @@ public class NewRequestPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(pullRequest.getStatus() == Status.PENDING_APPROVAL);
+				setVisible(getPullRequest().getStatus() == Status.PENDING_APPROVAL);
 			}
 			
 		});
@@ -556,18 +574,21 @@ public class NewRequestPage extends RepositoryPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(NewRequestPage.class, "new-request.css")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(NewRequestPage.class, "new-request.css")));
 	}
 
 	@Override
 	protected void onDetach() {
 		commitsModel.detach();
 
-		if (pullRequest != null && pullRequest.getSandbox() != null) {
-			FileUtils.deleteDir(pullRequest.getSandbox().repoDir());
-			pullRequest.setSandbox(null);
+		if (getPullRequest() != null && getPullRequest().getSandbox() != null) {
+			FileUtils.deleteDir(getPullRequest().getSandbox().repoDir());
+			getPullRequest().setSandbox(null);
 		}
 
+		requestModel.detach();
+		
 		super.onDetach();
 	}
 

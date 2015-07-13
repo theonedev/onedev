@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -82,6 +84,13 @@ public class DirectorySingleChoiceEditor extends PropertyEditor<String> {
 		return null;
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(DirectoryChoiceResourceReference.INSTANCE));
+	}
+	
 	@Override
 	protected String convertInputToValue() throws ConversionException {
 		return input.getConvertedInput();

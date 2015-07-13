@@ -13,7 +13,7 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.web.component.branch.GlobalBranchMultiChoice;
+import com.pmease.gitplex.web.component.branchchoice.globalchoice.GlobalBranchMultiChoice;
 
 @SuppressWarnings("serial")
 public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBranch>> {

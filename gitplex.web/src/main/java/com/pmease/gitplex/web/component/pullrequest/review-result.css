@@ -1,0 +1,16 @@
+.review-result {
+	font-size: 24px; 
+	position: absolute; 
+	left: 30px; 
+	top: 6px; 
+	cursor: pointer;
+}
+.review-result.current.approved {
+	color: #35A612;
+}
+.review-result.current.disapproved {
+	color: #F93333;
+}
+.review-result.previous.approved, .review-result.previous.disapproved {
+	color: #888;
+}

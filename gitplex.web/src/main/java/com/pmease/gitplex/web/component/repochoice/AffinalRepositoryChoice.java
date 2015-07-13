@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.repochoice;
 
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
@@ -27,9 +29,16 @@ public class AffinalRepositoryChoice extends Select2Choice<Repository> {
 	protected void onInitialize() {
 		super.onInitialize();
 		getSettings().setPlaceholder("Typing to find a repository...");
-		getSettings().setFormatResult("gitplex.choiceFormatter.repository.formatResult");
-		getSettings().setFormatSelection("gitplex.choiceFormatter.repository.formatSelection");
-		getSettings().setEscapeMarkup("gitplex.choiceFormatter.repository.escapeMarkup");
+		getSettings().setFormatResult("gitplex.repoChoiceFormatter.formatResult");
+		getSettings().setFormatSelection("gitplex.repoChoiceFormatter.formatSelection");
+		getSettings().setEscapeMarkup("gitplex.repoChoiceFormatter.escapeMarkup");
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(RepoChoiceResourceReference.INSTANCE));
 	}
 
 }

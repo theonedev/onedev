@@ -1,9 +1,12 @@
 package com.pmease.gitplex.web.component.pullrequest;
 
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.model.Review;
@@ -39,6 +42,12 @@ public class ReviewResultIcon extends WebComponent {
 		}
 		add(AttributeAppender.append("class", css));
 		add(new TooltipBehavior(Model.of(tooltip)));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(ReviewResultIcon.class, "review-result.css")));
 	}
 
 }

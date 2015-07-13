@@ -68,8 +68,7 @@ public class TeamChoiceProvider extends ChoiceProvider<Team> {
 	public void detach() {
 		super.detach();
 
-		if (criteria != null) {
+		if (criteria != null) 
 			criteria.detach();
-		}
 	}
 }

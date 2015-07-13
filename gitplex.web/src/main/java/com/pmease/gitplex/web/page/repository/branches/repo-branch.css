@@ -75,3 +75,27 @@
 	z-index: 100; 
 	display: none;
 }
+
+#branch-compare>.body>div {
+	margin-bottom: 20px;
+}
+#branch-compare>.body>.branches {
+	margin-bottom: 20px;
+}
+#branch-compare>.body>.branches td {
+	vertical-align: top;
+}
+#branch-compare>.body>.branches td>div.title {
+	font-size: 18px; 
+	margin-bottom: 8px;
+}
+#branch-compare>.body>.branches td>div.branch {
+	background: #F2F2F2; 
+	border-radius: 4px; 
+	vertical-align: top;
+}
+#branch-compare>.body>.branches .actions {
+	width: 1%; 
+	background: none; 
+	padding: 77px 10px 0 10px;
+}

@@ -78,7 +78,8 @@ public class CommitMessagePanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(CommitMessagePanel.class, "commit-message.css")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(CommitMessagePanel.class, "commit-message.css")));
 	}
 
 	@Override

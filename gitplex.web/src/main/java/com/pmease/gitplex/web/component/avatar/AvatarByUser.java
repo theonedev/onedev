@@ -7,7 +7,6 @@ import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -75,7 +74,7 @@ public class AvatarByUser extends WebComponent {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(AvatarPicker.class, "avatar.css")));
+		response.render(CssHeaderItem.forReference(AvatarResourceReference.INSTANCE));
 	}
 	
 	@Override

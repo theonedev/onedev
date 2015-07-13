@@ -1,0 +1,50 @@
+#request-list {
+	padding: 20px; 
+}
+#request-list>.head {
+	font-size: 18px;
+	margin-bottom: 20px;
+}
+#request-list>.head>.title {
+	margin-top: 4px;
+}
+#request-list>.head>div {
+	margin-right: 20px;
+}
+
+#request-list table td {
+	vertical-align: top; 
+	color: #666;
+}
+#request-list table td.narrow {
+	width: 1%;
+}
+#request-list table .title {
+	vertical-align: top; 
+	color: black; 
+	font-size: 16px; 
+	margin-bottom: 6px; 
+	font-weight: bold;
+}
+#request-list table .source>div {
+	margin-right: 6px;
+}
+#request-list table thead .fa {
+	cursor: pointer;
+}
+ul.status-help {
+	margin: 16px; 
+	padding: 0; 
+	width: 400px; 
+	list-style: none;
+}
+ul.status-help .description {
+	color: #444; 
+	margin: 4px 0 8px 0; 
+	border-bottom: 1px solid #DDD; 
+	padding-bottom: 4px; 
+	font-size: 14px;
+}
+ul.status-help li:last-child .description {
+	border-bottom: none;
+}

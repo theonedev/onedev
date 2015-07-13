@@ -1,5 +1,5 @@
 <wicket:extend>
-	<div class="request-detail">
+	<div id="request-detail">
 		<div wicket:id="requestHead" class="head clearfix">
 			<div wicket:id="status" class="label pull-left "></div>
 			<div wicket:id="title" class="title pull-left"></div>
@@ -55,7 +55,9 @@
 			</div>
 			<div wicket:id="integrationPreview" class="integration-preview">
 				<div wicket:id="calculating">
-					<img src="assets/img/ajax-indicator.gif"></img> Calculating integration preview...
+					<wicket:link>
+					<img src="ajax-indicator.gif"></img> Calculating integration preview...
+					</wicket:link>
 				</div>
 				<div wicket:id="noConflict" class="no-conflict">
 					<label><i class="fa fa-check-circle"></i> Able to integrate without conflicts.</label> 
