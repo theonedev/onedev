@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.branches;
+package com.pmease.gitplex.web.page.repository.branches.compare;
 
 import java.util.ArrayList;
 import java.util.List;
