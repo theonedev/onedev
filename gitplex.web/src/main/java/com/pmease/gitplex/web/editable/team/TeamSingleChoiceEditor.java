@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.editable.team;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -14,6 +12,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamSingleChoice;
@@ -49,7 +48,7 @@ public class TeamSingleChoiceEditor extends PropertyEditor<Long> {
 			team =  GitPlex.getInstance(Dao.class).load(Team.class, getModelObject());
 		else
 			team = null;
-    	input = new TeamSingleChoice("input", Model.of(team), teamProvider);
+    	input = new TeamSingleChoice("input", Model.of(team), teamProvider, !getPropertyDescriptor().isPropertyRequired());
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);

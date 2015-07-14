@@ -169,26 +169,60 @@ public class BranchComparePage extends RepositoryPage {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalBranchSingleChoice("target", repoModel, targetModel) {
+		add(new AffinalBranchSingleChoice("target", repoModel, new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return targetModel.getObject().getId();
+			}
+
+			@Override
+			public void setObject(String object) {
+				targetModel.setObject(new RepoAndBranch(object));
+			}
+			
+		}, false) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
-				setResponsePage(
-						BranchComparePage.class, 
-						paramsOf(getRepository(), sourceModel.getObject(), targetModel.getObject()));
+				
+				PageParameters params = paramsOf(getRepository(), 
+						sourceModel.getObject(), targetModel.getObject());
+				setResponsePage(BranchComparePage.class, params);
 			}
 			
 		}.setRequired(true));
 		
-		add(new AffinalBranchSingleChoice("source", repoModel, sourceModel) { 
+		add(new AffinalBranchSingleChoice("source", repoModel, new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return sourceModel.getObject().getId();
+			}
+
+			@Override
+			public void setObject(String object) {
+				sourceModel.setObject(new RepoAndBranch(object));
+			}
+			
+		}, false) { 
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
-				setResponsePage(
-						BranchComparePage.class, 
-						paramsOf(getRepository(), sourceModel.getObject(), targetModel.getObject()));
+
+				PageParameters params = paramsOf(getRepository(), 
+						sourceModel.getObject(), targetModel.getObject());
+				setResponsePage(BranchComparePage.class, params);
 			}
 			
 		}.setRequired(true));

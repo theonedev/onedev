@@ -12,15 +12,14 @@ import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.web.component.branchchoice.globalchoice.GlobalBranchMultiChoice;
 
 @SuppressWarnings("serial")
-public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBranch>> {
+public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private GlobalBranchMultiChoice input;
 	
-	public GlobalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<RepoAndBranch>> propertyModel) {
+	public GlobalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -28,11 +27,11 @@ public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBr
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new GlobalBranchMultiChoice("input", new LoadableDetachableModel<Collection<RepoAndBranch>>() {
+		input = new GlobalBranchMultiChoice("input", new LoadableDetachableModel<Collection<String>>() {
 
 			@Override
-			protected Collection<RepoAndBranch> load() {
-		    	List<RepoAndBranch> branches = new ArrayList<>();
+			protected Collection<String> load() {
+		    	List<String> branches = new ArrayList<>();
 				if (getModelObject() != null)
 					branches.addAll(getModelObject());
 				
@@ -50,13 +49,11 @@ public class GlobalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBr
 	}
 
 	@Override
-	protected List<RepoAndBranch> convertInputToValue() throws ConversionException {
-		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
-		
-		Collection<RepoAndBranch> convertedInput = input.getConvertedInput();
+	protected List<String> convertInputToValue() throws ConversionException {
+		List<String> repoAndBranches = new ArrayList<>();
+		Collection<String> convertedInput = input.getConvertedInput();
 		if (convertedInput != null)
 			repoAndBranches.addAll(convertedInput);
-		
 		return repoAndBranches;
 	}
 

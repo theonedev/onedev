@@ -7,15 +7,12 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -23,7 +20,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.component.userchoice.UserChoiceProvider;
+import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
@@ -44,19 +41,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 		add(new AvatarByUser("accountAvatar", accountModel, false));
 		
 		final IModel<User> accountModel = Model.of(getAccount());
-		Select2Choice<User> accountChoice = new Select2Choice<User>("accountChoice", accountModel, new UserChoiceProvider()) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				getSettings().setPlaceholder("Typing to find an account...");
-				getSettings().setFormatResult("gitplex.account.choiceFormatter.formatResult");
-				getSettings().setFormatSelection("gitplex.account.choiceFormatter.formatSelection");
-				getSettings().setEscapeMarkup("gitplex.account.choiceFormatter.escapeMarkup");
-			}
-			
-		};
+		UserSingleChoice accountChoice = new UserSingleChoice("accountChoice", accountModel, false);
 		accountChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
@@ -100,8 +85,8 @@ public abstract class AccountLayoutPage extends AccountPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(AccountLayoutPage.class, "account.js")));
-		response.render(CssHeaderItem.forReference(new CssResourceReference(AccountLayoutPage.class, "account.css")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(AccountLayoutPage.class, "account.css")));
 	}
 
 }

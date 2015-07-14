@@ -1,50 +1,38 @@
 #request-list {
-	padding: 20px; 
+	padding: 20px;
 }
 #request-list>.head {
-	font-size: 18px;
 	margin-bottom: 20px;
 }
 #request-list>.head>.title {
-	margin-top: 4px;
+	margin-top: 3px;
+	font-size: 18px;
 }
 #request-list>.head>div {
 	margin-right: 20px;
 }
 
-#request-list table td {
-	vertical-align: top; 
-	color: #666;
+#request-list table.body {
+	width: 100%;
 }
-#request-list table td.narrow {
-	width: 1%;
+#request-list table.body>tbody>tr>td {
+	vertical-align: top;
+	border: 3px solid #EEE;
 }
-#request-list table .title {
-	vertical-align: top; 
-	color: black; 
-	font-size: 16px; 
-	margin-bottom: 6px; 
-	font-weight: bold;
+#request-list td.filter {
+	width: 200px;
+	padding: 20px;
 }
-#request-list table .source>div {
-	margin-right: 6px;
+#request-list td.filter .select2-container .avatar {
+	display: none;
 }
-#request-list table thead .fa {
-	cursor: pointer;
+#request-list td.request .title {
+	font-size: 16px;
 }
-ul.status-help {
-	margin: 16px; 
-	padding: 0; 
-	width: 400px; 
-	list-style: none;
+#request-list td.request .id {
+	font-size: 16px;
+	color: #888;
 }
-ul.status-help .description {
-	color: #444; 
-	margin: 4px 0 8px 0; 
-	border-bottom: 1px solid #DDD; 
-	padding-bottom: 4px; 
+#request-list td.request .status {
 	font-size: 14px;
-}
-ul.status-help li:last-child .description {
-	border-bottom: none;
 }

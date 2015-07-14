@@ -36,23 +36,23 @@ public class BranchEditSupport implements EditSupport {
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(BranchChoice.class) != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
-        			&& EditableUtils.getElementClass(propertyGetter.getGenericReturnType()) == Long.class) {
-        		return new PropertyContext<List<RepoAndBranch>>(propertyDescriptor) {
+        			&& EditableUtils.getElementClass(propertyGetter.getGenericReturnType()) == String.class) {
+        		return new PropertyContext<List<String>>(propertyDescriptor) {
 
 					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<List<RepoAndBranch>> model) {
+					public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
 						return new PropertyViewer(componentId, this) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        List<RepoAndBranch> repoAndBranches = model.getObject();
+						        List<String> repoAndBranches = model.getObject();
 						        if (repoAndBranches != null && !repoAndBranches.isEmpty()) {
 						        	List<String> branches = new ArrayList<>();
-						        	for (RepoAndBranch each: repoAndBranches) {
+						        	for (String each: repoAndBranches) {
 										if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
-											branches.add(each.getFQN());
+											branches.add(new RepoAndBranch(each).getFQN());
 						        		else
-						        			branches.add(each.getBranch());
+						        			branches.add(each);
 						        	}
 						            return new Label(id, StringUtils.join(branches, ", " ));
 						        } else {
@@ -64,31 +64,31 @@ public class BranchEditSupport implements EditSupport {
 					}
 
 					@Override
-					public PropertyEditor<List<RepoAndBranch>> renderForEdit(String componentId, IModel<List<RepoAndBranch>> model) {
+					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
 						if (isAffinal(getPropertyGetter()))
 			        		return new AffinalBranchMultiChoiceEditor(componentId, this, model);
 						else if (isGlobal(getPropertyGetter()))
 							return new GlobalBranchMultiChoiceEditor(componentId, this, model);
 			        	else
-			        		return new LocalBranchMultiChoiceEditor(componentId, this, model);
+			        		return new BranchMultiChoiceEditor(componentId, this, model);
 					}
         			
         		};
-        	} else if (propertyGetter.getReturnType() == Long.class) {
-        		return new PropertyContext<RepoAndBranch>(propertyDescriptor) {
+        	} else if (propertyGetter.getReturnType() == String.class) {
+        		return new PropertyContext<String>(propertyDescriptor) {
 
 					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<RepoAndBranch> model) {
+					public PropertyViewer renderForView(String componentId, final IModel<String> model) {
 						return new PropertyViewer(componentId, this) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        RepoAndBranch repoAndBranch = model.getObject();
+						        String repoAndBranch = model.getObject();
 						        if (repoAndBranch != null) {
 									if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
-						        		return new Label(id, repoAndBranch.getFQN());
+						        		return new Label(id, new RepoAndBranch(repoAndBranch).getFQN());
 						        	else
-						        		return new Label(id, repoAndBranch.getBranch());
+						        		return new Label(id, repoAndBranch);
 						        } else {
 									return new NotDefinedLabel(id);
 						        }
@@ -98,19 +98,19 @@ public class BranchEditSupport implements EditSupport {
 					}
 
 					@Override
-					public PropertyEditor<RepoAndBranch> renderForEdit(String componentId, IModel<RepoAndBranch> model) {
+					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
 						if (isAffinal(getPropertyGetter()))
 			        		return new AffinalBranchSingleChoiceEditor(componentId, this, model);
 						else if (isGlobal(getPropertyGetter()))
 							return new GlobalBranchSingleChoiceEditor(componentId, this, model);
 			        	else
-			        		return new LocalBranchSingleChoiceEditor(componentId, this, model);
+			        		return new BranchSingleChoiceEditor(componentId, this, model);
 					}
         			
         		};
         	} else {
         		throw new RuntimeException("Annotation 'BranchChoice' should be applied to property "
-        				+ "with type 'Long' or 'List<Long>'.");
+        				+ "with type 'String' or 'List<String>'.");
         	}
         } else {
             return null;

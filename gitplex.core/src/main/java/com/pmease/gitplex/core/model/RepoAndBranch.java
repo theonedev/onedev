@@ -36,9 +36,9 @@ public class RepoAndBranch implements Serializable {
 		this.repository = repository;
 	}
 	
-	public RepoAndBranch(String id) {
-		this(Long.valueOf(StringUtils.substringBefore(id, SEPARATOR)), 
-				StringUtils.substringAfter(id, SEPARATOR));
+	public RepoAndBranch(String branchId) {
+		this(Long.valueOf(StringUtils.substringBefore(branchId, SEPARATOR)), 
+				StringUtils.substringAfter(branchId, SEPARATOR));
 	}
 	
 	public Long getRepoId() {

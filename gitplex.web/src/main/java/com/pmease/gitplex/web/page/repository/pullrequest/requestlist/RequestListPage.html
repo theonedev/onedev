@@ -6,10 +6,37 @@
 				<a wicket:id="newRequest" class="btn btn-default"><i class="fa fa-plus"></i> Open New</a>
 			</div>
 		</div>
-		<div class="body">
-			<table wicket:id="pullRequests" class="table table-hover table-striped"></table>
-		</div>
+		<table class="body">
+			<tr>
+				<td class="filter">
+					<form wicket:id="form">
+						<div wicket:id="editor"></div>
+						<div class="actions">
+							<button type="submit" class="btn btn-default"><i class="fa fa-search"></i> Search</button>
+						</div>
+					</form>
+				</td>
+				<td class="requests">
+					<table wicket:id="pullRequests" class="table table-hover table-striped"></table>
+				</td>
+			</tr>
+		</table>
 	</div>
+	<wicket:fragment wicket:id="requestFrag">
+		<div>
+			<span wicket:id="id" class="id"></span>
+			<span wicket:id="title" class="title"></span> 
+			<span wicket:id="status" class="status"></span>
+		</div>
+		<div>
+			<span wicket:id="submitter" class="submitter"></span>
+			wants to pull into
+			<span wicket:id="targetBranch" class="branch"></span>
+			from
+			<span wicket:id="source" class="branch"></span>
+			<span wicket:id="age" class="age"></span>
+		</div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="statusHeaderFrag">
 		Status <span wicket:id="helpDropdownTrigger" class="fa fa-question-circle"></span>
 		<div wicket:id="helpDropdown"></div>

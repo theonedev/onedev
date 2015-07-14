@@ -12,11 +12,13 @@ import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
 import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
 
 @SuppressWarnings("serial")
-public class AffinalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> {
+public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
-	private IModel<Repository> currentRepositoryModel;
+	private final IModel<Repository> currentRepoModel;
 	
-	private IModel<Repository> selectedRepositoryModel;
+	private final IModel<Repository> selectedRepoModel;
+	
+	private final boolean allowEmpty;
 	
 	private BranchSingleChoice branchChoice;
 	
@@ -30,12 +32,13 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<RepoAndBranch>
 	 * @param selectedBranchModel
 	 * 			model of selected branch
 	 */
-	public AffinalBranchSingleChoice(String id, IModel<Repository> currentRepoModel, IModel<RepoAndBranch> selectedBranchModel) {
+	public AffinalBranchSingleChoice(String id, IModel<Repository> currentRepoModel, 
+			IModel<String> selectedBranchModel, boolean allowEmpty) {
 		super(id, selectedBranchModel);
 		
-		this.currentRepositoryModel = currentRepoModel;
+		this.currentRepoModel = currentRepoModel;
 		
-		selectedRepositoryModel = new IModel<Repository>() {
+		selectedRepoModel = new IModel<Repository>() {
 
 			@Override
 			public void detach() {
@@ -43,20 +46,21 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<RepoAndBranch>
 
 			@Override
 			public Repository getObject() {
-				RepoAndBranch repoAndBranch = getRepoAndBranch();
-				if (repoAndBranch == null)
-					return AffinalBranchSingleChoice.this.currentRepositoryModel.getObject();
+				String branchId = getBranchId();
+				if (branchId == null)
+					return AffinalBranchSingleChoice.this.currentRepoModel.getObject();
 				else 
-					return repoAndBranch.getRepository();
+					return new RepoAndBranch(branchId).getRepository();
 			}
 
 			@Override
 			public void setObject(Repository object) {
-				setRepoAndBranch(new RepoAndBranch(object, object.getDefaultBranch()));
+				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).getId());
 			}
 			
 		};
 		
+		this.allowEmpty = allowEmpty;
 	}
 	
 	protected void onChange(AjaxRequestTarget target) {
@@ -68,7 +72,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<RepoAndBranch>
 		
 		setOutputMarkupId(true);
 		
-		add(new AffinalRepositoryChoice("repositoryChoice", currentRepositoryModel, selectedRepositoryModel).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoModel, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -78,8 +82,24 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<RepoAndBranch>
 
 		}));
 		
-		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(selectedRepositoryModel);
-		add(branchChoice = new BranchSingleChoice("branchChoice", getModel(), choiceProvider));
+		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(selectedRepoModel);
+		add(branchChoice = new BranchSingleChoice("branchChoice", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return new RepoAndBranch(AffinalBranchSingleChoice.this.getModelObject()).getBranch();
+			}
+
+			@Override
+			public void setObject(String object) {
+				AffinalBranchSingleChoice.this.setModelObject(new RepoAndBranch(selectedRepoModel.getObject(), object).getId());
+			}
+			
+		}, choiceProvider, allowEmpty));
 		branchChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
@@ -90,12 +110,12 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<RepoAndBranch>
 		});
 	}
 	
-	private RepoAndBranch getRepoAndBranch() {
+	private String getBranchId() {
 		return getModelObject();
 	}
 
-	private void setRepoAndBranch(RepoAndBranch repoAndBranch) {
-		getModel().setObject(repoAndBranch);
+	private void setBranchId(String branchId) {
+		getModel().setObject(branchId);
 	}
 
 	@Override
@@ -105,8 +125,8 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<RepoAndBranch>
 
 	@Override
 	protected void onDetach() {
-		currentRepositoryModel.detach();
-		selectedRepositoryModel.detach();
+		currentRepoModel.detach();
+		selectedRepoModel.detach();
 		
 		super.onDetach();
 	}

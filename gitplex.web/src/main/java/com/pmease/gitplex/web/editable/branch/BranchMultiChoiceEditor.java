@@ -13,18 +13,17 @@ import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchMultiChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBranch>> {
+public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private BranchMultiChoice input;
 	
-	public LocalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<RepoAndBranch>> propertyModel) {
+	public BranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -43,7 +42,7 @@ public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBra
     		
     	});
 
-    	ArrayList<RepoAndBranch> repoAndBranches = new ArrayList<>();
+    	ArrayList<String> repoAndBranches = new ArrayList<>();
 		if (getModelObject() != null) 
 			repoAndBranches.addAll(getModelObject());
 		
@@ -58,10 +57,10 @@ public class LocalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBra
 	}
 
 	@Override
-	protected List<RepoAndBranch> convertInputToValue() throws ConversionException {
-		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
-		Collection<RepoAndBranch> convertedInput = input.getConvertedInput();
-		if (convertedInput != null)
+	protected List<String> convertInputToValue() throws ConversionException {
+		List<String> repoAndBranches = new ArrayList<>();
+		Collection<String> convertedInput = input.getConvertedInput();
+		if (convertedInput != null) 
 			repoAndBranches.addAll(convertedInput);
 		return repoAndBranches;
 	}

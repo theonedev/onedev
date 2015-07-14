@@ -33,7 +33,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<Long> {
 		else
 			user = null;
 		
-    	input = new UserSingleChoice("input", Model.of(user));
+    	input = new UserSingleChoice("input", Model.of(user), !getPropertyDescriptor().isPropertyRequired());
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);

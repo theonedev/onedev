@@ -13,6 +13,8 @@ import com.pmease.gitplex.core.model.User;
 @SuppressWarnings("serial")
 public class RepositoryChoice extends Select2Choice<Repository> {
 
+	private final boolean allowEmpty;
+	
 	/**
 	 * Constructor with model.
 	 * 
@@ -23,13 +25,16 @@ public class RepositoryChoice extends Select2Choice<Repository> {
 	 * @param userModel
 	 * 			model of user to choose repository under, <tt>null</tt> to choose all accessible repositories
 	 */
-	public RepositoryChoice(String id, IModel<Repository> repoModel, @Nullable IModel<User> userModel) {
+	public RepositoryChoice(String id, IModel<Repository> repoModel, @Nullable IModel<User> userModel, boolean allowEmpty) {
 		super(id, repoModel, new RepositoryChoiceProvider(userModel));
+		
+		this.allowEmpty = allowEmpty;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		getSettings().setAllowClear(allowEmpty);
 		getSettings().setPlaceholder("Typing to find a repository...");
 		getSettings().setFormatResult("gitplex.repoChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.repoChoiceFormatter.formatSelection");

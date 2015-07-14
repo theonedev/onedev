@@ -7,13 +7,12 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 
 @SuppressWarnings("serial")
-public class BranchMultiChoice extends Select2MultiChoice<RepoAndBranch> {
+public class BranchMultiChoice extends Select2MultiChoice<String> {
 
-	public BranchMultiChoice(String id, IModel<Collection<RepoAndBranch>> model, ChoiceProvider<RepoAndBranch> provider) {
+	public BranchMultiChoice(String id, IModel<Collection<String>> model, ChoiceProvider<String> provider) {
 		super(id, model, provider);
 	}
 

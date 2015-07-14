@@ -8,18 +8,17 @@ import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class LocalBranchSingleChoiceEditor extends PropertyEditor<RepoAndBranch> {
+public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 	
 	private BranchSingleChoice input;
 	
-	public LocalBranchSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<RepoAndBranch> propertyModel) {
+	public BranchSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -37,7 +36,7 @@ public class LocalBranchSingleChoiceEditor extends PropertyEditor<RepoAndBranch>
     		
     	});
 
-    	input = new BranchSingleChoice("input", getModel(), branchProvider);
+    	input = new BranchSingleChoice("input", getModel(), branchProvider, !getPropertyDescriptor().isPropertyRequired());
         
         add(input);
 	}
@@ -48,7 +47,7 @@ public class LocalBranchSingleChoiceEditor extends PropertyEditor<RepoAndBranch>
 	}
 
 	@Override
-	protected RepoAndBranch convertInputToValue() throws ConversionException {
+	protected String convertInputToValue() throws ConversionException {
 		return input.getConvertedInput();
 	}
 

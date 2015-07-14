@@ -177,12 +177,6 @@ ul.threads li.unread {border-color: #70AEFA;}
 ul.threads li a {color: #444; cursor: pointer;}
 ul.threads li .markdown {color: #888; margin-top: 4px;}
 
-/* BRANCH CHOICE */
-.repository-and-branch {width: 100%;}
-.repository-and-branch td {padding: 12px; white-space: nowrap;}
-.repository-and-branch td.name {text-align: right; padding-right: 0; font-size: 16px; width: 1%; padding-top: 16px;}
-.repository-and-branch .select2-choice {width: 100%;}
-
 .content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
 .content>.commit-choice li {border-bottom: 1px dotted #BBB;}

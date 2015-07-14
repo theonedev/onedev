@@ -13,17 +13,16 @@ import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchMultiChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndBranch>> {
+public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private AffinalBranchMultiChoice input;
 	
-	public AffinalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<RepoAndBranch>> propertyModel) {
+	public AffinalBranchMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -44,7 +43,7 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndB
 
 			@Override
 			protected Object load() {
-				List<RepoAndBranch> repoAndBranches = getModelObject();
+				List<String> repoAndBranches = getModelObject();
 				if (repoAndBranches != null)
 					return repoAndBranches;
 				else
@@ -62,10 +61,10 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<RepoAndB
 	}
 
 	@Override
-	protected List<RepoAndBranch> convertInputToValue() throws ConversionException {
-		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
-		Collection<RepoAndBranch> convertedInput = input.getConvertedInput();
-		if (convertedInput != null) 
+	protected List<String> convertInputToValue() throws ConversionException {
+		List<String> repoAndBranches = new ArrayList<>();
+		Collection<String> convertedInput = input.getConvertedInput();
+		if (convertedInput != null)
 			repoAndBranches.addAll(convertedInput);
 		return repoAndBranches;
 	}

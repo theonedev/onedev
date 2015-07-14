@@ -13,6 +13,9 @@
 #account.sidebar>table>tbody>tr>td.nav>.head .select2-container {
 	width: 200px;
 }
+#account.sidebar>table>tbody>tr>td.nav>.head .select2-container .avatar {
+	display: none;
+}
 #account.sidebar>table>tbody>tr>td.nav>.head .name {
 	font-size: 16px;
 }
@@ -36,12 +39,4 @@
 }
 #account.sidebar>table>tbody>tr>td.content {
 	padding: 20px;
-}
-.select2-results .account .avatar {
-	display: inline-block;
-	border-radius: 3px;
-	vertical-align: middle;
-	height: 24px;
-	width: 24px;
-	margin-right: 6px;
 }

@@ -45,10 +45,7 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 
 	@Override
 	public void toJson(User choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
-		if (choice.getFullName() != null)
-			writer.key("fullName").value(StringEscapeUtils.escapeHtml4(choice.getFullName()));
-		writer.key("email").value(StringEscapeUtils.escapeHtml4(choice.getEmail()));
+		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getDisplayName()));
 		String avatarUrl = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice);
 		writer.key("avatar").value(avatarUrl);
 	}

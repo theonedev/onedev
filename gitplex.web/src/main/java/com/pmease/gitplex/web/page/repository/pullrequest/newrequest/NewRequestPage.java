@@ -215,14 +215,16 @@ public class NewRequestPage extends PullRequestPage {
 		};
 		
 		targetChoice = new AffinalBranchSingleChoice("target", currentRepositoryModel, 
-				Model.of(getPullRequest().getTarget())) {
+				Model.of(getPullRequest().getTarget().getId()), false) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
-				setResponsePage(
-						NewRequestPage.class, 
-						paramsOf(getRepository(), sourceChoice.getModelObject(), targetChoice.getModelObject()));
+				
+				PageParameters params = paramsOf(getRepository(), 
+						new RepoAndBranch(sourceChoice.getModelObject()), 
+						new RepoAndBranch(targetChoice.getModelObject()));
+				setResponsePage(NewRequestPage.class, params);
 			}
 			
 		};
@@ -230,14 +232,16 @@ public class NewRequestPage extends PullRequestPage {
 		add(targetChoice);
 		
 		sourceChoice = new AffinalBranchSingleChoice("source", currentRepositoryModel, 
-				Model.of(getPullRequest().getSource())) {
+				Model.of(getPullRequest().getSource().getId()), false) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
-				setResponsePage(
-						NewRequestPage.class, 
-						paramsOf(getRepository(), sourceChoice.getModelObject(), targetChoice.getModelObject()));
+
+				PageParameters params = paramsOf(getRepository(), 
+						new RepoAndBranch(sourceChoice.getModelObject()), 
+						new RepoAndBranch(targetChoice.getModelObject()));
+				setResponsePage(NewRequestPage.class, params);
 			}
 			
 		};

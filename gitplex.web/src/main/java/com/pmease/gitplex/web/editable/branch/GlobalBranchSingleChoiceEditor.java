@@ -7,15 +7,14 @@ import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.web.component.branchchoice.globalchoice.GlobalBranchSingleChoice;
 
 @SuppressWarnings("serial")
-public class GlobalBranchSingleChoiceEditor extends PropertyEditor<RepoAndBranch> {
+public class GlobalBranchSingleChoiceEditor extends PropertyEditor<String> {
 	
 	private GlobalBranchSingleChoice input;
 	
-	public GlobalBranchSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<RepoAndBranch> propertyModel) {
+	public GlobalBranchSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -23,7 +22,7 @@ public class GlobalBranchSingleChoiceEditor extends PropertyEditor<RepoAndBranch
 	protected void onInitialize() {
 		super.onInitialize();
     	
-		input = new GlobalBranchSingleChoice("input", getModel());
+		input = new GlobalBranchSingleChoice("input", getModel(), !getPropertyDescriptor().isPropertyRequired());
         
         add(input);
 	}
@@ -34,7 +33,7 @@ public class GlobalBranchSingleChoiceEditor extends PropertyEditor<RepoAndBranch
 	}
 
 	@Override
-	protected RepoAndBranch convertInputToValue() throws ConversionException {
+	protected String convertInputToValue() throws ConversionException {
 		return input.getConvertedInput();
 	}
 

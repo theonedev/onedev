@@ -12,9 +12,11 @@ import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
 import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
 
 @SuppressWarnings("serial")
-public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> {
+public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
-	private IModel<Repository> repositoryModel;
+	private final IModel<Repository> repoModel;
+	
+	private final boolean allowEmpty;
 	
 	private BranchSingleChoice branchChoice;
 	
@@ -26,10 +28,10 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> 
 	 * @param branchModel
 	 * 			model of selected branch
 	 */
-	public GlobalBranchSingleChoice(String id, IModel<RepoAndBranch> branchModel) {
+	public GlobalBranchSingleChoice(String id, IModel<String> branchModel, boolean allowEmpty) {
 		super(id, branchModel);
 		
-		repositoryModel = new IModel<Repository>() {
+		repoModel = new IModel<Repository>() {
 
 			@Override
 			public void detach() {
@@ -37,20 +39,21 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> 
 
 			@Override
 			public Repository getObject() {
-				RepoAndBranch repoAndBranch = getRepoAndBranch();
-				if (repoAndBranch != null) 
-					return repoAndBranch.getRepository();
+				String branchId = getBranchId();
+				if (branchId != null) 
+					return new RepoAndBranch(branchId).getRepository();
 				else 
 					return null;
 			}
 
 			@Override
 			public void setObject(Repository object) {
-				setRepoAndBranch(new RepoAndBranch(object, object.getDefaultBranch()));
+				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).getId());
 			}
 			
 		};
 		
+		this.allowEmpty = allowEmpty;
 	}
 	
 	protected void onChange(AjaxRequestTarget target) {
@@ -62,7 +65,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> 
 		
 		setOutputMarkupId(true);
 		
-		add(new RepositoryChoice("repositoryChoice", repositoryModel, null).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new RepositoryChoice("repositoryChoice", repoModel, null, false).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -72,8 +75,24 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> 
 
 		}));
 		
-		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(repositoryModel);
-		add(branchChoice = new BranchSingleChoice("branchChoice", getModel(), choiceProvider));
+		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(repoModel);
+		add(branchChoice = new BranchSingleChoice("branchChoice", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return new RepoAndBranch(GlobalBranchSingleChoice.this.getModelObject()).getBranch();
+			}
+
+			@Override
+			public void setObject(String object) {
+				GlobalBranchSingleChoice.this.setModelObject(new RepoAndBranch(repoModel.getObject(), object).getId());
+			}
+			
+		}, choiceProvider, allowEmpty));
 		branchChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
@@ -84,12 +103,12 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> 
 		});
 	}
 	
-	private RepoAndBranch getRepoAndBranch() {
+	private String getBranchId() {
 		return getModelObject();
 	}
 
-	private void setRepoAndBranch(RepoAndBranch repoAndBranch) {
-		getModel().setObject(repoAndBranch);
+	private void setBranchId(String branchId) {
+		getModel().setObject(branchId);
 	}
 
 	@Override
@@ -99,7 +118,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<RepoAndBranch> 
 
 	@Override
 	protected void onDetach() {
-		repositoryModel.detach();
+		repoModel.detach();
 		
 		super.onDetach();
 	}

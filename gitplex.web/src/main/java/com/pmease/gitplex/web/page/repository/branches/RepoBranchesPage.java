@@ -208,23 +208,23 @@ public class RepoBranchesPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BranchSingleChoice("baseBranch", new IModel<RepoAndBranch>() {
+		add(new BranchSingleChoice("baseBranch", new IModel<String>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public RepoAndBranch getObject() {
-				return new RepoAndBranch(getRepository(), getBaseBranch());
+			public String getObject() {
+				return new RepoAndBranch(getRepository(), getBaseBranch()).getId();
 			}
 
 			@Override
-			public void setObject(RepoAndBranch object) {
-				baseBranch = object.getBranch();
+			public void setObject(String object) {
+				baseBranch = new RepoAndBranch(object).getBranch();
 			}
 			
-		}, new BranchChoiceProvider(repoModel)).add(new AjaxFormComponentUpdatingBehavior("change") {
+		}, new BranchChoiceProvider(repoModel), false).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {

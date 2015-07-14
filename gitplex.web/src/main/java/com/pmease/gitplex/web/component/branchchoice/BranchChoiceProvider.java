@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.component.branchchoice;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -11,14 +10,13 @@ import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
-public class BranchChoiceProvider extends ChoiceProvider<RepoAndBranch> {
+public class BranchChoiceProvider extends ChoiceProvider<String> {
 
 	private IModel<Repository> repoModel;
 
@@ -27,44 +25,38 @@ public class BranchChoiceProvider extends ChoiceProvider<RepoAndBranch> {
 	}
 
 	@Override
-	public void query(String term, int page, Response<RepoAndBranch> response) {
+	public void query(String term, int page, Response<String> response) {
 		term = term.toLowerCase();
-		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+		List<String> branches = new ArrayList<>();
 		Repository repository = repoModel.getObject();
 		for (String branch: repository.getBranches()) {
 			if (branch.toLowerCase().startsWith(term))
-				repoAndBranches.add(new RepoAndBranch(repository, branch));
+				branches.add(branch);
 		}
 		
-		Collections.sort(repoAndBranches, new Comparator<RepoAndBranch>() {
-
-			@Override
-			public int compare(RepoAndBranch o1, RepoAndBranch o2) {
-				return o1.getBranch().compareTo(o2.getBranch());
-			}
-			
-		});
+		Collections.sort(branches);
 
 		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
 		int last = first + Constants.DEFAULT_SELECT2_PAGE_SIZE;
-		response.setHasMore(last<repoAndBranches.size());
-		if (last > repoAndBranches.size())
-			last = repoAndBranches.size();
-		response.addAll(repoAndBranches.subList(first, last));
+		response.setHasMore(last<branches.size());
+		if (last > branches.size())
+			last = branches.size();
+		response.addAll(branches.subList(first, last));
 	}
 
 	@Override
-	public void toJson(RepoAndBranch choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getBranch()));
+	public void toJson(String choice, JSONWriter writer) throws JSONException {
+		String escaped = StringEscapeUtils.escapeHtml4(choice);
+		writer.key("id").value(choice).key("name").value(escaped);
 	}
 
 	@Override
-	public Collection<RepoAndBranch> toChoices(Collection<String> ids) {
-		List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+	public Collection<String> toChoices(Collection<String> ids) {
+		List<String> branches = new ArrayList<>();
 		for (String each : ids)
-			repoAndBranches.add(new RepoAndBranch(each));
+			branches.add(each);
 
-		return repoAndBranches;
+		return branches;
 	}
 
 	@Override
