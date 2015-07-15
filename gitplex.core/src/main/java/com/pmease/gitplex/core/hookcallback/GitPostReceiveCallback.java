@@ -82,13 +82,10 @@ public class GitPostReceiveCallback extends HttpServlet {
         	String field = fields.get(pos);
 //        	String oldCommitHash = StringUtils.reverse(field.substring(0, 40));
         	
-    		String branch = GitUtils.ref2branch(refName);
-    		if (branch != null) {
-            	if (!newCommitHash.equals(GitUtils.NULL_SHA1))
-            		repository.cacheObjectId(branch, ObjectId.fromString(newCommitHash));
-            	else
-            		repository.cacheObjectId(branch, null);
-    		}
+        	if (!newCommitHash.equals(GitUtils.NULL_SHA1))
+        		repository.cacheObjectId(refName, ObjectId.fromString(newCommitHash));
+        	else
+        		repository.cacheObjectId(refName, null);
         	
     		for (RepositoryListener listener: listenersProvider.get())
     			listener.onRefUpdate(repository, refName, newCommitHash);

@@ -6,6 +6,8 @@ import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 
 @SuppressWarnings("serial")
@@ -79,7 +81,7 @@ public class IntegrationPreview implements Serializable {
 		if (getRequestHead().equals(request.getLatestUpdate().getHeadCommitHash())
 				&& getTargetHead().equals(request.getTarget().getHead())
 				&& getIntegrationStrategy() == request.getIntegrationStrategy()
-				&& (getIntegrated() == null || getIntegrated().equals(request.getTargetRepo().getObjectId(request.getIntegrateRef(), true).name()))) {
+				&& (getIntegrated() == null || ObjectId.fromString(getIntegrated()).equals((request.getTargetRepo().getObjectId(request.getIntegrateRef(), false))))) {
 			return false;
 		} else {
 			return true;

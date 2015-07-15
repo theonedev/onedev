@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitplex.core.editable.DirectoryChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -64,7 +65,7 @@ public class IfTouchSpecifiedDirectories extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		for (String file: repository.git().listChangedFiles(repository.getObjectId(branch).name(), commit, null)) {
+		for (String file: repository.git().listChangedFiles(repository.getObjectId(GitUtils.branch2ref(branch)).name(), commit, null)) {
 			for (String each: directories) {
 				if (WildcardUtils.matchPath(each + "/**", file))
 					return passed(Lists.newArrayList("Touched directory '" + each + "'."));

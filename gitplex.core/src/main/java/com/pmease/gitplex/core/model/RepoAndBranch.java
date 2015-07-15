@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 
@@ -73,7 +74,7 @@ public class RepoAndBranch implements Serializable {
 	
 	@Nullable
 	public String getHead(boolean mustExist) {
-		ObjectId commitId = getRepository().getObjectId(getBranch(), mustExist);
+		ObjectId commitId = getRepository().getObjectId(GitUtils.branch2ref(getBranch()), mustExist);
 		return commitId!=null?commitId.name():null;
 	}
 	

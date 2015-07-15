@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -56,7 +57,7 @@ public class IfTouchSpecifiedFilePatterns extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		for (String file: repository.git().listChangedFiles(repository.getObjectId(branch).name(), commit, null)) {
+		for (String file: repository.git().listChangedFiles(repository.getObjectId(GitUtils.branch2ref(branch)).name(), commit, null)) {
 			if (WildcardUtils.matchPath(filePatterns, file))
 					return passed(Lists.newArrayList("Touched files match patterns '" + filePatterns + "'."));
 		}

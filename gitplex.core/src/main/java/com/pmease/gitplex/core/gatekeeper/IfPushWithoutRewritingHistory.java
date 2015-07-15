@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -26,7 +27,7 @@ public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		if (repository.git().isAncestor(repository.getObjectId(branch).name(), commit))
+		if (repository.git().isAncestor(repository.getObjectId(GitUtils.branch2ref(branch)).name(), commit))
 			return passed(Lists.newArrayList("Push operation does not rewrite history."));
 		else
 			return failed(Lists.newArrayList("Push operation rewrites history."));

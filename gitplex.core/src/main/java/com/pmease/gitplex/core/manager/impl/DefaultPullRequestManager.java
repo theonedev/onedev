@@ -267,13 +267,13 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			String sourceRef = request.getSourceRef();
 			sourceGit.updateRef(sourceRef, integrated, preview.getRequestHead(), 
 					"Pull request #" + request.getId());
-			sourceRepo.cacheObjectId(request.getSourceBranch(), ObjectId.fromString(integrated));
+			sourceRepo.cacheObjectId(request.getSourceRef(), ObjectId.fromString(integrated));
 			onRefUpdate(sourceRepo, sourceRef, integrated);
 		}
 		
 		String targetRef = request.getTargetRef();
 		git.updateRef(targetRef, integrated, preview.getTargetHead(), "Pull request #" + request.getId());
-		targetRepo.cacheObjectId(request.getTargetBranch(), ObjectId.fromString(integrated));
+		targetRepo.cacheObjectId(request.getTargetRef(), ObjectId.fromString(integrated));
 		onRefUpdate(targetRepo, targetRef, integrated);
 		
 		PullRequestActivity activity = new PullRequestActivity();
