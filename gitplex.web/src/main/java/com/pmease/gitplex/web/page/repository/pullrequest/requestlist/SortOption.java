@@ -1,32 +1,34 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestlist;
 
+import java.io.Serializable;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Order;
 
-public enum SortOption {
-	
-	CREATE_DATE_DESCENDING("createDate", false, "newest create date"),
-	
-	CREATE_DATE_ASCENDING("createDate", true, "oldest create date"),
-	
-	UPDATE_DATE_DESCENDING("updateDate", false, "newest update date"),
+import com.pmease.commons.util.WordUtils;
 
-	UPDATE_DATE_ASCENDING("updateDate", true, "oldest update date");
+public class SortOption implements Serializable {
 
-	private final String displayName;
+	private static final long serialVersionUID = 1L;
+
+	private static final String PARAM_ORDER_PROPERTY = "orderProperty";
 	
+	private static final String PARAM_ORDER_ASCENDING = "orderAscending";
+
 	private final String propertyName;
 	
 	private final boolean ascending;
 	
-	SortOption(String propertyName, boolean ascending, String displayName) {
+	public SortOption(String propertyName, boolean ascending) {
 		this.propertyName = propertyName;
 		this.ascending = ascending;
-		this.displayName = displayName;
 	}
-	
-	@Override
-	public String toString() {
-		return displayName;
+
+	public SortOption(PageParameters params) {
+		propertyName = params.get(PARAM_ORDER_PROPERTY).toString("createDate");
+		ascending = params.get(PARAM_ORDER_ASCENDING).toBoolean(false); 
 	}
 	
 	public Order getOrder() {
@@ -35,4 +37,36 @@ public enum SortOption {
 		else
 			return Order.desc(propertyName);
 	}
+	
+	public String getDisplayName() {
+		String displayName = WordUtils.uncamel(propertyName).toLowerCase();
+		if (ascending)
+			return displayName + " ascending";
+		else
+			return displayName + " descending";
+	}
+
+	public void fillPageParams(PageParameters params) {
+		params.set(PARAM_ORDER_PROPERTY, propertyName);
+		params.set(PARAM_ORDER_ASCENDING, ascending);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof SortOption))
+			return false;
+		if (this == other)
+			return true;
+		SortOption otherOption = (SortOption) other;
+		return new EqualsBuilder()
+				.append(propertyName, otherOption.propertyName)
+				.append(ascending, otherOption.ascending)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(propertyName).append(ascending).toHashCode();
+	}
+		
 }

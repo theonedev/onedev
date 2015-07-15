@@ -26,6 +26,9 @@
 #request-list td.filter .select2-container .avatar {
 	display: none;
 }
+#request-list td.requests>table>tbody>tr:FIRST-CHILD>td {
+	border-top: none;
+}
 #request-list td.request .first-line {
 	margin-bottom: 4px;
 }
@@ -34,6 +37,9 @@
 }
 #request-list td.request .title {
 	font-size: 16px;
+}
+#request-list td.request .title a {
+	color: #444;
 }
 #request-list td.request .id {
 	font-size: 16px;

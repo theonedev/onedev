@@ -1,8 +1,6 @@
 package com.pmease.commons.wicket.behavior.menu;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.model.IModel;
 
 @SuppressWarnings("serial")
 public abstract class CheckItem extends MenuItem {
@@ -14,7 +12,8 @@ public abstract class CheckItem extends MenuItem {
 
 	protected abstract String getLabel();
 	
-	protected abstract IModel<Boolean> getCheckModel();
+	protected abstract boolean isTicked();
 	
-	protected abstract void onUpdate(AjaxRequestTarget target);
+	protected abstract void onClick();
+	
 }

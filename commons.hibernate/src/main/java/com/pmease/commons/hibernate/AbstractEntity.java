@@ -35,6 +35,7 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		this.id = id;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof AbstractEntity))
 			return false;
@@ -47,6 +48,7 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 			return new EqualsBuilder().append(getId(), otherEntity.getId()).isEquals();
 	}
 
+	@Override
 	public int hashCode() {
 		if (getId() == null)
 			return super.hashCode();

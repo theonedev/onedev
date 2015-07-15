@@ -19,7 +19,7 @@ public class BranchMultiChoice extends Select2MultiChoice<String> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Start typing to find branches ...");
+		getSettings().setPlaceholder("Choose branches ...");
 		getSettings().setFormatResult("gitplex.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.branchChoiceFormatter.escapeMarkup");

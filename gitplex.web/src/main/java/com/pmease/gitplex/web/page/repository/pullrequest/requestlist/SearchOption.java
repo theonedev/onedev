@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.editable.annotation.Editable;
@@ -18,7 +19,23 @@ import com.pmease.gitplex.core.model.Repository;
 @Editable
 public class SearchOption implements Serializable {
 	
-	public enum Status {OPEN, CLOSE, ALL};
+	private static final String PARAM_STATUS = "status";
+	
+	private static final String PARAM_ASSIGNEE = "assignee";
+	
+	private static final String PARAM_SUBMITTER = "submitter";
+	
+	private static final String PARAM_TARGET = "target";
+	
+	private static final String PARAM_TITLE = "title";
+	
+	private static final String PARAM_DESCRIPTION = "description";
+	
+	private static final String PARAM_BEGIN_DATE = "begin";
+	
+	private static final String PARAM_END_DATE = "end";
+	
+	public enum Status {OPEN, CLOSED, ALL};
 	
 	private Status status = Status.OPEN;
 
@@ -109,6 +126,35 @@ public class SearchOption implements Serializable {
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
+	
+	public SearchOption() {
+	}
+	
+	public SearchOption(PageParameters params) {
+		String value = params.get(PARAM_STATUS).toString();
+		if (value != null)
+			status = Status.valueOf(value);
+		
+		value = params.get(PARAM_ASSIGNEE).toString();
+		if (value != null)
+			assigneeId = Long.valueOf(value);
+		
+		value = params.get(PARAM_SUBMITTER).toString();
+		if (value != null)
+			submitterId = Long.valueOf(value);
+		
+		targetBranch = params.get(PARAM_TARGET).toString();
+		title = params.get(PARAM_TITLE).toString();
+		description = params.get(PARAM_DESCRIPTION).toString();
+		
+		value = params.get(PARAM_BEGIN_DATE).toString();
+		if (value != null)
+			beginDate = new Date(Long.valueOf(value));
+		
+		value = params.get(PARAM_END_DATE).toString();
+		if (value != null)
+			endDate = new Date(Long.valueOf(value));
+	}
 
 	public EntityCriteria<PullRequest> getCriteria(Repository repository) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
@@ -116,7 +162,7 @@ public class SearchOption implements Serializable {
 		
 		if (status == Status.OPEN) 
 			criteria.add(PullRequest.CriterionHelper.ofOpen());
-		else if (status == Status.CLOSE) 
+		else if (status == Status.CLOSED) 
 			criteria.add(PullRequest.CriterionHelper.ofClosed());
 		
 		if (submitterId != null)
@@ -135,4 +181,24 @@ public class SearchOption implements Serializable {
 			criteria.add(Restrictions.le("createDate", endDate));
 		return criteria;
 	}
+	
+	public void fillPageParams(PageParameters params) {
+		if (status != Status.ALL)
+			params.set(PARAM_STATUS, status.name());
+		if (assigneeId != null)
+			params.set(PARAM_ASSIGNEE, assigneeId);
+		if (submitterId != null)
+			params.set(PARAM_SUBMITTER, submitterId);
+		if (targetBranch != null)
+			params.set(PARAM_TARGET, targetBranch);
+		if (title != null)
+			params.set(PARAM_TITLE, title);
+		if (description != null)
+			params.set(PARAM_DESCRIPTION, description);
+		if (beginDate != null)
+			params.set(PARAM_BEGIN_DATE, beginDate.getTime());
+		if (endDate != null)
+			params.set(PARAM_END_DATE, endDate.getTime());
+	}
+	
 }

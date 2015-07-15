@@ -35,7 +35,7 @@ public class RepositoryChoice extends Select2Choice<Repository> {
 	protected void onInitialize() {
 		super.onInitialize();
 		getSettings().setAllowClear(allowEmpty);
-		getSettings().setPlaceholder("Typing to find a repository...");
+		getSettings().setPlaceholder("Choose a repository...");
 		getSettings().setFormatResult("gitplex.repoChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.repoChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.repoChoiceFormatter.escapeMarkup");

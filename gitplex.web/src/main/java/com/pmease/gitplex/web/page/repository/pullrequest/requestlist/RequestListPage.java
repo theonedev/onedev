@@ -2,7 +2,9 @@ package com.pmease.gitplex.web.page.repository.pullrequest.requestlist;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -13,6 +15,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationTo
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -26,9 +29,17 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.wicket.behavior.menu.LinkItem;
+import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
+import com.pmease.commons.wicket.behavior.menu.MenuItem;
+import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.AgeLabel;
@@ -40,19 +51,134 @@ import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.SearchOption.Status;
 
 @SuppressWarnings("serial")
 public class RequestListPage extends PullRequestPage {
 
-	private SearchOption searchOption = new SearchOption();
+	private static final Map<SortOption, String> sortNames = new LinkedHashMap<>();
+	
+	static {
+		sortNames.put(new SortOption("createDate", false), "Newest");
+		sortNames.put(new SortOption("createDate", true), "Oldest");
+		sortNames.put(new SortOption("lastEventDate", false), "Recently updated");
+		sortNames.put(new SortOption("lastEventDate", true), "Least recently updated");
+	}
+	
+	private SearchOption searchOption;
+	
+	private SortOption sortOption;
 	
 	public RequestListPage(PageParameters params) {
 		super(params);
+		
+		searchOption = new SearchOption(params);
+		sortOption = new SortOption(params);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		MenuPanel filterMenu = new MenuPanel("filterMenu") {
+
+			@Override
+			protected List<MenuItem> getMenuItems() {
+				List<MenuItem> menuItems = new ArrayList<>();
+
+				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+				if (currentUser != null) {
+					final Long userId = currentUser.getId();
+					menuItems.add(new LinkItem("Open requests assigned to me") {
+
+						@Override
+						public void onClick() {
+							searchOption = new SearchOption();
+							searchOption.setStatus(Status.OPEN);
+							searchOption.setAssigneeId(userId);
+							
+							setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+						}
+						
+					});
+					menuItems.add(new LinkItem("Open requests submitted by me") {
+
+						@Override
+						public void onClick() {
+							searchOption = new SearchOption();
+							searchOption.setStatus(Status.OPEN);
+							searchOption.setSubmitterId(userId);
+
+							setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+						}
+						
+					});
+				}
+				menuItems.add(new LinkItem("All open requests") {
+
+					@Override
+					public void onClick() {
+						searchOption = new SearchOption();
+						searchOption.setStatus(Status.OPEN);
+						
+						setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+					}
+					
+				});
+				menuItems.add(new LinkItem("All closed requests") {
+
+					@Override
+					public void onClick() {
+						searchOption = new SearchOption();
+						searchOption.setStatus(Status.CLOSED);
+						
+						setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+					}
+					
+				});
+				return menuItems;
+			}
+			
+		};
+		add(filterMenu);
+		add(new WebMarkupContainer("filters").add(new MenuBehavior(filterMenu)));
+		
+		MenuPanel sortMenu = new MenuPanel("sortMenu") {
+
+			@Override
+			protected List<MenuItem> getMenuItems() {
+				List<MenuItem> menuItems = new ArrayList<>();
+				
+				for (Map.Entry<SortOption, String> entry: sortNames.entrySet()) {
+					final SortOption sortOption = entry.getKey();
+					final String displayName = entry.getValue();
+					menuItems.add(new CheckItem() {
+
+						@Override
+						public void onClick() {
+							setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+						}
+
+						@Override
+						protected String getLabel() {
+							return displayName;
+						}
+
+						@Override
+						protected boolean isTicked() {
+							return RequestListPage.this.sortOption.equals(sortOption);
+						}
+						
+					});
+				}
+
+				return menuItems;
+			}
+			
+		};
+		add(sortMenu);
+		
+		add(new WebMarkupContainer("sortBy").add(new MenuBehavior(sortMenu)));
 		
 		add(new Link<Void>("newRequest") {
 
@@ -64,7 +190,16 @@ public class RequestListPage extends PullRequestPage {
 			
 		});
 
-		Form<?> form = new Form<Void>("form");
+		Form<?> form = new Form<Void>("form") {
+
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				
+				setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+			}
+			
+		};
 		form.add(BeanContext.editBean("editor", searchOption));
 		add(form);
 		
@@ -115,7 +250,10 @@ public class RequestListPage extends PullRequestPage {
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				RepositoryPage page = (RepositoryPage) getPage();
-				return GitPlex.getInstance(Dao.class).query(searchOption.getCriteria(page.getRepository()), (int)first, (int)count).iterator();
+				
+				EntityCriteria<PullRequest> criteria = searchOption.getCriteria(page.getRepository());
+				criteria.addOrder(sortOption.getOrder());
+				return GitPlex.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
 			}
 
 			@Override
@@ -150,7 +288,15 @@ public class RequestListPage extends PullRequestPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(RequestListPage.class, "request-list.css")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(RequestListPage.class, "request-list.css")));
 	}
 
+	public static PageParameters paramsOf(Repository repository, SearchOption searchOption, SortOption sortOption) {
+		PageParameters params = paramsOf(repository);
+		searchOption.fillPageParams(params);
+		sortOption.fillPageParams(params);
+		return params;
+	}
+	
 }

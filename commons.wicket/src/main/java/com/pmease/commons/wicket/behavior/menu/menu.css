@@ -57,3 +57,10 @@
 	padding: 6px 20px; 
 	white-space: nowrap;
 }
+.dropdown-panel.menu ul>li>.check {
+	float: left;
+	margin: 9px 0 0 5px;
+}
+.dropdown-panel.menu ul>li>.check+a {
+	padding-left: 24px;
+}

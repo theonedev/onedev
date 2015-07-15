@@ -28,7 +28,7 @@ public class AffinalRepositoryChoice extends Select2Choice<Repository> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Typing to find a repository...");
+		getSettings().setPlaceholder("Choose a repository...");
 		getSettings().setFormatResult("gitplex.repoChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.repoChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.repoChoiceFormatter.escapeMarkup");

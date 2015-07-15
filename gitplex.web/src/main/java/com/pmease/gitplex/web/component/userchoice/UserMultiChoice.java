@@ -22,7 +22,7 @@ public class UserMultiChoice extends Select2MultiChoice<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 		// getSettings().setMinimumInputLength(1);
-		getSettings().setPlaceholder("Typing to find users ...");
+		getSettings().setPlaceholder("Choose users ...");
 		getSettings().setFormatResult("gitplex.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.userChoiceFormatter.escapeMarkup");

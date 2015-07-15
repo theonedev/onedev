@@ -3,6 +3,10 @@
 		<div class="head clearfix">
 			<div class="title pull-left">Pull Requests</div>
 			<div class="actions pull-left">
+				<a wicket:id="filters" class="btn btn-default"><i class="fa fa-filter"></i> Filters <span class="caret"></span></a>
+				<div wicket:id="filterMenu"></div>
+				<a wicket:id="sortBy" class="btn btn-default"> <i class="fa fa-sort"></i> Sort by <span class="caret"></span></a>
+				<div wicket:id="sortMenu"></div>
 				<a wicket:id="newRequest" class="btn btn-default"><i class="fa fa-plus"></i> Open New</a>
 			</div>
 		</div>
@@ -29,11 +33,11 @@
 			<span wicket:id="status" class="status pull-right"></span>
 		</div>
 		<div class="second-line">
-			<span wicket:id="submitter" class="submitter"></span>
-			<span class="auxiliary">wants to pull into</span>
 			<span wicket:id="targetBranch" class="branch"></span>
-			<span class="auxiliary">from</span>
+			<span class="fa fa-long-arrow-left"></span>
 			<span wicket:id="source" class="branch"></span>
+			<span class="auxiliary">, submitted by</span> 
+			<span wicket:id="submitter" class="submitter"></span>
 			<span wicket:id="age" class="age"></span>
 			<wicket:enclosure child="assignee">
 			<span class="auxiliary">, assigned to</span> <span wicket:id="assignee"></span>

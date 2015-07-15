@@ -24,7 +24,7 @@ public class UserSingleChoice extends Select2Choice<User> {
 		super.onInitialize();
 		// getSettings().setMinimumInputLength(1);
 		getSettings().setAllowClear(allowEmpty);
-		getSettings().setPlaceholder("Typing to find an user ...");
+		getSettings().setPlaceholder("Choose an user ...");
 		getSettings().setFormatResult("gitplex.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.userChoiceFormatter.escapeMarkup");

@@ -21,7 +21,7 @@ public class TeamMultiChoice extends Select2MultiChoice<Team> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setPlaceholder("Start typing to find teams ...");
+		getSettings().setPlaceholder("Choose teams ...");
 		getSettings().setFormatResult("gitplex.teamChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.teamChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.teamChoiceFormatter.escapeMarkup");
