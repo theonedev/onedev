@@ -126,9 +126,9 @@ public class SearchOption implements Serializable {
 		if (targetBranch != null)
 			criteria.add(Restrictions.eq("targetBranch", targetBranch));
 		if (title != null)
-			criteria.add(Restrictions.ilike("title", title));
+			criteria.add(Restrictions.ilike("title", "%" + title + "%"));
 		if (description != null)
-			criteria.add(Restrictions.ilike("description", description));
+			criteria.add(Restrictions.ilike("description", "%" + description + "%"));
 		if (beginDate != null)
 			criteria.add(Restrictions.ge("createDate", beginDate));
 		if (endDate != null)

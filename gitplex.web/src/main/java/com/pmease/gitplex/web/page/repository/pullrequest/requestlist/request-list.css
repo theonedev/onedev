@@ -26,6 +26,12 @@
 #request-list td.filter .select2-container .avatar {
 	display: none;
 }
+#request-list td.request .first-line {
+	margin-bottom: 4px;
+}
+#request-list td.request .first-line>span.pull-left {
+	margin-right: 6px;
+}
 #request-list td.request .title {
 	font-size: 16px;
 }
@@ -35,4 +41,7 @@
 }
 #request-list td.request .status {
 	font-size: 14px;
+}
+#request-list td.request .auxiliary {
+	color: #888;
 }

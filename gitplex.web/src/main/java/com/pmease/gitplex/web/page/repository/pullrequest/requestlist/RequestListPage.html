@@ -12,54 +12,32 @@
 					<form wicket:id="form">
 						<div wicket:id="editor"></div>
 						<div class="actions">
-							<button type="submit" class="btn btn-default"><i class="fa fa-search"></i> Search</button>
+							<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
 						</div>
 					</form>
 				</td>
 				<td class="requests">
-					<table wicket:id="pullRequests" class="table table-hover table-striped"></table>
+					<table wicket:id="pullRequests" class="table table-hover"></table>
 				</td>
 			</tr>
 		</table>
 	</div>
 	<wicket:fragment wicket:id="requestFrag">
-		<div>
-			<span wicket:id="id" class="id"></span>
-			<span wicket:id="title" class="title"></span> 
-			<span wicket:id="status" class="status"></span>
+		<div class="first-line clearfix">
+			<span wicket:id="id" class="id pull-left"></span>
+			<span wicket:id="title" class="title pull-left"></span> 
+			<span wicket:id="status" class="status pull-right"></span>
 		</div>
-		<div>
+		<div class="second-line">
 			<span wicket:id="submitter" class="submitter"></span>
-			wants to pull into
+			<span class="auxiliary">wants to pull into</span>
 			<span wicket:id="targetBranch" class="branch"></span>
-			from
+			<span class="auxiliary">from</span>
 			<span wicket:id="source" class="branch"></span>
 			<span wicket:id="age" class="age"></span>
+			<wicket:enclosure child="assignee">
+			<span class="auxiliary">, assigned to</span> <span wicket:id="assignee"></span>
+			</wicket:enclosure>
 		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="statusHeaderFrag">
-		Status <span wicket:id="helpDropdownTrigger" class="fa fa-question-circle"></span>
-		<div wicket:id="helpDropdown"></div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="helpFrag">
-		<ul class="status-help">
-			<li>
-				<div class="label label-primary">Pending Integration</div>
-				<div class="description">The pull request is waiting to be integrated (merge or rebase based on 
-				integration strategy) into target branch. Anyone with repository write 
-				permission will be able to do this by clicking the integrate button.</div>
-			</li>
-			<li>
-				<div class="label label-warning">Pending Approval</div>
-				<div class="description">As result of gate keeper setting of the repository, the pull request is 
-				waiting for approval of someone before it can be integrated into target 
-				branch.</div>
-			</li>
-			<li>
-				<div class="label label-warning">Pending Update</div>
-				<div class="description">The pull request is currently rejected by gate keeper of the repository, 
-				and is expecting the submitter to update the pull request with new commits.</div>
-			</li>
-		</ul>
 	</wicket:fragment>
 </wicket:extend>

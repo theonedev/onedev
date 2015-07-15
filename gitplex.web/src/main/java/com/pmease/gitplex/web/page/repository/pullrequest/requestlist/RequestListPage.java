@@ -90,6 +90,15 @@ public class RequestListPage extends PullRequestPage {
 				fragment.add(new BranchLink("targetBranch", Model.of(request.getTarget())));
 				fragment.add(new BranchLink("source", Model.of(request.getSource())));
 				fragment.add(new AgeLabel("age", Model.of(request.getCreateDate())));
+				fragment.add(new UserLink("assignee", new LoadableDetachableModel<User>() {
+
+					@Override
+					protected User load() {
+						return rowModel.getObject().getSubmitter();
+					}
+					
+				}, AvatarMode.NAME).setVisible(request.getAssignee() != null));
+				
 				cellItem.add(fragment);
 				
 				cellItem.add(AttributeAppender.append("class", "request"));
