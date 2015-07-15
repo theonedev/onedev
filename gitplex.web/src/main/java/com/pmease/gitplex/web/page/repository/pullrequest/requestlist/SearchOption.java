@@ -111,6 +111,7 @@ public class SearchOption implements Serializable {
 		this.description = description;
 	}
 
+	@Editable(order=700, name="Created After")
 	public Date getBeginDate() {
 		return beginDate;
 	}
@@ -119,6 +120,7 @@ public class SearchOption implements Serializable {
 		this.beginDate = beginDate;
 	}
 
+	@Editable(order=800, name="Created Before")
 	public Date getEndDate() {
 		return endDate;
 	}
