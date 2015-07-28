@@ -3,6 +3,7 @@ package com.pmease.commons.git;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -90,6 +91,8 @@ public class Blob {
 	
 	public static class Text {
 
+		static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
+		
 		private final Charset charset;
 		
 		private final String content;
@@ -108,6 +111,13 @@ public class Blob {
 		public String getContent() {
 			return content;
 		}
+
+		public List<String> getLines(LineProcessor processor) {
+			List<String> processedLines = new ArrayList<>();
+			for (String line: getLines())
+				lines.add(processor.process(line));
+			return processedLines;
+		}
 		
 		public List<String> getLines() {
 			if (lines == null) {
@@ -116,7 +126,7 @@ public class Blob {
 				for (int i=0; i<content.length(); i++) {
 					char ch = content.charAt(i);
 					if (ch == '\n') {
-						lines.add(builder.toString());
+						lines.add(builder.toString() + '\n');
 						builder = new StringBuilder();
 					} else {
 						builder.append(ch);
@@ -127,6 +137,5 @@ public class Blob {
 			}
 			return lines;
 		}
-		
 	}
 }

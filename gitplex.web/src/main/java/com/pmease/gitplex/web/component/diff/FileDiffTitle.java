@@ -1,9 +1,5 @@
 package com.pmease.gitplex.web.component.diff;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -20,27 +16,22 @@ public class FileDiffTitle extends Panel {
 
 	private final Change change;
 	
-	private final List<String> alerts;
+	private final String alert;
 	
-	public FileDiffTitle(String id, Change change, List<String> alerts) {
+	public FileDiffTitle(String id, Change change) {
 		super(id);
 
 		this.change = change;
 		
-		this.alerts = new ArrayList<>();
 		if (change.getOldBlobIdent().mode != 0 && change.getNewBlobIdent().mode != 0 
 				&& change.getOldBlobIdent().mode != change.getNewBlobIdent().mode) {
-			this.alerts.add("Blob mode is changed from " + Integer.toString(change.getOldBlobIdent().mode, 8) 
-					+ " to " + Integer.toString(change.getNewBlobIdent().mode, 8));
+			alert = "Blob mode is changed from " + Integer.toString(change.getOldBlobIdent().mode, 8) 
+					+ " to " + Integer.toString(change.getNewBlobIdent().mode, 8);
+		} else {
+			alert = null;
 		}
-		if (alerts != null)
-			this.alerts.addAll(alerts);
 	}
 	
-	public FileDiffTitle(String id, Change diffInfo) {
-		this(id, diffInfo, null);
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -49,23 +40,12 @@ public class FileDiffTitle extends Panel {
 				.setVisible(change.getStatus() == Change.Status.RENAMED));
 		add(new Label("title", change.getPath()));
 		
-		if (alerts.size() == 0) {
+		if (alert == null) {
 			add(new WebMarkupContainer("alerts").setVisible(false));
-		} else if (alerts.size() == 1) {
-			WebMarkupContainer alertsTrigger = new WebMarkupContainer("alerts");
-			TooltipConfig config = new TooltipConfig().withPlacement(Placement.right);
-			alertsTrigger.add(new TooltipBehavior(Model.of(alerts.get(0)), config));
-			add(alertsTrigger);
 		} else {
-			WebMarkupContainer alertsTrigger = new WebMarkupContainer("alerts");
-			alertsTrigger.add(AttributeAppender.append("data-html", "true"));
-			StringBuffer html = new StringBuffer();
-			html.append("<ul class='diff-alerts'>");
-			for (String alert: alerts)
-				html.append("<li>").append(alert).append("</li>");
-			html.append("</ul>");
+			WebMarkupContainer alertsTrigger = new WebMarkupContainer("alert");
 			TooltipConfig config = new TooltipConfig().withPlacement(Placement.right);
-			alertsTrigger.add(new TooltipBehavior(Model.of(html.toString()), config));
+			alertsTrigger.add(new TooltipBehavior(Model.of(alert), config));
 			add(alertsTrigger);
 		}
 	}

@@ -4,6 +4,7 @@ import static com.pmease.commons.util.diff.DiffLine.Action.ADD;
 import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
 import static com.pmease.commons.util.diff.DiffLine.Action.EQUAL;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,10 +44,13 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.util.time.Duration;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
+import com.pmease.commons.git.LineProcessor;
+import com.pmease.commons.git.Blob.Text;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.util.diff.DiffHunk;
 import com.pmease.commons.util.diff.DiffLine;
@@ -79,8 +83,6 @@ import com.pmease.gitplex.web.model.UserModel;
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
-	private enum DiffOption {IGNORE_NOTHING, IGNORE_EOL, IGNORE_EOL_SPACES, IGNORE_CHANGE_SPACES};
-	
 	private static final int SCROLL_MARGIN = 100;
 	
 	private static final int CONTEXT_SIZE = 5;
@@ -93,11 +95,7 @@ public class TextDiffPanel extends Panel {
 	
 	private final IModel<Boolean> allowToAddCommentModel;
 	
-	private BlobText oldText;
-	
-	private BlobText newText;
-	
-	private DiffOption diffOption = DiffOption.IGNORE_NOTHING;
+	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
 	private boolean showComments = true;
 	
@@ -199,21 +197,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void onDiffOptionChanged() {
-		if (diffOption == DiffOption.IGNORE_EOL) {
-			oldText = readOldText().ignoreEOL();
-			newText = readNewText().ignoreEOL();
-		} else if (diffOption == DiffOption.IGNORE_EOL_SPACES) {
-			oldText = readOldText().ignoreEOLSpaces();
-			newText = readNewText().ignoreEOLSpaces();
-		} else if (diffOption == DiffOption.IGNORE_CHANGE_SPACES) {
-			oldText = readOldText().ignoreChangeSpaces();
-			newText = readNewText().ignoreChangeSpaces();
-		} else {
-			oldText = readOldText();
-			newText = readNewText();
-		}
-		
-		diffs = DiffUtils.diff(oldText.getLines(), newText.getLines(), new WordSplitter());
+		diffs = DiffUtils.diff(readOldText().getLines(lineProcessor), readNewText().getLines(lineProcessor), new WordSplitter());
 		
 		identical = true;
 		for (DiffLine diffLine: diffs) {
@@ -272,16 +256,7 @@ public class TextDiffPanel extends Panel {
 		});
 		add(head);
 		
-		List<String> alerts = new ArrayList<>();
-		if (change.getOldBlobIdent().path != null && change.getNewBlobIdent().path != null 
-				&& !oldText.getCharset().equals(newText.getCharset()))
-			alerts.add("Charset is changed from " + oldText.getCharset() + " to " + newText.getCharset());
-		if (!oldText.isHasEolAtEof())
-			alerts.add("Original text does not have EOL character at EOF");
-		if (!newText.isHasEolAtEof())
-			alerts.add("Revised text does not have EOL character at EOF");
-		
-		head.add(new FileDiffTitle("title", change, alerts));
+		head.add(new FileDiffTitle("title", change));
 		
 		head.add(new WebMarkupContainer("identical") {
 
@@ -904,18 +879,18 @@ public class TextDiffPanel extends Panel {
 		super.onDetach();
 	}
 	
-	private BlobText readOldText() {
+	private Blob.Text readOldText() {
 		if (change.getOldBlobIdent().path != null) 
-			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getOldBlobIdent()));
-		else
-			return new BlobText();
+			return Preconditions.checkNotNull(repoModel.getObject().getBlob(change.getOldBlobIdent())).getText();
+		else 
+			return new Blob.Text(Charsets.UTF_8, "");
 	}
 	
-	private BlobText readNewText() {
+	private Blob.Text readNewText() {
 		if (change.getNewBlobIdent().path != null) 
-			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getNewBlobIdent()));
+			return Preconditions.checkNotNull(repoModel.getObject().getBlob(change.getNewBlobIdent())).getText();
 		else
-			return new BlobText();
+			return new Blob.Text(Charsets.UTF_8, "");
 	}
 	
 	private int locateDiffPos(int lineNo, DiffLine.Action excludeAction) {

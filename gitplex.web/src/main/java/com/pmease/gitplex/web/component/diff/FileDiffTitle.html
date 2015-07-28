@@ -4,5 +4,7 @@
 		<i class="fa fa-long-arrow-right"></i>
 	</wicket:enclosure>
 	<span wicket:id="title"></span>
-	<span wicket:id="alerts"><i class="fa fa-warning"></i></span>
+	<wicket:enclosure child="alert">
+	<i class="fa fa-warning"></i> <span wicket:id="alert"></span>
+	</wicket:enclosure>
 </wicket:panel>

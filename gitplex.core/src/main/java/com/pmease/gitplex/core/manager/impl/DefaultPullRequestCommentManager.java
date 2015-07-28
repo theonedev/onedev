@@ -9,8 +9,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -70,11 +70,11 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					}
 				}
 				if (newBlobInfo != null) {
-					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobIdent());
+					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
 					if (newBlobInfo.path != null) {
-						BlobText newText = comment.getRepository().getBlobText(newBlobInfo);
+						Blob.Text newText = comment.getRepository().getBlob(newBlobInfo).getText();
 						if (newText != null)
 							newLines = newText.getLines();
 						else
@@ -104,11 +104,11 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					}
 				}
 				if (newBlobInfo != null) {
-					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobIdent());
+					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
 					if (newBlobInfo.path != null) {
-						BlobText newText = comment.getRepository().getBlobText(newBlobInfo);
+						Blob.Text newText = comment.getRepository().getBlob(newBlobInfo).getText();
 						if (newText != null)
 							newLines = newText.getLines();
 						else
@@ -125,7 +125,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 							
 							List<String> oldLines;
 							if (comment.getCompareWith().path != null) {
-								oldText = comment.getRepository().getBlobText(comment.getCompareWith());
+								oldText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
 								if (oldText != null)
 									oldLines = oldText.getLines();
 								else

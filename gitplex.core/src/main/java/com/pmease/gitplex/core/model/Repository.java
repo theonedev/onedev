@@ -54,7 +54,6 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Markdown;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.BlobText;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -130,8 +129,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	private Collection<Repository> forks = new ArrayList<>();
     
     private transient Map<BlobIdent, Blob> blobCache = new HashMap<>();
-    
-    private transient Map<BlobIdent, Optional<BlobText>> blobTextCache = new HashMap<>(); 
     
     private transient Map<CommitRange, List<Change>> changesCache = new HashMap<>();
     
@@ -452,31 +449,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-	
-	/**
-	 * Read blob content as text and cache result in repository in case the same 
-	 * blob text is requested again.
-	 * 
-	 * @param commit
-	 * 			commit of the blob
-	 * @param blobPath
-	 * 			path of the blob
-	 * @param blobMode
-	 * 			mode of the blob
-	 * @return
-	 * 			text of the blob, or <tt>null</tt> if the blob content can not be 
-	 * 			converted to text
-	 */
-	@Nullable
-	public BlobText getBlobText(BlobIdent blobPath) {
-		Optional<BlobText> optional = blobTextCache.get(blobPath);
-		if (optional == null) {
-			byte[] blobContent = getBlob(blobPath).getBytes();
-			optional = Optional.fromNullable(BlobText.from(blobContent, blobPath.path, blobPath.mode));
-			blobTextCache.put(blobPath, optional);
-		}
-		return optional.orNull();
 	}
 	
 	/**

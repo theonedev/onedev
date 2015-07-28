@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.pmease.commons.git.BlobText;
+import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.gitplex.core.GitPlex;
@@ -91,15 +91,15 @@ public class BlobDiffPanel extends Panel {
 		}
 		
 		if (!rendered) {
-			BlobText oldText;
+			Blob.Text oldText;
 			if (change.getOldBlobIdent().path != null)
-				oldText = repoModel.getObject().getBlobText(change.getOldBlobIdent());
+				oldText = repoModel.getObject().getBlob(change.getOldBlobIdent()).getText();
 			else
 				oldText = null;
 			
-			BlobText newText;
+			Blob.Text newText;
 			if (change.getNewBlobIdent().path != null)
-				newText = repoModel.getObject().getBlobText(change.getNewBlobIdent());
+				newText = repoModel.getObject().getBlob(change.getNewBlobIdent()).getText();
 			else
 				newText = null;
 
