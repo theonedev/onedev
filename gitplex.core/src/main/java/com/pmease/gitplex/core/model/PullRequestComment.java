@@ -149,13 +149,13 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	private Pair<String, String> getOldCommitAndNewCommit() {
 		if (oldCommitAndNewCommit == null) {
 			List<String> commitHashes = getRequest().getCommentables();
-			int index = commitHashes.indexOf(getBlobInfo().revision);
+			int index = commitHashes.indexOf(getBlobIdent().revision);
 			int compareIndex = commitHashes.indexOf(getCompareWith().revision);
 			Preconditions.checkState(index != -1 && compareIndex != -1);
 			if (index <= compareIndex)
-				oldCommitAndNewCommit = new Pair<>(getBlobInfo().revision, getCompareWith().revision);
+				oldCommitAndNewCommit = new Pair<>(getBlobIdent().revision, getCompareWith().revision);
 			else 
-				oldCommitAndNewCommit = new Pair<>(getCompareWith().revision, getBlobInfo().revision);
+				oldCommitAndNewCommit = new Pair<>(getCompareWith().revision, getBlobIdent().revision);
 		}
 		return oldCommitAndNewCommit;
 	}
@@ -177,14 +177,14 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	}
 
 	@Override
-	public BlobIdent getBlobInfo() {
-		return Preconditions.checkNotNull(inlineInfo).getBlobInfo();
+	public BlobIdent getBlobIdent() {
+		return Preconditions.checkNotNull(inlineInfo).getBlobIdent();
 	}
 	
-	public void setBlobInfo(BlobIdent blobInfo) {
+	public void setBlobIdent(BlobIdent blobIdent) {
 		if (inlineInfo == null)
 			inlineInfo = new InlineInfo();
-		inlineInfo.setBlobInfo(blobInfo);
+		inlineInfo.setBlobIdent(blobIdent);
 	}
 	
 	public BlobIdent getCompareWith() {

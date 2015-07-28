@@ -88,7 +88,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				int updateNo = updates.indexOf(update) + 1;
 				updateItem.add(new Label("updateNo", updateNo));
 				PageParameters params = RequestComparePage.paramsOf(
-						update.getRequest(), update.getBaseCommitHash(), update.getHeadCommitHash(), null);
+						update.getRequest(), update.getBaseCommitHash(), update.getHeadCommitHash());
 				
 				updateItem.add(new AgeLabel("age", Model.of(update.getDate())));
 				
@@ -184,7 +184,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new AgeLabel("age", Model.of(commit.getAuthor().getWhen())));
 						
 						commitItem.add(new CommitLink("hashLink", repoModel, commit.getHash()));
-						commitItem.add(new BookmarkablePageLink<Void>("treeLink", RepoFilePage.class, 
+						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
 								RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
 						
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {

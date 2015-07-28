@@ -176,16 +176,3 @@ ul.threads li {border-left: 4px solid #E5E5E5; padding-left: 8px;}
 ul.threads li.unread {border-color: #70AEFA;}
 ul.threads li a {color: #444; cursor: pointer;}
 ul.threads li .markdown {color: #888; margin-top: 4px;}
-
-.content>.commit-choice {max-height: 600px; padding: 8px 0; overflow-y: scroll;}
-.content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
-.content>.commit-choice li {border-bottom: 1px dotted #BBB;}
-.content>.commit-choice li:hover {background: #FDF2C3;}
-.content>.commit-choice a .commit {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
-.content>.commit-choice a .subject {font-size: 12px; color: #999;} 
-table.old-vs-new td {padding: 0 8px;}
-table.old-vs-new td.old {width: 140px; text-align: left;}
-table.old-vs-new td.new {width: 140px; text-align: right;}
-table.old-vs-new td.vs {width: 1px; text-align: center; font-weight: bold;}
-
-.conflict-resolve-instruction {padding: 8px; width: 400px;}

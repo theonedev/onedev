@@ -400,7 +400,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				
 				PageParameters params = RequestComparePage.paramsOf(
 						request, request.getTarget().getHead(), 
-						preview!=null?preview.getIntegrated():null, null);
+						preview!=null?preview.getIntegrated():null);
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params) {
 					

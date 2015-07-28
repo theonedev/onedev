@@ -23,7 +23,7 @@ public class InlineInfo implements Serializable {
         @AttributeOverride(name="path", column=@Column(name="G_BLOB_PATH")),
         @AttributeOverride(name="mode", column=@Column(name="G_BLOB_MODE"))
     })
- 	private BlobIdent blobInfo;
+ 	private BlobIdent blobIdent;
 
 	@Embedded
     @AttributeOverrides({
@@ -41,12 +41,12 @@ public class InlineInfo implements Serializable {
 	@Column(length=65535)
 	private AroundContext context;
 
-	public BlobIdent getBlobInfo() {
-		return blobInfo;
+	public BlobIdent getBlobIdent() {
+		return blobIdent;
 	}
 
-	public void setBlobInfo(BlobIdent blobInfo) {
-		this.blobInfo = blobInfo;
+	public void setBlobIdent(BlobIdent blobIdent) {
+		this.blobIdent = blobIdent;
 	}
 
 	public BlobIdent getCompareWith() {

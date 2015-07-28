@@ -7,7 +7,7 @@ public interface InlineComment extends Comment {
 
 	int CONTEXT_SIZE = 7;
 	
-	BlobIdent getBlobInfo();
+	BlobIdent getBlobIdent();
 	
 	int getLine();
 	

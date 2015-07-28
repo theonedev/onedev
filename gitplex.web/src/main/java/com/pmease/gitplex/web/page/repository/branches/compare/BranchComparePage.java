@@ -18,7 +18,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
@@ -27,14 +26,12 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
-import com.pmease.gitplex.web.component.diff.compareresult.CompareResultPanel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
@@ -382,18 +379,7 @@ public class BranchComparePage extends RepositoryPage {
 	}
 
 	private Component newChangedFilesPanel() {
-		return new CompareResultPanel("tabPanel", repoModel, mergeBaseModel.getObject(), 
-				sourceModel.getObject().getHead(), null) {
-			
-			@Override
-			protected void onSelection(AjaxRequestTarget target, Change change) {
-			}
-			
-			@Override
-			protected InlineCommentSupport getInlineCommentSupport(Change change) {
-				return null;
-			}
-		}.setOutputMarkupId(true);
+		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
 	}
 
 	@Override

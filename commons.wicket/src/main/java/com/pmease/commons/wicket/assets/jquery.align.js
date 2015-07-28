@@ -74,14 +74,10 @@ jQuery.fn.align = function(alignment) {
 			anchor = targetHeight * targetY / 100.0 + targetTop;
 			top = anchor - alignment.y * height / 100.0;
 		}
-		// comment below as this can make the dropdown adjust its position to 
-		// overlap the trigger which may be an input box
-		/*
 		if (top + height > borderBottom)
 			top = borderBottom - height;
 		if (top < borderTop)
 			top = borderTop;
-		*/
 	}
 
 	if (indicator[0] && indicator[1]) {

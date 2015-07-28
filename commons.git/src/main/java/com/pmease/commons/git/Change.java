@@ -5,8 +5,6 @@ import static com.pmease.commons.git.Change.Status.RENAMED;
 import java.io.Serializable;
 import java.util.StringTokenizer;
 
-import javax.annotation.Nullable;
-
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.util.QuotedString;
 
@@ -21,71 +19,40 @@ public class Change implements Comparable<Change>, Serializable {
 	
 	private final Status status;
 	
-	private final String oldRev;
+	private final BlobIdent oldBlobIdent;
 	
-	private final String newRev;
-
-	private final String oldPath;
+	private final BlobIdent newBlobIdent;
 	
-	private final String newPath;
-	
-	private final int oldMode;
-	
-	private final int newMode;
-	
-	public Change(Status status, String oldRev, String newRev, 
-			@Nullable String oldPath, @Nullable String newPath, int oldMode, int newMode) {
+	public Change(Status status, BlobIdent oldBlobIdent, BlobIdent newBlobIdent) {
 		this.status = status;
-		this.oldRev = oldRev;
-		this.newRev = newRev;
-		this.oldPath = oldPath;
-		this.newPath = newPath;
-		this.oldMode = oldMode;
-		this.newMode = newMode;
+		this.oldBlobIdent = oldBlobIdent;
+		this.newBlobIdent = newBlobIdent;
 	}
 	
-	public String getOldRev() {
-		return oldRev;
-	}
-
-	public String getNewRev() {
-		return newRev;
-	}
-
-	@Nullable
-	public String getOldPath() {
-		return oldPath;
-	}
-	
-	@Nullable
-	public String getNewPath() {
-		return newPath;
-	}
-
-	public int getOldMode() {
-		return oldMode;
-	}
-
-	public int getNewMode() {
-		return newMode;
-	}
-
 	public Status getStatus() {
 		return status;
+	}
+
+	public BlobIdent getOldBlobIdent() {
+		return oldBlobIdent;
+	}
+
+	public BlobIdent getNewBlobIdent() {
+		return newBlobIdent;
 	}
 
 	@Override
 	public String toString() {
 		if (status == Status.RENAMED)
-			return status.name() + "\t" + oldPath + "->" + newPath;
+			return status.name() + "\t" + oldBlobIdent.path + "->" + newBlobIdent.path;
 		else if (status == Status.DELETED)
-			return status.name() + "\t" + oldPath;
+			return status.name() + "\t" + oldBlobIdent.path;
 		else 
-			return status.name() + "\t" + newPath;
+			return status.name() + "\t" + newBlobIdent.path;
 	}
 	
 	public boolean isFolder() {
-		return oldMode == FileMode.TYPE_TREE || newMode == FileMode.TYPE_TREE;
+		return oldBlobIdent.mode == FileMode.TYPE_TREE || newBlobIdent.mode == FileMode.TYPE_TREE;
 	}
 	
 	@Override
@@ -104,9 +71,9 @@ public class Change implements Comparable<Change>, Serializable {
 	
 	public String getPath() {
 		if (status == Status.DELETED)
-			return oldPath;
+			return oldBlobIdent.path;
 		else
-			return newPath;
+			return newBlobIdent.path;
 	}
 
 	private static String dequoteFileName(String quotedFileName) {
@@ -125,17 +92,25 @@ public class Change implements Comparable<Change>, Serializable {
 		if (statusCode.startsWith("R")) {
 			String oldPath = dequoteFileName(tokenizer.nextToken("\t"));
 			String newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.RENAMED, oldRev, newRev, oldPath, newPath, oldMode, newMode);
+			BlobIdent oldBlobIdent = new BlobIdent(oldRev, oldPath, oldMode);
+			BlobIdent newBlobIdent = new BlobIdent(newRev, newPath, newMode);
+			return new Change(Change.Status.RENAMED, oldBlobIdent, newBlobIdent);
 		} else if (statusCode.equals("M") || statusCode.equals("T")) {
 			String oldPath, newPath;
 			oldPath = newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.MODIFIED, oldRev, newRev, oldPath, newPath, oldMode, newMode);
+			BlobIdent oldBlobIdent = new BlobIdent(oldRev, oldPath, oldMode);
+			BlobIdent newBlobIdent = new BlobIdent(newRev, newPath, newMode);
+			return new Change(Change.Status.MODIFIED, oldBlobIdent, newBlobIdent);
 		} else if (statusCode.equals("D")) {
 			String oldPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.DELETED, oldRev, newRev, oldPath, null, oldMode, newMode);
+			BlobIdent oldBlobIdent = new BlobIdent(oldRev, oldPath, oldMode);
+			BlobIdent newBlobIdent = new BlobIdent(newRev, null, newMode);
+			return new Change(Change.Status.DELETED, oldBlobIdent, newBlobIdent);
 		} else if (statusCode.equals("A")) {
 			String newPath = dequoteFileName(tokenizer.nextToken("\t"));
-			return new Change(Change.Status.ADDED, oldRev, newRev, null, newPath, oldMode, newMode);
+			BlobIdent oldBlobIdent = new BlobIdent(oldRev, null, oldMode);
+			BlobIdent newBlobIdent = new BlobIdent(newRev, newPath, newMode);
+			return new Change(Change.Status.ADDED, oldBlobIdent, newBlobIdent);
 		} else {
 			throw new RuntimeException("Unexpected status code: " + statusCode);
 		}
@@ -143,7 +118,7 @@ public class Change implements Comparable<Change>, Serializable {
 	
 	public String getHint() {
 		if (getStatus() == RENAMED)
-			return "Renamed from " + getOldPath();
+			return "Renamed from " + oldBlobIdent.path;
 		else
 			return WordUtils.capitalize(getStatus().name().toLowerCase());
 	}
@@ -153,14 +128,6 @@ public class Change implements Comparable<Change>, Serializable {
 			return StringUtils.substringAfterLast(getPath(), "/");
 		else
 			return getPath();
-	}
-	
-	public BlobIdent getOldBlobInfo() {
-		return new BlobIdent(getOldRev(), getOldPath(), getOldMode());
-	}
-	
-	public BlobIdent getNewBlobInfo() {
-		return new BlobIdent(getNewRev(), getNewPath(), getNewMode());
 	}
 	
 }

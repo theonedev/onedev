@@ -8,6 +8,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -26,6 +27,7 @@ import com.pmease.gitplex.web.component.commitlink.CommitLink;
 import com.pmease.gitplex.web.component.commitmessage.OldCommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -156,6 +158,9 @@ public class UpdateActivityPanel extends Panel {
 				}
 				
 				item.add(link);
+				
+				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
+						RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
 			}
 			
 		});

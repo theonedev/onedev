@@ -39,16 +39,16 @@ public class BlobDiffPanel extends Panel {
 		
 		setOutputMarkupId(true);
 
-		int oldBlobType = change.getOldMode() & FileMode.TYPE_MASK;
-		int newBlobType = change.getNewMode() & FileMode.TYPE_MASK;
+		int oldBlobType = change.getOldBlobIdent().mode & FileMode.TYPE_MASK;
+		int newBlobType = change.getNewBlobIdent().mode & FileMode.TYPE_MASK;
 
 		MediaType oldMediaType, newMediaType;
 		
 		if (oldBlobType == FileMode.TYPE_GITLINK || oldBlobType == FileMode.TYPE_SYMLINK) {
 			oldMediaType = MediaType.TEXT_PLAIN;
 		} else if (oldBlobType == FileMode.TYPE_FILE) {
-			byte[] oldContent = repoModel.getObject().getBlob(change.getOldBlobInfo()).getBytes();
-			oldMediaType = ContentDetector.detectMediaType(oldContent, change.getOldPath());
+			byte[] oldContent = repoModel.getObject().getBlob(change.getOldBlobIdent()).getBytes();
+			oldMediaType = ContentDetector.detectMediaType(oldContent, change.getOldBlobIdent().path);
 		} else {
 			oldMediaType = null;
 		}
@@ -56,8 +56,8 @@ public class BlobDiffPanel extends Panel {
 		if (newBlobType == FileMode.TYPE_GITLINK || newBlobType == FileMode.TYPE_SYMLINK) {
 			newMediaType = MediaType.TEXT_PLAIN;
 		} else if (newBlobType == FileMode.TYPE_FILE) {
-			byte[] newContent = repoModel.getObject().getBlob(change.getNewBlobInfo()).getBytes();
-			newMediaType = ContentDetector.detectMediaType(newContent, change.getNewPath());
+			byte[] newContent = repoModel.getObject().getBlob(change.getNewBlobIdent()).getBytes();
+			newMediaType = ContentDetector.detectMediaType(newContent, change.getNewBlobIdent().path);
 		} else {
 			newMediaType = null;
 		}
@@ -92,18 +92,18 @@ public class BlobDiffPanel extends Panel {
 		
 		if (!rendered) {
 			BlobText oldText;
-			if (change.getOldPath() != null)
-				oldText = repoModel.getObject().getBlobText(change.getOldBlobInfo());
+			if (change.getOldBlobIdent().path != null)
+				oldText = repoModel.getObject().getBlobText(change.getOldBlobIdent());
 			else
 				oldText = null;
 			
 			BlobText newText;
-			if (change.getNewPath() != null)
-				newText = repoModel.getObject().getBlobText(change.getNewBlobInfo());
+			if (change.getNewBlobIdent().path != null)
+				newText = repoModel.getObject().getBlobText(change.getNewBlobIdent());
 			else
 				newText = null;
 
-			if (change.getOldPath() != null && oldText == null || change.getNewPath() != null && newText == null) {
+			if (change.getOldBlobIdent().path != null && oldText == null || change.getNewBlobIdent().path != null && newText == null) {
 				Fragment fragment = new Fragment("content", "binaryFrag", this);
 				fragment.add(new FileDiffTitle("title", change));
 				add(fragment);

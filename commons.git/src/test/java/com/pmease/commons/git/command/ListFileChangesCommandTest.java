@@ -21,13 +21,13 @@ public class ListFileChangesCommandTest extends AbstractGitTest {
 		
 		List<Change> changes = git.listFileChanges("master~3", "master~2", null, true);
 		assertEquals(1, changes.size());
-		assertEquals("file name with space", changes.get(0).getNewPath());
+		assertEquals("file name with space", changes.get(0).getNewBlobIdent().path);
 		
 		changes = git.listFileChanges("master~2", "master", null, true);
 		assertEquals(1, changes.size());
 		assertEquals(Change.Status.RENAMED, changes.get(0).getStatus());
-		assertEquals("file name with space", changes.get(0).getOldPath());
-		assertEquals("another file name with space", changes.get(0).getNewPath());
+		assertEquals("file name with space", changes.get(0).getOldBlobIdent().path);
+		assertEquals("another file name with space", changes.get(0).getNewBlobIdent().path);
 		
 		if (!SystemUtils.IS_OS_WINDOWS) {
 			addFileAndCommit("file name with \"quote\" ", "hello world", "1");
@@ -38,8 +38,8 @@ public class ListFileChangesCommandTest extends AbstractGitTest {
 			changes = git.listFileChanges("master~1", "master", null, true);
 			assertEquals(1, changes.size());
 			assertEquals(Change.Status.RENAMED, changes.get(0).getStatus());
-			assertEquals("file name with \"quote\" ", changes.get(0).getOldPath());
-			assertEquals(" another file name with \"quote\" ", changes.get(0).getNewPath());
+			assertEquals("file name with \"quote\" ", changes.get(0).getOldBlobIdent().path);
+			assertEquals(" another file name with \"quote\" ", changes.get(0).getNewBlobIdent().path);
 		}
 		
 	}

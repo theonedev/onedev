@@ -121,7 +121,7 @@ public class TextDiffPanel extends Panel {
 	
 	private String autoScrollScript;
 	
-	public TextDiffPanel(String id, final IModel<Repository> repoModel, Change change, 
+	public TextDiffPanel(String id, final IModel<Repository> repoModel, final Change change, 
 			final @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
@@ -160,7 +160,7 @@ public class TextDiffPanel extends Panel {
 				}
 				
 				Map<Integer, List<InlineComment>> comments = new HashMap<>();
-				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getOldComments().entrySet()) {
+				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getComments(change.getOldBlobIdent()).entrySet()) {
 					int diffLineNo = oldLinesMap.get(entry.getKey());
 					List<InlineComment> lineComments = comments.get(diffLineNo);
 					if (lineComments == null) {
@@ -169,7 +169,7 @@ public class TextDiffPanel extends Panel {
 					}
 					lineComments.addAll(entry.getValue());
 				}
-				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getNewComments().entrySet()) {
+				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getComments(change.getNewBlobIdent()).entrySet()) {
 					int diffLineNo = newLinesMap.get(entry.getKey());
 					List<InlineComment> lineComments = comments.get(diffLineNo);
 					if (lineComments == null) {
@@ -225,8 +225,8 @@ public class TextDiffPanel extends Panel {
 		
 		if (!identical) {
 			if (commentSupport != null) {
-				hunks = DiffUtils.hunksOf(diffs, commentSupport.getOldComments().keySet(), 
-						commentSupport.getNewComments().keySet(), CONTEXT_SIZE);
+				hunks = DiffUtils.hunksOf(diffs, commentSupport.getComments(change.getOldBlobIdent()).keySet(), 
+						commentSupport.getComments(change.getNewBlobIdent()).keySet(), CONTEXT_SIZE);
 			} else {
 				hunks = DiffUtils.hunksOf(diffs, CONTEXT_SIZE);
 			}
@@ -273,7 +273,7 @@ public class TextDiffPanel extends Panel {
 		add(head);
 		
 		List<String> alerts = new ArrayList<>();
-		if (change.getOldPath() != null && change.getNewPath() != null 
+		if (change.getOldBlobIdent().path != null && change.getNewBlobIdent().path != null 
 				&& !oldText.getCharset().equals(newText.getCharset()))
 			alerts.add("Charset is changed from " + oldText.getCharset() + " to " + newText.getCharset());
 		if (!oldText.isHasEolAtEof())
@@ -554,13 +554,13 @@ public class TextDiffPanel extends Panel {
 				AroundContext commentContext; 
 				
 				if (diff.getAction() == DELETE) {
-					commentAt = change.getOldBlobInfo();
-					compareWith = change.getNewBlobInfo();
+					commentAt = change.getOldBlobIdent();
+					compareWith = change.getNewBlobIdent();
 					lineNo = diff.getOldLineNo();
 					commentContext = DiffUtils.around(diffs, lineNo, -1, InlineComment.CONTEXT_SIZE); 
 				} else {
-					commentAt = change.getNewBlobInfo();
-					compareWith = change.getOldBlobInfo();
+					commentAt = change.getNewBlobIdent();
+					compareWith = change.getOldBlobIdent();
 					lineNo = diff.getNewLineNo();
 					commentContext = DiffUtils.around(diffs, -1, lineNo, InlineComment.CONTEXT_SIZE); 
 				}
@@ -905,15 +905,15 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private BlobText readOldText() {
-		if (change.getOldPath() != null) 
-			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getOldBlobInfo()));
+		if (change.getOldBlobIdent().path != null) 
+			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getOldBlobIdent()));
 		else
 			return new BlobText();
 	}
 	
 	private BlobText readNewText() {
-		if (change.getNewPath() != null) 
-			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getNewBlobInfo()));
+		if (change.getNewBlobIdent().path != null) 
+			return Preconditions.checkNotNull(repoModel.getObject().getBlobText(change.getNewBlobIdent()));
 		else
 			return new BlobText();
 	}

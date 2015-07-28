@@ -28,9 +28,10 @@ public class FileDiffTitle extends Panel {
 		this.change = change;
 		
 		this.alerts = new ArrayList<>();
-		if (change.getOldMode() != 0 && change.getNewMode() != 0 && change.getOldMode() != change.getNewMode()) {
-			this.alerts.add("Blob mode is changed from " + Integer.toString(change.getOldMode(), 8) 
-					+ " to " + Integer.toString(change.getNewMode(), 8));
+		if (change.getOldBlobIdent().mode != 0 && change.getNewBlobIdent().mode != 0 
+				&& change.getOldBlobIdent().mode != change.getNewBlobIdent().mode) {
+			this.alerts.add("Blob mode is changed from " + Integer.toString(change.getOldBlobIdent().mode, 8) 
+					+ " to " + Integer.toString(change.getNewBlobIdent().mode, 8));
 		}
 		if (alerts != null)
 			this.alerts.addAll(alerts);
@@ -44,7 +45,7 @@ public class FileDiffTitle extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("renamedTitle", change.getOldPath())
+		add(new Label("renamedTitle", change.getOldBlobIdent().path)
 				.setVisible(change.getStatus() == Change.Status.RENAMED));
 		add(new Label("title", change.getPath()));
 		

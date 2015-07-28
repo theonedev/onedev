@@ -59,7 +59,7 @@ public class InlineCommentActivityPanel extends Panel {
 		add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME));
 		add(new AgeLabel("age", Model.of(comment.getDate())));
 		
-		add(new Label("file", comment.getBlobInfo().path) {
+		add(new Label("file", comment.getBlobIdent().path) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {

@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +13,9 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -24,12 +23,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.HibernateUtils;
@@ -43,7 +39,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -55,7 +51,7 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.diff.compareresult.CompareResultPanel;
+import com.pmease.gitplex.web.component.diff.RevisionDiffPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -70,13 +66,9 @@ public class RequestComparePage extends RequestDetailPage {
 
 	private static final String COMMENT_PARAM = "comment";
 	
-	private static final String ORIGINAL_PARAM = "original";
+	private static final String OLD_PARAM = "old";
 	
-	private static final String REVISED_PARAM = "revised";
-	
-	private static final String FILE_PARAM = "file";
-	
-	private String file;
+	private static final String NEW_PARAM = "new";
 	
 	private String oldCommitHash;
 	
@@ -100,11 +92,20 @@ public class RequestComparePage extends RequestDetailPage {
 			
 			for (int i=0; i<request.getSortedUpdates().size(); i++) {
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
-				int updateNo = i+1;
-				name = "Head of Update #" + updateNo;
-				Commit commit = update.getHeadCommit();
-				description = new CommitDescription(name, commit.getSubject());
-				choices.put(commit.getHash(), description);
+				for (int j=0; j<update.getCommits().size(); j++) {
+					Commit commit = update.getCommits().get(j);
+					if (j != update.getCommits().size()-1) {
+						name = null; 
+					} else {
+						int updateNo = i+1;
+						if (i == request.getSortedUpdates().size()-1)
+							name = "Head of Latest Update";
+						else
+							name = "Head of Update #" + updateNo;
+					}
+					description = new CommitDescription(name, commit.getSubject());
+					choices.put(commit.getHash(), description);
+				}
 			}
 
 			String targetHead = request.getTarget().getHead();
@@ -127,8 +128,6 @@ public class RequestComparePage extends RequestDetailPage {
 		
 	};
 	
-	private CompareResultPanel compareResult;
-	
 	public RequestComparePage(final PageParameters params) {
 		super(params);
 
@@ -145,21 +144,18 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 		
-		oldCommitHash = params.get(ORIGINAL_PARAM).toString();
-		newCommitHash = params.get(REVISED_PARAM).toString();
-		file = params.get(FILE_PARAM).toString();
+		oldCommitHash = params.get(OLD_PARAM).toString();
+		newCommitHash = params.get(NEW_PARAM).toString();
 		
 		PullRequestComment comment = getComment();
 		if (comment != null) {
 			if (oldCommitHash != null || newCommitHash != null) {
-				throw new IllegalArgumentException("Parameter 'original' or 'revised' "
+				throw new IllegalArgumentException("Parameter 'old' or 'new' "
 						+ "should not be specified if parameter 'comment' is specified.");
 			}
 
 			oldCommitHash = comment.getOldCommitHash();
 			newCommitHash = comment.getNewCommitHash();
-			if (file == null)
-				file = comment.getBlobInfo().path;
 		} else {
 			if (oldCommitHash == null)
 				oldCommitHash = getPullRequest().getBaseCommitHash();
@@ -220,7 +216,7 @@ public class RequestComparePage extends RequestDetailPage {
 				return description.getSubject();
 			}
 			
-		}, new TooltipConfig().withPlacement(Placement.bottom))));
+		}, new TooltipConfig().withPlacement(Placement.top))));
 		
 		DropdownPanel oldChoicesDropdown = new DropdownPanel("oldChoices", false) {
 
@@ -231,7 +227,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}; 
 		optionsContainer.add(oldChoicesDropdown);
-		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
+		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
 		
 		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector");
 		optionsContainer.add(newSelector);
@@ -257,7 +253,7 @@ public class RequestComparePage extends RequestDetailPage {
 				return description.getSubject();
 			}
 			
-		}, new TooltipConfig().withPlacement(Placement.bottom))));
+		}, new TooltipConfig().withPlacement(Placement.top))));
 		
 		DropdownPanel newChoicesDropdown = new DropdownPanel("newChoices", false) {
 
@@ -268,7 +264,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}; 
 		optionsContainer.add(newChoicesDropdown);
-		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 0, 0, 100));
+		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
 
 		MenuPanel commonComparisons = new MenuPanel("comparisonChoices") {
 
@@ -280,7 +276,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 					@Override
 					protected void onSelect() {
-						PageParameters params = paramsOf(getPullRequest(), null, null, file);
+						PageParameters params = paramsOf(getPullRequest(), null, null);
 						setResponsePage(RequestComparePage.class, params);
 					}
 
@@ -296,7 +292,7 @@ public class RequestComparePage extends RequestDetailPage {
 							@Override
 							protected void onSelect() {
 								PageParameters params = paramsOf(getPullRequest(), 
-										getPullRequest().getTarget().getHead(), preview.getIntegrated(), file);
+										getPullRequest().getTarget().getHead(), preview.getIntegrated());
 								setResponsePage(RequestComparePage.class, params);
 							}
 							
@@ -313,13 +309,18 @@ public class RequestComparePage extends RequestDetailPage {
 					if (index > 1) 
 						oldLabel = "Update #" + (index-1);
 					else
-						oldLabel = "Base";
+						oldLabel = "Request Base";
 					
-					items.add(new ComparisonChoiceItem(oldLabel, "Update #" + index) {
+					String newLabel;
+					if (index == getPullRequest().getSortedUpdates().size())
+						newLabel = "Latest Update";
+					else
+						newLabel = "Update #" + index;
+					items.add(new ComparisonChoiceItem(oldLabel, newLabel) {
 
 						@Override
 						protected void onSelect() {
-							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit, file);
+							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit);
 							setResponsePage(RequestComparePage.class, params);
 						}
 						
@@ -336,21 +337,6 @@ public class RequestComparePage extends RequestDetailPage {
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
-		optionsContainer.add(new CheckBox("changedOnly", new LoadableDetachableModel<Boolean>() {
-
-			@Override
-			protected Boolean load() {
-				return compareResult.isChangedOnly();
-			}
-			
-		}).add(new OnChangeAjaxBehavior() {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				compareResult.toggleChangedOnly(target);
-			}
-			
-		}));
 		optionsContainer.add(new WebMarkupContainer("outdatedAlert") {
 
 			@Override
@@ -359,8 +345,9 @@ public class RequestComparePage extends RequestDetailPage {
 
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PageParameters params = getPageParameters();
-					if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(REVISED_PARAM).toString() == null) {
+					if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(NEW_PARAM).toString() == null) {
 						setVisible(true);
+						/*
 						compareResult.visitChildren(new IVisitor<Component, Void>() {
 
 							@Override
@@ -371,6 +358,7 @@ public class RequestComparePage extends RequestDetailPage {
 							}
 							
 						});
+						*/
 					}
 					
 				}
@@ -386,81 +374,63 @@ public class RequestComparePage extends RequestDetailPage {
 
 		});
 
-		add(compareResult = new CompareResultPanel("compareResult", repoModel, oldCommitHash, newCommitHash, file) {
-			
-			@Override
-			protected InlineCommentSupport getInlineCommentSupport(final Change change) {
-				List<String> commentables = getPullRequest().getCommentables();
-				int oldCommitIndex = commentables.indexOf(oldCommitHash);
-				int newCommitIndex = commentables.indexOf(newCommitHash);
-				if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
-					return null;
-				} else {
-					return new InlineCommentSupport() {
-						
-						@Override
-						public Map<Integer, List<InlineComment>> getOldComments() {
-							return getPullRequest().getChangeComments(change).getOldComments();
-						}
-						
-						@Override
-						public Map<Integer, List<InlineComment>> getNewComments() {
-							return getPullRequest().getChangeComments(change).getNewComments();
-						}
-						
-						@Override
-						public InlineComment getConcernedComment() {
-							return RequestComparePage.this.getComment();
-						}
-						
-						@Override
-						public InlineComment addComment(BlobIdent blobInfo, BlobIdent compareWith, 
-								AroundContext commentContext, int line, String content) {
-							User user = GitPlex.getInstance(UserManager.class).getCurrent();
-							Preconditions.checkNotNull(user);
-							PullRequestComment comment = new PullRequestComment();
-							getPullRequest().getComments().add(comment);
-							comment.setUser(user);
-							comment.setDate(new Date());
-							comment.setContent(content);
-							comment.setRequest(getPullRequest());
-							comment.setBlobInfo(blobInfo);
-							comment.setCompareWith(compareWith);
-							comment.setLine(line);
-							comment.setContext(commentContext);
-							InheritableThreadLocalData.set(new PageId(getPageId()));
-							try {
-								GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
-							} finally {
-								InheritableThreadLocalData.clear();
+		InlineCommentSupport commentSupport;
+		
+		List<String> commentables = getPullRequest().getCommentables();
+		int oldCommitIndex = commentables.indexOf(oldCommitHash);
+		int newCommitIndex = commentables.indexOf(newCommitHash);
+		if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
+			commentSupport = null;
+		} else {
+			commentSupport = new InlineCommentSupport() {
+				
+				@Override
+				public Map<Integer, List<InlineComment>> getComments(BlobIdent blobIdent) {
+					Map<Integer, List<InlineComment>> comments = new HashMap<>();
+					for (PullRequestComment comment: getPullRequest().getComments()) {
+						if (comment.getInlineInfo() != null && comment.getBlobIdent().equals(blobIdent)) {
+							List<InlineComment> commentsAtLine = comments.get(comment.getLine());
+							if (commentsAtLine == null) {
+								commentsAtLine = new ArrayList<>();
+								comments.put(comment.getLine(), commentsAtLine);
 							}
-							return comment;
+							commentsAtLine.add(comment);
 						}
-					};
+					}
+					return comments;
 				}
-			}
-
-			@Override
-			protected void onSelection(AjaxRequestTarget target, Change change) {
-				file = change.getPath();
-
-				String original = getPageParameters().get(ORIGINAL_PARAM).toString();
-				String revised = getPageParameters().get(REVISED_PARAM).toString();
-				Long commentId = getPageParameters().get(COMMENT_PARAM).toOptionalLong();
 				
-				StringBuilder url = new StringBuilder("compare?file=");
-				url.append(file);
-				if (original != null)
-					url.append("&original=").append(original);
-				if (revised != null)
-					url.append("&revised=").append(revised);
-				if (commentId != null)
-					url.append("&comment=").append(commentId);
+				@Override
+				public InlineComment getConcernedComment() {
+					return getComment();
+				}
 				
-				pushState(target, url.toString(), file);
-			}
-			
-		});
+				@Override
+				public InlineComment addComment(BlobIdent blobInfo, BlobIdent compareWith, 
+						AroundContext commentContext, int line, String content) {
+					User user = GitPlex.getInstance(UserManager.class).getCurrent();
+					Preconditions.checkNotNull(user);
+					PullRequestComment comment = new PullRequestComment();
+					getPullRequest().getComments().add(comment);
+					comment.setUser(user);
+					comment.setDate(new Date());
+					comment.setContent(content);
+					comment.setRequest(getPullRequest());
+					comment.setBlobIdent(blobInfo);
+					comment.setCompareWith(compareWith);
+					comment.setLine(line);
+					comment.setContext(commentContext);
+					InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPageId()));
+					try {
+						GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
+					} finally {
+						InheritableThreadLocalData.clear();
+					}
+					return comment;
+				}
+			};
+		};
+		add(new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, commentSupport));
 	}
 	
 	@Override
@@ -479,15 +449,13 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommit, 
-			@Nullable String newCommit, @Nullable String file) {
+			@Nullable String newCommit) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 		
 		if (oldCommit != null)
-			params.set("original", oldCommit);
+			params.set(OLD_PARAM, oldCommit);
 		if (newCommit != null)
-			params.set("revised", newCommit);
-		if (file != null)
-			params.set("file", file);
+			params.set(NEW_PARAM, newCommit);
 		
 		return params;
 	}
@@ -504,7 +472,7 @@ public class RequestComparePage extends RequestDetailPage {
 			// to cause LazyInitializationException
 			if (getComment() != null 
 					&& HibernateUtils.getId(comment).equals(HibernateUtils.getId(getComment()))) {
-				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash, file);
+				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash);
 				setResponsePage(RequestComparePage.class, params);
 			}
 		}
@@ -515,7 +483,7 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		private final String subject;
 		
-		CommitDescription(final String name, final String subject) {
+		CommitDescription(@Nullable final String name, final String subject) {
 			this.name = name;
 			this.subject = subject;
 		}
@@ -569,10 +537,10 @@ public class RequestComparePage extends RequestDetailPage {
 							Map.Entry<String, CommitDescription> entry = item.getModelObject();
 							if (forBase) {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), entry.getKey(), newCommitHash, file));
+										paramsOf(getPullRequest(), entry.getKey(), newCommitHash));
 							} else {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), oldCommitHash, entry.getKey(), file));
+										paramsOf(getPullRequest(), oldCommitHash, entry.getKey()));
 							}
 						}
 						
@@ -635,7 +603,6 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 
-		compareResult.select(target, (String) data);
 		target.add(optionsContainer);
 	}
 	

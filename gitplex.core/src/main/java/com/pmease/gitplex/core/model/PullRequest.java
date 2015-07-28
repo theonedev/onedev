@@ -29,7 +29,6 @@ import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
@@ -38,9 +37,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jackson.ExternalView;
 import com.pmease.commons.util.LockUtils;
-import com.pmease.commons.util.Triple;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.ChangeComments;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
@@ -223,8 +220,6 @@ public class PullRequest extends AbstractEntity {
 	private transient Set<String> pendingCommits;
 	
 	private transient Collection<Commit> mergedCommits;
-	
-	private transient Map<ChangeKey, ChangeComments> commentsCache = new HashMap<>();
 	
 	private transient Collection<PullRequestCommentReply> commentReplies;
 	
@@ -769,16 +764,6 @@ public class PullRequest extends AbstractEntity {
 		return pendingCommits;
 	}
 
-	public ChangeComments getChangeComments(Change change) {
-		ChangeKey key = new ChangeKey(change.getOldRev(), change.getNewRev(), change.getPath());
-		ChangeComments comments = commentsCache.get(key);
-		if (comments == null) {
-			comments = new ChangeComments(this, change);
-			commentsCache.put(key, comments);
-		}
-		return comments;
-	}
-	
 	public List<String> getCommentables() {
 		List<String> commentables = new ArrayList<>();
 		commentables.add(getBaseCommitHash());
@@ -856,7 +841,7 @@ public class PullRequest extends AbstractEntity {
 		}
 		return reviews;
 	}
-
+	
 	public boolean isReviewEffective(User user) {
 		for (Review review: getReviews()) {
 			if (review.getUpdate().equals(getLatestUpdate()) && review.getReviewer().equals(user)) 
@@ -909,12 +894,4 @@ public class PullRequest extends AbstractEntity {
 				+ "/pull_requests/" + getId() + "/overview";
 	}
 	
-	private static class ChangeKey extends Triple<String, String, String> {
-
-		public ChangeKey(String oldCommit, String newCommit, String file) {
-			super(oldCommit, newCommit, file);
-		}
-		
-	}
-
 }

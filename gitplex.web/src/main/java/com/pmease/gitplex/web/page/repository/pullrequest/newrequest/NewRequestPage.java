@@ -32,7 +32,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -44,7 +43,6 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
@@ -59,7 +57,6 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.diff.compareresult.CompareResultPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
@@ -318,19 +315,7 @@ public class NewRequestPage extends PullRequestPage {
 	}
 	
 	private Component newChangedFilesPanel() {
-		return new CompareResultPanel("tabPanel", repoModel, getPullRequest().getBaseCommitHash(), 
-				getPullRequest().getLatestUpdate().getHeadCommitHash(), null) {
-			
-			@Override
-			protected void onSelection(AjaxRequestTarget target, Change change) {
-			}
-			
-			@Override
-			protected InlineCommentSupport getInlineCommentSupport(Change change) {
-				return null;
-			}
-			
-		}.setOutputMarkupId(true);
+		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
 	}
 
 	private Fragment newOpenedFrag() {

@@ -1,22 +1,11 @@
 package com.pmease.commons.git;
 
-import static com.pmease.commons.git.Change.Status.ADDED;
-import static com.pmease.commons.git.Change.Status.DELETED;
-import static com.pmease.commons.git.Change.Status.MODIFIED;
-import static com.pmease.commons.git.Change.Status.RENAMED;
-import static com.pmease.commons.git.Change.Status.UNCHANGED;
-
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -147,103 +136,6 @@ public class Git implements Serializable {
 	 */
 	public List<TreeNode> listTree(String revision, @Nullable String path) {
 		return new ListTreeCommand(repoDir).revision(revision).path(path).call();
-	}
-	
-	/**
-	 * List tree of fromRev, and mark differences from fromRev to toRev in the resulting tree.
-	 * 
-	 * @param fromRev
-	 * 			revision to base the tree off
-	 * @param toRev
-	 * 			revision to calculate file differences since fromRev 
-	 * @param path
-	 * 			path to list tree under5
-	 * @param changes
-	 * 			all changes between fromRev and toRev. This param is passed for performance reasons, 
-	 * 			in order not to calculate changes over and over again when expand nodes of a diff tree
-	 * @return
-	 * 			a list of tree node with appropriate actions set up to mark whether or not this 
-	 * 			tree node is modified, added, deleted or remaining the same
-	 */
-	public List<Change> listTree(String fromRev, String toRev, @Nullable String path, @Nullable List<Change> changes) {
-		if (path == null) 
-			path = "";
-		
-		if (path.length() != 0 && !path.endsWith("/"))
-			path += "/";
-		
-		if (changes == null)
-			changes = listFileChanges(fromRev, toRev, path, true);
-
-		List<Change> diffs = new ArrayList<>();
-		
-		Map<String, Change> changesMap = new HashMap<>();
-		
-		for (Change change: changes) { 
-			changesMap.put(change.getPath(), change);
-			if (change.getStatus() == RENAMED)
-				changesMap.put(change.getOldPath(), change);
-		}
-		
-		Set<String> nodePathsInToRev = new HashSet<>();
-		for (TreeNode each: listTree(toRev, path))
-			nodePathsInToRev.add(each.getPath());
-
-		Set<String> coveredFiles = new HashSet<>();
-		for (TreeNode treeNode: listTree(fromRev, path)) {
-			if (FileMode.TREE.equals(treeNode.getMode())) {
-				String treePath = treeNode.getPath() + "/";
-				Change diff = null;
-				for (String changedFile: changesMap.keySet()) {
-					if (changedFile.startsWith(treePath)) {
-						coveredFiles.add(changedFile);
-						if (diff == null) {
-							diff = new Change(MODIFIED, fromRev, toRev, treeNode.getPath(), treeNode.getPath(), 
-									FileMode.TYPE_TREE, FileMode.TYPE_TREE);
-						}
-					}
-				}
-				if (diff != null) {
-					if (!nodePathsInToRev.contains(treeNode.getPath()))
-						diff = new Change(DELETED, fromRev, toRev, treeNode.getPath(), null,
-								FileMode.TYPE_TREE, 0);
-				} else {
-					diff = new Change(UNCHANGED, fromRev, toRev, treeNode.getPath(), treeNode.getPath(), 
-							FileMode.TYPE_TREE, FileMode.TYPE_TREE);
-				}
-				diffs.add(diff);
-			} else {
-				Change change = changesMap.get(treeNode.getPath());
-				if (change != null) {
-					if (change.getStatus() != RENAMED || change.getNewPath().equals(treeNode.getPath())) 
-						diffs.add(change);
-				} else {
-					diffs.add(new Change(UNCHANGED, fromRev, toRev, treeNode.getPath(), treeNode.getPath(),  
-							treeNode.getMode(), treeNode.getMode()));
-				}
-			}
-		}
-
-		Set<String> addedDirs = new HashSet<>();
-		for (Map.Entry<String, Change> entry: changesMap.entrySet()) {
-			String file = entry.getKey();
-			Change change = entry.getValue();
-			if ((change.getStatus() == ADDED || change.getStatus() == RENAMED && change.getNewPath().equals(file)) 
-					&& !coveredFiles.contains(file) && file.startsWith(path)) {
-				String relativePath = file.substring(path.length());
-				int index = relativePath.indexOf('/');
-				if (index != -1)
-					addedDirs.add(path + relativePath.substring(0, index));
-				else  
-					diffs.add(change);
-			}
-		}
-		
-		for (String addedDir: addedDirs) 
-			diffs.add(new Change(ADDED, fromRev, toRev, null, addedDir, 0, FileMode.TYPE_TREE));
-		
-		Collections.sort(diffs);
-		return diffs;
 	}
 	
 	public Git init(boolean bare) {

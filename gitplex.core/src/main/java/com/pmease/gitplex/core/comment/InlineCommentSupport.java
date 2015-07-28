@@ -9,10 +9,8 @@ import com.pmease.commons.util.diff.AroundContext;
 
 public interface InlineCommentSupport extends Serializable {
 	
-	Map<Integer, List<InlineComment>> getOldComments();
+	Map<Integer, List<InlineComment>> getComments(BlobIdent blobIdent);
 	
-	Map<Integer, List<InlineComment>> getNewComments();
-
 	InlineComment addComment(BlobIdent commentAt, BlobIdent compareWith, 
 			AroundContext commentContext, int line, String content);
 	

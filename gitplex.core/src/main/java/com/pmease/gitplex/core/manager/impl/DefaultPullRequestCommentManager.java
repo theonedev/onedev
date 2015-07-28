@@ -52,25 +52,25 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 		if (!comment.getNewCommitHash().equals(latestCommitHash)) {
 			List<Change> changes = comment.getRepository().getChanges(comment.getNewCommitHash(), latestCommitHash);
 			String oldCommitHash = comment.getOldCommitHash();
-			if (oldCommitHash.equals(comment.getBlobInfo().revision)) {
+			if (oldCommitHash.equals(comment.getBlobIdent().revision)) {
 				BlobIdent newBlobInfo = null;
 				if (comment.getCompareWith().path != null) {
 					for (Change change: changes) {
-						if (comment.getCompareWith().path.equals(change.getOldPath())) {
-							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewPath(), change.getNewMode());
+						if (comment.getCompareWith().path.equals(change.getOldBlobIdent().path)) {
+							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
 							break;
 						}
 					}
 				} else {
 					for (Change change: changes) {
-						if (comment.getBlobInfo().path.equals(change.getNewPath())) {
-							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewPath(), change.getNewMode());
+						if (comment.getBlobIdent().path.equals(change.getNewBlobIdent().path)) {
+							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
 							break;
 						}
 					}
 				}
 				if (newBlobInfo != null) {
-					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobInfo());
+					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobIdent());
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
 					if (newBlobInfo.path != null) {
@@ -98,13 +98,13 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 			} else {
 				BlobIdent newBlobInfo = null;
 				for (Change change: changes) {
-					if (comment.getBlobInfo().path.equals(change.getOldPath())) {
-						newBlobInfo = new BlobIdent(latestCommitHash, change.getNewPath(), change.getNewMode());
+					if (comment.getBlobIdent().path.equals(change.getOldBlobIdent().path)) {
+						newBlobInfo = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
 						break;
 					}
 				}
 				if (newBlobInfo != null) {
-					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobInfo());
+					BlobText oldText = comment.getRepository().getBlobText(comment.getBlobIdent());
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
 					if (newBlobInfo.path != null) {
@@ -120,7 +120,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 						List<DiffLine> diffs = DiffUtils.diff(oldText.getLines(), newLines, null);
 						Integer newLineNo = DiffUtils.mapLines(diffs).get(comment.getLine());
 						if (newLineNo != null) {
-							comment.setBlobInfo(newBlobInfo);
+							comment.setBlobIdent(newBlobInfo);
 							comment.setLine(newLineNo);
 							
 							List<String> oldLines;
@@ -155,7 +155,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 						comment.setContext(null);
 					}
 				} else {
-					comment.getBlobInfo().revision = latestCommitHash;
+					comment.getBlobIdent().revision = latestCommitHash;
 				}
 			}
 			dao.persist(comment);
