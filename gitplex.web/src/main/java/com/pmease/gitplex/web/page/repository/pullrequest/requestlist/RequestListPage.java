@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -155,7 +156,7 @@ public class RequestListPage extends PullRequestPage {
 					menuItems.add(new CheckItem() {
 
 						@Override
-						public void onClick() {
+						public void onClick(AjaxRequestTarget target) {
 							setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
 						}
 

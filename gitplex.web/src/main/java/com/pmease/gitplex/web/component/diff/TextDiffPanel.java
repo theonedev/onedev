@@ -4,7 +4,6 @@ import static com.pmease.commons.util.diff.DiffLine.Action.ADD;
 import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
 import static com.pmease.commons.util.diff.DiffLine.Action.EQUAL;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +31,7 @@ import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -49,8 +49,6 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Change;
-import com.pmease.commons.git.LineProcessor;
-import com.pmease.commons.git.Blob.Text;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.util.diff.DiffHunk;
 import com.pmease.commons.util.diff.DiffLine;
@@ -58,10 +56,9 @@ import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.commons.util.diff.Token;
 import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
-import com.pmease.commons.wicket.behavior.ScrollBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.behavior.menu.CheckBoxItem;
+import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
@@ -79,6 +76,7 @@ import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
@@ -95,7 +93,7 @@ public class TextDiffPanel extends Panel {
 	
 	private final IModel<Boolean> allowToAddCommentModel;
 	
-	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
+	private LineProcessOption lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
 	private boolean showComments = true;
 	
@@ -105,8 +103,6 @@ public class TextDiffPanel extends Panel {
 	
 	private List<DiffHunk> hunks;
 	
-	private boolean identical;
-
 	private final IModel<Map<Integer, List<InlineComment>>> commentsModel;
 	
 	private WebMarkupContainer head;
@@ -193,41 +189,20 @@ public class TextDiffPanel extends Panel {
 			
 		};
 		
-		onDiffOptionChanged();
+		onLineProcessorChanged();
 	}
 	
-	private void onDiffOptionChanged() {
+	private void onLineProcessorChanged() {
 		diffs = DiffUtils.diff(readOldText().getLines(lineProcessor), readNewText().getLines(lineProcessor), new WordSplitter());
 		
-		identical = true;
-		for (DiffLine diffLine: diffs) {
-			if (diffLine.getAction() != EQUAL) {
-				identical = false;
-				break;
-			}
-		}
-		
-		if (!identical) {
-			if (commentSupport != null) {
-				hunks = DiffUtils.hunksOf(diffs, commentSupport.getComments(change.getOldBlobIdent()).keySet(), 
-						commentSupport.getComments(change.getNewBlobIdent()).keySet(), CONTEXT_SIZE);
-			} else {
-				hunks = DiffUtils.hunksOf(diffs, CONTEXT_SIZE);
-			}
+		if (commentSupport != null) {
+			hunks = DiffUtils.hunksOf(diffs, commentSupport.getComments(change.getOldBlobIdent()).keySet(), 
+					commentSupport.getComments(change.getNewBlobIdent()).keySet(), CONTEXT_SIZE);
 		} else {
-			hunks = new ArrayList<>();
-			hunks.add(new DiffHunk(0, 0, diffs));
+			hunks = DiffUtils.hunksOf(diffs, CONTEXT_SIZE);
 		}
 	}
 
-	private boolean isDisplayingFull() {
-		int lines = 0;
-		for (DiffHunk hunk: hunks)
-			lines += hunk.getDiffLines().size();
-		
-		return lines == diffs.size();
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -245,75 +220,12 @@ public class TextDiffPanel extends Panel {
 				return diffs;
 			}
 			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!identical);
-			}
-			
-		});
+		}));
 		add(head);
 		
 		head.add(new FileDiffTitle("title", change));
 		
-		head.add(new WebMarkupContainer("identical") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(identical);
-			}
-			
-		});
-		
-		WebMarkupContainer diffNavs = new WebMarkupContainer("diffNavs") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!identical && isDisplayingFull());
-			}
-			
-		};
-		head.add(diffNavs);
-		
-		diffNavs.add(new WebMarkupContainer("prevDiff").add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, false)));
-		diffNavs.add(new WebMarkupContainer("nextDiff").add(new ScrollBehavior(".diff-block", SCROLL_MARGIN, true)));
-
-		WebMarkupContainer commentNavs = new WebMarkupContainer("commentNavs") {
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!commentsModel.getObject().isEmpty());
-			}
-
-		};
-		head.add(commentNavs);
-		
-		commentNavs.add(new WebMarkupContainer("prevComment") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentSupport != null && showComments && isDisplayingFull());
-			}
-			
-		}.add(new ScrollBehavior("table.comments>tbody>tr", SCROLL_MARGIN, false)));
-		
-		commentNavs.add(new WebMarkupContainer("nextComment") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentSupport != null && showComments && isDisplayingFull());
-			}
-			
-		}.add(new ScrollBehavior("table.comments>tbody>tr", SCROLL_MARGIN, true)));
-		
-		commentNavs.add(new AjaxLink<Void>("showComments") {
+		head.add(new AjaxLink<Void>("showComments") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -327,7 +239,7 @@ public class TextDiffPanel extends Panel {
 			}
 
 		});
-		commentNavs.add(new AjaxLink<Void>("hideComments") {
+		head.add(new AjaxLink<Void>("hideComments") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -342,23 +254,14 @@ public class TextDiffPanel extends Panel {
 			
 		});
 		
-		head.add(new AjaxLink<Void>("displayFull") {
+		head.add(new Link<Void>("viewFile") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				hunks = new ArrayList<>();
-				hunks.add(new DiffHunk(0, 0, diffs));
-				target.add(TextDiffPanel.this);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(!isDisplayingFull());
+			public void onClick() {
+				setResponsePage(RepoFilePage.class, RepoFilePage.paramsOf(repoModel.getObject(), change.getNewBlobIdent()));
 			}
 			
-		});
+		}.add(AttributeAppender.append("title", "View full file at " + change.getNewBlobIdent().revision)));
 
 		MenuPanel diffOptionMenuPanel = new MenuPanel("diffOptions") {
 
@@ -366,122 +269,29 @@ public class TextDiffPanel extends Panel {
 			protected List<MenuItem> getMenuItems() {
 				List<MenuItem> menuItems = new ArrayList<>();
 				
-				menuItems.add(new CheckBoxItem() {
-					
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						onDiffOptionChanged();
-						hide(target);
-						target.add(TextDiffPanel.this);
-					}
-					
-					@Override
-					protected String getLabel() {
-						return "Ignore end of line differences";
-					}
-					
-					@Override
-					protected IModel<Boolean> getCheckModel() {
-						return new IModel<Boolean>() {
+				for (final LineProcessOption option: LineProcessOption.values()) {
+					menuItems.add(new CheckItem() {
 
-							@Override
-							public void detach() {
-							}
- 
-							@Override
-							public Boolean getObject() {
-								return diffOption == DiffOption.IGNORE_EOL;
-							}
+						@Override
+						protected String getLabel() {
+							return option.toString();
+						}
 
-							@Override
-							public void setObject(Boolean object) {
-								if (object)
-									diffOption = DiffOption.IGNORE_EOL;
-								else
-									diffOption = DiffOption.IGNORE_NOTHING;
-							}
-							
-						};
-					}
-				});
-				
-				menuItems.add(new CheckBoxItem() {
-					
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						onDiffOptionChanged();
-						hide(target);
-						target.add(TextDiffPanel.this);
-					}
-					
-					@Override
-					protected String getLabel() {
-						return "Ignore white spaces at line end";
-					}
-					
-					@Override
-					protected IModel<Boolean> getCheckModel() {
-						return new IModel<Boolean>() {
+						@Override
+						protected boolean isTicked() {
+							return lineProcessor == option;
+						}
 
-							@Override
-							public void detach() {
-							}
-
-							@Override
-							public Boolean getObject() {
-								return diffOption == DiffOption.IGNORE_EOL_SPACES;
-							}
-
-							@Override
-							public void setObject(Boolean object) {
-								if (object)
-									diffOption = DiffOption.IGNORE_EOL_SPACES;
-								else
-									diffOption = DiffOption.IGNORE_NOTHING;
-							}
-							
-						};
-					}
-				});
-
-				menuItems.add(new CheckBoxItem() {
-					
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						onDiffOptionChanged();
-						hide(target);
-						target.add(TextDiffPanel.this);
-					}
-					
-					@Override
-					protected String getLabel() {
-						return "Ignore white space changes";
-					}
-					
-					@Override
-					protected IModel<Boolean> getCheckModel() {
-						return new IModel<Boolean>() {
-
-							@Override
-							public void detach() {
-							}
-
-							@Override
-							public Boolean getObject() {
-								return diffOption == DiffOption.IGNORE_CHANGE_SPACES;
-							}
-
-							@Override
-							public void setObject(Boolean object) {
-								if (object)
-									diffOption = DiffOption.IGNORE_CHANGE_SPACES;
-								else
-									diffOption = DiffOption.IGNORE_NOTHING;
-							}
-							
-						};
-					}
-				});
+						@Override
+						protected void onClick(AjaxRequestTarget target) {
+							lineProcessor = option;
+							onLineProcessorChanged();
+							hide(target);
+							target.add(TextDiffPanel.this);
+						}
+						
+					});
+				}
 
 				return menuItems;
 			}
