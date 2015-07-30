@@ -51,7 +51,7 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 		
 		Commandline cmd = cmd();
 		
-		cmd.addArgs("diff", "--name-only", fromRev + ".." + toRev);
+		cmd.addArgs("diff", "--name-only", "--find-renames", fromRev + ".." + toRev);
 		
 		if (path != null)
 			cmd.addArgs("--", path);
