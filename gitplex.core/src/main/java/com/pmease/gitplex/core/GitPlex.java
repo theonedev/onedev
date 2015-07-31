@@ -1,12 +1,9 @@
 package com.pmease.gitplex.core;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -28,14 +25,12 @@ import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.loader.AbstractPlugin;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.AppName;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.schedule.SchedulableTask;
 import com.pmease.commons.schedule.TaskScheduler;
-import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
@@ -136,27 +131,6 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 			
 		});
 		checkGit();
-		
-		String jdk18Dir = "w:\\temp\\jdk1.8";
-		Collection<File> jdk18Files = FileUtils.listFiles(new File(jdk18Dir), "**/*.java");
-		int count=0;
-		long time = System.currentTimeMillis();
-		for (File jdk18File: jdk18Files) {
-			File jdk16File = new File("w:\\temp\\jdk1.6" + jdk18File.getAbsolutePath().substring(jdk18Dir.length()));
-			if (jdk16File.exists()) {
-				count++;
-				if (count % 100 == 0)
-					System.out.println(count);
-				try {
-					List<String> jdk16Lines = FileUtils.readLines(jdk16File);
-					List<String> jdk18Lines = FileUtils.readLines(jdk18File);
-					DiffUtils.diff(jdk16Lines, "test.java", jdk18Lines, "test.java");
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		System.out.println(System.currentTimeMillis()-time);
 	}
 	
 	public void checkGit() {
