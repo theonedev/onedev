@@ -12,6 +12,8 @@ public class Token implements Serializable {
 	
 	private final String text;
 	
+	private boolean changed;
+	
 	public Token(String style, String text) {
 		this.style = style;
 		this.text = text;
@@ -23,6 +25,14 @@ public class Token implements Serializable {
 
 	public String text() {
 		return text;
+	}
+	
+	public boolean isChanged() {
+		return changed;
+	}
+
+	public void setChanged(boolean changed) {
+		this.changed = changed;
 	}
 
 	public boolean isComment() {

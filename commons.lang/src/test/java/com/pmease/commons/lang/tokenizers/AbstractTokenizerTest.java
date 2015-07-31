@@ -70,26 +70,26 @@ public abstract class AbstractTokenizerTest {
 	
 	public static class Callback {
 
-		private List<TokenizedLine> tokenizedLines = new ArrayList<>();
+		private List<List<Token>> tokenizedLines = new ArrayList<>();
 	
-		private TokenizedLine currentLine = new TokenizedLine();
+		private List<Token> currentLine = new ArrayList<>();
 		
 		public void token(String style, String text) {
 			if (style == null || style.equals("null") || style.equals("undefined"))
 				style = "";
 			if (text.equals("\n")) {
-				if (!currentLine.getTokens().isEmpty()) {
+				if (!currentLine.isEmpty()) {
 					tokenizedLines.add(currentLine);
-					currentLine = new TokenizedLine();
+					currentLine = new ArrayList<>();
 				}
 			} else {
-				currentLine.getTokens().add(new Token(style, text));
+				currentLine.add(new Token(style, text));
 			}
 		}
 		
-		public List<TokenizedLine> getTokenizedLines() {
-			List<TokenizedLine> copy = new ArrayList<>(tokenizedLines);
-			if (!currentLine.getTokens().isEmpty())
+		public List<List<Token>> getTokenizedLines() {
+			List<List<Token>> copy = new ArrayList<>(tokenizedLines);
+			if (!currentLine.isEmpty())
 				copy.add(currentLine);
 			return copy;
 		}

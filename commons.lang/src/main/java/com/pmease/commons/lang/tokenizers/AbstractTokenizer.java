@@ -15,13 +15,13 @@ public abstract class AbstractTokenizer<S> implements Tokenizer {
 		List<List<Token>> tokenizedLines = new ArrayList<>();
 		S state = startState();
 		for (String line: lines) {
-			TokenizedLine tokenizedLine = new TokenizedLine();
+			List<Token> tokenizedLine = new ArrayList<>();
 			if (line.length() == 0)
 				blankLine(state);
 			StringStream stream = new StringStream(line);
 			while (!stream.eol()) {
 				String style = token(stream, state);
-				tokenizedLine.getTokens().add(new Token(style, stream.current()));
+				tokenizedLine.add(new Token(style, stream.current()));
 				stream.start(stream.pos());
 			}
 			tokenizedLines.add(tokenizedLine);
@@ -29,7 +29,7 @@ public abstract class AbstractTokenizer<S> implements Tokenizer {
 		return tokenizedLines;
 	}
 	
-	public List<TokenizedLine> tokenize(String text) {
+	public List<List<Token>> tokenize(String text) {
 		return tokenize(Splitter.on("\n").splitToList(text));
 	}
 
