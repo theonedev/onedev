@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class TokenizedLine implements Serializable {
 	
@@ -60,13 +61,18 @@ public class TokenizedLine implements Serializable {
 	}
 
 	@Override
-	public int hashCode() {
-		return tokens.hashCode();
+	public boolean equals(Object other) {
+		if (!(other instanceof TokenizedLine))
+			return false;
+		if (this == other)
+			return true;
+		TokenizedLine otherLine = (TokenizedLine) other;
+		return getTokens().equals(otherLine.getTokens());
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(getTokens()).toHashCode();
 	}
 	
 }

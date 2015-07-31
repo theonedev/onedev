@@ -17,12 +17,12 @@ public class DefaultTokenizers implements Tokenizers {
 	}
 
 	@Override
-	public List<TokenizedLine> tokenize(List<String> lines, String fileName) {
+	public List<List<Token>> tokenize(List<String> lines, String fileName) {
 		for (Tokenizer tokenizer: tokenizers) {
-			if (tokenizer.accept(fileName))
+			if (tokenizer.accept(fileName)) 
 				return tokenizer.tokenize(lines);
 		}
 		return null;
 	}
-
+	
 }

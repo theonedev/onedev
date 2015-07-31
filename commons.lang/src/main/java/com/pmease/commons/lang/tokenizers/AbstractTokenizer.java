@@ -11,8 +11,8 @@ import com.pmease.commons.util.StringUtils;
 
 public abstract class AbstractTokenizer<S> implements Tokenizer {	
 	
-	public List<TokenizedLine> tokenize(List<String> lines) {
-		List<TokenizedLine> tokenizedLines = new ArrayList<>();
+	public List<List<Token>> tokenize(List<String> lines) {
+		List<List<Token>> tokenizedLines = new ArrayList<>();
 		S state = startState();
 		for (String line: lines) {
 			TokenizedLine tokenizedLine = new TokenizedLine();

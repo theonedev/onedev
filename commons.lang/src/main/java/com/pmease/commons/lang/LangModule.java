@@ -1,5 +1,8 @@
 package com.pmease.commons.lang;
 
+import com.pmease.commons.lang.tokenizers.DefaultTokenizers;
+import com.pmease.commons.lang.tokenizers.Tokenizer;
+import com.pmease.commons.lang.tokenizers.Tokenizers;
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -13,8 +16,10 @@ public class LangModule extends AbstractPluginModule {
 		super.configure();
 		
 		contributeFromPackage(Extractor.class, Extractor.class);
+		contributeFromPackage(Tokenizer.class, Tokenizer.class);
 		
 		bind(Extractors.class).to(DefaultExtractors.class);
+		bind(Tokenizers.class).to(DefaultTokenizers.class);
 	}
 
 }

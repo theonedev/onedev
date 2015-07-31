@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -18,6 +20,24 @@ import com.pmease.commons.util.diff.DiffMatchPatch.Diff;
 
 public class DiffUtils {
 
+	private static final Pattern pattern = Pattern.compile("\\w+");
+	
+	public List<String> splitByWords(String line) {
+		List<String> tokens = new ArrayList<>();
+		Matcher matcher = pattern.matcher(line);
+		int lastEnd = 0;
+		while (matcher.find()) {
+			int start = matcher.start();
+			if (start > lastEnd)
+				tokens.add(line.substring(lastEnd, start));
+            tokens.add(matcher.group());
+            lastEnd = matcher.end();
+        }
+		if (lastEnd < line.length())
+			tokens.add(line.substring(lastEnd));
+		return tokens;
+	}
+	
 	/**
 	 * Diff two list of strings.
 	 * 
@@ -36,6 +56,7 @@ public class DiffUtils {
 			@Nullable TokenSplitter tokenSplitter) {
 		Preconditions.checkArgument(original.size() + revised.size() <= 65535, 
 				"Total size of original and revised list should be less than 65535.");
+		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		TokensToCharsResult result = tokensToChars(original, revised);
 		
