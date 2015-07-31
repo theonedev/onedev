@@ -1,4 +1,4 @@
-package com.pmease.commons.lang.java;
+package com.pmease.commons.lang.extractors.java;
 
 import java.util.List;
 
@@ -8,35 +8,49 @@ import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.lang.TokenPosition;
-import com.pmease.commons.lang.java.icons.Icons;
+import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.lang.extractors.java.icons.Icons;
 
-public class FieldDef extends JavaSymbol {
+public class MethodDef extends JavaSymbol {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String type;
+	private final String type; 
 	
+	private final String params;
+
 	private final List<Modifier> modifiers;
 	
-	public FieldDef(TypeDef parent, String name, TokenPosition pos, 
-			@Nullable String type, List<Modifier> modifiers) {
+	public MethodDef(TypeDef parent, String name, TokenPosition pos, 
+			@Nullable String type, @Nullable String params, List<Modifier> modifiers) {
 		super(parent, name, pos);
 		
 		this.type = type;
+		this.params = params;
 		this.modifiers = modifiers;
 	}
-	
+
 	/**
-	 * Get type of this field.
+	 * Get type of this method. 
 	 * 
-	 * @return 
-	 * 			type of this field, or <tt>null</tt> for enum constant
+	 * @return
+	 * 			type of this method, or <tt>null</tt> for constructor
 	 */
 	@Nullable
 	public String getType() {
 		return type;
+	}
+
+	/**
+	 * Get params of this method.
+	 * 
+	 * @return
+	 * 			params of this method, or <tt>null</tt> if no params
+	 */
+	@Nullable
+	public String getParams() {
+		return params;
 	}
 
 	public List<Modifier> getModifiers() {
@@ -45,7 +59,7 @@ public class FieldDef extends JavaSymbol {
 
 	@Override
 	public Component render(String componentId) {
-		return new FieldDefPanel(componentId, this);
+		return new MethodDefPanel(componentId, this);
 	}
 
 	@Override
@@ -55,7 +69,11 @@ public class FieldDef extends JavaSymbol {
 			builder.append(modifier.name().toLowerCase()).append(" ");
 		if (type != null)
 			builder.append(type).append(" ");
-		builder.append(getName()).append(";");
+		builder.append(getName());
+		if (params != null)
+			builder.append("(").append(params).append(");");
+		else
+			builder.append("();");
 		return builder.toString();
 	}
 
@@ -63,13 +81,13 @@ public class FieldDef extends JavaSymbol {
 	public ResourceReference getIcon() {
 		String icon;
 		if (modifiers.contains(Modifier.PRIVATE))
-			icon = "field_private_obj.png";
+			icon = "methpri_obj.png";
 		else if (modifiers.contains(Modifier.PROTECTED))
-			icon = "field_protected_obj.png";
+			icon = "methpro_obj.png";
 		else if (modifiers.contains(Modifier.PUBLIC))
-			icon = "field_public_obj.png";
+			icon = "methpub_obj.png";
 		else
-			icon = "field_default_obj.png";
+			icon = "methdef_obj.png";
 		return new PackageResourceReference(Icons.class, icon);
 	}
 
@@ -86,5 +104,5 @@ public class FieldDef extends JavaSymbol {
 	public boolean isPrimary() {
 		return false;
 	}
-
+	
 }

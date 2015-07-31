@@ -1,4 +1,4 @@
-package com.pmease.commons.lang.java;
+package com.pmease.commons.lang.extractors.java;
 
 import java.util.List;
 
@@ -8,49 +8,35 @@ import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.lang.TokenPosition;
-import com.pmease.commons.lang.java.icons.Icons;
+import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.lang.extractors.java.icons.Icons;
 
-public class MethodDef extends JavaSymbol {
+public class FieldDef extends JavaSymbol {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String type; 
+	private final String type;
 	
-	private final String params;
-
 	private final List<Modifier> modifiers;
 	
-	public MethodDef(TypeDef parent, String name, TokenPosition pos, 
-			@Nullable String type, @Nullable String params, List<Modifier> modifiers) {
+	public FieldDef(TypeDef parent, String name, TokenPosition pos, 
+			@Nullable String type, List<Modifier> modifiers) {
 		super(parent, name, pos);
 		
 		this.type = type;
-		this.params = params;
 		this.modifiers = modifiers;
 	}
-
+	
 	/**
-	 * Get type of this method. 
+	 * Get type of this field.
 	 * 
-	 * @return
-	 * 			type of this method, or <tt>null</tt> for constructor
+	 * @return 
+	 * 			type of this field, or <tt>null</tt> for enum constant
 	 */
 	@Nullable
 	public String getType() {
 		return type;
-	}
-
-	/**
-	 * Get params of this method.
-	 * 
-	 * @return
-	 * 			params of this method, or <tt>null</tt> if no params
-	 */
-	@Nullable
-	public String getParams() {
-		return params;
 	}
 
 	public List<Modifier> getModifiers() {
@@ -59,7 +45,7 @@ public class MethodDef extends JavaSymbol {
 
 	@Override
 	public Component render(String componentId) {
-		return new MethodDefPanel(componentId, this);
+		return new FieldDefPanel(componentId, this);
 	}
 
 	@Override
@@ -69,11 +55,7 @@ public class MethodDef extends JavaSymbol {
 			builder.append(modifier.name().toLowerCase()).append(" ");
 		if (type != null)
 			builder.append(type).append(" ");
-		builder.append(getName());
-		if (params != null)
-			builder.append("(").append(params).append(");");
-		else
-			builder.append("();");
+		builder.append(getName()).append(";");
 		return builder.toString();
 	}
 
@@ -81,13 +63,13 @@ public class MethodDef extends JavaSymbol {
 	public ResourceReference getIcon() {
 		String icon;
 		if (modifiers.contains(Modifier.PRIVATE))
-			icon = "methpri_obj.png";
+			icon = "field_private_obj.png";
 		else if (modifiers.contains(Modifier.PROTECTED))
-			icon = "methpro_obj.png";
+			icon = "field_protected_obj.png";
 		else if (modifiers.contains(Modifier.PUBLIC))
-			icon = "methpub_obj.png";
+			icon = "field_public_obj.png";
 		else
-			icon = "methdef_obj.png";
+			icon = "field_default_obj.png";
 		return new PackageResourceReference(Icons.class, icon);
 	}
 
@@ -104,5 +86,5 @@ public class MethodDef extends JavaSymbol {
 	public boolean isPrimary() {
 		return false;
 	}
-	
+
 }

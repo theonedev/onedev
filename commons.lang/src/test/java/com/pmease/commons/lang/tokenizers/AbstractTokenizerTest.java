@@ -70,9 +70,9 @@ public abstract class AbstractTokenizerTest {
 	
 	public static class Callback {
 
-		private List<List<Token>> tokenizedLines = new ArrayList<>();
+		private List<List<CmToken>> tokenizedLines = new ArrayList<>();
 	
-		private List<Token> currentLine = new ArrayList<>();
+		private List<CmToken> currentLine = new ArrayList<>();
 		
 		public void token(String style, String text) {
 			if (style == null || style.equals("null") || style.equals("undefined"))
@@ -83,12 +83,12 @@ public abstract class AbstractTokenizerTest {
 					currentLine = new ArrayList<>();
 				}
 			} else {
-				currentLine.add(new Token(style, text));
+				currentLine.add(new CmToken(style, text));
 			}
 		}
 		
-		public List<List<Token>> getTokenizedLines() {
-			List<List<Token>> copy = new ArrayList<>(tokenizedLines);
+		public List<List<CmToken>> getTokenizedLines() {
+			List<List<CmToken>> copy = new ArrayList<>(tokenizedLines);
 			if (!currentLine.isEmpty())
 				copy.add(currentLine);
 			return copy;

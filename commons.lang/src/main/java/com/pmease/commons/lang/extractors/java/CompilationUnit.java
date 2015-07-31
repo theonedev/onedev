@@ -1,4 +1,4 @@
-package com.pmease.commons.lang.java;
+package com.pmease.commons.lang.extractors.java;
 
 import java.util.List;
 
@@ -9,9 +9,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.lang.TokenPosition;
-import com.pmease.commons.lang.java.icons.Icons;
+import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.lang.extractors.java.icons.Icons;
 
 public class CompilationUnit extends JavaSymbol {
 	

@@ -7,7 +7,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;

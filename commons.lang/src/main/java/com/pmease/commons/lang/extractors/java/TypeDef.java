@@ -1,4 +1,4 @@
-package com.pmease.commons.lang.java;
+package com.pmease.commons.lang.extractors.java;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,9 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.lang.TokenPosition;
-import com.pmease.commons.lang.java.icons.Icons;
+import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.lang.extractors.java.icons.Icons;
 
 public class TypeDef extends JavaSymbol {
 

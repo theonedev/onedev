@@ -3,7 +3,7 @@ package com.pmease.gitplex.web.page.repository.file;
 import java.io.Serializable;
 
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.TokenPosition;
 
 public class HistoryState implements Serializable {
 

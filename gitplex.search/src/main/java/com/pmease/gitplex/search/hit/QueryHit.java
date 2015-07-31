@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.TokenPosition;
 
 public abstract class QueryHit implements Serializable, Comparable<QueryHit> {
 	

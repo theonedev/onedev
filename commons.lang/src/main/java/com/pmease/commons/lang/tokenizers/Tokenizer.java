@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface Tokenizer {
 	
-	List<List<Token>> tokenize(List<String> lines);
+	List<List<CmToken>> tokenize(List<String> lines);
 	
 	boolean accept(String fileName);
 	

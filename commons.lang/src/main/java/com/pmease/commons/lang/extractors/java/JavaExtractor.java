@@ -1,4 +1,4 @@
-package com.pmease.commons.lang.java;
+package com.pmease.commons.lang.extractors.java;
 
 import static com.pmease.commons.lang.java.JavaLexer.ASSIGN;
 import static com.pmease.commons.lang.java.JavaLexer.AT;
@@ -45,12 +45,13 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.pmease.commons.lang.AbstractExtractor;
-import com.pmease.commons.lang.LangStream;
-import com.pmease.commons.lang.LangToken;
-import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.lang.TokenFilter;
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.AbstractExtractor;
+import com.pmease.commons.lang.extractors.ExtractStream;
+import com.pmease.commons.lang.extractors.ExtractToken;
+import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.lang.extractors.TokenFilter;
+import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.lang.java.JavaLexer;
 import com.pmease.commons.util.Pair;
 
 public class JavaExtractor extends AbstractExtractor {
@@ -69,12 +70,12 @@ public class JavaExtractor extends AbstractExtractor {
 	 * 
 	 */
 	public List<Symbol> extract(String text) {
-		LangStream stream = new LangStream(
+		ExtractStream stream = new ExtractStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 
 		List<Symbol> symbols = new ArrayList<>();
 
-		LangToken token = stream.next();
+		ExtractToken token = stream.next();
 		
 		while (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
 			skipAnnotation(stream);
@@ -120,8 +121,8 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: '{' or ';' (';' occurs inside of a enum definition)
 	 * @after-token: '}'
 	 */
-	private void defineTypeBody(LangStream stream, List<Symbol> symbols, TypeDef parent, String packageName) {
-		LangToken token = stream.next();
+	private void defineTypeBody(ExtractStream stream, List<Symbol> symbols, TypeDef parent, String packageName) {
+		ExtractToken token = stream.next();
 		while(true) {
 			while (token.is(SEMI))
 				token = stream.next();
@@ -185,9 +186,9 @@ public class JavaExtractor extends AbstractExtractor {
 	 * 			fields to be consumed
 	 * 
 	 */
-	private List<Pair<LangToken, String>> skipValue(LangStream stream) {
-		List<Pair<LangToken, String>> fieldInfos = new ArrayList<>();
-		LangToken token = stream.current();
+	private List<Pair<ExtractToken, String>> skipValue(ExtractStream stream) {
+		List<Pair<ExtractToken, String>> fieldInfos = new ArrayList<>();
+		ExtractToken token = stream.current();
 		if (token.is(LBRACE)) { // array value
 			stream.nextClosed(LBRACE, RBRACE);
 			stream.next();
@@ -203,7 +204,7 @@ public class JavaExtractor extends AbstractExtractor {
 					break;
 				} else { // token is ','
 					token.checkType(COMMA);
-					List<Pair<LangToken, String>> subsequentFieldTokens = assumeFieldSeparator(stream);
+					List<Pair<ExtractToken, String>> subsequentFieldTokens = assumeFieldSeparator(stream);
 					if (subsequentFieldTokens != null) { // assumption is correct
 						fieldInfos.addAll(subsequentFieldTokens);
 						break;
@@ -228,13 +229,13 @@ public class JavaExtractor extends AbstractExtractor {
 	 * 			null if assumption is incorrect 
 	 * 
 	 */
-	private List<Pair<LangToken, String>> assumeFieldSeparator(LangStream stream) {
+	private List<Pair<ExtractToken, String>> assumeFieldSeparator(ExtractStream stream) {
 		while (true) {
-			LangToken token = stream.next();
+			ExtractToken token = stream.next();
 			if (token.is(Identifier)) {
-				List<Pair<LangToken, String>> fieldInfos = new ArrayList<>();
+				List<Pair<ExtractToken, String>> fieldInfos = new ArrayList<>();
 				stream.next();
-				fieldInfos.add(new Pair<LangToken, String>(token, skipDims(stream)));
+				fieldInfos.add(new Pair<ExtractToken, String>(token, skipDims(stream)));
 				token = stream.current();
 				if (token.is(ASSIGN)) { // assumption convinced
 					stream.next();
@@ -243,7 +244,7 @@ public class JavaExtractor extends AbstractExtractor {
 				} else if (token.is(SEMI)) { // assumption convinced
 					return fieldInfos;
 				} else if (token.is(COMMA)) { // assumption still not convinced 
-					List<Pair<LangToken, String>> subsequentFieldInfos = assumeFieldSeparator(stream);
+					List<Pair<ExtractToken, String>> subsequentFieldInfos = assumeFieldSeparator(stream);
 					if (subsequentFieldInfos != null) {
 						fieldInfos.addAll(subsequentFieldInfos);
 						return fieldInfos;
@@ -265,11 +266,11 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: start of possible dims
 	 * @after-token: next token after dims, or remain unchanged if no dims  
 	 */
-	private String skipDims(LangStream stream) {
+	private String skipDims(ExtractStream stream) {
 		String dims = "";
 		while (true) {
 			skipAnnotations(stream);
-			LangToken token = stream.current();
+			ExtractToken token = stream.current();
 			if (token.is(LBRACK)) {
 				dims += "[]";
 				stream.nextClosed(LBRACK, RBRACK);
@@ -287,8 +288,8 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: start of type ref
 	 * @after-token: next token after type ref
 	 */
-	private String skipTypeRef(LangStream stream) {
-		LangToken token = stream.current();
+	private String skipTypeRef(ExtractStream stream) {
+		ExtractToken token = stream.current();
 		String typeRef = token.getText();
 		if (token.is(PRIMITIVES)) {
 			stream.next();
@@ -312,14 +313,14 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @begin-token: start of a type ref segment including possible annotations
 	 * @end-token: next token after type ref segment
 	 */
-	private String skipTypeRefSegment(LangStream stream) {
+	private String skipTypeRefSegment(ExtractStream stream) {
 		skipModifiers(stream);
 		String identifier = stream.current().getText();
-		LangToken token = stream.next();
+		ExtractToken token = stream.next();
 		if (token.is(LT)) {
 			int tokenPos = stream.pos();
 			stream.nextClosed(LT, GT);
-			LangStream typeArgStream = new LangStream(stream.between(tokenPos, stream.pos()));
+			ExtractStream typeArgStream = new ExtractStream(stream.between(tokenPos, stream.pos()));
 			token = typeArgStream.next();
 			while (true) {
 				skipModifiers(typeArgStream);
@@ -341,9 +342,9 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: identifier of the method
 	 * @after-token: '}' for class method, ';' for interface method or annotation attribute
 	 */
-	private void defineMethod(LangStream stream, List<Symbol> symbols, TypeDef parent, 
+	private void defineMethod(ExtractStream stream, List<Symbol> symbols, TypeDef parent, 
 			List<Modifier> modifiers, @Nullable String typeRef) {
-		LangToken token = stream.current();
+		ExtractToken token = stream.current();
 		String name = token.getText();
 		TokenPosition pos = token.getPos();
 		String params = null;
@@ -418,16 +419,16 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: identifier of field declaration statement
 	 * @after-token: end of fields declaration statement, which is ';'
 	 */
-	private void defineFields(LangStream stream, List<Symbol> symbols, TypeDef parent, 
+	private void defineFields(ExtractStream stream, List<Symbol> symbols, TypeDef parent, 
 			List<Modifier> modifiers, String typeRef) {
-		LangToken token = stream.current();
+		ExtractToken token = stream.current();
 		while (!token.is(SEMI)) {
 			stream.next();
 			symbols.add(new FieldDef(parent, token.getText(), token.getPos(), typeRef + skipDims(stream), modifiers));
 			token = stream.current();
 			if (token.is(ASSIGN)) {
 				stream.next();
-				for (Pair<LangToken, String> fieldInfo: skipValue(stream)) {
+				for (Pair<ExtractToken, String> fieldInfo: skipValue(stream)) {
 					symbols.add(new FieldDef(parent, fieldInfo.getFirst().getText(), fieldInfo.getFirst().getPos(), 
 							typeRef + fieldInfo.getSecond(), modifiers));
 				}
@@ -444,8 +445,8 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: 'class', 'interface', 'enum', or '@interface'
 	 * @after-token: '}'
 	 */
-	private void defineType(LangStream stream, List<Symbol> symbols, Symbol parent, String packageName, List<Modifier> modifiers) {
-		LangToken token = stream.current();
+	private void defineType(ExtractStream stream, List<Symbol> symbols, Symbol parent, String packageName, List<Modifier> modifiers) {
+		ExtractToken token = stream.current();
 		if (token.is(AT) && stream.lookAhead(1).is(INTERFACE)) {
 			stream.next().checkType(INTERFACE); // 'interface'
 			stream.next().checkType(Identifier); // identifier
@@ -506,11 +507,11 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: type identifier 
 	 * @after-token: start of type body which is '{' 
 	 */
-	private LangToken defineTypeHead(LangStream stream) {
-		LangToken typeHeadToken = stream.current();
+	private ExtractToken defineTypeHead(ExtractStream stream) {
+		ExtractToken typeHeadToken = stream.current();
 		
 		while (true) {
-			LangToken token = stream.nextType(LBRACE, LPAREN);
+			ExtractToken token = stream.nextType(LBRACE, LPAREN);
 			if (token.is(LPAREN)) {
 				stream.nextClosed(LPAREN, RPAREN);
 				token = stream.next();
@@ -528,9 +529,9 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: possible start of modifiers
 	 * @after-token: remain unchanged or token after the modifiers if there are modifiers 
 	 */
-	private List<Modifier> skipModifiers(LangStream stream) {
+	private List<Modifier> skipModifiers(ExtractStream stream) {
 		List<Modifier> modifiers = new ArrayList<>();
-		LangToken token = stream.current();
+		ExtractToken token = stream.current();
 		while (true) {
 			if (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
 				skipAnnotation(stream);
@@ -562,8 +563,8 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: possible start of annotations
 	 * @after-token: remain unchanged or token after the annotations if there are annotations
 	 */
-	private void skipAnnotations(LangStream stream) {
-		LangToken token = stream.current();
+	private void skipAnnotations(ExtractStream stream) {
+		ExtractToken token = stream.current();
 		while (true) {
 			if (token.is(AT) && !stream.lookAhead(1).is(INTERFACE)) {
 				skipAnnotation(stream);
@@ -580,10 +581,10 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: '@'
 	 * @after-token: token after the annotation
 	 */
-	private void skipAnnotation(LangStream stream) {
+	private void skipAnnotation(ExtractStream stream) {
 		stream.next();
 		skipTypeName(stream);
-		LangToken token = stream.current();
+		ExtractToken token = stream.current();
 		if (token.is(LPAREN)) {
 			token = stream.nextClosed(LPAREN, RPAREN);
 			token = stream.next();
@@ -596,9 +597,9 @@ public class JavaExtractor extends AbstractExtractor {
 	 * @before-token: first section of type name
 	 * @after-token: token after type name  
 	 */
-	private String skipTypeName(LangStream stream) {
+	private String skipTypeName(ExtractStream stream) {
 		String typeName = stream.current().getText();
-		LangToken token = stream.next();
+		ExtractToken token = stream.next();
 		while (token.is(DOT)) {
 			typeName += ".";
 			token = stream.next();

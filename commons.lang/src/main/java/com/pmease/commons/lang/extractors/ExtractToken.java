@@ -1,14 +1,14 @@
-package com.pmease.commons.lang;
+package com.pmease.commons.lang.extractors;
 
 import java.io.Serializable;
 
 import org.antlr.v4.runtime.Token;
 
-public class LangToken implements Serializable {
+public class ExtractToken implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final LangToken EOF = new LangToken(Token.EOF, "", null);
+	public static final ExtractToken EOF = new ExtractToken(Token.EOF, "", null);
 	
 	private final int type;
 	
@@ -16,7 +16,7 @@ public class LangToken implements Serializable {
 	
 	private final TokenPosition pos;
 	
-	public LangToken(Token antlrToken) {
+	public ExtractToken(Token antlrToken) {
 		type = antlrToken.getType();
 		text = antlrToken.getText();
 		TokenPosition.Range range = new TokenPosition.Range(
@@ -25,7 +25,7 @@ public class LangToken implements Serializable {
 		pos = new TokenPosition(antlrToken.getLine()-1, range);
 	}
 
-	public LangToken(int type, String text, TokenPosition pos) {
+	public ExtractToken(int type, String text, TokenPosition pos) {
 		this.type = type;
 		this.text = text;
 		this.pos = pos;
@@ -63,13 +63,13 @@ public class LangToken implements Serializable {
 		return pos;
 	}
 	
-	public LangToken checkType(int... expectedTypes) {
+	public ExtractToken checkType(int... expectedTypes) {
 		if (!is(expectedTypes))
 			throw new UnexpectedTokenException(this);
 		return this;
 	}
 	
-	public LangToken checkText(String expectedText) {
+	public ExtractToken checkText(String expectedText) {
 		if (!text.equals(expectedText))
 			throw new UnexpectedTokenException(this);
 		return this;

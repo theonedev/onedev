@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.TokenPosition;
 
 @SuppressWarnings("serial")
 public class TextHitPanel extends Panel {

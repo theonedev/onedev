@@ -1,7 +1,7 @@
-package com.pmease.commons.lang.java;
+package com.pmease.commons.lang.extractors.java;
 
-import com.pmease.commons.lang.Symbol;
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.lang.extractors.TokenPosition;
 
 public abstract class JavaSymbol extends Symbol {
 

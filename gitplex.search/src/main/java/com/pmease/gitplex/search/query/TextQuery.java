@@ -22,7 +22,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.hit.QueryHit;

@@ -1,8 +1,8 @@
-package com.pmease.commons.lang.java;
+package com.pmease.commons.lang.extractors.java;
 
 import org.junit.Test;
 
-import com.pmease.commons.lang.ExtractorTest;
+import com.pmease.commons.lang.extractors.java.JavaExtractor;
 
 public class JavaExtractorTest extends ExtractorTest {
 

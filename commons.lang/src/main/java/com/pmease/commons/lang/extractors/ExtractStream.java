@@ -1,4 +1,4 @@
-package com.pmease.commons.lang;
+package com.pmease.commons.lang.extractors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,49 +6,49 @@ import java.util.List;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
-public class LangStream {
+public class ExtractStream {
 
-	private final List<LangToken> tokens;
+	private final List<ExtractToken> tokens;
 	
 	private int pos = -1; // 0-indexed position of current token 
 	
-	public LangStream(List<LangToken> tokens) {
+	public ExtractStream(List<ExtractToken> tokens) {
 		this.tokens = tokens;
-		this.tokens.add(LangToken.EOF);
+		this.tokens.add(ExtractToken.EOF);
 	}
 	
-	public LangStream(Lexer lexer, TokenFilter filter) {
+	public ExtractStream(Lexer lexer, TokenFilter filter) {
 		tokens = new ArrayList<>();
 		Token token = lexer.nextToken();
 		while (token.getType() != Token.EOF) {
 			if (filter.accept(token))
-				tokens.add(new LangToken(token));
+				tokens.add(new ExtractToken(token));
 			token = lexer.nextToken();
 		}
-		tokens.add(LangToken.EOF);
+		tokens.add(ExtractToken.EOF);
 	}
 	
-	public LangToken at(int pos) {
+	public ExtractToken at(int pos) {
 		if (pos >=0 && pos < tokens.size())
 			return tokens.get(pos);
 		else
 			throw new ExtractException("Invalid token position: " + pos);
 	}
 	
-	public LangToken next() {
+	public ExtractToken next() {
 		return at(++pos);
 	}
 	
-	public LangToken lookAhead(int ahead) {
+	public ExtractToken lookAhead(int ahead) {
 		return at(pos+ahead);
 	}
 	
-	public LangToken lookBehind(int behind) {
+	public ExtractToken lookBehind(int behind) {
 		return at(pos-behind);
 	}
 	
-	public LangToken nextType(int type) {
-		LangToken token = next();
+	public ExtractToken nextType(int type) {
+		ExtractToken token = next();
 		while(true) {
 			if (token.is(type))
 				return token;
@@ -56,8 +56,8 @@ public class LangStream {
 		}
 	}
 	
-	public LangToken nextType(int...types) {
-		LangToken token = next();
+	public ExtractToken nextType(int...types) {
+		ExtractToken token = next();
 		while(true) {
 			if (token.is(types))
 				return token;
@@ -78,9 +78,9 @@ public class LangStream {
 	 * @param closeType
 	 * @return
 	 */
-	public LangToken nextClosed(int openType, int closeType) {
+	public ExtractToken nextClosed(int openType, int closeType) {
 		int nestingLevel = 1;
-		LangToken balanced = nextType(openType, closeType);
+		ExtractToken balanced = nextType(openType, closeType);
 		while (true) {
 			if (balanced.is(closeType)) {
 				if (--nestingLevel == 0)
@@ -110,14 +110,14 @@ public class LangStream {
 	 * @return 
 	 * 			list of tokens between startPos and endPos 
 	 */
-	public List<LangToken> between(int startPos, int endPos) {
-		List<LangToken> tokens = new ArrayList<>();
+	public List<ExtractToken> between(int startPos, int endPos) {
+		List<ExtractToken> tokens = new ArrayList<>();
 		for (int i=startPos; i<=endPos; i++) 
 			tokens.add(at(i));
 		return tokens;
 	}
 	
-	public LangToken current() {
+	public ExtractToken current() {
 		return at(pos);
 	}
 	

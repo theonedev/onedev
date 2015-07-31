@@ -1,4 +1,4 @@
-package com.pmease.commons.lang;
+package com.pmease.commons.lang.extractors;
 
 import java.io.Serializable;
 

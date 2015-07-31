@@ -1,4 +1,4 @@
-package com.pmease.commons.lang;
+package com.pmease.commons.lang.extractors.java;
 
 import static org.junit.Assert.fail;
 
@@ -6,9 +6,12 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.pmease.commons.lang.extractors.ExtractStream;
+import com.pmease.commons.lang.extractors.TokenFilter;
+import com.pmease.commons.lang.extractors.UnexpectedTokenException;
 import com.pmease.commons.lang.java.JavaLexer;
 
-public class AnalyzeTokenStreamTest {
+public class ExtractStreamTest {
 
 	@Test
 	public void testBalanced() {
@@ -16,7 +19,7 @@ public class AnalyzeTokenStreamTest {
 				+ "  public void sayHello() {System.out.println(\"hello\");}"
 				+ "}";
 		
-		LangStream tokenStream = new LangStream(
+		ExtractStream tokenStream = new ExtractStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 		
 		tokenStream.nextType(JavaLexer.LBRACE);
@@ -28,7 +31,7 @@ public class AnalyzeTokenStreamTest {
 		String text = "public class MyClass {"
 				+ "  public void sayHello() {System.out.println(\"hello\");}";
 		
-		LangStream tokenStream = new LangStream(
+		ExtractStream tokenStream = new ExtractStream(
 				new JavaLexer(new ANTLRInputStream(text)), TokenFilter.DEFAULT_CHANNEL);
 		tokenStream.nextType(JavaLexer.LBRACE);
 		try {

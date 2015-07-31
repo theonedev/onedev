@@ -41,7 +41,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;

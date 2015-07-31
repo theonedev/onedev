@@ -18,7 +18,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.extractors.Symbol;
 
 @SuppressWarnings("serial")
 abstract class OutlinePanel extends Panel {

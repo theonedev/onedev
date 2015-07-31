@@ -3,7 +3,7 @@ package com.pmease.gitplex.search.hit;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.commons.lang.Symbol;
+import com.pmease.commons.lang.extractors.Symbol;
 
 public class SymbolHit extends QueryHit {
 

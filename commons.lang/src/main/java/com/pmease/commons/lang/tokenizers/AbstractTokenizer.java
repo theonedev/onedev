@@ -11,17 +11,17 @@ import com.pmease.commons.util.StringUtils;
 
 public abstract class AbstractTokenizer<S> implements Tokenizer {	
 	
-	public List<List<Token>> tokenize(List<String> lines) {
-		List<List<Token>> tokenizedLines = new ArrayList<>();
+	public List<List<CmToken>> tokenize(List<String> lines) {
+		List<List<CmToken>> tokenizedLines = new ArrayList<>();
 		S state = startState();
 		for (String line: lines) {
-			List<Token> tokenizedLine = new ArrayList<>();
+			List<CmToken> tokenizedLine = new ArrayList<>();
 			if (line.length() == 0)
 				blankLine(state);
 			StringStream stream = new StringStream(line);
 			while (!stream.eol()) {
 				String style = token(stream, state);
-				tokenizedLine.add(new Token(style, stream.current()));
+				tokenizedLine.add(new CmToken(style, stream.current()));
 				stream.start(stream.pos());
 			}
 			tokenizedLines.add(tokenizedLine);
@@ -29,7 +29,7 @@ public abstract class AbstractTokenizer<S> implements Tokenizer {
 		return tokenizedLines;
 	}
 	
-	public List<List<Token>> tokenize(String text) {
+	public List<List<CmToken>> tokenize(String text) {
 		return tokenize(Splitter.on("\n").splitToList(text));
 	}
 

@@ -5,7 +5,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
-import com.pmease.commons.lang.TokenPosition;
+import com.pmease.commons.lang.extractors.TokenPosition;
 
 public class TextHit extends QueryHit {
 

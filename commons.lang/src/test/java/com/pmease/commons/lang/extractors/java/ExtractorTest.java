@@ -1,4 +1,4 @@
-package com.pmease.commons.lang;
+package com.pmease.commons.lang.extractors.java;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 import com.google.common.io.Resources;
+import com.pmease.commons.lang.extractors.Symbol;
 
 public class ExtractorTest {
 

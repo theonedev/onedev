@@ -4,26 +4,32 @@ import java.io.Serializable;
 
 import com.google.common.base.Objects;
 
-public class Token implements Serializable {
+/**
+ * Represents a CodeMirror token
+ * 
+ * @author robin
+ *
+ */
+public class CmToken implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	private final String style;
+	private final String type;
 	
 	private final String text;
 	
 	private boolean changed;
 	
-	public Token(String style, String text) {
-		this.style = style;
+	public CmToken(String type, String text) {
+		this.type = type;
 		this.text = text;
 	}
 
-	public String style() {
-		return style;
+	public String getType() {
+		return type;
 	}
 
-	public String text() {
+	public String getText() {
 		return text;
 	}
 	
@@ -36,71 +42,71 @@ public class Token implements Serializable {
 	}
 
 	public boolean isComment() {
-		return style.contains("cm-comment");
+		return type.contains("comment");
 	}
 	
 	public boolean isKeyword() {
-		return style.contains("cm-keyword");
+		return type.contains("keyword");
 	}
 	
 	public boolean isNumber() {
-		return style.contains("cm-number");
+		return type.contains("number");
 	}
 	
 	public boolean isIdentifier() {
-		return style.contains("cm-variable");
+		return type.contains("variable");
 	}
 	
 	public boolean isString() {
-		return style.contains("cm-string");
+		return type.contains("string");
 	}
 	
 	public boolean isMeta() {
-		return style.contains("cm-meta");
+		return type.contains("meta");
 	}
 	
 	public boolean isTag() {
-		return style.contains("cm-tag");
+		return type.contains("tag");
 	}
 	
 	public boolean isBracket() {
-		return style.contains("cm-bracket");
+		return type.contains("bracket");
 	}
 	
 	public boolean isOperator() {
-		return style.contains("cm-operator");
+		return type.contains("operator");
 	}
 	
 	public boolean isAtom() {
-		return style.contains("cm-atom");
+		return type.contains("atom");
 	}
 	
 	public boolean isDef() {
-		return style.contains("cm-def");
+		return type.contains("def");
 	}
 	
 	public boolean isQualifier() {
-		return style.contains("cm-qualifier");
+		return type.contains("qualifier");
 	}
 	
 	public boolean isAttribute() {
-		return style.contains("cm-attribute");
+		return type.contains("attribute");
 	}
 	
 	public boolean isProperty() {
-		return style.contains("cm-property");
+		return type.contains("property");
 	}
 	
 	public boolean isBuiltin() {
-		return style.contains("cm-builtin");
+		return type.contains("builtin");
 	}
 	
 	public boolean isLink() {
-		return style.contains("cm-link");
+		return type.contains("link");
 	}
 	
 	public boolean isError() {
-		return style.contains("cm-error");
+		return type.contains("error");
 	}
 	
 	public boolean isNotCommentOrString() {
@@ -108,15 +114,15 @@ public class Token implements Serializable {
 	}
 	
 	public boolean isEof() {
-		return style.length() == 0 && text.length() == 0;
+		return type.length() == 0 && text.length() == 0;
 	}
 	
 	public boolean isEol() {
-		return style.length() == 0 && text.equals("\n");
+		return type.length() == 0 && text.equals("\n");
 	}
 	
 	public boolean isWhitespace() {
-		if (style.length() != 0)
+		if (type.length() != 0)
 			return false;
 		for (char ch: text.toCharArray()) {
 			if (ch != ' ' && ch != '\n' && ch != '\r' && ch != '\t')
@@ -126,21 +132,24 @@ public class Token implements Serializable {
 	}
 	
 	public boolean equals(Object other) {
-		if (!(other instanceof Token))
+		if (!(other instanceof CmToken))
 			return false;
 		if (this == other)
 			return true;
-		Token otherToken = (Token) other;
-		return Objects.equal(style, otherToken.style) && Objects.equal(text, otherToken.text);
+		CmToken otherToken = (CmToken) other;
+		return Objects.equal(type, otherToken.type) && Objects.equal(text, otherToken.text);
 	}
 
 	public int hashCode() {
-		return Objects.hashCode(style, text);
+		return Objects.hashCode(type, text);
 	}
 
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(Token.class).add("text", text).add("style", style).toString();
+		if (changed)
+			return "*" + text + "*";
+		else
+			return text;
 	}
 	
 }

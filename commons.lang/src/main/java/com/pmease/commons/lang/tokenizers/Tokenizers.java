@@ -15,5 +15,5 @@ public interface Tokenizers {
 	 * @return
 	 * 			tokenized lines, or <tt>null</tt> if fileName does not indicate a supported language 
 	 */
-	@Nullable List<List<Token>> tokenize(List<String> lines, String fileName);
+	@Nullable List<List<CmToken>> tokenize(List<String> lines, String fileName);
 }

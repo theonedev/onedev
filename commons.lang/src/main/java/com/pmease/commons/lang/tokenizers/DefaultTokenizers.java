@@ -17,7 +17,7 @@ public class DefaultTokenizers implements Tokenizers {
 	}
 
 	@Override
-	public List<List<Token>> tokenize(List<String> lines, String fileName) {
+	public List<List<CmToken>> tokenize(List<String> lines, String fileName) {
 		for (Tokenizer tokenizer: tokenizers) {
 			if (tokenizer.accept(fileName)) 
 				return tokenizer.tokenize(lines);
