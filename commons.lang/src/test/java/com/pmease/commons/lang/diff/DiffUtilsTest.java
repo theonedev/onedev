@@ -62,6 +62,35 @@ public class DiffUtilsTest extends AppLoaderMocker {
 	}
 
 	@Test
+	public void testAround() {
+		List<String> oldLines = Lists.newArrayList(
+				"public class HelloRobin {",
+				"	public static void main(String[] args) {",
+				"		System.out.println(\"hello robin\");",
+				"	}",
+				"}");
+		List<String> newLines = Lists.newArrayList(
+				"package test;",
+				"public class HelloTim {",
+				"	public static void main(String[] args) {",
+				"		System.out.println(\"hello tim\");",
+				"	}",
+				"}");
+		List<DiffBlock> diffBlocks = DiffUtils.diff(oldLines, "test.java", newLines, "test.java");
+		AroundContext aroundContext = DiffUtils.around(diffBlocks, 2, -1, 2);
+		assertEquals("+public class *HelloTim* {", 
+				aroundContext.getDiffLines().get(0).toString());
+		assertEquals(" 	public static void main(String[] args) {", 
+				aroundContext.getDiffLines().get(1).toString());
+		assertEquals("-		System.out.println(\"hello *robin*\");", 
+				aroundContext.getDiffLines().get(2).toString());
+		assertEquals("+		System.out.println(\"hello *tim*\");", 
+				aroundContext.getDiffLines().get(3).toString());
+		assertEquals(" 	}", 
+				aroundContext.getDiffLines().get(4).toString());
+	}
+	
+	@Test
 	public void testSimpleDiff() {
 		List<String> oldLines = Lists.newArrayList(
 				"public class HelloWorld {",

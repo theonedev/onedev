@@ -6,7 +6,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class AroundContext implements Serializable {
 	
-	private List<DiffBlock> diffs;
+	private List<DiffLine> diffLines;
 	
 	private final int line;
 	
@@ -14,19 +14,19 @@ public class AroundContext implements Serializable {
 	
 	private final boolean belowOmitted;
 	
-	public AroundContext(List<DiffBlock> diffs, int line, boolean aboveOmitted, boolean belowOmitted) {
-		this.diffs = diffs;
+	public AroundContext(List<DiffLine> diffLines, int line, boolean aboveOmitted, boolean belowOmitted) {
+		this.diffLines = diffLines;
 		this.line = line;
 		this.aboveOmitted = aboveOmitted;
 		this.belowOmitted = belowOmitted;
 	}
 
-	public List<DiffBlock> getDiffs() {
-		return diffs;
+	public List<DiffLine> getDiffLines() {
+		return diffLines;
 	}
 
-	public void setDiffs(List<DiffBlock> diffs) {
-		this.diffs = diffs;
+	public void setDiffs(List<DiffLine> diffLines) {
+		this.diffLines = diffLines;
 	}
 
 	public int getLine() {
@@ -39,6 +39,14 @@ public class AroundContext implements Serializable {
 
 	public boolean isBelowOmitted() {
 		return belowOmitted;
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		for (DiffLine diffLine: diffLines)
+			buffer.append(diffLine).append("\n");
+		return buffer.toString();
 	}
 	
 }

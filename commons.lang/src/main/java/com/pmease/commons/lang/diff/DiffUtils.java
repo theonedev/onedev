@@ -171,13 +171,17 @@ public class DiffUtils {
 		return diffBlocks;
 	}
 
-	public static AroundContext around(List<DiffBlock> diffs, int oldLine, int newLine, int contextSize) {
-		List<DiffBlock> contextDiffs = new ArrayList<>();
+	public static AroundContext around(List<DiffBlock> diffBlocks, int oldLine, int newLine, int contextSize) {
+		List<DiffLine> diffLines = new ArrayList<>();
+		for (DiffBlock diffBlock: diffBlocks)
+			diffLines.addAll(diffBlock.toDiffLines());
+		
+		List<DiffLine> contextDiffs = new ArrayList<>();
 		int index = -1;
-		for (int i=0; i<diffs.size(); i++) {
-			DiffBlock diff = diffs.get(i);
-			if (oldLine != -1 && diff.getOperation() != Operation.INSERT && diff.getOldStart() == oldLine
-					|| newLine != -1 && diff.getOperation() != Operation.DELETE && diff.getNewStart() == newLine) {
+		for (int i=0; i<diffLines.size(); i++) {
+			DiffLine diffLine = diffLines.get(i);
+			if (oldLine != -1 && diffLine.getOperation() != Operation.INSERT && diffLine.getOldLineNo() == oldLine
+					|| newLine != -1 && diffLine.getOperation() != Operation.DELETE && diffLine.getNewLineNo() == newLine) {
 				index = i;
 				break;
 			}
@@ -189,13 +193,13 @@ public class DiffUtils {
 		if (start < 0)
 			start = 0;
 		int end = index + contextSize;
-		if (end > diffs.size() - 1)
-			end = diffs.size() - 1;
+		if (end > diffLines.size() - 1)
+			end = diffLines.size() - 1;
 		
 		for (int i=start; i<=end; i++)
-			contextDiffs.add(diffs.get(i));
+			contextDiffs.add(diffLines.get(i));
 		
-		return new AroundContext(contextDiffs, index-start, start>0, end<diffs.size()-1);
+		return new AroundContext(contextDiffs, index-start, start>0, end<diffLines.size()-1);
 	}
 	
 	public static List<SimpleDiffBlock> simpleDiff(List<String> oldLines, List<String> newLines) {

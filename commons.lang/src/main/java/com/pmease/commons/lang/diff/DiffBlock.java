@@ -1,6 +1,7 @@
 package com.pmease.commons.lang.diff;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
@@ -52,6 +53,24 @@ public class DiffBlock implements Serializable {
 			return newStart;
 		else
 			return newStart + lines.size();
+	}
+	
+	public List<DiffLine> toDiffLines() {
+		List<DiffLine> diffLines = new ArrayList<>();
+		int oldLineNo = oldStart;
+		int newLineNo = newStart;
+		for (List<CmToken> line: lines) {
+			diffLines.add(new DiffLine(operation, line, oldLineNo, newLineNo));
+			if (operation == Operation.EQUAL) {
+				oldLineNo++;
+				newLineNo++;
+			} else if (operation == Operation.DELETE) {
+				oldLineNo++;
+			} else {
+				newLineNo++;
+			}
+		}
+		return diffLines;
 	}
 
 	@Override
