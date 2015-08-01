@@ -2,6 +2,7 @@ package com.pmease.commons.loader;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,8 @@ public class AppLoaderModule extends AbstractModule {
 	    
 	    bind(PluginManager.class).to(DefaultPluginManager.class);
 	    bind(ImplementationRegistry.class).to(DefaultImplementationRegistry.class);
+	    
+	    bind(ForkJoinPool.class).toInstance(new ForkJoinPool());
 	    
 	    bind(ExecutorService.class).toProvider(new Provider<ExecutorService>() {
 

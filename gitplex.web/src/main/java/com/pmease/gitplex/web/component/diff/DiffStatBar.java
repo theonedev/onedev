@@ -8,7 +8,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.util.diff.DiffLine;
+import com.pmease.commons.lang.diff.DiffBlock;
+import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -19,44 +20,40 @@ public class DiffStatBar extends Panel {
 
 	private static final int MAX_BLOCKS = 8;
 	
-	private IModel<List<DiffLine>> diffsModel;
+	private final IModel<List<DiffBlock>> diffsModel;
 	
-	private IModel<Integer> additionsModel;
+	private final IModel<Integer> additionsModel = new LoadableDetachableModel<Integer>() {
+
+		@Override
+		protected Integer load() {
+			int additions = 0;
+			for (DiffBlock diff: diffsModel.getObject()) {
+				if (diff.getOperation() == Operation.INSERT)
+					additions++;
+			}
+			return additions;
+		}
+		
+	};
 	
-	private IModel<Integer> deletionsModel;
+	private final IModel<Integer> deletionsModel = new LoadableDetachableModel<Integer>() {
+
+		@Override
+		protected Integer load() {
+			int deletions = 0;
+			for (DiffBlock diff: diffsModel.getObject()) {
+				if (diff.getOperation() == Operation.DELETE)
+					deletions++;
+			}
+			return deletions;
+		}
+		
+	};
 	
-	public DiffStatBar(String id, IModel<List<DiffLine>> diffsModel) {
+	public DiffStatBar(String id, IModel<List<DiffBlock>> diffsModel) {
 		super(id);
 		
 		this.diffsModel = diffsModel;
-
-		additionsModel = new LoadableDetachableModel<Integer>() {
-
-			@Override
-			protected Integer load() {
-				int additions = 0;
-				for (DiffLine diff: DiffStatBar.this.diffsModel.getObject()) {
-					if (diff.getAction() == DiffLine.Action.ADD)
-						additions++;
-				}
-				return additions;
-			}
-			
-		};
-		
-		deletionsModel = new LoadableDetachableModel<Integer>() {
-
-			@Override
-			protected Integer load() {
-				int deletions = 0;
-				for (DiffLine diff: DiffStatBar.this.diffsModel.getObject()) {
-					if (diff.getAction() == DiffLine.Action.DELETE)
-						deletions++;
-				}
-				return deletions;
-			}
-			
-		};
 	}
 
 	@Override

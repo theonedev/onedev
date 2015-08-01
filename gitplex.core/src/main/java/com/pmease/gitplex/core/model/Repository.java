@@ -30,6 +30,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -59,6 +60,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.Submodule;
+import com.pmease.commons.git.exception.NotFileException;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
@@ -128,15 +130,15 @@ public class Repository extends AbstractEntity implements UserBelonging {
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Repository> forks = new ArrayList<>();
     
-    private transient Map<BlobIdent, Blob> blobCache = new HashMap<>();
+    private transient Map<BlobIdent, Blob> blobCache;
     
-    private transient Map<CommitRange, List<Change>> changesCache = new HashMap<>();
+    private transient Map<CommitRange, List<Change>> changesCache;
     
-    private transient Map<String, Commit> commitCache = new HashMap<>();
+    private transient Map<String, Commit> commitCache;
     
-    private transient Map<String, Optional<ObjectId>> objectIdCache = new HashMap<>();
+    private transient Map<String, Optional<ObjectId>> objectIdCache;
     
-    private transient Map<String, Map<String, Ref>> refsCache = new HashMap<>();
+    private transient Map<String, Map<String, Ref>> refsCache;
     
     private transient Collection<String> branches;
     
@@ -382,6 +384,21 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			return getDefaultBranch();
 	}
 	
+	private Blob readBlob(ObjectLoader objectLoader, BlobIdent ident) {
+		long blobSize = objectLoader.getSize();
+		if (blobSize > MAX_READ_BLOB_SIZE) {
+			try (InputStream is = objectLoader.openStream()) {
+				byte[] bytes = new byte[MAX_READ_BLOB_SIZE];
+				is.read(bytes);
+				return new Blob(ident, bytes, blobSize);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return new Blob(ident, objectLoader.getCachedBytes());
+		}
+	}
+	
 	/**
 	 * Read blob content and cache result in repository in case the same blob 
 	 * content is requested again.
@@ -398,38 +415,54 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		Preconditions.checkArgument(ident.revision!=null && ident.path!=null && ident.mode!=null, 
 				"Revision, path and mode of ident param should be specified");
 		
+		if (blobCache == null)
+			blobCache = new HashMap<>();
+		
 		Blob blob = blobCache.get(ident);
 		if (blob == null) {
-			try (FileRepository jgitRepo = openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)) {
-				ObjectId commitId = getObjectId(ident.revision);
-				RevTree revTree = revWalk.parseCommit(commitId).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
-				if (treeWalk != null) {
+			if (ident.id != null) {
+				try (FileRepository jgitRepo = openAsJGitRepo()) {
 					if (ident.isGitLink()) {
 						String url = getSubmodules(ident.revision).get(ident.path);
 						if (url == null)
 							throw new ObjectNotExistException("Unable to find submodule '" + ident.path + "' in .gitmodules");
-						String hash = treeWalk.getObjectId(0).name();
+						String hash = ident.id.name();
 						blob = new Blob(ident, new Submodule(url, hash).toString().getBytes());
+					} else if (ident.isTree()) {
+						throw new NotFileException("Path '" + ident.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
-						long blobSize = objectLoader.getSize();
-						if (blobSize > MAX_READ_BLOB_SIZE) {
-							try (InputStream is = objectLoader.openStream()) {
-								byte[] bytes = new byte[MAX_READ_BLOB_SIZE];
-								is.read(bytes);
-								blob = new Blob(ident, bytes, blobSize);
-							}
-						} else {
-							blob = new Blob(ident, objectLoader.getCachedBytes());
-						}
+						ObjectLoader objectLoader = jgitRepo.open(ident.id, Constants.OBJ_BLOB);
+						blob = readBlob(objectLoader, ident);
 					}
 					blobCache.put(ident, blob);
-				} else {
-					throw new ObjectNotExistException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			} else {
+				try (FileRepository jgitRepo = openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)) {
+					ObjectId commitId = getObjectId(ident.revision);
+					RevTree revTree = revWalk.parseCommit(commitId).getTree();
+					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
+					if (treeWalk != null) {
+						if (ident.isGitLink()) {
+							String url = getSubmodules(ident.revision).get(ident.path);
+							if (url == null)
+								throw new ObjectNotExistException("Unable to find submodule '" + ident.path + "' in .gitmodules");
+							String hash = treeWalk.getObjectId(0).name();
+							blob = new Blob(ident, new Submodule(url, hash).toString().getBytes());
+						} else if (ident.isTree()) {
+							throw new NotFileException("Path '" + ident.path + "' is a tree");
+						} else {
+							ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
+							blob = readBlob(objectLoader, ident);
+						}
+						blobCache.put(ident, blob);
+					} else {
+						throw new ObjectNotExistException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		return blob;
@@ -465,6 +498,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 */
 	@Nullable
 	public ObjectId getObjectId(String revision, boolean mustExist) {
+		if (objectIdCache == null)
+			objectIdCache = new HashMap<>();
+		
 		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
 			try (FileRepository jgitRepo = openAsJGitRepo()) {
@@ -485,10 +521,16 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public void cacheObjectId(String revision, @Nullable ObjectId objectId) {
+		if (objectIdCache == null)
+			objectIdCache = new HashMap<>();
+		
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 	
 	public List<Change> getChanges(String fromCommit, String toCommit) {
+		if (changesCache == null)
+			changesCache = new HashMap<>();
+		
 		CommitRange range = new CommitRange(fromCommit, toCommit);
 		List<Change> changes = changesCache.get(range);
 		if (changes == null) {
@@ -499,6 +541,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public Commit getCommit(String commitHash) {
+		if (commitCache == null)
+			commitCache = new HashMap<>();
+		
 		Commit commit = commitCache.get(commitHash);
 		if (commit == null) {
 			commit = git().showRevision(commitHash);
@@ -508,6 +553,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public void cacheCommits(List<Commit> commits) {
+		if (commitCache == null)
+			commitCache = new HashMap<>();
+		
 		for (Commit commit: commits)
 			commitCache.put(commit.getHash(), commit);
 	}
@@ -605,6 +653,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public Map<String, Ref> getRefs(String prefix) {
+		if (refsCache == null)
+			refsCache = new HashMap<>();
+		
 		Map<String, Ref> cached = refsCache.get(prefix);
 		if (cached == null) {
 			try (FileRepository jgitRepo = openAsJGitRepo()) {

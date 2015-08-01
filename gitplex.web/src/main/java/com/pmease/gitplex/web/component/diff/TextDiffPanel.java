@@ -213,6 +213,7 @@ public class TextDiffPanel extends Panel {
 		
 		head.add(new StickyBehavior());
 		
+		/*
 		head.add(new DiffStatBar("diffStat", new AbstractReadOnlyModel<List<DiffLine>>() {
 
 			@Override
@@ -221,6 +222,7 @@ public class TextDiffPanel extends Panel {
 			}
 			
 		}));
+		*/
 		add(head);
 		
 		head.add(new FileDiffTitle("title", change));
