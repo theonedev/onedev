@@ -1,5 +1,6 @@
 package com.pmease.commons.git;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,9 +10,19 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.errors.CorruptObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.SystemReader;
+import org.eclipse.jgit.util.io.NullOutputStream;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -180,4 +191,17 @@ public class GitUtils {
     	return Git.REFS_HEADS + branch; 
     }    
     
+    public static List<BlobChange> getChanges(Repository repository, ObjectId oldCommitId, ObjectId newCommitId) {
+    	DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
+    	diffFormatter.setRepository(repository);
+    	try {
+			diffFormatter.scan(oldCommitId, newCommitId);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    public static List<BlobDiff> diff(Repository repository, ObjectId oldCommitId, ObjectId newCommitId, 
+    		LineProcessor lineProcessor) {
+    }
 }

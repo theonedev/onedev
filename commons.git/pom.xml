@@ -65,6 +65,11 @@
 			<artifactId>commons.editable</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.lang</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

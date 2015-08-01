@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.git.Change;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
 
@@ -32,7 +33,7 @@ public class RevisionDiffPanel extends Panel {
 		this.newRev = newRev;
 		this.commentSupport = commentSupport;
 		
-		changes = new ArrayList<>();
+		changes = GitUtils.getChanges(oldRev, newRev);
 	}
 
 	@Override
