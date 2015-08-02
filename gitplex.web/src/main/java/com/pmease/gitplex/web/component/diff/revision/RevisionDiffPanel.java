@@ -92,11 +92,8 @@ public class RevisionDiffPanel extends Panel {
 		    		}
 		    	}
 
-		    	System.out.println("**************************");
-		    	
 		    	// Diff calculation can be slow, so we pre-load diffs of each change 
 		    	// concurrently
-		    	long time = System.currentTimeMillis();
 		    	Collection<Callable<Void>> tasks = new ArrayList<>();
 		    	for (final BlobChange change: changes) {
 		    		tasks.add(new Callable<Void>() {
@@ -117,7 +114,6 @@ public class RevisionDiffPanel extends Panel {
 						throw new RuntimeException(e);
 					}
 		    	}
-		    	System.out.println(System.currentTimeMillis()-time);
 		    	
 		    	if (changes.size() == entries.size()) { 
 			    	// some changes should be removed if content is the same after line processing 
@@ -333,7 +329,9 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
-				item.add(new Label("change", change.getPath()).setMarkupId("diff-" + change.getPath()).setOutputMarkupId(true));
+				item.setMarkupId("diff-" + change.getPath());
+				item.setOutputMarkupId(true);
+				item.add(new Label("change", change.getPath()));
 			}
 			
 		});

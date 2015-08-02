@@ -47,3 +47,7 @@
 	margin-right: 4px;
 	margin-top: 2px;
 }
+.revision-diff .changes>.change {
+	padding-top: 48px;
+	margin-top: -48px;
+}
