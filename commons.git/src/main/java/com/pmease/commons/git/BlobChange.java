@@ -6,10 +6,11 @@ import java.util.List;
 
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.AnyObjectId;
 
 import com.pmease.commons.lang.diff.DiffBlock;
-import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
+import com.pmease.commons.lang.diff.DiffUtils;
 
 @SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
@@ -26,13 +27,15 @@ public abstract class BlobChange implements Serializable {
 		changeType = diffEntry.getChangeType();
 		if (changeType != ChangeType.DELETE) {
 			newBlobIdent = new BlobIdent(newCommitHash, diffEntry.getNewPath(), diffEntry.getNewMode().getBits());
-			newBlobIdent.id = diffEntry.getNewId().toObjectId();
+			AnyObjectId id = diffEntry.getNewId().toObjectId();
+			newBlobIdent.id = id!=null?id.name():null;
 		} else {
 			newBlobIdent = new BlobIdent(newCommitHash, null, 0);
 		}
 		if (changeType != ChangeType.ADD) {
 			oldBlobIdent = new BlobIdent(oldCommitHash, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());
-			oldBlobIdent.id = diffEntry.getOldId().toObjectId();
+			AnyObjectId id = diffEntry.getOldId().toObjectId();
+			newBlobIdent.id = id!=null?id.name():null;
 		} else {
 			oldBlobIdent = new BlobIdent(oldCommitHash, null, null);
 		}
@@ -56,8 +59,12 @@ public abstract class BlobChange implements Serializable {
 				Blob newBlob = getBlob(newBlobIdent);
 				if (newBlob.getText() != null) {
 					List<String> newLines = newBlob.getText().getLines(getLineProcessor());
-					List<String> oldLines = new ArrayList<>();
-					diffs = DiffUtils.diff(oldLines, null, newLines, newBlobIdent.getFileName());
+					if (newLines.size() <= DiffUtils.MAX_DIFF_LEN) {
+						List<String> oldLines = new ArrayList<>();
+						diffs = DiffUtils.diff(oldLines, null, newLines, newBlobIdent.getFileName());
+					} else {
+						diffs = new ArrayList<>();
+					}
 				} else {
 					diffs = new ArrayList<>();
 				}
@@ -65,8 +72,12 @@ public abstract class BlobChange implements Serializable {
 				Blob oldBlob = getBlob(oldBlobIdent);
 				if (oldBlob.getText() != null) {
 					List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
-					List<String> newLines = new ArrayList<>();
-					diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, null);
+					if (oldLines.size() <= DiffUtils.MAX_DIFF_LEN) {
+						List<String> newLines = new ArrayList<>();
+						diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, null);
+					} else {
+						diffs = new ArrayList<>();
+					}
 				} else {
 					diffs = new ArrayList<>();
 				}
@@ -78,7 +89,10 @@ public abstract class BlobChange implements Serializable {
 				if (oldBlob.getText() != null && newBlob.getText() != null) {
 					List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
 					List<String> newLines = newBlob.getText().getLines(getLineProcessor());
-					diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, newBlobIdent.getFileName());
+					if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_LEN)
+						diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, newBlobIdent.getFileName());
+					else 
+						diffs = new ArrayList<>();
 				} else {
 					diffs = new ArrayList<>();
 				}

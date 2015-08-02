@@ -22,6 +22,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -33,6 +34,7 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
+import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
@@ -119,10 +121,14 @@ public class RevisionDiffPanel extends Panel {
 			    	for (Iterator<BlobChange> it = changes.iterator(); it.hasNext();) {
 			    		BlobChange change = it.next();
 			    		if (change.getChangeType() == ChangeType.MODIFY 
-			    				&& repoModel.getObject().getBlob(change.getOldBlobIdent()).getText() != null
-			    				&& repoModel.getObject().getBlob(change.getNewBlobIdent()).getText() != null
+			    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
 			    				&& change.getDiffs().isEmpty()) {
-			    			it.remove();
+			    			Blob.Text oldText = repoModel.getObject().getBlob(change.getOldBlobIdent()).getText();
+			    			Blob.Text newText = repoModel.getObject().getBlob(change.getNewBlobIdent()).getText();
+			    			if (oldText != null && newText != null 
+			    					&& (oldText.getLines().size() + newText.getLines().size()) <= DiffUtils.MAX_DIFF_LEN) {
+				    			it.remove();
+			    			}
 			    		}
 			    	}
 			    	return new ChangesAndCount(changes, changes.size());
@@ -150,7 +156,6 @@ public class RevisionDiffPanel extends Panel {
 		this.newRev = newRev;
 		this.repoModel = repoModel;
 		this.commentSupport = commentSupport;
-		
 	}
 
 	@Override
@@ -202,6 +207,16 @@ public class RevisionDiffPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getChanges().size() == getChangesCount());
+			}
+			
+		});
+		
+		add(new WebMarkupContainer("tooManyChanges") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getChanges().size() < getChangesCount());
 			}
 			
 		});
@@ -277,14 +292,31 @@ public class RevisionDiffPanel extends Panel {
 				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
 				
 				WebMarkupContainer pathLink = new WebMarkupContainer("path");
-				pathLink.add(AttributeModifier.replace("href", "#" + change.getPath()));
+				pathLink.add(AttributeModifier.replace("href", "#diff-" + change.getPath()));
 				pathLink.add(new Label("path", change.getPath()));
 				
 				item.add(pathLink);
 				
 				item.add(new Label("additions", change.getAdditions()));
 				item.add(new Label("deletions", change.getDeletions()));
-				item.add(new DiffStatBar("bar", change.getAdditions(), change.getDeletions()));
+				item.add(new DiffStatBar("bar", change.getAdditions(), change.getDeletions(), false));
+			}
+			
+		});
+		
+		add(new ListView<BlobChange>("changes", new AbstractReadOnlyModel<List<BlobChange>>() {
+
+			@Override
+			public List<BlobChange> getObject() {
+				return getChanges();
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<BlobChange> item) {
+				BlobChange change = item.getModelObject();
+				item.add(new Label("change", change.getPath()).setMarkupId("diff-" + change.getPath()).setOutputMarkupId(true));
 			}
 			
 		});

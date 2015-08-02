@@ -1,21 +1,24 @@
 <wicket:panel>
 	<div class="revision-diff">
-		<div class="head">
-			<span class="title pull-left">
-				<i class="fa fa-ext fa-text-diff"></i> Showing <span wicket:id="totalChanged"></span> 
-				<a href="javascript:$(this).closest('.head').next().toggle();">changed files</a>
+		<div class="head clearfix">
+			<div class="title pull-left">
+				<span class="fa fa-ext fa-file-diff"></span> Total
+				<a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();return false;"><span wicket:id="totalChanged"></span> changed files</a>
 				<wicket:enclosure child="totalAdditions">
 				with <strong wicket:id="totalAdditions"></strong>
 				</wicket:enclosure>
 				<wicket:enclosure child="totalDeletions">
 				and <strong wicket:id="totalDeletions"></strong>			
 				</wicket:enclosure>
-			</span>
+			</div>
 			<span wicket:id="diffOptionsTrigger" class="btn btn-xs btn-default pull-right" title="Diff options"><i class="fa fa-gear"></i> <i class="caret"></i></span>
 			<div wicket:id="diffOptions"></div>
 		</div>
+		<div wicket:id="tooManyChanges" class="alert alert-warning">
+			Sorry we can not display the full diff as there are too many changes
+		</div>
 		<ul class="diff-stats">
-			<li wicket:id="diffStats" class="diff-stat">
+			<li wicket:id="diffStats" class="diff-stat clearfix">
 				<i wicket:id="icon" class="icon pull-left"></i>
 				<a wicket:id="path" class="path pull-left"><span wicket:id="path"></span></a>
 				<span wicket:id="bar" class="bar pull-right"></span>
@@ -23,9 +26,10 @@
 				<span wicket:id="additions" class="additions pull-right"></span>
 			</li>
 		</ul>
-		<div wicket:id="tooManyChanges" class="alert alert-warning"></div>
 		<ul class="changes">
-			<li wicket:id="changes" class="change"></li>
+			<li wicket:id="changes" class="change">
+				<div wicket:id="change"></div>
+			</li>
 		</ul>
 	</div>
 </wicket:panel>

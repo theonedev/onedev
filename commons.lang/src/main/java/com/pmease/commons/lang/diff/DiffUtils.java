@@ -20,7 +20,7 @@ import com.pmease.commons.loader.AppLoader;
 
 public class DiffUtils {
 
-	private static final int MAX_DIFF_LEN = 65535;
+	public static final int MAX_DIFF_LEN = 65535;
 	
 	private static final long TOKEN_CHANGE_CALC_TIMEOUT = 1000;
 	

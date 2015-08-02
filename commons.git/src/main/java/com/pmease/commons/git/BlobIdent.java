@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Objects;
@@ -26,7 +25,7 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	public Integer mode;
 	
 	@Nullable
-	public AnyObjectId id;
+	public String id;
 	
 	public BlobIdent() {
 	}

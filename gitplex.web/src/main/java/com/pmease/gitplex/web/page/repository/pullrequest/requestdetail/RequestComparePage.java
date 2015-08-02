@@ -92,20 +92,14 @@ public class RequestComparePage extends RequestDetailPage {
 			
 			for (int i=0; i<request.getSortedUpdates().size(); i++) {
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
-				for (int j=0; j<update.getCommits().size(); j++) {
-					Commit commit = update.getCommits().get(j);
-					if (j != update.getCommits().size()-1) {
-						name = null; 
-					} else {
-						int updateNo = i+1;
-						if (i == request.getSortedUpdates().size()-1)
-							name = "Head of Latest Update";
-						else
-							name = "Head of Update #" + updateNo;
-					}
-					description = new CommitDescription(name, commit.getSubject());
-					choices.put(commit.getHash(), description);
-				}
+				Commit commit = update.getHeadCommit();
+				int updateNo = i+1;
+				if (i == request.getSortedUpdates().size()-1)
+					name = "Head of Latest Update";
+				else
+					name = "Head of Update #" + updateNo;
+				description = new CommitDescription(name, commit.getSubject());
+				choices.put(commit.getHash(), description);
 			}
 
 			String targetHead = request.getTarget().getHead();

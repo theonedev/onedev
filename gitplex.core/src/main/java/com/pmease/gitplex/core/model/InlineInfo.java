@@ -21,7 +21,8 @@ public class InlineInfo implements Serializable {
     @AttributeOverrides({
         @AttributeOverride(name="revision", column=@Column(name="G_BLOB_REV")),
         @AttributeOverride(name="path", column=@Column(name="G_BLOB_PATH")),
-        @AttributeOverride(name="mode", column=@Column(name="G_BLOB_MODE"))
+        @AttributeOverride(name="mode", column=@Column(name="G_BLOB_MODE")),
+        @AttributeOverride(name="id", column=@Column(name="G_BLOB_ID"))
     })
  	private BlobIdent blobIdent;
 
@@ -29,7 +30,8 @@ public class InlineInfo implements Serializable {
     @AttributeOverrides({
         @AttributeOverride(name="revision", column=@Column(name="G_COMPARE_REV") ),
         @AttributeOverride(name="path", column=@Column(name="G_COMPARE_PATH")),
-        @AttributeOverride(name="mode", column=@Column(name="G_COMPARE_MODE"))
+        @AttributeOverride(name="mode", column=@Column(name="G_COMPARE_MODE")),
+        @AttributeOverride(name="id", column=@Column(name="G_COMPARE_ID"))
     })
 	private BlobIdent compareWith;
 	

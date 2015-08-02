@@ -22,11 +22,14 @@ public class DiffStatBar extends Panel {
 	
 	private final int deletions;
 	
-	public DiffStatBar(String id, int additions, int deletions) {
+	private final boolean showTooltip;
+	
+	public DiffStatBar(String id, int additions, int deletions, boolean showTooltip) {
 		super(id);
 
 		this.additions = additions;
 		this.deletions = deletions;
+		this.showTooltip = showTooltip;
 	}
 
 	@Override
@@ -74,15 +77,17 @@ public class DiffStatBar extends Panel {
 			}
 		}).setEscapeModelStrings(false));
 		
-		TooltipConfig config = new TooltipConfig().withPlacement(Placement.right);
-		add(new TooltipBehavior(new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return additions + " additions & " + deletions + " deletions";			
-			}
-			
-		}, config));
+		if (showTooltip) {
+			TooltipConfig config = new TooltipConfig().withPlacement(Placement.right);
+			add(new TooltipBehavior(new LoadableDetachableModel<String>() {
+	
+				@Override
+				protected String load() {
+					return additions + " additions & " + deletions + " deletions";			
+				}
+				
+			}, config));
+		}
 	}
 	
 	private int getAdditionBlocks() {

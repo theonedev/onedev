@@ -438,12 +438,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 						String url = getSubmodules(ident.revision).get(ident.path);
 						if (url == null)
 							throw new ObjectNotExistException("Unable to find submodule '" + ident.path + "' in .gitmodules");
-						String hash = ident.id.name();
-						blob = new Blob(ident, new Submodule(url, hash).toString().getBytes());
+						blob = new Blob(ident, new Submodule(url, ident.id).toString().getBytes());
 					} else if (ident.isTree()) {
 						throw new NotFileException("Path '" + ident.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = jgitRepo.open(ident.id, Constants.OBJ_BLOB);
+						ObjectLoader objectLoader = jgitRepo.open(ObjectId.fromString(ident.id), Constants.OBJ_BLOB);
 						blob = readBlob(objectLoader, ident);
 					}
 					getBlobCache().put(ident, blob);

@@ -115,7 +115,7 @@ public class Blob {
 		public List<String> getLines(LineProcessor processor) {
 			List<String> processedLines = new ArrayList<>();
 			for (String line: getLines())
-				lines.add(processor.process(line));
+				processedLines.add(processor.process(line));
 			return processedLines;
 		}
 		

@@ -1,35 +1,14 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.PullRequestVerification;
-import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.commitlink.CommitLink;
-import com.pmease.gitplex.web.component.commitmessage.OldCommitMessagePanel;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
-import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
 public class UpdateActivityPanel extends Panel {
@@ -59,6 +38,7 @@ public class UpdateActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		/*
 		add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {
 
 			@Override
@@ -164,6 +144,7 @@ public class UpdateActivityPanel extends Panel {
 			}
 			
 		});
+		*/
 	}
 
 	@Override
