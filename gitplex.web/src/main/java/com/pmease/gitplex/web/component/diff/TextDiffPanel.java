@@ -54,14 +54,9 @@ import com.pmease.commons.util.diff.DiffHunk;
 import com.pmease.commons.util.diff.DiffLine;
 import com.pmease.commons.util.diff.DiffUtils;
 import com.pmease.commons.util.diff.Token;
-import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.behavior.menu.CheckItem;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuItem;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineComment;
@@ -92,8 +87,6 @@ public class TextDiffPanel extends Panel {
 	private final InlineCommentSupport commentSupport;
 	
 	private final IModel<Boolean> allowToAddCommentModel;
-	
-	private LineProcessOption lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
 	private boolean showComments = true;
 	
@@ -189,20 +182,8 @@ public class TextDiffPanel extends Panel {
 			
 		};
 		
-		onLineProcessorChanged();
 	}
 	
-	private void onLineProcessorChanged() {
-		diffs = DiffUtils.diff(readOldText().getLines(lineProcessor), readNewText().getLines(lineProcessor), new WordSplitter());
-		
-		if (commentSupport != null) {
-			hunks = DiffUtils.hunksOf(diffs, commentSupport.getComments(change.getOldBlobIdent()).keySet(), 
-					commentSupport.getComments(change.getNewBlobIdent()).keySet(), CONTEXT_SIZE);
-		} else {
-			hunks = DiffUtils.hunksOf(diffs, CONTEXT_SIZE);
-		}
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -264,45 +245,6 @@ public class TextDiffPanel extends Panel {
 			}
 			
 		}.add(AttributeAppender.append("title", "View full file at " + change.getNewBlobIdent().revision)));
-
-		MenuPanel diffOptionMenuPanel = new MenuPanel("diffOptions") {
-
-			@Override
-			protected List<MenuItem> getMenuItems() {
-				List<MenuItem> menuItems = new ArrayList<>();
-				
-				for (final LineProcessOption option: LineProcessOption.values()) {
-					menuItems.add(new CheckItem() {
-
-						@Override
-						protected String getLabel() {
-							return option.toString();
-						}
-
-						@Override
-						protected boolean isTicked() {
-							return lineProcessor == option;
-						}
-
-						@Override
-						protected void onClick(AjaxRequestTarget target) {
-							lineProcessor = option;
-							onLineProcessorChanged();
-							hide(target);
-							target.add(TextDiffPanel.this);
-						}
-						
-					});
-				}
-
-				return menuItems;
-			}
-			
-		};
-		
-		head.add(diffOptionMenuPanel);
-		
-		head.add(new WebMarkupContainer("diffOptionsTrigger").add(new MenuBehavior(diffOptionMenuPanel)));
 
 		Form<?> form = new Form<Void>("addComment");
 		form.setOutputMarkupId(true);

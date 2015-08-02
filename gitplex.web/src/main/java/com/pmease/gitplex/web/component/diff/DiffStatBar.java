@@ -1,15 +1,10 @@
 package com.pmease.gitplex.web.component.diff;
 
-import java.util.List;
-
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.lang.diff.DiffBlock;
-import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -20,53 +15,20 @@ public class DiffStatBar extends Panel {
 
 	private static final int MAX_BLOCKS = 8;
 	
-	private final IModel<List<DiffBlock>> diffsModel;
+	private final int additions;
 	
-	private final IModel<Integer> additionsModel = new LoadableDetachableModel<Integer>() {
-
-		@Override
-		protected Integer load() {
-			int additions = 0;
-			for (DiffBlock diff: diffsModel.getObject()) {
-				if (diff.getOperation() == Operation.INSERT)
-					additions++;
-			}
-			return additions;
-		}
-		
-	};
+	private final int deletions;
 	
-	private final IModel<Integer> deletionsModel = new LoadableDetachableModel<Integer>() {
-
-		@Override
-		protected Integer load() {
-			int deletions = 0;
-			for (DiffBlock diff: diffsModel.getObject()) {
-				if (diff.getOperation() == Operation.DELETE)
-					deletions++;
-			}
-			return deletions;
-		}
-		
-	};
-	
-	public DiffStatBar(String id, IModel<List<DiffBlock>> diffsModel) {
+	public DiffStatBar(String id, int additions, int deletions) {
 		super(id);
-		
-		this.diffsModel = diffsModel;
+
+		this.additions = additions;
+		this.deletions = deletions;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new Label("totals", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return String.valueOf(additionsModel.getObject()+deletionsModel.getObject());
-			}
-		}));
 		
 		add(new Label("additions", new AbstractReadOnlyModel<String>() {
 
@@ -114,40 +76,32 @@ public class DiffStatBar extends Panel {
 
 			@Override
 			protected String load() {
-				return additionsModel.getObject() + " additions & " + deletionsModel.getObject() + " deletions";			
+				return additions + " additions & " + deletions + " deletions";			
 			}
 			
 		}, config));
 	}
 	
 	private int getAdditionBlocks() {
-		int totals = additionsModel.getObject() + deletionsModel.getObject();
+		int totals = additions + deletions;
 		
 		if (totals == 0)
 			return 0;
 		else if (totals <= MAX_BLOCKS)
-			return additionsModel.getObject();
+			return additions;
 		else 
-			return Math.round(Float.valueOf(additionsModel.getObject()) / totals * MAX_BLOCKS);
+			return Math.round(Float.valueOf(additions) / totals * MAX_BLOCKS);
 	}
 	
 	private int getDeletionBlocks() {
-		int totals = additionsModel.getObject() + deletionsModel.getObject();
+		int totals = additions + deletions;
 		
 		if (totals == 0) 
 			return 0;
 		else if (totals <= MAX_BLOCKS)
-			return deletionsModel.getObject();
+			return deletions;
 		else
 			return MAX_BLOCKS - getAdditionBlocks();
 	}
 
-	@Override
-	protected void onDetach() {
-		diffsModel.detach();
-		additionsModel.detach();
-		deletionsModel.detach();
-		super.onDetach();
-	}
-	
 }

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff;
+package com.pmease.commons.git;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,12 +7,8 @@ import java.util.List;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
-import com.pmease.commons.git.Blob;
-import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffUtils;
-import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
@@ -56,7 +52,7 @@ public abstract class BlobChange implements Serializable {
 	public List<DiffBlock> getDiffs() {
 		if (diffs == null) {
 			if (changeType == ChangeType.ADD) {
-				Blob newBlob = getRepository().getBlob(newBlobIdent);
+				Blob newBlob = getBlob(newBlobIdent);
 				if (newBlob.getText() != null) {
 					List<String> newLines = newBlob.getText().getLines(getLineProcessor());
 					List<String> oldLines = new ArrayList<>();
@@ -65,7 +61,7 @@ public abstract class BlobChange implements Serializable {
 					diffs = new ArrayList<>();
 				}
 			} else if (changeType == ChangeType.DELETE) {
-				Blob oldBlob = getRepository().getBlob(oldBlobIdent);
+				Blob oldBlob = getBlob(oldBlobIdent);
 				if (oldBlob.getText() != null) {
 					List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
 					List<String> newLines = new ArrayList<>();
@@ -73,9 +69,11 @@ public abstract class BlobChange implements Serializable {
 				} else {
 					diffs = new ArrayList<>();
 				}
+			} else if (oldBlobIdent.id != null && oldBlobIdent.id.equals(newBlobIdent.id)) {
+				diffs = new ArrayList<>();
 			} else {
-				Blob oldBlob = getRepository().getBlob(oldBlobIdent);
-				Blob newBlob = getRepository().getBlob(newBlobIdent);
+				Blob oldBlob = getBlob(oldBlobIdent);
+				Blob newBlob = getBlob(newBlobIdent);
 				if (oldBlob.getText() != null && newBlob.getText() != null) {
 					List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
 					List<String> newLines = newBlob.getText().getLines(getLineProcessor());
@@ -92,7 +90,7 @@ public abstract class BlobChange implements Serializable {
 		this.diffs = diffs;
 	}
 	
-	protected abstract Repository getRepository();
+	protected abstract Blob getBlob(BlobIdent blobIdent);
 	
 	protected abstract LineProcessor getLineProcessor();
 	

@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import javax.annotation.Nullable;
@@ -399,9 +400,23 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 	
+	private Map<BlobIdent, Blob> getBlobCache() {
+		if (blobCache == null) {
+			synchronized(this) {
+				if (blobCache == null)
+					blobCache = new ConcurrentHashMap<>();
+			}
+		}
+		return blobCache;
+	}
+	
 	/**
 	 * Read blob content and cache result in repository in case the same blob 
-	 * content is requested again.
+	 * content is requested again. 
+	 * 
+	 * We made this method thread-safe as we are using ForkJoinPool to calculate 
+	 * diffs of multiple blob changes concurrently, and this method will be 
+	 * accessed concurrently in that special case.
 	 * 
 	 * @param ident
 	 * 			ident of the blob
@@ -415,10 +430,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		Preconditions.checkArgument(ident.revision!=null && ident.path!=null && ident.mode!=null, 
 				"Revision, path and mode of ident param should be specified");
 		
-		if (blobCache == null)
-			blobCache = new HashMap<>();
-		
-		Blob blob = blobCache.get(ident);
+		Blob blob = getBlobCache().get(ident);
 		if (blob == null) {
 			if (ident.id != null) {
 				try (FileRepository jgitRepo = openAsJGitRepo()) {
@@ -434,7 +446,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 						ObjectLoader objectLoader = jgitRepo.open(ident.id, Constants.OBJ_BLOB);
 						blob = readBlob(objectLoader, ident);
 					}
-					blobCache.put(ident, blob);
+					getBlobCache().put(ident, blob);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -456,7 +468,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 							ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 							blob = readBlob(objectLoader, ident);
 						}
-						blobCache.put(ident, blob);
+						getBlobCache().put(ident, blob);
 					} else {
 						throw new ObjectNotExistException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
 					}

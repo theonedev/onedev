@@ -1,2 +1,27 @@
 <wicket:panel>
+	<div class="revision-diff">
+		<div class="head">
+			<span class="title pull-left">
+				Showing <span wicket:id="totalChanged"></span> 
+				<a href="javascript:$(this).next().toggle();">changed files</a>
+				with <strong wicket:id="totalAdditions"></strong>
+				and <strong wicket:id="totalDeletions"></strong>			
+			</span>
+			<span wicket:id="diffOptionsTrigger" class="btn btn-xs btn-default pull-right" title="Diff options"><i class="fa fa-gear"></i> <i class="caret"></i></span>
+			<div wicket:id="diffOptions"></div>
+		</div>
+		<ul class="diff-stats">
+			<li wicket:id="diffStat" class="diff-stat">
+				<i wicket:id="icon" class="icon pull-left"></i>
+				<a wicket:id="path" class="path pull-left"></a>
+				<span wicket:id="bar" class="bar pull-right"></span>
+				<span wicket:id="deletions" class="deletions pull-right"></span>
+				<span wicket:id="additions" class="additions pull-right"></span>
+			</li>
+		</ul>
+		<div wicket:id="tooManyChanges" class="alert alert-warning"></div>
+		<ul class="changes">
+			<li wicket:id="changes" class="change"></li>
+		</ul>
+	</div>
 </wicket:panel>
