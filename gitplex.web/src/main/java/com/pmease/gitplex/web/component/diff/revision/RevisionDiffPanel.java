@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff;
+package com.pmease.gitplex.web.component.diff.revision;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,11 +8,20 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -24,8 +33,6 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
-import com.pmease.commons.util.diff.DiffUtils;
-import com.pmease.commons.util.diff.WordSplitter;
 import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
@@ -33,6 +40,7 @@ import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 
 @SuppressWarnings("serial")
 public class RevisionDiffPanel extends Panel {
@@ -49,7 +57,7 @@ public class RevisionDiffPanel extends Panel {
 	
 	private LineProcessOption lineProcessor = LineProcessOption.IGNORE_NOTHING;
 
-	private IModel<ChangesAndCount> changesModel = new LoadableDetachableModel<ChangesAndCount>() {
+	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
 		@Override
 		protected ChangesAndCount load() {
@@ -149,6 +157,55 @@ public class RevisionDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new Label("totalChanged", new AbstractReadOnlyModel<Integer>() {
+
+			@Override
+			public Integer getObject() {
+				return getChangesCount();
+			}
+			
+		}));
+		
+		add(new Label("totalAdditions", new LoadableDetachableModel<Integer>() {
+
+			@Override
+			protected Integer load() {
+				int totalAdditions = 0;
+				for (BlobChange change: getChanges())
+					totalAdditions += change.getAdditions();
+				return totalAdditions;
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getChanges().size() == getChangesCount());
+			}
+			
+		});
+		
+		add(new Label("totalDeletions", new LoadableDetachableModel<Integer>() {
+
+			@Override
+			protected Integer load() {
+				int totalDeletions = 0;
+				for (BlobChange change: getChanges())
+					totalDeletions += change.getDeletions();
+				return totalDeletions;
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getChanges().size() == getChangesCount());
+			}
+			
+		});
+		
 		MenuPanel diffOptionMenuPanel = new MenuPanel("diffOptions") {
 
 			@Override
@@ -185,15 +242,74 @@ public class RevisionDiffPanel extends Panel {
 		
 		add(diffOptionMenuPanel);
 		
-		add(new WebMarkupContainer("diffOptionsTrigger").add(new MenuBehavior(diffOptionMenuPanel)));
+		add(new WebMarkupContainer("diffOptionsTrigger") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getChanges().size() == getChangesCount());
+			}
+			
+		}.add(new MenuBehavior(diffOptionMenuPanel)));
+		
+		add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
+
+			@Override
+			public List<BlobChange> getObject() {
+				return getChanges();
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<BlobChange> item) {
+				BlobChange change = item.getModelObject();
+				String iconClass;
+				if (change.getChangeType() == ChangeType.ADD)
+					iconClass = " fa-ext fa-diff-added";
+				else if (change.getChangeType() == ChangeType.DELETE)
+					iconClass = " fa-ext fa-diff-removed";
+				else if (change.getChangeType() == ChangeType.MODIFY)
+					iconClass = " fa-ext fa-diff-modified";
+				else
+					iconClass = " fa-ext fa-diff-renamed";
+				
+				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
+				
+				WebMarkupContainer pathLink = new WebMarkupContainer("path");
+				pathLink.add(AttributeModifier.replace("href", "#" + change.getPath()));
+				pathLink.add(new Label("path", change.getPath()));
+				
+				item.add(pathLink);
+				
+				item.add(new Label("additions", change.getAdditions()));
+				item.add(new Label("deletions", change.getDeletions()));
+				item.add(new DiffStatBar("bar", change.getAdditions(), change.getDeletions()));
+			}
+			
+		});
 	}
 
+	private List<BlobChange> getChanges() {
+		return changesAndCountModel.getObject().getChanges();
+	}
+	
+	private int getChangesCount() {
+		return changesAndCountModel.getObject().getCount();
+	}
+	
 	@Override
 	protected void onDetach() {
-		changesModel.detach();
+		changesAndCountModel.detach();
 		repoModel.detach();
 		
 		super.onDetach();
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
 	}
 
 	private static class ChangesAndCount {

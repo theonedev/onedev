@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff;
+package com.pmease.gitplex.web.component.diff.difftitle;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;

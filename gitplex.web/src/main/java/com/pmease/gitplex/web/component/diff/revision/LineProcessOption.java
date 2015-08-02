@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff;
+package com.pmease.gitplex.web.component.diff.revision;
 
 import java.util.regex.Pattern;
 

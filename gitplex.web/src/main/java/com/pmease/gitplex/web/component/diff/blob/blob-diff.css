@@ -1,0 +1,11 @@
+.binary-file {
+	border: 1px solid #DDD;
+}
+.binary-file>.head {
+	padding: 8px; 
+	font-size: 16px; 
+	border-bottom: 1px solid #DDD;
+}
+.binary-file>.body {
+	padding: 8px;
+}

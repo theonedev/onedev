@@ -9,6 +9,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 
 @SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
@@ -85,9 +86,31 @@ public abstract class BlobChange implements Serializable {
 		}
 		return diffs;
 	}
+	
+	public int getAdditions() {
+		int additions = 0;
+		for (DiffBlock diff: getDiffs()) {
+			if (diff.getOperation() == Operation.INSERT)
+				additions += diff.getLines().size();
+		}
+		return additions;
+	}
 
+	public int getDeletions() {
+		int deletions = 0;
+		for (DiffBlock diff: getDiffs()) {
+			if (diff.getOperation() == Operation.DELETE)
+				deletions += diff.getLines().size();
+		}
+		return deletions;
+	}
+	
 	public void setDiffs(List<DiffBlock> diffs) {
 		this.diffs = diffs;
+	}
+	
+	public String getPath() {
+		return newBlobIdent.path != null? newBlobIdent.path: oldBlobIdent.path;
 	}
 	
 	protected abstract Blob getBlob(BlobIdent blobIdent);

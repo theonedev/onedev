@@ -1,9 +1,12 @@
-package com.pmease.gitplex.web.component.diff;
+package com.pmease.gitplex.web.component.diff.diffstat;
 
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 
@@ -102,6 +105,12 @@ public class DiffStatBar extends Panel {
 			return deletions;
 		else
 			return MAX_BLOCKS - getAdditionBlocks();
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(DiffStatBar.class, "diff-stat.css")));
 	}
 
 }

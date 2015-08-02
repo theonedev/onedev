@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff;
+package com.pmease.gitplex.web.component.diff.text;
 
 import static com.pmease.commons.util.diff.DiffLine.Action.ADD;
 import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
@@ -25,7 +25,9 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -41,6 +43,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.util.time.Duration;
 
@@ -69,6 +73,7 @@ import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.diff.difftitle.FileDiffTitle;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -259,7 +264,7 @@ public class TextDiffPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				input.setModelObject("");
-				target.appendJavaScript(String.format("gitplex.comments.cancelAdd(%d);", index));
+				target.appendJavaScript(String.format("gitplex.textdiff.cancelAddComment(%d);", index));
 			}
 			
 		}.add(new DirtyIgnoreBehavior()));
@@ -304,7 +309,7 @@ public class TextDiffPanel extends Panel {
 				String prependScript = String.format("$('#comments-placeholder').append('<table id=\"%s\"></table>')", 
 						commentsRow.getMarkupId());
 				target.prependJavaScript(prependScript);
-				target.appendJavaScript(String.format("gitplex.comments.afterAdd(%d);", index));
+				target.appendJavaScript(String.format("gitplex.textdiff.afterAddComment(%d);", index));
 				
 				if (commentsView.size() == 1)
 					target.add(head);
@@ -333,7 +338,7 @@ public class TextDiffPanel extends Panel {
 				if (!showComments)
 					showComments(target);
 				
-				target.appendJavaScript(String.format("gitplex.comments.beforeAdd(%d);", index));
+				target.appendJavaScript(String.format("gitplex.textdiff.beforeAddComment(%d);", index));
 			}
 			
 		});
@@ -547,7 +552,7 @@ public class TextDiffPanel extends Panel {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					commentsView.remove(this);
 					commentsModel.getObject().get(index).remove(commentRemoved.getComment());
-					commentRemoved.getTarget().appendJavaScript(String.format("gitplex.comments.afterRemove(%d);", index));
+					commentRemoved.getTarget().appendJavaScript(String.format("gitplex.textdiff.afterRemoveComment(%d);", index));
 				} 
 			}
 			
@@ -613,7 +618,12 @@ public class TextDiffPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.comments.position();"));
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
+		
+		response.render(OnDomReadyHeaderItem.forScript("gitplex.textdiff.placeComments();"));
 		
 		// only auto-scroll this panel once after it is created; otherwise page refreshing 
 		// caused by actions such as integrate/discard on request compare page will also 
@@ -709,4 +719,5 @@ public class TextDiffPanel extends Panel {
 			}
 		}
 	}	
+	
 }

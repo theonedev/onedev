@@ -1,9 +1,12 @@
-package com.pmease.gitplex.web.component.diff;
+package com.pmease.gitplex.web.component.diff.blob;
 
 import org.apache.tika.mime.MediaType;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.Blob;
@@ -12,6 +15,8 @@ import com.pmease.commons.util.ContentDetector;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.diff.difftitle.FileDiffTitle;
+import com.pmease.gitplex.web.component.diff.text.TextDiffPanel;
 import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
 
@@ -114,6 +119,12 @@ public class BlobDiffPanel extends Panel {
 		
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(BlobDiffPanel.class, "blob-diff.css")));
+	}
+
 	protected void onDetach() {
 		repoModel.detach();
 		
