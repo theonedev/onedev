@@ -118,20 +118,12 @@ public abstract class CommonPage extends WebPage {
 	
 	public void pushState(AjaxRequestTarget target, String url, Serializable data) {
 		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
-		target.prependJavaScript(String.format(""
-				+ "var state = {data:'%s'};"
-				+ "pmease.commons.history.current = {state: state, url: '%s'};"
-				+ "history.pushState(state, '', '%s');", 
-				encodedData, url, url));
+		target.prependJavaScript(String.format("pmease.commons.history.pushState('%s', '%s');", encodedData, url));
 	}
 	
 	public void replaceState(AjaxRequestTarget target, String url, Serializable data) {
 		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
-		target.prependJavaScript(String.format(""
-				+ "var state = {data:'%s'};"
-				+ "pmease.commons.history.current = {state: state, url: '%s'};"
-				+ "history.replaceState(state, '', '%s');", 
-				encodedData, url, url));
+		target.prependJavaScript(String.format("pmease.commons.history.replaceState('%s', '%s');", encodedData, url));
 	}
 	
 	@Override

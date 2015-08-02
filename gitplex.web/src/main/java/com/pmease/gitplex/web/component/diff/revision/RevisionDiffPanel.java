@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -90,19 +92,13 @@ public class RevisionDiffPanel extends Panel {
 		    		}
 		    	}
 
+		    	System.out.println("**************************");
+		    	
 		    	// Diff calculation can be slow, so we pre-load diffs of each change 
 		    	// concurrently
+		    	long time = System.currentTimeMillis();
 		    	Collection<Callable<Void>> tasks = new ArrayList<>();
 		    	for (final BlobChange change: changes) {
-		    		// to avoid race conditions during concurrent diff calculation, we
-		    		// pre-populate blob data in repository 
-		    		/*
-		    		if (change.getOldBlobIdent().path != null)
-		    			repoModel.getObject().getBlob(change.getOldBlobIdent());
-		    		if (change.getNewBlobIdent().path != null)
-		    			repoModel.getObject().getBlob(change.getNewBlobIdent());
-		    		*/
-		    		
 		    		tasks.add(new Callable<Void>() {
 
 						@Override
@@ -113,8 +109,15 @@ public class RevisionDiffPanel extends Panel {
 		    			
 		    		});
 		    	}
-		    	
-		    	GitPlex.getInstance(ForkJoinPool.class).invokeAll(tasks);
+		    	for (Future<Void> future: GitPlex.getInstance(ForkJoinPool.class).invokeAll(tasks)) {
+		    		try {
+		    			// call get in order to throw exception if there is any during task execution
+						future.get();
+					} catch (InterruptedException|ExecutionException e) {
+						throw new RuntimeException(e);
+					}
+		    	}
+		    	System.out.println(System.currentTimeMillis()-time);
 		    	
 		    	if (changes.size() == entries.size()) { 
 			    	// some changes should be removed if content is the same after line processing 
@@ -171,14 +174,14 @@ public class RevisionDiffPanel extends Panel {
 			
 		}));
 		
-		add(new Label("totalAdditions", new LoadableDetachableModel<Integer>() {
+		add(new Label("totalAdditions", new LoadableDetachableModel<String>() {
 
 			@Override
-			protected Integer load() {
+			protected String load() {
 				int totalAdditions = 0;
 				for (BlobChange change: getChanges())
 					totalAdditions += change.getAdditions();
-				return totalAdditions;
+				return totalAdditions + " additions";
 			}
 			
 		}) {
@@ -191,14 +194,14 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		add(new Label("totalDeletions", new LoadableDetachableModel<Integer>() {
+		add(new Label("totalDeletions", new LoadableDetachableModel<String>() {
 
 			@Override
-			protected Integer load() {
+			protected String load() {
 				int totalDeletions = 0;
 				for (BlobChange change: getChanges())
 					totalDeletions += change.getDeletions();
-				return totalDeletions;
+				return totalDeletions + " deletions";
 			}
 			
 		}) {
@@ -297,9 +300,23 @@ public class RevisionDiffPanel extends Panel {
 				
 				item.add(pathLink);
 				
-				item.add(new Label("additions", change.getAdditions()));
-				item.add(new Label("deletions", change.getDeletions()));
-				item.add(new DiffStatBar("bar", change.getAdditions(), change.getDeletions(), false));
+				item.add(new Label("additions", "+" + change.getAdditions()));
+				item.add(new Label("deletions", "-" + change.getDeletions()));
+				
+				boolean barVisible;
+				if (change.getChangeType() == ChangeType.ADD) {
+					Blob.Text text = repoModel.getObject().getBlob(change.getNewBlobIdent()).getText();
+					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_LEN);
+				} else if (change.getChangeType() == ChangeType.DELETE) {
+					Blob.Text text = repoModel.getObject().getBlob(change.getOldBlobIdent()).getText();
+					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_LEN);
+				} else {
+					Blob.Text oldText = repoModel.getObject().getBlob(change.getOldBlobIdent()).getText();
+					Blob.Text newText = repoModel.getObject().getBlob(change.getNewBlobIdent()).getText();
+					barVisible = (oldText != null && newText != null 
+							&& oldText.getLines().size()+newText.getLines().size() <= DiffUtils.MAX_DIFF_LEN);
+				}
+				item.add(new DiffStatBar("bar", change.getAdditions(), change.getDeletions(), false).setVisible(barVisible));
 			}
 			
 		});

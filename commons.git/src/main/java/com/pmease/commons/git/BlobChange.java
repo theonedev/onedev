@@ -35,7 +35,7 @@ public abstract class BlobChange implements Serializable {
 		if (changeType != ChangeType.ADD) {
 			oldBlobIdent = new BlobIdent(oldCommitHash, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());
 			AnyObjectId id = diffEntry.getOldId().toObjectId();
-			newBlobIdent.id = id!=null?id.name():null;
+			oldBlobIdent.id = id!=null?id.name():null;
 		} else {
 			oldBlobIdent = new BlobIdent(oldCommitHash, null, null);
 		}
@@ -55,47 +55,51 @@ public abstract class BlobChange implements Serializable {
 
 	public List<DiffBlock> getDiffs() {
 		if (diffs == null) {
-			if (changeType == ChangeType.ADD) {
-				Blob newBlob = getBlob(newBlobIdent);
-				if (newBlob.getText() != null) {
-					List<String> newLines = newBlob.getText().getLines(getLineProcessor());
-					if (newLines.size() <= DiffUtils.MAX_DIFF_LEN) {
-						List<String> oldLines = new ArrayList<>();
-						diffs = DiffUtils.diff(oldLines, null, newLines, newBlobIdent.getFileName());
+			try {
+				if (changeType == ChangeType.ADD) {
+					Blob newBlob = getBlob(newBlobIdent);
+					if (newBlob.getText() != null) {
+						List<String> newLines = newBlob.getText().getLines(getLineProcessor());
+						if (newLines.size() <= DiffUtils.MAX_DIFF_LEN) {
+							List<String> oldLines = new ArrayList<>();
+							diffs = DiffUtils.diff(oldLines, null, newLines, newBlobIdent.getFileName());
+						} else {
+							diffs = new ArrayList<>();
+						}
 					} else {
 						diffs = new ArrayList<>();
 					}
-				} else {
-					diffs = new ArrayList<>();
-				}
-			} else if (changeType == ChangeType.DELETE) {
-				Blob oldBlob = getBlob(oldBlobIdent);
-				if (oldBlob.getText() != null) {
-					List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
-					if (oldLines.size() <= DiffUtils.MAX_DIFF_LEN) {
-						List<String> newLines = new ArrayList<>();
-						diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, null);
+				} else if (changeType == ChangeType.DELETE) {
+					Blob oldBlob = getBlob(oldBlobIdent);
+					if (oldBlob.getText() != null) {
+						List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
+						if (oldLines.size() <= DiffUtils.MAX_DIFF_LEN) {
+							List<String> newLines = new ArrayList<>();
+							diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, null);
+						} else {
+							diffs = new ArrayList<>();
+						}
 					} else {
 						diffs = new ArrayList<>();
 					}
-				} else {
+				} else if (oldBlobIdent.id != null && oldBlobIdent.id.equals(newBlobIdent.id)) {
 					diffs = new ArrayList<>();
-				}
-			} else if (oldBlobIdent.id != null && oldBlobIdent.id.equals(newBlobIdent.id)) {
-				diffs = new ArrayList<>();
-			} else {
-				Blob oldBlob = getBlob(oldBlobIdent);
-				Blob newBlob = getBlob(newBlobIdent);
-				if (oldBlob.getText() != null && newBlob.getText() != null) {
-					List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
-					List<String> newLines = newBlob.getText().getLines(getLineProcessor());
-					if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_LEN)
-						diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, newBlobIdent.getFileName());
-					else 
+				} else {
+					Blob oldBlob = getBlob(oldBlobIdent);
+					Blob newBlob = getBlob(newBlobIdent);
+					if (oldBlob.getText() != null && newBlob.getText() != null) {
+						List<String> oldLines = oldBlob.getText().getLines(getLineProcessor());
+						List<String> newLines = newBlob.getText().getLines(getLineProcessor());
+						if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_LEN)
+							diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, newBlobIdent.getFileName());
+						else 
+							diffs = new ArrayList<>();
+					} else {
 						diffs = new ArrayList<>();
-				} else {
-					diffs = new ArrayList<>();
+					}
 				}
+			} catch (Exception e) {
+				throw new RuntimeException("Error calculating diff of file: " + getPath(), e);
 			}
 		}
 		return diffs;
@@ -117,10 +121,6 @@ public abstract class BlobChange implements Serializable {
 				deletions += diff.getLines().size();
 		}
 		return deletions;
-	}
-	
-	public void setDiffs(List<DiffBlock> diffs) {
-		this.diffs = diffs;
 	}
 	
 	public String getPath() {

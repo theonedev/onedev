@@ -1,39 +1,6 @@
 package com.pmease.commons.lang.extractors.java;
 
-import static com.pmease.commons.lang.java.JavaLexer.ASSIGN;
-import static com.pmease.commons.lang.java.JavaLexer.AT;
-import static com.pmease.commons.lang.java.JavaLexer.BOOLEAN;
-import static com.pmease.commons.lang.java.JavaLexer.BYTE;
-import static com.pmease.commons.lang.java.JavaLexer.CHAR;
-import static com.pmease.commons.lang.java.JavaLexer.CLASS;
-import static com.pmease.commons.lang.java.JavaLexer.COMMA;
-import static com.pmease.commons.lang.java.JavaLexer.DEFAULT;
-import static com.pmease.commons.lang.java.JavaLexer.DOT;
-import static com.pmease.commons.lang.java.JavaLexer.DOUBLE;
-import static com.pmease.commons.lang.java.JavaLexer.ELLIPSIS;
-import static com.pmease.commons.lang.java.JavaLexer.ENUM;
-import static com.pmease.commons.lang.java.JavaLexer.FLOAT;
-import static com.pmease.commons.lang.java.JavaLexer.GT;
-import static com.pmease.commons.lang.java.JavaLexer.IMPORT;
-import static com.pmease.commons.lang.java.JavaLexer.INT;
-import static com.pmease.commons.lang.java.JavaLexer.INTERFACE;
-import static com.pmease.commons.lang.java.JavaLexer.Identifier;
-import static com.pmease.commons.lang.java.JavaLexer.LBRACE;
-import static com.pmease.commons.lang.java.JavaLexer.LBRACK;
-import static com.pmease.commons.lang.java.JavaLexer.LONG;
-import static com.pmease.commons.lang.java.JavaLexer.LPAREN;
-import static com.pmease.commons.lang.java.JavaLexer.LT;
-import static com.pmease.commons.lang.java.JavaLexer.PACKAGE;
-import static com.pmease.commons.lang.java.JavaLexer.RBRACE;
-import static com.pmease.commons.lang.java.JavaLexer.RBRACK;
-import static com.pmease.commons.lang.java.JavaLexer.RPAREN;
-import static com.pmease.commons.lang.java.JavaLexer.SEMI;
-import static com.pmease.commons.lang.java.JavaLexer.SHORT;
-import static com.pmease.commons.lang.java.JavaLexer.STATIC;
-import static com.pmease.commons.lang.java.JavaLexer.StringLiteral;
-import static com.pmease.commons.lang.java.JavaLexer.THIS;
-import static com.pmease.commons.lang.java.JavaLexer.THROWS;
-import static com.pmease.commons.lang.java.JavaLexer.VOID;
+import static com.pmease.commons.lang.extractors.java.JavaLexer.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +18,7 @@ import com.pmease.commons.lang.extractors.ExtractToken;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.lang.extractors.TokenFilter;
 import com.pmease.commons.lang.extractors.TokenPosition;
-import com.pmease.commons.lang.java.JavaLexer;
+import com.pmease.commons.lang.extractors.java.JavaLexer;
 import com.pmease.commons.util.Pair;
 
 public class JavaExtractor extends AbstractExtractor {

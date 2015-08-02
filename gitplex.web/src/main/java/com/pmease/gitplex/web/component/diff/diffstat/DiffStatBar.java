@@ -16,7 +16,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class DiffStatBar extends Panel {
 
-	private static final int MAX_BLOCKS = 8;
+	private static final int MAX_BLOCKS = 5;
 	
 	private final int additions;
 	
@@ -40,9 +40,8 @@ public class DiffStatBar extends Panel {
 
 			@Override
 			public String getObject() {
-				int i = getAdditionBlocks();
 				StringBuffer sb = new StringBuffer();
-				while (i-- > 0) 
+				for (int i=0; i<getAdditionBlocks(); i++)
 					sb.append("&#xf0c8; ");
 				return sb.toString();
 			}
@@ -53,12 +52,9 @@ public class DiffStatBar extends Panel {
 
 			@Override
 			public String getObject() {
-				int i = getDeletionBlocks();
-				
 				StringBuffer sb = new StringBuffer();
-				while (i-- > 0) {
+				for (int i=0; i<getDeletionBlocks(); i++)
 					sb.append("&#xf0c8; ");
-				}
 				return sb.toString();
 			}
 		}).setEscapeModelStrings(false));
@@ -67,10 +63,8 @@ public class DiffStatBar extends Panel {
 
 			@Override
 			public String getObject() {
-				int i = MAX_BLOCKS + 1 - getAdditionBlocks() - getDeletionBlocks();
-				
 				StringBuffer sb = new StringBuffer();
-				while (i-- > 0) 
+				for (int i=0; i<MAX_BLOCKS - getAdditionBlocks() - getDeletionBlocks(); i++)
 					sb.append("&#xf0c8; ");
 				
 				return sb.toString();
@@ -115,7 +109,7 @@ public class DiffStatBar extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(DiffStatBar.class, "diff-stat.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(DiffStatBar.class, "diff-stat-bar.css")));
 	}
 
 }

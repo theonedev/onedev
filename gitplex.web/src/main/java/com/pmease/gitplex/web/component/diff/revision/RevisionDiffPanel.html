@@ -17,16 +17,18 @@
 		<div wicket:id="tooManyChanges" class="alert alert-warning">
 			Sorry we can not display the full diff as there are too many changes
 		</div>
-		<ul class="diff-stats">
+		<ul class="diff-stats list-unstyled">
 			<li wicket:id="diffStats" class="diff-stat clearfix">
 				<i wicket:id="icon" class="icon pull-left"></i>
 				<a wicket:id="path" class="path pull-left"><span wicket:id="path"></span></a>
+				<wicket:enclosure child="bar">
 				<span wicket:id="bar" class="bar pull-right"></span>
 				<span wicket:id="deletions" class="deletions pull-right"></span>
 				<span wicket:id="additions" class="additions pull-right"></span>
+				</wicket:enclosure>
 			</li>
 		</ul>
-		<ul class="changes">
+		<ul class="changes list-unstyled">
 			<li wicket:id="changes" class="change">
 				<div wicket:id="change"></div>
 			</li>

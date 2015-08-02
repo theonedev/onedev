@@ -831,30 +831,48 @@ pmease.commons = {
 	
 	history: {
 		init: function(callback) {
+			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:"");
+			
 			// Use a timeout here solve the problem that Safari (and previous versions of Chrome) 
 			// fires event "onpopstate" on initial page load and this causes the page to reload 
 			// infinitely  
 			setTimeout(function() {
 				window.onpopstate = function(event) {
-					if (pmease.commons.form.confirmLeave()) {
-						if (!event.state || !event.state.data)
-							location.reload();
-						else 
-							callback(event.state.data);
-						pmease.commons.history.current = {
-							state: event.state,
-							url: window.location.href
-						};
-					} else {
-						history.pushState(pmease.commons.history.current.state, '' , 
-								pmease.commons.history.current.url);
+					var currentUrlWithoutHash = location.pathname+(location.search?location.search:"");
+					if (currentUrlWithoutHash != pmease.commons.history.urlWithoutHash) { // ignore hash changes
+						if (pmease.commons.form.confirmLeave()) {
+							if (!event.state || !event.state.data)
+								location.reload();
+							else 
+								callback(event.state.data);
+							pmease.commons.history.current = {
+								state: event.state,
+								url: window.location.href
+							};
+						} else {
+							history.pushState(pmease.commons.history.current.state, '' , 
+									pmease.commons.history.current.url);
+						}
 					}
+					pmease.commons.history.urlWithoutHash = currentUrlWithoutHash;
 				};
 			}, 100);
 			
 			pmease.commons.history.current = {
 				url: window.location.href	
 			};
+		},
+		pushState: function(data, url) {
+			var state = {data: data};
+			pmease.commons.history.current = {state: state, url: url};
+			history.pushState(state, '', url);
+			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:'');
+		},
+		replaceState: function(data, url) {
+			var state = {data: data};
+			pmease.commons.history.current = {state: state, url: url};
+			history.replaceState(state, '', url);
+			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:'');
 		},
 		setScrollPos: function(scrollPos) {
 			var state = history.state;

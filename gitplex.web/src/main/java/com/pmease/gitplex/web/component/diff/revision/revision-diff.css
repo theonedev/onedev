@@ -1,0 +1,49 @@
+.revision-diff>.head {
+	margin: 16px 0;
+}
+.revision-diff>.alert {
+	margin-bottom: 16px;
+}
+.revision-diff>.head>.title {
+	font-size: 15px;
+}
+.revision-diff>.head>.title .fa {
+	color: #BBB;
+}
+.revision-diff li.diff-stat {
+	font-size: 13px;
+}
+.revision-diff li.diff-stat>.icon {
+	margin-top: 2px;
+}
+.revision-diff .fa-diff-modified {
+	color: #D0B44C;
+}
+.revision-diff .fa-diff-added {
+	color: #35C335;
+}
+.revision-diff .fa-diff-removed {
+	color: #C33535;
+}
+.revision-diff .diff-stats li {
+	padding: 6px 0;
+	border-bottom: 1px solid #F2F2F2;
+}
+.revision-diff .diff-stats li:last-child {
+	border-bottom: none;
+}
+.revision-diff .diff-stats li a.path {
+	padding: 0 6px;
+}
+.revision-diff .diff-stats li>.additions {
+	color: #35C335;
+}
+.revision-diff .diff-stats li>.deletions {
+	color: #C33535;
+}
+.revision-diff .diff-stats li>.additions, .revision-diff .diff-stats li>.deletions {
+	font-size: 12px;
+	font-weight: bold;
+	margin-right: 4px;
+	margin-top: 2px;
+}

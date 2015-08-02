@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.pmease.commons.lang.extractors.ExtractStream;
 import com.pmease.commons.lang.extractors.TokenFilter;
 import com.pmease.commons.lang.extractors.UnexpectedTokenException;
-import com.pmease.commons.lang.java.JavaLexer;
+import com.pmease.commons.lang.extractors.java.JavaLexer;
 
 public class ExtractStreamTest {
 
