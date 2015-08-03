@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 
 /**
  * This panel can not be used separately. It should be used together with DropdownBehavior. 
@@ -22,6 +23,15 @@ public abstract class DropdownPanel extends Panel {
 	
 	public DropdownPanel(String id, boolean lazyLoad) {
 		super(id);
+		this.lazyLoad = lazyLoad;
+	}
+	
+	public DropdownPanel(String id, IModel<?> model) {
+		this(id, model, true);
+	}
+	
+	public DropdownPanel(String id, IModel<?> model, boolean lazyLoad) {
+		super(id, model);
 		this.lazyLoad = lazyLoad;
 	}
 	

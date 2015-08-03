@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff.revision;
+package com.pmease.gitplex.web.component.diff.diffoption;
 
 import java.util.regex.Pattern;
 
@@ -53,5 +53,5 @@ public enum LineProcessOption implements LineProcessor {
 	public String toString() {
 		return displayName;
 	}
-
+	
 }

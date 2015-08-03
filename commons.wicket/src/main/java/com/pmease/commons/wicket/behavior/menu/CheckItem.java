@@ -13,7 +13,7 @@ public abstract class CheckItem extends MenuItem {
 
 	protected abstract String getLabel();
 	
-	protected abstract boolean isTicked();
+	protected abstract boolean isChecked();
 	
 	protected abstract void onClick(AjaxRequestTarget target);
 	

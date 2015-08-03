@@ -27,7 +27,7 @@ class CheckComponent extends Panel {
 
 			@Override
 			public String getObject() {
-				if (tickItem.isTicked())
+				if (tickItem.isChecked())
 					return "fa fa-check checked check";
 				else
 					return "unchecked check";

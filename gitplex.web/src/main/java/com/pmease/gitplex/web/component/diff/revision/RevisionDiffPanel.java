@@ -11,7 +11,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -37,10 +36,6 @@ import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffUtils;
-import com.pmease.commons.wicket.behavior.menu.CheckItem;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuItem;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
@@ -59,8 +54,6 @@ public class RevisionDiffPanel extends Panel {
 	
 	private final InlineCommentSupport commentSupport;
 	
-	private LineProcessOption lineProcessor = LineProcessOption.IGNORE_NOTHING;
-
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
 		@Override
@@ -219,52 +212,6 @@ public class RevisionDiffPanel extends Panel {
 			}
 			
 		});
-		
-		MenuPanel diffOptionMenuPanel = new MenuPanel("diffOptions") {
-
-			@Override
-			protected List<MenuItem> getMenuItems() {
-				List<MenuItem> menuItems = new ArrayList<>();
-				
-				for (final LineProcessOption option: LineProcessOption.values()) {
-					menuItems.add(new CheckItem() {
-
-						@Override
-						protected String getLabel() {
-							return option.toString();
-						}
-
-						@Override
-						protected boolean isTicked() {
-							return lineProcessor == option;
-						}
-
-						@Override
-						protected void onClick(AjaxRequestTarget target) {
-							lineProcessor = option;
-							hide(target);
-							target.add(RevisionDiffPanel.this);
-						}
-						
-					});
-				}
-
-				return menuItems;
-			}
-			
-		};
-		
-		add(diffOptionMenuPanel);
-		
-		add(new WebMarkupContainer("diffOptionsTrigger") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getChanges().size() == getChangesCount());
-			}
-			
-		}.add(new MenuBehavior(diffOptionMenuPanel)));
 		
 		add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
 

@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
@@ -51,6 +52,8 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.diff.diffoption.LineProcessOption;
+import com.pmease.gitplex.web.component.diff.diffoption.LineProcessOptionMenu;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 
@@ -77,6 +80,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private WebMarkupContainer optionsContainer;
 	
 	private final IModel<PullRequestComment> commentModel;
+	
+	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -368,6 +373,35 @@ public class RequestComparePage extends RequestDetailPage {
 
 		});
 
+		MenuPanel diffOptionMenu = new LineProcessOptionMenu("lineProcessMenu", new IModel<LineProcessor>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public LineProcessor getObject() {
+				return lineProcessor;
+			}
+
+			@Override
+			public void setObject(LineProcessor object) {
+				lineProcessor = object;
+			}
+			
+		});
+		optionsContainer.add(diffOptionMenu);
+		
+		optionsContainer.add(new WebMarkupContainer("lineProcessMenuTrigger") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getChanges().size() == getChangesCount());
+			}
+			
+		}.add(new MenuBehavior(diffOptionMenu)));
+		
 		InlineCommentSupport commentSupport;
 		
 		List<String> commentables = getPullRequest().getCommentables();

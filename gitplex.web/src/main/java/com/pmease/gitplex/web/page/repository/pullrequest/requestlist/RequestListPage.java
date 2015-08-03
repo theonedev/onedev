@@ -166,7 +166,7 @@ public class RequestListPage extends PullRequestPage {
 						}
 
 						@Override
-						protected boolean isTicked() {
+						protected boolean isChecked() {
 							return RequestListPage.this.sortOption.equals(sortOption);
 						}
 						

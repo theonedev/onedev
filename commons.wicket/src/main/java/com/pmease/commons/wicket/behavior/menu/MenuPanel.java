@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 
@@ -18,6 +19,14 @@ public abstract class MenuPanel extends DropdownPanel {
 		this(id, false);
 	}
 
+	public MenuPanel(String id, IModel<?> model, boolean lazyLoad) {
+		super(id, model, lazyLoad);
+	}
+	
+	public MenuPanel(String id, IModel<?> model) {
+		this(id, model, false);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
