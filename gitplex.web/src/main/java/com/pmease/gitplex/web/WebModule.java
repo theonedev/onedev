@@ -2,15 +2,12 @@ package com.pmease.gitplex.web;
 
 import java.util.Collection;
 
-import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.pegdown.Parser;
 import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.git.extensionpoint.TextConverter;
-import com.pmease.commons.git.extensionpoint.TextConverterProvider;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
@@ -24,12 +21,9 @@ import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
 import com.pmease.gitplex.web.component.comment.MentionTransformer;
+import com.pmease.gitplex.web.component.diff.blob.DiffRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
-import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
-import com.pmease.gitplex.web.extensionpoint.DiffRendererProvider;
-import com.pmease.gitplex.web.extensionpoint.MediaRenderer;
-import com.pmease.gitplex.web.extensionpoint.MediaRendererProvider;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 
@@ -57,33 +51,7 @@ public class WebModule extends AbstractPluginModule {
 		contribute(PullRequestListener.class, RequestDetailPage.Updater.class);
 		contribute(IndexListener.class, RepoFilePage.IndexedListener.class);
 		
-		contribute(MediaRendererProvider.class, new MediaRendererProvider() {
-
-			@Override
-			public MediaRenderer getMediaRenderer(MediaType mediaType) {
-				return null;
-			}
-			
-		});
-		
-		contribute(DiffRendererProvider.class, new DiffRendererProvider() {
-
-			@Override
-			public DiffRenderer getDiffRenderer(MediaType mediaType) {
-				return null;
-			}
-			
-		});
-		
-		contribute(TextConverterProvider.class, new TextConverterProvider() {
-
-			@Override
-			public TextConverter getTextConverter(MediaType mediaType) {
-				return null;
-			}
-
-		});
-		
+		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
 		contributeFromPackage(BlobRenderer.class, BlobRenderer.class);
 		
 		contribute(MarkdownExtension.class, new MarkdownExtension() {

@@ -25,6 +25,9 @@
 .revision-diff .fa-diff-removed {
 	color: #C33535;
 }
+.revision-diff .diff-stats {
+	display: none;
+}
 .revision-diff .diff-stats li {
 	padding: 6px 0;
 	border-bottom: 1px solid #F2F2F2;

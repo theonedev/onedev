@@ -128,6 +128,7 @@
 #request-detail .compare>.head>.outdated-alert {padding-top: 2px; color: #CF9115; font-size: 16px;}
 #request-detail .compare>.head>.pull-left:FIRST-CHILD {margin-right: 16px;}
 #request-detail .compare>.head>.pull-left:LAST-CHILD {margin-top: 3px;}
+#request-detail .compare>.head>.line-process {margin-right: 16px;}
 
 .content>.commit-choice {max-height: 400px; padding: 8px 0; overflow-y: scroll;}
 .content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}

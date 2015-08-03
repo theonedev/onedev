@@ -20,7 +20,7 @@ import com.pmease.commons.loader.AppLoader;
 
 public class DiffUtils {
 
-	public static final int MAX_DIFF_LEN = 65535;
+	public static final int MAX_DIFF_SIZE = 65535;
 	
 	private static final long TOKEN_CHANGE_CALC_TIMEOUT = 1000;
 	
@@ -80,8 +80,8 @@ public class DiffUtils {
 	 */
 	public static List<DiffBlock> diff(List<String> oldLines, @Nullable String oldFileName, 
 			List<String> newLines, @Nullable String newFileName) {
-		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_LEN, 
-				"Total size of old lines and new lines should be less than " + MAX_DIFF_LEN + ".");
+		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_SIZE, 
+				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
 		
 		List<List<CmToken>> oldTokenizedLines = tokenize(oldLines, oldFileName);
 		List<List<CmToken>> newTokenizedLines = tokenize(newLines, newFileName);
@@ -203,8 +203,8 @@ public class DiffUtils {
 	}
 	
 	public static List<SimpleDiffBlock> simpleDiff(List<String> oldLines, List<String> newLines) {
-		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_LEN, 
-				"Total size of old lines and new lines should be less than " + MAX_DIFF_LEN + ".");
+		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_SIZE, 
+				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		TokensToCharsResult<String> result = tokensToChars(oldLines, newLines);

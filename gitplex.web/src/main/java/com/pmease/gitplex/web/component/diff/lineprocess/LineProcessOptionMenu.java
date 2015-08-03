@@ -1,23 +1,29 @@
-package com.pmease.gitplex.web.component.diff.diffoption;
+package com.pmease.gitplex.web.component.diff.lineprocess;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 
 @SuppressWarnings("serial")
-public class LineProcessOptionMenu extends MenuPanel {
+public abstract class LineProcessOptionMenu extends MenuPanel {
 
-	public LineProcessOptionMenu(String id, IModel<LineProcessor> model) {
-		super(id, model);
+	private LineProcessOption option = LineProcessOption.IGNORE_NOTHING;
+	
+	public LineProcessOptionMenu(String id) {
+		super(id);
 	}
 
+	protected abstract void onOptionChange(AjaxRequestTarget target);
+	
+	public LineProcessOption getOption() {
+		return option;
+	}
+	
 	@Override
 	protected List<MenuItem> getMenuItems() {
 		List<MenuItem> menuItems = new ArrayList<>();
@@ -27,18 +33,20 @@ public class LineProcessOptionMenu extends MenuPanel {
 
 				@Override
 				protected String getLabel() {
-					return option.toString();
+					return option.getName();
 				}
 
 				@Override
 				protected boolean isChecked() {
-					return getDefaultModelObject() == option;
+					return getOption() == option;
 				}
 
 				@Override
 				protected void onClick(AjaxRequestTarget target) {
-					setDefaultModelObject(option);
+					LineProcessOptionMenu.this.option = option;
 					hide(target);
+					
+					onOptionChange(target);
 				}
 				
 			});

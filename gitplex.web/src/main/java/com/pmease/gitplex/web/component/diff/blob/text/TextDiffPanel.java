@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff.text;
+package com.pmease.gitplex.web.component.diff.blob.text;
 
 import static com.pmease.commons.util.diff.DiffLine.Action.ADD;
 import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
@@ -29,7 +29,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -48,11 +47,8 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.util.time.Duration;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
-import com.pmease.commons.git.Blob;
+import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.Change;
 import com.pmease.commons.util.diff.AroundContext;
 import com.pmease.commons.util.diff.DiffHunk;
 import com.pmease.commons.util.diff.DiffLine;
@@ -73,7 +69,6 @@ import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.diff.difftitle.FileDiffTitle;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -81,13 +76,15 @@ import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
-	private static final int SCROLL_MARGIN = 100;
+	public static final int MAX_DISPLAY_SIZE = 5000;
 	
-	private static final int CONTEXT_SIZE = 5;
+	public static final int CONTEXT_SIZE = 5;
 
 	private final IModel<Repository> repoModel;
 	
-	private final Change change;
+	private final BlobChange change;
+	
+	private final boolean unified;
 	
 	private final InlineCommentSupport commentSupport;
 	
@@ -111,15 +108,13 @@ public class TextDiffPanel extends Panel {
 	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
-	private String autoScrollScript;
-	
-	public TextDiffPanel(String id, final IModel<Repository> repoModel, final Change change, 
-			final @Nullable InlineCommentSupport commentSupport) {
+	public TextDiffPanel(String id, final IModel<Repository> repoModel, final BlobChange change, 
+			final boolean unified, final @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		
 		this.change = change;
+		this.unified = unified;
 		this.commentSupport = commentSupport;
 		
 		// cache add comment permission check in model to avoid recalculation for every line
@@ -211,7 +206,7 @@ public class TextDiffPanel extends Panel {
 		*/
 		add(head);
 		
-		head.add(new FileDiffTitle("title", change));
+//		head.add(new BlobDiffTitle("title", change));
 		
 		head.add(new AjaxLink<Void>("showComments") {
 
@@ -397,8 +392,6 @@ public class TextDiffPanel extends Panel {
 		}.add(new TooltipBehavior(Model.of("Show more lines"))));
 
 		add(newCommentsView());
-		
-		autoScrollScript = String.format("pmease.commons.scroll.next('table.comments>tbody>tr.concerned', %d);", SCROLL_MARGIN);
 	}
 	
 	private String renderDiffs(List<DiffLine> diffLines) {
@@ -624,14 +617,6 @@ public class TextDiffPanel extends Panel {
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
 		
 		response.render(OnDomReadyHeaderItem.forScript("gitplex.textdiff.placeComments();"));
-		
-		// only auto-scroll this panel once after it is created; otherwise page refreshing 
-		// caused by actions such as integrate/discard on request compare page will also 
-		// get scrolled
-		if (autoScrollScript != null) {
-			response.render(OnLoadHeaderItem.forScript(autoScrollScript));
-			autoScrollScript = null;
-		}
 	}
 	
 	@Override
@@ -641,20 +626,6 @@ public class TextDiffPanel extends Panel {
 		commentsModel.detach();
 		
 		super.onDetach();
-	}
-	
-	private Blob.Text readOldText() {
-		if (change.getOldBlobIdent().path != null) 
-			return Preconditions.checkNotNull(repoModel.getObject().getBlob(change.getOldBlobIdent())).getText();
-		else 
-			return new Blob.Text(Charsets.UTF_8, "");
-	}
-	
-	private Blob.Text readNewText() {
-		if (change.getNewBlobIdent().path != null) 
-			return Preconditions.checkNotNull(repoModel.getObject().getBlob(change.getNewBlobIdent())).getText();
-		else
-			return new Blob.Text(Charsets.UTF_8, "");
 	}
 	
 	private int locateDiffPos(int lineNo, DiffLine.Action excludeAction) {

@@ -3,7 +3,7 @@
 		<div class="head clearfix">
 			<div class="title pull-left">
 				<span class="fa fa-ext fa-file-diff"></span> Total
-				<a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();return false;"><span wicket:id="totalChanged"></span> changed files</a>
+				<a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
 				<wicket:enclosure child="totalAdditions">
 				with <strong wicket:id="totalAdditions"></strong>
 				</wicket:enclosure>

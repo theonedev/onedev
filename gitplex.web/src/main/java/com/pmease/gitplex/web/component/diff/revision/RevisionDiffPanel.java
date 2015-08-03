@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -39,10 +41,11 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 
 @SuppressWarnings("serial")
-public class RevisionDiffPanel extends Panel {
+public abstract class RevisionDiffPanel extends Panel {
 
 	private static final int MAX_DISPLAY_CHANGES = 500;
 	
@@ -65,17 +68,18 @@ public class RevisionDiffPanel extends Panel {
 				AnyObjectId newCommitId = repoModel.getObject().getObjectId(newRev);
 				List<DiffEntry> entries = diffFormatter.scan(oldCommitId, newCommitId);
 				List<BlobChange> changes = new ArrayList<>();
+				final LineProcessor lineProcessor = getLineProcessor();
 		    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
 		    		if (changes.size() < MAX_DISPLAY_CHANGES) {
 			    		changes.add(new BlobChange(oldCommitId.name(), newCommitId.name(), entry) {
 	
 							@Override
-							protected Blob getBlob(BlobIdent blobIdent) {
+							public Blob getBlob(BlobIdent blobIdent) {
 								return repoModel.getObject().getBlob(blobIdent);
 							}
 	
 							@Override
-							protected LineProcessor getLineProcessor() {
+							public LineProcessor getLineProcessor() {
 								return lineProcessor;
 							}
 			    			
@@ -112,13 +116,13 @@ public class RevisionDiffPanel extends Panel {
 			    	// some changes should be removed if content is the same after line processing 
 			    	for (Iterator<BlobChange> it = changes.iterator(); it.hasNext();) {
 			    		BlobChange change = it.next();
-			    		if (change.getChangeType() == ChangeType.MODIFY 
+			    		if (change.getType() == ChangeType.MODIFY 
 			    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
 			    				&& change.getDiffs().isEmpty()) {
-			    			Blob.Text oldText = repoModel.getObject().getBlob(change.getOldBlobIdent()).getText();
-			    			Blob.Text newText = repoModel.getObject().getBlob(change.getNewBlobIdent()).getText();
+			    			Blob.Text oldText = change.getOldText();
+			    			Blob.Text newText = change.getNewText();
 			    			if (oldText != null && newText != null 
-			    					&& (oldText.getLines().size() + newText.getLines().size()) <= DiffUtils.MAX_DIFF_LEN) {
+			    					&& (oldText.getLines().size() + newText.getLines().size()) <= DiffUtils.MAX_DIFF_SIZE) {
 				    			it.remove();
 			    			}
 			    		}
@@ -126,11 +130,9 @@ public class RevisionDiffPanel extends Panel {
 			    	return new ChangesAndCount(changes, changes.size());
 		    	} else {
 		    		/*
-		    		 * line processing will not apply if we have too many changes as:
-		    		 * 1. we do not want to diff all changes for line processing
-		    		 * 2. even for the first MAX_DISPLAY_CHANGES, we do not want to apply 
-		    		 * 	  line processing as we can not determine the total changes count 
-		    		 * 	  after line processing
+		    		 * if the changes are a subset of too many changes, do not remove the change even if 
+		    		 * content is the same after line processing in order not to cause confusions to 
+		    		 * users as they are looking at the "too many changes" alert 
 		    		 */
 		    		return new ChangesAndCount(changes, entries.size());
 		    	}
@@ -141,15 +143,19 @@ public class RevisionDiffPanel extends Panel {
 	};
 	
 	public RevisionDiffPanel(String id, IModel<Repository> repoModel, String oldRev, String newRev, 
-			InlineCommentSupport commentSupport) {
+			@Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
+		this.repoModel = repoModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
-		this.repoModel = repoModel;
 		this.commentSupport = commentSupport;
 	}
 
+	protected abstract LineProcessor getLineProcessor();
+	
+	protected abstract boolean isUnified();
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -226,11 +232,11 @@ public class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				String iconClass;
-				if (change.getChangeType() == ChangeType.ADD)
+				if (change.getType() == ChangeType.ADD)
 					iconClass = " fa-ext fa-diff-added";
-				else if (change.getChangeType() == ChangeType.DELETE)
+				else if (change.getType() == ChangeType.DELETE)
 					iconClass = " fa-ext fa-diff-removed";
-				else if (change.getChangeType() == ChangeType.MODIFY)
+				else if (change.getType() == ChangeType.MODIFY)
 					iconClass = " fa-ext fa-diff-modified";
 				else
 					iconClass = " fa-ext fa-diff-renamed";
@@ -247,17 +253,17 @@ public class RevisionDiffPanel extends Panel {
 				item.add(new Label("deletions", "-" + change.getDeletions()));
 				
 				boolean barVisible;
-				if (change.getChangeType() == ChangeType.ADD) {
-					Blob.Text text = repoModel.getObject().getBlob(change.getNewBlobIdent()).getText();
-					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_LEN);
-				} else if (change.getChangeType() == ChangeType.DELETE) {
-					Blob.Text text = repoModel.getObject().getBlob(change.getOldBlobIdent()).getText();
-					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_LEN);
+				if (change.getType() == ChangeType.ADD) {
+					Blob.Text text = change.getNewText();
+					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_SIZE);
+				} else if (change.getType() == ChangeType.DELETE) {
+					Blob.Text text = change.getOldText();
+					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_SIZE);
 				} else {
-					Blob.Text oldText = repoModel.getObject().getBlob(change.getOldBlobIdent()).getText();
-					Blob.Text newText = repoModel.getObject().getBlob(change.getNewBlobIdent()).getText();
+					Blob.Text oldText = change.getOldText();
+					Blob.Text newText = change.getNewText();
 					barVisible = (oldText != null && newText != null 
-							&& oldText.getLines().size()+newText.getLines().size() <= DiffUtils.MAX_DIFF_LEN);
+							&& oldText.getLines().size()+newText.getLines().size() <= DiffUtils.MAX_DIFF_SIZE);
 				}
 				item.add(new DiffStatBar("bar", change.getAdditions(), change.getDeletions(), false).setVisible(barVisible));
 			}
@@ -278,7 +284,7 @@ public class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				item.setOutputMarkupId(true);
-				item.add(new Label("change", change.getPath()));
+				item.add(new BlobDiffPanel("change", repoModel, change, isUnified(), commentSupport));
 			}
 			
 		});

@@ -52,8 +52,8 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.diff.diffoption.LineProcessOption;
-import com.pmease.gitplex.web.component.diff.diffoption.LineProcessOptionMenu;
+import com.pmease.gitplex.web.component.diff.diffmode.DiffModePanel;
+import com.pmease.gitplex.web.component.diff.lineprocess.LineProcessOptionMenu;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 
@@ -81,7 +81,9 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private final IModel<PullRequestComment> commentModel;
 	
-	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
+	private LineProcessOptionMenu lineProcessOptionMenu;
+	
+	private DiffModePanel diffModePanel;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -373,34 +375,23 @@ public class RequestComparePage extends RequestDetailPage {
 
 		});
 
-		MenuPanel diffOptionMenu = new LineProcessOptionMenu("lineProcessMenu", new IModel<LineProcessor>() {
+		lineProcessOptionMenu = new LineProcessOptionMenu("lineProcessOptionMenu") {
 
 			@Override
-			public void detach() {
+			protected void onOptionChange(AjaxRequestTarget target) {
 			}
+			
+		};
+		optionsContainer.add(lineProcessOptionMenu);
+		optionsContainer.add(new WebMarkupContainer("lineProcessOptionMenuTrigger").add(new MenuBehavior(lineProcessOptionMenu)));
+		
+		optionsContainer.add(diffModePanel = new DiffModePanel("diffMode") {
 
 			@Override
-			public LineProcessor getObject() {
-				return lineProcessor;
-			}
-
-			@Override
-			public void setObject(LineProcessor object) {
-				lineProcessor = object;
+			protected void onModeChange(AjaxRequestTarget target) {
 			}
 			
 		});
-		optionsContainer.add(diffOptionMenu);
-		
-		optionsContainer.add(new WebMarkupContainer("lineProcessMenuTrigger") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getChanges().size() == getChangesCount());
-			}
-			
-		}.add(new MenuBehavior(diffOptionMenu)));
 		
 		InlineCommentSupport commentSupport;
 		
@@ -458,7 +449,20 @@ public class RequestComparePage extends RequestDetailPage {
 				}
 			};
 		};
-		add(new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, commentSupport));
+		
+		add(new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, commentSupport) {
+
+			@Override
+			protected LineProcessor getLineProcessor() {
+				return lineProcessOptionMenu.getOption();
+			}
+
+			@Override
+			protected boolean isUnified() {
+				return diffModePanel.isUnified();
+			}
+			
+		});
 	}
 	
 	@Override
