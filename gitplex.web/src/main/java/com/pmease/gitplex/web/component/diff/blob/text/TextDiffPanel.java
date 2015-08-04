@@ -69,6 +69,8 @@ import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
+import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -194,19 +196,10 @@ public class TextDiffPanel extends Panel {
 		
 		head.add(new StickyBehavior());
 		
-		/*
-		head.add(new DiffStatBar("diffStat", new AbstractReadOnlyModel<List<DiffLine>>() {
-
-			@Override
-			public List<DiffLine> getObject() {
-				return diffs;
-			}
-			
-		}));
-		*/
+		head.add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		add(head);
 		
-//		head.add(new BlobDiffTitle("title", change));
+		head.add(new BlobDiffTitle("title", change));
 		
 		head.add(new AjaxLink<Void>("showComments") {
 
@@ -259,7 +252,8 @@ public class TextDiffPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				input.setModelObject("");
-				target.appendJavaScript(String.format("gitplex.textdiff.cancelAddComment(%d);", index));
+				target.appendJavaScript(String.format("gitplex.textdiff.cancelAddComment('%s', %d);", 
+						TextDiffPanel.this.getMarkupId(), index));
 			}
 			
 		}.add(new DirtyIgnoreBehavior()));
@@ -301,10 +295,11 @@ public class TextDiffPanel extends Panel {
 				target.add(commentsRow);
 				
 				input.setModelObject("");
-				String prependScript = String.format("$('#comments-placeholder').append('<table id=\"%s\"></table>')", 
-						commentsRow.getMarkupId());
+				String prependScript = String.format("$('#%s .comments-placeholder').append('<table data-line=\"%s\"></table>')", 
+						TextDiffPanel.this.getMarkupId(), commentsRow.getMarkupAttributes().get("data-line"));
 				target.prependJavaScript(prependScript);
-				target.appendJavaScript(String.format("gitplex.textdiff.afterAddComment(%d);", index));
+				target.appendJavaScript(String.format("gitplex.textdiff.afterAddComment('%s', %d);", 
+						TextDiffPanel.this.getMarkupId(), index));
 				
 				if (commentsView.size() == 1)
 					target.add(head);
@@ -333,7 +328,8 @@ public class TextDiffPanel extends Panel {
 				if (!showComments)
 					showComments(target);
 				
-				target.appendJavaScript(String.format("gitplex.textdiff.beforeAddComment(%d);", index));
+				target.appendJavaScript(String.format("gitplex.textdiff.beforeAddComment('%s', %d);", 
+						TextDiffPanel.this.getMarkupId(), index));
 			}
 			
 		});
@@ -395,9 +391,6 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private String renderDiffs(List<DiffLine> diffLines) {
-		if (diffLines.isEmpty())
-			return "";
-		
 		StringBuilder builder = new StringBuilder();
 		
 		DiffLine firstLine = diffLines.get(0);
@@ -417,7 +410,7 @@ public class TextDiffPanel extends Panel {
 			} else {
 				addCommentLink = "";
 			}
-			builder.append("<tr id='diffline-").append(index).append("' class='line diff ");
+			builder.append("<tr class='diffline-").append(index).append("' class='line diff ");
 			if (line.getAction() == ADD) {
 				if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
 					builder.append("new diff-block'>");
@@ -550,8 +543,7 @@ public class TextDiffPanel extends Panel {
 			}
 			
 		};
-		row.setOutputMarkupId(true);
-		row.setMarkupId("comment-diffline-" + index);
+		row.add(AttributeAppender.append("data-line", "diffline-" + index));
 		
 		row.add(new ListView<InlineComment>("comments", new LoadableDetachableModel<List<InlineComment>>() {
 
@@ -616,7 +608,8 @@ public class TextDiffPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
 		
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.textdiff.placeComments();"));
+		response.render(OnDomReadyHeaderItem.forScript(
+				String.format("gitplex.textdiff.placeComments('%s');", getMarkupId())));
 	}
 	
 	@Override
@@ -654,7 +647,7 @@ public class TextDiffPanel extends Panel {
 				
 				String row = renderDiffs(Lists.newArrayList(line));
 				row = StringUtils.replace(row, "\"", "\\\"");
-				String script = String.format("$(\"%s\").insertAfter('#diffline-%d')", row, i-1);
+				String script = String.format("$(\"%s\").insertAfter('#%s .diffline-%d')", row, getMarkupId(), i-1);
 				target.appendJavaScript(script);
 			} else {
 				break;
@@ -683,7 +676,7 @@ public class TextDiffPanel extends Panel {
 				hunk.getDiffLines().add(0, line);
 				String row = renderDiffs(Lists.newArrayList(line));
 				row = StringUtils.replace(row, "\"", "\\\"");
-				String script = String.format("$(\"%s\").insertBefore('#diffline-%d')", row, i+1);
+				String script = String.format("$(\"%s\").insertBefore('#%s .diffline-%d')", row, getMarkupId(), i+1);
 				target.appendJavaScript(script);
 			} else {
 				break;

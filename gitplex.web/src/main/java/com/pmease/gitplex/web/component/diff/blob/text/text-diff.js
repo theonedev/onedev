@@ -1,20 +1,20 @@
 gitplex.textdiff = {
-	placeComments: function() {
-		$("#comments-placeholder").children("table").each(function() {
+	placeComments: function(containerId) {
+		var $container = $("#" + containerId);
+		$container.find(".comments-placeholder").children("table").each(function() {
 			var $lineComments = $(this);
-			var id = $lineComments.attr("id");
-			var lineId = id.substring("comment-".length);
-			var $line = $("#" + lineId);
+			var $line = $container.find("." + $lineComments.attr("data-line"));
 			var $tr = $("<tr class='line comments'><td colspan='3'></td></tr>").insertAfter($line);
 			$tr.children().append($lineComments);
 			$line.find("a.add-comment").hide();
 		});
 	},
-	beforeAddComment: function(index) {
-		var $line = $("#diffline-" + index); 
+	beforeAddComment: function(containerId, index) {
+		var $container = $("#" + containerId);
+		var $line = $container.find(".diffline-" + index); 
 
 		var $tr = $("<tr class='line comments'><td colspan='3'></td></tr>").insertAfter($line);
-		var $addComment = $("#add-comment");
+		var $addComment = $container.find("form.add-comment");
 		var $commentsRow = $addComment.closest("tr.line.comments");
 		$addComment.find("textarea").val("");
 		$tr.children().append($addComment);
@@ -24,22 +24,25 @@ gitplex.textdiff = {
 		pmease.commons.form.trackDirty($addComment);
 		$line.find("a.add-comment").hide();
 	},
-	afterAddComment: function(index) {
-		$("#comments-placeholder").append($("#add-comment"));
-		var $line = $("#diffline-" + index);
-		$line.next().find("td").append($("#comment-diffline-" + index));
-		$("#add-comment").areYouSure({"silent": "true"});
+	afterAddComment: function(containerId, index) {
+		var $container = $("#" + containerId);
+		$container.find(".comments-placeholder").append($container.find("form.add-comment"));
+		var $line = $container.find(".diffline-" + index);
+		$line.next().find("td").append($container.find(".comment-diffline-" + index));
+		$container.find("form.add-comment").areYouSure({"silent": "true"});
 	},
-	cancelAddComment: function(index) {
-		$("#comments-placeholder").append($("#add-comment"));
-		var $line = $("#diffline-" + index);
+	cancelAddComment: function(containerId, index) {
+		var $container = $("#" + containerId);
+		$container.find(".comments-placeholder").append($container.find("form.add-comment"));
+		var $line = $container.find(".diffline-" + index);
 		$line.next().remove(); 
 		$line.find("a.add-comment").show();
-		$("#add-comment").areYouSure({"silent": "true"});
+		$container.find("form.add-comment").areYouSure({"silent": "true"});
 	},
-	afterRemoveComment: function(index) {
-		$("#comment-diffline-" + index).closest("tr").remove();
-		$("#diffline-" + index).find("a.add-comment").show();
+	afterRemoveComment: function(containerId, index) {
+		var $container = $("#" + containerId);
+		$container.find(".comment-diffline-" + index).closest("tr").remove();
+		$container.find(".diffline-" + index).find("a.add-comment").show();
 	}
 }
 	

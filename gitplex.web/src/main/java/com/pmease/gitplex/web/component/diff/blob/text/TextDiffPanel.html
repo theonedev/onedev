@@ -13,7 +13,7 @@
 				<span wicket:id="hideComments" class="btn btn-default btn-xs hide-comments" title="Hide comments"><i class="fa fa-eye-slash"></i> <i class="fa fa-comments"></i></span>
 			</div>
 		</div>
-		<table id="diffs-table" class="table-diff body">
+		<table class="body">
 			<wicket:container wicket:id="hunks">
 				<tr wicket:id="head" class="line hunk-head">
 					<td colspan="2" class="action">
@@ -29,7 +29,7 @@
 			</tr>
 		</table>
 		
-		<div id="comments-placeholder" class="hidden">
+		<div class="comments-placeholder hidden">
 			<table wicket:id="lines" class="comments">
 				<tr wicket:id="comments">
 					<td class="avatar">
@@ -40,7 +40,7 @@
 					</td>
 				</tr>
 			</table>
-			<form wicket:id="addComment" id="add-comment" class="leave-confirm">
+			<form wicket:id="addComment" class="add-comment leave-confirm">
 				<textarea wicket:id="input" rows="10" class="form-control focusable"></textarea>
 				<div wicket:id="feedback"></div>
 				<div class="actions">
