@@ -1,78 +1,24 @@
 package com.pmease.gitplex.web.component.diff.blob.text;
 
-import static com.pmease.commons.util.diff.DiffLine.Action.ADD;
-import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
-import static com.pmease.commons.util.diff.DiffLine.Action.EQUAL;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import jersey.repackaged.com.google.common.collect.Lists;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.util.string.Strings;
-import org.apache.wicket.util.time.Duration;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.BlobChange;
-import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.util.diff.AroundContext;
-import com.pmease.commons.util.diff.DiffHunk;
-import com.pmease.commons.util.diff.DiffLine;
-import com.pmease.commons.util.diff.DiffUtils;
-import com.pmease.commons.util.diff.Token;
-import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
-import com.pmease.commons.wicket.behavior.StickyBehavior;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.InlineComment;
+import com.pmease.commons.lang.diff.DiffBlock;
+import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.comment.CommentPanel;
-import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
-import com.pmease.gitplex.web.component.userlink.UserLink;
-import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -80,608 +26,60 @@ public class TextDiffPanel extends Panel {
 
 	public static final int MAX_DISPLAY_SIZE = 5000;
 	
-	public static final int CONTEXT_SIZE = 5;
-
+	private static final int DEFAULT_CONTEXT_SIZE = 5;
+	
 	private final IModel<Repository> repoModel;
 	
 	private final BlobChange change;
+	
+	private final Map<Integer, Integer> contextSizes = new HashMap<>();
 	
 	private final boolean unified;
 	
 	private final InlineCommentSupport commentSupport;
 	
-	private final IModel<Boolean> allowToAddCommentModel;
-	
-	private boolean showComments = true;
-	
-	private int index;
-	
-	private List<DiffLine> diffs;
-	
-	private List<DiffHunk> hunks;
-	
-	private final IModel<Map<Integer, List<InlineComment>>> commentsModel;
-	
-	private WebMarkupContainer head;
-	
-	private ListView<DiffHunk> hunksView;
-	
-	private RepeatingView commentsView;
-	
-	private AbstractDefaultAjaxBehavior addCommentBehavior;
-	
-	public TextDiffPanel(String id, final IModel<Repository> repoModel, final BlobChange change, 
-			final boolean unified, final @Nullable InlineCommentSupport commentSupport) {
+	public TextDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, boolean unified, 
+			@Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.change = change;
 		this.unified = unified;
 		this.commentSupport = commentSupport;
-		
-		// cache add comment permission check in model to avoid recalculation for every line
-		allowToAddCommentModel = new LoadableDetachableModel<Boolean>() {
-	
-			@Override
-			protected Boolean load() {
-				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-				ObjectPermission readPermission = ObjectPermission.ofRepoPull(repoModel.getObject());
-				return currentUser != null && SecurityUtils.getSubject().isPermitted(readPermission);
-			}
-			
-		};
-		
-		commentsModel = new LoadableDetachableModel<Map<Integer, List<InlineComment>>>() {
-
-			@Override
-			protected Map<Integer, List<InlineComment>> load() {
-				if (commentSupport == null)
-					return new HashMap<>();
-				
-				Map<Integer, Integer> oldLinesMap = new HashMap<>();
-				Map<Integer, Integer> newLinesMap = new HashMap<>();
-
-				int index = 0;
-				for (DiffLine diff: diffs) {
-					oldLinesMap.put(diff.getOldLineNo(), index);
-					newLinesMap.put(diff.getNewLineNo(), index);
-					index++;
-				}
-				
-				Map<Integer, List<InlineComment>> comments = new HashMap<>();
-				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getComments(change.getOldBlobIdent()).entrySet()) {
-					int diffLineNo = oldLinesMap.get(entry.getKey());
-					List<InlineComment> lineComments = comments.get(diffLineNo);
-					if (lineComments == null) {
-						lineComments = new ArrayList<>();
-						comments.put(diffLineNo, lineComments);
-					}
-					lineComments.addAll(entry.getValue());
-				}
-				for (Map.Entry<Integer, List<InlineComment>> entry: commentSupport.getComments(change.getNewBlobIdent()).entrySet()) {
-					int diffLineNo = newLinesMap.get(entry.getKey());
-					List<InlineComment> lineComments = comments.get(diffLineNo);
-					if (lineComments == null) {
-						lineComments = new ArrayList<>();
-						comments.put(diffLineNo, lineComments);
-					}
-					lineComments.addAll(entry.getValue());
-				}
-				
-				for (List<InlineComment> lineComments: comments.values()) {
-					Collections.sort(lineComments, new Comparator<InlineComment>() {
-
-						@Override
-						public int compare(InlineComment o1, InlineComment o2) {
-							return o1.getDate().compareTo(o2.getDate());
-						}
-						
-					});
-				}
-				
-				return comments;
-			}
-			
-		};
-		
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		setOutputMarkupId(true);
+		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
+		add(new BlobDiffTitle("title", change));
 		
-		head = new WebMarkupContainer("head");
+		PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), change.getBlobIdent());
+		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params)
+				.add(AttributeAppender.append("title", "View file at commit " + change.getBlobIdent().revision)));
 		
-		head.add(new StickyBehavior());
-		
-		head.add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
-		add(head);
-		
-		head.add(new BlobDiffTitle("title", change));
-		
-		head.add(new AjaxLink<Void>("showComments") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				showComments(target);
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentSupport != null && !showComments);
-			}
-
-		});
-		head.add(new AjaxLink<Void>("hideComments") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				hideComments(target);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentSupport != null && showComments);
-			}
-			
-		});
-		
-		head.add(new Link<Void>("viewFile") {
-
-			@Override
-			public void onClick() {
-				setResponsePage(RepoFilePage.class, RepoFilePage.paramsOf(repoModel.getObject(), change.getNewBlobIdent()));
-			}
-			
-		}.add(AttributeAppender.append("title", "View full file at " + change.getNewBlobIdent().revision)));
-
-		Form<?> form = new Form<Void>("addComment");
-		form.setOutputMarkupId(true);
-		
-		final CommentInput input;
-		form.add(input = new CommentInput("input", Model.of("")));
-		input.setRequired(true);
-		form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
-		
-		form.add(new AjaxLink<Void>("cancel") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				input.setModelObject("");
-				target.appendJavaScript(String.format("gitplex.textdiff.cancelAddComment('%s', %d);", 
-						TextDiffPanel.this.getMarkupId(), index));
-			}
-			
-		}.add(new DirtyIgnoreBehavior()));
-		
-		form.add(new AjaxSubmitLink("save") {
-
-			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
-				target.add(form);
-			}
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-
-				DiffLine diff = diffs.get(index);
-				BlobIdent commentAt;
-				BlobIdent compareWith;
-				int lineNo;
-				AroundContext commentContext; 
-				
-				if (diff.getAction() == DELETE) {
-					commentAt = change.getOldBlobIdent();
-					compareWith = change.getNewBlobIdent();
-					lineNo = diff.getOldLineNo();
-					commentContext = DiffUtils.around(diffs, lineNo, -1, InlineComment.CONTEXT_SIZE); 
-				} else {
-					commentAt = change.getNewBlobIdent();
-					compareWith = change.getOldBlobIdent();
-					lineNo = diff.getNewLineNo();
-					commentContext = DiffUtils.around(diffs, -1, lineNo, InlineComment.CONTEXT_SIZE); 
-				}
-				
-				commentSupport.addComment(commentAt, compareWith, commentContext, lineNo, input.getModelObject());
-				
-				Component commentsRow = newCommentsRow(commentsView.newChildId(), index);
-				commentsView.add(commentsRow);
-				target.add(commentsRow);
-				
-				input.setModelObject("");
-				String prependScript = String.format("$('#%s .comments-placeholder').append('<table data-line=\"%s\"></table>')", 
-						TextDiffPanel.this.getMarkupId(), commentsRow.getMarkupAttributes().get("data-line"));
-				target.prependJavaScript(prependScript);
-				target.appendJavaScript(String.format("gitplex.textdiff.afterAddComment('%s', %d);", 
-						TextDiffPanel.this.getMarkupId(), index));
-				
-				if (commentsView.size() == 1)
-					target.add(head);
-			}
-
-		}.add(new DirtyIgnoreBehavior()));
-		add(form);
-		
-		add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
-			
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getDynamicExtraParameters().add("return {index: index}");
-			}
-
-			@Override
-			public boolean getStatelessHint(Component component) {
-				return false;
-			}
-
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				index = RequestCycle.get().getRequest().getQueryParameters()
-						.getParameterValue("index").toInt();
-				if (!showComments)
-					showComments(target);
-				
-				target.appendJavaScript(String.format("gitplex.textdiff.beforeAddComment('%s', %d);", 
-						TextDiffPanel.this.getMarkupId(), index));
-			}
-			
-		});
-		
-		add(hunksView = new ListView<DiffHunk>("hunks", new AbstractReadOnlyModel<List<DiffHunk>>() {
-
-			@Override
-			public List<DiffHunk> getObject() {
-				return hunks;
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(final ListItem<DiffHunk> item) {
-				DiffHunk hunk = item.getModelObject();
-				
-				item.add(newHunkHead("head", item.getIndex()));
-				item.add(new Label("body", renderDiffs(hunk.getDiffLines())).setEscapeModelStrings(false));
-			}
-
-		});
-		
-		final WebMarkupContainer lastRow = new WebMarkupContainer("lastRow") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				if (hunks.isEmpty()) {
-					setVisible(false);
-				} else {
-					int lines = 0;
-					for (DiffLine diffLine: diffs) {
-						if (diffLine.getAction() != DiffLine.Action.DELETE)
-							lines++;
-					}
-					DiffHunk hunk = hunks.get(hunks.size()-1);
-					setVisible(hunk.getNewEnd() < lines);
-				}
-			}
-			
-		};
-		lastRow.setOutputMarkupId(true);
-		add(lastRow);
-		lastRow.add(new AjaxLink<Void>("expand") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				expandBelow(target, hunks.size()-1, diffs.size());
-				target.add(findPrevVisibleHunkHead(hunks.size()));
-				target.add(lastRow);
-				target.add(head);
-			}
-			
-		}.add(new TooltipBehavior(Model.of("Show more lines"))));
-
-		add(newCommentsView());
+		add(new Label("diffs", renderDiffs()));
 	}
 	
-	private String renderDiffs(List<DiffLine> diffLines) {
+	private String renderDiffs() {
 		StringBuilder builder = new StringBuilder();
-		
-		DiffLine firstLine = diffLines.get(0);
-		int index = 0;
-		for (DiffLine diff: diffs) {
-			if (diff.getOldLineNo() == firstLine.getOldLineNo() && diff.getNewLineNo() == firstLine.getNewLineNo())
-				break;
-			index++;
-		}
-		
-		for (DiffLine line: diffLines) {
-			String addCommentLink;
-			if (allowToAddCommentModel.getObject() && commentSupport != null) {
-				addCommentLink = "<a href='javascript: var index=" + index + "; " 
-					+ addCommentBehavior.getCallbackScript() 
-					+ ";' class='add-comment' title='Add comment'><i class='fa fa-comments'></i></a>";
+		DiffBlock prevBlock = null;
+		for (DiffBlock block: change.getDiffBlocks()) {
+			if (block.getOperation() == Operation.EQUAL) {
+				
 			} else {
-				addCommentLink = "";
+				
 			}
-			builder.append("<tr class='diffline-").append(index).append("' class='line diff ");
-			if (line.getAction() == ADD) {
-				if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
-					builder.append("new diff-block'>");
-				else
-					builder.append("new'>");
-				builder.append("<td class='old line-no'>").append(addCommentLink).append("</td>");
-				builder.append("<td class='new line-no'>");
-				builder.append(line.getNewLineNo()+1).append("</td>");
-			} else if (line.getAction() == DELETE) {
-				if (index == 0 || diffs.get(index-1).getAction() == EQUAL)
-					builder.append("old diff-block'>");
-				else
-					builder.append("old'>");
-				builder.append("<td class='old line-no'>").append(addCommentLink);
-				builder.append(line.getOldLineNo()+1).append("</td>");
-				builder.append("<td class='new line-no'></td>");
-			} else {
-				builder.append("equal'>");
-				builder.append("<td class='old line-no'>").append(addCommentLink)
-						.append("  ").append(line.getOldLineNo()+1).append("</td>");
-				builder.append("<td class='new line-no'>  ").append(line.getNewLineNo()+1).append("</td>");
-			}
-			builder.append("<td class='text'>");
-			if (line.getAction() == ADD)
-				builder.append("+");
-			else if (line.getAction() == DELETE)
-				builder.append("-");
-			else
-				builder.append("&nbsp;");
-			for (Token partial: line.getTokens()) {
-				if (partial.isEmphasized())
-					builder.append("<span class='emphasize'>");
-				else
-					builder.append("<span>");
-				String content = StringUtils.replaceChars(partial.getContent(), '\r', ' ');
-				builder.append(Strings.escapeMarkup(content, false, false));
-				builder.append("</span>");
-			}
-			builder.append("</td></tr>");
-			index++;
+			prevBlock = block;
 		}
 		return builder.toString();
 	}
-	
-	private WebMarkupContainer newHunkHead(String id, final int index) {
-		final DiffHunk hunk = hunks.get(index);
-		final WebMarkupContainer hunkHead = new WebMarkupContainer(id) {
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(index == 0 || hunk.getNewStart() > hunks.get(index-1).getNewEnd());
-			}
-			
-		};
-		hunkHead.add(new AjaxLink<Void>("expand") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				if (index == 0) {
-					expandAbove(target, index, 0);
-					target.add(hunkHead);
-				} else {
-					int diffPos = locateDiffPos(hunk.getNewStart(), DiffLine.Action.DELETE);
-					expandBelow(target, index-1, diffPos);
-					
-					diffPos = locateDiffPos(hunks.get(index-1).getNewEnd(), DiffLine.Action.DELETE);
-					expandAbove(target, index, diffPos);
-					
-					target.add(hunkHead);
-					target.add(findPrevVisibleHunkHead(index));
-				}
-				target.add(head);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				if (index == 0) {
-					setVisible(hunk.getOldStart() != 0 && hunk.getNewStart() != 0);
-				} else {
-					DiffHunk previousHunk = hunks.get(index-1);
-					setVisible(previousHunk.getNewEnd() < hunk.getNewStart());
-				}
-			}
-			
-		}.add(new TooltipBehavior(Model.of("Show more lines"))));
-		
-		hunkHead.add(new Label("content", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				int oldStart = hunk.getOldStart();
-				int newStart = hunk.getNewStart();
-				int oldEnd = hunk.getOldEnd();
-				int newEnd = hunk.getNewEnd();
-				for (int i=index+1; i<hunks.size(); i++) {
-					DiffHunk nextHunk = hunks.get(i);
-					if (newEnd == nextHunk.getNewStart()) {
-						newEnd = nextHunk.getNewEnd();
-						oldEnd = nextHunk.getOldEnd();
-					} else {
-						break;
-					}
-				}
-				return DiffHunk.describe(oldStart, newStart, oldEnd, newEnd);
-			}
-			
-		}));
-		
-		hunkHead.setOutputMarkupId(true);
-		
-		return hunkHead;
-	}
-
-	private Component newCommentsRow(String id, final int index) {
-		WebMarkupContainer row = new WebMarkupContainer(commentsView.newChildId()) {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				
-				if (event.getPayload() instanceof CommentRemoved) {
-					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-					commentsView.remove(this);
-					commentsModel.getObject().get(index).remove(commentRemoved.getComment());
-					commentRemoved.getTarget().appendJavaScript(String.format("gitplex.textdiff.afterRemoveComment(%d);", index));
-				} 
-			}
-			
-		};
-		row.add(AttributeAppender.append("data-line", "diffline-" + index));
-		
-		row.add(new ListView<InlineComment>("comments", new LoadableDetachableModel<List<InlineComment>>() {
-
-			@Override
-			protected List<InlineComment> load() {
-				return commentsModel.getObject().get(index); 
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<InlineComment> item) {
-				item.add(new UserLink("avatar", new UserModel(item.getModelObject().getUser()), AvatarMode.AVATAR));
-				item.add(new CommentPanel("comment", item.getModel()).setOutputMarkupId(true));
-				if (item.getModelObject().equals(commentSupport.getConcernedComment()))
-					item.add(AttributeAppender.append("class", " concerned"));
-			}
-			
-		});
-		
-		return row;
-	}
-	
-	private Component newCommentsView() {
-		commentsView = new RepeatingView("lines");
-		
-		if (commentSupport != null) {
-			for (int index: commentsModel.getObject().keySet()) 
-				commentsView.add(newCommentsRow(commentsView.newChildId(), index));
-		}
-		
-		return commentsView;
-	}
-	
-	@Override
-	protected void onBeforeRender() {
-		replace(newCommentsView());
-		
-		super.onBeforeRender();
-	}
-
-	private void showComments(AjaxRequestTarget target) {
-		showComments = true;
-		target.add(head);
-
-		target.appendJavaScript("$('.comments.line').show();");
-	}
-
-	private void hideComments(AjaxRequestTarget target) {
-		showComments = false;
-		target.add(head);
-		
-		target.appendJavaScript("$('.comments.line').hide();");
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
-		
-		response.render(OnDomReadyHeaderItem.forScript(
-				String.format("gitplex.textdiff.placeComments('%s');", getMarkupId())));
-	}
-	
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		allowToAddCommentModel.detach();
-		commentsModel.detach();
-		
 		super.onDetach();
 	}
-	
-	private int locateDiffPos(int lineNo, DiffLine.Action excludeAction) {
-		int index = 0;
-		for (int i=0; i<diffs.size(); i++) {
-			if (index < lineNo) {
-				if (diffs.get(i).getAction() != excludeAction)
-					index++;
-			} else {
-				return i;
-			}
-		}
-		throw new IllegalStateException();
-	}
-	
-	private void expandBelow(AjaxRequestTarget target, int hunkIndex, int diffLimit) {
-		DiffHunk hunk = hunks.get(hunkIndex);
-		
-		int diffPos = locateDiffPos(hunk.getNewEnd(), DiffLine.Action.DELETE);
-		for (int i = diffPos; i<diffs.size(); i++) {
-			if (i-diffPos < CONTEXT_SIZE*2 && i<diffLimit) {
-				DiffLine line = diffs.get(i);
-				hunk.getDiffLines().add(line);
-				hunk.setNewEnd(hunk.getNewEnd()+1);
-				hunk.setOldEnd(hunk.getOldEnd()+1);
-				
-				String row = renderDiffs(Lists.newArrayList(line));
-				row = StringUtils.replace(row, "\"", "\\\"");
-				String script = String.format("$(\"%s\").insertAfter('#%s .diffline-%d')", row, getMarkupId(), i-1);
-				target.appendJavaScript(script);
-			} else {
-				break;
-			}			
-		}
-	}
-	
-	private Component findPrevVisibleHunkHead(int index) {
-		for (int i=index-1; i>=0; i--) {
-			Component hunkHead = hunksView.get(i).get("head");
-			hunkHead.configure();
-			if (hunkHead.isVisible())
-				return hunkHead;
-		}
-		throw new IllegalStateException();
-	}
-	
-	private void expandAbove(AjaxRequestTarget target, int hunkIndex, int diffLimit) {
-		DiffHunk hunk = hunks.get(hunkIndex);
-		int diffPos = locateDiffPos(hunk.getNewStart(), DiffLine.Action.DELETE);
-		for (int i=diffPos-1; i>=diffLimit; i--) {
-			if (diffPos-i <= CONTEXT_SIZE*2) {
-				hunk.setOldStart(hunk.getOldStart()-1);
-				hunk.setNewStart(hunk.getNewStart()-1);
-				DiffLine line = diffs.get(i);
-				hunk.getDiffLines().add(0, line);
-				String row = renderDiffs(Lists.newArrayList(line));
-				row = StringUtils.replace(row, "\"", "\\\"");
-				String script = String.format("$(\"%s\").insertBefore('#%s .diffline-%d')", row, getMarkupId(), i+1);
-				target.appendJavaScript(script);
-			} else {
-				break;
-			}
-		}
-	}	
-	
+
 }

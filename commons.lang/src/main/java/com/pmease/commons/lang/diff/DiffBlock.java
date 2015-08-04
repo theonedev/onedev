@@ -55,7 +55,7 @@ public class DiffBlock implements Serializable {
 			return newStart + lines.size();
 	}
 	
-	public List<DiffLine> toDiffLines() {
+	public List<DiffLine> asDiffLines() {
 		List<DiffLine> diffLines = new ArrayList<>();
 		int oldLineNo = oldStart;
 		int newLineNo = newStart;

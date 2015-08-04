@@ -25,7 +25,7 @@ public class AroundContext implements Serializable {
 		return diffLines;
 	}
 
-	public void setDiffs(List<DiffLine> diffLines) {
+	public void setDiffLines(List<DiffLine> diffLines) {
 		this.diffLines = diffLines;
 	}
 

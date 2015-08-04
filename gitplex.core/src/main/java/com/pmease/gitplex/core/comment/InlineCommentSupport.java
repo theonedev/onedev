@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.util.diff.AroundContext;
+import com.pmease.commons.lang.diff.AroundContext;
 
 public interface InlineCommentSupport extends Serializable {
 	

@@ -60,9 +60,9 @@ public class BlobDiffPanel extends Panel {
 		if (blob.getText() != null) {
 			if (blob.getText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 				add(newFragment("Unable to diff as the file is too large.", true));
-			} else if (change.getDiffs().size() > TextDiffPanel.MAX_DISPLAY_SIZE) {
+			} else if (change.getDiffBlocks().size() > TextDiffPanel.MAX_DISPLAY_SIZE) {
 				add(newFragment("Diff is too large to be displayed.", true));
-			} else if (change.getDiffs().isEmpty()) {
+			} else if (change.getDiffBlocks().isEmpty()) {
 				if (change.getOldBlobIdent().path != null)
 					add(newFragment("Empty file removed.", false));
 				else
@@ -98,9 +98,9 @@ public class BlobDiffPanel extends Panel {
 			if (change.getOldText() != null && change.getNewText() != null) {
 				if (change.getOldText().getLines().size() + change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 					add(newFragment("Unable to diff as the file is too large.", true));
-				} else if (change.getDiffs().size() > TextDiffPanel.MAX_DISPLAY_SIZE) {
+				} else if (change.getDiffBlocks().size() > TextDiffPanel.MAX_DISPLAY_SIZE) {
 					add(newFragment("Diff is too large to be displayed.", true));
-				} else if (change.getDiffs().isEmpty()) {
+				} else if (change.getDiffBlocks().isEmpty()) {
 					add(newFragment("File is identical if " + change.getLineProcessor().getName() + ".", false));
 				} else {
 					add(new TextDiffPanel(CONTENT_ID, repoModel, change, unified, commentSupport));

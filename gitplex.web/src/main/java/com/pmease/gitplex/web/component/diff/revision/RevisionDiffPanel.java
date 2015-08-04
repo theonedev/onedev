@@ -97,7 +97,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 						@Override
 						public Void call() throws Exception {
-							change.getDiffs();
+							change.getDiffBlocks();
 							return null;
 						}
 		    			
@@ -118,7 +118,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			    		BlobChange change = it.next();
 			    		if (change.getType() == ChangeType.MODIFY 
 			    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
-			    				&& change.getDiffs().isEmpty()) {
+			    				&& change.getDiffBlocks().isEmpty()) {
 			    			Blob.Text oldText = change.getOldText();
 			    			Blob.Text newText = change.getNewText();
 			    			if (oldText != null && newText != null 

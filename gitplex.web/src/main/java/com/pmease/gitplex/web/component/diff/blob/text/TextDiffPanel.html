@@ -1,54 +1,14 @@
 <wicket:panel>
 	<div class="text-diff">
-		<div wicket:id="head" class="head clearfix">
-			<div class="pull-left">
-				<span wicket:id="diffStat"></span>
-				<span wicket:id="title" class="title"></span>
-			</div>
-			<div class="pull-right">
-				<span wicket:id="viewFile" class="btn btn-xs btn-default" title="View full file"><i class="fa fa-file-text-o"></i> </span>
-			</div>
-			<div class="pull-right">
-				<span wicket:id="showComments" class="btn btn-default btn-xs show-comments" title="Show comments"><i class="fa fa-eye"></i> <i class="fa fa-comments"></i></span>
-				<span wicket:id="hideComments" class="btn btn-default btn-xs hide-comments" title="Hide comments"><i class="fa fa-eye-slash"></i> <i class="fa fa-comments"></i></span>
+		<div class="head">
+			<div wicket:id="diffStat" class="pull-left"></div>
+			<div wicket:id="title" class="pull-left"></div>
+			<div class="actions pull-right">
+				<a wicket:id="viewFile"><i class="fa fa-file-text-o"></i></a>
 			</div>
 		</div>
 		<table class="body">
-			<wicket:container wicket:id="hunks">
-				<tr wicket:id="head" class="line hunk-head">
-					<td colspan="2" class="action">
-						<a wicket:id="expand"><i class="fa fa-sort"></i></a>
-					</td>
-					<td class="content"><span wicket:id="content"></span></td>
-				</tr>
-				<wicket:container wicket:id="body"></wicket:container>
-			</wicket:container>
-			<tr wicket:id="lastRow" class="line hunk-head">
-				<td colspan="2" class="action"><a wicket:id="expand"><i class="fa fa-sort"></i></a></td>
-				<td class="content">&nbsp;</td>
-			</tr>
+			<wicket:container wicket:id="diffs"></wicket:container>
 		</table>
-		
-		<div class="comments-placeholder hidden">
-			<table wicket:id="lines" class="comments">
-				<tr wicket:id="comments">
-					<td class="avatar">
-						<div wicket:id="avatar"></div>
-					</td>
-					<td class="comment">
-						<div wicket:id="comment"></div>
-					</td>
-				</tr>
-			</table>
-			<form wicket:id="addComment" class="add-comment leave-confirm">
-				<textarea wicket:id="input" rows="10" class="form-control focusable"></textarea>
-				<div wicket:id="feedback"></div>
-				<div class="actions">
-					<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware leave-confirm">Comment on this line</button>
-					&nbsp;&nbsp;&nbsp;&nbsp;
-					<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
-				</div>
-			</form>
-		</div>
 	</div>
 </wicket:panel>

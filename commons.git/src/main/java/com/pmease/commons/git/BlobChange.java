@@ -12,6 +12,7 @@ import org.eclipse.jgit.lib.AnyObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.lang.diff.DiffBlock;
+import com.pmease.commons.lang.diff.DiffLine;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
 
@@ -24,7 +25,9 @@ public abstract class BlobChange implements Serializable {
 	
 	private final BlobIdent newBlobIdent;
 	
-	private transient List<DiffBlock> diffs;
+	private transient List<DiffBlock> diffBlocks;
+	
+	private transient List<DiffLine> diffLines;
 	
 	public BlobChange(String oldCommitHash, String newCommitHash, DiffEntry diffEntry) {
 		type = diffEntry.getChangeType();
@@ -55,58 +58,71 @@ public abstract class BlobChange implements Serializable {
 	public BlobIdent getNewBlobIdent() {
 		return newBlobIdent;
 	}
+	
+	public BlobIdent getBlobIdent() {
+		return newBlobIdent.path!=null? newBlobIdent: oldBlobIdent;
+	}
 
-	public List<DiffBlock> getDiffs() {
-		if (diffs == null) {
+	public List<DiffBlock> getDiffBlocks() {
+		if (diffBlocks == null) {
 			try {
 				if (type == ChangeType.ADD) {
 					if (getNewText() != null) {
 						List<String> newLines = getNewText().getLines(getLineProcessor());
 						if (newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> oldLines = new ArrayList<>();
-							diffs = DiffUtils.diff(oldLines, null, newLines, newBlobIdent.getFileName());
+							diffBlocks = DiffUtils.diff(oldLines, null, newLines, newBlobIdent.getFileName());
 						} else {
-							diffs = new ArrayList<>();
+							diffBlocks = new ArrayList<>();
 						}
 					} else {
-						diffs = new ArrayList<>();
+						diffBlocks = new ArrayList<>();
 					}
 				} else if (type == ChangeType.DELETE) {
 					if (getOldText() != null) {
 						List<String> oldLines = getOldText().getLines(getLineProcessor());
 						if (oldLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> newLines = new ArrayList<>();
-							diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, null);
+							diffBlocks = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, null);
 						} else {
-							diffs = new ArrayList<>();
+							diffBlocks = new ArrayList<>();
 						}
 					} else {
-						diffs = new ArrayList<>();
+						diffBlocks = new ArrayList<>();
 					}
 				} else if (oldBlobIdent.id != null && oldBlobIdent.id.equals(newBlobIdent.id)) {
-					diffs = new ArrayList<>();
+					diffBlocks = new ArrayList<>();
 				} else {
 					if (getOldText() != null && getNewText() != null) {
 						List<String> oldLines = getOldText().getLines(getLineProcessor());
 						List<String> newLines = getNewText().getLines(getLineProcessor());
 						if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE)
-							diffs = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, newBlobIdent.getFileName());
+							diffBlocks = DiffUtils.diff(oldLines, oldBlobIdent.getFileName(), newLines, newBlobIdent.getFileName());
 						else 
-							diffs = new ArrayList<>();
+							diffBlocks = new ArrayList<>();
 					} else {
-						diffs = new ArrayList<>();
+						diffBlocks = new ArrayList<>();
 					}
 				}
 			} catch (Exception e) {
 				throw new RuntimeException("Error calculating diff of file: " + getPath(), e);
 			}
 		}
-		return diffs;
+		return diffBlocks;
+	}
+	
+	public List<DiffLine> getDiffLines() {
+		if (diffLines == null) {
+			diffLines = new ArrayList<>();
+			for (DiffBlock block: getDiffBlocks()) 
+				diffLines.addAll(block.asDiffLines());
+		}
+		return diffLines;
 	}
 	
 	public int getAdditions() {
 		int additions = 0;
-		for (DiffBlock diff: getDiffs()) {
+		for (DiffBlock diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.INSERT)
 				additions += diff.getLines().size();
 		}
@@ -115,7 +131,7 @@ public abstract class BlobChange implements Serializable {
 
 	public int getDeletions() {
 		int deletions = 0;
-		for (DiffBlock diff: getDiffs()) {
+		for (DiffBlock diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.DELETE)
 				deletions += diff.getLines().size();
 		}

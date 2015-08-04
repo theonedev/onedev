@@ -1,8 +1,5 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
 
-import static com.pmease.commons.util.diff.DiffLine.Action.ADD;
-import static com.pmease.commons.util.diff.DiffLine.Action.DELETE;
-
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -24,8 +21,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.util.diff.DiffLine;
-import com.pmease.commons.util.diff.Token;
+import com.pmease.commons.lang.diff.DiffLine;
+import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
+import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
@@ -134,7 +132,7 @@ public class InlineCommentActivityPanel extends Panel {
 
 			@Override
 			public List<DiffLine> getObject() {
-				return commentModel.getObject().getContext().getDiffs();
+				return commentModel.getObject().getContext().getDiffLines();
 			}
 			
 		}) {
@@ -143,12 +141,12 @@ public class InlineCommentActivityPanel extends Panel {
 			protected void populateItem(final ListItem<DiffLine> item) {
 				DiffLine diffLine = item.getModelObject();
 
-				if (diffLine.getAction() == ADD) {
+				if (diffLine.getOperation() == Operation.INSERT) {
 					item.add(AttributeAppender.append("class", " new"));
 					item.add(new Label("oldLineNo"));
 					item.add(new Label("newLineNo", diffLine.getNewLineNo() + 1));
 					item.add(new Label("diffMark", "+"));
-				} else if (diffLine.getAction() == DELETE) {
+				} else if (diffLine.getOperation() == Operation.DELETE) {
 					item.add(AttributeAppender.append("class", " old"));
 					item.add(new Label("oldLineNo", diffLine.getOldLineNo() + 1));
 					item.add(new Label("newLineNo"));
@@ -159,18 +157,18 @@ public class InlineCommentActivityPanel extends Panel {
 					item.add(new Label("newLineNo", diffLine.getNewLineNo()+1));
 					item.add(new Label("diffMark", " "));
 				}
-				item.add(new ListView<Token>("partials", diffLine.getTokens()) {
+				item.add(new ListView<CmToken>("tokens", diffLine.getTokens()) {
 
 					@Override
-					protected void populateItem(ListItem<Token> item) {
-						Token partial = item.getModelObject();
+					protected void populateItem(ListItem<CmToken> item) {
+						CmToken token = item.getModelObject();
 						Label label;
-						if (partial.getContent().equals("\r"))
-							label = new Label("partial", " ");
+						if (token.getText().equals("\r"))
+							label = new Label("token", " ");
 						else
-							label = new Label("partial", partial.getContent());
-						if (partial.isEmphasized())
-							label.add(AttributeAppender.append("class", "emphasize"));
+							label = new Label("token", token.getText());
+						if (token.isChanged())
+							label.add(AttributeAppender.append("class", "changed"));
 						item.add(label);
 					}
 					

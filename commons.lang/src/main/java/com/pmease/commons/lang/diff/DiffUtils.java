@@ -22,8 +22,6 @@ public class DiffUtils {
 
 	public static final int MAX_DIFF_SIZE = 65535;
 	
-	private static final long TOKEN_CHANGE_CALC_TIMEOUT = 1000;
-	
 	private static final Pattern pattern = Pattern.compile("\\w+");
 	
 	private static List<String> splitByWords(String line) {
@@ -118,50 +116,46 @@ public class DiffUtils {
 		for (DiffBlock block: diffBlocks) {
 			if (block.getOperation() == Operation.INSERT && prevBlock != null 
 					&& prevBlock.getOperation() == Operation.DELETE) {
-				long time = System.currentTimeMillis();
-				int nextInsert = 0;
-				for (List<CmToken> deleteLine: prevBlock.getLines()) {
-					for (int i=nextInsert; i<block.getLines().size(); i++) {
-						List<CmToken> insertLine = block.getLines().get(i);
-						TokensToCharsResult<CmToken> result2 = tokensToChars(deleteLine, insertLine);						
-						diffs = dmp.diff_main(result2.chars1, result2.chars2, false);
-						int equal = 0;
-						int total = 0;
-						for (Diff diff: diffs) {
-							for (int j=0; j<diff.text.length(); j++) {
-								int pos = diff.text.charAt(j);
-								CmToken token = result2.tokenArray.get(pos);
-								if (StringUtils.isNotBlank(token.getText())) {
-									total += token.getText().length();
-									if (diff.operation == Operation.EQUAL)
-										equal += token.getText().length();
-								}
+				int numOfCompareLines = prevBlock.getLines().size();
+				if (numOfCompareLines > block.getLines().size())
+					numOfCompareLines = block.getLines().size();
+				for (int i=0; i<numOfCompareLines; i++) {
+					List<CmToken> insertLine = block.getLines().get(i);
+					List<CmToken> deleteLine = prevBlock.getLines().get(i);
+					
+					TokensToCharsResult<CmToken> result2 = tokensToChars(deleteLine, insertLine);						
+					diffs = dmp.diff_main(result2.chars1, result2.chars2, false);
+					int equal = 0;
+					int total = 0;
+					for (Diff diff: diffs) {
+						for (int j=0; j<diff.text.length(); j++) {
+							int pos = diff.text.charAt(j);
+							CmToken token = result2.tokenArray.get(pos);
+							if (StringUtils.isNotBlank(token.getText())) {
+								total += token.getText().length();
+								if (diff.operation == Operation.EQUAL)
+									equal += token.getText().length();
 							}
 						}
-						if (equal*3 >= total) {
-							oldLineNo = 0;
-							newLineNo = 0;
-							for (Diff diff: diffs) {
-								if (diff.operation == Operation.EQUAL) {
-									oldLineNo += diff.text.length();
-									newLineNo += diff.text.length();
-								} else if (diff.operation == Operation.INSERT) {
-									for (int j=0; j<diff.text.length(); j++) {
-										insertLine.get(newLineNo).setChanged(true);
-										newLineNo++;
-									}
-								} else {
-									for (int j=0; j<diff.text.length(); j++) {
-										deleteLine.get(oldLineNo).setChanged(true);
-										oldLineNo++;
-									}
+					}
+					if (equal*3 >= total) {
+						oldLineNo = 0;
+						newLineNo = 0;
+						for (Diff diff: diffs) {
+							if (diff.operation == Operation.EQUAL) {
+								oldLineNo += diff.text.length();
+								newLineNo += diff.text.length();
+							} else if (diff.operation == Operation.INSERT) {
+								for (int j=0; j<diff.text.length(); j++) {
+									insertLine.get(newLineNo).setChanged(true);
+									newLineNo++;
+								}
+							} else {
+								for (int j=0; j<diff.text.length(); j++) {
+									deleteLine.get(oldLineNo).setChanged(true);
+									oldLineNo++;
 								}
 							}
-							nextInsert = i+1;
-							break;
-						} else if (System.currentTimeMillis()-time > TOKEN_CHANGE_CALC_TIMEOUT) {
-							nextInsert = block.getLines().size();
-							break;
 						}
 					}
 				}
@@ -174,7 +168,7 @@ public class DiffUtils {
 	public static AroundContext around(List<DiffBlock> diffBlocks, int oldLine, int newLine, int contextSize) {
 		List<DiffLine> diffLines = new ArrayList<>();
 		for (DiffBlock diffBlock: diffBlocks)
-			diffLines.addAll(diffBlock.toDiffLines());
+			diffLines.addAll(diffBlock.asDiffLines());
 		
 		List<DiffLine> contextDiffs = new ArrayList<>();
 		int index = -1;
@@ -232,12 +226,12 @@ public class DiffUtils {
 	}
 	
 	public static Map<Integer, Integer> mapLines(List<String> oldLines, List<String> newLines) {
-		return mapLines(simpleDiff(oldLines, newLines));
+		return mapLines(diff(oldLines, null, newLines, null));
 	}
 	
-	public static Map<Integer, Integer> mapLines(List<SimpleDiffBlock> diffBlocks) {
+	public static Map<Integer, Integer> mapLines(List<DiffBlock> diffBlocks) {
 		Map<Integer, Integer> lineMapping = new HashMap<Integer, Integer>();
-		for (SimpleDiffBlock diffBlock: diffBlocks) {
+		for (DiffBlock diffBlock: diffBlocks) {
 			if (diffBlock.getOperation() == Operation.EQUAL) {
 				for (int i=0; i<diffBlock.getLines().size(); i++)
 					lineMapping.put(i+diffBlock.getOldStart(), i+diffBlock.getNewStart());
