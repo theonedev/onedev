@@ -2,7 +2,11 @@ package com.pmease.commons.lang.tokenizers;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
 
 /**
  * Represents a CodeMirror token
@@ -144,6 +148,22 @@ public class CmToken implements Serializable {
 		return Objects.hashCode(type, text);
 	}
 
+	public String toHtml() {
+		String escapedText = StringEscapeUtils.escapeHtml4(text);
+		if (!changed && StringUtils.isBlank(type)) {
+			return escapedText;
+		} else {
+			StringBuilder builder = new StringBuilder("<span class='");
+			for (String each: Splitter.on(" ").trimResults().omitEmptyStrings().split(type)) 
+				builder.append("cm-" + each + " ");
+			if (changed)
+				builder.append("changed");
+			builder.append("'>").append(escapedText).append("</span>");
+			return builder.toString();
+		}
+		
+	}
+	
 	@Override
 	public String toString() {
 		if (changed)

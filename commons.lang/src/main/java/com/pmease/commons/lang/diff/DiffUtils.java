@@ -120,10 +120,10 @@ public class DiffUtils {
 		for (DiffBlock block: diffBlocks) {
 			if (block.getOperation() == Operation.INSERT && prevBlock != null 
 					&& prevBlock.getOperation() == Operation.DELETE) {
-				int numOfCompareLines = prevBlock.getLines().size();
-				if (numOfCompareLines > block.getLines().size())
-					numOfCompareLines = block.getLines().size();
-				for (int i=0; i<numOfCompareLines; i++) {
+				int min = prevBlock.getLines().size();
+				if (min > block.getLines().size())
+					min = block.getLines().size();
+				for (int i=0; i<min; i++) {
 					List<CmToken> insertLine = block.getLines().get(i);
 					List<CmToken> deleteLine = prevBlock.getLines().get(i);
 					
