@@ -24,7 +24,7 @@ public class DiffUtils {
 	
 	private static final Pattern pattern = Pattern.compile("\\w+");
 	
-	private static List<String> splitByWords(String line) {
+	private static List<String> splitByWord(String line) {
 		List<String> tokens = new ArrayList<>();
 		Matcher matcher = pattern.matcher(line);
 		int lastEnd = 0;
@@ -52,7 +52,7 @@ public class DiffUtils {
 					if (token.getType().equals("") || token.isComment() || token.isString() 
 							|| token.isMeta() || token.isLink() || token.isAttribute() 
 							|| token.isProperty()) {
-						for (String each: splitByWords(token.getText()))
+						for (String each: splitByWord(token.getText()))
 							refinedLine.add(new CmToken(token.getType(), each));
 					} else {
 						refinedLine.add(token);
@@ -65,12 +65,16 @@ public class DiffUtils {
 			tokenizedLines = new ArrayList<>();
 			for (String line: lines) {
 				List<CmToken> tokenizedLine = new ArrayList<>();
-				for (String each: splitByWords(line)) 
+				for (String each: splitByWord(line)) 
 					tokenizedLine.add(new CmToken(each, ""));
 				tokenizedLines.add(tokenizedLine);
 			}
 			return tokenizedLines;
 		}
+	}
+	
+	public static List<DiffBlock> diff(List<String> oldLines, List<String> newLines) {
+		return diff(oldLines, null, newLines, null);
 	}
 	
 	/**
@@ -196,37 +200,8 @@ public class DiffUtils {
 		return new AroundContext(contextDiffs, index-start, start>0, end<diffLines.size()-1);
 	}
 	
-	public static List<SimpleDiffBlock> simpleDiff(List<String> oldLines, List<String> newLines) {
-		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_SIZE, 
-				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
-		
-		DiffMatchPatch dmp = new DiffMatchPatch();
-		TokensToCharsResult<String> result = tokensToChars(oldLines, newLines);
-		
-		List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result.chars1, result.chars2, false);
-
-		List<SimpleDiffBlock> diffBlocks = new ArrayList<>();
-		int oldLineNo = 0;
-		int newLineNo = 0;
-		for (Diff diff : diffs) {
-			List<String> lines = new ArrayList<>();
-			for (int i=0; i< diff.text.length(); i++)
-				lines.add(result.tokenArray.get(diff.text.charAt(i)));
-			diffBlocks.add(new SimpleDiffBlock(diff.operation, lines, oldLineNo, newLineNo));
-			if (diff.operation == Operation.EQUAL) {
-				oldLineNo += diff.text.length();
-				newLineNo += diff.text.length();
-			} else if (diff.operation == Operation.INSERT) {
-				newLineNo += diff.text.length();
-			} else {
-				oldLineNo += diff.text.length();
-			}
-		}
-		return diffBlocks;
-	}
-	
 	public static Map<Integer, Integer> mapLines(List<String> oldLines, List<String> newLines) {
-		return mapLines(diff(oldLines, null, newLines, null));
+		return mapLines(diff(oldLines, newLines));
 	}
 	
 	public static Map<Integer, Integer> mapLines(List<DiffBlock> diffBlocks) {

@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.component.diff.blob.text;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -15,6 +16,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
+import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
@@ -59,23 +61,54 @@ public class TextDiffPanel extends Panel {
 		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params)
 				.add(AttributeAppender.append("title", "View file at commit " + change.getBlobIdent().revision)));
 		
-		add(new Label("diffs", renderDiffs()));
+		add(new Label("diffLines", renderDiffs()));
 	}
 	
 	private String renderDiffs() {
-		StringBuilder builder = new StringBuilder();
-		DiffBlock prevBlock = null;
-		for (DiffBlock block: change.getDiffBlocks()) {
+		int contextSize = DEFAULT_CONTEXT_SIZE;
+		StringBuilder builder = new StringBuilder("<tr class='diff-line'>");
+		for (int i=0; i<change.getDiffBlocks().size(); i++) {
+			DiffBlock block = change.getDiffBlocks().get(i);
 			if (block.getOperation() == Operation.EQUAL) {
-				
+				if (i == 0) {
+					int start = block.getLines().size()-contextSize;
+					if (start < 0)
+						start=0;
+					for (int j=start; j<block.getLines().size(); j++) 
+						appendEqual(builder, block.getLines().get(j));
+				} else if (i == change.getDiffBlocks().size()-1) {
+					int end = block.getLines().size();
+					if (end > contextSize)
+						end = contextSize;
+					for (int j=0; j<end; j++)
+						appendEqual(builder, block.getLines().get(j));
+				} else if (2*contextSize < block.getLines().size()) {
+					for (int j=0; j<contextSize; j++)
+						appendEqual(builder, block.getLines().get(j));
+					for (int j=block.getLines().size()-1; j>=block.getLines().size()-contextSize; j--)
+						appendEqual(builder, block.getLines().get(j));
+				} else {
+					for (int j=0; j<block.getLines().size(); j++)
+						appendEqual(builder, block.getLines().get(j));
+				}
+			} else if (block.getOperation() == Operation.INSERT) {
+				for (int j=0; j<block.getLines().size(); j++) {
+					
+				}
 			} else {
-				
+				for (int j=0; j<block.getLines().size(); j++) {
+					
+				}
 			}
-			prevBlock = block;
 		}
+		builder.append("</tr>");
 		return builder.toString();
 	}
 
+	private void appendEqual(StringBuilder builder, List<CmToken> line) {
+		
+	}
+	
 	@Override
 	protected void onDetach() {
 		repoModel.detach();

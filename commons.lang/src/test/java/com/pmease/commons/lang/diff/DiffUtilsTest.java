@@ -1,6 +1,7 @@
 package com.pmease.commons.lang.diff;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -88,41 +89,6 @@ public class DiffUtilsTest extends AppLoaderMocker {
 				aroundContext.getDiffLines().get(3).toString());
 		assertEquals(" 	}", 
 				aroundContext.getDiffLines().get(4).toString());
-	}
-	
-	@Test
-	public void testSimpleDiff() {
-		List<String> oldLines = Lists.newArrayList(
-				"public class HelloWorld {",
-				"	public static void main(String[] args) {",
-				"		System.out.println(\"hello robin\");",
-				"	}",
-				"}");
-		List<String> newLines = Lists.newArrayList(
-				"public class HelloWorld {",
-				"	public static void main(String[] args) {",
-				"		System.out.println(\"hello steve\");",
-				"	}",
-				"}");
-		List<SimpleDiffBlock> diffBlocks = DiffUtils.simpleDiff(oldLines, newLines);
-		assertEquals(""
-				+ " public class HelloWorld {\n"
-				+ " 	public static void main(String[] args) {\n", diffBlocks.get(0).toString());
-		assertEquals(""
-				+ "-		System.out.println(\"hello robin\");\n", diffBlocks.get(1).toString());
-		assertEquals(""
-				+ "+		System.out.println(\"hello steve\");\n", diffBlocks.get(2).toString());
-		assertEquals(""
-				+ " 	}\n"
-				+ " }\n", diffBlocks.get(3).toString());
-		assertEquals(0, diffBlocks.get(0).getOldStart());
-		assertEquals(0, diffBlocks.get(0).getNewStart());
-		assertEquals(2, diffBlocks.get(1).getOldStart());
-		assertEquals(2, diffBlocks.get(1).getNewStart());
-		assertEquals(3, diffBlocks.get(2).getOldStart());
-		assertEquals(2, diffBlocks.get(2).getNewStart());
-		assertEquals(3, diffBlocks.get(3).getOldStart());
-		assertEquals(3, diffBlocks.get(3).getNewStart());
 	}
 	
 	@Test
