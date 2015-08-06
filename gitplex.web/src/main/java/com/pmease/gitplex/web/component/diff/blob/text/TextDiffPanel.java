@@ -102,8 +102,10 @@ public class TextDiffPanel extends Panel {
 				StringBuilder builder = new StringBuilder();
 				appendEquals(builder, index, lastContextSize, contextSize);
 				
-				String script = String.format("$('#%s expander%d').replaceWith('%s');", 
-						getMarkupId(), index, StringUtils.replace(builder.toString(), "'", "\\'"));
+				String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
+				expanded = StringUtils.replace(expanded, "\n", "");
+				String script = String.format("$('#%s .expander%d').replaceWith(\"%s\");", 
+						getMarkupId(), index, expanded);
 				target.appendJavaScript(script);
 			}
 
@@ -293,13 +295,13 @@ public class TextDiffPanel extends Panel {
 		
 		String script = String.format("javascript: $('#%s')[0].expander(%d);", getMarkupId(), blockIndex);
 		if (unified) {
-			builder.append("<td colspan='2' class='expander'><a class='expander' title='Show more lines' href='")
-					.append(script).append("'><i class='fa fa-expand'></i></a></td>");
+			builder.append("<td colspan='2' class='expander'><a class='expander' title='Show more lines' href=\"")
+					.append(script).append("\"><i class='fa fa-expand'></i></a></td>");
 			builder.append("<td class='skipped'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
-			builder.append("<td class='expander'><a class='expander' title='Show more lines' href='").append(script)
-					.append("'><i class='fa fa-expand'></i></a></td>");
+			builder.append("<td class='expander'><a class='expander' title='Show more lines' href=\"").append(script)
+					.append("\"><i class='fa fa-expand'></i></a></td>");
 			builder.append("<td class='skipped' colspan='3'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		}

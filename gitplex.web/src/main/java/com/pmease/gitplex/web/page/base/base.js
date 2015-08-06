@@ -56,6 +56,6 @@ $(document).ready(function() {
 		$(document).mouseup(function() {
 			gitplex.expandable.mouseDown = false;
 		});		
-		gitplex.expandable.check();
+//		gitplex.expandable.check();
 	});
 });
