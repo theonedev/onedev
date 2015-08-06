@@ -23,6 +23,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
@@ -84,6 +86,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private LineProcessOptionMenu lineProcessOptionMenu;
 	
 	private DiffModePanel diffModePanel;
+	
+	private RevisionDiffPanel revisionDiffPanel;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -348,8 +352,7 @@ public class RequestComparePage extends RequestDetailPage {
 					PageParameters params = getPageParameters();
 					if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(NEW_PARAM).toString() == null) {
 						setVisible(true);
-						/*
-						compareResult.visitChildren(new IVisitor<Component, Void>() {
+						revisionDiffPanel.visitChildren(new IVisitor<Component, Void>() {
 
 							@Override
 							public void component(Component object, IVisit<Void> visit) {
@@ -359,7 +362,6 @@ public class RequestComparePage extends RequestDetailPage {
 							}
 							
 						});
-						*/
 					}
 					
 				}
@@ -379,6 +381,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected void onOptionChange(AjaxRequestTarget target) {
+				target.add(revisionDiffPanel);
 			}
 			
 		};
@@ -389,6 +392,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected void onModeChange(AjaxRequestTarget target) {
+				target.add(revisionDiffPanel);
 			}
 			
 		});
@@ -450,7 +454,7 @@ public class RequestComparePage extends RequestDetailPage {
 			};
 		};
 		
-		add(new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, commentSupport) {
+		add(revisionDiffPanel = new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, commentSupport) {
 
 			@Override
 			protected LineProcessor getLineProcessor() {
@@ -463,6 +467,7 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		});
+		revisionDiffPanel.setOutputMarkupId(true);
 	}
 	
 	@Override

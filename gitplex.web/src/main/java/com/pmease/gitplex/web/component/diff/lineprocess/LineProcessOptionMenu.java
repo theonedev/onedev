@@ -44,8 +44,6 @@ public abstract class LineProcessOptionMenu extends MenuPanel {
 				@Override
 				protected void onClick(AjaxRequestTarget target) {
 					LineProcessOptionMenu.this.option = option;
-					hide(target);
-					
 					onOptionChange(target);
 				}
 				

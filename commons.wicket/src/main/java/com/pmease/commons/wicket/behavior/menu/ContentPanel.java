@@ -25,6 +25,8 @@ abstract class ContentPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		setOutputMarkupId(true);
+		
 		add(new ListView<MenuItem>("items", new LoadableDetachableModel<List<MenuItem>>() {
 
 			@Override

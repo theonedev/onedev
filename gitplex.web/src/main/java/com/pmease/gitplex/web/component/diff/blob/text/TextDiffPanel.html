@@ -1,10 +1,10 @@
 <wicket:panel>
-	<div class="text-diff cm-s-eclipse">
+	<div wicket:id="container" class="text-diff cm-s-eclipse">
 		<div class="head clearfix">
 			<div wicket:id="diffStat" class="pull-left"></div>
 			<div wicket:id="title" class="pull-left"></div>
 			<div class="actions pull-right">
-				<a wicket:id="viewFile"><i class="fa fa-file-text-o"></i></a>
+				<a wicket:id="viewFile" class="btn btn-xs btn-default" title="View the whole file">View</a>
 			</div>
 		</div>
 		<table class="body">

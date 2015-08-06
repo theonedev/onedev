@@ -1,5 +1,7 @@
 .text-diff {
 	border: 1px solid #D8D8D8;
+	border-radius: 4px;
+	overflow: auto;
 }
 .text-diff>.head {
 	padding: 8px;
@@ -12,44 +14,70 @@
 	margin-right: 0;
 }
 .text-diff>.body {
-	width: 100%;
-	font-size: 13px;
-}
-.text-diff>.body>tbody>tr>td {
-	padding: 4px;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	font-size: 12px;
 }
 .text-diff>.body>tbody>tr>td.number {
-	padding: 4px;
-	width: 50px;
-	border-right: 1px solid #D8D8D8;
+	padding: 0 8px;
+	width: 40px;
+	border-left: 1px solid #EEE;
+	border-right: 1px solid #EEE;
 	text-align: right;
 	font-size: 12px;
-	color: #888;
+	color: #BBB;
 }
-.text-diff>.body>tbody>tr.expander>td {
-	border-top: 1px solid #D8D8D8;
-	border-bottom: 1px solid #D8D8D8;
-	color: #888;
+.text-diff>.body>tbody>tr>td:first-child {
+	border-left: none !important;
 }
-.text-diff>.body>tbody>tr.expander:first-child>td {
-	border-top: none;
-}
-.text-diff>.body>tbody>tr.expander:last-child>td {
-	border-bottom: none;
+.text-diff>.body>tbody>tr.expander>td.skipped {
+	padding: 6px 16px;
+	background: #f4f7fb;
+	color: #999;
 }
 .text-diff>.body>tbody>tr.expander>td.expander {
-	border-right: 1px solid #D8D8D8;
+	border-right: 1px solid #EEE;
 	text-align: center;
 }
-.text-diff>.body>tbody>tr.line>td.old {
+.text-diff>.body>tbody>tr.expander>td.expander>a {
+	display: block;
+	color: #888;
+	padding: 6px 8px;
+	background: #edf2f9;
+}
+.text-diff>.body>tbody>tr.expander>td.expander>a:hover {
+	background: #4078c0;
+	color: white;
+}
+.text-diff>.body>tbody>tr.line>td.old.number {
 	background: #ffdddd;
+	border-left: 1px solid #f1c0c0;
 	border-right: 1px solid #f1c0c0;
 }
-.text-diff>.body>tbody>tr.line>td.new {
-	background: #eaffea;
+.text-diff>.body>tbody>tr.line>td.old.content {
+	background: #ffecec;
+}
+.text-diff>.body>tbody>tr.line>td.old .changed {
+	background-color: #f8cbcb;
+}
+.text-diff>.body>tbody>tr.line>td.new.number {
+	background: #dbffdb;
+	border-left: 1px solid #c1e9c1;
 	border-right: 1px solid #c1e9c1;
 }
+.text-diff>.body>tbody>tr.line>td.new.content {
+	background: #eaffea;
+}
+.text-diff>.body>tbody>tr.line>td.new .changed {
+	background-color: #a6f3a6;
+}
 .text-diff>.body>tbody>tr>td.content {
-	white-space: pre;
-	font-family: monospace;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	padding: 0 8px;
+}
+.text-diff>.body>tbody>tr.expanded>td {
+	background: #F9F9F9;
+}
+.text-diff.split>.body>tbody>tr>td.content {
+	width: 50%;
 }

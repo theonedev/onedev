@@ -8,15 +8,17 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
+import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+
 @SuppressWarnings("serial")
 class CheckComponent extends Panel {
 
-	private final CheckItem tickItem;
+	private final CheckItem checkItem;
 	
-	public CheckComponent(String id, CheckItem tickItem) {
+	public CheckComponent(String id, CheckItem checkItem) {
 		super(id);
 
-		this.tickItem = tickItem;
+		this.checkItem = checkItem;
 	}
 
 	@Override
@@ -27,7 +29,7 @@ class CheckComponent extends Panel {
 
 			@Override
 			public String getObject() {
-				if (tickItem.isChecked())
+				if (checkItem.isChecked())
 					return "fa fa-check checked check";
 				else
 					return "unchecked check";
@@ -39,7 +41,9 @@ class CheckComponent extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				tickItem.onClick(target);
+				findParent(DropdownPanel.class).hide(target);
+				target.add(findParent(ContentPanel.class));
+				checkItem.onClick(target);
 			}
 			
 		};
@@ -47,7 +51,7 @@ class CheckComponent extends Panel {
 
 			@Override
 			public String getObject() {
-				return tickItem.getLabel();
+				return checkItem.getLabel();
 			}
 			
 		}));

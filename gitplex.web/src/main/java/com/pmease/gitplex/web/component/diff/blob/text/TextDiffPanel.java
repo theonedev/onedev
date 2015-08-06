@@ -14,6 +14,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -42,7 +43,7 @@ public class TextDiffPanel extends Panel {
 
 	public static final int MAX_DISPLAY_SIZE = 5000;
 	
-	private static final int DEFAULT_CONTEXT_SIZE = 5;
+	private static final int DEFAULT_CONTEXT_SIZE = 3;
 	
 	private static final int EXPAND_CONTEXT_SIZE = 15;
 	
@@ -70,14 +71,21 @@ public class TextDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
-		add(new BlobDiffTitle("title", change));
+		WebMarkupContainer container = new WebMarkupContainer("container");
+		add(container);
+		
+		if (unified)
+			container.add(AttributeAppender.append("class", " unified"));
+		else
+			container.add(AttributeAppender.append("class", " split"));
+		
+		container.add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
+		container.add(new BlobDiffTitle("title", change));
 		
 		PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), change.getBlobIdent());
-		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params)
-				.add(AttributeAppender.append("title", "View file at commit " + change.getBlobIdent().revision)));
+		container.add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
 		
-		add(new Label("diffLines", renderDiffs()).setEscapeModelStrings(false));
+		container.add(new Label("diffLines", renderDiffs()).setEscapeModelStrings(false));
 		
 		add(new AbstractDefaultAjaxBehavior() {
 			
@@ -135,7 +143,7 @@ public class TextDiffPanel extends Panel {
 			appendExpander(builder, index, block.getLines().size() - 2*contextSize);
 			for (int j=lastContextSize; j<contextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
-			for (int j=block.getLines().size()-1-lastContextSize; j>=block.getLines().size()-contextSize; j--)
+			for (int j=block.getLines().size()-contextSize; j<block.getLines().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		} else {
 			for (int j=lastContextSize; j<block.getLines().size()-lastContextSize; j++)
@@ -282,12 +290,12 @@ public class TextDiffPanel extends Panel {
 		
 		String script = String.format("javascript: $('#%s')[0].expander(%d);", getMarkupId(), blockIndex);
 		if (unified) {
-			builder.append("<td colspan='2' class='expander'><a class='expander' href='")
+			builder.append("<td colspan='2' class='expander'><a class='expander' title='Show more lines' href='")
 					.append(script).append("'><i class='fa fa-expand'></i></a></td>");
-			builder.append("<td class='skipped'><i class='fa fa-ellipsis-h'></i> skipped")
+			builder.append("<td class='skipped'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
-			builder.append("<td class='expander'><a class='expander' href='").append(script)
+			builder.append("<td class='expander'><a class='expander' title='Show more lines' href='").append(script)
 					.append("'><i class='fa fa-expand'></i></a></td>");
 			builder.append("<td class='skipped' colspan='3'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");

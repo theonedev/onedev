@@ -6,6 +6,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
+import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+
 @SuppressWarnings("serial")
 class CheckBoxComponent extends Panel {
 
@@ -25,6 +27,8 @@ class CheckBoxComponent extends Panel {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
+				findParent(DropdownPanel.class).hide(target);
+				target.add(findParent(ContentPanel.class));
 				checkBoxItem.onUpdate(target);
 			}
 			
