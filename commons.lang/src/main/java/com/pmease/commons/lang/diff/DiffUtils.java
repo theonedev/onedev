@@ -66,7 +66,7 @@ public class DiffUtils {
 			for (String line: lines) {
 				List<CmToken> tokenizedLine = new ArrayList<>();
 				for (String each: splitByWord(line)) 
-					tokenizedLine.add(new CmToken(each, ""));
+					tokenizedLine.add(new CmToken("", each));
 				tokenizedLines.add(tokenizedLine);
 			}
 			return tokenizedLines;

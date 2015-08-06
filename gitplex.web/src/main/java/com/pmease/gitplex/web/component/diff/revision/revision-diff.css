@@ -53,4 +53,5 @@
 .revision-diff .changes>.change {
 	padding-top: 48px;
 	margin-top: -48px;
+	margin-bottom: 16px;
 }

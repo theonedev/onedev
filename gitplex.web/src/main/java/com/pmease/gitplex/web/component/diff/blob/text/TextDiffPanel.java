@@ -35,6 +35,8 @@ import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
+import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
+
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
@@ -75,7 +77,7 @@ public class TextDiffPanel extends Panel {
 		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params)
 				.add(AttributeAppender.append("title", "View file at commit " + change.getBlobIdent().revision)));
 		
-		add(new Label("diffLines", renderDiffs()));
+		add(new Label("diffLines", renderDiffs()).setEscapeModelStrings(false));
 		
 		add(new AbstractDefaultAjaxBehavior() {
 			
@@ -148,6 +150,8 @@ public class TextDiffPanel extends Panel {
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
 		response.render(CssHeaderItem.forReference(
+				new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
+		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
 	}
 
@@ -197,7 +201,7 @@ public class TextDiffPanel extends Panel {
 		contentBuilder.append("<td class='content old").append(block.getOldStart()+lineIndex)
 				.append(" new").append(block.getNewStart()+lineIndex).append("'> ");
 		for (CmToken token: block.getLines().get(lineIndex))
-			contentBuilder.append(token);
+			contentBuilder.append(token.toHtml());
 		contentBuilder.append("</td>");
 		
 		if (unified) {
@@ -217,9 +221,9 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='line'>");
 		
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append("<td class='content new new").append(block.getNewStart()+lineIndex).append("'>+");
+		contentBuilder.append("<td class='content new new").append(block.getNewStart()+lineIndex).append("'><strong>+</strong>");
 		for (CmToken token: block.getLines().get(lineIndex))
-			contentBuilder.append(token);
+			contentBuilder.append(token.toHtml());
 		contentBuilder.append("</td>");
 		
 		if (unified) {
@@ -238,9 +242,9 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='line'>");
 		
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append("<td class='content old old").append(block.getOldStart()+lineIndex).append("'>-");
+		contentBuilder.append("<td class='content old old").append(block.getOldStart()+lineIndex).append("'><strong>-</strong>");
 		for (CmToken token: block.getLines().get(lineIndex))
-			contentBuilder.append(token);
+			contentBuilder.append(token.toHtml());
 		contentBuilder.append("</td>");
 		
 		if (unified) {
@@ -259,15 +263,15 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='line'>");
 		
 		builder.append("<td class='number old'>").append(delete.getOldStart() + lineIndex).append("</td>");
-		builder.append("<td class='content old old").append(delete.getOldStart()+lineIndex).append("'>-");
+		builder.append("<td class='content old old").append(delete.getOldStart()+lineIndex).append("'><strong>-</strong>");
 		for (CmToken token: delete.getLines().get(lineIndex))
-			builder.append(token);
+			builder.append(token.toHtml());
 		builder.append("</td>");
 		
 		builder.append("<td class='number new'>").append(insert.getNewStart() + lineIndex).append("</td>");
-		builder.append("<td class='content new new").append(insert.getNewStart()+lineIndex).append("'>+");
+		builder.append("<td class='content new new").append(insert.getNewStart()+lineIndex).append("'><strong>+</strong>");
 		for (CmToken token: insert.getLines().get(lineIndex))
-			builder.append(token);
+			builder.append(token.toHtml());
 		builder.append("</td>");
 		
 		builder.append("</tr>");
@@ -280,13 +284,13 @@ public class TextDiffPanel extends Panel {
 		if (unified) {
 			builder.append("<td colspan='2' class='expander'><a class='expander' href='")
 					.append(script).append("'><i class='fa fa-expand'></i></a></td>");
-			builder.append("<td class='skipped'>...skipped ")
-					.append(skippedLines).append(" lines...</td>");
+			builder.append("<td class='skipped'><i class='fa fa-ellipsis-h'></i> skipped")
+					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
 			builder.append("<td class='expander'><a class='expander' href='").append(script)
 					.append("'><i class='fa fa-expand'></i></a></td>");
-			builder.append("<td class='skipped' colspan='3'>...skipped ")
-					.append(skippedLines).append(" lines...</td>");
+			builder.append("<td class='skipped' colspan='3'><i class='fa fa-ellipsis-h'></i> skipped ")
+					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		}
 		builder.append("</tr>");
 	}
