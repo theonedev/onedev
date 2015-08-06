@@ -133,16 +133,19 @@ public class TextDiffPanel extends Panel {
 				appendEqual(builder, block, j, lastContextSize);
 		} else if (index == change.getDiffBlocks().size()-1) {
 			int end = block.getLines().size();
+			int skipped = 0;
 			if (end > contextSize) {
-				appendExpander(builder, index, end-contextSize);
+				skipped = end-contextSize;
 				end = contextSize;
 			}
 			for (int j=lastContextSize; j<end; j++)
 				appendEqual(builder, block, j, lastContextSize);
+			if (skipped != 0)
+				appendExpander(builder, index, skipped);
 		} else if (2*contextSize < block.getLines().size()) {
-			appendExpander(builder, index, block.getLines().size() - 2*contextSize);
 			for (int j=lastContextSize; j<contextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
+			appendExpander(builder, index, block.getLines().size() - 2*contextSize);
 			for (int j=block.getLines().size()-contextSize; j<block.getLines().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		} else {
