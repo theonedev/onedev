@@ -1,7 +1,6 @@
 .text-diff {
 	border: 1px solid #D8D8D8;
 	border-radius: 4px;
-	overflow: auto;
 }
 .text-diff>.head {
 	padding: 8px;
@@ -14,12 +13,13 @@
 	margin-right: 0;
 }
 .text-diff>.body {
+	width: 100%;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 12px;
+	table-layout: fixed;
 }
 .text-diff>.body>tbody>tr>td.number {
 	padding: 0 8px;
-	width: 40px;
 	border-left: 1px solid #EEE;
 	border-right: 1px solid #EEE;
 	text-align: right;
@@ -77,7 +77,4 @@
 }
 .text-diff>.body>tbody>tr.expanded>td {
 	background: #F9F9F9;
-}
-.text-diff.split>.body>tbody>tr>td.content {
-	width: 50%;
 }

@@ -502,8 +502,10 @@ pmease.commons = {
 			if (ajaxLoadingIndicator[0].timer)
 				clearTimeout(ajaxLoadingIndicator[0].timer);
 			ajaxLoadingIndicator[0].timer = setTimeout(function() {
-				if (!$(".ajax-indicator").is(":visible"))
+				if (!$(".ajax-indicator").is(":visible")) {
 					ajaxLoadingIndicator.show();
+					console.log("show");
+				}
 			}, 2000);		
 		});
 		

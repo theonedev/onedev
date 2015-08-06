@@ -193,10 +193,11 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 	
 /* Ajax Loading Indicator */
 #ajax-loading-indicator {
-	position: absolute; 
+	position: fixed; 
 	top: 0;
 	left: 50%; 
 	display:none;
+	z-index: 10000;
 }
 #ajax-loading-indicator>div {
 	position:relative; 
@@ -209,7 +210,6 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 	border: 1px solid #FAEBCC;
 	border-top:none; 
 	padding:6px 6px 6px 10px; 
-	z-index:10000; 
 	border-radius:0 0 4px 4px;
 }	
 

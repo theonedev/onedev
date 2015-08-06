@@ -171,6 +171,12 @@ public class TextDiffPanel extends Panel {
 	private String renderDiffs() {
 		int contextSize = DEFAULT_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
+		builder.append("<colgroup><col width='40'></col>");
+		if (unified)
+			builder.append("<col width='40'></col>");
+		else
+			builder.append("</col><col></col><col width=40></col>");
+		builder.append("<col></col></colgroup>");
 		for (int i=0; i<change.getDiffBlocks().size(); i++) {
 			DiffBlock block = change.getDiffBlocks().get(i);
 			if (block.getOperation() == Operation.EQUAL) {
@@ -301,7 +307,7 @@ public class TextDiffPanel extends Panel {
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
 			builder.append("<td class='expander'><a class='expander' title='Show more lines' href=\"").append(script)
-					.append("\"><i class='fa fa-expand'></i></a></td>");
+					.append("\"><i class='fa fa-sort'></i></a></td>");
 			builder.append("<td class='skipped' colspan='3'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		}
