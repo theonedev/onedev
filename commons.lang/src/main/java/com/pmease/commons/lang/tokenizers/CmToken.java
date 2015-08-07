@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
+import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 
 /**
  * Represents a CodeMirror token
@@ -22,8 +23,6 @@ public class CmToken implements Serializable {
 	
 	private final String text;
 	
-	private boolean changed;
-	
 	public CmToken(String type, String text) {
 		this.type = type;
 		this.text = text;
@@ -37,14 +36,6 @@ public class CmToken implements Serializable {
 		return text;
 	}
 	
-	public boolean isChanged() {
-		return changed;
-	}
-
-	public void setChanged(boolean changed) {
-		this.changed = changed;
-	}
-
 	public boolean isComment() {
 		return type.contains("comment");
 	}
@@ -148,16 +139,18 @@ public class CmToken implements Serializable {
 		return Objects.hashCode(type, text);
 	}
 
-	public String toHtml() {
+	public String toHtml(Operation operation) {
 		String escapedText = StringEscapeUtils.escapeHtml4(text);
-		if (!changed && StringUtils.isBlank(type)) {
+		if (operation == Operation.EQUAL && StringUtils.isBlank(type)) {
 			return escapedText;
 		} else {
 			StringBuilder builder = new StringBuilder("<span class='");
 			for (String each: Splitter.on(" ").trimResults().omitEmptyStrings().split(type)) 
 				builder.append("cm-" + each + " ");
-			if (changed)
-				builder.append("changed");
+			if (operation == Operation.DELETE)
+				builder.append("delete");
+			else if (operation == Operation.INSERT)
+				builder.append("insert");
 			builder.append("'>").append(escapedText).append("</span>");
 			return builder.toString();
 		}
@@ -166,10 +159,7 @@ public class CmToken implements Serializable {
 	
 	@Override
 	public String toString() {
-		if (changed)
-			return "*" + text + "*";
-		else
-			return text;
+		return text;
 	}
 	
 }

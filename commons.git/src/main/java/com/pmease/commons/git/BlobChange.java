@@ -12,7 +12,6 @@ import org.eclipse.jgit.lib.AnyObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.lang.diff.DiffBlock;
-import com.pmease.commons.lang.diff.DiffLine;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
 
@@ -26,8 +25,6 @@ public abstract class BlobChange implements Serializable {
 	private final BlobIdent newBlobIdent;
 	
 	private transient List<DiffBlock> diffBlocks;
-	
-	private transient List<DiffLine> diffLines;
 	
 	public BlobChange(String oldCommitHash, String newCommitHash, DiffEntry diffEntry) {
 		type = diffEntry.getChangeType();
@@ -109,15 +106,6 @@ public abstract class BlobChange implements Serializable {
 			}
 		}
 		return diffBlocks;
-	}
-	
-	public List<DiffLine> getDiffLines() {
-		if (diffLines == null) {
-			diffLines = new ArrayList<>();
-			for (DiffBlock block: getDiffBlocks()) 
-				diffLines.addAll(block.asDiffLines());
-		}
-		return diffLines;
 	}
 	
 	public int getAdditions() {

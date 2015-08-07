@@ -167,8 +167,6 @@ public class InlineCommentActivityPanel extends Panel {
 							label = new Label("token", " ");
 						else
 							label = new Label("token", token.getText());
-						if (token.isChanged())
-							label.add(AttributeAppender.append("class", "changed"));
 						item.add(label);
 					}
 					

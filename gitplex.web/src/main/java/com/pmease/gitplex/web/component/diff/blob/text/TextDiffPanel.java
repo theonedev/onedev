@@ -1,6 +1,8 @@
 package com.pmease.gitplex.web.component.diff.blob.text;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -28,6 +30,9 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
+import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.lang.diff.LineModification;
+import com.pmease.commons.lang.diff.TokenDiffBlock;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -182,25 +187,35 @@ public class TextDiffPanel extends Panel {
 			if (block.getOperation() == Operation.EQUAL) {
 				appendEquals(builder, i, 0, contextSize);
 			} else if (block.getOperation() == Operation.DELETE) {
-				if (unified || i+1 >= change.getDiffBlocks().size() 
-						|| change.getDiffBlocks().get(i+1).getOperation() != Operation.INSERT) {
-					for (int j=0; j<block.getLines().size(); j++) 
-						appendDelete(builder, block, j);
-				} else {
-					int min = block.getLines().size();
-					if (min > change.getDiffBlocks().get(i+1).getLines().size())
-						min = change.getDiffBlocks().get(i+1).getLines().size();
-					for (int j=0; j<min; j++)
-						appendDeleteAndInsert(builder, block, change.getDiffBlocks().get(i+1), j);
-					
-					if (min == block.getLines().size()) {
-						for (int j=min+1; j<change.getDiffBlocks().get(i+1).getLines().size(); j++)
-							appendInsert(builder, change.getDiffBlocks().get(i+1), j);
+				if (i+1<change.getDiffBlocks().size()) {
+					DiffBlock nextBlock = change.getDiffBlocks().get(i+1);
+					if (nextBlock.getOperation() == Operation.INSERT) {
+						LinkedHashMap<Integer, LineModification> lineChanges = DiffUtils.calcLineChange(block, nextBlock);
+						int prevDeleteLineIndex = 0;
+						int prevInsertLineIndex = 0;
+						for (Map.Entry<Integer, LineModification> entry: lineChanges.entrySet()) {
+							int deleteLineIndex = entry.getKey();
+							LineModification lineChange = entry.getValue();
+							int insertLineIndex = lineChange.getCompareLine();
+							
+							appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, deleteLineIndex, 
+									prevInsertLineIndex, insertLineIndex);
+							
+							appendModification(builder, block, nextBlock, deleteLineIndex, insertLineIndex, lineChange.getTokenDiffs()); 
+							
+							prevDeleteLineIndex = deleteLineIndex+1;
+							prevInsertLineIndex = insertLineIndex+1;
+						}
+						appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, block.getLines().size(), 
+								prevInsertLineIndex, nextBlock.getLines().size());
+						i++;
 					} else {
-						for (int j=min+1; j<block.getLines().size(); j++)
+						for (int j=0; j<block.getLines().size(); j++) 
 							appendDelete(builder, block, j);
 					}
-					i++;
+				} else {
+					for (int j=0; j<block.getLines().size(); j++) 
+						appendDelete(builder, block, j);
 				}
 			} else {
 				for (int j=0; j<block.getLines().size(); j++) 
@@ -210,6 +225,30 @@ public class TextDiffPanel extends Panel {
 		return builder.toString();
 	}
 
+	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock deleteBlock, DiffBlock insertBlock, 
+			int fromDeleteLineIndex, int toDeleteLineIndex, int fromInsertLineIndex, int toInsertLineIndex) {
+		if (unified) {
+			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
+				appendDelete(builder, deleteBlock, i);
+			for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++)
+				appendInsert(builder, insertBlock, i);
+		} else {
+			int deleteSize = toDeleteLineIndex - fromDeleteLineIndex;
+			int insertSize = toInsertLineIndex - fromInsertLineIndex;
+			if (deleteSize < insertSize) {
+				for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++) 
+					appendSideBySide(builder, deleteBlock, insertBlock, i, i-fromDeleteLineIndex+fromInsertLineIndex);
+				for (int i=fromInsertLineIndex+deleteSize; i<toInsertLineIndex; i++)
+					appendInsert(builder, insertBlock, i);
+			} else {
+				for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++) 
+					appendSideBySide(builder, deleteBlock, insertBlock, i-fromInsertLineIndex+fromDeleteLineIndex, i);
+				for (int i=fromDeleteLineIndex+insertSize; i<toDeleteLineIndex; i++)
+					appendDelete(builder, deleteBlock, i);
+			}
+		}
+	}
+	
 	private void appendEqual(StringBuilder builder, DiffBlock block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
 			builder.append("<tr class='line expanded'>");
@@ -218,9 +257,9 @@ public class TextDiffPanel extends Panel {
 
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append("<td class='content old").append(block.getOldStart()+lineIndex)
-				.append(" new").append(block.getNewStart()+lineIndex).append("'> ");
+				.append(" new").append(block.getNewStart()+lineIndex).append("'><span class='operation'>&nbsp;</span>");
 		for (CmToken token: block.getLines().get(lineIndex))
-			contentBuilder.append(token.toHtml());
+			contentBuilder.append(token.toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
 		if (unified) {
@@ -240,9 +279,10 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='line'>");
 		
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append("<td class='content new new").append(block.getNewStart()+lineIndex).append("'><strong>+</strong>");
-		for (CmToken token: block.getLines().get(lineIndex))
-			contentBuilder.append(token.toHtml());
+		contentBuilder.append("<td class='content new new").append(block.getNewStart()+lineIndex).append("'><span class='operation'>+</span>");
+		List<CmToken> tokens = block.getLines().get(lineIndex);
+		for (int i=0; i<tokens.size(); i++) 
+			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
 		if (unified) {
@@ -261,9 +301,10 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='line'>");
 		
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append("<td class='content old old").append(block.getOldStart()+lineIndex).append("'><strong>-</strong>");
-		for (CmToken token: block.getLines().get(lineIndex))
-			contentBuilder.append(token.toHtml());
+		contentBuilder.append("<td class='content old old").append(block.getOldStart()+lineIndex).append("'><span class='operation'>-</span>");
+		List<CmToken> tokens = block.getLines().get(lineIndex);
+		for (int i=0; i<tokens.size(); i++) 
+			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
 		if (unified) {
@@ -278,20 +319,66 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private void appendDeleteAndInsert(StringBuilder builder, DiffBlock delete, DiffBlock insert, int lineIndex) {
+	private void appendSideBySide(StringBuilder builder, DiffBlock deleteBlock, DiffBlock insertBlock, 
+			int deleteLineIndex, int insertLineIndex) {
 		builder.append("<tr class='line'>");
-		
-		builder.append("<td class='number old'>").append(delete.getOldStart() + lineIndex).append("</td>");
-		builder.append("<td class='content old old").append(delete.getOldStart()+lineIndex).append("'><strong>-</strong>");
-		for (CmToken token: delete.getLines().get(lineIndex))
-			builder.append(token.toHtml());
+
+		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
+		builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
+		builder.append("<td class='content old old")
+				.append(deleteBlock.getOldStart()+deleteLineIndex)
+				.append("'><span class='operation'>-</span>");
+		for (CmToken token: deleteBlock.getLines().get(deleteLineIndex))
+			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
 		
-		builder.append("<td class='number new'>").append(insert.getNewStart() + lineIndex).append("</td>");
-		builder.append("<td class='content new new").append(insert.getNewStart()+lineIndex).append("'><strong>+</strong>");
-		for (CmToken token: insert.getLines().get(lineIndex))
-			builder.append(token.toHtml());
+		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
+		builder.append("<td class='number new'>").append(newLineNo).append("</td>");
+		builder.append("<td class='content new new").append(newLineNo).append("'><span class='operation'>+</span>");
+		for (CmToken token: insertBlock.getLines().get(insertLineIndex))
+			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
+		
+		builder.append("</tr>");
+	}
+
+	private void appendModification(StringBuilder builder, DiffBlock deleteBlock, DiffBlock insertBlock, 
+			int deleteLineIndex, int insertLineIndex, List<TokenDiffBlock> tokenDiffs) {
+		builder.append("<tr class='line'>");
+
+		if (unified) {
+			builder.append("<td class='number old new'>").append(deleteBlock.getOldStart() + deleteLineIndex).append("</td>");
+			builder.append("<td class='number old new'>").append(insertBlock.getNewStart() + insertLineIndex).append("</td>");
+			builder.append("<td class='content old new old")
+					.append(deleteBlock.getOldStart() + deleteLineIndex)
+					.append(" new").append(insertBlock.getNewStart() + insertLineIndex)
+					.append("'><span class='operation'>*</span>");
+			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
+				for (CmToken token: tokenBlock.getTokens()) 
+					builder.append(token.toHtml(tokenBlock.getOperation()));
+			}
+			builder.append("</td>");
+		} else {
+			builder.append("<td class='number old'>").append(deleteBlock.getOldStart() + deleteLineIndex).append("</td>");
+			builder.append("<td class='content old old").append(deleteBlock.getOldStart() + deleteLineIndex).append("'><span class='operation'>-</span>");
+			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
+				for (CmToken token: tokenBlock.getTokens()) {
+					if (tokenBlock.getOperation() != Operation.INSERT) 
+						builder.append(token.toHtml(tokenBlock.getOperation()));
+				}
+			}
+			builder.append("</td>");
+			
+			builder.append("<td class='number new'>").append(insertBlock.getNewStart() + insertLineIndex).append("</td>");
+			builder.append("<td class='content new new").append(insertBlock.getNewStart()+insertLineIndex).append("'><span class='operation'>+</span>");
+			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
+				for (CmToken token: tokenBlock.getTokens()) {
+					if (tokenBlock.getOperation() != Operation.DELETE) 
+						builder.append(token.toHtml(tokenBlock.getOperation()));
+				}
+			}
+			builder.append("</td>");
+		}
 		
 		builder.append("</tr>");
 	}

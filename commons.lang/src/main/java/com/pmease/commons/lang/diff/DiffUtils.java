@@ -2,6 +2,7 @@ package com.pmease.commons.lang.diff;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -9,17 +10,18 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Preconditions;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Diff;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.lang.tokenizers.Tokenizers;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.StringUtils;
 
 public class DiffUtils {
 
+	private static final int CHANGE_CALC_TIMEOUT = 100;
+	
 	public static final int MAX_DIFF_SIZE = 65535;
 	
 	private static final Pattern pattern = Pattern.compile("\\w+");
@@ -116,57 +118,72 @@ public class DiffUtils {
 			}
 		}
 		
-		DiffBlock prevBlock =  null;
-		for (DiffBlock block: diffBlocks) {
-			if (block.getOperation() == Operation.INSERT && prevBlock != null 
-					&& prevBlock.getOperation() == Operation.DELETE) {
-				int min = prevBlock.getLines().size();
-				if (min > block.getLines().size())
-					min = block.getLines().size();
-				for (int i=0; i<min; i++) {
-					List<CmToken> insertLine = block.getLines().get(i);
-					List<CmToken> deleteLine = prevBlock.getLines().get(i);
-					
-					TokensToCharsResult<CmToken> result2 = tokensToChars(deleteLine, insertLine);						
-					diffs = dmp.diff_main(result2.chars1, result2.chars2, false);
-					int equal = 0;
-					int total = 0;
-					for (Diff diff: diffs) {
-						for (int j=0; j<diff.text.length(); j++) {
-							int pos = diff.text.charAt(j);
-							CmToken token = result2.tokenArray.get(pos);
-							if (StringUtils.isNotBlank(token.getText())) {
-								total += token.getText().length();
-								if (diff.operation == Operation.EQUAL)
-									equal += token.getText().length();
-							}
-						}
-					}
-					if (equal*3 >= total) {
-						oldLineNo = 0;
-						newLineNo = 0;
-						for (Diff diff: diffs) {
-							if (diff.operation == Operation.EQUAL) {
-								oldLineNo += diff.text.length();
-								newLineNo += diff.text.length();
-							} else if (diff.operation == Operation.INSERT) {
-								for (int j=0; j<diff.text.length(); j++) {
-									insertLine.get(newLineNo).setChanged(true);
-									newLineNo++;
-								}
-							} else {
-								for (int j=0; j<diff.text.length(); j++) {
-									deleteLine.get(oldLineNo).setChanged(true);
-									oldLineNo++;
-								}
-							}
+		return diffBlocks;
+	}
+	
+	public static LinkedHashMap<Integer, LineModification> calcLineChange(DiffBlock deleteBlock, DiffBlock insertBlock) {
+		LinkedHashMap<Integer, LineModification> lineModifications = new LinkedHashMap<>();
+		
+		DiffMatchPatch dmp = new DiffMatchPatch();
+		
+		long time = System.currentTimeMillis();
+		int nextInsert = 0;
+		for (int i=0; i<deleteBlock.getLines().size(); i++) {
+			List<CmToken> deleteLine = deleteBlock.getLines().get(i);
+			for (int j=nextInsert; j<insertBlock.getLines().size(); j++) {
+				List<CmToken> insertLine = insertBlock.getLines().get(j);
+				TokensToCharsResult<CmToken> result = DiffUtils.tokensToChars(deleteLine, insertLine);						
+				List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result.chars1, result.chars2, false);
+				int equal = 0;
+				int total = 0;
+				for (DiffMatchPatch.Diff diff: diffs) {
+					for (int k=0; k<diff.text.length(); k++) {
+						int pos = diff.text.charAt(k);
+						CmToken token = result.tokenArray.get(pos);
+						if (StringUtils.isNotBlank(token.getText())) {
+							total += token.getText().length();
+							if (diff.operation == Operation.EQUAL)
+								equal += token.getText().length();
 						}
 					}
 				}
+				if (equal*3 >= total) {
+					List<TokenDiffBlock> diffBlocks = new ArrayList<>();
+					int oldLineNo = 0;
+					int newLineNo = 0;
+					for (Diff diff : diffs) {
+						List<CmToken> tokens = new ArrayList<>();
+						if (diff.operation == Operation.EQUAL) {
+							for (int k = 0; k < diff.text.length(); k++) {
+								tokens.add(insertLine.get(newLineNo));
+								oldLineNo++;
+								newLineNo++;
+							}
+							diffBlocks.add(new TokenDiffBlock(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo-tokens.size()));
+						} else if (diff.operation == Operation.INSERT) {
+							for (int k = 0; k < diff.text.length(); k++)
+								tokens.add(insertLine.get(newLineNo++));
+							diffBlocks.add(new TokenDiffBlock(diff.operation, tokens, oldLineNo, newLineNo-tokens.size()));
+						} else {
+							for (int k = 0; k < diff.text.length(); k++)
+								tokens.add(deleteLine.get(oldLineNo++));
+							diffBlocks.add(new TokenDiffBlock(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo));
+						}
+					}
+
+					LineModification lineModification = new LineModification(j, diffBlocks);
+					lineModifications.put(i, lineModification);
+					nextInsert = j+1;
+					break;
+				} else {
+					if (System.currentTimeMillis()-time > CHANGE_CALC_TIMEOUT) {
+						nextInsert = insertBlock.getLines().size();
+						break;
+					}
+				}
 			}
-			prevBlock = block;
 		}
-		return diffBlocks;
+		return lineModifications;
 	}
 
 	public static AroundContext around(List<DiffBlock> diffBlocks, int oldLine, int newLine, int contextSize) {
@@ -215,7 +232,7 @@ public class DiffUtils {
 		return lineMapping;
 	}
 	
-	private static <T> TokensToCharsResult<T> tokensToChars(List<T> tokens1, List<T> tokens2) {
+	public static <T> TokensToCharsResult<T> tokensToChars(List<T> tokens1, List<T> tokens2) {
 		List<T> tokenArray = new ArrayList<>();
 		Map<T, Integer> tokenHash = new HashMap<>();
 		// e.g. linearray[4] == "Hello\n"

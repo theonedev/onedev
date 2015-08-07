@@ -35,16 +35,16 @@ public class DiffUtilsTest extends AppLoaderMocker {
 				"}");
 		List<DiffBlock> diffBlocks = DiffUtils.diff(oldLines, "test.java", newLines, "test.java");
 		assertEquals(""
-				+ "-public class *HelloRobin* {\n", diffBlocks.get(0).toString());
+				+ "-public class HelloRobin {\n", diffBlocks.get(0).toString());
 		assertEquals(""
 				+ "+package test;\n"
-				+ "+public class *HelloTim* {\n", diffBlocks.get(1).toString());
+				+ "+public class HelloTim {\n", diffBlocks.get(1).toString());
 		assertEquals(""
 				+ " 	public static void main(String[] args) {\n", diffBlocks.get(2).toString());
 		assertEquals(""
-				+ "-		System.out.println(\"hello *robin*\");\n", diffBlocks.get(3).toString());
+				+ "-		System.out.println(\"hello robin\");\n", diffBlocks.get(3).toString());
 		assertEquals(""
-				+ "+		System.out.println(\"hello *tim*\");\n", diffBlocks.get(4).toString());
+				+ "+		System.out.println(\"hello tim\");\n", diffBlocks.get(4).toString());
 		assertEquals(""
 				+ " 	}\n"
 				+ " }\n", diffBlocks.get(5).toString());
@@ -79,13 +79,13 @@ public class DiffUtilsTest extends AppLoaderMocker {
 				"}");
 		List<DiffBlock> diffBlocks = DiffUtils.diff(oldLines, "test.java", newLines, "test.java");
 		AroundContext aroundContext = DiffUtils.around(diffBlocks, 2, -1, 2);
-		assertEquals("+public class *HelloTim* {", 
+		assertEquals("+public class HelloTim {", 
 				aroundContext.getDiffLines().get(0).toString());
 		assertEquals(" 	public static void main(String[] args) {", 
 				aroundContext.getDiffLines().get(1).toString());
-		assertEquals("-		System.out.println(\"hello *robin*\");", 
+		assertEquals("-		System.out.println(\"hello robin\");", 
 				aroundContext.getDiffLines().get(2).toString());
-		assertEquals("+		System.out.println(\"hello *tim*\");", 
+		assertEquals("+		System.out.println(\"hello tim\");", 
 				aroundContext.getDiffLines().get(3).toString());
 		assertEquals(" 	}", 
 				aroundContext.getDiffLines().get(4).toString());
