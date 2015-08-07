@@ -204,12 +204,13 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 	left:-50%;	
 	top:0; 
 	text-align:center; 
-	width:80px;
-	background: #FCF8E3;
+	font-weight: bold;
+	width:95px;
+	background: #FAF3D0;
 	color: #8A6D3B;
-	border: 1px solid #FAEBCC;
+	border: 2px solid #F6DBA4;
 	border-top:none; 
-	padding:6px 6px 6px 10px; 
+	padding:6px 12px; 
 	border-radius:0 0 4px 4px;
 }	
 

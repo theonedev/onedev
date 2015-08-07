@@ -2,7 +2,10 @@ package com.pmease.gitplex.web.component.diff.diffmode;
 
 import javax.servlet.http.Cookie;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -44,6 +47,49 @@ public abstract class DiffModePanel extends Panel {
 		add(new AjaxLink<Void>("unified") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
+					
+					@Override
+					public CharSequence getSuccessHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getPrecondition(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getFailureHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getCompleteHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getBeforeSendHandler(Component component) {
+						return "$('#ajax-loading-indicator').show();";
+					}
+					
+					@Override
+					public CharSequence getBeforeHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getAfterHandler(Component component) {
+						return null;
+					}
+					
+				});
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				setUnified(true);
 				target.add(DiffModePanel.this);
@@ -62,6 +108,49 @@ public abstract class DiffModePanel extends Panel {
 		
 		add(new AjaxLink<Void>("split") {
 
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
+					
+					@Override
+					public CharSequence getSuccessHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getPrecondition(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getFailureHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getCompleteHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getBeforeSendHandler(Component component) {
+						return "$('#ajax-loading-indicator').show();";
+					}
+					
+					@Override
+					public CharSequence getBeforeHandler(Component component) {
+						return null;
+					}
+					
+					@Override
+					public CharSequence getAfterHandler(Component component) {
+						return null;
+					}
+					
+				});
+			}
+			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				setUnified(false);

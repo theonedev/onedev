@@ -498,24 +498,22 @@ pmease.commons = {
 		});
 
 		Wicket.Event.subscribe('/ajax/call/beforeSend', function() {
-			var ajaxLoadingIndicator = $("#ajax-loading-indicator");
-			if (ajaxLoadingIndicator[0].timer)
-				clearTimeout(ajaxLoadingIndicator[0].timer);
-			ajaxLoadingIndicator[0].timer = setTimeout(function() {
-				if (!$(".ajax-indicator").is(":visible")) {
-					ajaxLoadingIndicator.show();
-					console.log("show");
-				}
+			var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
+			if ($ajaxLoadingIndicator[0].timer)
+				clearTimeout($ajaxLoadingIndicator[0].timer);
+			$ajaxLoadingIndicator[0].timer = setTimeout(function() {
+				if (!$ajaxLoadingIndicator.is(":visible"))
+					$ajaxLoadingIndicator.show();
 			}, 2000);		
 		});
 		
 		Wicket.Event.subscribe('/ajax/call/complete', function() {
-			var ajaxLoadingIndicator = $("#ajax-loading-indicator");
-			if (ajaxLoadingIndicator[0].timer) {
-				clearTimeout(ajaxLoadingIndicator[0].timer);
-				ajaxLoadingIndicator[0].timer = null;
+			var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
+			if ($ajaxLoadingIndicator[0].timer) {
+				clearTimeout($ajaxLoadingIndicator[0].timer);
+				$ajaxLoadingIndicator[0].timer = null;
 			}
-			ajaxLoadingIndicator.hide();
+			$ajaxLoadingIndicator.hide();
 		});
 	}, 
 		

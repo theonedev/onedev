@@ -1,6 +1,7 @@
 package com.pmease.commons.wicket.behavior.menu;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -38,6 +39,12 @@ class CheckComponent extends Panel {
 		})));
 		
 		AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				checkItem.updateAjaxAttributes(attributes);
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
