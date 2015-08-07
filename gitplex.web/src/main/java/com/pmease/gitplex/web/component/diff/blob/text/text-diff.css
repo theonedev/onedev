@@ -78,6 +78,9 @@
 .text-diff>.body>tbody>tr.line>td.old.new.content {
 	background: #FAF3D0;
 }
+.text-diff>.body>tbody>tr.line>td.old.new .delete {
+	text-decoration: line-through;
+}
 .text-diff>.body>tbody>tr>td.content {
 	white-space: pre-wrap;
 	word-wrap: break-word;
