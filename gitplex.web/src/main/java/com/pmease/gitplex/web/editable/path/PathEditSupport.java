@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.directory;
+package com.pmease.gitplex.web.editable.path;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -17,10 +17,10 @@ import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
-import com.pmease.gitplex.core.editable.DirectoryChoice;
+import com.pmease.gitplex.core.editable.PathChoice;
 
 @SuppressWarnings("serial")
-public class DirectoryEditSupport implements EditSupport {
+public class PathEditSupport implements EditSupport {
 
 	@Override
 	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
@@ -31,7 +31,7 @@ public class DirectoryEditSupport implements EditSupport {
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
         Method propertyGetter = propertyDescriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(DirectoryChoice.class) != null) {
+        if (propertyGetter.getAnnotation(PathChoice.class) != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
         			&& EditableUtils.getElementClass(propertyGetter.getGenericReturnType()) == String.class) {
         		return new PropertyContext<List<String>>(propertyDescriptor) {
@@ -54,7 +54,7 @@ public class DirectoryEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
-						return new DirectoryMultiChoiceEditor(componentId, this, model);
+						return new PathMultiChoiceEditor(componentId, this, model);
 					}
         			
         		};
@@ -78,7 +78,7 @@ public class DirectoryEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new DirectorySingleChoiceEditor(componentId, this, model);
+						return new PathSingleChoiceEditor(componentId, this, model);
 					}
         			
         		};

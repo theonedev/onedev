@@ -61,7 +61,7 @@ public class SinceChangesLink extends Panel {
 			public void onClick() {
 				PullRequest request = requestModel.getObject();
 				PageParameters params = RequestComparePage.paramsOf(request, oldCommitModel.getObject(), 
-						request.getLatestUpdate().getHeadCommitHash());
+						request.getLatestUpdate().getHeadCommitHash(), null);
 				setResponsePage(RequestComparePage.class, params);
 			}
 			

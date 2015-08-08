@@ -75,9 +75,13 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private static final String NEW_PARAM = "new";
 	
+	private static final String PATH_PARAM = "path";
+	
 	private String oldCommitHash;
 	
 	private String newCommitHash;
+	
+	private String path;
 	
 	private WebMarkupContainer optionsContainer;
 	
@@ -167,11 +171,8 @@ public class RequestComparePage extends RequestDetailPage {
 			if (newCommitHash == null)
 				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
 		}
-		if (oldCommitHash != null && !commitsModel.getObject().containsKey(oldCommitHash))
-			throw new IllegalArgumentException("Commit '" + oldCommitHash + "' is not relevant to current pull request.");
-
-		if (newCommitHash != null && !commitsModel.getObject().containsKey(newCommitHash))
-			throw new IllegalArgumentException("Commit '" + newCommitHash + "' is not relevant to current pull request.");
+		
+		path = params.get(PATH_PARAM).toString();
 	}
 	
 	@Override
@@ -205,8 +206,7 @@ public class RequestComparePage extends RequestDetailPage {
 			@Override
 			protected String load() {
 				CommitDescription description = commitsModel.getObject().get(oldCommitHash);
-				Preconditions.checkNotNull(description);
-				if (description.getName() != null)
+				if (description != null)
 					return GitUtils.abbreviateSHA(oldCommitHash) + " - " + description.getName();
 				else
 					return GitUtils.abbreviateSHA(oldCommitHash);
@@ -217,8 +217,10 @@ public class RequestComparePage extends RequestDetailPage {
 			@Override
 			protected String load() {
 				CommitDescription description = commitsModel.getObject().get(oldCommitHash);
-				Preconditions.checkNotNull(description);
-				return description.getSubject();
+				if (description != null) 
+					return description.getSubject();
+				else 
+					return getRepository().getCommit(oldCommitHash).getSubject();
 			}
 			
 		}, new TooltipConfig().withPlacement(Placement.top))));
@@ -241,9 +243,7 @@ public class RequestComparePage extends RequestDetailPage {
 			@Override
 			protected String load() {
 				CommitDescription description = commitsModel.getObject().get(newCommitHash);
-				Preconditions.checkNotNull(description);
-				
-				if (description.getName() != null)
+				if (description != null)
 					return GitUtils.abbreviateSHA(newCommitHash) + " - " + description.getName();
 				else
 					return GitUtils.abbreviateSHA(newCommitHash);
@@ -254,8 +254,10 @@ public class RequestComparePage extends RequestDetailPage {
 			@Override
 			protected String load() {
 				CommitDescription description = commitsModel.getObject().get(newCommitHash);
-				Preconditions.checkNotNull(description);
-				return description.getSubject();
+				if (description != null)
+					return description.getSubject();
+				else
+					return getRepository().getCommit(newCommitHash).getSubject();
 			}
 			
 		}, new TooltipConfig().withPlacement(Placement.top))));
@@ -281,7 +283,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 					@Override
 					protected void onSelect() {
-						PageParameters params = paramsOf(getPullRequest(), null, null);
+						PageParameters params = paramsOf(getPullRequest(), null, null, path);
 						setResponsePage(RequestComparePage.class, params);
 					}
 
@@ -297,7 +299,7 @@ public class RequestComparePage extends RequestDetailPage {
 							@Override
 							protected void onSelect() {
 								PageParameters params = paramsOf(getPullRequest(), 
-										getPullRequest().getTarget().getHead(), preview.getIntegrated());
+										getPullRequest().getTarget().getHead(), preview.getIntegrated(), path);
 								setResponsePage(RequestComparePage.class, params);
 							}
 							
@@ -325,7 +327,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 						@Override
 						protected void onSelect() {
-							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit);
+							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit, path);
 							setResponsePage(RequestComparePage.class, params);
 						}
 						
@@ -454,7 +456,7 @@ public class RequestComparePage extends RequestDetailPage {
 			};
 		};
 		
-		add(revisionDiffPanel = new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, commentSupport) {
+		add(revisionDiffPanel = new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, path, commentSupport) {
 
 			@Override
 			protected LineProcessor getLineProcessor() {
@@ -486,13 +488,15 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommit, 
-			@Nullable String newCommit) {
+			@Nullable String newCommit, @Nullable String path) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 		
 		if (oldCommit != null)
 			params.set(OLD_PARAM, oldCommit);
 		if (newCommit != null)
 			params.set(NEW_PARAM, newCommit);
+		if (path != null)
+			params.set(PATH_PARAM,  path);
 		
 		return params;
 	}
@@ -509,7 +513,7 @@ public class RequestComparePage extends RequestDetailPage {
 			// to cause LazyInitializationException
 			if (getComment() != null 
 					&& HibernateUtils.getId(comment).equals(HibernateUtils.getId(getComment()))) {
-				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash);
+				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash, path);
 				setResponsePage(RequestComparePage.class, params);
 			}
 		}
@@ -520,7 +524,7 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		private final String subject;
 		
-		CommitDescription(@Nullable final String name, final String subject) {
+		CommitDescription(final String name, final String subject) {
 			this.name = name;
 			this.subject = subject;
 		}
@@ -574,10 +578,10 @@ public class RequestComparePage extends RequestDetailPage {
 							Map.Entry<String, CommitDescription> entry = item.getModelObject();
 							if (forBase) {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), entry.getKey(), newCommitHash));
+										paramsOf(getPullRequest(), entry.getKey(), newCommitHash, path));
 							} else {
 								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), oldCommitHash, entry.getKey()));
+										paramsOf(getPullRequest(), oldCommitHash, entry.getKey(), path));
 							}
 						}
 						

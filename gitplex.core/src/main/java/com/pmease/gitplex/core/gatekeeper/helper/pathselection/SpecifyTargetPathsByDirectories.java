@@ -8,7 +8,7 @@ import javax.validation.constraints.Size;
 
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.OmitName;
-import com.pmease.gitplex.core.editable.DirectoryChoice;
+import com.pmease.gitplex.core.editable.PathChoice;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.IfTouchSpecifiedDirectories;
 
@@ -19,7 +19,7 @@ public class SpecifyTargetPathsByDirectories implements TargetPathSelection {
 	private List<String> directories = new ArrayList<>();
 	
 	@Editable(name="Directories", description="Use comma to separate multiple directories.")
-	@DirectoryChoice
+	@PathChoice
 	@NotNull
 	@Size(min=1, message="At least one directory has to be specified.")
 	@OmitName

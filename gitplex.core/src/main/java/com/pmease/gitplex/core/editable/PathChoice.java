@@ -5,7 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.eclipse.jgit.lib.FileMode;
+
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DirectoryChoice {
+public @interface PathChoice {
+
+	int[] value() default FileMode.TYPE_FILE;
+	
 }

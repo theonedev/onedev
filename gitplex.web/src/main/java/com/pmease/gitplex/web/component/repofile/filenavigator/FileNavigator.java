@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -48,6 +47,7 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
@@ -206,20 +206,8 @@ public abstract class FileNavigator extends Panel {
 							protected Component newContentComponent(String id, final IModel<BlobIdent> model) {
 								BlobIdent blobIdent = model.getObject();
 								Fragment fragment = new Fragment(id, "treeNodeFrag", FileNavigator.this);
-								
-								WebMarkupContainer icon = new WebMarkupContainer("icon");
-								String iconClass;
-								if (blobIdent.isTree())
-									iconClass = "fa fa-folder-o";
-								else if (blobIdent.isGitLink()) 
-									iconClass = "fa fa-ext fa-folder-submodule-o";
-								else if (blobIdent.isSymbolLink()) 
-									iconClass = "fa fa-ext fa-folder-symbol-link-o";
-								else  
-									iconClass = "fa fa-file-text-o";
-								
-								icon.add(AttributeModifier.append("class", iconClass));
-								fragment.add(icon);
+
+								fragment.add(new BlobIcon("icon", model));
 								
 								AjaxLink<Void> link = new DirtyAwareAjaxLink<Void>("link") {
 

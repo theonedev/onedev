@@ -31,6 +31,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
 import com.pmease.commons.git.Blob;
@@ -51,10 +52,14 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
+	@Nullable
+	private final String path;
+	
 	private final String oldRev;
 	
 	private final String newRev;
 	
+	@Nullable
 	private final InlineCommentSupport commentSupport;
 	
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
@@ -65,6 +70,9 @@ public abstract class RevisionDiffPanel extends Panel {
 					DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
 		    	diffFormatter.setRepository(jgitRepo);
 		    	diffFormatter.setDetectRenames(true);
+		    	
+		    	if (path != null)
+		    		diffFormatter.setPathFilter(PathFilter.create(path));
 				AnyObjectId oldCommitId = repoModel.getObject().getObjectId(oldRev);
 				AnyObjectId newCommitId = repoModel.getObject().getObjectId(newRev);
 				List<DiffEntry> entries = diffFormatter.scan(oldCommitId, newCommitId);
@@ -144,12 +152,13 @@ public abstract class RevisionDiffPanel extends Panel {
 	};
 	
 	public RevisionDiffPanel(String id, IModel<Repository> repoModel, String oldRev, String newRev, 
-			@Nullable InlineCommentSupport commentSupport) {
+			@Nullable String path, @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
+		this.path = path;
 		this.commentSupport = commentSupport;
 	}
 

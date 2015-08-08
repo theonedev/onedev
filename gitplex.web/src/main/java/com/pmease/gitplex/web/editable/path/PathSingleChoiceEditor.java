@@ -1,35 +1,37 @@
-package com.pmease.gitplex.web.editable.directory;
+package com.pmease.gitplex.web.editable.path;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.git.TreeNode;
+import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.web.component.directorychooser.DirectoryChooser;
+import com.pmease.gitplex.core.editable.PathChoice;
+import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.pathselector.PathSelector;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
 @SuppressWarnings("serial")
-public class DirectorySingleChoiceEditor extends PropertyEditor<String> {
+public class PathSingleChoiceEditor extends PropertyEditor<String> {
 
 	private TextField<String> input;
 	
-	public DirectorySingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public PathSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -48,30 +50,27 @@ public class DirectorySingleChoiceEditor extends PropertyEditor<String> {
 				String defaultBranch = page.getRepository().getDefaultBranch();
 				
 				if (defaultBranch != null) {
-					return new DirectoryChooser(id, Model.of(new RepoAndBranch(page.getRepository(), defaultBranch))) {
+					PathChoice pathChoice = getPropertyDescriptor().getPropertyGetter().getAnnotation(PathChoice.class);
+					return new PathSelector(id, new AbstractReadOnlyModel<Repository>() {
+
+						@Override
+						public Repository getObject() {
+							return ((RepositoryPage) getPage()).getRepository();
+						}
+						
+					}, GitUtils.branch2ref(defaultBranch), pathChoice.value()) {
 	
 						@Override
-						protected MarkupContainer newLinkComponent(String id, IModel<TreeNode> node) {
-							final String path = StringEscapeUtils.escapeEcmaScript(node.getObject().getPath());
-							WebMarkupContainer link = new WebMarkupContainer(id) {
-
-								@Override
-								protected void onComponentTag(ComponentTag tag) {
-									super.onComponentTag(tag);
-									String script = String.format("gitplex.selectDirectory('%s', '%s', '%s', %s);", 
-											input.getMarkupId(), getMarkupId(), path, false);
-									tag.put("onclick", script);
-									tag.put("href", "javascript:void(0);");
-								}
-								
-							};
-							link.setOutputMarkupId(true);
-							return link;
+						protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
+							String path = StringEscapeUtils.escapeEcmaScript(blobIdent.path);
+							String script = String.format("gitplex.selectDirectory('%s', '%s', '%s', %s);", 
+									input.getMarkupId(), getMarkupId(), path, false);
+							target.appendJavaScript(script);
 						}
 						
 					};
 				} else {
-					return new Fragment(id, "noDefaultBranchFrag", DirectorySingleChoiceEditor.this);
+					return new Fragment(id, "noDefaultBranchFrag", PathSingleChoiceEditor.this);
 				}					
 			}
 		};
@@ -88,7 +87,7 @@ public class DirectorySingleChoiceEditor extends PropertyEditor<String> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(DirectoryChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(PathChoiceResourceReference.INSTANCE));
 	}
 	
 	@Override
