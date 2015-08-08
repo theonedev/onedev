@@ -8,10 +8,8 @@ $(function() {
 	}
 	
 	var cookieKey = "repository.miniSidebar";
-	if (Cookies.get(cookieKey) === "yes") {
-		$nav.addClass("mini");
+	if (Cookies.get(cookieKey) === "yes")
 		enableTooltip();
-	}
 	
 	$nav.find(">.mini-toggle").click(function() {
 		$nav.toggleClass("mini");

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -18,6 +20,8 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -135,7 +139,19 @@ public abstract class RepositoryPage extends AccountPage {
 		if (SecurityUtils.canManage(getRepository()))
 			tabs.add(new RepoTab(Model.of("Setting"), "fa fa-fw fa-cog", GeneralSettingPage.class, RepoSettingPage.class));
 		
-		add(new Tabbable("repoTabs", tabs));
+		WebMarkupContainer sidebar = new WebMarkupContainer("sidebar");
+		add(sidebar);
+		
+		/*
+		 * Add mini class here instead of repository.js as we want the sidebar to 
+		 * be minimized initially even if the page takes some time to load 
+		 */
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie("repository.miniSidebar");
+		if (cookie != null && "yes".equals(cookie.getValue()))
+			sidebar.add(AttributeAppender.append("class", " mini"));
+		
+		sidebar.add(new Tabbable("repoTabs", tabs));
 	}
 
 	@Override
