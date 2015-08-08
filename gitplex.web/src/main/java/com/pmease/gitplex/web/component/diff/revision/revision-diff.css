@@ -16,7 +16,7 @@
 .revision-diff li.diff-stat>.icon {
 	margin-top: 2px;
 }
-.revision-diff .fa-diff-modified {
+.revision-diff .fa-diff-modified, .revision-diff .fa-diff-renamed {
 	color: #D0B44C;
 }
 .revision-diff .fa-diff-added {

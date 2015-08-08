@@ -3,7 +3,7 @@
 	
 	<wicket:fragment wicket:id="mergeInTargetFrag">
 		<div class="conflict-resolve-instruction">
-			<p>From working directory of repository <em wicket:id="destRepoName"></em>,
+			<p>Step 1: From working directory of repository <em wicket:id="destRepoName"></em>,
 			check out target branch and merge with source branch.</p>
 			<div class="terminal">
 				<div>git checkout <span wicket:id="destBranchNameForCheckout"></span></div>	
@@ -25,7 +25,7 @@
 	
 	<wicket:fragment wicket:id="mergeInSourceFrag">
 		<div class="conflict-resolve-instruction">
-			<p>From working directory of repository <em wicket:id="srcRepoName"></em>,
+			<p>Step 1: From working directory of repository <em wicket:id="srcRepoName"></em>,
 			check out source branch and merge with target branch.</p>
 			<div class="terminal">
 				<div>git checkout <span wicket:id="srcBranchNameForCheckout"></span></div>	
@@ -47,7 +47,7 @@
 	
 	<wicket:fragment wicket:id="rebaseInTargetFrag">
 		<div class="conflict-resolve-instruction">
-			<p>From working directory of repository <em wicket:id="destRepoName"></em>,
+			<p>Step 1: From working directory of repository <em wicket:id="destRepoName"></em>,
 			check out target branch and rebase to source branch.</p>
 			<div class="terminal">
 				<div>git checkout <span wicket:id="destBranchNameForCheckout"></span></div>	

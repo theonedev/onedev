@@ -140,7 +140,8 @@ public class CmToken implements Serializable {
 	}
 
 	public String toHtml(Operation operation) {
-		String escapedText = StringEscapeUtils.escapeHtml4(text);
+		String escapedText = StringEscapeUtils.escapeHtml4(StringUtils.replace(StringUtils.replace(text, "\n", " "), "\r", " "));
+		
 		if (operation == Operation.EQUAL && StringUtils.isBlank(type)) {
 			return escapedText;
 		} else {
@@ -159,7 +160,7 @@ public class CmToken implements Serializable {
 	
 	@Override
 	public String toString() {
-		return text;
+		return StringUtils.replace(StringUtils.replace(text, "\n", " "), "\r", " ");
 	}
 	
 }

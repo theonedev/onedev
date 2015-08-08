@@ -126,7 +126,12 @@ public class Blob {
 				for (int i=0; i<content.length(); i++) {
 					char ch = content.charAt(i);
 					if (ch == '\n') {
-						lines.add(builder.toString() + '\n');
+						// add extra eol at end of text in order to make it different from 
+						// text without eol at end of text
+						if (i == content.length() - 1)
+							lines.add(builder.toString() + "\n");
+						else
+							lines.add(builder.toString());
 						builder = new StringBuilder();
 					} else {
 						builder.append(ch);

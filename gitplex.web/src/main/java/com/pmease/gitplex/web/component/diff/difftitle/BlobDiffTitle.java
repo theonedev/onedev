@@ -1,36 +1,23 @@
 package com.pmease.gitplex.web.component.diff.difftitle;
 
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.Model;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.pmease.commons.git.BlobChange;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public class BlobDiffTitle extends Panel {
 
 	private final BlobChange change;
 	
-	private final String alert;
-	
 	public BlobDiffTitle(String id, BlobChange change) {
 		super(id);
 
-		this.change = change;
-		
-		if (change.getOldBlobIdent().mode != null && change.getNewBlobIdent().mode != null
-				&& !change.getOldBlobIdent().mode.equals(change.getNewBlobIdent().mode)) {
-			alert = "Blob mode is changed from " + Integer.toString(change.getOldBlobIdent().mode, 8) 
-					+ " to " + Integer.toString(change.getNewBlobIdent().mode, 8);
-		} else {
-			alert = null;
-		}
+		this.change = change;		
 	}
 	
 	@Override
@@ -40,15 +27,24 @@ public class BlobDiffTitle extends Panel {
 		add(new Label("renamedTitle", change.getOldBlobIdent().path)
 				.setVisible(change.getType() == ChangeType.RENAME));
 		add(new Label("title", change.getPath()));
-		
-		if (alert == null) {
-			add(new WebMarkupContainer("alert").setVisible(false));
+
+		String modeChange;
+		if (change.getOldBlobIdent().mode != null && change.getNewBlobIdent().mode != null
+				&& !change.getOldBlobIdent().mode.equals(change.getNewBlobIdent().mode)) {
+			modeChange = Integer.toString(change.getOldBlobIdent().mode, 8) 
+					+ " <i class='fa fa-long-arrow-right'></i> " 
+					+ Integer.toString(change.getNewBlobIdent().mode, 8);
 		} else {
-			WebMarkupContainer alertTrigger = new WebMarkupContainer("alert");
-			TooltipConfig config = new TooltipConfig().withPlacement(Placement.right);
-			alertTrigger.add(new TooltipBehavior(Model.of(alert), config));
-			add(alertTrigger);
+			modeChange = null;
 		}
+
+		add(new Label("modeChange", modeChange).setEscapeModelStrings(false));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(BlobDiffTitle.class, "diff-title.css")));
 	}
 
 }

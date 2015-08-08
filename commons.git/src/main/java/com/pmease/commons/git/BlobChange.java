@@ -33,7 +33,7 @@ public abstract class BlobChange implements Serializable {
 			AnyObjectId id = diffEntry.getNewId().toObjectId();
 			newBlobIdent.id = id!=null?id.name():null;
 		} else {
-			newBlobIdent = new BlobIdent(newCommitHash, null, 0);
+			newBlobIdent = new BlobIdent(newCommitHash, null, null);
 		}
 		if (type != ChangeType.ADD) {
 			oldBlobIdent = new BlobIdent(oldCommitHash, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());

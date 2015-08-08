@@ -141,4 +141,14 @@ table.old-vs-new td.old {width: 140px; text-align: left;}
 table.old-vs-new td.new {width: 140px; text-align: right;}
 table.old-vs-new td.vs {width: 1px; text-align: center; font-weight: bold;}
 
-.conflict-resolve-instruction {padding: 8px; width: 400px;}
+.conflict-resolve-instruction {
+	padding: 8px; 
+	width: 400px;
+}
+.conflict-resolve-instruction .terminal {
+	background: #333;
+	color: #EEE;
+	border-radius: 4px;
+	font-family: monospace;
+	margin: 4px 0 16px 0;
+}

@@ -64,6 +64,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();
 					DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
 		    	diffFormatter.setRepository(jgitRepo);
+		    	diffFormatter.setDetectRenames(true);
 				AnyObjectId oldCommitId = repoModel.getObject().getObjectId(oldRev);
 				AnyObjectId newCommitId = repoModel.getObject().getObjectId(newRev);
 				List<DiffEntry> entries = diffFormatter.scan(oldCommitId, newCommitId);
@@ -118,7 +119,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			    		BlobChange change = it.next();
 			    		if (change.getType() == ChangeType.MODIFY 
 			    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
-			    				&& change.getDiffBlocks().isEmpty()) {
+			    				&& change.getAdditions() + change.getDeletions() == 0) {
 			    			Blob.Text oldText = change.getOldText();
 			    			Blob.Text newText = change.getNewText();
 			    			if (oldText != null && newText != null 
