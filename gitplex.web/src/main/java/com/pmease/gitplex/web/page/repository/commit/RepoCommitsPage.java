@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -31,6 +32,11 @@ public class RepoCommitsPage extends RepositoryPage {
 		PageParameters params = paramsOf(repository);
 		params.set(PARAM_REVISION, revision);
 		return params;
+	}
+	
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RepoCommitsPage.class, paramsOf(repository));
 	}
 	
 }

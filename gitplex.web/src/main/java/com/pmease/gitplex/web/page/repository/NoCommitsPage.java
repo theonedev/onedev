@@ -1,12 +1,14 @@
 package com.pmease.gitplex.web.page.repository;
 
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -32,6 +34,11 @@ public class NoCommitsPage extends RepositoryPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(NoCommitsPage.class, "no-commits.css")));
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RepoFilePage.class, paramsOf(repository));
 	}
 	
 }

@@ -111,7 +111,7 @@ public abstract class RepositoryPage extends AccountPage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Repository repository) {
-						setResponsePage(getPage().getClass(), paramsOf(repository));
+						RepositoryPage.this.onSelect(target, repository);
 					}
 					
 				};
@@ -181,4 +181,6 @@ public abstract class RepositoryPage extends AccountPage {
 		super.onDetach();
 	}
 
+	protected abstract void onSelect(AjaxRequestTarget target, Repository repository);
+	
 }

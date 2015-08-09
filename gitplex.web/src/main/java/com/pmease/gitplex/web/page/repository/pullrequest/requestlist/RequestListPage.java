@@ -300,4 +300,9 @@ public class RequestListPage extends PullRequestPage {
 		return params;
 	}
 	
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RequestListPage.class, paramsOf(repository));
+	}
+	
 }

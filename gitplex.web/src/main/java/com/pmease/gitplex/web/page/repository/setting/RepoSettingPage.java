@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.repository.setting;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -10,6 +11,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
@@ -45,6 +47,11 @@ public class RepoSettingPage extends RepositoryPage {
 		super.renderHead(response);
 		
 		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoSettingPage.class, "repo-setting.css")));
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RepoSettingPage.class, paramsOf(repository));
 	}
 	
 }

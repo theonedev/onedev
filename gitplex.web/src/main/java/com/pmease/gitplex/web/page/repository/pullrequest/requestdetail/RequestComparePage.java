@@ -52,12 +52,14 @@ import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.diffmode.DiffModePanel;
 import com.pmease.gitplex.web.component.diff.lineprocess.LineProcessOptionMenu;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -645,6 +647,11 @@ public class RequestComparePage extends RequestDetailPage {
 		super.onPopState(target, data);
 
 		target.add(optionsContainer);
+	}
+	
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RequestListPage.class, paramsOf(repository));
 	}
 	
 }

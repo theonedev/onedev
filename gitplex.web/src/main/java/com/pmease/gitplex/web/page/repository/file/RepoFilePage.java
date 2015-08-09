@@ -653,6 +653,11 @@ public class RepoFilePage extends RepositoryPage {
 		newFileViewer(target);
 	}
 	
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RepoFilePage.class, paramsOf(repository));
+	}
+	
 	private static class RevisionIndexed implements Serializable {
 
 		Long repoId;

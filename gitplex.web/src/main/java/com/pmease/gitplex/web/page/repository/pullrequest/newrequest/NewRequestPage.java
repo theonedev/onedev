@@ -66,6 +66,7 @@ import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestOverviewPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
@@ -579,6 +580,11 @@ public class NewRequestPage extends PullRequestPage {
 		requestModel.detach();
 		
 		super.onDetach();
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RequestListPage.class, paramsOf(repository));
 	}
 
 }

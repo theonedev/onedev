@@ -51,6 +51,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.PullRequestWatch;
 import com.pmease.gitplex.core.model.RepoAndBranch;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
@@ -82,6 +83,7 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.Render
 import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.ReopenPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.UndoReviewPullRequest;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.UpdatePullRequest;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -811,4 +813,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 		return reviewersContainer;
 	}
 
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RequestListPage.class, paramsOf(repository));
+	}
+	
 }

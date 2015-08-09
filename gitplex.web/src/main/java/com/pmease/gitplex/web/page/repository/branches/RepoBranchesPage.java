@@ -53,6 +53,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.BranchWatch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.RepoAndBranch;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
@@ -572,5 +573,10 @@ public class RepoBranchesPage extends RepositoryPage {
 			return "searching-branches";
 		}
 		
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RepoBranchesPage.class, paramsOf(repository));
 	}
 }

@@ -34,6 +34,7 @@ import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranch
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestOverviewPage;
@@ -391,6 +392,11 @@ public class BranchComparePage extends RepositoryPage {
 		commitsModel.detach();
 
 		super.onDetach();
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RepoBranchesPage.class, paramsOf(repository));
 	}
 
 }

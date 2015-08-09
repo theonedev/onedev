@@ -43,6 +43,7 @@ import com.pmease.gitplex.web.component.pullrequest.verificationstatus.Verificat
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {
@@ -251,4 +252,9 @@ public class RequestUpdatesPage extends RequestDetailPage {
 		});		
 	}
 
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RequestListPage.class, paramsOf(repository));
+	}
+	
 }
