@@ -13,6 +13,10 @@ import java.util.concurrent.Future;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -31,6 +35,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
@@ -39,11 +44,15 @@ import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
+import com.pmease.gitplex.web.component.pathselector.PathSelector;
 
 @SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
@@ -53,7 +62,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	private final IModel<Repository> repoModel;
 	
 	@Nullable
-	private final String path;
+	private String path;
 	
 	private final String oldRev;
 	
@@ -170,6 +179,66 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		DropdownPanel pathDropdown = new DropdownPanel("pathDropdown", true) {
+
+			@Override
+			protected Component newContent(String id) {
+				return new PathSelector(id, repoModel, newRev, FileMode.TYPE_TREE, 
+						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
+					
+					@Override
+					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
+						path = blobIdent.path;
+						hide(target);
+						target.add(RevisionDiffPanel.this);
+					}
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+					}
+					
+				};
+			}
+			
+		};
+		add(pathDropdown);
+		WebMarkupContainer pathContainer = new WebMarkupContainer("path");
+		pathContainer.add(new DropdownBehavior(pathDropdown));
+		pathContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				if (path != null)
+					return path;
+				else
+					return "Filter by";
+			}
+			
+		}));
+		add(new AjaxLink<Void>("clear") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				path = null;
+				target.add(RevisionDiffPanel.this);
+			}
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(path != null);
+			}
+			
+		});
+		add(pathContainer);
+		
 		add(new Label("totalChanged", new AbstractReadOnlyModel<Integer>() {
 
 			@Override
@@ -178,46 +247,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 		}));
-		
-		add(new Label("totalAdditions", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				int totalAdditions = 0;
-				for (BlobChange change: getChanges())
-					totalAdditions += change.getAdditions();
-				return totalAdditions + " additions";
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getChanges().size() == getChangesCount());
-			}
-			
-		});
-		
-		add(new Label("totalDeletions", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				int totalDeletions = 0;
-				for (BlobChange change: getChanges())
-					totalDeletions += change.getDeletions();
-				return totalDeletions + " deletions";
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getChanges().size() == getChangesCount());
-			}
-			
-		});
 		
 		add(new WebMarkupContainer("tooManyChanges") {
 
@@ -298,6 +327,8 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 
 	private List<BlobChange> getChanges() {

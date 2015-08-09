@@ -14,6 +14,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
+import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+
 @SuppressWarnings("serial")
 public abstract class DiffModePanel extends Panel {
 
@@ -49,44 +51,7 @@ public abstract class DiffModePanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
-					
-					@Override
-					public CharSequence getSuccessHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getPrecondition(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getFailureHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getCompleteHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getBeforeSendHandler(Component component) {
-						return "$('#ajax-loading-indicator').show();";
-					}
-					
-					@Override
-					public CharSequence getBeforeHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getAfterHandler(Component component) {
-						return null;
-					}
-					
-				});
+				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
 			}
 
 			@Override

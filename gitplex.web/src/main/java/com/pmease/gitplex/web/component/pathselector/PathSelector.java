@@ -9,9 +9,11 @@ import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
+import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -118,6 +120,12 @@ public abstract class PathSelector extends Panel {
 		}) {
 
 			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new HumanTheme());				
+			}
+
+			@Override
 			protected Component newContentComponent(String id, final IModel<BlobIdent> model) {
 				BlobIdent blobIdent = model.getObject();
 				Fragment fragment = new Fragment(id, "treeNodeFrag", PathSelector.this);
@@ -125,9 +133,15 @@ public abstract class PathSelector extends Panel {
 
 				WebMarkupContainer link;
 				
-				if (pathTypes.contains(blobIdent.mode)) {
+				if (pathTypes.contains(blobIdent.mode & FileMode.TYPE_MASK)) {
 					link = new AjaxLink<Void>("link") {
 	
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							PathSelector.this.updateAjaxAttributes(attributes);
+						}
+
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							onSelect(target, model.getObject());
@@ -174,4 +188,8 @@ public abstract class PathSelector extends Panel {
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
+	
+	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+	}
+	
 }

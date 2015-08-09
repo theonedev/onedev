@@ -9,8 +9,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.lib.FileMode;
-
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.AddNoteCommand;
@@ -36,18 +34,15 @@ import com.pmease.commons.git.command.ListFileChangesCommand;
 import com.pmease.commons.git.command.ListHeadCommitCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
-import com.pmease.commons.git.command.ListTreeCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.git.command.MoveCommand;
 import com.pmease.commons.git.command.ParseRevisionCommand;
-import com.pmease.commons.git.command.PullCommand;
 import com.pmease.commons.git.command.PushCommand;
 import com.pmease.commons.git.command.RemoveCommand;
 import com.pmease.commons.git.command.ResetCommand;
 import com.pmease.commons.git.command.ShowCommand;
-import com.pmease.commons.git.command.ShowRefCommand;
 import com.pmease.commons.git.command.ShowSymbolicRefCommand;
 import com.pmease.commons.git.command.UpdateRefCommand;
 import com.pmease.commons.git.command.UpdateSymbolicRefCommand;
@@ -123,21 +118,6 @@ public class Git implements Serializable {
 		return commits.get(0);
 	}
 
-	/**
-	 * List tree of specified revision under specified path.
-	 * 
-	 * @param revision
-	 * 			revision to list the tree off
-	 * @param path
-	 * 			path to list tree for. Note that if path is not empty and does not end 
-	 * 			with slash, this method will list the path itself, instead of listing 
-	 * 			child entries under this path
-	 * @return
-	 */
-	public List<TreeNode> listTree(String revision, @Nullable String path) {
-		return new ListTreeCommand(repoDir).revision(revision).path(path).call();
-	}
-	
 	public Git init(boolean bare) {
 		new InitCommand(repoDir).bare(bare).call();
 		return this;
@@ -273,16 +253,6 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public Git pull(String from, String... refspec) {
-		new PullCommand(repoDir).from(from).refspec(refspec).call();
-		return this;
-	}
-
-	public Git pull(Git from, String... refspec) {
-		new PullCommand(repoDir).from(from.repoDir.getAbsolutePath()).refspec(refspec).call();
-		return this;
-	}
-
 	public Git push(String to, String... refspec) {
 		new PushCommand(repoDir).to(to).refspec(refspec).call();
 		return this;
@@ -293,10 +263,6 @@ public class Git implements Serializable {
 		return this;
 	}
 
-	public List<RefInfo> showRefs(String pattern) {
-		return new ShowRefCommand(repoDir).pattern(pattern).call();
-	}
-	
 	/**
 	 * Parse commit hash of specified revision. 
 	 * 
@@ -394,17 +360,6 @@ public class Git implements Serializable {
 		return new ShowCommand(repoDir).revision(revision).path(path).call();
 	}
 	
-	public byte[] readBlob(BlobIdent blob) {
-		if (blob.mode == FileMode.TYPE_GITLINK) {
-			String subModuleUrl = listSubModules(blob.revision).get(blob.path);
-			Preconditions.checkNotNull(subModuleUrl);
-			List<TreeNode> result = listTree(blob.revision, blob.path);
-			return (subModuleUrl + ":" + result.iterator().next().getHash()).getBytes();
-		} else {
-			return show(blob.revision, blob.path);
-		}
-	}
-
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCount, int skip) {
 		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)

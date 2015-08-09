@@ -66,6 +66,7 @@ public class PathSingleChoiceEditor extends PropertyEditor<String> {
 							String script = String.format("gitplex.selectDirectory('%s', '%s', '%s', %s);", 
 									input.getMarkupId(), getMarkupId(), path, false);
 							target.appendJavaScript(script);
+							hide(target);
 						}
 						
 					};

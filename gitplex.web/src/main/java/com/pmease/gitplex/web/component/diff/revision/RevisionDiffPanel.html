@@ -1,15 +1,17 @@
 <wicket:panel>
 	<div class="revision-diff">
 		<div class="head clearfix">
-			<div class="title pull-left">
+			<div class="pull-left">
+				<span wicket:id="path" class="btn btn-sm btn-default" title="Filter changes by path">
+					<span wicket:id="label"></span>
+					<i class="fa fa-caret-down"></i>
+				</span>
+				<a wicket:id="clear" title="Clear path filter"><i class="fa fa-close"></i></a>
+				<div wicket:id="pathDropdown"></div>
+			</div>
+			<div class="title pull-right">
 				<span class="fa fa-ext fa-file-diff"></span> Total
 				<a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
-				<wicket:enclosure child="totalAdditions">
-				with <strong wicket:id="totalAdditions"></strong>
-				</wicket:enclosure>
-				<wicket:enclosure child="totalDeletions">
-				and <strong wicket:id="totalDeletions"></strong>			
-				</wicket:enclosure>
 			</div>
 		</div>
 		<div wicket:id="tooManyChanges" class="alert alert-warning">
