@@ -191,6 +191,7 @@ public abstract class RevisionDiffPanel extends Panel {
 						path = blobIdent.path;
 						hide(target);
 						target.add(RevisionDiffPanel.this);
+						onPathChange(target, path);
 					}
 
 					@Override
@@ -222,6 +223,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				path = null;
 				target.add(RevisionDiffPanel.this);
+				onPathChange(target, path);
 			}
 			
 			@Override
@@ -330,7 +332,9 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-
+	
+	protected abstract void onPathChange(AjaxRequestTarget target, String path);
+	
 	private List<BlobChange> getChanges() {
 		return changesAndCountModel.getObject().getChanges();
 	}

@@ -89,7 +89,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				int updateNo = updates.indexOf(update) + 1;
 				updateItem.add(new Label("updateNo", updateNo));
 				PageParameters params = RequestComparePage.paramsOf(
-						update.getRequest(), update.getBaseCommitHash(), update.getHeadCommitHash(), null);
+						update.getRequest(), null, update.getBaseCommitHash(), update.getHeadCommitHash(), null);
 				
 				updateItem.add(new AgeLabel("age", Model.of(update.getDate())));
 				

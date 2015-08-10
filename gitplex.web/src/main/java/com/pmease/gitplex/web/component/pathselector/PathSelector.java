@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.component.pathselector;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -81,6 +82,7 @@ public abstract class PathSelector extends Panel {
 						if (fileType == FileMode.TYPE_TREE || pathTypes.contains(fileType))
 							roots.add(new BlobIdent(revision, treeWalk.getPathString(), fileMode));
 					}
+					Collections.sort(roots);
 					return roots.iterator();
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -106,6 +108,7 @@ public abstract class PathSelector extends Panel {
 						if (fileType == FileMode.TYPE_TREE || pathTypes.contains(fileType))
 							children.add(new BlobIdent(revision, treeWalk.getPathString(), fileMode));
 					}
+					Collections.sort(children);
 					return children.iterator();
 				} catch (IOException e) {
 					throw new RuntimeException(e);

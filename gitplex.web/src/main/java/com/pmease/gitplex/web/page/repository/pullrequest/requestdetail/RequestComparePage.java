@@ -13,18 +13,18 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
@@ -35,6 +35,7 @@ import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.AroundContext;
 import com.pmease.commons.loader.InheritableThreadLocalData;
+import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -71,13 +72,13 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
 
-	private static final String COMMENT_PARAM = "comment";
+	private static final String PARAM_COMMENT = "comment";
 	
-	private static final String OLD_PARAM = "old";
+	private static final String PARAM_OLD = "old";
 	
-	private static final String NEW_PARAM = "new";
+	private static final String PARAM_NEW = "new";
 	
-	private static final String PATH_PARAM = "path";
+	private static final String PARAM_PATH = "path";
 	
 	private String oldCommitHash;
 	
@@ -85,15 +86,15 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private String path;
 	
-	private WebMarkupContainer optionsContainer;
+	private Long commentId;
 	
-	private final IModel<PullRequestComment> commentModel;
+	private WebMarkupContainer compareOptions;
 	
 	private LineProcessOptionMenu lineProcessOptionMenu;
 	
 	private DiffModePanel diffModePanel;
 	
-	private RevisionDiffPanel revisionDiffPanel;
+	private Component compareResult;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -141,68 +142,39 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	public RequestComparePage(final PageParameters params) {
 		super(params);
-
-		commentModel = new LoadableDetachableModel<PullRequestComment>() {
-
-			@Override
-			protected PullRequestComment load() {
-				Long commentId = params.get(COMMENT_PARAM).toOptionalLong();
-				if (commentId != null)
-					return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
-				else 
-					return null;
-			}
-			
-		};
-		
-		oldCommitHash = params.get(OLD_PARAM).toString();
-		newCommitHash = params.get(NEW_PARAM).toString();
-		
-		PullRequestComment comment = getComment();
-		if (comment != null) {
-			if (oldCommitHash != null || newCommitHash != null) {
-				throw new IllegalArgumentException("Parameter 'old' or 'new' "
-						+ "should not be specified if parameter 'comment' is specified.");
-			}
-
-			oldCommitHash = comment.getOldCommitHash();
-			newCommitHash = comment.getNewCommitHash();
-		} else {
-			if (oldCommitHash == null)
-				oldCommitHash = getPullRequest().getBaseCommitHash();
-			if (newCommitHash == null)
-				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
-		}
-		
-		path = params.get(PATH_PARAM).toString();
+		initState(params);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		optionsContainer = new WebMarkupContainer("compareOptions") {
-			
+		compareOptions = new WebMarkupContainer("compareOptions") {
+
 			@Override
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
-
+				
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 					AjaxRequestTarget target = pullRequestChanged.getTarget();
-					for (StickyBehavior behavior: getBehaviors(StickyBehavior.class))
-						behavior.unstick(target);
-					target.add(this);
+					refreshCompareOptions(target);
+					
+					PageParameters params = getPageParameters();
+					if (params.get(PARAM_NEW).toString() == null) {
+						newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+						newCompareResult(target);
+					}
 				}
 			}
-
+			
 		};
-		optionsContainer.add(new StickyBehavior());
+		compareOptions.add(new StickyBehavior());
 		
-		add(optionsContainer);
+		add(compareOptions);
 
 		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
-		optionsContainer.add(oldSelector);
+		compareOptions.add(oldSelector);
 		oldSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -231,15 +203,25 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new CommitChoicePanel(id, true);
+				return new CommitChoicePanel(id) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String commitHash) {
+						oldCommitHash = commitHash;
+						getPageParameters().set(PARAM_OLD, commitHash);
+						hide(target);
+						onStateChange(target);
+					}
+					
+				};
 			}
 			
 		}; 
-		optionsContainer.add(oldChoicesDropdown);
+		compareOptions.add(oldChoicesDropdown);
 		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
 		
 		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector");
-		optionsContainer.add(newSelector);
+		compareOptions.add(newSelector);
 		newSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -268,11 +250,21 @@ public class RequestComparePage extends RequestDetailPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new CommitChoicePanel(id, false);
+				return new CommitChoicePanel(id) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String commitHash) {
+						newCommitHash = commitHash;
+						getPageParameters().set(PARAM_NEW, commitHash);
+						hide(target);
+						onStateChange(target);
+					}
+					
+				};
 			}
 			
 		}; 
-		optionsContainer.add(newChoicesDropdown);
+		compareOptions.add(newChoicesDropdown);
 		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
 
 		MenuPanel commonComparisons = new MenuPanel("comparisonChoices") {
@@ -284,9 +276,13 @@ public class RequestComparePage extends RequestDetailPage {
 				items.add(new ComparisonChoiceItem("Base", "Latest Update") {
 
 					@Override
-					protected void onSelect() {
-						PageParameters params = paramsOf(getPullRequest(), null, null, path);
-						setResponsePage(RequestComparePage.class, params);
+					protected void onSelect(AjaxRequestTarget target) {
+						hide(target);
+						oldCommitHash = getPullRequest().getBaseCommitHash();
+						newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+						getPageParameters().set(PARAM_OLD, oldCommitHash);
+						getPageParameters().set(PARAM_NEW, newCommitHash);
+						onStateChange(target);
 					}
 
 				});
@@ -299,10 +295,13 @@ public class RequestComparePage extends RequestDetailPage {
 						items.add(new ComparisonChoiceItem("Target Branch", "Integration Preview") {
 
 							@Override
-							protected void onSelect() {
-								PageParameters params = paramsOf(getPullRequest(), 
-										getPullRequest().getTarget().getHead(), preview.getIntegrated(), path);
-								setResponsePage(RequestComparePage.class, params);
+							protected void onSelect(AjaxRequestTarget target) {
+								hide(target);
+								oldCommitHash = getPullRequest().getTarget().getHead();
+								newCommitHash = preview.getIntegrated();
+								getPageParameters().set(PARAM_OLD, oldCommitHash);
+								getPageParameters().set(PARAM_NEW, newCommitHash);
+								onStateChange(target);
 							}
 							
 						});
@@ -328,9 +327,13 @@ public class RequestComparePage extends RequestDetailPage {
 					items.add(new ComparisonChoiceItem(oldLabel, newLabel) {
 
 						@Override
-						protected void onSelect() {
-							PageParameters params = paramsOf(getPullRequest(), baseCommit, headCommit, path);
-							setResponsePage(RequestComparePage.class, params);
+						protected void onSelect(AjaxRequestTarget target) {
+							hide(target);
+							oldCommitHash = baseCommit;
+							newCommitHash = headCommit;
+							getPageParameters().set(PARAM_OLD, oldCommitHash);
+							getPageParameters().set(PARAM_NEW, newCommitHash);
+							onStateChange(target);
 						}
 						
 					});
@@ -341,66 +344,251 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 		
-		optionsContainer.add(commonComparisons);
-		optionsContainer.add(new WebMarkupContainer("comparisonSelector")
+		compareOptions.add(commonComparisons);
+		compareOptions.add(new WebMarkupContainer("comparisonSelector")
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
-		optionsContainer.add(new WebMarkupContainer("outdatedAlert") {
-
-			@Override
-			public void onEvent(final IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PageParameters params = getPageParameters();
-					if (params.get(COMMENT_PARAM).toOptionalLong() != null || getPageParameters().get(NEW_PARAM).toString() == null) {
-						setVisible(true);
-						revisionDiffPanel.visitChildren(new IVisitor<Component, Void>() {
-
-							@Override
-							public void component(Component object, IVisit<Void> visit) {
-								AjaxRequestTarget target = ((PullRequestChanged) event.getPayload()).getTarget();
-								for (StickyBehavior behavior: object.getBehaviors(StickyBehavior.class))
-									behavior.restick(target);
-							}
-							
-						});
-					}
-					
-				}
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				setVisible(false);
-				setOutputMarkupPlaceholderTag(true);
-			}
-
-		});
-
 		lineProcessOptionMenu = new LineProcessOptionMenu("lineProcessOptionMenu") {
 
 			@Override
 			protected void onOptionChange(AjaxRequestTarget target) {
-				target.add(revisionDiffPanel);
+				target.add(compareResult);
 			}
 			
 		};
-		optionsContainer.add(lineProcessOptionMenu);
-		optionsContainer.add(new WebMarkupContainer("lineProcessOptionMenuTrigger").add(new MenuBehavior(lineProcessOptionMenu)));
+		compareOptions.add(lineProcessOptionMenu);
+		compareOptions.add(new WebMarkupContainer("lineProcessOptionMenuTrigger").add(new MenuBehavior(lineProcessOptionMenu)));
 		
-		optionsContainer.add(diffModePanel = new DiffModePanel("diffMode") {
+		compareOptions.add(diffModePanel = new DiffModePanel("diffMode") {
 
 			@Override
 			protected void onModeChange(AjaxRequestTarget target) {
-				target.add(revisionDiffPanel);
+				target.add(compareResult);
 			}
 			
 		});
+
+		newCompareResult(null);
+	}
+	
+	@Override
+	public void onDetach() {
+		commitsModel.detach();
 		
+		super.onDetach();
+	}
+	
+	public static PageParameters paramsOf(PullRequest request, @Nullable PullRequestComment comment, 
+			@Nullable String oldCommitHash, @Nullable String newCommitHash, @Nullable String path) {
+		PageParameters params = RequestDetailPage.paramsOf(request);
+
+		if (comment != null)
+			params.set(PARAM_COMMENT, comment.getId());
+		if (oldCommitHash != null)
+			params.set(PARAM_OLD, oldCommitHash);
+		if (newCommitHash != null)
+			params.set(PARAM_NEW, newCommitHash);
+		if (path != null)
+			params.set(PARAM_PATH,  path);
+		
+		return params;
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		
+		if (event.getPayload() instanceof CommentRemoved) {
+			CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
+			PullRequestComment comment = (PullRequestComment) commentRemoved.getComment();
+			
+			// compare identifier instead of comment object as comment may have been deleted
+			// to cause LazyInitializationException
+			if (HibernateUtils.getId(comment).equals(commentId)) {
+				commentId = null;
+				onStateChange(commentRemoved.getTarget());
+			}
+		}
+	}
+
+	private static class CommitDescription implements Serializable {
+		private final String name;
+		
+		private final String subject;
+		
+		CommitDescription(final String name, final String subject) {
+			this.name = name;
+			this.subject = subject;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getSubject() {
+			return subject;
+		}
+		
+	}
+	
+	private abstract class CommitChoicePanel extends Fragment {
+
+		CommitChoicePanel(String id) {
+			super(id, "commitChoiceFrag", RequestComparePage.this);
+		}
+
+		protected abstract void onSelect(AjaxRequestTarget target, String commitHash);
+		
+		@Override
+		protected void onInitialize() {
+			super.onInitialize();
+			
+			setOutputMarkupId(true);
+			
+			IModel<List<Map.Entry<String, CommitDescription>>> model = 
+					new LoadableDetachableModel<List<Map.Entry<String, CommitDescription>>>() {
+
+				@Override
+				protected List<Entry<String, CommitDescription>> load() {
+					List<Entry<String, CommitDescription>> entries = new ArrayList<>();
+					entries.addAll(commitsModel.getObject().entrySet());
+					return entries;
+				}
+				
+			};
+			
+			add(new ListView<Map.Entry<String, CommitDescription>>("commits", model) {
+
+				@Override
+				protected void populateItem(final ListItem<Entry<String, CommitDescription>> item) {
+					AjaxLink<Void> link = new AjaxLink<Void>("commit") {
+
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+						}
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							Map.Entry<String, CommitDescription> entry = item.getModelObject();
+							onSelect(target, entry.getKey());
+						}
+						
+					};
+					Map.Entry<String, CommitDescription> entry = item.getModelObject();
+					String hash = GitUtils.abbreviateSHA(entry.getKey(), 7);
+					String name = entry.getValue().getName();
+					link.add(new Label("commit", hash));
+					link.add(new Label("name", name).setVisible(name != null));
+					if (entry.getValue().getSubject() != null)
+						link.add(new Label("subject", entry.getValue().getSubject()));
+					else
+						link.add(new WebMarkupContainer("subject").setVisible(false));
+					item.add(link);
+				}
+				
+			});
+		}
+
+	}
+	
+	private abstract class ComparisonChoiceItem extends MenuItem {
+
+		private final String oldName;
+		
+		private final String newName;
+		
+		ComparisonChoiceItem(String oldName, String newName) {
+			this.oldName = oldName;
+			this.newName = newName;
+		}
+
+		protected abstract void onSelect(AjaxRequestTarget target);
+
+		@Override
+		public Component newContent(String componentId) {
+			Fragment fragment = new Fragment(componentId, "comparisonChoiceFrag", RequestComparePage.this);
+			AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+				}
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					onSelect(target);
+				}
+				
+			};
+			fragment.add(link);
+			
+			link.add(new Label("old", oldName));
+			link.add(new Label("new", newName));
+			
+			return fragment;
+		}
+	}
+
+	private void initState(PageParameters params) {
+		oldCommitHash = params.get(PARAM_OLD).toString();
+		newCommitHash = params.get(PARAM_NEW).toString();
+		path = params.get(PARAM_PATH).toString();
+		commentId = params.get(PARAM_COMMENT).toOptionalLong();
+
+		PullRequestComment comment = getComment();
+		if (comment != null) {
+			if (oldCommitHash == null)
+				oldCommitHash = comment.getOldCommitHash();
+			if (newCommitHash == null)
+				newCommitHash = comment.getNewCommitHash();
+			if (path == null)
+				path = comment.getBlobIdent().path;
+		}
+		if (oldCommitHash == null)
+			oldCommitHash = getPullRequest().getBaseCommitHash();
+		if (newCommitHash == null)
+			newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+
+		initState((PageParameters) data);
+		
+		refreshCompareOptions(target);
+		newCompareResult(target);
+	}
+	
+	private void refreshCompareOptions(AjaxRequestTarget target) {
+		for (StickyBehavior behavior: compareOptions.getBehaviors(StickyBehavior.class))
+			behavior.unstick(target);
+		target.add(compareOptions);
+	}
+	
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Repository repository) {
+		setResponsePage(RequestListPage.class, paramsOf(repository));
+	}
+
+	private void pushState(AjaxRequestTarget target) {
+		PageParameters params = getPageParameters();
+		CharSequence url = RequestCycle.get().urlFor(RequestComparePage.class, params);
+		pushState(target, url.toString(), params);
+	}
+	
+	private void onStateChange(AjaxRequestTarget target) {
+		pushState(target);
+		
+		refreshCompareOptions(target);
+		newCompareResult(target);
+	}
+	
+	private void newCompareResult(@Nullable AjaxRequestTarget target) {
 		InlineCommentSupport commentSupport;
 		
 		List<String> commentables = getPullRequest().getCommentables();
@@ -458,7 +646,7 @@ public class RequestComparePage extends RequestDetailPage {
 			};
 		};
 		
-		add(revisionDiffPanel = new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, path, commentSupport) {
+		compareResult = new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, path, commentSupport) {
 
 			@Override
 			protected LineProcessor getLineProcessor() {
@@ -469,189 +657,28 @@ public class RequestComparePage extends RequestDetailPage {
 			protected boolean isUnified() {
 				return diffModePanel.isUnified();
 			}
-			
-		});
-		revisionDiffPanel.setOutputMarkupId(true);
-	}
-	
-	@Override
-	public void onDetach() {
-		commitsModel.detach();
-		commentModel.detach();
-		
-		super.onDetach();
-	}
-	
-	public static PageParameters paramsOf(PullRequestComment concernedComment) {
-		PageParameters params = RequestDetailPage.paramsOf(concernedComment.getRequest());
-		params.set("comment", concernedComment.getId());
-		
-		return params;
-	}
-	
-	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommit, 
-			@Nullable String newCommit, @Nullable String path) {
-		PageParameters params = RequestDetailPage.paramsOf(request);
-		
-		if (oldCommit != null)
-			params.set(OLD_PARAM, oldCommit);
-		if (newCommit != null)
-			params.set(NEW_PARAM, newCommit);
-		if (path != null)
-			params.set(PATH_PARAM,  path);
-		
-		return params;
-	}
 
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof CommentRemoved) {
-			CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-			PullRequestComment comment = (PullRequestComment) commentRemoved.getComment();
-			
-			// compare identifier instead of comment object as comment may have been deleted
-			// to cause LazyInitializationException
-			if (getComment() != null 
-					&& HibernateUtils.getId(comment).equals(HibernateUtils.getId(getComment()))) {
-				PageParameters params = paramsOf(getPullRequest(), oldCommitHash, newCommitHash, path);
-				setResponsePage(RequestComparePage.class, params);
+			@Override
+			protected void onPathChange(AjaxRequestTarget target, String path) {
+				RequestComparePage.this.path = path;
+				getPageParameters().set(PARAM_PATH, path);
+				pushState(target);
 			}
+			
+		};
+		if (target != null) {
+			replace(compareResult);
+			target.add(compareResult);
+		} else {
+			add(compareResult);
 		}
-	}
-
-	private static class CommitDescription implements Serializable {
-		private final String name;
-		
-		private final String subject;
-		
-		CommitDescription(final String name, final String subject) {
-			this.name = name;
-			this.subject = subject;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getSubject() {
-			return subject;
-		}
-		
 	}
 	
-	private class CommitChoicePanel extends Fragment {
-
-		private final boolean forBase;
-		
-		CommitChoicePanel(String id, boolean forBase) {
-			super(id, "commitChoiceFrag", RequestComparePage.this);
-			
-			this.forBase = forBase;
-		}
-
-		@Override
-		protected void onInitialize() {
-			super.onInitialize();
-			
-			setOutputMarkupId(true);
-			
-			IModel<List<Map.Entry<String, CommitDescription>>> model = 
-					new LoadableDetachableModel<List<Map.Entry<String, CommitDescription>>>() {
-
-				@Override
-				protected List<Entry<String, CommitDescription>> load() {
-					List<Entry<String, CommitDescription>> entries = new ArrayList<>();
-					entries.addAll(commitsModel.getObject().entrySet());
-					return entries;
-				}
-				
-			};
-			
-			add(new ListView<Map.Entry<String, CommitDescription>>("commits", model) {
-
-				@Override
-				protected void populateItem(final ListItem<Entry<String, CommitDescription>> item) {
-					Link<Void> link = new Link<Void>("commit") {
-
-						@Override
-						public void onClick() {
-							Map.Entry<String, CommitDescription> entry = item.getModelObject();
-							if (forBase) {
-								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), entry.getKey(), newCommitHash, path));
-							} else {
-								setResponsePage(RequestComparePage.class, 
-										paramsOf(getPullRequest(), oldCommitHash, entry.getKey(), path));
-							}
-						}
-						
-					};
-					Map.Entry<String, CommitDescription> entry = item.getModelObject();
-					String hash = GitUtils.abbreviateSHA(entry.getKey(), 7);
-					String name = entry.getValue().getName();
-					link.add(new Label("commit", hash));
-					link.add(new Label("name", name).setVisible(name != null));
-					if (entry.getValue().getSubject() != null)
-						link.add(new Label("subject", entry.getValue().getSubject()));
-					else
-						link.add(new WebMarkupContainer("subject").setVisible(false));
-					item.add(link);
-				}
-				
-			});
-		}
-
-	}
-	
-	private abstract class ComparisonChoiceItem extends MenuItem {
-
-		private final String oldName;
-		
-		private final String newName;
-		
-		ComparisonChoiceItem(String oldName, String newName) {
-			this.oldName = oldName;
-			this.newName = newName;
-		}
-
-		protected abstract void onSelect();
-
-		@Override
-		public Component newContent(String componentId) {
-			Fragment fragment = new Fragment(componentId, "comparisonChoiceFrag", RequestComparePage.this);
-			Link<Void> link = new Link<Void>("link") {
-
-				@Override
-				public void onClick() {
-					onSelect();
-				}
-				
-			};
-			fragment.add(link);
-			
-			link.add(new Label("old", oldName));
-			link.add(new Label("new", newName));
-			
-			return fragment;
-		}
-	}
-
 	private PullRequestComment getComment() {
-		return commentModel.getObject();
-	}
-
-	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		super.onPopState(target, data);
-
-		target.add(optionsContainer);
-	}
-	
-	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RequestListPage.class, paramsOf(repository));
+		if (commentId != null)
+			return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
+		else 
+			return null;
 	}
 	
 }

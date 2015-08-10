@@ -122,24 +122,71 @@
 #request-detail>.updates>.update>.commits tr:hover td {background: #F7ECB9;}
 #request-detail>.updates>.update>.commits .commit-message>.full {margin-bottom: 4px;}
 
-#request-detail .compare>.head {background: #F2F2F2; z-index: 90; padding: 8px; 
-	border: 1px solid #DDD;}
-#request-detail .compare>.head>.changed-toggle {margin-right: 12px; padding-top: 4px;}
-#request-detail .compare>.head>.outdated-alert {padding-top: 2px; color: #CF9115; font-size: 16px;}
-#request-detail .compare>.head>.pull-left:FIRST-CHILD {margin-right: 16px;}
-#request-detail .compare>.head>.pull-left:LAST-CHILD {margin-top: 3px;}
-#request-detail .compare>.head>.line-process {margin-right: 16px;}
+#request-detail .compare>.head {
+	background: #F2F2F2; 
+	z-index: 90; 
+	padding: 8px; 
+	border: 1px solid #DDD;
+}
+#request-detail .compare>.head>.changed-toggle {
+	margin-right: 12px; 
+	padding-top: 4px;
+}
+#request-detail .compare>.head>.outdate-alert {
+	padding-top: 2px; 
+	color: #CF9115; 
+	font-size: 16px;
+}
+#request-detail .compare>.head>.pull-left:FIRST-CHILD {
+	margin-right: 16px;
+}
+#request-detail .compare>.head>.pull-left:LAST-CHILD {
+	margin-top: 3px;
+}
+#request-detail .compare>.head>.line-process {
+	margin-right: 16px;
+}
 
-.content>.commit-choice {max-height: 400px; padding: 8px 0; overflow-y: scroll;}
-.content>.commit-choice a {text-decoration: none; color: #333; display: block; padding: 8px;}
-.content>.commit-choice li {border-bottom: 1px dotted #BBB;}
-.content>.commit-choice li:hover {background: #FDF2C3;}
-.content>.commit-choice a .commit {font-family: Consolas, 'Liberation Mono', Courier, monospace;}
-.content>.commit-choice a .subject {font-size: 12px; color: #999;} 
-table.old-vs-new td {padding: 0 8px;}
-table.old-vs-new td.old {width: 140px; text-align: left;}
-table.old-vs-new td.new {width: 140px; text-align: right;}
-table.old-vs-new td.vs {width: 1px; text-align: center; font-weight: bold;}
+.content>.commit-choice {
+	max-height: 400px; 
+	padding: 8px 0; 
+	overflow-y: scroll;
+}
+.content>.commit-choice a {
+	text-decoration: none; 
+	color: #333; 
+	display: block; 
+	padding: 8px;
+}
+.content>.commit-choice li {
+	border-bottom: 1px dotted #BBB;
+}
+.content>.commit-choice li:hover {
+	background: #FDF2C3;
+}
+.content>.commit-choice a .commit {
+	font-family: Consolas, 'Liberation Mono', Courier, monospace;
+}
+.content>.commit-choice a .subject {
+	font-size: 12px; 
+	color: #999;
+} 
+table.old-vs-new td {
+	padding: 0 8px;
+}
+table.old-vs-new td.old {
+	width: 140px; 
+	text-align: left;
+}
+table.old-vs-new td.new {
+	width: 140px; 
+	text-align: right;
+}
+table.old-vs-new td.vs {
+	width: 1px; 
+	text-align: center; 
+	font-weight: bold;
+}
 
 .conflict-resolve-instruction {
 	padding: 8px; 

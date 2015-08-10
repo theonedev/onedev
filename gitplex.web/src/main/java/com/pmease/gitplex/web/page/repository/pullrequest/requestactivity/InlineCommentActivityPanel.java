@@ -82,7 +82,9 @@ public class InlineCommentActivityPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				setResponsePage(RequestComparePage.class, RequestComparePage.paramsOf(commentModel.getObject()));
+				PullRequestComment comment = commentModel.getObject();
+				setResponsePage(RequestComparePage.class, 
+						RequestComparePage.paramsOf(comment.getRequest(), comment, null, null, null));
 			}
 			
 		});
