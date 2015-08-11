@@ -17,7 +17,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -48,7 +47,7 @@ import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 
 @SuppressWarnings("serial")
@@ -94,17 +93,9 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				List<PullRequestUpdate> updates = update.getRequest().getSortedUpdates();
 				int updateNo = updates.indexOf(update) + 1;
 				updateItem.add(new Label("updateNo", updateNo));
-				PageParameters params = RequestComparePage.paramsOf(
-						update.getRequest(), null, update.getBaseCommitHash(), update.getHeadCommitHash(), null);
-				
 				updateItem.add(new Label("age", DateUtils.formatAge(update.getDate())));
-				
-				Link<Void> compareLink = new BookmarkablePageLink<Void>("compare", RequestComparePage.class, params);
-				if (updateNo == 1)
-					compareLink.add(AttributeAppender.append("title", "Compare with request base"));
-				else
-					compareLink.add(AttributeAppender.append("title", "Compare with previous update"));
-				updateItem.add(compareLink);
+
+				updateItem.add(new UpdateChangesLink("changes", update));
 
 				final WebMarkupContainer reviewsContainer = new WebMarkupContainer("reviews");
 				reviewsContainer.setOutputMarkupId(true);

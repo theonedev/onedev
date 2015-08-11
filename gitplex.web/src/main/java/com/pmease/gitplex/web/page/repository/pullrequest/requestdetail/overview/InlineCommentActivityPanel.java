@@ -206,7 +206,7 @@ class InlineCommentActivityPanel extends Panel {
 		add(new CommentPanel("comment", commentModel) {
 
 			@Override
-			protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {
+			protected Component newAdditionalCommentOperations(String id, IModel<Comment> comment) {
 				Fragment fragment = new Fragment(id, "actionsFrag", InlineCommentActivityPanel.this);
 				fragment.add(new AjaxLink<Void>("collapse") {
 

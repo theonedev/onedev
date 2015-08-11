@@ -1,7 +1,5 @@
 package com.pmease.commons.wicket.component;
 
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 
@@ -18,29 +16,15 @@ public abstract class LabelLink<T> extends Link<T> {
 		super(id, linkModel);
 		this.labelModel = labelModel;
 	}
-
-	@Override
-	public void onComponentTagBody(final MarkupStream markupStream,
-			final ComponentTag openTag) {
-
-		// Draw anything before the body?
-		if (!isLinkEnabled() && (getBeforeDisabledLink() != null)) {
-			getResponse().write(getBeforeDisabledLink());
-		}
-		
-		replaceComponentTagBody(markupStream, openTag, labelModel.getObject());
-
-		// Draw anything after the body?
-		if (!isLinkEnabled() && (getAfterDisabledLink() != null)) {
-			getResponse().write(getAfterDisabledLink());
-		}
-	}
 	
 	@Override
+	public IModel<?> getBody() {
+		return labelModel;
+	}
+
+	@Override
 	public void onDetach() {
-		if (labelModel != null) {
-			labelModel.detach();
-		}
+		labelModel.detach();
 		
 		super.onDetach();
 	}

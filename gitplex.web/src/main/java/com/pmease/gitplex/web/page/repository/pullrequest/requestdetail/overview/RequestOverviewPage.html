@@ -5,7 +5,7 @@
 				<table>
 					<tr wicket:id="requestActivities" class="activity">
 						<td wicket:id="avatar" class="avatar"><div wicket:id="avatar"></div></td>
-						<td wicket:id="activity" class="activity"></td>
+						<td wicket:id="detail" class="detail"></td>
 					</tr>
 				</table>
 				<div wicket:id="addComment" class="add-comment">
@@ -16,9 +16,9 @@
 					</form>
 				</div>
 			</td>
-			<td class="others">
+			<td class="info">
 				<div class="well">
-					<div wicket:id="basicInfo" class="basic-info">
+					<div wicket:id="basicInfo" class="basic">
 						<div class="submitter">
 							<label>Submitted By: </label> <span wicket:id="submitter" class="avatar"></span>
 						</div>
@@ -70,14 +70,16 @@
 		</tr>
 	</table>
 	<wicket:fragment wicket:id="collapsedCommentFrag">
-		<div class="summary">
-			<span wicket:id="user" class="user"></span> <span wicket:id="activity"></span> <span wicket:id="age"></span> 
-			<span class="actions">
-				<span class="fa fa-check" title="This comment is marked as resolved"></span>
-				<a wicket:id="expand" class="fa fa-expand" title="Expand this comment"></a>
-			</span>
+		<div class="collapsed comment">
+			<div class="head">
+				<span wicket:id="user" class="user"></span> <span wicket:id="action"></span> <span wicket:id="age"></span> 
+				<span class="operations">
+					<span class="fa fa-check" title="This comment is marked as resolved"></span>
+					<a wicket:id="expand" class="fa fa-expand" title="Expand this comment"></a>
+				</span>
+			</div>
+			<div wicket:id="body" class="body"></div>
 		</div>
-		<div wicket:id="detail" class="detail"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="assigneeEditFrag">
 		<label>Assigned To: <span wicket:id="help" class="fa fa-question-circle pointer small"></span></label>

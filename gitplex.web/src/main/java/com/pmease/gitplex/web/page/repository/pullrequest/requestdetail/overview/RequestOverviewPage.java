@@ -85,6 +85,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class RequestOverviewPage extends RequestDetailPage {
 	
+	private static final String DETAIL_ID = "detail";
+	
 	private static final String ASSIGNEE_HELP = "Assignee has write permission to the "
 			+ "repository and is resonsible for integrating the pull request into "
 			+ "target branch after it passes gate keeper check.";
@@ -143,23 +145,23 @@ public class RequestOverviewPage extends RequestDetailPage {
 		if (commentActivity != null && commentActivity.isCollapsed()) {
 			PullRequestComment comment = commentActivity.getComment();
 
-			Fragment fragment = new Fragment("activity", "collapsedCommentFrag", RequestOverviewPage.this);
+			Fragment fragment = new Fragment(DETAIL_ID, "collapsedCommentFrag", RequestOverviewPage.this);
 
 			fragment.add(new UserLink("user", new UserModel(comment.getUser()), AvatarMode.NAME));
 			if (comment.getInlineInfo() != null)
-				fragment.add(new Label("activity", "added inline comment on file '" + comment.getBlobIdent().path + "'"));
+				fragment.add(new Label("action", "added inline comment on file '" + comment.getBlobIdent().path + "'"));
 			else 
-				fragment.add(new Label("activity", "commented"));
+				fragment.add(new Label("action", "commented"));
 			fragment.add(new Label("age", DateUtils.formatAge(comment.getDate())));
 			
-			fragment.add(new Label("detail", comment.getContent()));
+			fragment.add(new Label("body", comment.getContent()));
 			
 			fragment.add(new AjaxLink<Void>("expand") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					RenderableActivity activity = (RenderableActivity) row.getDefaultModelObject();
-					row.replace(activity.render("activity"));
+					row.replace(activity.render(DETAIL_ID));
 					commentActivity.setCollapsed(false);
 					target.add(row);
 				}
@@ -174,15 +176,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 		avatarColumn.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
 		row.add(avatarColumn);
 		
-		if (row.get("activity") == null) 
-			row.add(activity.render("activity"));
+		if (row.get(DETAIL_ID) == null) 
+			row.add(activity.render(DETAIL_ID));
 		
 		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
-			row.add(AttributeAppender.append("class", " discussion non-update"));
-		else if (activity instanceof UpdatePullRequest)
-			row.add(AttributeAppender.append("class", " non-discussion update"));
+			row.add(AttributeAppender.append("class", " discussion"));
 		else
-			row.add(AttributeAppender.append("class", " non-discussion non-update"));
+			row.add(AttributeAppender.append("class", " non-discussion"));
 		
 		PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 		final Date lastVisitDate = pullRequestManager.getLastVisitDate(getPullRequest());

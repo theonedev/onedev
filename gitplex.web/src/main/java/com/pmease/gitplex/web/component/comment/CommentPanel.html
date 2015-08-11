@@ -1,17 +1,17 @@
 <wicket:panel>
 	<div class="comment">
-		<div wicket:id="info" class="info">
+		<div wicket:id="head" class="head">
 			<span wicket:id="user" class="user"></span> commented <span wicket:id="age"></span>
 			<span class="actions">
 				<a wicket:id="edit" title="Edit comment"><span class="fa fa-pencil"></span></a>
 				<a wicket:id="delete" title="Delete comment"><span class="fa fa-times"></span></a>
 				<a wicket:id="resolve"></a>
 				<span wicket:id="resolved" class="fa fa-check" title="This comment is marked as resolved"></span>
-				<span wicket:id="additionalActions"></span>
+				<span wicket:id="additionalOperations"></span>
 			</span>
 			<a wicket:id="anchor"></a>
 		</div>
-		<div wicket:id="content" class="content"></div>
+		<div wicket:id="body" class="body"></div>
 		<div class="replies">
 			<table>
 				<tbody>
@@ -20,16 +20,16 @@
 							<div wicket:id="avatar"></div>
 						</td>
 						<td class="detail">
-							<div class="info">
+							<div class="head">
 								<span wicket:id="user" class="user"></span> replied <span wicket:id="age"></span>
-								<span class="actions">
+								<span class="operations">
 									<a wicket:id="edit" title="Edit reply"><span class="fa fa-pencil"></span></a>
 									<a wicket:id="delete" title="Delete reply"><span class="fa fa-times"></span></a>
-									<span wicket:id="additionalActions"></span>
+									<span wicket:id="additionalOperations"></span>
 								</span>
 								<a wicket:id="anchor"></a>
 							</div>
-							<div wicket:id="content" class="content"></div>
+							<div wicket:id="body" class="body"></div>
 						</td>
 					</tr>
 				</tbody>
@@ -46,7 +46,6 @@
 			<div wicket:id="feedback"></div>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
-				&nbsp;&nbsp;
 				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
 			</div>
 		</form>

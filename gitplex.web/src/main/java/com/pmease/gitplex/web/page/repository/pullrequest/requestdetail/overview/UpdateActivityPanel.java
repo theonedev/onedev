@@ -30,6 +30,7 @@ import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -64,6 +65,9 @@ class UpdateActivityPanel extends Panel {
 		PullRequestUpdate update = updateModel.getObject();
 		add(new Label("updateNo", update.getRequest().getSortedUpdates().indexOf(update)+1));
 		add(new Label("age", DateUtils.formatAge(update.getDate())));
+		
+		add(new UpdateChangesLink("changes", update));
+		
 		String tooManyMessage = "Too many commits, displaying recent " + Constants.MAX_DISPLAY_COMMITS;
 		add(new Label("tooManyCommits", tooManyMessage) {
 

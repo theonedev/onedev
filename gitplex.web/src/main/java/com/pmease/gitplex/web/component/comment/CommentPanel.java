@@ -49,6 +49,12 @@ import com.pmease.gitplex.web.model.UserModel;
 @SuppressWarnings("serial")
 public class CommentPanel extends Panel {
 
+	private static final String HEAD_ID = "head";
+	
+	private static final String BODY_ID = "body";
+	
+	private static final String CONTENT_ID = "content";
+	
 	private static final String ADD_REPLY_ID = "addReply";
 	
 	private RepeatingView repliesView;
@@ -80,7 +86,7 @@ public class CommentPanel extends Panel {
 	}
 	
 	private Fragment renderForView(String content) {
-		Fragment fragment = new Fragment("content", "viewFrag", this);
+		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 		fragment.add(new MarkdownPanel("comment", Model.of(content)));
 		fragment.setOutputMarkupId(true);
 		return fragment;
@@ -90,18 +96,18 @@ public class CommentPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		final WebMarkupContainer info = new WebMarkupContainer("info"); 
-		info.setOutputMarkupId(true);
-		add(info);
+		final WebMarkupContainer head = new WebMarkupContainer(HEAD_ID); 
+		head.setOutputMarkupId(true);
+		add(head);
 		
-		info.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
-		info.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
+		head.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
+		head.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 
-		info.add(new AjaxLink<Void>("edit") {
+		head.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("content", "editFrag", CommentPanel.this);
+				Fragment fragment = new Fragment(BODY_ID, "editFrag", CommentPanel.this);
 
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
@@ -155,7 +161,7 @@ public class CommentPanel extends Panel {
 
 		});
 		
-		info.add(new AjaxLink<Void>("delete") {
+		head.add(new AjaxLink<Void>("delete") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -173,7 +179,7 @@ public class CommentPanel extends Panel {
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
 		
 		AjaxLink<Void> resolveLink;
-		info.add(resolveLink = new AjaxLink<Void>("resolve") {
+		head.add(resolveLink = new AjaxLink<Void>("resolve") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -181,7 +187,7 @@ public class CommentPanel extends Panel {
 				if (getComment().isResolved())
 					send(CommentPanel.this, Broadcast.BUBBLE, new CommentCollapsing(target, getComment()));
 				if (findPage() != null) // only render this checkbox if the whole comment panel is not replaced
-					target.add(info);
+					target.add(head);
 			}
 
 			@Override
@@ -207,7 +213,7 @@ public class CommentPanel extends Panel {
 		});
 		resolveLink.setOutputMarkupId(true);
 		
-		info.add(new WebMarkupContainer("resolved") {
+		head.add(new WebMarkupContainer("resolved") {
 
 			@Override
 			protected void onConfigure() {
@@ -218,7 +224,7 @@ public class CommentPanel extends Panel {
 			
 		});
 		
-		info.add(newAdditionalCommentActions("additionalActions", new AbstractReadOnlyModel<Comment>() {
+		head.add(newAdditionalCommentOperations("additionalOperations", new AbstractReadOnlyModel<Comment>() {
 
 			@Override
 			public Comment getObject() {
@@ -227,11 +233,11 @@ public class CommentPanel extends Panel {
 			
 		}));
 		
-		info.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
+		head.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
 		
 		add(renderForView(getComment().getContent()));
 
-		add(newAddReplyRow());
+		add(newAddReply());
 		
 		setOutputMarkupId(true);
 	}
@@ -265,21 +271,21 @@ public class CommentPanel extends Panel {
 		}
 	}
 
-	private Component newAddReplyRow() {
+	private Component newAddReply() {
 		WebMarkupContainer addReplyRow = new WebMarkupContainer(ADD_REPLY_ID);
 		addReplyRow.setOutputMarkupId(true);
 		addReplyRow.setVisible(GitPlex.getInstance(UserManager.class).getCurrent() != null);
 		
-		Fragment fragment = new Fragment("content", "addFrag", this);
-		fragment.add(new AjaxLink<Void>("addReply") {
+		Fragment fragment = new Fragment(CONTENT_ID, "addFrag", this);
+		fragment.add(new AjaxLink<Void>(ADD_REPLY_ID) {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				final WebMarkupContainer row = new WebMarkupContainer("addReply");
+				final WebMarkupContainer row = new WebMarkupContainer(ADD_REPLY_ID);
 				
 				row.setOutputMarkupId(true);
 					
-				Fragment fragment = new Fragment("content", "editFrag", CommentPanel.this);
+				Fragment fragment = new Fragment(CONTENT_ID, "editFrag", CommentPanel.this);
 				row.add(fragment);
 				
 				Form<?> form = new Form<Void>("form");
@@ -295,9 +301,9 @@ public class CommentPanel extends Panel {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						Component addReplyRow = newAddReplyRow();
-						CommentPanel.this.replace(addReplyRow);
-						target.add(addReplyRow);
+						Component addReply = newAddReply();
+						CommentPanel.this.replace(addReply);
+						target.add(addReply);
 						
 						CommentReply reply; 
 						InheritableThreadLocalData.set(new PageId(pageId));
@@ -308,7 +314,7 @@ public class CommentPanel extends Panel {
 						}
 						Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
 						repliesView.add(newReplyRow);
-						String script = String.format("$('#%s>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
+						String script = String.format("$('#%s>.comment>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
 								CommentPanel.this.getMarkupId(), newReplyRow.getMarkupId());
 						target.prependJavaScript(script);
 						target.add(newReplyRow);
@@ -326,9 +332,9 @@ public class CommentPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Component addReplyRow = newAddReplyRow();
-						CommentPanel.this.replace(addReplyRow);
-						target.add(addReplyRow);
+						Component addReply = newAddReply();
+						CommentPanel.this.replace(addReply);
+						target.add(addReply);
 					}
 					
 				}.add(new DirtyIgnoreBehavior()));
@@ -373,7 +379,7 @@ public class CommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("content", "editFrag", CommentPanel.this);
+				Fragment fragment = new Fragment(BODY_ID, "editFrag", CommentPanel.this);
 
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
@@ -448,7 +454,7 @@ public class CommentPanel extends Panel {
 
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
-		row.add(newAdditionalReplyActions("additionalActions", (CommentReply) row.getDefaultModelObject()));
+		row.add(newAdditionalReplyOperations("additionalOperations", (CommentReply) row.getDefaultModelObject()));
 		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "reply" + reply.getId())));		
 		
 		row.add(renderForView(reply.getContent()));
@@ -462,11 +468,11 @@ public class CommentPanel extends Panel {
 		return row;
 	}
 
-	protected Component newAdditionalCommentActions(String id, IModel<Comment> comment) {
+	protected Component newAdditionalCommentOperations(String id, IModel<Comment> comment) {
 		return new WebMarkupContainer(id);
 	}
 	
-	protected Component newAdditionalReplyActions(String id, CommentReply reply) {
+	protected Component newAdditionalReplyOperations(String id, CommentReply reply) {
 		return new WebMarkupContainer(id);
 	}
 

@@ -34,8 +34,8 @@ class CommentActivityPanel extends Panel {
 		add(new CommentPanel("content", commentModel) {
 
 			@Override
-			protected Component newAdditionalCommentActions(String id, final IModel<Comment> commentModel) {
-				Fragment fragment = new Fragment(id, "actionsFrag", CommentActivityPanel.this) {
+			protected Component newAdditionalCommentOperations(String id, final IModel<Comment> commentModel) {
+				Fragment fragment = new Fragment(id, "operationsFrag", CommentActivityPanel.this) {
 
 					@Override
 					protected void onDetach() {
@@ -77,7 +77,7 @@ class CommentActivityPanel extends Panel {
 			}
 
 			@Override
-			protected Component newAdditionalReplyActions(String id, CommentReply reply) {
+			protected Component newAdditionalReplyOperations(String id, CommentReply reply) {
 				return new SinceChangesLink(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
