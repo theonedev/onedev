@@ -37,7 +37,7 @@ import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestOverviewPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 
 @SuppressWarnings("serial")
 public class BranchComparePage extends RepositoryPage {

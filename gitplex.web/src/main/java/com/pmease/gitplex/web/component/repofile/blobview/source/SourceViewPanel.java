@@ -198,7 +198,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						BlobQuery query = new TextQuery(symbol, false, true, true, 
-									null, null, SearchResultPanel.QUERY_ENTRIES);
+									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(context.getRepository(), 

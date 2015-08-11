@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.Date;
 
@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class IntegratePullRequest implements RenderableActivity {
+class IntegratePullRequest implements RenderableActivity {
 
 	private final Long userId;
 	

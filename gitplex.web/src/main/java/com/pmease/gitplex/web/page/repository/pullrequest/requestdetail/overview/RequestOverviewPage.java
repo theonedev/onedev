@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +16,8 @@ import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -30,6 +32,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.time.Duration;
 
 import com.google.common.base.Preconditions;
@@ -73,16 +76,7 @@ import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.ApprovePullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.CommentPullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.DisapprovePullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.DiscardPullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.IntegratePullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.OpenPullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.RenderableActivity;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.ReopenPullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.UndoReviewPullRequest;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestactivity.UpdatePullRequest;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -816,6 +810,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Repository repository) {
 		setResponsePage(RequestListPage.class, paramsOf(repository));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(RequestOverviewPage.class, "request-overview.css")));
 	}
 	
 }

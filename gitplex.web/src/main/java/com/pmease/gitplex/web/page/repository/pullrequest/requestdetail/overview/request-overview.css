@@ -1,0 +1,236 @@
+#request-detail>.overview>tbody>tr>td.activities {
+	width: 75%; 
+	padding-right: 16px;
+}
+#request-detail .activities>table {
+	margin-bottom: 20px; 
+	border-bottom: 1px solid #E5E5E5;
+}
+#request-detail .activities>table>tbody>tr.discussion>td {
+	border-top: 1px solid #E5E5E5; 
+	padding: 12px 0;
+}
+#request-detail .activities>table>tbody>tr.discussion.collapsed>td {
+	padding: 8px 0;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.avatar {
+	width: 1px; 
+	padding-left: 12px; 
+	padding-right: 12px;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.activity {
+	padding-left: 12px;
+}
+#request-detail .activities>table>tbody>tr.activity>td.avatar {
+	border-right: 1px dashed #DDD;
+}
+
+#request-detail .activities>table>tbody>tr.activity.discussion>td.avatar {
+	border-right: none;
+}
+#request-detail .activities>table>tbody>tr.discussion+.non-discussion>td {
+	border-top: 1px solid #E5E5E5;
+}
+#request-detail .activities>table>tbody>tr.discussion+.non-update>td {
+	padding-top: 8px;
+}
+#request-detail .activities>table>tbody>tr.discussion>.avatar img {
+	width: 40px; 
+	height: 40px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion>td {
+	padding-left: 6px; 
+	font-size: 13px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion>td.avatar img {
+	display: none;
+}
+#request-detail .activities>table>tbody>tr.non-discussion>.activity>div.summary .user a {
+	font-weight: normal;
+}
+#request-detail .activities>table>tbody>tr.update+.update>td>table {
+	margin-top: -12px;
+}
+
+#request-detail .activities .activity>.commits {
+	color: #777; 
+	margin-left: -32px;
+}
+#request-detail .activities .activity>.commits a {
+	color: #555;
+}
+#request-detail .activities .activity>.commits td {
+	padding-top: 8px; 
+	padding-bottom: 8px;
+}
+#request-detail .activities .non-update+.update>td tr:first-child td {
+	border-top: none;
+}
+#request-detail .activities .activity>.commits td.icon {
+	width: 32px; 
+	white-space: nowrap; 
+	text-align: right;
+}
+#request-detail .activities .activity>.commits tr.integrated td.icon .fa {
+	color: #35A612;
+}
+#request-detail .activities .activity>.commits td.detail {
+	padding-left: 15px; 
+	padding-right: 8px;
+}
+#request-detail .activities .activity>.commits td.status {
+	text-align: right;
+}
+#request-detail .activities .activity>.commits tr:hover td.detail, 
+#request-detail .activities .activity>.commits tr:hover td.status {
+	background: #F5F5F5;
+}
+#request-detail .activities .activity>.commits td.status a.commit-hash {
+	font-family: monospace;
+}
+#request-detail .activities .activity>.commits tr.rebased td a {
+	color: #AAA;
+}
+#request-detail .activities .activity>.commits tr.rebased td.icon .fa {
+	color: #CCC;
+}
+#request-detail .activities .activity>.commits tr.rebased img.avatar {
+	opacity: 0.5;
+}
+#request-detail .activities .activity>.commits td.status .successful {
+	color: #35A612;
+}
+#request-detail .activities .activity>.commits td.status .failed {
+	color: #F93333;
+}
+#request-detail .activities .activity>.commits td.status .running {
+	color: #AFAD1F;
+}
+#request-detail .activities .activity.new>.avatar {
+	background: #FCF6D6;
+}
+
+#request-detail .others>div>div {
+	border-bottom: 1px dotted #BBB; 
+	margin-bottom: 16px; 
+	padding-bottom: 16px; 
+	font-size: 13px; 
+	color: #666;
+}
+#request-detail .others>div>div:last-child {
+	border-bottom: none; 
+	margin-bottom: 0; 
+	padding-bottom: 0;
+}
+#request-detail .others .help-block {
+	margin-bottom: 0; 
+	color: #888;
+}
+#request-detail .others .fa.small {
+	font-size: 14px; 
+	vertical-align: middle;
+}
+#request-detail .others label {
+	margin-right: 4px; 
+	font-weight: normal;
+}
+#request-detail .others .select2-container {
+	width: 100%;
+}
+#request-detail .others .avatar {
+	width: 24px; 
+	height: 24px;
+}
+#request-detail .others .select2-container .avatar {
+	width: 20px; 
+	height: 20px;
+}
+
+#request-detail .others .basic-info .submitter, #request-detail .others .basic-info .target {
+	margin-bottom: 4px;
+}
+#request-detail .others .basic-info span, #request-detail .others .basic-info a {
+	white-space: nowrap;
+}
+#request-detail .others .basic-info .source>a {
+	margin-left: 4px;
+}
+
+#request-detail .others .reviewers ul {
+	margin-bottom: 0;
+}
+#request-detail .others .reviewers li {
+	margin-right: 20px; 
+	margin-bottom: 10px; 
+	position: relative;
+}
+#request-detail .others .reviewers li a:hover {
+	text-decoration: none;
+}
+
+#request-detail .others .reviewers .review-result {
+	top: 12px;
+}
+	
+#request-detail .activities .table-diff>tbody>.line.comments>td {
+	padding: 12px;
+}
+#request-detail .activities .table-diff>tbody>tr.omit>td .fa {
+	font-size: 24px; 
+	color: #888; 
+	margin-left: 12px;
+}
+#request-detail .activities .inline-comment.panel>.panel-heading {
+	padding: 8px;
+}
+#request-detail .activities .inline-comment.panel>.panel-heading .actions {
+	margin-left: 12px;
+}
+#request-detail .activities .inline-comment.panel>.panel-heading .actions a {
+	color: #BBB; 
+	margin-right: 4px;
+}
+#request-detail .activities .inline-comment.panel>.panel-heading:hover .actions a {
+	color: #666;
+}
+#request-detail .activities .inline-comment.panel {
+	margin-bottom: 4px;
+}
+
+#request-detail .activities .activity.non-discussion>.activity>.summary .fa {
+	background: white;
+}
+#request-detail .activities .activity>div>.fa {
+	vertical-align: middle; 
+	margin: 0 8px 0 -16px; 
+	font-size: 24px;
+}
+#request-detail .activities .activity>.update>.fa {
+	margin: 0 8px 0 -15px; 
+	font-size: 20px;
+}
+#request-detail .activities .activity>.discard>.fa {
+	color: #F93333;
+}
+#request-detail .activities .activity>.integrate>.fa {
+	color: #35A612; 
+	margin-left: -20px;
+}
+#request-detail .activities .activity>.approve>.fa {
+	color: #35A612; 
+	margin-left: -18px;
+}
+#request-detail .activities .activity>.disapprove>.fa {
+	color: #F93333; 
+	margin-left: -18px;
+}
+#request-detail .activities .activity>.undo-review>.fa {
+	color: #666; 
+	margin-left: -14px;
+}
+#request-detail .activities .activity>.reopen>.fa {
+	color: #666; 
+	font-size: 30px; 
+	margin-left: -20px; 
+	margin-right: 7px;
+}

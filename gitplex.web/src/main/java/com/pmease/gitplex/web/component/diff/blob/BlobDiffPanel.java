@@ -19,12 +19,13 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {
-	
+
 	private static final String CONTENT_ID = "content";
 	
 	private final IModel<Repository> repoModel;
@@ -60,7 +61,7 @@ public class BlobDiffPanel extends Panel {
 		if (blob.getText() != null) {
 			if (blob.getText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 				add(newFragment("Unable to diff as the file is too large.", true));
-			} else if (change.getDiffBlocks().size() > TextDiffPanel.MAX_DISPLAY_SIZE) {
+			} else if (change.getAdditions()+change.getDeletions() > Constants.MAX_SINGLE_FILE_DIFF_LINES) {
 				add(newFragment("Diff is too large to be displayed.", true));
 			} else if (change.getDiffBlocks().isEmpty()) {
 				if (change.getOldBlobIdent().path != null)
@@ -98,7 +99,7 @@ public class BlobDiffPanel extends Panel {
 			if (change.getOldText() != null && change.getNewText() != null) {
 				if (change.getOldText().getLines().size() + change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 					add(newFragment("Unable to diff as the file is too large.", true));
-				} else if (change.getDiffBlocks().size() > TextDiffPanel.MAX_DISPLAY_SIZE) {
+				} else if (change.getAdditions() + change.getDeletions() > Constants.MAX_SINGLE_FILE_DIFF_LINES) {
 					add(newFragment("Diff is too large to be displayed.", true));
 				} else if (change.getAdditions() + change.getDeletions() == 0) {
 					add(newFragment("File is identical if " + change.getLineProcessor().getName().toLowerCase() + ".", false));

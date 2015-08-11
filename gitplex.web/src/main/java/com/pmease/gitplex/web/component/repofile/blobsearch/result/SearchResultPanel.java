@@ -42,7 +42,7 @@ import com.pmease.gitplex.search.hit.TextHit;
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
 
-	public static final int QUERY_ENTRIES = 1000;
+	public static final int MAX_QUERY_ENTRIES = 1000;
 	
 	private enum ExpandStatus {EXPAND_ALL, COLLAPSE_ALL};
 	
@@ -69,7 +69,7 @@ public abstract class SearchResultPanel extends Panel {
 	public SearchResultPanel(String id, List<QueryHit> hits) {
 		super(id);
 		
-		hasMore = (hits.size() == SearchResultPanel.QUERY_ENTRIES);
+		hasMore = (hits.size() == MAX_QUERY_ENTRIES);
 		
 		Map<String, MatchedBlob> hitsByBlob = new LinkedHashMap<>();
 
@@ -172,7 +172,7 @@ public abstract class SearchResultPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String message = "too many matches, displaying " + SearchResultPanel.QUERY_ENTRIES + " of them";
+		String message = "too many matches, displaying " + MAX_QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
 		add(prevMatchLink = new DirtyAwareAjaxLink<Void>("prevMatch") {

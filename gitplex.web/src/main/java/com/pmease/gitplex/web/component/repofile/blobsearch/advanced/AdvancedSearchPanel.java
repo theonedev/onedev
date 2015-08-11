@@ -518,13 +518,13 @@ public abstract class AdvancedSearchPanel extends Panel {
 			List<QueryHit> hits;
 			BlobQuery query = new SymbolQuery(term, true, caseSensitive, 
 					context.getDirectory(insideCurrentDir), fileNames, 
-					SearchResultPanel.QUERY_ENTRIES);
+					SearchResultPanel.MAX_QUERY_ENTRIES);
 			hits = searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query);
 			
-			if (hits.size() < SearchResultPanel.QUERY_ENTRIES) {
+			if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 				query = new SymbolQuery(term, false, caseSensitive, 
 						context.getDirectory(insideCurrentDir), fileNames, 
-						SearchResultPanel.QUERY_ENTRIES - hits.size());
+						SearchResultPanel.MAX_QUERY_ENTRIES - hits.size());
 				hits.addAll(searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query));
 			}
 			
@@ -545,7 +545,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			BlobQuery query = new FileQuery(term, caseSensitive, 
-					context.getDirectory(insideCurrentDir), SearchResultPanel.QUERY_ENTRIES);
+					context.getDirectory(insideCurrentDir), SearchResultPanel.MAX_QUERY_ENTRIES);
 			return searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query);
 		}
 		
@@ -568,7 +568,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			BlobQuery query = new TextQuery(term, regex, caseSensitive, wholeWord, 
-					context.getDirectory(insideCurrentDir), fileNames, SearchResultPanel.QUERY_ENTRIES);
+					context.getDirectory(insideCurrentDir), fileNames, SearchResultPanel.MAX_QUERY_ENTRIES);
 			return searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query);
 		}
 		

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.Date;
 
@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class CommentPullRequest implements RenderableActivity {
+class CommentPullRequest implements RenderableActivity {
 
 	private final Long commentId;
 	

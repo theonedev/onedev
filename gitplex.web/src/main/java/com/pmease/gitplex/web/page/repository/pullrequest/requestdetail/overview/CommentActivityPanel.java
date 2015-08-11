@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,7 +17,7 @@ import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 
 @SuppressWarnings("serial")
-public class CommentActivityPanel extends Panel {
+class CommentActivityPanel extends Panel {
 
 	private final IModel<PullRequestComment> commentModel;
 	

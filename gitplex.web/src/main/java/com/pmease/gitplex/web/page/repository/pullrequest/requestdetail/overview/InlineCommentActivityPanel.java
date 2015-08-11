@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.List;
 
@@ -35,10 +35,10 @@ import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestComparePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 
 @SuppressWarnings("serial")
-public class InlineCommentActivityPanel extends Panel {
+class InlineCommentActivityPanel extends Panel {
 
 	private final IModel<PullRequestComment> commentModel;
 	

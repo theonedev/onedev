@@ -1,17 +1,39 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.commitlink.CommitLink;
+import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.personlink.PersonLink;
+import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
-public class UpdateActivityPanel extends Panel {
+class UpdateActivityPanel extends Panel {
 
 	private final IModel<PullRequestUpdate> updateModel;
 	
@@ -38,12 +60,25 @@ public class UpdateActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		/*
+		String tooManyMessage = "Too many commits, displaying recent " + Constants.MAX_DISPLAY_COMMITS;
+		add(new Label("tooManyCommits", tooManyMessage) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(updateModel.getObject().getCommits().size()>Constants.MAX_DISPLAY_COMMITS);
+			}
+			
+		});
 		add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {
 
 			@Override
 			public List<Commit> getObject() {
-				return updateModel.getObject().getCommits();
+				List<Commit> commits = updateModel.getObject().getCommits();
+				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
+					return commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
+				else 
+					return commits;
 			}
 			
 		}) {
@@ -63,7 +98,7 @@ public class UpdateActivityPanel extends Panel {
 					}
 					
 				};
-				item.add(new OldCommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
+				item.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
 
 					@Override
 					public Commit getObject() {
@@ -144,7 +179,7 @@ public class UpdateActivityPanel extends Panel {
 			}
 			
 		});
-		*/
+		
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.Date;
 
@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 
 @SuppressWarnings("serial")
-public class DisapproveActivityPanel extends Panel {
+class UndoReviewActivityPanel extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	
@@ -20,7 +20,7 @@ public class DisapproveActivityPanel extends Panel {
 	
 	private final Date date;
 	
-	public DisapproveActivityPanel(String id, IModel<PullRequest> requestModel, IModel<User> userModel, Date date) {
+	public UndoReviewActivityPanel(String id, IModel<PullRequest> requestModel, IModel<User> userModel, Date date) {
 		super(id);
 		this.requestModel = requestModel;
 		this.userModel = userModel;
@@ -33,7 +33,7 @@ public class DisapproveActivityPanel extends Panel {
 		
 		add(new UserLink("user", userModel));
 		add(new Label("age", Model.of(date)));
-		add(new SinceChangesLink("changes", requestModel, date, "Changes since this disapproval"));
+		add(new SinceChangesLink("changes", requestModel, date, "Changes since this activity"));
 	}
 
 	@Override
@@ -42,4 +42,5 @@ public class DisapproveActivityPanel extends Panel {
 		userModel.detach();
 		super.onDetach();
 	}
+
 }

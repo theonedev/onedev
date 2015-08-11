@@ -51,6 +51,7 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;
@@ -58,8 +59,6 @@ import com.pmease.gitplex.web.component.pathselector.PathSelector;
 @SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
 
-	private static final int MAX_DISPLAY_CHANGES = 500;
-	
 	private final IModel<Repository> repoModel;
 	
 	@Nullable
@@ -90,11 +89,11 @@ public abstract class RevisionDiffPanel extends Panel {
 				AnyObjectId oldCommitId = repoModel.getObject().getObjectId(oldRev);
 				AnyObjectId newCommitId = repoModel.getObject().getObjectId(newRev);
 				List<DiffEntry> entries = diffFormatter.scan(oldCommitId, newCommitId);
-				List<BlobChange> changes = new ArrayList<>();
+				List<BlobChange> diffableChanges = new ArrayList<>();
 				final LineProcessor lineProcessor = lineProcessOptionMenu.getOption();
 		    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
-		    		if (changes.size() < MAX_DISPLAY_CHANGES) {
-			    		changes.add(new BlobChange(oldCommitId.name(), newCommitId.name(), entry) {
+		    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
+			    		diffableChanges.add(new BlobChange(oldCommitId.name(), newCommitId.name(), entry) {
 	
 							@Override
 							public Blob getBlob(BlobIdent blobIdent) {
@@ -115,7 +114,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		    	// Diff calculation can be slow, so we pre-load diffs of each change 
 		    	// concurrently
 		    	Collection<Callable<Void>> tasks = new ArrayList<>();
-		    	for (final BlobChange change: changes) {
+		    	for (final BlobChange change: diffableChanges) {
 		    		tasks.add(new Callable<Void>() {
 
 						@Override
@@ -134,10 +133,11 @@ public abstract class RevisionDiffPanel extends Panel {
 						throw new RuntimeException(e);
 					}
 		    	}
-		    	
-		    	if (changes.size() == entries.size()) { 
+
+		    	int totalChanges = entries.size();
+		    	if (diffableChanges.size() == totalChanges) { 
 			    	// some changes should be removed if content is the same after line processing 
-			    	for (Iterator<BlobChange> it = changes.iterator(); it.hasNext();) {
+			    	for (Iterator<BlobChange> it = diffableChanges.iterator(); it.hasNext();) {
 			    		BlobChange change = it.next();
 			    		if (change.getType() == ChangeType.MODIFY 
 			    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
@@ -150,15 +150,32 @@ public abstract class RevisionDiffPanel extends Panel {
 			    			}
 			    		}
 			    	}
-			    	return new ChangesAndCount(changes, changes.size());
-		    	} else {
-		    		/*
-		    		 * if the changes are a subset of too many changes, do not remove the change even if 
-		    		 * content is the same after line processing in order not to cause confusions to 
-		    		 * users as they are looking at the "too many changes" alert 
-		    		 */
-		    		return new ChangesAndCount(changes, entries.size());
+			    	totalChanges = diffableChanges.size();
+		    	} 
+
+		    	List<BlobChange> displayableChanges = new ArrayList<>();
+		    	int totalChangedLines = 0;
+		    	for (BlobChange change: diffableChanges) {
+		    		int changedLines = change.getAdditions() + change.getDeletions(); 
+		    		
+		    		// we do not count large diff in a single file in order to 
+		    		// display smaller diffs from different files as many as 
+		    		// possible. 
+		    		if (changedLines <= Constants.MAX_SINGLE_FILE_DIFF_LINES) {
+			    		totalChangedLines += changedLines;
+			    		if (totalChangedLines <= Constants.MAX_DIFF_LINES)
+			    			displayableChanges.add(change);
+			    		else
+			    			break;
+		    		} else {
+		    			// large diff in a single file will not be displayed, so 
+		    			// adding it to change list will do no harm, and can avoid 
+		    			// displaying "too many changes" when some big text file 
+		    			// is added/removed without touching too many files
+		    			displayableChanges.add(change);
+		    		}
 		    	}
+		    	return new ChangesAndCount(displayableChanges, totalChanges);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -23,7 +23,7 @@ import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 
 @SuppressWarnings("serial")
-public class OpenActivityPanel extends Panel {
+class OpenActivityPanel extends Panel {
 
 	private IModel<PullRequest> requestModel;
 	

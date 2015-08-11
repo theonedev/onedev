@@ -1,0 +1,61 @@
+#request-detail>.updates>.update {
+	padding: 12px; 
+	margin: 20px 0; 
+	border: 1px solid #DDD; 
+	border-radius: 4px;
+}
+#request-detail>.updates>.update>.summary .actions .fa {
+	font-size: 16px;
+}
+#request-detail>.updates>.update>.summary>.reviews>.review {
+	margin-left: 12px; 
+	white-space: nowrap; 
+	position: relative;
+}
+#request-detail>.updates>.update>.alert {
+	margin-bottom: 12px;
+}
+#request-detail>.updates>.update>.commits td {
+	padding-top: 8px; 
+	padding-bottom: 8px; 
+	color: #999; 
+	border-top: 1px dashed #CCC;
+}
+#request-detail>.updates>.update>.commits tr.rebased td a {
+	color: #AAA;
+}
+#request-detail>.updates>.update>.commits tr.rebased img.avatar {
+	opacity: 0.5;
+}
+#request-detail>.updates>.update>.commits td.avatar {
+	width: 1px;
+}
+#request-detail>.updates>.update>.commits td.avatar img {
+	width: 36px; 
+	height: 36px;
+}
+#request-detail>.updates>.update>.commits a {
+	color: #666;
+}
+#request-detail>.updates>.update>.commits a.subject {
+	font-weight: bold;
+}
+#request-detail>.updates>.update>.commits td.detail {
+	padding-left: 8px; 
+	padding-right: 8px;
+}
+#request-detail>.updates>.update>.commits td.status {
+	text-align: right;
+}
+#request-detail>.updates>.update>.commits td.status a.commit-hash {
+	font-family: monospace;
+}
+#request-detail>.updates>.update>.commits td.status>div:first-child {
+	white-space: nowrap;
+}
+#request-detail>.updates>.update>.commits tr:hover td {
+	background: #F7ECB9;
+}
+#request-detail>.updates>.update>.commits .commit-message>.full {
+	margin-bottom: 4px;
+}

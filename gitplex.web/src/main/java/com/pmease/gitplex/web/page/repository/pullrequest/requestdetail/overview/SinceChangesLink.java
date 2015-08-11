@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.Date;
 
@@ -14,10 +14,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.web.event.PullRequestChanged;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestComparePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 
 @SuppressWarnings("serial")
-public class SinceChangesLink extends Panel {
+class SinceChangesLink extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	

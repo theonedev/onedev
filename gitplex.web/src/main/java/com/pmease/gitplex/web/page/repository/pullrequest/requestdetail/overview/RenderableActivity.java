@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitplex.core.model.User;
 
-public interface RenderableActivity extends Serializable {
+interface RenderableActivity extends Serializable {
 	
 	Date getDate();
 	

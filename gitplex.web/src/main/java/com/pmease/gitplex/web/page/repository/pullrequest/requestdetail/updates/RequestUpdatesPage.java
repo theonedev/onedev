@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.updates;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,6 +12,8 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -23,6 +25,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.GitPlex;
@@ -32,17 +35,20 @@ import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.AgeLabel;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
 import com.pmease.gitplex.web.component.commitlink.CommitLink;
-import com.pmease.gitplex.web.component.commitmessage.OldCommitMessagePanel;
+import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 
 @SuppressWarnings("serial")
@@ -149,11 +155,27 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				for (Commit commit: update.getRequest().getMergedCommits())
 					mergedCommitHashes.add(commit.getHash());
 
+				String tooManyMessage = "Too many commits, displaying recent " + Constants.MAX_DISPLAY_COMMITS;
+				updateItem.add(new Label("tooManyCommits", tooManyMessage) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+
+						List<Commit> commits = updateItem.getModelObject().getCommits();
+						setVisible(commits.size()>Constants.MAX_DISPLAY_COMMITS);
+					}
+					
+				});
 				updateItem.add(new ListView<Commit>("commits", new LoadableDetachableModel<List<Commit>>() {
 
 					@Override
 					protected List<Commit> load() {
-						return updateItem.getModelObject().getCommits();
+						List<Commit> commits = updateItem.getModelObject().getCommits();
+						if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
+							return commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
+						else 
+							return commits;
 					}
 					
 				}) {
@@ -172,7 +194,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							}
 							
 						};
-						commitItem.add(new OldCommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
+						commitItem.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
 
 							@Override
 							public Commit getObject() {
@@ -255,6 +277,13 @@ public class RequestUpdatesPage extends RequestDetailPage {
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Repository repository) {
 		setResponsePage(RequestListPage.class, paramsOf(repository));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(RequestUpdatesPage.class, "request-updates.css")));
 	}
 	
 }

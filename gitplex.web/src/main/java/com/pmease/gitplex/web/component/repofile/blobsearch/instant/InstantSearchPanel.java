@@ -53,7 +53,7 @@ import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultP
 @SuppressWarnings("serial")
 public abstract class InstantSearchPanel extends Panel {
 
-	private static final int QUERY_ENTRIES = 15;
+	private static final int MAX_QUERY_ENTRIES = 15;
 	
 	final IModel<Repository> repoModel;
 	
@@ -160,21 +160,21 @@ public abstract class InstantSearchPanel extends Panel {
 									List<QueryHit> hits = new ArrayList<>();
 
 									BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
-											null, null, SearchResultPanel.QUERY_ENTRIES);
+											null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									
 									hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
 									
-									if (hits.size() < SearchResultPanel.QUERY_ENTRIES) {
+									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 										query = new FileQuery(searchInput+"*", false, null, 
-												SearchResultPanel.QUERY_ENTRIES-hits.size());
+												SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
 										hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
 									}
 									
-									if (hits.size() < SearchResultPanel.QUERY_ENTRIES) {
+									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 										query = new SymbolQuery(searchInput+"*", false, false, 
-												null, null, SearchResultPanel.QUERY_ENTRIES-hits.size());
+												null, null, SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
 										hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
 									}
 									onSearchComplete(target, hits);
@@ -193,7 +193,7 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(symbolHits.size() == QUERY_ENTRIES);
+						setVisible(symbolHits.size() == MAX_QUERY_ENTRIES);
 					}
 
 					@Override
@@ -265,7 +265,7 @@ public abstract class InstantSearchPanel extends Panel {
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
 								TextQuery query = new TextQuery(searchInput, false, false, false, 
-										null, null, SearchResultPanel.QUERY_ENTRIES);
+										null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
@@ -285,7 +285,7 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(textHits.size() == QUERY_ENTRIES);
+						setVisible(textHits.size() == MAX_QUERY_ENTRIES);
 					}
 
 					@Override
@@ -332,18 +332,18 @@ public abstract class InstantSearchPanel extends Panel {
 
 					try {
 						BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
-								null, null, QUERY_ENTRIES);
+								null, null, MAX_QUERY_ENTRIES);
 						symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
 						
-						if (symbolHits.size() < QUERY_ENTRIES) {
+						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
 							query = new FileQuery(searchInput+"*", false, null, 
-									QUERY_ENTRIES-symbolHits.size());
+									MAX_QUERY_ENTRIES-symbolHits.size());
 							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
 						}
 						
-						if (symbolHits.size() < QUERY_ENTRIES) {
+						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
 							query = new SymbolQuery(searchInput+"*", false, false, 
-									null, null, QUERY_ENTRIES-symbolHits.size());
+									null, null, MAX_QUERY_ENTRIES-symbolHits.size());
 							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
 						}
 					} catch (TooGeneralQueryException e) {
@@ -354,7 +354,7 @@ public abstract class InstantSearchPanel extends Panel {
 					
 					try {
 						BlobQuery query = new TextQuery(searchInput, false, false, false, 
-								null, null, QUERY_ENTRIES);
+								null, null, MAX_QUERY_ENTRIES);
 						textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
 					} catch (TooGeneralQueryException e) {
 						textHits = new ArrayList<>();
@@ -425,10 +425,10 @@ public abstract class InstantSearchPanel extends Panel {
 	private QueryHit getActiveHit() {
 		List<QueryHit> hits = new ArrayList<>();
 		hits.addAll(symbolHits);
-		if (symbolHits.size() == QUERY_ENTRIES)
+		if (symbolHits.size() == MAX_QUERY_ENTRIES)
 			hits.add(new MoreSymbolHit());
 		hits.addAll(textHits);
-		if (textHits.size() == QUERY_ENTRIES)
+		if (textHits.size() == MAX_QUERY_ENTRIES)
 			hits.add(new MoreTextHit());
 		
 		if (activeHitIndex >=0 && activeHitIndex<hits.size())

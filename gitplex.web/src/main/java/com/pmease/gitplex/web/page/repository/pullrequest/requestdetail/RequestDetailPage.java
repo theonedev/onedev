@@ -94,6 +94,9 @@ import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.updates.RequestUpdatesPage;
 
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends PullRequestPage {

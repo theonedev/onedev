@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.pullrequest.requestactivity;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class ReopenPullRequest implements RenderableActivity {
+class DisapprovePullRequest implements RenderableActivity {
 
 	private final Long requestId;
 	
@@ -19,7 +19,7 @@ public class ReopenPullRequest implements RenderableActivity {
 	
 	private final Date date;
 	
-	public ReopenPullRequest(PullRequest request, User user, Date date) {
+	public DisapprovePullRequest(PullRequest request, User user, Date date) {
 		this.requestId = request.getId();
 		this.userId = user.getId();
 		this.date = date;
@@ -27,7 +27,7 @@ public class ReopenPullRequest implements RenderableActivity {
 	
 	@Override
 	public Panel render(String panelId) {
-		return new ReopenActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
+		return new DisapproveActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
 
 			@Override
 			protected PullRequest load() {
@@ -44,14 +44,12 @@ public class ReopenPullRequest implements RenderableActivity {
 		}, date);
 	}
 
-	@Override
-	public Date getDate() {
-		return date;
-	}
-
-	@Override
 	public User getUser() {
 		return GitPlex.getInstance(Dao.class).load(User.class, userId);
+	}
+
+	public Date getDate() {
+		return date;
 	}
 
 }

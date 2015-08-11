@@ -37,6 +37,7 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -46,12 +47,6 @@ import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReferenc
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
-	public static final int MAX_DISPLAY_SIZE = 5000;
-	
-	private static final int DEFAULT_CONTEXT_SIZE = 3;
-	
-	private static final int EXPAND_CONTEXT_SIZE = 15;
-	
 	private final IModel<Repository> repoModel;
 	
 	private final BlobChange change;
@@ -100,8 +95,8 @@ public class TextDiffPanel extends Panel {
 				int index = params.getParameterValue("index").toInt();
 				Integer lastContextSize = contextSizes.get(index);
 				if (lastContextSize == null)
-					lastContextSize = DEFAULT_CONTEXT_SIZE;
-				int contextSize = lastContextSize + EXPAND_CONTEXT_SIZE;
+					lastContextSize = Constants.DIFF_DEFAULT_CONTEXT_SIZE;
+				int contextSize = lastContextSize + Constants.DIFF_EXPAND_CONTEXT_SIZE;
 				contextSizes.put(index, contextSize);
 				
 				StringBuilder builder = new StringBuilder();
@@ -174,7 +169,7 @@ public class TextDiffPanel extends Panel {
 	}
 
 	private String renderDiffs() {
-		int contextSize = DEFAULT_CONTEXT_SIZE;
+		int contextSize = Constants.DIFF_DEFAULT_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
 		builder.append("<colgroup><col width='40'></col>");
 		if (unified)
