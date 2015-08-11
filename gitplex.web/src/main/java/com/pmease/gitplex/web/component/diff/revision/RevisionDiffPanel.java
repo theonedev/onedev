@@ -11,6 +11,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -28,6 +29,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -47,7 +51,10 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
+import com.pmease.commons.wicket.behavior.menu.MenuItem;
+import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
@@ -59,6 +66,8 @@ import com.pmease.gitplex.web.component.pathselector.PathSelector;
 @SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
 
+	private static final String COOKIE_DIFF_MODE = "gitplex.diff.mode";
+	
 	private final IModel<Repository> repoModel;
 	
 	@Nullable
@@ -71,9 +80,9 @@ public abstract class RevisionDiffPanel extends Panel {
 	@Nullable
 	private final InlineCommentSupport commentSupport;
 	
-	private LineProcessOptionMenu lineProcessOptionMenu;
+	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
-	private DiffModePanel diffModePanel;
+	private DiffMode diffMode;
 	
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
@@ -90,7 +99,6 @@ public abstract class RevisionDiffPanel extends Panel {
 				AnyObjectId newCommitId = repoModel.getObject().getObjectId(newRev);
 				List<DiffEntry> entries = diffFormatter.scan(oldCommitId, newCommitId);
 				List<BlobChange> diffableChanges = new ArrayList<>();
-				final LineProcessor lineProcessor = lineProcessOptionMenu.getOption();
 		    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
 		    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
 			    		diffableChanges.add(new BlobChange(oldCommitId.name(), newCommitId.name(), entry) {
@@ -191,6 +199,13 @@ public abstract class RevisionDiffPanel extends Panel {
 		this.newRev = newRev;
 		this.path = path;
 		this.commentSupport = commentSupport;
+		
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie(COOKIE_DIFF_MODE);
+		if (cookie == null)
+			diffMode = DiffMode.UNIFIED;
+		else
+			diffMode = DiffMode.valueOf(cookie.getValue());
 	}
 
 	@Override
@@ -259,16 +274,46 @@ public abstract class RevisionDiffPanel extends Panel {
 		});
 		add(pathContainer);
 		
-		lineProcessOptionMenu = new LineProcessOptionMenu("lineProcessOptionMenu") {
+		MenuPanel lineProcessorMenu = new MenuPanel("lineProcessorMenu") {
 
 			@Override
-			protected void onOptionChange(AjaxRequestTarget target) {
-				target.add(RevisionDiffPanel.this);
-			}
+			protected List<MenuItem> getMenuItems() {
+				List<MenuItem> menuItems = new ArrayList<>();
+				
+				for (final LineProcessOption option: LineProcessOption.values()) {
+					menuItems.add(new CheckItem() {
+
+						@Override
+						protected String getLabel() {
+							return option.getName();
+						}
+
+						@Override
+						protected boolean isChecked() {
+							return lineProcessor == option;
+						}
+
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+						}
+
+						@Override
+						protected void onClick(AjaxRequestTarget target) {
+							lineProcessor = option;
+							target.add(RevisionDiffPanel.this);
+						}
+						
+					});
+				}
+
+				return menuItems;
+			}	
 			
 		};
-		add(lineProcessOptionMenu);
-		add(new WebMarkupContainer("lineProcessOptionMenuTrigger").add(new MenuBehavior(lineProcessOptionMenu)));
+		add(lineProcessorMenu);
+		add(new WebMarkupContainer("lineProcessor").add(new MenuBehavior(lineProcessorMenu)));
 		
 		add(new Label("totalChanged", new AbstractReadOnlyModel<Integer>() {
 
@@ -278,15 +323,37 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 		}));
-		
-		add(diffModePanel = new DiffModePanel("diffMode") {
 
-			@Override
-			protected void onModeChange(AjaxRequestTarget target) {
-				target.add(RevisionDiffPanel.this);
-			}
-			
-		});
+		for (final DiffMode each: DiffMode.values()) {
+			add(new AjaxLink<Void>(each.name().toLowerCase()) {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+				}
+				
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					diffMode = each;
+					WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+					Cookie cookie = new Cookie(COOKIE_DIFF_MODE, diffMode.name());
+					cookie.setMaxAge(Integer.MAX_VALUE);
+					response.addCookie(cookie);
+					
+					target.add(RevisionDiffPanel.this);
+					target.focusComponent(null);
+				}
+				
+			}.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					return each==diffMode?" active":"";
+				}
+				
+			})));
+		}
 		
 		add(new WebMarkupContainer("tooManyChanges") {
 
@@ -363,7 +430,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				item.setOutputMarkupId(true);
-				item.add(new BlobDiffPanel("change", repoModel, change, diffModePanel.isUnified(), commentSupport));
+				item.add(new BlobDiffPanel("change", repoModel, change, diffMode, commentSupport));
 			}
 			
 		});

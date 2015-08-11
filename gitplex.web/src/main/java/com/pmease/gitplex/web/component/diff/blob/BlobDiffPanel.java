@@ -22,6 +22,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
+import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {
@@ -32,17 +33,17 @@ public class BlobDiffPanel extends Panel {
 	
 	private final BlobChange change;
 	
-	private final boolean unified;
+	private final DiffMode diffMode;
 	
 	private final InlineCommentSupport commentSupport;
 	
 	public BlobDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, 
-			boolean unified, @Nullable InlineCommentSupport commentSupport) {
+			DiffMode diffMode, @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.change = change;
-		this.unified = unified;
+		this.diffMode = diffMode;
 		this.commentSupport = commentSupport;
 	}
 	
@@ -69,7 +70,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newFragment("Empty file added.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, repoModel, change, unified, commentSupport));
+				add(new TextDiffPanel(CONTENT_ID, repoModel, change, diffMode, commentSupport));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -104,7 +105,7 @@ public class BlobDiffPanel extends Panel {
 				} else if (change.getAdditions() + change.getDeletions() == 0) {
 					add(newFragment("File is identical if " + change.getLineProcessor().getName().toLowerCase() + ".", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, repoModel, change, unified, commentSupport));
+					add(new TextDiffPanel(CONTENT_ID, repoModel, change, diffMode, commentSupport));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));

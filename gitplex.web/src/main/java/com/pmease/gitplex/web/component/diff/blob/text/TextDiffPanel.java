@@ -40,6 +40,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
+import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -53,17 +54,17 @@ public class TextDiffPanel extends Panel {
 	
 	private final Map<Integer, Integer> contextSizes = new HashMap<>();
 	
-	private final boolean unified;
+	private final DiffMode diffMode;
 	
 	private final InlineCommentSupport commentSupport;
 	
-	public TextDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, boolean unified, 
+	public TextDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, DiffMode diffMode, 
 			@Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.change = change;
-		this.unified = unified;
+		this.diffMode = diffMode;
 		this.commentSupport = commentSupport;
 	}
 
@@ -74,10 +75,7 @@ public class TextDiffPanel extends Panel {
 		WebMarkupContainer container = new WebMarkupContainer("container");
 		add(container);
 		
-		if (unified)
-			container.add(AttributeAppender.append("class", " unified"));
-		else
-			container.add(AttributeAppender.append("class", " split"));
+		container.add(AttributeAppender.append("class", " " + diffMode.name().toLowerCase()));
 		
 		container.add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		container.add(new BlobDiffTitle("title", change));
@@ -172,7 +170,7 @@ public class TextDiffPanel extends Panel {
 		int contextSize = Constants.DIFF_DEFAULT_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
 		builder.append("<colgroup><col width='40'></col>");
-		if (unified)
+		if (diffMode == DiffMode.UNIFIED)
 			builder.append("<col width='40'></col>");
 		else
 			builder.append("</col><col></col><col width=40></col>");
@@ -222,7 +220,7 @@ public class TextDiffPanel extends Panel {
 
 	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock deleteBlock, DiffBlock insertBlock, 
 			int fromDeleteLineIndex, int toDeleteLineIndex, int fromInsertLineIndex, int toInsertLineIndex) {
-		if (unified) {
+		if (diffMode == DiffMode.UNIFIED) {
 			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
 				appendDelete(builder, deleteBlock, i);
 			for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++)
@@ -257,7 +255,7 @@ public class TextDiffPanel extends Panel {
 			contentBuilder.append(token.toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
-		if (unified) {
+		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td class='number'>").append(block.getOldStart() + lineIndex).append("</td>");
 			builder.append("<td class='number'>").append(block.getNewStart() + lineIndex).append("</td>");
 			builder.append(contentBuilder);
@@ -280,7 +278,7 @@ public class TextDiffPanel extends Panel {
 			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
-		if (unified) {
+		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td class='number new'>&nbsp;</td>");
 			builder.append("<td class='number new'>").append(block.getNewStart() + lineIndex).append("</td>");
 			builder.append(contentBuilder);
@@ -302,7 +300,7 @@ public class TextDiffPanel extends Panel {
 			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
-		if (unified) {
+		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td class='number old'>").append(block.getOldStart() + lineIndex).append("</td>");
 			builder.append("<td class='number old'>&nbsp;</td>");
 			builder.append(contentBuilder);
@@ -341,7 +339,7 @@ public class TextDiffPanel extends Panel {
 			int deleteLineIndex, int insertLineIndex, List<TokenDiffBlock> tokenDiffs) {
 		builder.append("<tr class='line'>");
 
-		if (unified) {
+		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td class='number old new'>").append(deleteBlock.getOldStart() + deleteLineIndex).append("</td>");
 			builder.append("<td class='number old new'>").append(insertBlock.getNewStart() + insertLineIndex).append("</td>");
 			builder.append("<td class='content old new old")
@@ -382,7 +380,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
 		String script = String.format("javascript: $('#%s')[0].expander(%d);", getMarkupId(), blockIndex);
-		if (unified) {
+		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td colspan='2' class='expander'><a class='expander' title='Show more lines' href=\"")
 					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
 			builder.append("<td class='skipped'><i class='fa fa-ellipsis-h'></i> skipped ")
