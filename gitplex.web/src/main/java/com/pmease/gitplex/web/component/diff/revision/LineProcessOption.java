@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff.lineprocess;
+package com.pmease.gitplex.web.component.diff.revision;
 
 import java.util.regex.Pattern;
 

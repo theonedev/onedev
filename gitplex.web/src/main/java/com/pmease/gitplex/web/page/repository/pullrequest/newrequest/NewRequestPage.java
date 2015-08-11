@@ -57,6 +57,7 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
@@ -72,6 +73,8 @@ import com.pmease.gitplex.web.page.security.LoginPage;
 @SuppressWarnings("serial")
 public class NewRequestPage extends PullRequestPage {
 
+	private static final String TAB_PANEL_ID = "tabPanel";
+	
 	private AffinalBranchSingleChoice targetChoice, sourceChoice;
 	
 	private IModel<List<Commit>> commitsModel;
@@ -288,7 +291,7 @@ public class NewRequestPage extends PullRequestPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newChangedFilesPanel();
+				Component panel = newDiffPanel();
 				getPage().replace(panel);
 				target.add(panel);
 			}
@@ -312,11 +315,21 @@ public class NewRequestPage extends PullRequestPage {
 	}
 	
 	private Component newCommitsPanel() {
-		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
+		return new WebMarkupContainer(TAB_PANEL_ID).setOutputMarkupId(true);
 	}
 	
-	private Component newChangedFilesPanel() {
-		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
+	private Component newDiffPanel() {
+		PullRequest request = getPullRequest();
+		String oldRev = request.getBaseCommitHash();
+		String newRev = request.getLatestUpdate().getHeadCommitHash();
+		
+		return new RevisionDiffPanel(TAB_PANEL_ID, repoModel, oldRev, newRev, null, null) {
+
+			@Override
+			protected void onPathChange(AjaxRequestTarget target, String path) {
+			}
+			
+		};
 	}
 
 	private Fragment newOpenedFrag() {

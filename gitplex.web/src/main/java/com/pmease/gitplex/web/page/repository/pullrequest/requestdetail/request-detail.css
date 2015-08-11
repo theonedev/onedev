@@ -128,24 +128,6 @@
 	padding: 8px; 
 	border: 1px solid #DDD;
 }
-#request-detail .compare>.head>.changed-toggle {
-	margin-right: 12px; 
-	padding-top: 4px;
-}
-#request-detail .compare>.head>.outdate-alert {
-	padding-top: 2px; 
-	color: #CF9115; 
-	font-size: 16px;
-}
-#request-detail .compare>.head>.pull-left:FIRST-CHILD {
-	margin-right: 16px;
-}
-#request-detail .compare>.head>.pull-left:LAST-CHILD {
-	margin-top: 3px;
-}
-#request-detail .compare>.head>.line-process {
-	margin-right: 16px;
-}
 
 .content>.commit-choice {
 	max-height: 400px; 

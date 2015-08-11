@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff.lineprocess;
+package com.pmease.gitplex.web.component.diff.revision;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 
 @SuppressWarnings("serial")
-public abstract class LineProcessOptionMenu extends MenuPanel {
+abstract class LineProcessOptionMenu extends MenuPanel {
 
 	private LineProcessOption option = LineProcessOption.IGNORE_NOTHING;
 	

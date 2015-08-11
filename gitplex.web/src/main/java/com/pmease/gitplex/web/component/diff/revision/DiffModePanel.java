@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.diff.diffmode;
+package com.pmease.gitplex.web.component.diff.revision;
 
 import javax.servlet.http.Cookie;
 
@@ -17,7 +17,7 @@ import org.apache.wicket.request.http.WebResponse;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 
 @SuppressWarnings("serial")
-public abstract class DiffModePanel extends Panel {
+abstract class DiffModePanel extends Panel {
 
 	private static final String COOKIE_NAME = "gitplex.diff.mode";
 	

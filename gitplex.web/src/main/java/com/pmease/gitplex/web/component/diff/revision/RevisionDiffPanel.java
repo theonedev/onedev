@@ -47,6 +47,7 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
@@ -71,6 +72,10 @@ public abstract class RevisionDiffPanel extends Panel {
 	@Nullable
 	private final InlineCommentSupport commentSupport;
 	
+	private LineProcessOptionMenu lineProcessOptionMenu;
+	
+	private DiffModePanel diffModePanel;
+	
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
 		@Override
@@ -86,7 +91,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				AnyObjectId newCommitId = repoModel.getObject().getObjectId(newRev);
 				List<DiffEntry> entries = diffFormatter.scan(oldCommitId, newCommitId);
 				List<BlobChange> changes = new ArrayList<>();
-				final LineProcessor lineProcessor = getLineProcessor();
+				final LineProcessor lineProcessor = lineProcessOptionMenu.getOption();
 		    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
 		    		if (changes.size() < MAX_DISPLAY_CHANGES) {
 			    		changes.add(new BlobChange(oldCommitId.name(), newCommitId.name(), entry) {
@@ -171,10 +176,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		this.commentSupport = commentSupport;
 	}
 
-	protected abstract LineProcessor getLineProcessor();
-	
-	protected abstract boolean isUnified();
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -241,6 +242,17 @@ public abstract class RevisionDiffPanel extends Panel {
 		});
 		add(pathContainer);
 		
+		lineProcessOptionMenu = new LineProcessOptionMenu("lineProcessOptionMenu") {
+
+			@Override
+			protected void onOptionChange(AjaxRequestTarget target) {
+				target.add(RevisionDiffPanel.this);
+			}
+			
+		};
+		add(lineProcessOptionMenu);
+		add(new WebMarkupContainer("lineProcessOptionMenuTrigger").add(new MenuBehavior(lineProcessOptionMenu)));
+		
 		add(new Label("totalChanged", new AbstractReadOnlyModel<Integer>() {
 
 			@Override
@@ -249,6 +261,15 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 		}));
+		
+		add(diffModePanel = new DiffModePanel("diffMode") {
+
+			@Override
+			protected void onModeChange(AjaxRequestTarget target) {
+				target.add(RevisionDiffPanel.this);
+			}
+			
+		});
 		
 		add(new WebMarkupContainer("tooManyChanges") {
 
@@ -325,7 +346,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				item.setOutputMarkupId(true);
-				item.add(new BlobDiffPanel("change", repoModel, change, isUnified(), commentSupport));
+				item.add(new BlobDiffPanel("change", repoModel, change, diffModePanel.isUnified(), commentSupport));
 			}
 			
 		});

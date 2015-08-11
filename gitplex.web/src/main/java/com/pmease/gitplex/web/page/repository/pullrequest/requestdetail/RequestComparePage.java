@@ -30,7 +30,6 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.AroundContext;
@@ -56,8 +55,6 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.diff.diffmode.DiffModePanel;
-import com.pmease.gitplex.web.component.diff.lineprocess.LineProcessOptionMenu;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
@@ -89,10 +86,6 @@ public class RequestComparePage extends RequestDetailPage {
 	private Long commentId;
 	
 	private WebMarkupContainer compareOptions;
-	
-	private LineProcessOptionMenu lineProcessOptionMenu;
-	
-	private DiffModePanel diffModePanel;
 	
 	private Component compareResult;
 	
@@ -349,26 +342,6 @@ public class RequestComparePage extends RequestDetailPage {
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
-		lineProcessOptionMenu = new LineProcessOptionMenu("lineProcessOptionMenu") {
-
-			@Override
-			protected void onOptionChange(AjaxRequestTarget target) {
-				target.add(compareResult);
-			}
-			
-		};
-		compareOptions.add(lineProcessOptionMenu);
-		compareOptions.add(new WebMarkupContainer("lineProcessOptionMenuTrigger").add(new MenuBehavior(lineProcessOptionMenu)));
-		
-		compareOptions.add(diffModePanel = new DiffModePanel("diffMode") {
-
-			@Override
-			protected void onModeChange(AjaxRequestTarget target) {
-				target.add(compareResult);
-			}
-			
-		});
-
 		newCompareResult(null);
 	}
 	
@@ -647,16 +620,6 @@ public class RequestComparePage extends RequestDetailPage {
 		};
 		
 		compareResult = new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, path, commentSupport) {
-
-			@Override
-			protected LineProcessor getLineProcessor() {
-				return lineProcessOptionMenu.getOption();
-			}
-
-			@Override
-			protected boolean isUnified() {
-				return diffModePanel.isUnified();
-			}
 
 			@Override
 			protected void onPathChange(AjaxRequestTarget target, String path) {

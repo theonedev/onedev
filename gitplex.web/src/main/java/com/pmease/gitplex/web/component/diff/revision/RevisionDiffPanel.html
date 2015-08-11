@@ -9,10 +9,13 @@
 				<a wicket:id="clear" title="Clear path filter"><i class="fa fa-close"></i></a>
 				<div wicket:id="pathDropdown"></div>
 			</div>
+			<div wicket:id="lineProcessOptionMenuTrigger" class="line-process btn btn-sm btn-default pull-left" title="Line process options">White space <i class="caret"></i></div>
+			<div wicket:id="lineProcessOptionMenu"></div>
 			<div class="title pull-left">
 				<span class="fa fa-ext fa-file-diff"></span> Total
 				<a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
 			</div>
+			<div wicket:id="diffMode" class="pull-right"></div>
 		</div>
 		<div wicket:id="tooManyChanges" class="alert alert-warning">
 			Sorry we can not display the full diff as there are too many changes
