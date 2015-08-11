@@ -16,6 +16,7 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -27,8 +28,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.loader.InheritableThreadLocalData;
-import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
@@ -37,7 +38,7 @@ import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.AgeLabel;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
@@ -89,14 +90,14 @@ public class CommentPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		final WebMarkupContainer summary = new WebMarkupContainer("summary"); 
-		summary.setOutputMarkupId(true);
-		add(summary);
+		final WebMarkupContainer info = new WebMarkupContainer("info"); 
+		info.setOutputMarkupId(true);
+		add(info);
 		
-		summary.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
-		summary.add(new AgeLabel("age", Model.of(getComment().getDate())));
+		info.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
+		info.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 
-		summary.add(new AjaxLink<Void>("edit") {
+		info.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -154,7 +155,7 @@ public class CommentPanel extends Panel {
 
 		});
 		
-		summary.add(new AjaxLink<Void>("delete") {
+		info.add(new AjaxLink<Void>("delete") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -172,7 +173,7 @@ public class CommentPanel extends Panel {
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
 		
 		AjaxLink<Void> resolveLink;
-		summary.add(resolveLink = new AjaxLink<Void>("resolve") {
+		info.add(resolveLink = new AjaxLink<Void>("resolve") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -180,7 +181,7 @@ public class CommentPanel extends Panel {
 				if (getComment().isResolved())
 					send(CommentPanel.this, Broadcast.BUBBLE, new CommentCollapsing(target, getComment()));
 				if (findPage() != null) // only render this checkbox if the whole comment panel is not replaced
-					target.add(summary);
+					target.add(info);
 			}
 
 			@Override
@@ -206,7 +207,7 @@ public class CommentPanel extends Panel {
 		});
 		resolveLink.setOutputMarkupId(true);
 		
-		summary.add(new WebMarkupContainer("resolved") {
+		info.add(new WebMarkupContainer("resolved") {
 
 			@Override
 			protected void onConfigure() {
@@ -217,7 +218,7 @@ public class CommentPanel extends Panel {
 			
 		});
 		
-		summary.add(newAdditionalCommentActions("additionalActions", new AbstractReadOnlyModel<Comment>() {
+		info.add(newAdditionalCommentActions("additionalActions", new AbstractReadOnlyModel<Comment>() {
 
 			@Override
 			public Comment getObject() {
@@ -226,7 +227,7 @@ public class CommentPanel extends Panel {
 			
 		}));
 		
-		summary.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
+		info.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
 		
 		add(renderForView(getComment().getContent()));
 
@@ -366,7 +367,7 @@ public class CommentPanel extends Panel {
 		avatarColumn.add(new UserLink("avatar", new UserModel(reply.getUser()), AvatarMode.AVATAR));
 		row.add(avatarColumn);
 		row.add(new UserLink("user", new UserModel(reply.getUser()), AvatarMode.NAME));
-		row.add(new AgeLabel("age", Model.of(reply.getDate())));
+		row.add(new Label("age", DateUtils.formatAge(reply.getDate())));
 
 		row.add(new AjaxLink<Void>("edit") {
 

@@ -1,6 +1,6 @@
 <wicket:panel>
-	<div class="comment activity">
-		<div wicket:id="summary" class="summary">
+	<div class="comment">
+		<div wicket:id="info" class="info">
 			<span wicket:id="user" class="user"></span> commented <span wicket:id="age"></span>
 			<span class="actions">
 				<a wicket:id="edit" title="Edit comment"><span class="fa fa-pencil"></span></a>
@@ -11,31 +11,31 @@
 			</span>
 			<a wicket:id="anchor"></a>
 		</div>
-		<div wicket:id="content" class="body"></div>
-	</div>
-	<div class="comment replies">
-		<table>
-			<tbody>
-				<tr wicket:id="replies" class="reply">
-					<td wicket:id="avatar" class="avatar">
-						<div wicket:id="avatar"></div>
-					</td>
-					<td class="detail activity">
-						<div class="summary">
-							<span wicket:id="user" class="user"></span> replied <span wicket:id="age"></span>
-							<span class="actions">
-								<a wicket:id="edit" title="Edit reply"><span class="fa fa-pencil"></span></a>
-								<a wicket:id="delete" title="Delete reply"><span class="fa fa-times"></span></a>
-								<span wicket:id="additionalActions"></span>
-							</span>
-							<a wicket:id="anchor"></a>
-						</div>
-						<div wicket:id="content" class="body"></div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<div wicket:id="addReply" class="add-reply"><div wicket:id="content"></div></div>
+		<div wicket:id="content" class="content"></div>
+		<div class="replies">
+			<table>
+				<tbody>
+					<tr wicket:id="replies" class="reply">
+						<td wicket:id="avatar" class="avatar">
+							<div wicket:id="avatar"></div>
+						</td>
+						<td class="detail">
+							<div class="info">
+								<span wicket:id="user" class="user"></span> replied <span wicket:id="age"></span>
+								<span class="actions">
+									<a wicket:id="edit" title="Edit reply"><span class="fa fa-pencil"></span></a>
+									<a wicket:id="delete" title="Delete reply"><span class="fa fa-times"></span></a>
+									<span wicket:id="additionalActions"></span>
+								</span>
+								<a wicket:id="anchor"></a>
+							</div>
+							<div wicket:id="content" class="content"></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div wicket:id="addReply" class="add-reply"><div wicket:id="content"></div></div>
+		</div>
 	</div>
 	<wicket:fragment wicket:id="viewFrag">
 		<div wicket:id="comment"></div>

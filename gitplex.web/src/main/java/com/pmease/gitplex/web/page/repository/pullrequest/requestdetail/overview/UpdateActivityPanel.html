@@ -1,19 +1,26 @@
 <wicket:panel>
-	<div class="commits">
-		<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
-		<table>
-			<tr wicket:id="commits">
-				<td class="icon"><i class="fa fa-ext fa-commit"></i></td>
-				<td class="detail">
-					<span wicket:id="author"></span> 
-					<span wicket:id="message"></span> 
-				</td>
-				<td class="status">
-					<span wicket:id="verification"></span>
-					<span wicket:id="hashLink"></span>
-					<a wicket:id="codeLink" title="Browse files of this commit"><span class="fa fa-file-text-o"></span></a>
-				</td>
-			</tr>
-		</table>
+	<div class="update">
+		<div class="info">
+			<span class="fa fa-ext fa-repo-push"></span>
+			Update #<span wicket:id="updateNo"></span> pushed <span wicket:id="age"></span>
+			<span class="actions"><span wicket:id="changes"></span></span>
+		</div>
+		<div class="commits">
+			<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
+			<table>
+				<tr wicket:id="commits">
+					<td class="icon"><i class="fa fa-ext fa-commit"></i></td>
+					<td class="detail">
+						<span wicket:id="author"></span> 
+						<span wicket:id="message"></span> 
+					</td>
+					<td class="status">
+						<span wicket:id="verification"></span>
+						<span wicket:id="hashLink"></span>
+						<a wicket:id="codeLink" title="Browse files of this commit"><span class="fa fa-file-text-o"></span></a>
+					</td>
+				</tr>
+			</table>
+		</div>
 	</div>
 </wicket:panel>

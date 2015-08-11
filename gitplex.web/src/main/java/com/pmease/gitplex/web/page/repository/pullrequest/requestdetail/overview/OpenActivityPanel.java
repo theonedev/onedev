@@ -16,7 +16,7 @@ import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.AgeLabel;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.userlink.UserLink;
@@ -50,7 +50,7 @@ class OpenActivityPanel extends Panel {
 		super.onInitialize();
 		
 		add(new UserLink("user", new UserModel(requestModel.getObject().getSubmitter()), AvatarMode.NAME));
-		add(new AgeLabel("age", Model.of(requestModel.getObject().getCreateDate())));
+		add(new Label("age", DateUtils.formatAge(requestModel.getObject().getCreateDate())));
 		
 		add(new AjaxLink<Void>("edit") {
 

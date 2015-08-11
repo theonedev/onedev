@@ -31,11 +31,11 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.behavior.menu.LinkItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.behavior.menu.CheckItem;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -43,7 +43,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.AgeLabel;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
@@ -225,7 +225,7 @@ public class RequestListPage extends PullRequestPage {
 				}, AvatarMode.NAME));
 				fragment.add(new BranchLink("targetBranch", Model.of(request.getTarget())));
 				fragment.add(new BranchLink("source", Model.of(request.getSource())));
-				fragment.add(new AgeLabel("age", Model.of(request.getCreateDate())));
+				fragment.add(new Label("age", DateUtils.formatAge(request.getCreateDate())));
 				fragment.add(new UserLink("assignee", new LoadableDetachableModel<User>() {
 
 					@Override

@@ -60,7 +60,7 @@ import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.AgeLabel;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
@@ -150,7 +150,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				fragment.add(new Label("activity", "added inline comment on file '" + comment.getBlobIdent().path + "'"));
 			else 
 				fragment.add(new Label("activity", "commented"));
-			fragment.add(new AgeLabel("age", Model.of(comment.getDate())));
+			fragment.add(new Label("age", DateUtils.formatAge(comment.getDate())));
 			
 			fragment.add(new Label("detail", comment.getContent()));
 			

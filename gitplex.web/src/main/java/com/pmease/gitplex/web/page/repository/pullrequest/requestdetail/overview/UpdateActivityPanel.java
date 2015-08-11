@@ -23,6 +23,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.commitlink.CommitLink;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
@@ -60,6 +61,9 @@ class UpdateActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		PullRequestUpdate update = updateModel.getObject();
+		add(new Label("updateNo", update.getRequest().getSortedUpdates().indexOf(update)+1));
+		add(new Label("age", DateUtils.formatAge(update.getDate())));
 		String tooManyMessage = "Too many commits, displaying recent " + Constants.MAX_DISPLAY_COMMITS;
 		add(new Label("tooManyCommits", tooManyMessage) {
 

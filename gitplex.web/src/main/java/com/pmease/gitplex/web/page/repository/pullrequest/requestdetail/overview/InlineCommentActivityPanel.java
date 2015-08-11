@@ -19,7 +19,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
 import com.pmease.commons.lang.diff.DiffLine;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
@@ -28,7 +27,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.web.component.AgeLabel;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
@@ -55,7 +54,7 @@ class InlineCommentActivityPanel extends Panel {
 		PullRequestComment comment = commentModel.getObject();
 		GitPlex.getInstance(PullRequestCommentManager.class).updateInline(comment);
 		add(new UserLink("name", new UserModel(comment.getUser()), AvatarMode.NAME));
-		add(new AgeLabel("age", Model.of(comment.getDate())));
+		add(new Label("age", DateUtils.formatAge(comment.getDate())));
 		
 		add(new Label("file", comment.getBlobIdent().path) {
 

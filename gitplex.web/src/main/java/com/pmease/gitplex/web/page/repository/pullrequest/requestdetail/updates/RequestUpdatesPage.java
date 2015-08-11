@@ -36,7 +36,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.AgeLabel;
+import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
 import com.pmease.gitplex.web.component.commitlink.CommitLink;
@@ -97,7 +97,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 				PageParameters params = RequestComparePage.paramsOf(
 						update.getRequest(), null, update.getBaseCommitHash(), update.getHeadCommitHash(), null);
 				
-				updateItem.add(new AgeLabel("age", Model.of(update.getDate())));
+				updateItem.add(new Label("age", DateUtils.formatAge(update.getDate())));
 				
 				Link<Void> compareLink = new BookmarkablePageLink<Void>("compare", RequestComparePage.class, params);
 				if (updateNo == 1)
@@ -204,7 +204,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						}));
 
 						commitItem.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
-						commitItem.add(new AgeLabel("age", Model.of(commit.getAuthor().getWhen())));
+						commitItem.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 						
 						commitItem.add(new CommitLink("hashLink", repoModel, commit.getHash()));
 						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
