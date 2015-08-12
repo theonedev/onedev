@@ -27,14 +27,14 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.comment.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
-import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 import com.pmease.gitplex.web.component.userlink.UserLink;
-import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
 class InlineCommentActivityPanel extends Panel {

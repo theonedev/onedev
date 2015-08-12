@@ -13,8 +13,8 @@ import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.web.component.comment.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
-import com.pmease.gitplex.web.component.comment.event.CommentCollapsing;
 
 @SuppressWarnings("serial")
 class CommentActivityPanel extends Panel {

@@ -53,11 +53,11 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {

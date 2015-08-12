@@ -1,10 +1,12 @@
-package com.pmease.gitplex.web;
+package com.pmease.gitplex.web.utils;
 
 import java.util.Date;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
+
+import com.pmease.gitplex.web.Constants;
 
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 

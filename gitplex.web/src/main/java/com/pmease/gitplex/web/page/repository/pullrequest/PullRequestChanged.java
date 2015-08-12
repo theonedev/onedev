@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.event;
+package com.pmease.gitplex.web.page.repository.pullrequest;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 

@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
@@ -21,11 +22,10 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.exception.AccessDeniedException;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 /**
  * Loading commits of children may take some time, and we do this via resource loading to avoid blocking 
@@ -60,7 +60,7 @@ class LastCommitsResource extends AbstractResource {
 				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
 				
 				if (!SecurityUtils.canPull(repo))
-					throw new AccessDeniedException();
+					throw new UnauthorizedException();
 				
 				LastCommitsOfChildren lastCommits = repo.getLastCommitsOfChildren(revision, path);
 				

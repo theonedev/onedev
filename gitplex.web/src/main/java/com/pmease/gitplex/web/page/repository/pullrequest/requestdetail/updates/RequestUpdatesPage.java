@@ -35,7 +35,6 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
 import com.pmease.gitplex.web.component.commitlink.CommitLink;
@@ -43,12 +42,13 @@ import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
-import com.pmease.gitplex.web.event.PullRequestChanged;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {

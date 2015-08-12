@@ -8,8 +8,8 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.userlink.UserLink;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
 class ApproveActivityPanel extends Panel {

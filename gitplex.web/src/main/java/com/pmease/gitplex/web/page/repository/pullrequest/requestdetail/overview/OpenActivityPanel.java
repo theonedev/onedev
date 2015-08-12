@@ -16,11 +16,11 @@ import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
 class OpenActivityPanel extends Panel {

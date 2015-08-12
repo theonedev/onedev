@@ -57,7 +57,6 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
@@ -67,6 +66,7 @@ import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.compare.BranchComparePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;

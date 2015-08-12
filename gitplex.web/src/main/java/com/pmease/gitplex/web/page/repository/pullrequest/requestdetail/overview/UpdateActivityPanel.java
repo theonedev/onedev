@@ -23,7 +23,6 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.commitlink.CommitLink;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
@@ -31,6 +30,7 @@ import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 

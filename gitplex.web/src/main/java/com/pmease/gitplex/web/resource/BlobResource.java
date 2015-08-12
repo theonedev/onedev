@@ -6,6 +6,7 @@ import java.io.InputStream;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
@@ -18,7 +19,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.exception.AccessDeniedException;
 
 public class BlobResource extends AbstractResource {
 
@@ -61,7 +61,7 @@ public class BlobResource extends AbstractResource {
 			throw new IllegalArgumentException("path parameter has to be specified");
 
 		if (!SecurityUtils.canPull(repository)) 
-			throw new AccessDeniedException();
+			throw new UnauthorizedException();
 
 		final Blob blob = repository.getBlob(new BlobIdent(revision, path, 0));
 		

@@ -43,7 +43,6 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.DateUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
@@ -53,6 +52,7 @@ import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.SearchOption.Status;
+import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
 public class RequestListPage extends PullRequestPage {

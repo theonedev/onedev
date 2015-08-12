@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page.base;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -17,7 +18,6 @@ import com.pmease.commons.wicket.CommonPage;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.exception.AccessDeniedException;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 
@@ -52,7 +52,7 @@ public abstract class BasePage extends CommonPage {
 
 		if (!isPermitted()) {
 			if (getCurrentUser() != null) 
-				throw new AccessDeniedException("Access denied");
+				throw new UnauthorizedException();
 			else 
 				throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		}
