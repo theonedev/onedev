@@ -233,3 +233,18 @@
 #request-detail .info .reviewers .review-result {
 	top: 12px;
 }
+
+.collapsed>.avatar img {
+	opacity: 0.3;
+}
+.collapsed>.activity>div.summary {
+	margin-bottom: 0; 
+	color: #AAA;
+}
+.collapsed>.activity>div.summary .user a {
+	color: #888;
+}
+.collapsed>.activity>div.detail {
+	text-overflow: ellipsis; overflow: hidden; 
+	max-width: 600px; color: #777; white-space: nowrap;
+}

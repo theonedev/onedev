@@ -60,46 +60,37 @@ li.selectable.active a, a.selectable.active {
 	border-color: #8BC8F9;
 }
 
-/* ACTIVITY */
-.activity>div.summary {color: #999; margin-bottom: 8px;}
-.activity>div.summary a {color: #999;}
-.activity>div.summary .actions .fa {font-size: 13px;}
-.activity>div.summary .actions {margin-left: 8px;}
-.activity>div.summary .actions>a, .activity>div.summary .actions>span {margin-right: 6px; color: #DDD;}
-.activity>div.summary .actions a, .activity>div.summary .actions span {color: #DDD;}
-.activity:hover>div.summary .actions a, .activity:hover>div.summary .actions span {color: #999;}
-.activity>div.summary .actions a .fa-times {font-size: 14px;}
-.activity>div.summary .actions a .fa-diff {font-size: 14px;}
-.activity>div.summary .user a, .activity>div.summary em {color: #666; font-weight: bold; font-style: normal;}
-
-.collapsed>.avatar img {opacity: 0.3;}
-.collapsed>.activity>div.summary {margin-bottom: 0; color: #AAA;}
-.collapsed>.activity>div.summary .user a {color: #888;}
-.collapsed>.activity>div.detail {
-	text-overflow: ellipsis; overflow: hidden; 
-	max-width: 600px; color: #777; white-space: nowrap;}
-
-/* COMMENTS */
-.comment .md-editor {margin-bottom: 16px;}
-.reply>.activity {padding: 8px;}
-.reply>.activity>div.summary {font-size: 13px;}
-.reply.new>.avatar {background: #FCF6D6;}
-
-div.replies {padding-top: 8px; padding-left: 16px;}
-div.replies>table>tbody>tr>td {vertical-align: top; border-top: 1px dashed #CCC; 
-	padding: 8px 0 8px 0; background: #F5F5F5;}
-div.replies>table>tbody>tr:first-child>td {border-top: none;}
-div.replies>table>tbody>tr>td.avatar {width: 1px; padding: 10px;}
-div.replies>table>tbody>tr>td.avatar img {width: 26px; height: 26px;}
-div.replies>.add-reply {padding-top: 10px; color: #999;}
-div.replies>.add-reply>div>a {color: #999;}
-div.replies>.add-reply:hover>div>a {color: #333;}
-table.comments>tbody>tr>td.avatar {width: 1px; padding-right: 16px;}
-table.comments>tbody>tr>td.avatar img {width: 36px; height: 36px;}
-table.comments>tbody>tr>td {border-top: 1px solid #E5E5E5; padding: 12px 0 12px 0;}
-table.comments>tbody>tr:first-child>td {border-top: none;}
-
-ul.threads li {border-left: 4px solid #E5E5E5; padding-left: 8px;}
-ul.threads li.unread {border-color: #70AEFA;}
-ul.threads li a {color: #444; cursor: pointer;}
-ul.threads li .markdown {color: #888; margin-top: 4px;}
+.activity-summary {
+	color: #999; 
+	margin-bottom: 8px;
+}
+.activity-summary a {
+	color: #999;
+}
+.activity-summary .operations {
+	margin-left: 8px;
+}
+.activity-summary .operations .fa {
+	font-size: 13px;
+}
+.activity-summary .operations>a, .activity-summary .operations>span {
+	margin-right: 6px; 
+	color: #DDD;
+}
+.activity-summary .operations a, .activity-summary .operations span {
+	color: #DDD;
+}
+.activity-summary:hover .operations a, .activity-summary:hover .operations span {
+	color: #999;
+}
+.activity-summary .operations a .fa-times {
+	font-size: 14px;
+}
+.activity-summary .operations a .fa-diff {
+	font-size: 14px;
+}
+.activity-summary .user a, .activity-summary em {
+	color: #666; 
+	font-weight: bold; 
+	font-style: normal;
+}

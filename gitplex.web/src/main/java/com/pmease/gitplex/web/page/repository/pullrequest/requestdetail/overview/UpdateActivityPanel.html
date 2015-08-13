@@ -1,11 +1,11 @@
 <wicket:panel>
 	<div class="update">
-		<div class="info">
-			<span class="fa fa-ext fa-repo-push"></span>
+		<div class="head activity-summary">
+			<span class="icon fa fa-ext fa-repo-push"></span>
 			Update #<span wicket:id="updateNo"></span> pushed <span wicket:id="age"></span>
-			<span class="actions"><a wicket:id="changes" title="Changes of this update"></a></span>
+			<span class="operations"><a wicket:id="changes" title="Changes of this update"></a></span>
 		</div>
-		<div class="commits">
+		<div class="body">
 			<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
 			<table>
 				<tr wicket:id="commits">

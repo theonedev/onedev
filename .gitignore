@@ -2,6 +2,7 @@
 */bin/**
 .metadata/**
 .idea/**
+.recommenders/**
 **/.classpath
 **/.project
 **/*.iml
@@ -20,4 +21,3 @@ pom.xml.releaseBackup
 *~.nib
 *.DS_Store
 *.log
-

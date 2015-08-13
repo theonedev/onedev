@@ -25,6 +25,8 @@ import com.pmease.gitplex.web.utils.DateUtils;
 @SuppressWarnings("serial")
 class OpenActivityPanel extends Panel {
 
+	private static final String BODY_ID = "body";
+	
 	private IModel<PullRequest> requestModel;
 	
 	public OpenActivityPanel(String id, IModel<PullRequest> requestModel) {
@@ -33,7 +35,7 @@ class OpenActivityPanel extends Panel {
 	}
 	
 	private Fragment renderForView() {
-		Fragment fragment = new Fragment("content", "viewFrag", this);
+		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 
 		String description = requestModel.getObject().getDescription();
 		if (StringUtils.isNotBlank(description))
@@ -56,7 +58,7 @@ class OpenActivityPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("content", "editFrag", OpenActivityPanel.this);
+				Fragment fragment = new Fragment(BODY_ID, "editFrag", OpenActivityPanel.this);
 				
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);

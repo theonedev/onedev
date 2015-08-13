@@ -1,11 +1,13 @@
 <wicket:panel>
 	<div class="open">
-		<span wicket:id="user" class="user"></span> opened <span wicket:id="age"></span>
-		<span class="actions">
-			<a wicket:id="edit" title="Edit"><span class="fa fa-pencil"></span></a>
-		</span>
+		<div class="head activity-summary">
+			<span wicket:id="user" class="user"></span> opened <span wicket:id="age"></span>
+			<span class="operations">
+				<a wicket:id="edit" title="Edit"><span class="fa fa-pencil"></span></a>
+			</span>
+		</div>
+		<div wicket:id="body" class="body"></div>
 	</div>
-	<div wicket:id="content" class="body"></div>
 	<wicket:fragment wicket:id="viewFrag">
 		<div wicket:id="description"></div>
 	</wicket:fragment>
