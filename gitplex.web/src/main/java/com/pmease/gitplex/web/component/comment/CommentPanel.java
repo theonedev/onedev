@@ -14,7 +14,6 @@ import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -178,52 +177,6 @@ public class CommentPanel extends Panel {
 			}
 
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
-		
-		AjaxLink<Void> resolveLink;
-		head.add(resolveLink = new AjaxLink<Void>("resolve") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				getComment().resolve(!getComment().isResolved());
-				if (getComment().isResolved())
-					send(CommentPanel.this, Broadcast.BUBBLE, new CommentCollapsing(target, getComment()));
-				if (findPage() != null) // only render this checkbox if the whole comment panel is not replaced
-					target.add(head);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(SecurityUtils.canModify(getComment()));
-			}
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				
-				if (getComment().isResolved()) {
-					tag.put("class", "fa fa-check-square-o resolve");
-					tag.put("title", "Mark this comment as unresolved");
-				} else {
-					tag.put("class", "fa fa-square-o resolve");
-					tag.put("title", "Mark this comment as resolved");
-				}
-			}
-			
-		});
-		resolveLink.setOutputMarkupId(true);
-		
-		head.add(new WebMarkupContainer("resolved") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(getComment().isResolved() && !SecurityUtils.canModify(getComment()));
-			}
-			
-		});
 		
 		head.add(newAdditionalCommentOperations("additionalOperations", new AbstractReadOnlyModel<Comment>() {
 

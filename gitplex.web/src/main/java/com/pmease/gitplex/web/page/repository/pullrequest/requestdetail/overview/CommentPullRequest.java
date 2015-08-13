@@ -16,8 +16,6 @@ class CommentPullRequest implements RenderableActivity {
 
 	private final Long commentId;
 	
-	private Boolean collapsed;
-
 	@Override
 	public Date getDate() {
 		return getComment().getDate();
@@ -26,16 +24,6 @@ class CommentPullRequest implements RenderableActivity {
 	@Override
 	public User getUser() {
 		return getComment().getUser();
-	}
-
-	public boolean isCollapsed() {
-		if (collapsed == null)
-			collapsed = getComment().isResolved();
-		return collapsed;
-	}
-
-	public void setCollapsed(boolean collapsed) {
-		this.collapsed = collapsed;
 	}
 
 	public CommentPullRequest(PullRequestComment comment) {

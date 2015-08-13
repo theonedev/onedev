@@ -2,11 +2,8 @@ package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overvie
 
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -15,7 +12,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -24,11 +20,9 @@ import com.pmease.commons.lang.diff.DiffLine;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.comment.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
@@ -204,29 +198,6 @@ class InlineCommentActivityPanel extends Panel {
 		 * when we update context of the inline comment
 		 */
 		add(new CommentPanel("comment", commentModel) {
-
-			@Override
-			protected Component newAdditionalCommentOperations(String id, IModel<Comment> comment) {
-				Fragment fragment = new Fragment(id, "operationsFrag", InlineCommentActivityPanel.this);
-				fragment.add(new AjaxLink<Void>("collapse") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						send(InlineCommentActivityPanel.this, Broadcast.BUBBLE, 
-								new CommentCollapsing(target, commentModel.getObject()));
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						setVisible(commentModel.getObject().isResolved());
-					}
-
-				});
-				fragment.setRenderBodyOnly(true);
-				return fragment;
-			}
 
 			@Override
 			public void onEvent(IEvent<?> event) {

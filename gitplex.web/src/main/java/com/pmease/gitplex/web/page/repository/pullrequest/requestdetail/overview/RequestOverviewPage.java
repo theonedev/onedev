@@ -11,7 +11,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
@@ -63,7 +62,6 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
-import com.pmease.gitplex.web.component.comment.CommentCollapsing;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentRemoved;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
@@ -77,7 +75,6 @@ import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
-import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -116,12 +113,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 	}
 	
 	private Component newActivityRow(final String id, RenderableActivity activity) {
-		final CommentPullRequest commentActivity;
-		if (activity instanceof CommentPullRequest)
-			commentActivity = (CommentPullRequest) activity;
-		else
-			commentActivity = null;
-		
 		final WebMarkupContainer row = new WebMarkupContainer(id, Model.of(activity)) {
 
 			@Override
@@ -132,43 +123,10 @@ public class RequestOverviewPage extends RequestDetailPage {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					remove();
 					commentRemoved.getTarget().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
-				} else if (event.getPayload() instanceof CommentCollapsing) {
-					Preconditions.checkNotNull(commentActivity);
-					commentActivity.setCollapsed(true);
-					Component row = newActivityRow(id, commentActivity);
-					replaceWith(row);
-					((CommentCollapsing) event.getPayload()).getTarget().add(row);
-				}
+				} 
 			}
 			
 		};
-		if (commentActivity != null && commentActivity.isCollapsed()) {
-			PullRequestComment comment = commentActivity.getComment();
-
-			Fragment fragment = new Fragment(DETAIL_ID, "collapsedCommentFrag", RequestOverviewPage.this);
-
-			fragment.add(new UserLink("user", new UserModel(comment.getUser()), AvatarMode.NAME));
-			if (comment.getInlineInfo() != null)
-				fragment.add(new Label("action", "added inline comment on file '" + comment.getBlobIdent().path + "'"));
-			else 
-				fragment.add(new Label("action", "commented"));
-			fragment.add(new Label("age", DateUtils.formatAge(comment.getDate())));
-			
-			fragment.add(new Label("body", comment.getContent()));
-			
-			fragment.add(new AjaxLink<Void>("expand") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					RenderableActivity activity = (RenderableActivity) row.getDefaultModelObject();
-					row.replace(activity.render(DETAIL_ID));
-					commentActivity.setCollapsed(false);
-					target.add(row);
-				}
-				
-			});
-			row.add(fragment);
-		}
 
 		row.setOutputMarkupId(true);
 		
@@ -193,13 +151,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected String load() {
 				String cssClasses = "";
 				RenderableActivity activity = (RenderableActivity) row.getDefaultModelObject();
-				if (activity instanceof CommentPullRequest) {
-					CommentPullRequest commentActivity = (CommentPullRequest) activity;
-					if (commentActivity.isCollapsed())
-						cssClasses += " collapsed";
-					if (commentActivity.getComment().isResolved())
-						cssClasses += " resolved";
-				} 
 				if (lastVisitDate != null && lastVisitDate.before(activity.getDate()))
 					cssClasses += " new";
 				return cssClasses;
