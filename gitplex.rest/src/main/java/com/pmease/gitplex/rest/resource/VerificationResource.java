@@ -56,7 +56,7 @@ public class VerificationResource {
     @ValidQueryParams
     @GET
     public Collection<PullRequestVerification> query(
-    		@QueryParam("request") Long requestId,
+    		@QueryParam("requestId") Long requestId,
     		@QueryParam("configuration") String configuration, 
     		@QueryParam("commit") String commit) {
 		EntityCriteria<PullRequestVerification> criteria = EntityCriteria.of(PullRequestVerification.class);

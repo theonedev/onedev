@@ -60,7 +60,7 @@ public class RepositoryResource {
     
 	@ValidQueryParams
 	@GET
-	public Collection<Repository> query(@QueryParam("user") Long userId, @QueryParam("name") String name, 
+	public Collection<Repository> query(@QueryParam("userId") Long userId, @QueryParam("name") String name, 
 			@QueryParam("path") String path) {
 		EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
 		if (path != null) {
