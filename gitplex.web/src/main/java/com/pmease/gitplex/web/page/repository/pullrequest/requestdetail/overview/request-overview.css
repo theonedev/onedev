@@ -39,10 +39,10 @@
 	padding-top: 16px;
 }
 #request-detail .activities>table>tbody>tr.non-discussion .activity-summary {
-	margin-left: -13px;
+	margin-left: -14px;
 }
 #request-detail .activities>table>tbody>tr.non-discussion .activity-summary .icon {
-	border-radius: 12px;
+	border-radius: 13px;
 	background: #5CA7F8;
 	width: 26px;
 	height: 26px;
@@ -75,8 +75,8 @@
 }
 #request-detail .activities .activity>.detail>.update>.body td.icon {
 	width: 1px; 
-	vertical-align: middle;
 	background: white;
+	padding-top: 4px;
 }
 #request-detail .activities .activity>.detail>.update>.body td.status {
 	text-align: right;
@@ -138,6 +138,7 @@
 
 #request-detail .activities .activity>.detail>.discard>.icon {
 	background: #F93333;
+	padding-left: 8px;
 }
 #request-detail .activities .activity>.detail>.integrate>.icon {
 	background: #35A612; 
@@ -149,10 +150,11 @@
 	background: #F93333; 
 }
 #request-detail .activities .activity>.detail>.undo-review>.icon {
-	background: #666; 
+	padding-left: 8px;
+	padding-top: 7px;
 }
 #request-detail .activities .activity>.detail>.reopen>.icon {
-	background: #666; 
+	padding-left: 7px;
 }
 
 #request-detail .info>div>div {
