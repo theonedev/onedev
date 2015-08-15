@@ -12,8 +12,7 @@
 			<div wicket:id="lineProcessor" class="line-process btn btn-sm btn-default pull-left" title="Line process options">White space <i class="caret"></i></div>
 			<div wicket:id="lineProcessorMenu"></div>
 			<div class="title pull-left">
-				<span class="fa fa-ext fa-file-diff"></span> Total
-				<a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
+				Total <a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
 			</div>
 			<div class="btn-group pull-right">
 				<a wicket:id="unified" class="btn btn-sm btn-default">Unified</a>
