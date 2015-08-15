@@ -58,6 +58,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
@@ -82,12 +84,18 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final Extractors extractors; 
 	
+	private final UnitOfWork unitOfWork;
+	
+	private final Dao dao;
+	
 	@Inject
-	public DefaultIndexManager(Set<IndexListener> listeners, 
-			StorageManager storageManager, Extractors extractors) {
+	public DefaultIndexManager(Set<IndexListener> listeners, UnitOfWork unitOfWork, 
+			StorageManager storageManager, Extractors extractors, Dao dao) {
 		this.listeners = listeners;
+		this.unitOfWork = unitOfWork;
 		this.storageManager = storageManager;
 		this.extractors = extractors;
+		this.dao = dao;
 	}
 
 	private String getCommitIndexVersion(final IndexSearcher searcher, AnyObjectId commitId) throws IOException {
@@ -374,8 +382,18 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public void onRefUpdate(Repository repository, String refName, String newCommitHash) {
-		if (newCommitHash != null)
-			index(repository, newCommitHash);
+	public void onRefUpdate(Repository repository, String refName, final String newCommitHash) {
+		if (newCommitHash != null) {
+			final Long repoId = repository.getId();
+			unitOfWork.asyncCall(new Runnable() {
+
+				@Override
+				public void run() {
+					Repository repo = dao.load(Repository.class, repoId);
+					index(repo, newCommitHash);
+				}
+				
+			});
+		}
 	}
 }

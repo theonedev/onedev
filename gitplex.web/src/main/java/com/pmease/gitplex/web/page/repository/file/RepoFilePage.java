@@ -41,6 +41,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
@@ -223,11 +224,13 @@ public class RepoFilePage extends RepositoryPage {
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				if (!indexManager.isIndexed(getRepository(), state.file.revision)) {
+					final Long repoId = getRepository().getId();
 					GitPlex.getInstance(UnitOfWork.class).asyncCall(new Runnable() {
 
 						@Override
 						public void run() {
-							GitPlex.getInstance(IndexManager.class).index(getRepository(), state.file.revision);
+							Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
+							GitPlex.getInstance(IndexManager.class).index(repo, state.file.revision);
 						}
 						
 					});

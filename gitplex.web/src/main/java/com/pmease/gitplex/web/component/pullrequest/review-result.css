@@ -1,8 +1,8 @@
 .review-result {
-	font-size: 24px; 
+	font-size: 16px; 
 	position: absolute; 
-	left: 30px; 
-	top: 6px; 
+	left: 28px; 
+	top: 12px; 
 	cursor: pointer;
 }
 .review-result.current.approved {

@@ -13,8 +13,10 @@ public interface RepositoryListener {
 	void afterDelete(Repository repository);
 	
 	/**
-	 * Update or delete a ref
-	 * 
+	 * Update or delete a ref. Push operation will wait for completion of this method. If the 
+	 * implementation takes a long time, it should be executed in a separate thread in order 
+	 * not to block the push operation.
+	 *  
 	 * @param repository
 	 * 			repository to update/delete ref inside
 	 * @param refName

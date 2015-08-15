@@ -7,15 +7,20 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.AbstractGitTest;
+import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
@@ -47,6 +52,44 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	
 	private SearchManager searchManager;
 	
+	private UnitOfWork unitOfWork = new UnitOfWork() {
+
+		@Override
+		public void begin() {
+		}
+
+		@Override
+		public void end() {
+		}
+
+		@Override
+		public <T> T call(Callable<T> callable) {
+			return null;
+		}
+
+		@Override
+		public void asyncCall(Runnable runnable) {
+			runnable.run();
+		}
+
+		@Override
+		public void reset() {
+		}
+
+		@Override
+		public Session getSession() {
+			return null;
+		}
+
+		@Override
+		public SessionFactory getSessionFactory() {
+			return null;
+		}
+		
+	};
+	
+	private Dao dao;
+	
 	@Override
 	protected void setup() {
 		super.setup();
@@ -63,6 +106,9 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		when(storageManager.getIndexDir(Mockito.any(Repository.class))).thenReturn(indexDir);
 		when(storageManager.getRepoDir(Mockito.any(Repository.class))).thenReturn(new File(git.repoDir(), ".git"));
 		
+		dao = mock(Dao.class);
+		when(dao.load(Repository.class, Mockito.any(Long.class))).thenReturn(repository);
+		
 		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
 		
 		extractors = mock(Extractors.class);
@@ -73,7 +119,8 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		searchManager = new DefaultSearchManager(storageManager);
 		
-		indexManager = new DefaultIndexManager(Sets.<IndexListener>newHashSet(searchManager), storageManager, extractors);
+		indexManager = new DefaultIndexManager(Sets.<IndexListener>newHashSet(searchManager), 
+				unitOfWork, storageManager, extractors, dao);
 	}
 
 	@Test

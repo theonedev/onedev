@@ -78,7 +78,6 @@
 }
 #request-detail .activities .activity>.detail>.update>.body td.icon {
 	width: 1px; 
-	background: white;
 	padding-top: 4px;
 }
 #request-detail .activities .activity>.detail>.update>.body td.status {
