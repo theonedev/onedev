@@ -1,11 +1,18 @@
 #request-detail>.updates>.update {
-	padding: 12px; 
 	margin: 20px 0; 
 	border: 1px solid #DDD; 
 	border-radius: 4px;
 }
 #request-detail>.updates>.update>.summary {
-	margin-bottom: 8px;
+	color: #999;
+	padding: 8px 12px;
+	border-bottom: 1px solid #DDD;	
+	background: #F5F5F5;
+	border-radius: 4px;
+}
+#request-detail>.updates>.update>.summary .update-no {
+	font-weight: bold;
+	color: #666;
 }
 #request-detail>.updates>.update>.summary .operations {
 	margin-left: 8px;
@@ -22,10 +29,12 @@
 	margin-bottom: 12px;
 }
 #request-detail>.updates>.update>.commits td {
-	padding-top: 8px; 
-	padding-bottom: 8px; 
+	padding: 8px; 
 	color: #999; 
 	border-top: 1px dashed #CCC;
+}
+#request-detail>.updates>.update>.commits tr:first-child td {
+	border-top: none;
 }
 #request-detail>.updates>.update>.commits tr.rebased td a {
 	color: #AAA;
