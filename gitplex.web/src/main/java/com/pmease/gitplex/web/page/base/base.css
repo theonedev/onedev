@@ -70,12 +70,6 @@ li.selectable.active a, a.selectable.active {
 .activity-summary .operations {
 	margin-left: 8px;
 }
-.activity-summary .operations .fa {
-	font-size: 13px;
-}
-.activity-summary .operations .fa-file-diff {
-	font-size: 14px;
-}
 .activity-summary .operations>a, .activity-summary .operations>span {
 	margin-right: 6px; 
 	color: #DDD;
@@ -85,12 +79,6 @@ li.selectable.active a, a.selectable.active {
 }
 .activity-summary:hover .operations a, .activity-summary:hover .operations span {
 	color: #999;
-}
-.activity-summary .operations a .fa-times {
-	font-size: 14px;
-}
-.activity-summary .operations a .fa-diff {
-	font-size: 14px;
 }
 .activity-summary .user a, .activity-summary em {
 	color: #666; 

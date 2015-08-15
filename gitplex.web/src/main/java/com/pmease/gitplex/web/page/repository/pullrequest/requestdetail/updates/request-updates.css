@@ -11,7 +11,7 @@
 	margin-left: 8px;
 }
 #request-detail>.updates>.update>.summary .operations .fa {
-	font-size: 16px;
+	color: #999;
 }
 #request-detail>.updates>.update>.summary>.reviews>.review {
 	margin-left: 12px; 

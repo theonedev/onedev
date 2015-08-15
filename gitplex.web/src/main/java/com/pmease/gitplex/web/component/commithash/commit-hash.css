@@ -6,8 +6,5 @@
 	padding-left: 3px;
 	padding-right: 3px;
 	height: 22px;
-	color: black;
 	font-family: monospace;
-	position: relative;
-	top: 1px; /* align with the browse code button often occurred at right side of this component */
 }
