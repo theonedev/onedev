@@ -4,6 +4,7 @@ import static com.pmease.gitplex.core.model.PullRequest.Status.INTEGRATED;
 import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_UPDATE;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -57,6 +58,7 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
@@ -187,8 +189,11 @@ public class NewRequestPage extends PullRequestPage {
 
 			@Override
 			protected List<Commit> load() {
-				return getPullRequest().git().log(getPullRequest().getBaseCommitHash(), 
-						getPullRequest().getLatestUpdate().getHeadCommitHash(), null, 0, 0);
+				PullRequest request = getPullRequest();
+				List<Commit> commits = request.git().log(request.getBaseCommitHash(), 
+						request.getLatestUpdate().getHeadCommitHash(), null, 0, 0);
+				Collections.reverse(commits);
+				return commits;
 			}
 			
 		};
@@ -309,13 +314,13 @@ public class NewRequestPage extends PullRequestPage {
 			
 		});
 		
-		add(new WebMarkupContainer("tabPanel").setOutputMarkupId(true));
+		add(newCommitsPanel());
 
 		add(new BackToTop("backToTop"));
 	}
 	
 	private Component newCommitsPanel() {
-		return new WebMarkupContainer(TAB_PANEL_ID).setOutputMarkupId(true);
+		return new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel).setOutputMarkupId(true);
 	}
 	
 	private Component newDiffPanel() {

@@ -1,0 +1,46 @@
+.commit-list table {
+	width: 100%;
+}
+.commit-list td {
+	padding-top: 8px; 
+	padding-bottom: 8px; 
+	color: #999; 
+	border-top: 1px dashed #BBB;
+	vertical-align: top;
+}
+.commit-list td.avatar {
+	width: 1px;
+}
+.commit-list td.info {
+	text-align: right;
+	white-space: nowrap;
+}
+.commit-list td.avatar img {
+	width: 37px; 
+	height: 37px;
+}
+.commit-list a {
+	color: #666;
+}
+.commit-list a.summary {
+	font-weight: bold;
+}
+.commit-list td.detail {
+	padding-left: 8px; 
+	padding-right: 8px;
+}
+.commit-list td.detail .name {
+	color: #666;
+}
+.commit-list a.commit-hash {
+	font-family: monospace;
+}
+.commit-list tr:hover td {
+	background: #F7ECB9;
+}
+.commit-list .commit-message>.full {
+	margin-bottom: 4px;
+}
+.commit-list .alert {
+	margin-bottom: 16px;
+}

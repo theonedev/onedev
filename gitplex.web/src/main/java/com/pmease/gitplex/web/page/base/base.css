@@ -73,6 +73,9 @@ li.selectable.active a, a.selectable.active {
 .activity-summary .operations .fa {
 	font-size: 13px;
 }
+.activity-summary .operations .fa-file-diff {
+	font-size: 14px;
+}
 .activity-summary .operations>a, .activity-summary .operations>span {
 	margin-right: 6px; 
 	color: #DDD;

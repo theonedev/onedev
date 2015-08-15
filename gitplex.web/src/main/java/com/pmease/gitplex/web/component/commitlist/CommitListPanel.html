@@ -1,0 +1,22 @@
+<wicket:panel>
+	<div class="commit-list">
+		<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
+		<table>
+			<tr wicket:id="commits">
+				<td class="avatar">
+					<span wicket:id="avatar"></span>
+				</td>
+				<td class="detail">
+					<div wicket:id="message"></div> 
+					<div class="author">
+						<span wicket:id="name"></span> authored <span wicket:id="age"></span>
+					</div>
+				</td>
+				<td class="info">
+					<span wicket:id="hash"></span>
+					<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
+				</td>
+			</tr>
+		</table>
+	</div>
+</wicket:panel>

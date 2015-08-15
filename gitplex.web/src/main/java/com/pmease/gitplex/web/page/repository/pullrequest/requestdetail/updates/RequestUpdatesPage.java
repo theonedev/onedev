@@ -37,7 +37,7 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
-import com.pmease.gitplex.web.component.commitlink.CommitLink;
+import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
@@ -197,7 +197,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
 						commitItem.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 						
-						commitItem.add(new CommitLink("hashLink", repoModel, commit.getHash()));
+						commitItem.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
 						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
 								RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
 						

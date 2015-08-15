@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web.page.repository.file;
 
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -9,6 +8,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -39,7 +39,7 @@ class LastCommitPanel extends Panel {
 		
 		add(new CommitMessagePanel("message", repoModel, Model.of(commit)));
 		
-		add(new TextField<String>("hash", Model.of(commit.getHash())));
+		add(new CommitHashPanel("hash", Model.of(commit.getHash())));
 		
 		setOutputMarkupId(true);
 	}

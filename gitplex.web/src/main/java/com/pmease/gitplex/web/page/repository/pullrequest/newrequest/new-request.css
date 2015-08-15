@@ -80,3 +80,6 @@
 #new-request>.body>.status>.can-send form .help-block {
 	margin-bottom: 0;
 }
+#new-request .commit-list {
+	margin-top: 16px;
+}

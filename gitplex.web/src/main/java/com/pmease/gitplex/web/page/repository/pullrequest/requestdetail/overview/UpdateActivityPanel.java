@@ -24,7 +24,7 @@ import com.pmease.gitplex.core.model.PullRequestVerification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.commitlink.CommitLink;
+import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
@@ -78,10 +78,10 @@ class UpdateActivityPanel extends Panel {
 			}
 			
 		});
-		add(new ListView<Commit>("commits", new AbstractReadOnlyModel<List<Commit>>() {
+		add(new ListView<Commit>("commits", new LoadableDetachableModel<List<Commit>>() {
 
 			@Override
-			public List<Commit> getObject() {
+			protected List<Commit> load() {
 				List<Commit> commits = updateModel.getObject().getCommits();
 				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
 					return commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
@@ -171,7 +171,7 @@ class UpdateActivityPanel extends Panel {
 
 				});
 				
-				CommitLink link = new CommitLink("hashLink", repoModel, commit.getHash());
+				item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
 				if (mergedCommitsModel.getObject().contains(commit.getHash())) {
 					item.add(AttributeAppender.append("class", " integrated"));
 					item.add(AttributeAppender.append("title", "This commit has been integrated"));
@@ -179,8 +179,6 @@ class UpdateActivityPanel extends Panel {
 					item.add(AttributeAppender.append("class", " rebased"));
 					item.add(AttributeAppender.append("title", "This commit has been rebased"));
 				}
-				
-				item.add(link);
 				
 				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
 						RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));

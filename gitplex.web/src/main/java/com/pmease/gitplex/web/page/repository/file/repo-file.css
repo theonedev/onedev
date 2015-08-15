@@ -104,17 +104,6 @@
 	display: none;
 	margin-top: 6px;
 }
-#repo-file>.last-commit .hash {
-	font-size: 13px;
-	width: 62px;
-	border: none;
-	border-radius: 3px;
-	padding-left: 3px;
-	padding-right: 3px;
-	background: #CCC;
-	height: 22px;
-	font-family: monospace;
-}
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;

@@ -82,12 +82,10 @@
 }
 #request-detail .activities .activity>.detail>.update>.body td.status {
 	text-align: right;
+	white-space: nowrap;
 }
 #request-detail .activities .activity>.detail>.update>.body tr:hover td {
 	background: #F5F5F5;
-}
-#request-detail .activities .activity>.detail>.update>.body td.status a.commit-hash {
-	font-family: monospace;
 }
 #request-detail .activities .activity>.detail>.update>.body tr.integrated td.icon .fa {
 	color: #35A612;

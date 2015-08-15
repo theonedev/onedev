@@ -43,7 +43,7 @@
 #request-detail>.updates>.update>.commits a {
 	color: #666;
 }
-#request-detail>.updates>.update>.commits a.subject {
+#request-detail>.updates>.update>.commits a.summary {
 	font-weight: bold;
 }
 #request-detail>.updates>.update>.commits td.detail {
