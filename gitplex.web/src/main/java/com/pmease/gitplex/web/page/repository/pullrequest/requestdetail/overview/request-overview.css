@@ -63,6 +63,9 @@
 	color: #777; 
 	margin-left: -7px;
 }
+#request-detail .activities .activity>.detail>.update>.body>.alert {
+	margin: 0 0 12px 28px;
+}
 #request-detail .activities .activity>.detail>.update>.body a {
 	color: #555;
 }

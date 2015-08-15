@@ -23,7 +23,6 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
@@ -60,22 +59,23 @@ public class RepositoryResource {
     
 	@ValidQueryParams
 	@GET
-	public Collection<Repository> query(@QueryParam("userId") Long userId, @QueryParam("name") String name, 
+	public Collection<?> query(@QueryParam("userId") Long userId, @QueryParam("name") String name, 
 			@QueryParam("path") String path) {
+		
+		List<Repository> repositories = new ArrayList<>();
+		
 		EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
 		if (path != null) {
 			Repository repository = repositoryManager.findBy(path);
 			if (repository != null)
-				return Lists.newArrayList(repository);
-			else
-				return new ArrayList<>();
+				repositories.add(repository);
+		} else {
+			if (userId != null)
+				criteria.add(Restrictions.eq("owner.id", userId));
+			if (name != null)
+				criteria.add(Restrictions.eq("name", name));
+			repositories.addAll(dao.query(criteria));
 		}
-		
-		if (userId != null)
-			criteria.add(Restrictions.eq("owner.id", userId));
-		if (name != null)
-			criteria.add(Restrictions.eq("name", name));
-		List<Repository> repositories = dao.query(criteria);
 		
 		for (Repository repository: repositories) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
