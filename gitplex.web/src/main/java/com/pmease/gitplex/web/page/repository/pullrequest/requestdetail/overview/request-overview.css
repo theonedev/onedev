@@ -12,10 +12,8 @@
 }
 #request-detail .activities>table>tbody>tr.discussion>td.avatar {
 	width: 1px; 
-	padding-left: 12px; 
-	padding-right: 12px;
 }
-#request-detail .activities>table>tbody>tr.discussion>td.activity {
+#request-detail .activities>table>tbody>tr.discussion>td.detail {
 	padding-left: 12px;
 }
 #request-detail .activities>table>tbody>tr.activity>td.avatar {
