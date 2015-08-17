@@ -82,10 +82,6 @@
 	text-align: right;
 	white-space: nowrap;
 }
-#request-detail .activities .activity>.detail>.update>.body td.status .commit-hash {
-	position: relative;
-	top: 1px;
-}
 #request-detail .activities .activity>.detail>.update>.body tr:hover td {
 	background: #F5F5F5;
 }

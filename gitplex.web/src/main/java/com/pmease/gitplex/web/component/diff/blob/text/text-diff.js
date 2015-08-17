@@ -20,14 +20,25 @@ gitplex.textdiff = {
 		else
 			$content = $container.find(".old" + oldLineNo);
 
-		var $tr = $("<tr class='line comments'><td colspan='3'></td></tr>").insertAfter($line);
+		var $line = $content.closest(".line");
+		var $commentLine = $("<tr class='line comments'></tr>").insertAfter($line);
+		if ($line.children.length == 3)
+			$commentLine.append("<td colspan='3' class='content'></td>");
+		else if (oldLineNo != -1 && newLineNo != -1)
+			$commentLine.append("<td colspan='4' class='content'></td>");
+		else if (oldLineNo != -1)
+			$commentLine.append("<td colspan='2' class='content'></td><td colspan='2'>&nbsp;</td>");
+		else
+			$commentLine.append("<td colspan='2'>&nbsp;</td><td colspan='2' class='content'></td>");
+			
+		var $addComment = $container.find("form.add-comment");
 		
-		var $addComment = $("#add-comment");
-		var $commentsRow = $addComment.closest("tr.line.comments");
+		var $prevCommentLine = $addComment.closest(".line");
 		$addComment.find("textarea").val("");
-		$tr.children().append($addComment);
-		$commentsRow.prev().find("a.add-comment").show();
-		$commentsRow.remove();
+		$commentLine.children(".content").append($addComment);
+		
+		$prevCommentLine.prev().find("a.add-comment").show();
+		$prevCommentLine.remove();
 		$addComment.find("textarea").focus();
 		pmease.commons.form.trackDirty($addComment);
 		$line.find("a.add-comment").hide();

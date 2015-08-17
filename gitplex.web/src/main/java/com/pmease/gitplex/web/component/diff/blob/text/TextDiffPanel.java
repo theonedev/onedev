@@ -58,6 +58,8 @@ public class TextDiffPanel extends Panel {
 	
 	private final InlineCommentSupport commentSupport;
 	
+	private AbstractDefaultAjaxBehavior addCommentBehavior;
+	
 	public TextDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, DiffMode diffMode, 
 			@Nullable InlineCommentSupport commentSupport) {
 		super(id);
@@ -118,6 +120,41 @@ public class TextDiffPanel extends Panel {
 			
 		});
 		
+		add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				int oldLineNo = params.getParameterValue("oldLineNo").toInt();
+				int newLineNo = params.getParameterValue("newLineNo").toInt();
+				
+				String script;
+				if (oldLineNo != -1 && newLineNo != -1) {
+					script = String.format("gitplex.textdiff.beforeAddComments('%s', %d, %d);", 
+							getMarkupId(), oldLineNo, newLineNo);
+				} else if (oldLineNo != -1) {
+					script = String.format("gitplex.textdiff.beforeAddComments('%s', %d, undefined);", 
+							getMarkupId(), oldLineNo);
+				} else {
+					script = String.format("gitplex.textdiff.beforeAddComments('%s', undefined, %d);", 
+							getMarkupId(), newLineNo);
+				}
+				
+				target.appendJavaScript(script);
+			}
+			
+			@Override
+			public void renderHead(Component component, IHeaderResponse response) {
+				super.renderHead(component, response);
+				CharSequence addCommentCallback = addCommentBehavior.getCallbackFunction(
+						CallbackParameter.explicit("oldLineNo"), CallbackParameter.explicit("newLineNo"));
+				String script = String.format("document.getElementById('%s').addComment=%s;", 
+						getMarkupId(), addCommentCallback);
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+
+		});
+		
 		setOutputMarkupId(true);
 	}
 	
@@ -164,6 +201,12 @@ public class TextDiffPanel extends Panel {
 				new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
+		
+		CharSequence addCommentCallback = addCommentBehavior.getCallbackFunction(
+				CallbackParameter.explicit("oldLineNo"), CallbackParameter.explicit("newLineNo"));
+		String script = String.format("document.getElementById('%s').addComment=%s;", 
+				getMarkupId(), addCommentCallback);
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	private String renderDiffs() {
@@ -242,27 +285,37 @@ public class TextDiffPanel extends Panel {
 		}
 	}
 	
+	private String getAddCommentLink(int oldLineNo, int newLineNo) {
+		return String.format("<a class='add-comment' "
+				+ "href='javascript: document.getElementById('%s').addComment(%d, %d);'></a>", 
+				getMarkupId(), oldLineNo, newLineNo);
+	}
+	
 	private void appendEqual(StringBuilder builder, DiffBlock block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
 			builder.append("<tr class='line expanded'>");
 		else
 			builder.append("<tr class='line'>");
 
+		int oldLineNo = block.getOldStart() + lineIndex;
+		int newLineNo = block.getNewStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append("<td class='content old").append(block.getOldStart()+lineIndex)
-				.append(" new").append(block.getNewStart()+lineIndex).append("'><span class='operation'>&nbsp;</span>");
+		contentBuilder.append("<td class='content old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
+		if (lastContextSize == 0)
+			contentBuilder.append(getAddCommentLink(oldLineNo, newLineNo));
+		contentBuilder.append("<span class='operation'>&nbsp;</span>");
 		for (CmToken token: block.getLines().get(lineIndex))
 			contentBuilder.append(token.toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number'>").append(block.getOldStart() + lineIndex).append("</td>");
-			builder.append("<td class='number'>").append(block.getNewStart() + lineIndex).append("</td>");
+			builder.append("<td class='number'>").append(oldLineNo).append("</td>");
+			builder.append("<td class='number'>").append(newLineNo).append("</td>");
 			builder.append(contentBuilder);
 		} else {
-			builder.append("<td class='number'>").append(block.getOldStart() + lineIndex).append("</td>");
+			builder.append("<td class='number'>").append(oldLineNo).append("</td>");
 			builder.append(contentBuilder);
-			builder.append("<td class='number'>").append(block.getNewStart() + lineIndex).append("</td>");
+			builder.append("<td class='number'>").append(newLineNo).append("</td>");
 			builder.append(contentBuilder);
 		}
 		builder.append("</tr>");
@@ -270,9 +323,12 @@ public class TextDiffPanel extends Panel {
 	
 	private void appendInsert(StringBuilder builder, DiffBlock block, int lineIndex) {
 		builder.append("<tr class='line'>");
-		
+
+		int newLineNo = block.getNewStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append("<td class='content new new").append(block.getNewStart()+lineIndex).append("'><span class='operation'>+</span>");
+		contentBuilder.append("<td class='content new new").append(newLineNo).append("'>");
+		contentBuilder.append(getAddCommentLink(-1, newLineNo));
+		contentBuilder.append("<span class='operation'>+</span>");
 		List<CmToken> tokens = block.getLines().get(lineIndex);
 		for (int i=0; i<tokens.size(); i++) 
 			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
@@ -280,11 +336,11 @@ public class TextDiffPanel extends Panel {
 		
 		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td class='number new'>&nbsp;</td>");
-			builder.append("<td class='number new'>").append(block.getNewStart() + lineIndex).append("</td>");
+			builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
 			builder.append(contentBuilder);
 		} else {
 			builder.append("<td class='number'>&nbsp;</td><td class='content'>&nbsp;</td>");
-			builder.append("<td class='number new'>").append(block.getNewStart() + lineIndex).append("</td>");
+			builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
 			builder.append(contentBuilder);
 		}
 		builder.append("</tr>");
@@ -293,19 +349,22 @@ public class TextDiffPanel extends Panel {
 	private void appendDelete(StringBuilder builder, DiffBlock block, int lineIndex) {
 		builder.append("<tr class='line'>");
 		
+		int oldLineNo = block.getOldStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append("<td class='content old old").append(block.getOldStart()+lineIndex).append("'><span class='operation'>-</span>");
+		contentBuilder.append("<td class='content old old").append(oldLineNo).append("'>");
+		contentBuilder.append(getAddCommentLink(oldLineNo, -1));
+		contentBuilder.append("<span class='operation'>-</span>");
 		List<CmToken> tokens = block.getLines().get(lineIndex);
 		for (int i=0; i<tokens.size(); i++) 
 			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number old'>").append(block.getOldStart() + lineIndex).append("</td>");
+			builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
 			builder.append("<td class='number old'>&nbsp;</td>");
 			builder.append(contentBuilder);
 		} else {
-			builder.append("<td class='number old'>").append(block.getNewStart() + lineIndex).append("</td>");
+			builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
 			builder.append(contentBuilder);
 			builder.append("<td class='number'>&nbsp;</td><td class='content'>&nbsp;</td>");
 		}
@@ -318,16 +377,18 @@ public class TextDiffPanel extends Panel {
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
 		builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
-		builder.append("<td class='content old old")
-				.append(deleteBlock.getOldStart()+deleteLineIndex)
-				.append("'><span class='operation'>-</span>");
+		builder.append("<td class='content old old").append(oldLineNo).append("'>");
+		builder.append(getAddCommentLink(oldLineNo, -1));
+		builder.append("<span class='operation'>-</span>");
 		for (CmToken token: deleteBlock.getLines().get(deleteLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
 		
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
 		builder.append("<td class='number new'>").append(newLineNo).append("</td>");
-		builder.append("<td class='content new new").append(newLineNo).append("'><span class='operation'>+</span>");
+		builder.append("<td class='content new new").append(newLineNo).append("'>");
+		builder.append(getAddCommentLink(-1, newLineNo));
+		builder.append("<span class='operation'>+</span>");
 		for (CmToken token: insertBlock.getLines().get(insertLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
@@ -339,21 +400,24 @@ public class TextDiffPanel extends Panel {
 			int deleteLineIndex, int insertLineIndex, List<TokenDiffBlock> tokenDiffs) {
 		builder.append("<tr class='line'>");
 
+		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
+		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number old new'>").append(deleteBlock.getOldStart() + deleteLineIndex).append("</td>");
-			builder.append("<td class='number old new'>").append(insertBlock.getNewStart() + insertLineIndex).append("</td>");
-			builder.append("<td class='content old new old")
-					.append(deleteBlock.getOldStart() + deleteLineIndex)
-					.append(" new").append(insertBlock.getNewStart() + insertLineIndex)
-					.append("'><span class='operation'>*</span>");
+			builder.append("<td class='number old new'>").append(oldLineNo).append("</td>");
+			builder.append("<td class='number old new'>").append(newLineNo).append("</td>");
+			builder.append("<td class='content old new old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
+			builder.append(getAddCommentLink(oldLineNo, newLineNo));
+			builder.append("<span class='operation'>*</span>");
 			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getTokens()) 
 					builder.append(token.toHtml(tokenBlock.getOperation()));
 			}
 			builder.append("</td>");
 		} else {
-			builder.append("<td class='number old'>").append(deleteBlock.getOldStart() + deleteLineIndex).append("</td>");
-			builder.append("<td class='content old old").append(deleteBlock.getOldStart() + deleteLineIndex).append("'><span class='operation'>-</span>");
+			builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
+			builder.append("<td class='content old old").append(oldLineNo).append("'>");
+			builder.append(getAddCommentLink(oldLineNo, -1));
+			builder.append("span class='operation'>-</span>");
 			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getTokens()) {
 					if (tokenBlock.getOperation() != Operation.INSERT) 
@@ -362,8 +426,10 @@ public class TextDiffPanel extends Panel {
 			}
 			builder.append("</td>");
 			
-			builder.append("<td class='number new'>").append(insertBlock.getNewStart() + insertLineIndex).append("</td>");
-			builder.append("<td class='content new new").append(insertBlock.getNewStart()+insertLineIndex).append("'><span class='operation'>+</span>");
+			builder.append("<td class='number new'>").append(newLineNo).append("</td>");
+			builder.append("<td class='content new new").append(newLineNo).append("'>");
+			builder.append(getAddCommentLink(-1, newLineNo));
+			builder.append("<span class='operation'>+</span>");
 			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getTokens()) {
 					if (tokenBlock.getOperation() != Operation.DELETE) 

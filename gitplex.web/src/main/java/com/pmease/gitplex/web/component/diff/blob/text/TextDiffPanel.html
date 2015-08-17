@@ -11,4 +11,26 @@
 			<wicket:container wicket:id="diffLines"></wicket:container>
 		</table>
 	</div>
+	<div class="comments-placeholder hidden">
+		<table wicket:id="lines" class="comments">
+			<tr wicket:id="comments">
+				<td class="avatar">
+					<div wicket:id="avatar"></div>
+				</td>
+				<td class="comment">
+					<div wicket:id="comment"></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<wicket:fragment wicket:id="addCommentFrag">
+		<form wicket:id="addComment" class="add-comment leave-confirm">
+			<textarea wicket:id="input" rows="10" class="form-control focusable"></textarea>
+			<div wicket:id="feedback"></div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware leave-confirm">Comment on this line</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
+			</div>
+		</form>
+	</wicket:fragment>
 </wicket:panel>
