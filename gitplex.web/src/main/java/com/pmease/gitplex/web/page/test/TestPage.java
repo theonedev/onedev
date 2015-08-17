@@ -1,8 +1,10 @@
 package com.pmease.gitplex.web.page.test;
 
-import com.pmease.gitplex.web.page.base.BasePage;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.repeater.RepeatingView;
 
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextField;
+import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
@@ -10,8 +12,13 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new DateTextField("date"));
+
+		RepeatingView repeatingView = new RepeatingView("list");
+		WebMarkupContainer child = new WebMarkupContainer(repeatingView.newChildId());
+		child.add(new Label("name", "robin"));
+		child.setOutputMarkupId(true);
+		repeatingView.add(child);
+		add(repeatingView);
 	}
 	
 }

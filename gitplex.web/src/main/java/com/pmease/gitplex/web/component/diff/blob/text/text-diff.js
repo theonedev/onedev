@@ -11,11 +11,11 @@ gitplex.textdiff = {
 			$line.find("a.add-comment").hide();
 		});
 	},
-	beforeAddComments: function(containerId, oldLineNo, newLineNo) {
+	placeNewComment: function(containerId, newCommentId, oldLineNo, newLineNo) {
 		var $container = $("#" + containerId);
 		
 		var $content;
-		if (newLineNo)
+		if (newLineNo != -1)
 			$content = $container.find(".new" + newLineNo); 
 		else
 			$content = $container.find(".old" + oldLineNo);
@@ -31,23 +31,14 @@ gitplex.textdiff = {
 		else
 			$commentLine.append("<td colspan='2'>&nbsp;</td><td colspan='2' class='content'></td>");
 			
-		var $addComment = $container.find("form.add-comment");
-		
-		var $prevCommentLine = $addComment.closest(".line");
-		$addComment.find("textarea").val("");
-		$commentLine.children(".content").append($addComment);
-		
-		$prevCommentLine.prev().find("a.add-comment").show();
-		$prevCommentLine.remove();
-		$addComment.find("textarea").focus();
-		pmease.commons.form.trackDirty($addComment);
+		var $newComment = $("#" + newCommentId);
+		$commentLine.children(".content").replaceWith($newComment);
+		$newComment.removeClass("hidden");
 		$line.find("a.add-comment").hide();
 	},
-	afterAddComments: function(index) {
-		$("#comments-placeholder").append($("#add-comment"));
+	afterAddComment: function(index) {
 		var $line = $("#diffline-" + index);
 		$line.next().find("td").append($("#comment-diffline-" + index));
-		$("#add-comment").areYouSure({"silent": "true"});
 	},
 	cancelAddComments: function(index) {
 		$("#comments-placeholder").append($("#add-comment"));

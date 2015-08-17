@@ -11,6 +11,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -18,14 +20,18 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.lang.diff.DiffBlock;
@@ -35,9 +41,12 @@ import com.pmease.commons.lang.diff.LineModification;
 import com.pmease.commons.lang.diff.TokenDiffBlock;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
@@ -59,6 +68,8 @@ public class TextDiffPanel extends Panel {
 	private final InlineCommentSupport commentSupport;
 	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
+	
+	private RepeatingView newComments;
 	
 	public TextDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, DiffMode diffMode, 
 			@Nullable InlineCommentSupport commentSupport) {
@@ -128,18 +139,41 @@ public class TextDiffPanel extends Panel {
 				int oldLineNo = params.getParameterValue("oldLineNo").toInt();
 				int newLineNo = params.getParameterValue("newLineNo").toInt();
 				
-				String script;
-				if (oldLineNo != -1 && newLineNo != -1) {
-					script = String.format("gitplex.textdiff.beforeAddComments('%s', %d, %d);", 
-							getMarkupId(), oldLineNo, newLineNo);
-				} else if (oldLineNo != -1) {
-					script = String.format("gitplex.textdiff.beforeAddComments('%s', %d, undefined);", 
-							getMarkupId(), oldLineNo);
-				} else {
-					script = String.format("gitplex.textdiff.beforeAddComments('%s', undefined, %d);", 
-							getMarkupId(), newLineNo);
-				}
+				Form<?> newComment = new Form<Void>(newComments.newChildId());
+				newComment.setOutputMarkupId(true);
 				
+				final CommentInput input;
+				newComment.add(input = new CommentInput("input", Model.of("")));
+				input.setRequired(true);
+				newComment.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
+				
+				newComment.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+					}
+					
+				}.add(new DirtyIgnoreBehavior()));
+				
+				newComment.add(new AjaxSubmitLink("save") {
+
+					@Override
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(form);
+					}
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+					}
+
+				}.add(new DirtyIgnoreBehavior()));
+				
+				newComments.add(newComment);
+				target.add(newComment);
+				String script = String.format("gitplex.textdiff.placeNewComment('%s', '%s', %d, %d);", 
+						getMarkupId(), newComment.getMarkupId(), oldLineNo, newLineNo);
 				target.appendJavaScript(script);
 			}
 			
@@ -154,6 +188,8 @@ public class TextDiffPanel extends Panel {
 			}
 
 		});
+		
+		add(newComments = new RepeatingView("newComments"));
 		
 		setOutputMarkupId(true);
 	}
@@ -286,8 +322,8 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private String getAddCommentLink(int oldLineNo, int newLineNo) {
-		return String.format("<a class='add-comment' "
-				+ "href='javascript: document.getElementById('%s').addComment(%d, %d);'></a>", 
+		return String.format("<span class='add-comment'><a class='add-comment' "
+				+ "href=\"javascript: document.getElementById('%s').addComment(%d, %d);\"><i class='fa fa-plus'></i></a></span>", 
 				getMarkupId(), oldLineNo, newLineNo);
 	}
 	
