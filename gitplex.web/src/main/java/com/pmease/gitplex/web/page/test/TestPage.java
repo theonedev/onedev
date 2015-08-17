@@ -1,8 +1,11 @@
 package com.pmease.gitplex.web.page.test;
 
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.web.page.base.BasePage;
 
@@ -12,13 +15,12 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+	}
 
-		RepeatingView repeatingView = new RepeatingView("list");
-		WebMarkupContainer child = new WebMarkupContainer(repeatingView.newChildId());
-		child.add(new Label("name", "robin"));
-		child.setOutputMarkupId(true);
-		repeatingView.add(child);
-		add(repeatingView);
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new CssResourceReference(TestPage.class, "test.css")));
 	}
 	
 }

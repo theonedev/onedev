@@ -39,12 +39,11 @@
 	border-right: 1px solid #EEE;
 	text-align: center;
 }
-.text-diff>.body>tbody>tr.expander>td.expander>a {
+.text-diff>.body>tbody>tr.expander>td.expander a {
 	display: block;
-	color: #888;
-	padding: 6px 8px;
 	background: #edf2f9;
-	border: 1px solid red;
+	padding: 6px 0;
+	color: #888;
 }
 .text-diff>.body>tbody>tr.expander>td.expander>a:hover {
 	background: #4078c0;

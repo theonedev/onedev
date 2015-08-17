@@ -489,12 +489,12 @@ public class TextDiffPanel extends Panel {
 		
 		String script = String.format("javascript: $('#%s')[0].expander(%d);", getMarkupId(), blockIndex);
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td colspan='2' class='expander'><a class='expander' title='Show more lines' href=\"")
+			builder.append("<td colspan='2' class='expander'><a title='Show more lines' href=\"")
 					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
 			builder.append("<td class='skipped'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
-			builder.append("<td class='expander'><a class='expander' title='Show more lines' href=\"").append(script)
+			builder.append("<td class='expander'><a title='Show more lines' href=\"").append(script)
 					.append("\"><i class='fa fa-sort'></i></a></td>");
 			builder.append("<td class='skipped' colspan='3'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
