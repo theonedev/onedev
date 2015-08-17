@@ -13,6 +13,8 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -43,19 +45,21 @@ public abstract class DiffOptionPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
+	private final IModel<String> filterPathModel;
+	
 	private final String newRev;
 	
 	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
 	private DiffMode diffMode;
 	
-	private String filterPath;
-	
-	public DiffOptionPanel(String id, IModel<Repository> repoModel, String newRev) {
+	public DiffOptionPanel(String id, IModel<Repository> repoModel, 
+			IModel<String> filterPathModel, String newRev) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.newRev = newRev;
+		this.filterPathModel = filterPathModel;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_DIFF_MODE);
@@ -73,13 +77,44 @@ public abstract class DiffOptionPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new PathSelector(id, repoModel, newRev, FileMode.TYPE_TREE, 
+				Fragment fragment = new Fragment(id, "filterPathFrag", DiffOptionPanel.this);
+				WebMarkupContainer current = new WebMarkupContainer("current") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(filterPathModel.getObject() != null);
+					}
+					
+				};
+				current.add(new Label("path", filterPathModel));
+				current.add(new AjaxLink<Void>("clear") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						filterPathModel.setObject(null);
+						hide(target);
+						target.add(DiffOptionPanel.this);
+						onFilterPathChange(target);
+					}
+					
+				});
+				fragment.add(current);
+				
+				fragment.add(new PathSelector("selector", repoModel, newRev, FileMode.TYPE_TREE, 
 						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
 					
 					@Override
 					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-						filterPath = blobIdent.path;
+						filterPathModel.setObject(blobIdent.path);
 						hide(target);
+						target.add(DiffOptionPanel.this);
 						onFilterPathChange(target);
 					}
 
@@ -88,7 +123,8 @@ public abstract class DiffOptionPanel extends Panel {
 						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
 					}
 					
-				};
+				});
+				return fragment;
 			}
 			
 		};
@@ -152,6 +188,7 @@ public abstract class DiffOptionPanel extends Panel {
 					Cookie cookie = new Cookie(COOKIE_DIFF_MODE, diffMode.name());
 					cookie.setMaxAge(Integer.MAX_VALUE);
 					response.addCookie(cookie);
+					target.add(DiffOptionPanel.this);
 					
 					target.focusComponent(null);
 					onDiffModeChange(target);
@@ -173,6 +210,7 @@ public abstract class DiffOptionPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
+		filterPathModel.detach();
 		
 		super.onDetach();
 	}
@@ -199,7 +237,4 @@ public abstract class DiffOptionPanel extends Panel {
 		return diffMode;
 	}
 	
-	public String getFilterPath() {
-		return filterPath;
-	}
 }

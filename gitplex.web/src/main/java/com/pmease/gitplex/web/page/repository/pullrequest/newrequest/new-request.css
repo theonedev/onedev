@@ -73,6 +73,14 @@
 #new-request>.body>.status>.can-send form .help-block {
 	margin-bottom: 0;
 }
-#new-request .commit-list {
-	margin-top: 16px;
+#new-request>.body>.nav-tabs {
+	margin-bottom: 16px;
+}
+#new-request .diff-option {
+	padding: 8px;
+	display: block;
+	background: #F2F2F2;
+	border: 1px solid #DDD;
+	z-index: 200;
+	margin-bottom: 16px;
 }

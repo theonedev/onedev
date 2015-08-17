@@ -13,4 +13,13 @@
 			<a wicket:id="split" class="btn btn-sm btn-default">Split</a>
 		</span>
 	</span>
+	<wicket:fragment wicket:id="filterPathFrag">
+		<div class="filter-path">
+			<div wicket:id="current" class="current">
+				Filter path: <span wicket:id="path"></span> 
+				<a wicket:id="clear" title="Clear filter path"><i class="fa fa-times"></i></a>
+			</div>
+			<div wicket:id="selector"></div>
+		</div>
+	</wicket:fragment>
 </wicket:panel>

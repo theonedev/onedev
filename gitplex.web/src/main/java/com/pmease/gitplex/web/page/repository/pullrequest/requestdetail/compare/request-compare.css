@@ -1,15 +1,10 @@
 #request-detail>.compare>.head {
 	background: #F2F2F2; 
-	z-index: 90; 
+	z-index: 200; 
 	padding: 8px; 
 	border: 1px solid #DDD;
-	border-bottom: none;
+	margin-bottom: 16px;
 }
-#request-detail>.compare .revision-diff>.options {
-	border-top: none;
-	padding-top: 0;
-}
-
 .content>.commit-choice {
 	max-height: 400px; 
 	padding: 8px 0; 

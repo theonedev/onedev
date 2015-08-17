@@ -1,3 +1,16 @@
 .diff-option>.pull-left {
 	margin-right: 8px;
 }
+.dropdown-panel .filter-path>.current {
+	padding: 12px;
+	font-weight: bold;
+	background: #F2F2F2;
+	border-radius: 4px 4px 0 0;
+	border-bottom: 1px solid #DDD;
+} 
+.dropdown-panel .filter-path>.current a {
+	color: #666;
+} 
+.dropdown-panel .filter-path .path-selector {
+	width: 600px;
+} 

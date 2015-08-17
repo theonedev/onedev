@@ -37,6 +37,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -85,6 +86,8 @@ public class NewRequestPage extends PullRequestPage {
 	private IModel<PullRequest> requestModel;
 	
 	private DiffOptionPanel diffOption;
+	
+	private String filterPath;
 	
 	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
 		PageParameters params = paramsOf(repository);
@@ -284,7 +287,7 @@ public class NewRequestPage extends PullRequestPage {
 
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new AjaxActionTab(Model.of("Pending Commits")) {
+		tabs.add(new AjaxActionTab(Model.of("Commits")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -295,11 +298,11 @@ public class NewRequestPage extends PullRequestPage {
 			
 		});
 
-		tabs.add(new AjaxActionTab(Model.of("Changed Files")) {
+		tabs.add(new AjaxActionTab(Model.of("Files Changed")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newDiffPanel();
+				Component panel = newComparePanel();
 				getPage().replace(panel);
 				target.add(panel);
 			}
@@ -326,27 +329,54 @@ public class NewRequestPage extends PullRequestPage {
 		return new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel).setOutputMarkupId(true);
 	}
 	
-	private Component newDiffPanel() {
-		Fragment fragment = new Fragment(TAB_PANEL_ID, "changedFilesFrag", this);
+	private Component newComparePanel() {
+		final Fragment fragment = new Fragment(TAB_PANEL_ID, "compareFrag", this);
 		
 		PullRequest request = getPullRequest();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
-		diffOption = new DiffOptionPanel("diffOption", repoModel, newRev) {
+		diffOption = new DiffOptionPanel("diffOption", repoModel, new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return filterPath;
+			}
+
+			@Override
+			public void setObject(String object) {
+				filterPath = object;
+			}
+			
+		}, newRev) {
 
 			@Override
 			protected void onFilterPathChange(AjaxRequestTarget target) {
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				fragment.replace(diffPanel);
+				target.add(diffPanel);
 			}
 
 			@Override
 			protected void onLineProcessorChange(AjaxRequestTarget target) {
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				fragment.replace(diffPanel);
+				target.add(diffPanel);
 			}
 
 			@Override
 			protected void onDiffModeChange(AjaxRequestTarget target) {
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				fragment.replace(diffPanel);
+				target.add(diffPanel);
 			}
 			
 		};
+		diffOption.add(new StickyBehavior());
+		fragment.add(diffOption);
 		fragment.add(newRevDiffPanel());
 		
 		return fragment;
@@ -356,8 +386,11 @@ public class NewRequestPage extends PullRequestPage {
 		PullRequest request = getPullRequest();
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
-		return new RevisionDiffPanel("revisionDiff", repoModel, oldRev, newRev, diffOption.getFilterPath(), 
-				diffOption.getLineProcessor(), diffOption.getDiffMode(), null);
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
+				oldRev, newRev, filterPath, diffOption.getLineProcessor(), 
+				diffOption.getDiffMode(), null);
+		diffPanel.setOutputMarkupId(true);
+		return diffPanel;
 	}
 
 	private Fragment newOpenedFrag() {

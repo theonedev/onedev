@@ -59,6 +59,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
+import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
@@ -85,13 +86,13 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private String newCommitHash;
 	
-	private String path;
+	private String filterPath;
 	
 	private Long commentId;
 	
 	private WebMarkupContainer compareOptions;
 	
-	private Component compareResult;
+	private DiffOptionPanel diffOption;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -346,6 +347,42 @@ public class RequestComparePage extends RequestDetailPage {
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
+		compareOptions.add(diffOption = new DiffOptionPanel("diffOption", repoModel, new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return filterPath;
+			}
+
+			@Override
+			public void setObject(String object) {
+				filterPath = object;
+			}
+			
+		}, newCommitHash) {
+
+			@Override
+			protected void onFilterPathChange(AjaxRequestTarget target) {
+				newCompareResult(target);
+				getPageParameters().set(PARAM_PATH, filterPath);
+				pushState(target);
+			}
+
+			@Override
+			protected void onLineProcessorChange(AjaxRequestTarget target) {
+				newCompareResult(target);
+			}
+
+			@Override
+			protected void onDiffModeChange(AjaxRequestTarget target) {
+				newCompareResult(target);
+			}
+			
+		});
 		newCompareResult(null);
 	}
 	
@@ -513,7 +550,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void initState(PageParameters params) {
 		oldCommitHash = params.get(PARAM_OLD).toString();
 		newCommitHash = params.get(PARAM_NEW).toString();
-		path = params.get(PARAM_PATH).toString();
+		filterPath = params.get(PARAM_PATH).toString();
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 
 		PullRequestComment comment = getComment();
@@ -522,8 +559,8 @@ public class RequestComparePage extends RequestDetailPage {
 				oldCommitHash = comment.getOldCommitHash();
 			if (newCommitHash == null)
 				newCommitHash = comment.getNewCommitHash();
-			if (path == null)
-				path = comment.getBlobIdent().path;
+			if (filterPath == null)
+				filterPath = comment.getBlobIdent().path;
 		}
 		if (oldCommitHash == null)
 			oldCommitHash = getPullRequest().getBaseCommitHash();
@@ -617,21 +654,15 @@ public class RequestComparePage extends RequestDetailPage {
 			};
 		};
 		
-		compareResult = new RevisionDiffPanel("compareResult", repoModel, oldCommitHash, newCommitHash, path, commentSupport) {
-
-			@Override
-			protected void onPathChange(AjaxRequestTarget target, String path) {
-				RequestComparePage.this.path = path;
-				getPageParameters().set(PARAM_PATH, path);
-				pushState(target);
-			}
-			
-		};
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("compareResult", repoModel, 
+				oldCommitHash, newCommitHash, filterPath, diffOption.getLineProcessor(), 
+				diffOption.getDiffMode(), commentSupport);
+		diffPanel.setOutputMarkupId(true);
 		if (target != null) {
-			replace(compareResult);
-			target.add(compareResult);
+			replace(diffPanel);
+			target.add(diffPanel);
 		} else {
-			add(compareResult);
+			add(diffPanel);
 		}
 	}
 	

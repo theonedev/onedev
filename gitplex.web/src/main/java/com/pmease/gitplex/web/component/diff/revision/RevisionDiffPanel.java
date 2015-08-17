@@ -196,6 +196,10 @@ public class RevisionDiffPanel extends Panel {
 			}
 			
 		}));
+		if (filterPath != null)
+			add(new Label("filterPath", "under " + filterPath));
+		else
+			add(new Label("filterPath"));
 
 		add(new WebMarkupContainer("tooManyChanges") {
 
@@ -276,8 +280,6 @@ public class RevisionDiffPanel extends Panel {
 			}
 			
 		});
-		
-		setOutputMarkupId(true);
 	}
 	
 	private List<BlobChange> getChanges() {
