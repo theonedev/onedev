@@ -11,13 +11,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -29,9 +24,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.http.WebRequest;
-import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -39,7 +31,6 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
@@ -48,41 +39,30 @@ import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffUtils;
-import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.behavior.menu.CheckItem;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuItem;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
-import com.pmease.gitplex.web.component.pathselector.PathSelector;
 
 @SuppressWarnings("serial")
-public abstract class RevisionDiffPanel extends Panel {
+public class RevisionDiffPanel extends Panel {
 
-	private static final String COOKIE_DIFF_MODE = "gitplex.diff.mode";
-	
 	private final IModel<Repository> repoModel;
-	
-	@Nullable
-	private String path;
 	
 	private final String oldRev;
 	
 	private final String newRev;
 	
+	private final String filterPath;
+	
+	private final LineProcessor lineProcessor;
+	
+	private final DiffMode diffMode;
+	
 	@Nullable
 	private final InlineCommentSupport commentSupport;
-	
-	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
-	
-	private DiffMode diffMode;
 	
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
@@ -93,8 +73,8 @@ public abstract class RevisionDiffPanel extends Panel {
 		    	diffFormatter.setRepository(jgitRepo);
 		    	diffFormatter.setDetectRenames(true);
 		    	
-		    	if (path != null)
-		    		diffFormatter.setPathFilter(PathFilter.create(path));
+		    	if (filterPath != null)
+		    		diffFormatter.setPathFilter(PathFilter.create(filterPath));
 				AnyObjectId oldCommitId = repoModel.getObject().getObjectId(oldRev);
 				AnyObjectId newCommitId = repoModel.getObject().getObjectId(newRev);
 				List<DiffEntry> entries = diffFormatter.scan(oldCommitId, newCommitId);
@@ -191,130 +171,23 @@ public abstract class RevisionDiffPanel extends Panel {
 	};
 	
 	public RevisionDiffPanel(String id, IModel<Repository> repoModel, String oldRev, String newRev, 
-			@Nullable String path, @Nullable InlineCommentSupport commentSupport) {
+			@Nullable String filterPath, LineProcessor lineProcessor, DiffMode diffMode, 
+			@Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
-		this.path = path;
+		this.filterPath = filterPath;
+		this.lineProcessor = lineProcessor;
+		this.diffMode = diffMode;
 		this.commentSupport = commentSupport;
-		
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_DIFF_MODE);
-		if (cookie == null)
-			diffMode = DiffMode.UNIFIED;
-		else
-			diffMode = DiffMode.valueOf(cookie.getValue());
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		DropdownPanel pathDropdown = new DropdownPanel("pathDropdown", true) {
-
-			@Override
-			protected Component newContent(String id) {
-				return new PathSelector(id, repoModel, newRev, FileMode.TYPE_TREE, 
-						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
-					
-					@Override
-					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-						path = blobIdent.path;
-						hide(target);
-						target.add(RevisionDiffPanel.this);
-						onPathChange(target, path);
-					}
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-					}
-					
-				};
-			}
-			
-		};
-		add(pathDropdown);
-		WebMarkupContainer pathContainer = new WebMarkupContainer("path");
-		pathContainer.add(new DropdownBehavior(pathDropdown));
-		pathContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (path != null)
-					return path;
-				else
-					return "Filter by";
-			}
-			
-		}));
-		add(new AjaxLink<Void>("clear") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				path = null;
-				target.add(RevisionDiffPanel.this);
-				onPathChange(target, path);
-			}
-			
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(path != null);
-			}
-			
-		});
-		add(pathContainer);
-		
-		MenuPanel lineProcessorMenu = new MenuPanel("lineProcessorMenu") {
-
-			@Override
-			protected List<MenuItem> getMenuItems() {
-				List<MenuItem> menuItems = new ArrayList<>();
-				
-				for (final LineProcessOption option: LineProcessOption.values()) {
-					menuItems.add(new CheckItem() {
-
-						@Override
-						protected String getLabel() {
-							return option.getName();
-						}
-
-						@Override
-						protected boolean isChecked() {
-							return lineProcessor == option;
-						}
-
-						@Override
-						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-						}
-
-						@Override
-						protected void onClick(AjaxRequestTarget target) {
-							lineProcessor = option;
-							target.add(RevisionDiffPanel.this);
-						}
-						
-					});
-				}
-
-				return menuItems;
-			}	
-			
-		};
-		add(lineProcessorMenu);
-		add(new WebMarkupContainer("lineProcessor").add(new MenuBehavior(lineProcessorMenu)));
-		
 		add(new Label("totalChanged", new AbstractReadOnlyModel<Integer>() {
 
 			@Override
@@ -324,37 +197,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		}));
 
-		for (final DiffMode each: DiffMode.values()) {
-			add(new AjaxLink<Void>(each.name().toLowerCase()) {
-
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-				}
-				
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					diffMode = each;
-					WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-					Cookie cookie = new Cookie(COOKIE_DIFF_MODE, diffMode.name());
-					cookie.setMaxAge(Integer.MAX_VALUE);
-					response.addCookie(cookie);
-					
-					target.add(RevisionDiffPanel.this);
-					target.focusComponent(null);
-				}
-				
-			}.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-				@Override
-				protected String load() {
-					return each==diffMode?" active":"";
-				}
-				
-			})));
-		}
-		
 		add(new WebMarkupContainer("tooManyChanges") {
 
 			@Override
@@ -437,8 +279,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-	
-	protected abstract void onPathChange(AjaxRequestTarget target, String path);
 	
 	private List<BlobChange> getChanges() {
 		return changesAndCountModel.getObject().getChanges();

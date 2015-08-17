@@ -1,18 +1,12 @@
-.revision-diff>.head {
-	margin: 16px 0;
-}
-.revision-diff>.head>.pull-left {
-	margin-right: 16px;
-}
-.revision-diff>.head>.title {
-	margin-top: 4px;
+.revision-diff>.title {
 	font-size: 16px;
+	margin-bottom: 16px;	
+}
+.revision-diff>.title .fa {
+	color: #BBB;
 }
 .revision-diff>.alert {
 	margin-bottom: 16px;
-}
-.revision-diff>.head>.title .fa {
-	color: #BBB;
 }
 .revision-diff li.diff-stat {
 	font-size: 13px;
@@ -55,7 +49,5 @@
 	margin-top: 2px;
 }
 .revision-diff .changes>.change {
-	padding-top: 48px;
-	margin-top: -48px;
 	margin-bottom: 16px;
 }

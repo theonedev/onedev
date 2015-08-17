@@ -1,23 +1,7 @@
 <wicket:panel>
 	<div class="revision-diff">
-		<div class="head clearfix">
-			<div class="pull-left">
-				<span wicket:id="path" class="btn btn-sm btn-default" title="Filter changes by path">
-					<span wicket:id="label"></span>
-					<i class="fa fa-caret-down"></i>
-				</span>
-				<a wicket:id="clear" title="Clear path filter"><i class="fa fa-close"></i></a>
-				<div wicket:id="pathDropdown"></div>
-			</div>
-			<div wicket:id="lineProcessor" class="line-process btn btn-sm btn-default pull-left" title="Line process options">White space <i class="caret"></i></div>
-			<div wicket:id="lineProcessorMenu"></div>
-			<div class="title pull-left">
-				Total <a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
-			</div>
-			<div class="btn-group pull-right">
-				<a wicket:id="unified" class="btn btn-sm btn-default">Unified</a>
-				<a wicket:id="split" class="btn btn-sm btn-default">Split</a>
-			</div>
+		<div class="title">
+			Total <a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
 		</div>
 		<div wicket:id="tooManyChanges" class="alert alert-warning">Sorry we are unable to display the full diff as there are too many changes</div>
 		<ul class="diff-stats list-unstyled">

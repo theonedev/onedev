@@ -26,7 +26,7 @@ public class GitUtils {
     
 	public static final Pattern PATTERN_HASH = Pattern.compile("[a-z0-9]{40}");
     
-    public static final int SHORT_SHA_LENGTH = 10;
+    public static final int SHORT_SHA_LENGTH = 8;
     
     public static boolean isHash(String sha) {
     	return PATTERN_HASH.matcher(sha).matches();

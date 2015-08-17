@@ -60,6 +60,7 @@ import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
+import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
@@ -82,6 +83,8 @@ public class NewRequestPage extends PullRequestPage {
 	private IModel<List<Commit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
+	
+	private DiffOptionPanel diffOption;
 	
 	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
 		PageParameters params = paramsOf(repository);
@@ -324,17 +327,37 @@ public class NewRequestPage extends PullRequestPage {
 	}
 	
 	private Component newDiffPanel() {
+		Fragment fragment = new Fragment(TAB_PANEL_ID, "changedFilesFrag", this);
+		
 		PullRequest request = getPullRequest();
-		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
-		return new RevisionDiffPanel(TAB_PANEL_ID, repoModel, oldRev, newRev, null, null) {
+		diffOption = new DiffOptionPanel("diffOption", repoModel, newRev) {
 
 			@Override
-			protected void onPathChange(AjaxRequestTarget target, String path) {
+			protected void onFilterPathChange(AjaxRequestTarget target) {
+			}
+
+			@Override
+			protected void onLineProcessorChange(AjaxRequestTarget target) {
+			}
+
+			@Override
+			protected void onDiffModeChange(AjaxRequestTarget target) {
 			}
 			
 		};
+		fragment.add(newRevDiffPanel());
+		
+		return fragment;
+	}
+	
+	protected RevisionDiffPanel newRevDiffPanel() {
+		PullRequest request = getPullRequest();
+		String oldRev = request.getBaseCommitHash();
+		String newRev = request.getLatestUpdate().getHeadCommitHash();
+		return new RevisionDiffPanel("revisionDiff", repoModel, oldRev, newRev, diffOption.getFilterPath(), 
+				diffOption.getLineProcessor(), diffOption.getDiffMode(), null);
 	}
 
 	private Fragment newOpenedFrag() {

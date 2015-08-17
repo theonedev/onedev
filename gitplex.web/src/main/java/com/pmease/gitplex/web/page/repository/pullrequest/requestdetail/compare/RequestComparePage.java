@@ -69,7 +69,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class RequestComparePage extends RequestDetailPage {
 
-	private static final String TARGET_BRANCH_HEAD = "Head of Target Branch";
+	private static final String TARGET_BRANCH_HEAD = "Target Branch Head";
 	
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
 
@@ -101,7 +101,7 @@ public class RequestComparePage extends RequestDetailPage {
 			LinkedHashMap<String, CommitDescription> choices = new LinkedHashMap<>();
 			PullRequest request = getPullRequest();
 
-			String name = "Base of Pull Request";
+			String name = "Pull Request Base";
 			CommitDescription description = new CommitDescription(name, request.getBaseCommit().getSubject());
 			choices.put(request.getBaseCommitHash(), description);
 			
@@ -110,9 +110,9 @@ public class RequestComparePage extends RequestDetailPage {
 				Commit commit = update.getHeadCommit();
 				int updateNo = i+1;
 				if (i == request.getSortedUpdates().size()-1)
-					name = "Head of Latest Update";
+					name = "Latest Update Head";
 				else
-					name = "Head of Update #" + updateNo;
+					name = "Head of Update " + updateNo;
 				description = new CommitDescription(name, commit.getSubject());
 				choices.put(commit.getHash(), description);
 			}
@@ -155,7 +155,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 					AjaxRequestTarget target = pullRequestChanged.getTarget();
-					refreshCompareOptions(target);
+					target.add(compareOptions);
 					
 					PageParameters params = getPageParameters();
 					if (params.get(PARAM_NEW).toString() == null) {
@@ -312,7 +312,7 @@ public class RequestComparePage extends RequestDetailPage {
 					int index = i+1;
 					String oldLabel;
 					if (index > 1) 
-						oldLabel = "Update #" + (index-1);
+						oldLabel = "Update " + (index-1);
 					else
 						oldLabel = "Request Base";
 					
@@ -320,7 +320,7 @@ public class RequestComparePage extends RequestDetailPage {
 					if (index == getPullRequest().getSortedUpdates().size())
 						newLabel = "Latest Update";
 					else
-						newLabel = "Update #" + index;
+						newLabel = "Update " + index;
 					items.add(new ComparisonChoiceItem(oldLabel, newLabel) {
 
 						@Override
@@ -537,14 +537,8 @@ public class RequestComparePage extends RequestDetailPage {
 
 		initState((PageParameters) data);
 		
-		refreshCompareOptions(target);
-		newCompareResult(target);
-	}
-	
-	private void refreshCompareOptions(AjaxRequestTarget target) {
-		for (StickyBehavior behavior: compareOptions.getBehaviors(StickyBehavior.class))
-			behavior.unstick(target);
 		target.add(compareOptions);
+		newCompareResult(target);
 	}
 	
 	@Override
@@ -561,7 +555,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void onStateChange(AjaxRequestTarget target) {
 		pushState(target);
 		
-		refreshCompareOptions(target);
+		target.add(compareOptions);
 		newCompareResult(target);
 	}
 	

@@ -3,6 +3,11 @@
 	z-index: 90; 
 	padding: 8px; 
 	border: 1px solid #DDD;
+	border-bottom: none;
+}
+#request-detail>.compare .revision-diff>.options {
+	border-top: none;
+	padding-top: 0;
 }
 
 .content>.commit-choice {
