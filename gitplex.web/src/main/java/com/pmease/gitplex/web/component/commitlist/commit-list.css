@@ -1,12 +1,8 @@
-.commit-list table {
-	width: 100%;
-}
 .commit-list td {
 	padding-top: 8px; 
 	padding-bottom: 8px; 
 	color: #999; 
 	border-top: 1px dashed #BBB;
-	vertical-align: top;
 }
 .commit-list td.avatar {
 	width: 1px;

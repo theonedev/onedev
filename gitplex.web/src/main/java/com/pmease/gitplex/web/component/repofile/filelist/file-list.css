@@ -1,13 +1,9 @@
 .file-list {
 	overflow: auto;
 }
-.file-list>table {
-	width: 100%; 
-}
 .file-list>table>tbody>tr>td {
 	padding: 6px 12px; 
 	border-top: 1px solid #EEE; 
-	vertical-align: top;
 }
 .file-list>table>tbody>tr>td.path, .file-list>table>tbody>tr>td.last-commit.author, 
 .file-list>table>tbody>tr>td.last-commit.when {

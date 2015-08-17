@@ -11,9 +11,6 @@
 #branch-compare>.body>.branches {
 	margin-bottom: 20px;
 }
-#branch-compare>.body>.branches td {
-	vertical-align: top;
-}
 #branch-compare>.body>.branches td>div.title {
 	font-size: 18px; 
 	margin-bottom: 8px;

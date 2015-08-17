@@ -12,11 +12,7 @@
 	margin-right: 20px;
 }
 
-#request-list table.body {
-	width: 100%;
-}
 #request-list table.body>tbody>tr>td {
-	vertical-align: top;
 	border: 3px solid #EEE;
 }
 #request-list td.filter {

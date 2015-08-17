@@ -112,11 +112,7 @@
 	font-size: 13px !important; 
 	color: #444444;
 }
-.gate-keeper table.children {
-	width: 100%;
-}
 .gate-keeper td.child {
-	vertical-align: top; 
 	padding-right: 12px;
 }
 .gate-keeper table.children>tbody>tr>td.child:last-child {
@@ -124,12 +120,6 @@
 }
 .gate-keeper.panel .panel-body {
 	overflow:auto;
-}
-.gate-keeper table.ifthen {
-	width: 100%;
-}
-.gate-keeper td.ifthen {
-	vertical-align: top;
 }
 .gate-keeper td.ifthen.connector {
 	width:1px;

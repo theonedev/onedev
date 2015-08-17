@@ -77,12 +77,6 @@ html, body {
 	margin: 0 -15px;
 }
 
-.sidebar>table {
-	width: 100%;
-}
-.sidebar>table>tbody>tr>td {
-	vertical-align: top;
-}
 .sidebar>table>tbody>tr>td.nav {
 	padding: 20px 0;
 	width: 1px;

@@ -16,7 +16,6 @@ div.replies {
 	padding-left: 16px;
 }
 div.replies>table>tbody>tr>td {
-	vertical-align: top; 
 	border-top: 1px dashed #CCC; 
 	padding: 8px 0 8px 0; 
 	background: #F5F5F5;

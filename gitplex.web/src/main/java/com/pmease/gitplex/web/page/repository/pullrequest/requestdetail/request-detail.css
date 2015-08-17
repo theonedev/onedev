@@ -7,14 +7,8 @@
 #request-detail>div:last-child {
 	margin-bottom: 0;
 }
-#request-detail table {
-	width: 100%;
-}
-#request-detail td {
-	vertical-align: top;
-}
 #request-detail .md-editor {
-	margin-bottom: 16px;
+	margin-bottom: 12px;
 }
 
 #request-detail>.head {

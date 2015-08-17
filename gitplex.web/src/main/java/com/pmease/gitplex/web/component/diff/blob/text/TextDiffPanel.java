@@ -139,7 +139,7 @@ public class TextDiffPanel extends Panel {
 				int oldLineNo = params.getParameterValue("oldLineNo").toInt();
 				int newLineNo = params.getParameterValue("newLineNo").toInt();
 				
-				Form<?> newComment = new Form<Void>(newComments.newChildId());
+				final Form<?> newComment = new Form<Void>(newComments.newChildId());
 				newComment.setOutputMarkupId(true);
 				
 				final CommentInput input;
@@ -151,6 +151,9 @@ public class TextDiffPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
+						newComment.remove();
+						String script = String.format("gitplex.textdiff.cancelAddComment('%s');", newComment.getMarkupId());
+						target.appendJavaScript(script);
 					}
 					
 				}.add(new DirtyIgnoreBehavior()));
@@ -171,10 +174,12 @@ public class TextDiffPanel extends Panel {
 				}.add(new DirtyIgnoreBehavior()));
 				
 				newComments.add(newComment);
-				target.add(newComment);
-				String script = String.format("gitplex.textdiff.placeNewComment('%s', '%s', %d, %d);", 
+				
+				String script = String.format("gitplex.textdiff.beforeAddComment('%s', '%s', %d, %d);", 
 						getMarkupId(), newComment.getMarkupId(), oldLineNo, newLineNo);
-				target.appendJavaScript(script);
+				target.prependJavaScript(script);
+				
+				target.add(newComment);
 			}
 			
 			@Override
@@ -325,7 +330,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("<span class='add-comment'>");
 		String script = String.format("document.getElementById('%s').addComment(%d, %d);", 
 				getMarkupId(), oldLineNo, newLineNo);
-		builder.append("<a href=\"javascript:").append(script).append("\">").append("</a></span>");
+		builder.append("<a href=\"javascript:").append(script).append("\">").append("<i class='fa fa-plus'></i></a></span>");
 	}
 	
 	private void appendEqual(StringBuilder builder, DiffBlock block, int lineIndex, int lastContextSize) {

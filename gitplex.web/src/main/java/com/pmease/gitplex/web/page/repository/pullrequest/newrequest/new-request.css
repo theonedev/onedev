@@ -11,9 +11,6 @@
 #new-request>.body>.branches {
 	margin-bottom: 20px;
 }
-#new-request>.body>.branches td {
-	vertical-align: top;
-}
 #new-request>.body>.branches td>div.title {
 	font-size: 18px; 
 	margin-bottom: 8px;
@@ -35,11 +32,7 @@
 	margin-bottom: 8px;
 }
 
-#new-request>.body>.status>.can-send form>table {
-	width: 100%;
-}
 #new-request>.body>.status>.can-send form>table td {
-	vertical-align: top; 
 	padding: 16px 0; 
 	border-top: 1px dashed #BBB; 
 	border-bottom: 1px dashed #BBB;

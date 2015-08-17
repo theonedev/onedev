@@ -11,7 +11,7 @@ gitplex.textdiff = {
 			$line.find("a.add-comment").hide();
 		});
 	},
-	placeNewComment: function(containerId, newCommentId, oldLineNo, newLineNo) {
+	beforeAddComment: function(containerId, commentId, oldLineNo, newLineNo) {
 		var $container = $("#" + containerId);
 		
 		var $content;
@@ -22,30 +22,27 @@ gitplex.textdiff = {
 
 		var $line = $content.closest(".line");
 		var $commentLine = $("<tr class='line comments'></tr>").insertAfter($line);
-		if ($line.children.length == 3)
-			$commentLine.append("<td colspan='3' class='content'></td>");
+		if ($line.children().length == 3)
+			$commentLine.append("<td colspan='3' class='content comments'></td>");
 		else if (oldLineNo != -1 && newLineNo != -1)
-			$commentLine.append("<td colspan='4' class='content'></td>");
+			$commentLine.append("<td colspan='4' class='content comments'></td>");
 		else if (oldLineNo != -1)
-			$commentLine.append("<td colspan='2' class='content'></td><td colspan='2'>&nbsp;</td>");
+			$commentLine.append("<td colspan='2' class='content comments'></td><td class='number'>&nbsp;</td><td class='content'>&nbsp;</td>");
 		else
-			$commentLine.append("<td colspan='2'>&nbsp;</td><td colspan='2' class='content'></td>");
+			$commentLine.append("<td class='number'>&nbsp;</td><td class='content'>&nbsp;</td><td colspan='2' class='content comments'></td>");
 			
-		var $newComment = $("#" + newCommentId);
-		$commentLine.children(".content").replaceWith($newComment);
-		$newComment.removeClass("hidden");
-		$line.find("a.add-comment").hide();
+		$commentLine.children(".content.comments").append("<div id=" + commentId + "></div>");
+		
+		$line.find(".add-comment").addClass("hidden");
 	},
 	afterAddComment: function(index) {
 		var $line = $("#diffline-" + index);
 		$line.next().find("td").append($("#comment-diffline-" + index));
 	},
-	cancelAddComments: function(index) {
-		$("#comments-placeholder").append($("#add-comment"));
-		var $line = $("#diffline-" + index);
-		$line.next().remove(); 
-		$line.find("a.add-comment").show();
-		$("#add-comment").areYouSure({"silent": "true"});
+	cancelAddComment: function(commentId) {
+		var $commentLine = $("#" + commentId).closest(".line");
+		$commentLine.prev().find(".add-comment").removeClass("hidden");
+		$commentLine.remove();
 	},
 	afterRemoveComments: function(index) {
 		$("#comment-diffline-" + index).closest("tr").remove();

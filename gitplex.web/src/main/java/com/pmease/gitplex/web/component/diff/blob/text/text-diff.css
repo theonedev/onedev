@@ -13,7 +13,6 @@
 	margin-right: 0;
 }
 .text-diff>.body {
-	width: 100%;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 12px;
 	table-layout: fixed;
@@ -21,12 +20,14 @@
 .text-diff>.body>tbody>tr>td.number {
 	padding: 0 8px;
 	border-left: 1px solid #EEE;
-	border-right: 1px solid #EEE;
 	text-align: right;
 	font-size: 12px;
 	color: #BBB;
 }
-.text-diff>.body>tbody>tr>td:first-child {
+.text-diff>.body>tbody>tr>td.content {
+	border-left: 1px solid #EEE;
+}
+.text-diff>.body>tbody>tr>td:FIRST-CHILD {
 	border-left: none !important;
 }
 .text-diff>.body>tbody>tr.expander>td.skipped {
@@ -43,6 +44,7 @@
 	color: #888;
 	padding: 6px 8px;
 	background: #edf2f9;
+	border: 1px solid red;
 }
 .text-diff>.body>tbody>tr.expander>td.expander>a:hover {
 	background: #4078c0;
@@ -51,9 +53,9 @@
 .text-diff>.body>tbody>tr.line>td.old.number {
 	background: #ffdddd;
 	border-left: 1px solid #f1c0c0;
-	border-right: 1px solid #f1c0c0;
 }
 .text-diff>.body>tbody>tr.line>td.old.content {
+	border-left: 1px solid #f1c0c0;
 	background: #ffecec;
 }
 .text-diff>.body>tbody>tr.line>td.old .delete {
@@ -62,9 +64,9 @@
 .text-diff>.body>tbody>tr.line>td.new.number {
 	background: #dbffdb;
 	border-left: 1px solid #c1e9c1;
-	border-right: 1px solid #c1e9c1;
 }
 .text-diff>.body>tbody>tr.line>td.new.content {
+	border-left: 1px solid #c1e9c1;
 	background: #eaffea;
 }
 .text-diff>.body>tbody>tr.line>td.new .insert {
@@ -93,14 +95,13 @@
 	background: #F9F9F9;
 }
 .text-diff>.body>tbody>tr>td.content>span.add-comment {
-	position: relative;
-	display: inline-block;
+	position: absolute;
+	display: none;
 }
 .text-diff>.body>tbody>tr>td.content>span.add-comment>a {
-	display: none;
+	display: block;
 	position: absolute;
 	left: -8px;
-	top: -12px;
 	border-radius: 3px;
 	color: white;
 	background: #087AD8;
@@ -112,9 +113,23 @@
 .text-diff>.body>tbody>tr>td.content>span.add-comment>a:hover {
 	font-size: 16px;
 	left: -9px;
-	top: -13px;
+	top: -1px;
 	padding-top: 2px;
 }
-.text-diff>.body>tbody>tr:hover>td.content>span.add-comment>a {
-	display: block;
+.text-diff>.body>tbody>tr>td.content:hover>span.add-comment, 
+.text-diff>.body>tbody>tr>td.number:hover+.content>span.add-comment {
+	display: inline-block;
+}
+.text-diff>.body>tbody>tr.comments>td.content.comments {
+	white-space: normal;
+	word-wrap: normal;
+	padding: 12px;
+	border-top: 1px solid #EEE;
+	border-bottom: 1px solid #EEE;
+}
+.text-diff>.body>tbody>tr:FIRST-CHILD>td {
+	border-top: none !important;
+}
+.text-diff>.body>tbody>tr:LAST-CHILD>td {
+	border-bottom: none !important;
 }
