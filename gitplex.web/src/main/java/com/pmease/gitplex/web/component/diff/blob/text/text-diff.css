@@ -19,7 +19,7 @@
 	table-layout: fixed;
 }
 .text-diff>.body>tbody>tr>td.number {
-	padding: 0 10px 0 8px;
+	padding: 0 8px;
 	border-left: 1px solid #EEE;
 	border-right: 1px solid #EEE;
 	text-align: right;
@@ -87,7 +87,7 @@
 }
 .text-diff>.body>tbody>tr>td.content>.operation {
 	font-weight: bold;
-	margin: 0 2px 0 10px;
+	margin: 0 2px 0 8px;
 }
 .text-diff>.body>tbody>tr.expanded>td {
 	background: #F9F9F9;
@@ -100,18 +100,7 @@
 	display: none;
 	position: absolute;
 	left: -8px;
-	border-radius: 3px;
-	color: white;
-	background: #087AD8;
-	z-index: 100;
-	line-height: 14px;
-	padding: 1px 2px;
-	text-decoration: none;
-}
-.text-diff>.body>tbody>tr>td.content>span.add-comment>a {
-	display: none;
-	position: absolute;
-	left: -8px;
+	top: -12px;
 	border-radius: 3px;
 	color: white;
 	background: #087AD8;
@@ -123,7 +112,7 @@
 .text-diff>.body>tbody>tr>td.content>span.add-comment>a:hover {
 	font-size: 16px;
 	left: -9px;
-	top: -1px;
+	top: -13px;
 	padding-top: 2px;
 }
 .text-diff>.body>tbody>tr:hover>td.content>span.add-comment>a {

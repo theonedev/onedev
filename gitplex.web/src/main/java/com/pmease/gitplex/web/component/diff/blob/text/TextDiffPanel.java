@@ -321,10 +321,11 @@ public class TextDiffPanel extends Panel {
 		}
 	}
 	
-	private String getAddCommentLink(int oldLineNo, int newLineNo) {
-		return String.format("<span class='add-comment'><a class='add-comment' "
-				+ "href=\"javascript: document.getElementById('%s').addComment(%d, %d);\"><i class='fa fa-plus'></i></a></span>", 
+	private void appendAddComment(StringBuilder builder, int oldLineNo, int newLineNo) {
+		builder.append("<span class='add-comment'>");
+		String script = String.format("document.getElementById('%s').addComment(%d, %d);", 
 				getMarkupId(), oldLineNo, newLineNo);
+		builder.append("<a href=\"javascript:").append(script).append("\">").append("</a></span>");
 	}
 	
 	private void appendEqual(StringBuilder builder, DiffBlock block, int lineIndex, int lastContextSize) {
@@ -338,7 +339,7 @@ public class TextDiffPanel extends Panel {
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append("<td class='content old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
 		if (lastContextSize == 0)
-			contentBuilder.append(getAddCommentLink(oldLineNo, newLineNo));
+			appendAddComment(contentBuilder, oldLineNo, newLineNo);
 		contentBuilder.append("<span class='operation'>&nbsp;</span>");
 		for (CmToken token: block.getLines().get(lineIndex))
 			contentBuilder.append(token.toHtml(Operation.EQUAL));
@@ -363,7 +364,7 @@ public class TextDiffPanel extends Panel {
 		int newLineNo = block.getNewStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append("<td class='content new new").append(newLineNo).append("'>");
-		contentBuilder.append(getAddCommentLink(-1, newLineNo));
+		appendAddComment(contentBuilder, -1, newLineNo);
 		contentBuilder.append("<span class='operation'>+</span>");
 		List<CmToken> tokens = block.getLines().get(lineIndex);
 		for (int i=0; i<tokens.size(); i++) 
@@ -388,7 +389,7 @@ public class TextDiffPanel extends Panel {
 		int oldLineNo = block.getOldStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append("<td class='content old old").append(oldLineNo).append("'>");
-		contentBuilder.append(getAddCommentLink(oldLineNo, -1));
+		appendAddComment(contentBuilder, oldLineNo, -1);
 		contentBuilder.append("<span class='operation'>-</span>");
 		List<CmToken> tokens = block.getLines().get(lineIndex);
 		for (int i=0; i<tokens.size(); i++) 
@@ -414,7 +415,7 @@ public class TextDiffPanel extends Panel {
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
 		builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
 		builder.append("<td class='content old old").append(oldLineNo).append("'>");
-		builder.append(getAddCommentLink(oldLineNo, -1));
+		appendAddComment(builder, oldLineNo, -1);
 		builder.append("<span class='operation'>-</span>");
 		for (CmToken token: deleteBlock.getLines().get(deleteLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
@@ -423,7 +424,7 @@ public class TextDiffPanel extends Panel {
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
 		builder.append("<td class='number new'>").append(newLineNo).append("</td>");
 		builder.append("<td class='content new new").append(newLineNo).append("'>");
-		builder.append(getAddCommentLink(-1, newLineNo));
+		appendAddComment(builder, -1, newLineNo);
 		builder.append("<span class='operation'>+</span>");
 		for (CmToken token: insertBlock.getLines().get(insertLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
@@ -442,7 +443,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number old new'>").append(oldLineNo).append("</td>");
 			builder.append("<td class='number old new'>").append(newLineNo).append("</td>");
 			builder.append("<td class='content old new old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
-			builder.append(getAddCommentLink(oldLineNo, newLineNo));
+			appendAddComment(builder, oldLineNo, newLineNo);
 			builder.append("<span class='operation'>*</span>");
 			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getTokens()) 
@@ -452,7 +453,7 @@ public class TextDiffPanel extends Panel {
 		} else {
 			builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
 			builder.append("<td class='content old old").append(oldLineNo).append("'>");
-			builder.append(getAddCommentLink(oldLineNo, -1));
+			appendAddComment(builder, oldLineNo, -1);
 			builder.append("span class='operation'>-</span>");
 			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getTokens()) {
@@ -464,7 +465,7 @@ public class TextDiffPanel extends Panel {
 			
 			builder.append("<td class='number new'>").append(newLineNo).append("</td>");
 			builder.append("<td class='content new new").append(newLineNo).append("'>");
-			builder.append(getAddCommentLink(-1, newLineNo));
+			appendAddComment(builder, -1, newLineNo);
 			builder.append("<span class='operation'>+</span>");
 			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getTokens()) {
