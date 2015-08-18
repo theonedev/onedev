@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div wicket:id="container" class="text-diff cm-s-eclipse">
+	<div class="text-diff cm-s-eclipse">
 		<div class="head clearfix">
 			<div wicket:id="diffStat" class="pull-left"></div>
 			<div wicket:id="title" class="pull-left"></div>
@@ -7,9 +7,7 @@
 				<a wicket:id="viewFile" class="btn btn-xs btn-default" title="View the whole file">View</a>
 			</div>
 		</div>
-		<table class="body">
-			<wicket:container wicket:id="diffLines"></wicket:container>
-		</table>
+		<table class="body"><wicket:container wicket:id="diffLines"></wicket:container></table>
 	</div>
 	<form wicket:id="newComments" class="new-comment leave-confirm">
 		<textarea wicket:id="input" rows="10" class="form-control focusable"></textarea>
@@ -19,4 +17,12 @@
 			<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
 		</div>
 	</form>
+	<div class="comments hidden">
+		<ul wicket:id="commentLines" class="list-unstyled">
+			<li wicket:id="comments" class="clearfix">
+				<div wicket:id="avatar" class="avatar pull-left"></div>
+				<div wicket:id="comment" class="comment pull-left"></div>
+			</li>
+		</ul>
+	</div>
 </wicket:panel>
