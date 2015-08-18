@@ -91,7 +91,7 @@ public abstract class PathSelector extends Panel {
 
 			@Override
 			public boolean hasChildren(BlobIdent node) {
-				return true;
+				return node.isTree();
 			}
 
 			@Override

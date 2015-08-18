@@ -351,13 +351,13 @@ public class TextDiffPanel extends Panel {
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number'>").append(oldLineNo).append("</td>");
-			builder.append("<td class='number'>").append(newLineNo).append("</td>");
+			builder.append("<td class='number'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number'>").append(newLineNo+1).append("</td>");
 			builder.append(contentBuilder);
 		} else {
-			builder.append("<td class='number'>").append(oldLineNo).append("</td>");
+			builder.append("<td class='number'>").append(oldLineNo+1).append("</td>");
 			builder.append(contentBuilder);
-			builder.append("<td class='number'>").append(newLineNo).append("</td>");
+			builder.append("<td class='number'>").append(newLineNo+1).append("</td>");
 			builder.append(contentBuilder);
 		}
 		builder.append("</tr>");
@@ -402,11 +402,11 @@ public class TextDiffPanel extends Panel {
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
+			builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number old'>&nbsp;</td>");
 			builder.append(contentBuilder);
 		} else {
-			builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
+			builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
 			builder.append(contentBuilder);
 			builder.append("<td class='number'>&nbsp;</td><td class='content'>&nbsp;</td>");
 		}
@@ -418,7 +418,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='line'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
-		builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
+		builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
 		builder.append("<td class='content old old").append(oldLineNo).append("'>");
 		appendAddComment(builder, oldLineNo, -1);
 		builder.append("<span class='operation'>-</span>");
@@ -427,7 +427,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("</td>");
 		
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
-		builder.append("<td class='number new'>").append(newLineNo).append("</td>");
+		builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
 		builder.append("<td class='content new new").append(newLineNo).append("'>");
 		appendAddComment(builder, -1, newLineNo);
 		builder.append("<span class='operation'>+</span>");
@@ -445,8 +445,8 @@ public class TextDiffPanel extends Panel {
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number old new'>").append(oldLineNo).append("</td>");
-			builder.append("<td class='number old new'>").append(newLineNo).append("</td>");
+			builder.append("<td class='number old new'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number old new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='content old new old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
 			appendAddComment(builder, oldLineNo, newLineNo);
 			builder.append("<span class='operation'>*</span>");
@@ -456,10 +456,10 @@ public class TextDiffPanel extends Panel {
 			}
 			builder.append("</td>");
 		} else {
-			builder.append("<td class='number old'>").append(oldLineNo).append("</td>");
+			builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='content old old").append(oldLineNo).append("'>");
 			appendAddComment(builder, oldLineNo, -1);
-			builder.append("span class='operation'>-</span>");
+			builder.append("<span class='operation'>-</span>");
 			for (TokenDiffBlock tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getTokens()) {
 					if (tokenBlock.getOperation() != Operation.INSERT) 
@@ -468,7 +468,7 @@ public class TextDiffPanel extends Panel {
 			}
 			builder.append("</td>");
 			
-			builder.append("<td class='number new'>").append(newLineNo).append("</td>");
+			builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='content new new").append(newLineNo).append("'>");
 			appendAddComment(builder, -1, newLineNo);
 			builder.append("<span class='operation'>+</span>");

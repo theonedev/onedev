@@ -32,7 +32,7 @@
 	margin-right: 6px;
 }
 #request-list td.request .title {
-	font-size: 16px;
+	font-weight: bold;
 }
 #request-list td.request .title a {
 	color: #444;

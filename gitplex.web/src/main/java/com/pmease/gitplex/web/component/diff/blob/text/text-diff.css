@@ -16,6 +16,22 @@
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 12px;
 	table-layout: fixed;
+	border-collapse: separate;
+}
+
+/* 
+ * have to use relative here as otherwise the last table row will have problem
+ * focusing on expander or comment link. This relates to negative margin top 
+ * specified for change class in revision diff panel
+ */
+.text-diff>.body>tbody>tr>td {
+	position: relative;
+}
+.text-diff>.body>tbody>tr:last-child>td:first-child {
+	border-radius: 0 0 0 4px;
+}
+.text-diff>.body>tbody>tr:last-child>td:last-child {
+	border-radius: 0 0 4px 0;
 }
 .text-diff>.body>tbody>tr>td.number {
 	padding: 0 8px;
@@ -32,11 +48,12 @@
 }
 .text-diff>.body>tbody>tr.expander>td.skipped {
 	padding: 6px 16px;
+	border-left: 1px solid #D8E2F2;
 	background: #f4f7fb;
 	color: #999;
 }
 .text-diff>.body>tbody>tr.expander>td.expander {
-	border-right: 1px solid #EEE;
+	border-left: 1px solid #D8E2F2;
 	text-align: center;
 }
 .text-diff>.body>tbody>tr.expander>td.expander a {
@@ -44,6 +61,9 @@
 	background: #edf2f9;
 	padding: 6px 0;
 	color: #888;
+}
+.text-diff>.body>tbody>tr:last-child>td.expander a {
+	border-radius: 0 0 0 4px;
 }
 .text-diff>.body>tbody>tr.expander>td.expander>a:hover {
 	background: #4078c0;
@@ -73,10 +93,10 @@
 }
 .text-diff>.body>tbody>tr.line>td.old.new.number {
 	background: #F6EAAC;
-	border-left: 1px solid #F1DE7D;
-	border-right: 1px solid #F1DE7D;
+	border-left: 1px solid #EBD049;
 }
 .text-diff>.body>tbody>tr.line>td.old.new.content {
+	border-left: 1px solid #EBD049;
 	background: #FAF3D0;
 }
 .text-diff>.body>tbody>tr.line>td.old.new .delete {
@@ -116,7 +136,8 @@
 	padding-top: 2px;
 }
 .text-diff>.body>tbody>tr>td.content:hover>span.add-comment, 
-.text-diff>.body>tbody>tr>td.number:hover+.content>span.add-comment {
+.text-diff>.body>tbody>tr>td.number:hover+.content>span.add-comment,
+.text-diff>.body>tbody>tr>td.number:hover+.number+.content>span.add-comment {
 	display: inline-block;
 }
 .text-diff>.body>tbody>tr.comments>td.content.comments {
