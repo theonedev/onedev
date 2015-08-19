@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.component.diff.blob.text;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +19,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.event.IEventSink;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.MarkupStream;
@@ -31,6 +35,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.component.IRequestablePage;
@@ -78,11 +83,47 @@ public class TextDiffPanel extends Panel {
 	
 	private final InlineCommentSupport commentSupport;
 	
+	private final IModel<List<DiffComment>> commentsModel = new LoadableDetachableModel<List<DiffComment>>() {
+
+		@Override
+		protected List<DiffComment> load() {
+			List<DiffComment> comments = new ArrayList<>();
+			for (Map.Entry<Integer, List<InlineComment>> entry: 
+					commentSupport.getComments(change.getOldBlobIdent()).entrySet()) {
+				for (InlineComment inline: entry.getValue()) {
+					DiffComment comment = new DiffComment();
+					comment.inline = inline;
+					comment.oldLineNo = entry.getKey();
+					comment.newLineNo = -1;
+				}
+			}
+			for (Map.Entry<Integer, List<InlineComment>> entry: 
+					commentSupport.getComments(change.getNewBlobIdent()).entrySet()) {
+				for (InlineComment inline: entry.getValue()) {
+					DiffComment comment = new DiffComment();
+					comment.inline = inline;
+					comment.oldLineNo = -1;
+					comment.newLineNo = entry.getKey();
+				}
+			}
+			Collections.sort(comments, new Comparator<DiffComment>() {
+
+				@Override
+				public int compare(DiffComment comment1, DiffComment comment2) {
+					return comment1.inline.getDate().compareTo(comment2.inline.getDate());
+				}
+				
+			});
+			return comments;
+		}
+		
+	};
+	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
 	private RepeatingView newCommentForms;
 	
-	private RepeatingView commentLines;
+	private RepeatingView commentRows;
 	
 	public TextDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, DiffMode diffMode, 
 			@Nullable InlineCommentSupport commentSupport) {
@@ -160,7 +201,7 @@ public class TextDiffPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						newCommentForm.remove();
-						String script = String.format("gitplex.textdiff.cancelAddComment('%s');", newCommentForm.getMarkupId());
+						String script = String.format("$('#%s').closest('.line').remove();", newCommentForm.getMarkupId());
 						target.appendJavaScript(script);
 					}
 					
@@ -539,19 +580,21 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private Component newCommentLines() {
-		commentLines = new RepeatingView("lines");
+	private Component newCommentRows() {
+		commentRows = new RepeatingView("commentLines");
 		
 		if (commentSupport != null) {
-			for (int index: commentsModel.getObject().keySet()) 
-				commentsView.add(newCommentsRow(commentsView.newChildId(), index));
+			for (int index: commentSupport.getComments(blobIdent).keySet()) 
+				commentRows.add(newCommentsRow(commentsView.newChildId(), index));
+			for (int index: commentSupportsModel.getObject().keySet()) 
+				commentRows.add(newCommentsRow(commentsView.newChildId(), index));
 		}
 		
-		return commentLines;
+		return commentRows;
 	}
 	
-	private Component newCommentsRow(String id, final int index) {
-		WebMarkupContainer row = new WebMarkupContainer(commentsView.newChildId()) {
+	private Component newCommentRow(String id, final int oldLineNo, final int newLineNo) {
+		WebMarkupContainer row = new WebMarkupContainer(commentLines.newChildId()) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -559,9 +602,10 @@ public class TextDiffPanel extends Panel {
 				
 				if (event.getPayload() instanceof CommentRemoved) {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-					commentsView.remove(this);
-					commentsModel.getObject().get(index).remove(commentRemoved.getComment());
-					commentRemoved.getTarget().appendJavaScript(String.format("gitplex.comments.afterRemove(%d);", index));
+					commentRows.remove(this);
+					String script = String.format("$('#%s').closest('tr').remove();", 
+							TextDiffPanel.this.getMarkupId(), oldLineNo, newLineNo);
+					commentRemoved.getTarget().appendJavaScript(script);
 				} 
 			}
 			
@@ -593,7 +637,7 @@ public class TextDiffPanel extends Panel {
 	
 	@Override
 	protected void onBeforeRender() {
-		replace(newCommentsView());
+		replace(newCommentLines());
 		
 		super.onBeforeRender();
 	}
@@ -601,6 +645,7 @@ public class TextDiffPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
+		commentsModel.detach();
 		super.onDetach();
 	}
 
