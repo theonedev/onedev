@@ -46,6 +46,12 @@
 .text-diff>.body>tbody>tr>td:FIRST-CHILD {
 	border-left: none !important;
 }
+.text-diff>.body>tbody>tr:FIRST-CHILD>td {
+	border-top: none !important;
+}
+.text-diff>.body>tbody>tr:LAST-CHILD>td {
+	border-bottom: none !important;
+}
 .text-diff>.body>tbody>tr.expander>td.skipped {
 	padding: 6px 16px;
 	border-left: 1px solid #D8E2F2;
@@ -140,16 +146,22 @@
 .text-diff>.body>tbody>tr>td.number:hover+.number+.content>span.add-comment {
 	display: inline-block;
 }
-.text-diff>.body>tbody>tr.comments>td.content.comments {
+.text-diff>.body>tbody>tr.comment>td.content.comment {
 	white-space: normal;
 	word-wrap: normal;
 	padding: 12px;
-	border-top: 1px solid #EEE;
-	border-bottom: 1px solid #EEE;
+	border-top: 1px solid #DDD;
+	border-bottom: 1px solid #DDD;
 }
-.text-diff>.body>tbody>tr:FIRST-CHILD>td {
-	border-top: none !important;
+.text-diff>.body>tbody>tr.comment>td.content.comment>div>.detail {
+	margin-left: 36px;
+	font-size: 14px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.text-diff>.body>tbody>tr:LAST-CHILD>td {
-	border-bottom: none !important;
+.text-diff>.body>tbody>tr.comment>td.content.comment>div>.avatar img {
+	width: 28px;
+	height: 28px;
+}
+.text-diff>.comment {
+	display: none;
 }
