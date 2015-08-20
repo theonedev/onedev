@@ -203,7 +203,7 @@ public class TextDiffPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						newCommentForm.remove();
-						String script = String.format("$('#%s').closest('.line').remove();", newCommentForm.getMarkupId());
+						String script = String.format("$('#%s').closest('tr').remove();", newCommentForm.getMarkupId());
 						target.appendJavaScript(script);
 					}
 					
@@ -417,15 +417,15 @@ public class TextDiffPanel extends Panel {
 			builder.append("<span class='add-comment'>");
 			String script = String.format("document.getElementById('%s').addComment(%d, %d);", 
 					getMarkupId(), oldLineNo, newLineNo);
-			builder.append("<a href=\"javascript:").append(script).append("\">").append("<i class='fa fa-plus'></i></a></span>");
+			builder.append("<a title='Add inline comment' href=\"javascript:").append(script).append("\">").append("<i class='fa fa-plus'></i></a></span>");
 		}
 	}
 	
 	private void appendEqual(StringBuilder builder, DiffBlock block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
-			builder.append("<tr class='line expanded'>");
+			builder.append("<tr class='code expanded'>");
 		else
-			builder.append("<tr class='line'>");
+			builder.append("<tr class='code intrinsic'>");
 
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
@@ -452,7 +452,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendInsert(StringBuilder builder, DiffBlock block, int lineIndex) {
-		builder.append("<tr class='line'>");
+		builder.append("<tr class='code intrinsic'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
@@ -477,7 +477,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendDelete(StringBuilder builder, DiffBlock block, int lineIndex) {
-		builder.append("<tr class='line'>");
+		builder.append("<tr class='code intrinsic'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
@@ -503,7 +503,7 @@ public class TextDiffPanel extends Panel {
 	
 	private void appendSideBySide(StringBuilder builder, DiffBlock deleteBlock, DiffBlock insertBlock, 
 			int deleteLineIndex, int insertLineIndex) {
-		builder.append("<tr class='line'>");
+		builder.append("<tr class='code intrinsic'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
 		builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
@@ -528,7 +528,7 @@ public class TextDiffPanel extends Panel {
 
 	private void appendModification(StringBuilder builder, DiffBlock deleteBlock, DiffBlock insertBlock, 
 			int deleteLineIndex, int insertLineIndex, List<TokenDiffBlock> tokenDiffs) {
-		builder.append("<tr class='line'>");
+		builder.append("<tr class='code intrinsic'>");
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
@@ -600,7 +600,7 @@ public class TextDiffPanel extends Panel {
 				if (event.getPayload() instanceof CommentRemoved) {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					commentRows.remove(this);
-					String script = String.format("$('#%s').closest('tr.line').remove();", getMarkupId());
+					String script = String.format("$('#%s').closest('tr').remove();", getMarkupId());
 					commentRemoved.getTarget().appendJavaScript(script);
 				} 
 			}

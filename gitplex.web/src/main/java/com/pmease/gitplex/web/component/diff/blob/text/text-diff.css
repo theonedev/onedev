@@ -75,37 +75,37 @@
 	background: #4078c0;
 	color: white;
 }
-.text-diff>.body>tbody>tr.line>td.old.number {
+.text-diff>.body>tbody>tr>td.old.number {
 	background: #ffdddd;
 	border-left: 1px solid #f1c0c0;
 }
-.text-diff>.body>tbody>tr.line>td.old.content {
+.text-diff>.body>tbody>tr>td.old.content {
 	border-left: 1px solid #f1c0c0;
 	background: #ffecec;
 }
-.text-diff>.body>tbody>tr.line>td.old .delete {
+.text-diff>.body>tbody>tr>td.old .delete {
 	background-color: #f8cbcb;
 }
-.text-diff>.body>tbody>tr.line>td.new.number {
+.text-diff>.body>tbody>tr>td.new.number {
 	background: #dbffdb;
 	border-left: 1px solid #c1e9c1;
 }
-.text-diff>.body>tbody>tr.line>td.new.content {
+.text-diff>.body>tbody>tr>td.new.content {
 	border-left: 1px solid #c1e9c1;
 	background: #eaffea;
 }
-.text-diff>.body>tbody>tr.line>td.new .insert {
+.text-diff>.body>tbody>tr>td.new .insert {
 	background-color: #a6f3a6;
 }
-.text-diff>.body>tbody>tr.line>td.old.new.number {
+.text-diff>.body>tbody>tr>td.old.new.number {
 	background: #F6EAAC;
 	border-left: 1px solid #EBD049;
 }
-.text-diff>.body>tbody>tr.line>td.old.new.content {
+.text-diff>.body>tbody>tr>td.old.new.content {
 	border-left: 1px solid #EBD049;
 	background: #FAF3D0;
 }
-.text-diff>.body>tbody>tr.line>td.old.new .delete {
+.text-diff>.body>tbody>tr>td.old.new .delete {
 	text-decoration: line-through;
 }
 .text-diff>.body>tbody>tr>td.content {
@@ -115,6 +115,12 @@
 .text-diff>.body>tbody>tr>td.content>.operation {
 	font-weight: bold;
 	margin: 0 2px 0 8px;
+}
+.text-diff>.body>tbody>tr.intrinsic+.expanded>td {
+	border-top: 1px solid #E8E8E8;
+}
+.text-diff>.body>tbody>tr.expanded+.intrinsic>td {
+	border-top: 1px solid #E8E8E8;
 }
 .text-diff>.body>tbody>tr.expanded>td {
 	background: #F9F9F9;
@@ -146,11 +152,13 @@
 .text-diff>.body>tbody>tr>td.number:hover+.number+.content>span.add-comment {
 	display: inline-block;
 }
+.text-diff>.body>tbody>tr.code+tr.comment>td.content.comment {
+	border-top: 1px solid #DDD;
+}
 .text-diff>.body>tbody>tr.comment>td.content.comment {
 	white-space: normal;
 	word-wrap: normal;
 	padding: 12px;
-	border-top: 1px solid #DDD;
 	border-bottom: 1px solid #DDD;
 }
 .text-diff>.body>tbody>tr.comment>td.content.comment>div>.detail {

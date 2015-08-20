@@ -15,12 +15,12 @@ gitplex.textdiff = {
 		else
 			$content = $container.find(".content.old" + oldLineNo);
 
-		var $line = $content.closest(".line");
+		var $line = $content.closest("tr");
 		var $lastLine = $line;
 		while ($lastLine.next().hasClass("comment")) 
 			$lastLine = $lastLine.next();
 		
-		var $commentLine = $("<tr class='line comment'></tr>").insertAfter($lastLine);
+		var $commentLine = $("<tr class='comment'></tr>").insertAfter($lastLine);
 		if ($line.children().length == 3)
 			$commentLine.append("<td colspan='3' class='content comment'></td>");
 		else if (!$content.hasClass("old") && !$content.hasClass("new"))
