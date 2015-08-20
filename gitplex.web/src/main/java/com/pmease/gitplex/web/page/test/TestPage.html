@@ -1,13 +1,10 @@
 <wicket:extend>
-	<table class="test">
-		<colgroup>
-		<col width="40"></col>
-		<col></col>
-		</colgroup>
-		<tr><td>1</td><td>2</td></tr>
-		<tr><td>3</td><td>2</td></tr>
-		<tr><td>3</td><td>2</td></tr>
-		<tr><td>3</td><td>2</td></tr>
-		<tr><td><a><i class="fa fa-sort"></i></a></td><td></td></tr>
-	</table>
+	<ul>
+		<li class="1">1</li>
+		<li class="2">2</li>
+		<li class="3">3</li>
+	</ul>
+	<script type="text/javascript">
+		console.log($("li.2").next().prev().length);
+	</script>
 </wicket:extend>

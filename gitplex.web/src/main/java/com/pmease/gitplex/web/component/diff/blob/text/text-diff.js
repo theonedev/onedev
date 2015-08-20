@@ -8,6 +8,14 @@ gitplex.textdiff = {
 			gitplex.textdiff.placeComment($container, oldLineNo, newLineNo, $(this));
 		});
 	},
+	removeComment: function(commentId) {
+		var $comment = $("#" + commentId);
+		var $tr = $comment.closest("tr");
+		if ($tr.children(".comment").length == 1)
+			$tr.remove();
+		else 
+			$comment.closest("td").empty().addClass("removed").append("This comment has been removed");
+	},
 	placeComment: function($container, oldLineNo, newLineNo, $comment) {
 		var $content;
 		if (newLineNo != -1)
@@ -16,11 +24,24 @@ gitplex.textdiff = {
 			$content = $container.find(".content.old" + oldLineNo);
 
 		var $line = $content.closest("tr");
-		var $lastLine = $line;
-		while ($lastLine.next().hasClass("comment")) 
-			$lastLine = $lastLine.next();
+		var $currentLine = $line;
+		var $nextLine = $line.next();
 		
-		var $commentLine = $("<tr class='comment'></tr>").insertAfter($lastLine);
+		// check if we should place the comment into left side of right side 
+		// of existing comment line
+		while ($nextLine.hasClass("comment")) {
+			var $seat = $nextLine.children(".content").eq(oldLineNo!=-1?0:1);
+			if ($seat.length == 0 || $seat.hasClass("comment")) {
+				$currentLine = $nextLine;
+				$nextLine = $nextLine.next();
+			} else {
+				$seat.prev().remove();
+				$seat.attr("colspan", "2").addClass("comment").empty().append($comment);
+				return;
+			}
+		} 
+		
+		var $commentLine = $("<tr class='comment'></tr>").insertAfter($currentLine);
 		if ($line.children().length == 3)
 			$commentLine.append("<td colspan='3' class='content comment'></td>");
 		else if (!$content.hasClass("old") && !$content.hasClass("new"))

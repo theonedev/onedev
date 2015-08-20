@@ -50,7 +50,6 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
@@ -81,42 +80,42 @@ public class TextDiffPanel extends Panel {
 	
 	private final InlineCommentSupport commentSupport;
 	
-	private final IModel<List<DiffComment>> commentsModel = new LoadableDetachableModel<List<DiffComment>>() {
+	private final IModel<List<CommentAndPos>> listOfCommentAndPosModel = new LoadableDetachableModel<List<CommentAndPos>>() {
 
 		@Override
-		protected List<DiffComment> load() {
-			List<DiffComment> comments = new ArrayList<>();
+		protected List<CommentAndPos> load() {
+			List<CommentAndPos> listOfCommentAndPos = new ArrayList<>();
 			if (commentSupport != null) {
 				for (Map.Entry<Integer, List<InlineComment>> entry: 
 					commentSupport.getComments(change.getOldBlobIdent()).entrySet()) {
-					for (InlineComment inline: entry.getValue()) {
-						DiffComment comment = new DiffComment();
-						comment.inline = inline;
-						comment.oldLineNo = entry.getKey();
-						comment.newLineNo = -1;
-						comments.add(comment);
+					for (InlineComment each: entry.getValue()) {
+						CommentAndPos commentAndPos = new CommentAndPos();
+						commentAndPos.comment = each;
+						commentAndPos.oldLineNo = entry.getKey();
+						commentAndPos.newLineNo = -1;
+						listOfCommentAndPos.add(commentAndPos);
 					}
 				}
 				for (Map.Entry<Integer, List<InlineComment>> entry: 
 						commentSupport.getComments(change.getNewBlobIdent()).entrySet()) {
-					for (InlineComment inline: entry.getValue()) {
-						DiffComment comment = new DiffComment();
-						comment.inline = inline;
-						comment.oldLineNo = -1;
-						comment.newLineNo = entry.getKey();
-						comments.add(comment);
+					for (InlineComment each: entry.getValue()) {
+						CommentAndPos commentAndPos = new CommentAndPos();
+						commentAndPos.comment = each;
+						commentAndPos.oldLineNo = -1;
+						commentAndPos.newLineNo = entry.getKey();
+						listOfCommentAndPos.add(commentAndPos);
 					}
 				}
-				Collections.sort(comments, new Comparator<DiffComment>() {
+				Collections.sort(listOfCommentAndPos, new Comparator<CommentAndPos>() {
 	
 					@Override
-					public int compare(DiffComment comment1, DiffComment comment2) {
-						return comment1.inline.getDate().compareTo(comment2.inline.getDate());
+					public int compare(CommentAndPos commentAndPos1, CommentAndPos commentAndPos2) {
+						return commentAndPos1.comment.getDate().compareTo(commentAndPos2.comment.getDate());
 					}
 					
 				});
 			}
-			return comments;
+			return listOfCommentAndPos;
 		}
 		
 	};
@@ -203,7 +202,7 @@ public class TextDiffPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						newCommentForm.remove();
-						String script = String.format("$('#%s').closest('tr').remove();", newCommentForm.getMarkupId());
+						String script = String.format("gitplex.textdiff.removeComment('%s');", newCommentForm.getMarkupId());
 						target.appendJavaScript(script);
 					}
 					
@@ -241,7 +240,8 @@ public class TextDiffPanel extends Panel {
 						commentSupport.addComment(commentAt, compareWith, commentContext, 
 								lineNo, input.getModelObject());
 						
- 						Component commentRow = newCommentRow(commentRows.newChildId(), commentsModel.getObject().size()-1);
+						CommentAndPos lastComment = listOfCommentAndPosModel.getObject().get(listOfCommentAndPosModel.getObject().size()-1);
+ 						Component commentRow = newCommentRow(commentRows.newChildId(), lastComment);
 						commentRows.add(commentRow);
 						commentRow.setMarkupId(newCommentForm.getMarkupId());
 						newCommentForm.remove();
@@ -276,8 +276,8 @@ public class TextDiffPanel extends Panel {
 
 		commentRows = new RepeatingView("comments");
 		
-		for (int i=0; i<commentsModel.getObject().size(); i++)
-			commentRows.add(newCommentRow(commentRows.newChildId(), i));
+		for (CommentAndPos each: listOfCommentAndPosModel.getObject())
+			commentRows.add(newCommentRow(commentRows.newChildId(), each));
 		
 		add(commentRows);
 		
@@ -590,7 +590,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private Component newCommentRow(String id, final int index) {
+	private Component newCommentRow(String id, CommentAndPos commentAndPos) {
 		WebMarkupContainer row = new WebMarkupContainer(id) {
 
 			@Override
@@ -600,28 +600,19 @@ public class TextDiffPanel extends Panel {
 				if (event.getPayload() instanceof CommentRemoved) {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					commentRows.remove(this);
-					String script = String.format("$('#%s').closest('tr').remove();", getMarkupId());
+					String script = String.format("gitplex.textdiff.removeComment('%s');", getMarkupId());
 					commentRemoved.getTarget().appendJavaScript(script);
 				} 
 			}
 			
 		};
-		DiffComment comment = commentsModel.getObject().get(index);
+		row.add(new UserLink("avatar", new UserModel(commentAndPos.comment.getUser()), AvatarMode.AVATAR));
+		row.add(new CommentPanel("detail", Model.of(commentAndPos.comment)));
 		
-		row.add(new UserLink("avatar", new UserModel(comment.inline.getUser()), AvatarMode.AVATAR));
-		row.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
-
-			@Override
-			protected Comment load() {
-				return commentsModel.getObject().get(index).inline;
-			}
-			
-		}));
-		
-		if (comment.inline.equals(commentSupport.getConcernedComment()))
+		if (commentAndPos.comment.equals(commentSupport.getConcernedComment()))
 			row.add(AttributeAppender.append("class", " concerned"));
-		row.add(AttributeAppender.append("data-oldLineNo", comment.oldLineNo));
-		row.add(AttributeAppender.append("data-newLineNo", comment.newLineNo));
+		row.add(AttributeAppender.append("data-oldLineNo", commentAndPos.oldLineNo));
+		row.add(AttributeAppender.append("data-newLineNo", commentAndPos.newLineNo));
 		
 		row.setOutputMarkupId(true);
 		
@@ -631,7 +622,7 @@ public class TextDiffPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		commentsModel.detach();
+		listOfCommentAndPosModel.detach();
 		super.onDetach();
 	}
 

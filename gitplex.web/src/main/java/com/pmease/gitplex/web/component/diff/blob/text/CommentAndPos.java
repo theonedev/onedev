@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import com.pmease.gitplex.core.comment.InlineComment;
 
-class DiffComment implements Serializable {
+class CommentAndPos implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	InlineComment inline;
+	InlineComment comment;
 	
 	int oldLineNo;
 	

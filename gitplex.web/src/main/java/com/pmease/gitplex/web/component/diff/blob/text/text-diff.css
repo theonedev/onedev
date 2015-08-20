@@ -161,6 +161,10 @@
 	padding: 12px;
 	border-bottom: 1px solid #DDD;
 }
+.text-diff>.body>tbody>tr.comment>td.content.comment.removed {
+	font-style: italic;
+	font-size: 16px;
+}
 .text-diff>.body>tbody>tr.comment>td.content.comment>div>.detail {
 	margin-left: 36px;
 	font-size: 14px;

@@ -68,7 +68,7 @@
 	color: #555;
 }
 #request-detail .activities .activity>.detail>.update>.body td {
-	padding: 2px 0;
+	padding: 4px 0;
 }
 #request-detail .activities .activity>.detail>.update>.body td.detail {
 	padding-left: 14px;
@@ -76,7 +76,7 @@
 }
 #request-detail .activities .activity>.detail>.update>.body td.icon {
 	width: 1px; 
-	padding-top: 4px;
+	padding-top: 7px;
 }
 #request-detail .activities .activity>.detail>.update>.body td.status {
 	text-align: right;
