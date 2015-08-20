@@ -5,7 +5,7 @@ import com.pmease.commons.lang.diff.AroundContext;
 
 public interface InlineComment extends Comment {
 
-	public static final int CONTEXT_SIZE = 7;
+	public static final int CONTEXT_SIZE = 3;
 
 	BlobIdent getBlobIdent();
 	

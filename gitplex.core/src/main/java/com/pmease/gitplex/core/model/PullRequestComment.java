@@ -207,4 +207,9 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		return GitPlex.getInstance(PullRequestManager.class).getLastVisitDate(getRequest());
 	}
 
+	@Override
+	public CommentReply loadReply(Long replyId) {
+		return GitPlex.getInstance(Dao.class).load(PullRequestCommentReply.class, replyId);
+	}
+
 }

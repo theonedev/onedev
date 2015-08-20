@@ -320,7 +320,15 @@ public class CommentPanel extends Panel {
 	}
 
 	private Component newReplyRow(String id, CommentReply reply) {
-		final WebMarkupContainer row = new WebMarkupContainer(id, Model.of(reply));
+		final Long replyId = reply.getId();
+		final WebMarkupContainer row = new WebMarkupContainer(id, new LoadableDetachableModel<CommentReply>() {
+
+			@Override
+			protected CommentReply load() {
+				return getComment().loadReply(replyId);
+			}
+			
+		});
 		row.setOutputMarkupId(true);
 		
 		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");

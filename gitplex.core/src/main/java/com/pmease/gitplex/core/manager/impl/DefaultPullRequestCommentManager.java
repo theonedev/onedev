@@ -52,28 +52,28 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 			List<Change> changes = comment.getRepository().getChanges(comment.getNewCommitHash(), latestCommitHash);
 			String oldCommitHash = comment.getOldCommitHash();
 			if (oldCommitHash.equals(comment.getBlobIdent().revision)) {
-				BlobIdent newBlobInfo = null;
+				BlobIdent newBlobIdent = null;
 				if (comment.getCompareWith().path != null) {
 					for (Change change: changes) {
 						if (comment.getCompareWith().path.equals(change.getOldBlobIdent().path)) {
-							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
+							newBlobIdent = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
 							break;
 						}
 					}
 				} else {
 					for (Change change: changes) {
 						if (comment.getBlobIdent().path.equals(change.getNewBlobIdent().path)) {
-							newBlobInfo = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
+							newBlobIdent = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
 							break;
 						}
 					}
 				}
-				if (newBlobInfo != null) {
+				if (newBlobIdent != null) {
 					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
-					if (newBlobInfo.path != null) {
-						Blob.Text newText = comment.getRepository().getBlob(newBlobInfo).getText();
+					if (newBlobIdent.path != null) {
+						Blob.Text newText = comment.getRepository().getBlob(newBlobIdent).getText();
 						if (newText != null)
 							newLines = newText.getLines();
 						else
@@ -83,31 +83,31 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					}
 					if (newLines != null) {
 						List<DiffBlock> diffs = DiffUtils.diff(oldText.getLines(), 
-								comment.getBlobIdent().getFileName(), newLines, newBlobInfo.getFileName());					
+								comment.getBlobIdent().getFileName(), newLines, newBlobIdent.getFileName());					
 						AroundContext context = DiffUtils.around(
 								diffs, comment.getLine(), -1, InlineComment.CONTEXT_SIZE);
 						comment.setContext(context);
 					} else {
 						comment.setContext(null);
 					}
-					comment.setCompareWith(newBlobInfo);
+					comment.setCompareWith(newBlobIdent);
 				} else {
 					comment.getCompareWith().revision = latestCommitHash;
 				}
 			} else {
-				BlobIdent newBlobInfo = null;
+				BlobIdent newBlobIdent = null;
 				for (Change change: changes) {
 					if (comment.getBlobIdent().path.equals(change.getOldBlobIdent().path)) {
-						newBlobInfo = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
+						newBlobIdent = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
 						break;
 					}
 				}
-				if (newBlobInfo != null) {
+				if (newBlobIdent != null) {
 					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
 					Preconditions.checkNotNull(oldText);
 					List<String> newLines;
-					if (newBlobInfo.path != null) {
-						Blob.Text newText = comment.getRepository().getBlob(newBlobInfo).getText();
+					if (newBlobIdent.path != null) {
+						Blob.Text newText = comment.getRepository().getBlob(newBlobIdent).getText();
 						if (newText != null)
 							newLines = newText.getLines();
 						else
@@ -117,10 +117,10 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					}
 					if (newLines != null) {
 						List<DiffBlock> diffs = DiffUtils.diff(oldText.getLines(), comment.getBlobIdent().getFileName(), 
-								newLines, newBlobInfo.getFileName());
+								newLines, newBlobIdent.getFileName());
 						Integer newLineNo = DiffUtils.mapLines(diffs).get(comment.getLine());
 						if (newLineNo != null) {
-							comment.setBlobIdent(newBlobInfo);
+							comment.setBlobIdent(newBlobIdent);
 							comment.setLine(newLineNo);
 							
 							List<String> oldLines;
@@ -136,7 +136,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 							if (oldLines != null) {
 								diffs = DiffUtils.diff(oldLines, 
 										comment.getCompareWith().getFileName(), 
-										newLines, newBlobInfo.getFileName());					
+										newLines, newBlobIdent.getFileName());					
 								AroundContext context = DiffUtils.around(
 										diffs, -1, newLineNo, InlineComment.CONTEXT_SIZE);
 								comment.setContext(context);
@@ -144,14 +144,14 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 								comment.setContext(null);
 							}
 						} else {
-							comment.setCompareWith(newBlobInfo);
+							comment.setCompareWith(newBlobIdent);
 							
 							AroundContext context = DiffUtils.around(
 									diffs, comment.getLine(), -1, InlineComment.CONTEXT_SIZE);
 							comment.setContext(context);
 						}
 					} else {
-						comment.setCompareWith(newBlobInfo);
+						comment.setCompareWith(newBlobIdent);
 						comment.setContext(null);
 					}
 				} else {

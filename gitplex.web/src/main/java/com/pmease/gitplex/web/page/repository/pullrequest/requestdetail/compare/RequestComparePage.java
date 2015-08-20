@@ -651,6 +651,11 @@ public class RequestComparePage extends RequestDetailPage {
 					}
 					return comment;
 				}
+
+				@Override
+				public InlineComment loadComment(Long commentId) {
+					return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
+				}
 			};
 		};
 		

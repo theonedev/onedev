@@ -26,6 +26,8 @@ public interface Comment extends Serializable {
 	
 	Collection<? extends CommentReply> getReplies();
 	
+	CommentReply loadReply(Long replyId);
+	
 	CommentReply addReply(String content);
 	
 	/**

@@ -16,4 +16,5 @@ public interface InlineCommentSupport extends Serializable {
 	
 	InlineComment getConcernedComment();
 
+	InlineComment loadComment(Long commentId);
 }

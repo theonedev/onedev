@@ -50,6 +50,7 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
@@ -146,7 +147,14 @@ public class TextDiffPanel extends Panel {
 		PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), change.getBlobIdent());
 		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
 		
-		add(new Label("diffLines", renderDiffs()).setEscapeModelStrings(false));
+		add(new Label("diffLines", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return renderDiffs();
+			}
+			
+		}).setEscapeModelStrings(false));
 		
 		add(new AbstractDefaultAjaxBehavior() {
 			
@@ -607,7 +615,15 @@ public class TextDiffPanel extends Panel {
 			
 		};
 		row.add(new UserLink("avatar", new UserModel(commentAndPos.comment.getUser()), AvatarMode.AVATAR));
-		row.add(new CommentPanel("detail", Model.of(commentAndPos.comment)));
+		final Long commentId = commentAndPos.comment.getId();
+		row.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
+
+			@Override
+			protected Comment load() {
+				return commentSupport.loadComment(commentId);
+			}
+			
+		}));
 		
 		if (commentAndPos.comment.equals(commentSupport.getConcernedComment()))
 			row.add(AttributeAppender.append("class", " concerned"));
