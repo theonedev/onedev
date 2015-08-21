@@ -106,32 +106,12 @@
 #request-detail .activities .activity>.detail>.update>.body td.status .running {
 	color: #AFAD1F;
 }
+#request-detail .activities .activity-summary a.file {
+	color: #666;
+	font-weight: bold;
+}
 #request-detail .activities .activity.new>.avatar {
 	background: #FCF6D6;
-}
-#request-detail .activities .table-diff>tbody>.line.comments>td {
-	padding: 12px;
-}
-#request-detail .activities .table-diff>tbody>tr.omit>td .fa {
-	font-size: 24px; 
-	color: #888; 
-	margin-left: 12px;
-}
-#request-detail .activities .inline-comment.panel>.panel-heading {
-	padding: 8px;
-}
-#request-detail .activities .inline-comment.panel>.panel-heading .actions {
-	margin-left: 12px;
-}
-#request-detail .activities .inline-comment.panel>.panel-heading .actions a {
-	color: #BBB; 
-	margin-right: 4px;
-}
-#request-detail .activities .inline-comment.panel>.panel-heading:hover .actions a {
-	color: #666;
-}
-#request-detail .activities .inline-comment.panel {
-	margin-bottom: 4px;
 }
 
 #request-detail .activities .activity>.detail>.discard>.icon {

@@ -101,6 +101,7 @@ public class CommentPanel extends Panel {
 		add(head);
 		
 		head.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
+		head.add(newActionComponent("action"));
 		head.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 
 		head.add(new AjaxLink<Void>("edit") {
@@ -436,6 +437,10 @@ public class CommentPanel extends Panel {
 	
 	protected Component newAdditionalReplyOperations(String id, CommentReply reply) {
 		return new WebMarkupContainer(id);
+	}
+	
+	protected Component newActionComponent(String id) {
+		return new Label(id, "commented");
 	}
 
 	@Override

@@ -7,10 +7,8 @@ import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
-import javax.persistence.Lob;
 
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.lang.diff.AroundContext;
 
 @Embeddable
 public class InlineInfo implements Serializable {
@@ -39,10 +37,6 @@ public class InlineInfo implements Serializable {
 	// embedded as nullable property of JPA entities 
 	private Integer line;
 
-	@Lob
-	@Column(length=65535)
-	private AroundContext context;
-
 	public BlobIdent getBlobIdent() {
 		return blobIdent;
 	}
@@ -65,14 +59,6 @@ public class InlineInfo implements Serializable {
 
 	public void setLine(int line) {
 		this.line = line;
-	}
-
-	public AroundContext getContext() {
-		return context;
-	}
-
-	public void setContext(AroundContext context) {
-		this.context = context;
 	}
 
 }

@@ -23,7 +23,6 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.lang.diff.AroundContext;
 import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.CommentReply;
@@ -191,17 +190,6 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		inlineInfo.setLine(line);
 	}
 	
-	@Override
-	public AroundContext getContext() {
-		return Preconditions.checkNotNull(inlineInfo).getContext();
-	}
-	
-	public void setContext(AroundContext context) {
-		if (inlineInfo == null)
-			inlineInfo = new InlineInfo();
-		inlineInfo.setContext(context);
-	}
-
 	@Override
 	public Date getLastVisitDate() {
 		return GitPlex.getInstance(PullRequestManager.class).getLastVisitDate(getRequest());

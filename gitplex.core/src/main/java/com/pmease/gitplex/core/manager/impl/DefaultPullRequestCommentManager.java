@@ -14,11 +14,9 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Change;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.lang.diff.AroundContext;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
@@ -71,25 +69,6 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 				if (newBlobIdent != null) {
 					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
 					Preconditions.checkNotNull(oldText);
-					List<String> newLines;
-					if (newBlobIdent.path != null) {
-						Blob.Text newText = comment.getRepository().getBlob(newBlobIdent).getText();
-						if (newText != null)
-							newLines = newText.getLines();
-						else
-							newLines = null;
-					} else {
-						newLines = new ArrayList<>();
-					}
-					if (newLines != null) {
-						List<DiffBlock> diffs = DiffUtils.diff(oldText.getLines(), 
-								comment.getBlobIdent().getFileName(), newLines, newBlobIdent.getFileName());					
-						AroundContext context = DiffUtils.around(
-								diffs, comment.getLine(), -1, InlineComment.CONTEXT_SIZE);
-						comment.setContext(context);
-					} else {
-						comment.setContext(null);
-					}
 					comment.setCompareWith(newBlobIdent);
 				} else {
 					comment.getCompareWith().revision = latestCommitHash;
@@ -116,43 +95,16 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 						newLines = new ArrayList<>();
 					}
 					if (newLines != null) {
-						List<DiffBlock> diffs = DiffUtils.diff(oldText.getLines(), comment.getBlobIdent().getFileName(), 
-								newLines, newBlobIdent.getFileName());
+						List<DiffBlock<String>> diffs = DiffUtils.diff(oldText.getLines(), newLines);
 						Integer newLineNo = DiffUtils.mapLines(diffs).get(comment.getLine());
 						if (newLineNo != null) {
 							comment.setBlobIdent(newBlobIdent);
 							comment.setLine(newLineNo);
-							
-							List<String> oldLines;
-							if (comment.getCompareWith().path != null) {
-								oldText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
-								if (oldText != null)
-									oldLines = oldText.getLines();
-								else
-									oldLines = null;
-							} else {
-								oldLines = new ArrayList<>();
-							}
-							if (oldLines != null) {
-								diffs = DiffUtils.diff(oldLines, 
-										comment.getCompareWith().getFileName(), 
-										newLines, newBlobIdent.getFileName());					
-								AroundContext context = DiffUtils.around(
-										diffs, -1, newLineNo, InlineComment.CONTEXT_SIZE);
-								comment.setContext(context);
-							} else {
-								comment.setContext(null);
-							}
 						} else {
 							comment.setCompareWith(newBlobIdent);
-							
-							AroundContext context = DiffUtils.around(
-									diffs, comment.getLine(), -1, InlineComment.CONTEXT_SIZE);
-							comment.setContext(context);
 						}
 					} else {
 						comment.setCompareWith(newBlobIdent);
-						comment.setContext(null);
 					}
 				} else {
 					comment.getBlobIdent().revision = latestCommitHash;

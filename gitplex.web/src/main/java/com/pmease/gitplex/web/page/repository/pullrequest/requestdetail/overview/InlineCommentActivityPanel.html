@@ -1,36 +1,6 @@
 <wicket:panel>
-	<div class="inline-comment activity-summary">
-		<span wicket:id="name" class="user"></span> 
-		added inline comment
-		<span wicket:id="age"></span>
-	</div>
-	<div class="inline-comment panel panel-default">
-		<div class="panel-heading">
-			<span wicket:id="file"></span> 
-			<span class="operations">
-				<a wicket:id="compareView" class="fa fa-file-text" title="View full context"></a>
-			</span>
-		</div>
-		<table wicket:id="context" class="table-diff">
-			<tr wicket:id="aboveOmitted" class="omit">
-				<td colspan="3"><i class="fa fa-ellipsis-h"></i></td>
-			</tr>
-			<tr wicket:id="lines" class="line diff">
-				<td class="old line-no">
-					<span wicket:id="oldLineNo"></span>
-				</td>
-				<td class="new line-no">
-					<span wicket:id="newLineNo"></span>
-				</td>
-				<td class="text"><wicket:container wicket:id="diffMark"></wicket:container><wicket:container wicket:id="tokens"><span wicket:id="token"></span></wicket:container></td>
-			</tr>
-			<tr wicket:id="belowOmitted" class="omit">
-				<td colspan="3"><i class="fa fa-ellipsis-h"></i></td>
-			</tr>
-		</table>
-		<div wicket:id="noContext" class="panel-body">
-			<div class="alert alert-warning before-comment">Line context is not available as file is binary.</div>
-		</div>
-		<div wicket:id="comment"></div>
-	</div>
+	<div wicket:id="content" class="inline-comment"></div>
+	<wicket:fragment wicket:id="actionFrag">
+		added inline comment on file <a wicket:id="fileLink" class="file"></a>
+	</wicket:fragment>
 </wicket:panel>

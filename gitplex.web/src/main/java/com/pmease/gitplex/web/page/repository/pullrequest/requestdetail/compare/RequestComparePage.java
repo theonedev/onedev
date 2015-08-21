@@ -35,7 +35,6 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.lang.diff.AroundContext;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -630,7 +629,7 @@ public class RequestComparePage extends RequestDetailPage {
 				
 				@Override
 				public InlineComment addComment(BlobIdent blobInfo, BlobIdent compareWith, 
-						AroundContext commentContext, int line, String content) {
+						int line, String content) {
 					User user = GitPlex.getInstance(UserManager.class).getCurrent();
 					Preconditions.checkNotNull(user);
 					PullRequestComment comment = new PullRequestComment();
@@ -642,7 +641,6 @@ public class RequestComparePage extends RequestDetailPage {
 					comment.setBlobIdent(blobInfo);
 					comment.setCompareWith(compareWith);
 					comment.setLine(line);
-					comment.setContext(commentContext);
 					InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPageId()));
 					try {
 						GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);

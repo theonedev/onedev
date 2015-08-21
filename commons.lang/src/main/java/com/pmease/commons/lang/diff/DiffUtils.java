@@ -75,14 +75,10 @@ public class DiffUtils {
 		}
 	}
 	
-	public static List<DiffBlock> diff(List<String> oldLines, List<String> newLines) {
-		return diff(oldLines, null, newLines, null);
-	}
-	
 	/**
 	 * Diff two list of strings.
 	 */
-	public static List<DiffBlock> diff(List<String> oldLines, @Nullable String oldFileName, 
+	public static List<DiffBlock<List<CmToken>>> diff(List<String> oldLines, @Nullable String oldFileName, 
 			List<String> newLines, @Nullable String newFileName) {
 		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_SIZE, 
 				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
@@ -95,7 +91,7 @@ public class DiffUtils {
 		
 		List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result1.chars1, result1.chars2, false);
 
-		List<DiffBlock> diffBlocks = new ArrayList<>();
+		List<DiffBlock<List<CmToken>>> diffBlocks = new ArrayList<>();
 		int oldLineNo = 0;
 		int newLineNo = 0;
 		for (Diff diff : diffs) {
@@ -106,32 +102,71 @@ public class DiffUtils {
 					oldLineNo++;
 					newLineNo++;
 				}
-				diffBlocks.add(new DiffBlock(diff.operation, lines, oldLineNo-lines.size(), newLineNo-lines.size()));
+				diffBlocks.add(new DiffBlock<List<CmToken>>(diff.operation, lines, 
+						oldLineNo-lines.size(), newLineNo-lines.size()));
 			} else if (diff.operation == Operation.INSERT) {
 				for (int i = 0; i < diff.text.length(); i++)
 					lines.add(newTokenizedLines.get(newLineNo++));
-				diffBlocks.add(new DiffBlock(diff.operation, lines, oldLineNo, newLineNo-lines.size()));
+				diffBlocks.add(new DiffBlock<List<CmToken>>(diff.operation, lines, 
+						oldLineNo, newLineNo-lines.size()));
 			} else {
 				for (int i = 0; i < diff.text.length(); i++)
 					lines.add(oldTokenizedLines.get(oldLineNo++));
-				diffBlocks.add(new DiffBlock(diff.operation, lines, oldLineNo-lines.size(), newLineNo));
+				diffBlocks.add(new DiffBlock<List<CmToken>>(diff.operation, lines, 
+						oldLineNo-lines.size(), newLineNo));
 			}
 		}
 		
 		return diffBlocks;
 	}
 	
-	public static LinkedHashMap<Integer, LineModification> calcLineChange(DiffBlock deleteBlock, DiffBlock insertBlock) {
-		LinkedHashMap<Integer, LineModification> lineModifications = new LinkedHashMap<>();
+	public static <T> List<DiffBlock<T>> diff(List<T> oldLines, List<T> newLines) {
+		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_SIZE, 
+				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
+		
+		DiffMatchPatch dmp = new DiffMatchPatch();
+		TokensToCharsResult<T> result1 = tokensToChars(oldLines, newLines);
+		
+		List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result1.chars1, result1.chars2, false);
+
+		List<DiffBlock<T>> diffBlocks = new ArrayList<>();
+		int oldLineNo = 0;
+		int newLineNo = 0;
+		for (Diff diff : diffs) {
+			List<T> lines = new ArrayList<>();
+			if (diff.operation == Operation.EQUAL) {
+				for (int i = 0; i < diff.text.length(); i++) {
+					lines.add(newLines.get(newLineNo));
+					oldLineNo++;
+					newLineNo++;
+				}
+				diffBlocks.add(new DiffBlock<T>(diff.operation, lines, oldLineNo-lines.size(), newLineNo-lines.size()));
+			} else if (diff.operation == Operation.INSERT) {
+				for (int i = 0; i < diff.text.length(); i++)
+					lines.add(newLines.get(newLineNo++));
+				diffBlocks.add(new DiffBlock<T>(diff.operation, lines, oldLineNo, newLineNo-lines.size()));
+			} else {
+				for (int i = 0; i < diff.text.length(); i++)
+					lines.add(oldLines.get(oldLineNo++));
+				diffBlocks.add(new DiffBlock<T>(diff.operation, lines, oldLineNo-lines.size(), newLineNo));
+			}
+		}
+		
+		return diffBlocks;
+	}
+	
+	public static LinkedHashMap<Integer, LineDiff> align(
+			DiffBlock<List<CmToken>> deleteBlock, DiffBlock<List<CmToken>> insertBlock) {
+		LinkedHashMap<Integer, LineDiff> lineDiffs = new LinkedHashMap<>();
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		
 		long time = System.currentTimeMillis();
 		int nextInsert = 0;
-		for (int i=0; i<deleteBlock.getLines().size(); i++) {
-			List<CmToken> deleteLine = deleteBlock.getLines().get(i);
-			for (int j=nextInsert; j<insertBlock.getLines().size(); j++) {
-				List<CmToken> insertLine = insertBlock.getLines().get(j);
+		for (int i=0; i<deleteBlock.getUnits().size(); i++) {
+			List<CmToken> deleteLine = deleteBlock.getUnits().get(i);
+			for (int j=nextInsert; j<insertBlock.getUnits().size(); j++) {
+				List<CmToken> insertLine = insertBlock.getUnits().get(j);
 				TokensToCharsResult<CmToken> result = DiffUtils.tokensToChars(deleteLine, insertLine);						
 				List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result.chars1, result.chars2, false);
 				int equal = 0;
@@ -148,7 +183,7 @@ public class DiffUtils {
 					}
 				}
 				if (equal*3 >= total) {
-					List<TokenDiffBlock> diffBlocks = new ArrayList<>();
+					List<DiffBlock<CmToken>> diffBlocks = new ArrayList<>();
 					int oldLineNo = 0;
 					int newLineNo = 0;
 					for (Diff diff : diffs) {
@@ -159,73 +194,42 @@ public class DiffUtils {
 								oldLineNo++;
 								newLineNo++;
 							}
-							diffBlocks.add(new TokenDiffBlock(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo-tokens.size()));
+							diffBlocks.add(new DiffBlock<CmToken>(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo-tokens.size()));
 						} else if (diff.operation == Operation.INSERT) {
 							for (int k = 0; k < diff.text.length(); k++)
 								tokens.add(insertLine.get(newLineNo++));
-							diffBlocks.add(new TokenDiffBlock(diff.operation, tokens, oldLineNo, newLineNo-tokens.size()));
+							diffBlocks.add(new DiffBlock<CmToken>(diff.operation, tokens, oldLineNo, newLineNo-tokens.size()));
 						} else {
 							for (int k = 0; k < diff.text.length(); k++)
 								tokens.add(deleteLine.get(oldLineNo++));
-							diffBlocks.add(new TokenDiffBlock(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo));
+							diffBlocks.add(new DiffBlock<CmToken>(diff.operation, tokens, oldLineNo-tokens.size(), newLineNo));
 						}
 					}
 
-					LineModification lineModification = new LineModification(j, diffBlocks);
-					lineModifications.put(i, lineModification);
+					LineDiff lineDiff = new LineDiff(j, diffBlocks);
+					lineDiffs.put(i, lineDiff);
 					nextInsert = j+1;
 					break;
 				} else {
 					if (System.currentTimeMillis()-time > CHANGE_CALC_TIMEOUT) {
-						nextInsert = insertBlock.getLines().size();
+						nextInsert = insertBlock.getUnits().size();
 						break;
 					}
 				}
 			}
 		}
-		return lineModifications;
+		return lineDiffs;
 	}
 
-	public static AroundContext around(List<DiffBlock> diffBlocks, int oldLine, int newLine, int contextSize) {
-		List<DiffLine> diffLines = new ArrayList<>();
-		for (DiffBlock diffBlock: diffBlocks)
-			diffLines.addAll(diffBlock.asDiffLines());
-		
-		List<DiffLine> contextDiffs = new ArrayList<>();
-		int index = -1;
-		for (int i=0; i<diffLines.size(); i++) {
-			DiffLine diffLine = diffLines.get(i);
-			if (oldLine != -1 && diffLine.getOperation() != Operation.INSERT && diffLine.getOldLineNo() == oldLine
-					|| newLine != -1 && diffLine.getOperation() != Operation.DELETE && diffLine.getNewLineNo() == newLine) {
-				index = i;
-				break;
-			}
-		}
-		
-		Preconditions.checkState(index != -1);
-		
-		int start = index - contextSize;
-		if (start < 0)
-			start = 0;
-		int end = index + contextSize;
-		if (end > diffLines.size() - 1)
-			end = diffLines.size() - 1;
-		
-		for (int i=start; i<=end; i++)
-			contextDiffs.add(diffLines.get(i));
-		
-		return new AroundContext(contextDiffs, index-start, start>0, end<diffLines.size()-1);
-	}
-	
-	public static Map<Integer, Integer> mapLines(List<String> oldLines, List<String> newLines) {
+	public static <T> Map<Integer, Integer> mapLines(List<T> oldLines, List<T> newLines) {
 		return mapLines(diff(oldLines, newLines));
 	}
 	
-	public static Map<Integer, Integer> mapLines(List<DiffBlock> diffBlocks) {
+	public static <T> Map<Integer, Integer> mapLines(List<DiffBlock<T>> diffBlocks) {
 		Map<Integer, Integer> lineMapping = new HashMap<Integer, Integer>();
-		for (DiffBlock diffBlock: diffBlocks) {
+		for (DiffBlock<T> diffBlock: diffBlocks) {
 			if (diffBlock.getOperation() == Operation.EQUAL) {
-				for (int i=0; i<diffBlock.getLines().size(); i++)
+				for (int i=0; i<diffBlock.getUnits().size(); i++)
 					lineMapping.put(i+diffBlock.getOldStart(), i+diffBlock.getNewStart());
 			}
 		}

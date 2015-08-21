@@ -1,26 +1,24 @@
 package com.pmease.commons.lang.diff;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
-import com.pmease.commons.lang.tokenizers.CmToken;
 
-public class DiffBlock implements Serializable {
+public class DiffBlock<T> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private final DiffMatchPatch.Operation operation;
 	
-	private final List<List<CmToken>> lines;
+	private final List<T> units;
 	
 	private final int oldStart, newStart;
 	
-	public DiffBlock(DiffMatchPatch.Operation operation, List<List<CmToken>> lines, 
+	public DiffBlock(DiffMatchPatch.Operation operation, List<T> units, 
 			int oldStart, int newStart) {
 		this.operation = operation;
-		this.lines = lines;
+		this.units = units;
 		this.oldStart = oldStart;
 		this.newStart = newStart;
 	}
@@ -29,8 +27,8 @@ public class DiffBlock implements Serializable {
 		return operation;
 	}
 
-	public List<List<CmToken>> getLines() {
-		return lines;
+	public List<T> getUnits() {
+		return units;
 	}
 
 	public int getOldStart() {
@@ -45,46 +43,27 @@ public class DiffBlock implements Serializable {
 		if (operation == Operation.INSERT)
 			return oldStart;
 		else
-			return oldStart + lines.size();
+			return oldStart + units.size();
 	}
 	
 	public int getNewEnd() {
 		if (operation == Operation.DELETE)
 			return newStart;
 		else
-			return newStart + lines.size();
+			return newStart + units.size();
 	}
 	
-	public List<DiffLine> asDiffLines() {
-		List<DiffLine> diffLines = new ArrayList<>();
-		int oldLineNo = oldStart;
-		int newLineNo = newStart;
-		for (List<CmToken> line: lines) {
-			diffLines.add(new DiffLine(operation, line, oldLineNo, newLineNo));
-			if (operation == Operation.EQUAL) {
-				oldLineNo++;
-				newLineNo++;
-			} else if (operation == Operation.DELETE) {
-				oldLineNo++;
-			} else {
-				newLineNo++;
-			}
-		}
-		return diffLines;
-	}
-
 	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for (List<CmToken> line: lines) {
+		for (T unit: units) {
 			if (operation == Operation.INSERT)
 				buffer.append("+");
 			else if (operation == Operation.DELETE)
 				buffer.append("-");
 			else
 				buffer.append(" ");
-			for (CmToken token: line)
-				buffer.append(token);
+			buffer.append(unit);
 			buffer.append("\n");
 		}
 		return buffer.toString();

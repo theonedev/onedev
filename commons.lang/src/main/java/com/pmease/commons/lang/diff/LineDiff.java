@@ -3,15 +3,17 @@ package com.pmease.commons.lang.diff;
 import java.io.Serializable;
 import java.util.List;
 
-public class LineModification implements Serializable {
+import com.pmease.commons.lang.tokenizers.CmToken;
+
+public class LineDiff implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private final int compareLine;
 	
-	private final List<TokenDiffBlock> tokenDiffs;
+	private final List<DiffBlock<CmToken>> tokenDiffs;
 	
-	public LineModification(int line, List<TokenDiffBlock> diffs) {
+	public LineDiff(int line, List<DiffBlock<CmToken>> diffs) {
 		this.compareLine = line;
 		this.tokenDiffs = diffs;
 	}
@@ -20,7 +22,7 @@ public class LineModification implements Serializable {
 		return compareLine;
 	}
 
-	public List<TokenDiffBlock> getTokenDiffs() {
+	public List<DiffBlock<CmToken>> getTokenDiffs() {
 		return tokenDiffs;
 	}
 	

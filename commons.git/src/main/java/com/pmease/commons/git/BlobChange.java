@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.lang.tokenizers.CmToken;
 
 @SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
@@ -24,7 +25,7 @@ public abstract class BlobChange implements Serializable {
 	
 	private final BlobIdent newBlobIdent;
 	
-	private transient List<DiffBlock> diffBlocks;
+	private transient List<DiffBlock<List<CmToken>>> diffBlocks;
 	
 	public BlobChange(String oldCommitHash, String newCommitHash, DiffEntry diffEntry) {
 		type = diffEntry.getChangeType();
@@ -60,7 +61,7 @@ public abstract class BlobChange implements Serializable {
 		return newBlobIdent.path!=null? newBlobIdent: oldBlobIdent;
 	}
 
-	public List<DiffBlock> getDiffBlocks() {
+	public List<DiffBlock<List<CmToken>>> getDiffBlocks() {
 		if (diffBlocks == null) {
 			try {
 				if (type == ChangeType.ADD) {
@@ -110,18 +111,18 @@ public abstract class BlobChange implements Serializable {
 	
 	public int getAdditions() {
 		int additions = 0;
-		for (DiffBlock diff: getDiffBlocks()) {
+		for (DiffBlock<List<CmToken>> diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.INSERT)
-				additions += diff.getLines().size();
+				additions += diff.getUnits().size();
 		}
 		return additions;
 	}
 
 	public int getDeletions() {
 		int deletions = 0;
-		for (DiffBlock diff: getDiffBlocks()) {
+		for (DiffBlock<List<CmToken>> diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.DELETE)
-				deletions += diff.getLines().size();
+				deletions += diff.getUnits().size();
 		}
 		return deletions;
 	}
