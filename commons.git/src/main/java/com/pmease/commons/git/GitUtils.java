@@ -9,6 +9,8 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.util.SystemReader;
@@ -179,5 +181,29 @@ public class GitUtils {
     public static String branch2ref(String branch) {
     	return Git.REFS_HEADS + branch; 
     }    
+
+    public static BlobIdent getOldBlobIdent(DiffEntry diffEntry, String oldRev) {
+    	BlobIdent blobIdent;
+		if (diffEntry.getChangeType() != ChangeType.ADD) {
+			blobIdent = new BlobIdent(oldRev, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());
+			AnyObjectId id = diffEntry.getOldId().toObjectId();
+			blobIdent.id = id!=null?id.name():null;
+		} else {
+			blobIdent = new BlobIdent(oldRev, null, null);
+		}
+		return blobIdent;
+    }
+    
+    public static BlobIdent getNewBlobIdent(DiffEntry diffEntry, String newRev) {
+    	BlobIdent blobIdent;
+		if (diffEntry.getChangeType() != ChangeType.DELETE) {
+			blobIdent = new BlobIdent(newRev, diffEntry.getNewPath(), diffEntry.getNewMode().getBits());
+			AnyObjectId id = diffEntry.getNewId().toObjectId();
+			blobIdent.id = id!=null?id.name():null;
+		} else {
+			blobIdent = new BlobIdent(newRev, null, null);
+		}
+		return blobIdent;
+    }
     
 }

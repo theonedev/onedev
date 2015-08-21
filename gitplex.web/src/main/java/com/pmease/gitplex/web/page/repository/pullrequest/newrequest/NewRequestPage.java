@@ -387,7 +387,7 @@ public class NewRequestPage extends PullRequestPage {
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
-				oldRev, newRev, filterPath, diffOption.getLineProcessor(), 
+				oldRev, newRev, filterPath, null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode(), null);
 		diffPanel.setOutputMarkupId(true);
 		return diffPanel;

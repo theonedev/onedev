@@ -51,6 +51,7 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.comment.Comment;
 import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
@@ -162,8 +163,8 @@ public class TextDiffPanel extends Panel {
 				int index = params.getParameterValue("index").toInt();
 				Integer lastContextSize = contextSizes.get(index);
 				if (lastContextSize == null)
-					lastContextSize = Constants.DIFF_DEFAULT_CONTEXT_SIZE;
-				int contextSize = lastContextSize + Constants.DIFF_EXPAND_CONTEXT_SIZE;
+					lastContextSize = PullRequestComment.DIFF_CONTEXT_SIZE;
+				int contextSize = lastContextSize + Constants.DIFF_EXPAND_SIZE;
 				contextSizes.put(index, contextSize);
 				
 				StringBuilder builder = new StringBuilder();
@@ -339,7 +340,7 @@ public class TextDiffPanel extends Panel {
 	}
 
 	private String renderDiffs() {
-		int contextSize = Constants.DIFF_DEFAULT_CONTEXT_SIZE;
+		int contextSize = PullRequestComment.DIFF_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
 		builder.append("<colgroup><col width='40'></col>");
 		if (diffMode == DiffMode.UNIFIED)

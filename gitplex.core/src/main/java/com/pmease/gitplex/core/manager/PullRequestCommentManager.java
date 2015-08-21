@@ -10,7 +10,7 @@ public interface PullRequestCommentManager {
 	 * @param comment
 	 *			comment to be updated 
 	 */
-	void updateInline(PullRequestComment comment);
+	void updateInlineInfo(PullRequestComment comment);
 	
 	void save(PullRequestComment comment, boolean notify);
 	

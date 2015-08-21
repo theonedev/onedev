@@ -79,7 +79,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 						PullRequest request = dao.load(PullRequest.class, requestId);
 						for (PullRequestComment comment: request.getComments()) {
 							if (comment.getInlineInfo() != null)
-								pullRequestCommentManager.updateInline(comment);
+								pullRequestCommentManager.updateInlineInfo(comment);
 						}
 					}
 					

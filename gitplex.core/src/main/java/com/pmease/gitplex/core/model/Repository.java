@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -28,6 +29,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
@@ -43,20 +46,24 @@ import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.OrTreeFilter;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.FS;
+import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Markdown;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.Change;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
@@ -67,7 +74,6 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.LockUtils;
-import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
@@ -133,7 +139,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Map<BlobIdent, Blob> blobCache;
     
-    private transient Map<CommitRange, List<Change>> changesCache;
+    private transient Map<DiffKey, List<DiffEntry>> diffCache;
     
     private transient Map<String, Commit> commitCache;
     
@@ -538,17 +544,34 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 	
-	public List<Change> getChanges(String fromCommit, String toCommit) {
-		if (changesCache == null)
-			changesCache = new HashMap<>();
+	public List<DiffEntry> getDiffs(String oldRev, String newRev, boolean detectRenames, String...paths) {
+		if (diffCache == null)
+			diffCache = new HashMap<>();
 		
-		CommitRange range = new CommitRange(fromCommit, toCommit);
-		List<Change> changes = changesCache.get(range);
-		if (changes == null) {
-			changes = git().listFileChanges(fromCommit, toCommit, null, true);
-			changesCache.put(range, changes);
+		DiffKey key = new DiffKey(oldRev, newRev, detectRenames, paths);
+		List<DiffEntry> diffs = diffCache.get(key);
+		if (diffs == null) {
+			try (	FileRepository jgitRepo = openAsJGitRepo();
+					DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
+		    	diffFormatter.setRepository(jgitRepo);
+		    	diffFormatter.setDetectRenames(detectRenames);
+				AnyObjectId oldCommitId = getObjectId(oldRev);
+				AnyObjectId newCommitId = getObjectId(newRev);
+				if (paths.length >= 2) {
+					List<TreeFilter> pathFilters = new ArrayList<>();
+					for (String path: paths)
+						pathFilters.add(PathFilter.create(path));
+					diffFormatter.setPathFilter(OrTreeFilter.create(pathFilters));
+				} else if (paths.length == 1) {
+					diffFormatter.setPathFilter(PathFilter.create(paths[0]));
+				}
+		    	diffs = diffFormatter.scan(oldCommitId, newCommitId);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}			
+			diffCache.put(key, diffs);
 		}
-		return changes;
+		return diffs;
 	}
 	
 	public Commit getCommit(String commitHash) {
@@ -571,10 +594,38 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			commitCache.put(commit.getHash(), commit);
 	}
 
-	private static class CommitRange extends Pair<String, String> {
-		CommitRange(String fromCommit, String toCommit) {
-			super(fromCommit, toCommit);
+	private static class DiffKey implements Serializable {
+		String oldRev;
+		
+		String newRev;
+		
+		String[] paths;
+		
+		boolean detectRenames;
+		
+		DiffKey(String oldRev, String newRev, boolean detectRenames, String...paths) {
+			this.oldRev = oldRev;
+			this.newRev = newRev;
+			this.detectRenames = detectRenames;
+			this.paths = paths;
 		}
+		
+		public boolean equals(Object other) {
+			if (!(other instanceof DiffKey))
+				return false;
+			if (this == other)
+				return true;
+			DiffKey otherKey = (DiffKey) other;
+			return Objects.equal(oldRev, otherKey.oldRev) 
+					&& Objects.equal(newRev, otherKey.newRev) 
+					&& Objects.equal(paths, otherKey.paths)
+					&& Objects.equal(detectRenames, otherKey.detectRenames);
+		}
+
+		public int hashCode() {
+			return Objects.hashCode(oldRev, newRev, paths, detectRenames);
+		}
+		
 	}
 	
 	public FileRepository openAsJGitRepo() {

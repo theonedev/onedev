@@ -8,19 +8,23 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.jgit.diff.DiffEntry;
+
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.Change;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.DiffBlock;
+import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import static com.pmease.gitplex.core.model.PullRequestComment.DIFF_CONTEXT_SIZE;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
@@ -42,42 +46,76 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 
 	@Transactional
 	@Override
-	public void updateInline(PullRequestComment comment) {
+	public void updateInlineInfo(PullRequestComment comment) {
 		Preconditions.checkNotNull(comment.getInlineInfo());
 		
 		String latestCommitHash = comment.getRequest().getLatestUpdate().getHeadCommitHash();
 		if (!comment.getNewCommitHash().equals(latestCommitHash)) {
-			List<Change> changes = comment.getRepository().getChanges(comment.getNewCommitHash(), latestCommitHash);
+			List<DiffEntry> changes = comment.getRepository().getDiffs(comment.getNewCommitHash(), 
+					latestCommitHash, true);
 			String oldCommitHash = comment.getOldCommitHash();
 			if (oldCommitHash.equals(comment.getBlobIdent().revision)) {
-				BlobIdent newBlobIdent = null;
+				BlobIdent newCompareWith = null;
 				if (comment.getCompareWith().path != null) {
-					for (Change change: changes) {
-						if (comment.getCompareWith().path.equals(change.getOldBlobIdent().path)) {
-							newBlobIdent = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
+					for (DiffEntry change: changes) {
+						if (comment.getCompareWith().path.equals(change.getOldPath())) {
+							newCompareWith = GitUtils.getNewBlobIdent(change, latestCommitHash);
 							break;
 						}
 					}
 				} else {
-					for (Change change: changes) {
-						if (comment.getBlobIdent().path.equals(change.getNewBlobIdent().path)) {
-							newBlobIdent = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
+					for (DiffEntry diff: changes) {
+						if (comment.getBlobIdent().path.equals(diff.getNewPath())) {
+							newCompareWith = GitUtils.getNewBlobIdent(diff, latestCommitHash);
 							break;
 						}
 					}
 				}
-				if (newBlobIdent != null) {
-					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
-					Preconditions.checkNotNull(oldText);
-					comment.setCompareWith(newBlobIdent);
-				} else {
+				if (newCompareWith == null)
+					comment.setCompareWith(newCompareWith);
+				else 
 					comment.getCompareWith().revision = latestCommitHash;
+				
+				if (comment.getCompareWith().path != null) {
+					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
+					Blob.Text newText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
+					if (oldText != null && newText != null) {
+						List<DiffBlock<String>> diffs = DiffUtils.diff(oldText.getLines(), newText.getLines());
+						for (int i=0; i<diffs.size(); i++) {
+							DiffBlock<String> diff = diffs.get(i);
+							int startOffset = comment.getLine() - diff.getOldStart();
+							int endOffset = diff.getOldEnd() - comment.getLine();
+							if (startOffset >= 0 && endOffset > 0) {
+								if (diff.getOperation() == Operation.EQUAL) {
+									int newLine = startOffset + diff.getNewStart();
+									if (diffs.size() == 1) {
+										comment.setBlobIdent(comment.getCompareWith());
+										comment.setLine(newLine);
+									} else if (i == 0) {
+										if (endOffset > DIFF_CONTEXT_SIZE) {
+											comment.setBlobIdent(comment.getCompareWith());
+											comment.setLine(newLine);
+										}
+									} else if (i == diffs.size()-1) {
+										if (startOffset >= DIFF_CONTEXT_SIZE) {
+											comment.setBlobIdent(comment.getCompareWith());
+											comment.setLine(newLine);
+										}
+									} else if (endOffset > DIFF_CONTEXT_SIZE && startOffset >= DIFF_CONTEXT_SIZE){
+										comment.setBlobIdent(comment.getCompareWith());
+										comment.setLine(newLine);
+									}
+								}
+								break;
+							}
+						}
+					}
 				}
 			} else {
 				BlobIdent newBlobIdent = null;
-				for (Change change: changes) {
-					if (comment.getBlobIdent().path.equals(change.getOldBlobIdent().path)) {
-						newBlobIdent = new BlobIdent(latestCommitHash, change.getNewBlobIdent().path, change.getNewBlobIdent().mode);
+				for (DiffEntry diff: changes) {
+					if (comment.getBlobIdent().path.equals(diff.getOldPath())) {
+						newBlobIdent = GitUtils.getNewBlobIdent(diff, latestCommitHash);
 						break;
 					}
 				}

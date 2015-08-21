@@ -767,8 +767,10 @@ public class PullRequest extends AbstractEntity {
 	public List<String> getCommentables() {
 		List<String> commentables = new ArrayList<>();
 		commentables.add(getBaseCommitHash());
-		for (PullRequestUpdate update: getSortedUpdates())
-			commentables.add(update.getHeadCommitHash());
+		for (PullRequestUpdate update: getSortedUpdates()) {
+			for (Commit commit: update.getCommits())
+				commentables.add(commit.getHash());
+		}
 		return commentables;
 	}
 	

@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.jgit.lib.AnyObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.lang.diff.DiffBlock;
@@ -19,30 +18,18 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 @SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
 
-	private final ChangeType type;
+	protected final ChangeType type;
 	
-	private final BlobIdent oldBlobIdent;
+	protected final BlobIdent oldBlobIdent;
 	
-	private final BlobIdent newBlobIdent;
+	protected final BlobIdent newBlobIdent;
 	
 	private transient List<DiffBlock<List<CmToken>>> diffBlocks;
 	
 	public BlobChange(String oldCommitHash, String newCommitHash, DiffEntry diffEntry) {
 		type = diffEntry.getChangeType();
-		if (type != ChangeType.DELETE) {
-			newBlobIdent = new BlobIdent(newCommitHash, diffEntry.getNewPath(), diffEntry.getNewMode().getBits());
-			AnyObjectId id = diffEntry.getNewId().toObjectId();
-			newBlobIdent.id = id!=null?id.name():null;
-		} else {
-			newBlobIdent = new BlobIdent(newCommitHash, null, null);
-		}
-		if (type != ChangeType.ADD) {
-			oldBlobIdent = new BlobIdent(oldCommitHash, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());
-			AnyObjectId id = diffEntry.getOldId().toObjectId();
-			oldBlobIdent.id = id!=null?id.name():null;
-		} else {
-			oldBlobIdent = new BlobIdent(oldCommitHash, null, null);
-		}
+		oldBlobIdent = GitUtils.getOldBlobIdent(diffEntry, oldCommitHash);
+		newBlobIdent = GitUtils.getNewBlobIdent(diffEntry, newCommitHash);
 	}
 	
 	public ChangeType getType() {
@@ -61,6 +48,10 @@ public abstract class BlobChange implements Serializable {
 		return newBlobIdent.path!=null? newBlobIdent: oldBlobIdent;
 	}
 
+	public String getPath() {
+		return newBlobIdent.path != null? newBlobIdent.path: oldBlobIdent.path;
+	}
+	
 	public List<DiffBlock<List<CmToken>>> getDiffBlocks() {
 		if (diffBlocks == null) {
 			try {
@@ -125,10 +116,6 @@ public abstract class BlobChange implements Serializable {
 				deletions += diff.getUnits().size();
 		}
 		return deletions;
-	}
-	
-	public String getPath() {
-		return newBlobIdent.path != null? newBlobIdent.path: oldBlobIdent.path;
 	}
 	
 	public Blob getOldBlob() {

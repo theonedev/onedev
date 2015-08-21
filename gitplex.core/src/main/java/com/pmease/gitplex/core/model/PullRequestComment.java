@@ -35,6 +35,8 @@ import com.pmease.gitplex.core.manager.UserManager;
 @Entity
 public class PullRequestComment extends AbstractEntity implements InlineComment {
 	
+	public static final int DIFF_CONTEXT_SIZE = 3;
+
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	@Fetch(FetchMode.JOIN)
@@ -56,7 +58,7 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	@Embedded
 	private InlineInfo inlineInfo;
 	
-	private transient Pair<String, String> oldCommitAndNewCommit;
+	private transient Pair<String, String> oldAndNew;
 	
 	public PullRequest getRequest() {
 		return request;
@@ -128,18 +130,24 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		return reply;
 	}
 
-	private Pair<String, String> getOldCommitAndNewCommit() {
-		if (oldCommitAndNewCommit == null) {
-			List<String> commitHashes = getRequest().getCommentables();
-			int index = commitHashes.indexOf(getBlobIdent().revision);
-			int compareIndex = commitHashes.indexOf(getCompareWith().revision);
-			Preconditions.checkState(index != -1 && compareIndex != -1);
-			if (index <= compareIndex)
-				oldCommitAndNewCommit = new Pair<>(getBlobIdent().revision, getCompareWith().revision);
-			else 
-				oldCommitAndNewCommit = new Pair<>(getCompareWith().revision, getBlobIdent().revision);
+	private Pair<String, String> getOldAndNew() {
+		String rev = getBlobIdent().revision;
+		if (oldAndNew == null) {
+			if (getCompareWith() != null) {
+				List<String> commitHashes = getRequest().getCommentables();
+				String compareRev = getCompareWith().revision;
+				int index = commitHashes.indexOf(rev);
+				int compareIndex = commitHashes.indexOf(compareRev);
+				Preconditions.checkState(index != -1 && compareIndex != -1);
+				if (index <= compareIndex)
+					oldAndNew = new Pair<>(rev, compareRev);
+				else 
+					oldAndNew = new Pair<>(compareRev, rev);
+			} else {
+				oldAndNew = new Pair<>(rev, rev);
+			}
 		}
-		return oldCommitAndNewCommit;
+		return oldAndNew;
 	}
 	
 	public InlineInfo getInlineInfo() {
@@ -151,11 +159,11 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	}
 
 	public String getOldCommitHash() {
-		return getOldCommitAndNewCommit().getFirst();
+		return getOldAndNew().getFirst();
 	}
 	
 	public String getNewCommitHash() {
-		return getOldCommitAndNewCommit().getSecond();
+		return getOldAndNew().getSecond();
 	}
 
 	@Override

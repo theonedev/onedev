@@ -28,6 +28,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
@@ -86,6 +88,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private String newCommitHash;
 	
 	private String filterPath;
+	
+	private String comparePath;
 	
 	private Long commentId;
 	
@@ -287,21 +291,26 @@ public class RequestComparePage extends RequestDetailPage {
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					final IntegrationPreview preview = request.getIntegrationPreview();
-					if (preview != null && preview.getIntegrated() != null 
-							&& !getRepository().getChanges(preview.getRequestHead(), preview.getIntegrated()).isEmpty()) {
-						items.add(new ComparisonChoiceItem("Target Branch", "Integration Preview") {
+					if (preview != null && preview.getIntegrated() != null) {
+						try (FileRepository jgitRepo = getRepository().openAsJGitRepo();) {
+							List<DiffEntry> diffs = getRepository().getDiffs(
+									preview.getRequestHead(), preview.getIntegrated(), false);
+							if (!diffs.isEmpty()) {
+								items.add(new ComparisonChoiceItem("Target Branch", "Integration Preview") {
 
-							@Override
-							protected void onSelect(AjaxRequestTarget target) {
-								hide(target);
-								oldCommitHash = getPullRequest().getTarget().getHead();
-								newCommitHash = preview.getIntegrated();
-								getPageParameters().set(PARAM_OLD, oldCommitHash);
-								getPageParameters().set(PARAM_NEW, newCommitHash);
-								onStateChange(target);
+									@Override
+									protected void onSelect(AjaxRequestTarget target) {
+										hide(target);
+										oldCommitHash = getPullRequest().getTarget().getHead();
+										newCommitHash = preview.getIntegrated();
+										getPageParameters().set(PARAM_OLD, oldCommitHash);
+										getPageParameters().set(PARAM_NEW, newCommitHash);
+										onStateChange(target);
+									}
+									
+								});
 							}
-							
-						});
+						}
 					}
 				}
 
@@ -558,8 +567,10 @@ public class RequestComparePage extends RequestDetailPage {
 				oldCommitHash = comment.getOldCommitHash();
 			if (newCommitHash == null)
 				newCommitHash = comment.getNewCommitHash();
-			if (filterPath == null)
+			if (filterPath == null) {
 				filterPath = comment.getBlobIdent().path;
+				comparePath = comment.getCompareWith().path;
+			}
 		}
 		if (oldCommitHash == null)
 			oldCommitHash = getPullRequest().getBaseCommitHash();
@@ -657,9 +668,9 @@ public class RequestComparePage extends RequestDetailPage {
 			};
 		};
 		
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("compareResult", repoModel, 
-				oldCommitHash, newCommitHash, filterPath, diffOption.getLineProcessor(), 
-				diffOption.getDiffMode(), commentSupport);
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("compareResult", 
+				repoModel, oldCommitHash, newCommitHash, filterPath, comparePath, 
+				diffOption.getLineProcessor(), diffOption.getDiffMode(), commentSupport);
 		diffPanel.setOutputMarkupId(true);
 		if (target != null) {
 			replace(diffPanel);

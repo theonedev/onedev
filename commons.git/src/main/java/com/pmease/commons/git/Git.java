@@ -30,7 +30,6 @@ import com.pmease.commons.git.command.IsTreeLinkCommand;
 import com.pmease.commons.git.command.ListBranchCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
 import com.pmease.commons.git.command.ListCherriesCommand;
-import com.pmease.commons.git.command.ListFileChangesCommand;
 import com.pmease.commons.git.command.ListHeadCommitCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
@@ -162,12 +161,6 @@ public class Git implements Serializable {
 
 	public Collection<String> listChangedFiles(String fromRev, String toRev, @Nullable String path) {
 		return new ListChangedFilesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path).call();
-	}
-
-	public List<Change> listFileChanges(String fromRev, String toRev, @Nullable String path,
-			boolean findRenames) {
-		return new ListFileChangesCommand(repoDir).fromRev(fromRev).toRev(toRev).path(path)
-				.findRenames(findRenames).call();
 	}
 
 	public Git checkout(String revision, @Nullable String newBranch) {
