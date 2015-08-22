@@ -1,7 +1,7 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -10,6 +10,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 
 @SuppressWarnings("serial")
@@ -32,15 +33,24 @@ class InlineCommentActivityPanel extends Panel {
 			@Override
 			protected Component newActionComponent(String id) {
 				Fragment fragment = new Fragment(id, "actionFrag", InlineCommentActivityPanel.this);
-				PullRequestComment comment = commentModel.getObject();
-				final String path = comment.getInlineInfo().getBlobIdent().path;
-				PageParameters params = RequestComparePage.paramsOf(
-						comment.getRequest(), comment, null, null, path);
-				fragment.add(new BookmarkablePageLink<Void>("fileLink", RequestComparePage.class, params) {
+				fragment.add(new Link<Void>("fileLink") {
 
 					@Override
+					public void onClick() {
+						PageParameters params;
+						PullRequestComment comment = commentModel.getObject();
+						if (comment.getBlobIdent().equals(comment.getCompareWith())) {
+							params = RepoFilePage.paramsOf(comment.getRepository(), comment.getBlobIdent());
+							setResponsePage(RepoFilePage.class, params);
+						} else {
+							params = RequestComparePage.paramsOf(comment.getRequest(), comment, null, null, null);
+							setResponsePage(RequestComparePage.class, params);
+						}
+					}
+					
+					@Override
 					public IModel<?> getBody() {
-						return Model.of(path);
+						return Model.of(commentModel.getObject().getInlineInfo().getBlobIdent().path);
 					}
 					
 				});

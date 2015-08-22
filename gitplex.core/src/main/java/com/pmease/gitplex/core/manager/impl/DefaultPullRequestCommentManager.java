@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.ArrayList;
+import static com.pmease.gitplex.core.model.PullRequestComment.DIFF_CONTEXT_SIZE;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,6 @@ import com.pmease.gitplex.core.comment.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.model.PullRequestComment;
-import static com.pmease.gitplex.core.model.PullRequestComment.DIFF_CONTEXT_SIZE;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
@@ -55,30 +55,21 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					latestCommitHash, true);
 			String oldCommitHash = comment.getOldCommitHash();
 			if (oldCommitHash.equals(comment.getBlobIdent().revision)) {
-				BlobIdent newCompareWith = null;
-				if (comment.getCompareWith().path != null) {
-					for (DiffEntry change: changes) {
-						if (comment.getCompareWith().path.equals(change.getOldPath())) {
-							newCompareWith = GitUtils.getNewBlobIdent(change, latestCommitHash);
-							break;
-						}
-					}
-				} else {
-					for (DiffEntry diff: changes) {
-						if (comment.getBlobIdent().path.equals(diff.getNewPath())) {
-							newCompareWith = GitUtils.getNewBlobIdent(diff, latestCommitHash);
-							break;
-						}
+				BlobIdent newBlobIdent = null;
+				String comparePath = comment.getCompareWith().path;
+				for (DiffEntry change: changes) {
+					if (comparePath != null && comparePath.equals(change.getOldPath()) 
+							|| comparePath == null && comment.getBlobIdent().path.equals(change.getNewPath())) {
+						newBlobIdent = GitUtils.getNewBlobIdent(change, latestCommitHash);
+						break;
 					}
 				}
-				if (newCompareWith == null)
-					comment.setCompareWith(newCompareWith);
-				else 
-					comment.getCompareWith().revision = latestCommitHash;
-				
-				if (comment.getCompareWith().path != null) {
+				if (newBlobIdent != null) {
+					comment.setCompareWith(newBlobIdent);
 					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
-					Blob.Text newText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
+					Blob.Text newText = null;
+					if (comment.getCompareWith().path != null)
+						newText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
 					if (oldText != null && newText != null) {
 						List<DiffBlock<String>> diffs = DiffUtils.diff(oldText.getLines(), newText.getLines());
 						for (int i=0; i<diffs.size(); i++) {
@@ -89,20 +80,20 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 								if (diff.getOperation() == Operation.EQUAL) {
 									int newLine = startOffset + diff.getNewStart();
 									if (diffs.size() == 1) {
-										comment.setBlobIdent(comment.getCompareWith());
+										comment.setBlobIdent(new BlobIdent(comment.getCompareWith()));
 										comment.setLine(newLine);
 									} else if (i == 0) {
 										if (endOffset > DIFF_CONTEXT_SIZE) {
-											comment.setBlobIdent(comment.getCompareWith());
+											comment.setBlobIdent(new BlobIdent(comment.getCompareWith()));
 											comment.setLine(newLine);
 										}
 									} else if (i == diffs.size()-1) {
 										if (startOffset >= DIFF_CONTEXT_SIZE) {
-											comment.setBlobIdent(comment.getCompareWith());
+											comment.setBlobIdent(new BlobIdent(comment.getCompareWith()));
 											comment.setLine(newLine);
 										}
 									} else if (endOffset > DIFF_CONTEXT_SIZE && startOffset >= DIFF_CONTEXT_SIZE){
-										comment.setBlobIdent(comment.getCompareWith());
+										comment.setBlobIdent(new BlobIdent(comment.getCompareWith()));
 										comment.setLine(newLine);
 									}
 								}
@@ -110,6 +101,8 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 							}
 						}
 					}
+				} else {
+					comment.getCompareWith().revision = latestCommitHash;
 				}
 			} else {
 				BlobIdent newBlobIdent = null;
@@ -121,23 +114,43 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 				}
 				if (newBlobIdent != null) {
 					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
-					Preconditions.checkNotNull(oldText);
-					List<String> newLines;
-					if (newBlobIdent.path != null) {
-						Blob.Text newText = comment.getRepository().getBlob(newBlobIdent).getText();
-						if (newText != null)
-							newLines = newText.getLines();
-						else
-							newLines = null;
-					} else {
-						newLines = new ArrayList<>();
-					}
-					if (newLines != null) {
-						List<DiffBlock<String>> diffs = DiffUtils.diff(oldText.getLines(), newLines);
+					Blob.Text newText = null;
+					if (newBlobIdent.path != null)
+						newText = comment.getRepository().getBlob(newBlobIdent).getText();
+					if (oldText != null && newText != null) {
+						List<DiffBlock<String>> diffs = DiffUtils.diff(oldText.getLines(), newText.getLines());
 						Integer newLineNo = DiffUtils.mapLines(diffs).get(comment.getLine());
 						if (newLineNo != null) {
 							comment.setBlobIdent(newBlobIdent);
 							comment.setLine(newLineNo);
+							
+							oldText = null;
+							if (comment.getCompareWith().path != null)
+								oldText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
+							if (oldText != null) {
+								diffs = DiffUtils.diff(oldText.getLines(), newText.getLines());
+								for (int i=0; i<diffs.size(); i++) {
+									DiffBlock<String> diff = diffs.get(i);
+									int startOffset = comment.getLine() - diff.getNewStart();
+									int endOffset = diff.getNewEnd() - comment.getLine();
+									if (startOffset >= 0 && endOffset > 0) {
+										if (diff.getOperation() == Operation.EQUAL) {
+											if (diffs.size() == 1) {
+												comment.setCompareWith(new BlobIdent(comment.getBlobIdent()));
+											} else if (i == 0) {
+												if (endOffset > DIFF_CONTEXT_SIZE) 
+													comment.setCompareWith(new BlobIdent(comment.getBlobIdent()));
+											} else if (i == diffs.size()-1) {
+												if (startOffset >= DIFF_CONTEXT_SIZE) 
+													comment.setCompareWith(new BlobIdent(comment.getBlobIdent()));
+											} else if (endOffset > DIFF_CONTEXT_SIZE && startOffset >= DIFF_CONTEXT_SIZE){
+												comment.setCompareWith(new BlobIdent(comment.getBlobIdent()));
+											}
+										}
+										break;
+									}
+								}
+							}
 						} else {
 							comment.setCompareWith(newBlobIdent);
 						}

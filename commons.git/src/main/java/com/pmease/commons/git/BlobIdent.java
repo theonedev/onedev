@@ -30,8 +30,11 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	public BlobIdent() {
 	}
 	
-	public BlobIdent(BlobIdent copy) {
-		this(copy.revision, copy.path, copy.mode);
+	public BlobIdent(BlobIdent blobIdent) {
+		revision = blobIdent.revision;
+		path = blobIdent.path;
+		mode = blobIdent.mode;
+		id = blobIdent.id;
 	}
 	
 	public BlobIdent(@Nullable String revision, @Nullable String path, @Nullable Integer mode) {
