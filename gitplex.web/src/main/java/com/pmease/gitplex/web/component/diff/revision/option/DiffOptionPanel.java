@@ -24,6 +24,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
@@ -84,6 +85,8 @@ public abstract class DiffOptionPanel extends Panel {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+						if (getDirtyContainer() != null)
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
 					}
 					
 				};
@@ -123,6 +126,8 @@ public abstract class DiffOptionPanel extends Panel {
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
 							attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+							if (getDirtyContainer() != null)
+								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
 						}
 
 						@Override
@@ -148,6 +153,8 @@ public abstract class DiffOptionPanel extends Panel {
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
 					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+					if (getDirtyContainer() != null)
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
 				}
 				
 				@Override
@@ -205,5 +212,9 @@ public abstract class DiffOptionPanel extends Panel {
 	public DiffMode getDiffMode() {
 		return diffMode;
 	}
+	
+	protected Component getDirtyContainer() {
+		return null;
+	};
 	
 }

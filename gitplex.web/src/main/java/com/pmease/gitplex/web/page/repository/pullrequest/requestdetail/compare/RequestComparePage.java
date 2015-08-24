@@ -39,6 +39,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -99,6 +100,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private WebMarkupContainer compareOptions;
 	
 	private DiffOptionPanel diffOption;
+	
+	private Component compareResult;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -391,6 +394,11 @@ public class RequestComparePage extends RequestDetailPage {
 			protected void onDiffModeChange(AjaxRequestTarget target) {
 				newCompareResult(target);
 			}
+
+			@Override
+			protected Component getDirtyContainer() {
+				return compareResult;
+			}
 			
 		});
 		newCompareResult(null);
@@ -507,6 +515,7 @@ public class RequestComparePage extends RequestDetailPage {
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
 							attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(compareResult));
 						}
 
 						@Override
@@ -555,6 +564,7 @@ public class RequestComparePage extends RequestDetailPage {
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
 					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(compareResult));
 				}
 
 				@Override
@@ -682,7 +692,7 @@ public class RequestComparePage extends RequestDetailPage {
 			};
 		};
 		
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("compareResult", 
+		compareResult = new RevisionDiffPanel("compareResult", 
 				repoModel, oldCommitHash, newCommitHash, path, comparePath, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode(), 
 				commentSupport) {
@@ -702,12 +712,12 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		};
-		diffPanel.setOutputMarkupId(true);
+		compareResult.setOutputMarkupId(true);
 		if (target != null) {
-			replace(diffPanel);
-			target.add(diffPanel);
+			replace(compareResult);
+			target.add(compareResult);
 		} else {
-			add(diffPanel);
+			add(compareResult);
 		}
 	}
 	

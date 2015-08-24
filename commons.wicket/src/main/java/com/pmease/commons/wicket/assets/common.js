@@ -418,9 +418,13 @@ pmease.commons = {
 		 * called if underlying data has been changed but no form fields are updated, for instance 
 		 * when sorting the elements inside a form. 
 		 */
-		markDirty: function(componentId) {
-			var $component = $("#" + componentId);
-			$component.closest("form").addClass("dirty").find(".dirty-aware").removeAttr("disabled");
+		markDirty: function(triggerId) {
+			var $trigger = $("#" + triggerId);
+			$trigger.closest("form.leave-confirm").addClass("dirty").find(".dirty-aware").removeAttr("disabled");
+		},
+		markClean: function(triggerId) {
+			var $trigger = $("#" + triggerId);
+			$trigger.closest("form.leave-confirm").removeClass("dirty").find(".dirty-aware").attr("disabled", "disabled");
 		},
 		removeDirty: function(triggerId) {
 			$(function() {
@@ -438,7 +442,7 @@ pmease.commons = {
 				$trigger.unbind('click');
 
 				$trigger.click(function(event){
-					$("form.leave-confirm").removeClass("dirty");
+					pmease.commons.form.markClean(triggerId);
 					previousClick(event);
 				});
 			});
@@ -484,8 +488,14 @@ pmease.commons = {
 			});
 			
 		},
-		confirmLeave: function() {
-			if ($("form.leave-confirm.dirty").length != 0) 
+		confirmLeave: function(containerId) {
+			var $container;
+			if (containerId)
+				$container = $("#" + containerId);
+			else
+				$container = $(document);
+			var dirty = "form.leave-confirm.dirty";
+			if ($container.is(dirty) || $container.find(dirty).length != 0) 
 				return confirm("There are unsaved changes, do you want to discard and continue?");
 			else
 				return true;

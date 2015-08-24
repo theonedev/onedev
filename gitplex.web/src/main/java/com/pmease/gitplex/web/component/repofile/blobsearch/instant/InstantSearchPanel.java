@@ -34,11 +34,11 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
@@ -122,8 +122,14 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new DirtyAwareAjaxLink<Void>("link") {
+						AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+							}
+							
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								selectHit(target, hit);
@@ -230,8 +236,14 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new DirtyAwareAjaxLink<Void>("link") {
+						AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+							}
+							
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								selectHit(target, hit);

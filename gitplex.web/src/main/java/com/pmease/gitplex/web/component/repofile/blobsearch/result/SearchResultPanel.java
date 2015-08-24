@@ -33,8 +33,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
@@ -175,7 +175,13 @@ public abstract class SearchResultPanel extends Panel {
 		String message = "too many matches, displaying " + MAX_QUERY_ENTRIES + " of them";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
-		add(prevMatchLink = new DirtyAwareAjaxLink<Void>("prevMatch") {
+		add(prevMatchLink = new AjaxLink<Void>("prevMatch") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -192,8 +198,14 @@ public abstract class SearchResultPanel extends Panel {
 		});
 		prevMatchLink.setOutputMarkupId(true);
 		
-		add(nextMatchLink = new DirtyAwareAjaxLink<Void>("nextMatch") {
+		add(nextMatchLink = new AjaxLink<Void>("nextMatch") {
 
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
+			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onNextMatch(target);
@@ -329,12 +341,13 @@ public abstract class SearchResultPanel extends Panel {
 					
 				});
 				
-				blobItem.add(new DirtyAwareAjaxLink<Void>("blobLink") {
+				blobItem.add(new AjaxLink<Void>("blobLink") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
 					}
 					
 					@Override
@@ -375,7 +388,7 @@ public abstract class SearchResultPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<QueryHit> hitItem) {
 						final QueryHit hit = hitItem.getModelObject();
-						hitItem.add(new DirtyAwareAjaxLink<Void>("hitLink") {
+						hitItem.add(new AjaxLink<Void>("hitLink") {
 
 							@Override
 							protected void onInitialize() {
@@ -405,6 +418,7 @@ public abstract class SearchResultPanel extends Panel {
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 								super.updateAjaxAttributes(attributes);
 								attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
+								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
 							}
 							
 							@Override

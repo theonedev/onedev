@@ -36,6 +36,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
@@ -200,6 +201,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(RevisionDiffPanel.this));
 					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
 				}
 

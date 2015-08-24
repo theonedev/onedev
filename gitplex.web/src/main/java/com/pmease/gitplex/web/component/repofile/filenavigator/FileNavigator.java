@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
@@ -43,9 +44,9 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
@@ -105,8 +106,14 @@ public abstract class FileNavigator extends Panel {
 			@Override
 			protected void populateItem(final ListItem<BlobIdent> item) {
 				final BlobIdent blobIdent = item.getModelObject();
-				AjaxLink<Void> link = new DirtyAwareAjaxLink<Void>("link") {
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					}
+					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						onSelect(target, blobIdent);
@@ -209,8 +216,14 @@ public abstract class FileNavigator extends Panel {
 
 								fragment.add(new BlobIcon("icon", model));
 								
-								AjaxLink<Void> link = new DirtyAwareAjaxLink<Void>("link") {
+								AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+									}
+									
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										onSelect(target, model.getObject());

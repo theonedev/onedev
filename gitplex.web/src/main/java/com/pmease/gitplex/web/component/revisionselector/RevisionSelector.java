@@ -10,6 +10,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -39,11 +40,11 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.component.DirtyAwareAjaxLink;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -286,8 +287,14 @@ public abstract class RevisionSelector extends Panel {
 
 			@Override
 			protected void populateItem(final ListItem<String> item) {
-				AjaxLink<Void> link = new DirtyAwareAjaxLink<Void>("link") {
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					}
+					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						selectRevision(target, item.getModelObject());

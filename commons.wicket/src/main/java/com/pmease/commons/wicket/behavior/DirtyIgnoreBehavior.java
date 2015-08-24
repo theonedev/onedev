@@ -47,7 +47,7 @@ public class DirtyIgnoreBehavior extends Behavior {
 							}
 			
 							String decoratedScript = String.format(
-									"$('form.leave-confirm').removeClass('dirty'); %s", script);
+									"pmease.commons.form.markClean('%s');", component.getMarkupId(true));
 							tag.put("onclick", decoratedScript);
 						}
 					}
@@ -61,8 +61,9 @@ public class DirtyIgnoreBehavior extends Behavior {
 						super.renderHead(component, response);
 
 						if (component.isEnabled()) {
-							String script = String.format("pmease.commons.form.removeDirty('%s')", component.getMarkupId());
-
+							String script;
+							
+							script = String.format("pmease.commons.form.removeDirty('%s')", component.getMarkupId(true));
 							AjaxRequestTarget target = component.getRequestCycle().find(AjaxRequestTarget.class);
 							if (target == null) 
 								response.render(OnDomReadyHeaderItem.forScript(script));
