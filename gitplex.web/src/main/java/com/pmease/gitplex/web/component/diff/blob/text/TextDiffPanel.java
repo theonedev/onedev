@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -608,6 +609,8 @@ public class TextDiffPanel extends Panel {
 					commentRows.remove(this);
 					String script = String.format("gitplex.textdiff.removeComment('%s');", getMarkupId());
 					commentRemoved.getTarget().appendJavaScript(script);
+					
+					send(TextDiffPanel.this, Broadcast.BUBBLE, commentRemoved);
 				} 
 			}
 
