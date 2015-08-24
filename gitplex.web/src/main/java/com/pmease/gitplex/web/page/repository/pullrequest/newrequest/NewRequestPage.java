@@ -87,7 +87,7 @@ public class NewRequestPage extends PullRequestPage {
 	
 	private DiffOptionPanel diffOption;
 	
-	private String filterPath;
+	private String path;
 	
 	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
 		PageParameters params = paramsOf(repository);
@@ -332,29 +332,18 @@ public class NewRequestPage extends PullRequestPage {
 	private Component newComparePanel() {
 		final Fragment fragment = new Fragment(TAB_PANEL_ID, "compareFrag", this);
 		
-		PullRequest request = getPullRequest();
-		String newRev = request.getLatestUpdate().getHeadCommitHash();
-		
-		diffOption = new DiffOptionPanel("diffOption", repoModel, new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
+		diffOption = new DiffOptionPanel("diffOption", repoModel, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return filterPath;
-			}
-
-			@Override
-			public void setObject(String object) {
-				filterPath = object;
+				return getPullRequest().getLatestUpdate().getHeadCommitHash();
 			}
 			
-		}, newRev) {
+		}) {
 
 			@Override
-			protected void onFilterPathChange(AjaxRequestTarget target) {
+			protected void onSelectPath(AjaxRequestTarget target, String path) {
+				NewRequestPage.this.path = path;
 				RevisionDiffPanel diffPanel = newRevDiffPanel();
 				fragment.replace(diffPanel);
 				target.add(diffPanel);
@@ -387,8 +376,18 @@ public class NewRequestPage extends PullRequestPage {
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
-				oldRev, newRev, filterPath, null, diffOption.getLineProcessor(), 
-				diffOption.getDiffMode(), null);
+				oldRev, newRev, path, null, diffOption.getLineProcessor(), 
+				diffOption.getDiffMode(), null) {
+
+			@Override
+			protected void onClearPath(AjaxRequestTarget target) {
+				path = null;
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				replaceWith(diffPanel);
+				target.add(diffPanel);
+			}
+			
+		};
 		diffPanel.setOutputMarkupId(true);
 		return diffPanel;
 	}

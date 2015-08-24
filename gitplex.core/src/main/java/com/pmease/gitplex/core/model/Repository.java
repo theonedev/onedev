@@ -594,40 +594,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			commitCache.put(commit.getHash(), commit);
 	}
 
-	private static class DiffKey implements Serializable {
-		String oldRev;
-		
-		String newRev;
-		
-		String[] paths;
-		
-		boolean detectRenames;
-		
-		DiffKey(String oldRev, String newRev, boolean detectRenames, String...paths) {
-			this.oldRev = oldRev;
-			this.newRev = newRev;
-			this.detectRenames = detectRenames;
-			this.paths = paths;
-		}
-		
-		public boolean equals(Object other) {
-			if (!(other instanceof DiffKey))
-				return false;
-			if (this == other)
-				return true;
-			DiffKey otherKey = (DiffKey) other;
-			return Objects.equal(oldRev, otherKey.oldRev) 
-					&& Objects.equal(newRev, otherKey.newRev) 
-					&& Objects.equal(paths, otherKey.paths)
-					&& Objects.equal(detectRenames, otherKey.detectRenames);
-		}
-
-		public int hashCode() {
-			return Objects.hashCode(oldRev, newRev, paths, detectRenames);
-		}
-		
-	}
-	
 	public FileRepository openAsJGitRepo() {
 		try {
 			return (FileRepository) RepositoryCache.open(FileKey.exact(git().repoDir(), FS.DETECTED), true);
@@ -767,4 +733,38 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			listener.onRefUpdate(this, GitUtils.branch2ref(branch), null);
     }
     
+	private static class DiffKey implements Serializable {
+		String oldRev;
+		
+		String newRev;
+		
+		String[] paths;
+		
+		boolean detectRenames;
+		
+		DiffKey(String oldRev, String newRev, boolean detectRenames, String...paths) {
+			this.oldRev = oldRev;
+			this.newRev = newRev;
+			this.detectRenames = detectRenames;
+			this.paths = paths;
+		}
+		
+		public boolean equals(Object other) {
+			if (!(other instanceof DiffKey))
+				return false;
+			if (this == other)
+				return true;
+			DiffKey otherKey = (DiffKey) other;
+			return Objects.equal(oldRev, otherKey.oldRev) 
+					&& Objects.equal(newRev, otherKey.newRev) 
+					&& Objects.equal(paths, otherKey.paths)
+					&& Objects.equal(detectRenames, otherKey.detectRenames);
+		}
+
+		public int hashCode() {
+			return Objects.hashCode(oldRev, newRev, paths, detectRenames);
+		}
+		
+	}
+	
 }

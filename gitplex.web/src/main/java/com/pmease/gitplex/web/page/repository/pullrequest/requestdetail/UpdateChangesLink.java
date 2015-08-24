@@ -21,7 +21,7 @@ public class UpdateChangesLink extends BookmarkablePageLink<Void> {
 	private static PageParameters paramsOf(PullRequestUpdate update) {
 		PullRequest request = update.getRequest();
 		PageParameters params = RequestComparePage.paramsOf(
-				request, null, update.getBaseCommitHash(), update.getHeadCommitHash(), null);
+				request, update.getBaseCommitHash(), update.getHeadCommitHash(), null);
 		return params;
 	}
 

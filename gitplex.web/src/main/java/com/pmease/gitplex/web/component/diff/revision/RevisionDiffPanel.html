@@ -1,8 +1,8 @@
 <wicket:panel>
 	<div class="revision-diff">
 		<div class="title">
-			Total <a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files</a>
-			<span wicket:id="filterPath"></span>
+			Total <a onclick="$(this).closest('.revision-diff').find('.diff-stats').toggle();$(document.body).trigger('sticky_kit:recalc');return false;"><span wicket:id="totalChanged"></span> changed files </a>
+			<span wicket:id="filterPath"></span> <a wicket:id="clearPath" title="Clear filter path"><i class="fa fa-times"></i></a>
 		</div>
 		<div wicket:id="tooManyChanges" class="alert alert-warning">Sorry we are unable to display the full diff as there are too many changes</div>
 		<ul class="diff-stats list-unstyled">

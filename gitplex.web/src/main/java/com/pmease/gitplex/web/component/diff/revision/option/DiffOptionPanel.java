@@ -13,8 +13,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -45,21 +43,17 @@ public abstract class DiffOptionPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<String> filterPathModel;
-	
-	private final String newRev;
+	private final IModel<String> newRevModel;
 	
 	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
 	private DiffMode diffMode;
 	
-	public DiffOptionPanel(String id, IModel<Repository> repoModel, 
-			IModel<String> filterPathModel, String newRev) {
+	public DiffOptionPanel(String id, IModel<Repository> repoModel, IModel<String> newRevModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.newRev = newRev;
-		this.filterPathModel = filterPathModel;
+		this.newRevModel = newRevModel;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_DIFF_MODE);
@@ -70,52 +64,21 @@ public abstract class DiffOptionPanel extends Panel {
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		DropdownPanel filterByDropdown = new DropdownPanel("filterByDropdown", true) {
+	protected void onBeforeRender() {
+		// replace filter dropdown at render time in order to update it for instance 
+		// when pull request is updated with new commit in request compare page
+		DropdownPanel filterDropdown = new DropdownPanel("filterDropdown", true) {
 
 			@Override
 			protected Component newContent(String id) {
-				Fragment fragment = new Fragment(id, "filterPathFrag", DiffOptionPanel.this);
-				WebMarkupContainer current = new WebMarkupContainer("current") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(filterPathModel.getObject() != null);
-					}
-					
-				};
-				current.add(new Label("path", filterPathModel));
-				current.add(new AjaxLink<Void>("clear") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						filterPathModel.setObject(null);
-						hide(target);
-						target.add(DiffOptionPanel.this);
-						onFilterPathChange(target);
-					}
-					
-				});
-				fragment.add(current);
-				
-				fragment.add(new PathSelector("selector", repoModel, newRev, FileMode.TYPE_TREE, 
+				return new PathSelector(id, repoModel, newRevModel.getObject(), FileMode.TYPE_TREE, 
 						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
 					
 					@Override
 					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-						filterPathModel.setObject(blobIdent.path);
 						hide(target);
 						target.add(DiffOptionPanel.this);
-						onFilterPathChange(target);
+						onSelectPath(target, blobIdent.path);
 					}
 
 					@Override
@@ -123,13 +86,19 @@ public abstract class DiffOptionPanel extends Panel {
 						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
 					}
 					
-				});
-				return fragment;
+				};
 			}
 			
 		};
-		add(filterByDropdown);
-		add(new WebMarkupContainer("filterBy").add(new DropdownBehavior(filterByDropdown)));
+		addOrReplace(filterDropdown);
+		addOrReplace(new WebMarkupContainer("filter").add(new DropdownBehavior(filterDropdown)));
+		
+		super.onBeforeRender();
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		MenuPanel lineProcessorMenu = new MenuPanel("lineProcessorMenu") {
 
@@ -210,7 +179,7 @@ public abstract class DiffOptionPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		filterPathModel.detach();
+		newRevModel.detach();
 		
 		super.onDetach();
 	}
@@ -223,7 +192,7 @@ public abstract class DiffOptionPanel extends Panel {
 				new CssResourceReference(DiffOptionPanel.class, "diff-option.css")));
 	}
 
-	protected abstract void onFilterPathChange(AjaxRequestTarget target);
+	protected abstract void onSelectPath(AjaxRequestTarget target, String path);
 
 	protected abstract void onLineProcessorChange(AjaxRequestTarget target);
 	

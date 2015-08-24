@@ -43,13 +43,13 @@ gitplex.textdiff = {
 		
 		var $commentLine = $("<tr class='comment'></tr>").insertAfter($currentLine);
 		if ($line.children().length == 3)
-			$commentLine.append("<td colspan='3' class='content comment'></td>");
+			$commentLine.append("<td colspan='3' tabindex='0' class='content comment'></td>");
 		else if (!$content.hasClass("old") && !$content.hasClass("new"))
-			$commentLine.append("<td colspan='4' class='content comment'></td>");
+			$commentLine.append("<td colspan='4' tabindex='0' class='content comment'></td>");
 		else if (newLineNo != -1)
-			$commentLine.append("<td class='number'>&nbsp;</td><td class='content'>&nbsp;</td><td colspan='2' class='content comment'></td>");
+			$commentLine.append("<td class='number'>&nbsp;</td><td tabindex='0' class='content'>&nbsp;</td><td colspan='2' tabindex='0' class='content comment'></td>");
 		else
-			$commentLine.append("<td colspan='2' class='content comment'></td><td class='number'>&nbsp;</td><td class='content'>&nbsp;</td>");
+			$commentLine.append("<td colspan='2' tabindex='0' class='content comment'></td><td class='number'>&nbsp;</td><td class='content' tabindex='0'>&nbsp;</td>");
 
 		$commentLine.children(".content.comment").append($comment);
 	}

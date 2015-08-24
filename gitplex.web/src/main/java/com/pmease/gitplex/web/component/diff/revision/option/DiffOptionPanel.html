@@ -1,10 +1,10 @@
 <wicket:panel>
 	<span class="diff-option clearfix">
 		<span class="pull-left">
-			<span wicket:id="filterBy" class="btn btn-sm btn-default" title="Filter changes by path">
+			<span wicket:id="filter" class="btn btn-sm btn-default" title="Filter changes by path">
 				Filter by <i class="fa fa-caret-down"></i>
 			</span>
-			<div wicket:id="filterByDropdown"></div>
+			<div wicket:id="filterDropdown"></div>
 		</span>
 		<span wicket:id="lineProcessor" class="line-process btn btn-sm btn-default pull-left" title="Line process options">White space <i class="caret"></i></span>
 		<div wicket:id="lineProcessorMenu"></div>
@@ -13,13 +13,4 @@
 			<a wicket:id="split" class="btn btn-sm btn-default">Split</a>
 		</span>
 	</span>
-	<wicket:fragment wicket:id="filterPathFrag">
-		<div class="filter-path">
-			<div wicket:id="current" class="current">
-				Filter path: <span wicket:id="path"></span> 
-				<a wicket:id="clear" title="Clear filter path"><i class="fa fa-times"></i></a>
-			</div>
-			<div wicket:id="selector"></div>
-		</div>
-	</wicket:fragment>
 </wicket:panel>

@@ -12,6 +12,9 @@ import java.util.concurrent.Future;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -33,6 +36,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.comment.InlineCommentSupport;
 import com.pmease.gitplex.core.model.Repository;
@@ -41,7 +45,7 @@ import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 
 @SuppressWarnings("serial")
-public class RevisionDiffPanel extends Panel {
+public abstract class RevisionDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
@@ -49,7 +53,7 @@ public class RevisionDiffPanel extends Panel {
 	
 	private final String newRev;
 	
-	private final String filterPath;
+	private final String path;
 	
 	private final String comparePath;
 	
@@ -66,8 +70,13 @@ public class RevisionDiffPanel extends Panel {
 		protected ChangesAndCount load() {
 			String oldCommitHash = repoModel.getObject().getObjectId(oldRev).name();
 			String newCommitHash = repoModel.getObject().getObjectId(newRev).name();
+			List<String> paths = new ArrayList<>();
+			if (path != null)
+				paths.add(path);
+			if (comparePath != null)
+				paths.add(comparePath);
 			List<DiffEntry> diffEntries = repoModel.getObject().getDiffs(oldCommitHash, newCommitHash,
-					true, filterPath, comparePath);
+					true, paths.toArray(new String[paths.size()]));
 			List<BlobChange> diffableChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
 	    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
@@ -158,14 +167,14 @@ public class RevisionDiffPanel extends Panel {
 	};
 	
 	public RevisionDiffPanel(String id, IModel<Repository> repoModel, String oldRev, String newRev, 
-			@Nullable String filterPath, @Nullable String comparePath, LineProcessor lineProcessor, 
+			@Nullable String path, @Nullable String comparePath, LineProcessor lineProcessor, 
 			DiffMode diffMode, @Nullable InlineCommentSupport commentSupport) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
-		this.filterPath = filterPath;
+		this.path = path;
 		this.comparePath = comparePath;
 		this.lineProcessor = lineProcessor;
 		this.diffMode = diffMode;
@@ -184,10 +193,26 @@ public class RevisionDiffPanel extends Panel {
 			}
 			
 		}));
-		if (filterPath != null)
-			add(new Label("filterPath", "under " + filterPath));
-		else
-			add(new Label("filterPath"));
+		if (path != null) {
+			add(new Label("filterPath", "filter by " + path));
+			add(new AjaxLink<Void>("clearPath") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+				}
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					onClearPath(target);
+				}
+				
+			});
+		} else {
+			add(new WebMarkupContainer("filterPath").setVisible(false));
+			add(new WebMarkupContainer("clearPath").setVisible(false));
+		}
 
 		add(new WebMarkupContainer("tooManyChanges") {
 
@@ -291,6 +316,8 @@ public class RevisionDiffPanel extends Panel {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
 	}
+	
+	protected abstract void onClearPath(AjaxRequestTarget target);
 
 	private static class ChangesAndCount {
 		

@@ -596,6 +596,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private Component newCommentRow(String id, CommentAndPos commentAndPos) {
+		final Long commentId = commentAndPos.comment.getId();
 		WebMarkupContainer row = new WebMarkupContainer(id) {
 
 			@Override
@@ -609,10 +610,20 @@ public class TextDiffPanel extends Panel {
 					commentRemoved.getTarget().appendJavaScript(script);
 				} 
 			}
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				if (commentSupport.getConcernedComment() != null 
+						&& commentId.equals(commentSupport.getConcernedComment().getId())) {
+					String script = String.format("$('#%s').closest('td').focus();", getMarkupId());
+					response.render(OnDomReadyHeaderItem.forScript(script));
+				}
+			}
 			
 		};
 		row.add(new UserLink("avatar", new UserModel(commentAndPos.comment.getUser()), AvatarMode.AVATAR));
-		final Long commentId = commentAndPos.comment.getId();
 		row.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
 
 			@Override
@@ -626,7 +637,6 @@ public class TextDiffPanel extends Panel {
 			row.add(AttributeAppender.append("class", " concerned"));
 		row.add(AttributeAppender.append("data-oldLineNo", commentAndPos.oldLineNo));
 		row.add(AttributeAppender.append("data-newLineNo", commentAndPos.newLineNo));
-		
 		row.setOutputMarkupId(true);
 		
 		return row;
