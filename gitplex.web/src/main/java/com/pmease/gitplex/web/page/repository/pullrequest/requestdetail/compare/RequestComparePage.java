@@ -156,26 +156,7 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		compareOptions = new WebMarkupContainer("compareOptions") {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					AjaxRequestTarget target = pullRequestChanged.getTarget();
-					target.add(compareOptions);
-					
-					PageParameters params = getPageParameters();
-					if (params.get(PARAM_NEW_COMMIT).toString() == null) {
-						newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
-						newCompareResult(target);
-					}
-				}
-			}
-			
-		};
+		compareOptions = new WebMarkupContainer("compareOptions");
 		compareOptions.add(new StickyBehavior());
 		
 		add(compareOptions);
@@ -401,6 +382,34 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		});
+		
+		add(new WebMarkupContainer("outdatedAlert") {
+
+			@Override
+			public void onEvent(final IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PageParameters params = getPageParameters();
+					if (params.get(PARAM_NEW_COMMIT).toString() == null) {
+						setVisible(true);
+						PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+						pullRequestChanged.getTarget().add(this);
+					}
+					
+				}
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				setVisible(false);
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+		});
+		
 		newCompareResult(null);
 	}
 

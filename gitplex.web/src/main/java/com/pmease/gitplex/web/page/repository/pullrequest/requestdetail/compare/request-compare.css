@@ -5,6 +5,12 @@
 	border: 1px solid #DDD;
 	margin-bottom: 16px;
 }
+#request-detail>.compare>.outdated {
+	margin-bottom: 12px;;
+}
+#request-detail>.compare>.outdated>a {
+	color: #8a6d3b;
+}
 .content>.commit-choice {
 	max-height: 400px; 
 	padding: 8px 0; 

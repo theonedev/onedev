@@ -65,41 +65,6 @@ public abstract class DiffOptionPanel extends Panel {
 	}
 
 	@Override
-	protected void onBeforeRender() {
-		// replace filter dropdown at render time in order to update it for instance 
-		// when pull request is updated with new commit in request compare page
-		DropdownPanel filterDropdown = new DropdownPanel("filterDropdown", true) {
-
-			@Override
-			protected Component newContent(String id) {
-				return new PathSelector(id, repoModel, newRevModel.getObject(), FileMode.TYPE_TREE, 
-						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
-					
-					@Override
-					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-						hide(target);
-						target.add(DiffOptionPanel.this);
-						onSelectPath(target, blobIdent.path);
-					}
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-						if (getDirtyContainer() != null)
-							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
-					}
-					
-				};
-			}
-			
-		};
-		addOrReplace(filterDropdown);
-		addOrReplace(new WebMarkupContainer("filter").add(new DropdownBehavior(filterDropdown)));
-		
-		super.onBeforeRender();
-	}
-
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
@@ -179,6 +144,34 @@ public abstract class DiffOptionPanel extends Panel {
 				
 			})));
 		}
+		
+		DropdownPanel filterDropdown = new DropdownPanel("filterDropdown", true) {
+
+			@Override
+			protected Component newContent(String id) {
+				return new PathSelector(id, repoModel, newRevModel.getObject(), FileMode.TYPE_TREE, 
+						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
+					
+					@Override
+					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
+						hide(target);
+						target.add(DiffOptionPanel.this);
+						onSelectPath(target, blobIdent.path);
+					}
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+						if (getDirtyContainer() != null)
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
+					}
+					
+				};
+			}
+			
+		};
+		add(filterDropdown);
+		add(new WebMarkupContainer("filter").add(new DropdownBehavior(filterDropdown)));
 		
 		setOutputMarkupId(true);
 	}
