@@ -9,6 +9,10 @@ public class HistoryState implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public Long requestId;
+	
+	public Long commentId;
+	
 	public BlobIdent file = new BlobIdent();
 	
 	public TokenPosition tokenPos;
@@ -18,10 +22,12 @@ public class HistoryState implements Serializable {
 	public HistoryState() {
 	}
 
-	public HistoryState(HistoryState copy) {
-		file = new BlobIdent(copy.file);
-		tokenPos = copy.tokenPos;
-		blame = copy.blame;
+	public HistoryState(HistoryState state) {
+		file = new BlobIdent(state.file);
+		tokenPos = state.tokenPos;
+		blame = state.blame;
+		requestId = state.requestId;
+		commentId = state.commentId;
 	}
 	
 }

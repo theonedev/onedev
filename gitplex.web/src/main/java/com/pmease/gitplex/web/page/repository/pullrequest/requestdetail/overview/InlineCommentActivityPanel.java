@@ -40,7 +40,7 @@ class InlineCommentActivityPanel extends Panel {
 						PageParameters params;
 						PullRequestComment comment = commentModel.getObject();
 						if (comment.getBlobIdent().equals(comment.getCompareWith())) {
-							params = RepoFilePage.paramsOf(comment.getRepository(), comment.getBlobIdent());
+							params = RepoFilePage.paramsOf(comment);
 							setResponsePage(RepoFilePage.class, params);
 						} else {
 							params = RequestComparePage.paramsOf(comment);

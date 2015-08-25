@@ -45,10 +45,13 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
@@ -69,6 +72,8 @@ import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIResizableJavaScriptReference;
 
 @SuppressWarnings("serial")
@@ -79,6 +84,10 @@ public class RepoFilePage extends RepositoryPage {
 	private static final String PARAM_PATH = "path";
 	
 	private static final String PARAM_BLAME = "blame";
+	
+	private static final String PARAM_REQUEST = "request";
+	
+	private static final String PARAM_COMMENT = "comment";
 	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
@@ -91,7 +100,7 @@ public class RepoFilePage extends RepositoryPage {
 	private static final String SEARCH_RESULD_ID = "searchResult";
 
 	private HistoryState state = new HistoryState();
-
+	
 	private Component revisionSelector;
 	
 	private Component fileNavigator;
@@ -135,6 +144,9 @@ public class RepoFilePage extends RepositoryPage {
 		}
 		
 		state.blame = params.get(PARAM_BLAME).toBoolean(false);
+		
+		state.commentId = getPageParameters().get(PARAM_COMMENT).toOptionalLong();
+		state.requestId = getPageParameters().get(PARAM_REQUEST).toOptionalLong();
 	}
 	
 	private ObjectId getCommitId() {
@@ -146,6 +158,7 @@ public class RepoFilePage extends RepositoryPage {
 		super.onInitialize();
 		
 		newRevisionSelector(null);
+		newCommentContext(null);
 		newFileNavigator(null, null);
 		newLastCommit(null);
 		newFileViewer(null);
@@ -261,6 +274,23 @@ public class RepoFilePage extends RepositoryPage {
 		
 	}
 	
+	public PullRequestComment getComment() {
+		if (state.commentId != null)
+			return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, state.commentId);
+		else
+			return null;
+	}
+	
+	public PullRequest getPullRequest() {
+		PullRequestComment comment = getComment();
+		if (comment != null)
+			return comment.getRequest();
+		else if (state.requestId != null)
+			return GitPlex.getInstance(Dao.class).load(PullRequest.class, state.requestId);
+		else
+			return null;
+	}
+	
 	private void newRevisionSelector(@Nullable AjaxRequestTarget target) {
 		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, state.file.revision) {
 
@@ -286,8 +316,11 @@ public class RepoFilePage extends RepositoryPage {
 					}
 				}
 
+				state.requestId = null;
+				state.commentId = null;
 				RepoFilePage.this.onSelect(target, blobIdent, null);
 				newRevisionSelector(target);
+				newCommentContext(target);
 				target.add(revisionIndexing);
 			}
 
@@ -298,6 +331,44 @@ public class RepoFilePage extends RepositoryPage {
 			target.add(revisionSelector);
 		} else {
 			add(revisionSelector);
+		}
+	}
+	
+	private void newCommentContext(@Nullable AjaxRequestTarget target) {
+		Component commentContext = new WebMarkupContainer("commentContext") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(getPullRequest() != null);
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new TooltipBehavior(new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						PullRequest request = getPullRequest();
+						String tooltip = String.format("Inline comments added/displayed in files of "
+								+ "this commit belong to pull request #%d (%s)", 
+								request.getId(), request.getTitle());
+						return tooltip;
+					}
+					
+				}, new TooltipConfig().withPlacement(Placement.bottom)));
+			}
+
+		};
+		commentContext.setOutputMarkupId(true);
+		if (target != null) {
+			replace(commentContext);
+			target.add(commentContext);
+		} else {
+			add(commentContext);
 		}
 	}
 	
@@ -586,6 +657,22 @@ public class RepoFilePage extends RepositoryPage {
 			params.set(PARAM_PATH, state.file.path);
 		if (state.blame)
 			params.set(PARAM_BLAME, state.blame);
+		if (state.commentId != null)
+			params.set(PARAM_COMMENT, state.commentId);
+		if (state.requestId != null)
+			params.set(PARAM_REQUEST, state.requestId);
+		return params;
+	}
+	
+	public static PageParameters paramsOf(PullRequest request, String revision, @Nullable String path) {
+		PageParameters params = paramsOf(request.getTargetRepo(), revision, path);
+		params.set(PARAM_REQUEST, request.getId());
+		return params;
+	}
+	
+	public static PageParameters paramsOf(PullRequestComment comment) {
+		PageParameters params = paramsOf(comment.getRepository(), comment.getBlobIdent());
+		params.set(PARAM_COMMENT, comment.getId());
 		return params;
 	}
 	
@@ -651,6 +738,7 @@ public class RepoFilePage extends RepositoryPage {
 
 		target.add(revisionIndexing);
 		newRevisionSelector(target);
+		newCommentContext(target);
 		newFileNavigator(target, null);
 		newLastCommit(target);
 		newFileViewer(target);

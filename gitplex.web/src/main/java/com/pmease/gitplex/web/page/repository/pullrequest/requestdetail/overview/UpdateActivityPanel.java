@@ -181,7 +181,7 @@ class UpdateActivityPanel extends Panel {
 				}
 				
 				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-						RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
+						RepoFilePage.paramsOf(updateModel.getObject().getRequest(), commit.getHash(), null)));
 			}
 			
 		});

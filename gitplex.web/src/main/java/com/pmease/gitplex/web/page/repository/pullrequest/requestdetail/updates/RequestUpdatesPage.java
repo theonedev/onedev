@@ -199,7 +199,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						
 						commitItem.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
 						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-								RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
+								RepoFilePage.paramsOf(getPullRequest(), commit.getHash(), null)));
 						
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 

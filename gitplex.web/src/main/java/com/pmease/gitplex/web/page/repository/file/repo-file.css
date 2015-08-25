@@ -5,6 +5,12 @@
 #repo-file>.head>.revision-selector {
 	padding: 0;
 }
+#repo-file>.head>.comment-context {
+	border-right: 1px solid #BBB;
+	padding: 5px 8px 0 8px;
+	height: 31px;
+	cursor: pointer;
+}
 #repo-file>.head>.revision-selector>a {
 	display: block;
 	border-right: 1px solid #BBB;
