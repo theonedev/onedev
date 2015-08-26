@@ -191,8 +191,10 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 		onSourceBranchUpdate(request, false);
 		
-		for (PullRequestListener listener: pullRequestListeners)
-			listener.onReopened(request, user, comment);
+		if (request.isOpen()) {
+			for (PullRequestListener listener: pullRequestListeners)
+				listener.onReopened(request, user, comment);
+		}
 	}
 
 	@Transactional
@@ -411,23 +413,26 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		
 		request.addUpdate(update);
 		pullRequestUpdateManager.save(update, notify);
+		closeIfMerged(request);
 
-		final Long requestId = request.getId();
-		dao.afterCommit(new Runnable() {
+		if (request.isOpen()) {
+			final Long requestId = request.getId();
+			dao.afterCommit(new Runnable() {
 
-			@Override
-			public void run() {
-				unitOfWork.asyncCall(new Runnable() {
+				@Override
+				public void run() {
+					unitOfWork.asyncCall(new Runnable() {
 
-					@Override
-					public void run() {
-						check(dao.load(PullRequest.class, requestId));
-					}
-					
-				});
-			}
-			
-		});
+						@Override
+						public void run() {
+							check(dao.load(PullRequest.class, requestId));
+						}
+						
+					});
+				}
+				
+			});
+		}
 	}
 
 	/**

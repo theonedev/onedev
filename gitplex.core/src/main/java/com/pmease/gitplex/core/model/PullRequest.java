@@ -469,11 +469,10 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public PullRequestUpdate getReferentialUpdate() {
-		if (referentialUpdate != null) {
+		if (referentialUpdate != null) 
 			return referentialUpdate;
-		} else {
+		else 
 			return getEffectiveUpdates().get(0);
-		}
 	}
 
 	public void setReferentialUpdate(PullRequestUpdate referentiralUpdate) {
@@ -548,6 +547,7 @@ public class PullRequest extends AbstractEntity {
 	 * 			list of effective updates reversely sorted by id
 	 */
 	public List<PullRequestUpdate> getEffectiveUpdates() {
+		Preconditions.checkState(isOpen(), "Can only be called while request is open");
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
