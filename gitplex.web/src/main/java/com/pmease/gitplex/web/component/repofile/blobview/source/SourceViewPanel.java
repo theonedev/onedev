@@ -37,6 +37,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blame;
+import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.extractors.ExtractException;
@@ -81,14 +82,15 @@ public class SourceViewPanel extends BlobViewPanel {
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
 		
-		Preconditions.checkArgument(context.getBlob().getText() != null);
+		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Preconditions.checkArgument(blob.getText() != null);
 		
-		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getState().file.path);
+		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getBlobIdent().path);
 		if (extractor != null) {
 			try {
-				symbols.addAll(extractor.extract(context.getBlob().getText().getContent()));
+				symbols.addAll(extractor.extract(blob.getText().getContent()));
 			} catch (ExtractException e) {
-				logger.debug("Error extracting symbols from blob: " + context.getState().file, e);
+				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
 			}
 		}
 	}
@@ -164,7 +166,7 @@ public class SourceViewPanel extends BlobViewPanel {
 								codeContainer.getMarkupId());
 						target.prependJavaScript(script);
 						BlobIdent blobIdent = new BlobIdent(
-								context.getState().file.revision, 
+								context.getBlobIdent().revision, 
 								hit.getBlobPath(), 
 								FileMode.REGULAR_FILE.getBits());
 						context.onSelect(target, blobIdent, hit.getTokenPos());
@@ -202,7 +204,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(context.getRepository(), 
-									context.getState().file.revision, query);
+									context.getBlobIdent().revision, query);
 							String script = String.format(
 									"$('#%s .CodeMirror')[0].CodeMirror.hideTokenHover();", 
 									codeContainer.getMarkupId());
@@ -235,11 +237,11 @@ public class SourceViewPanel extends BlobViewPanel {
 				try {
 					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(context.getRepository(), context.getState().file.revision, query);
+					symbolHits = searchManager.search(context.getRepository(), context.getBlobIdent().revision, query);
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
 						symbolHits.addAll(searchManager.search(context.getRepository(), 
-								context.getState().file.revision, query));
+								context.getBlobIdent().revision, query));
 					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
@@ -264,15 +266,16 @@ public class SourceViewPanel extends BlobViewPanel {
 				
 				String highlightToken;
 				try {
-					highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getState().tokenPos);
+					highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPos());
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
 				} 
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
+				Blob blob = context.getRepository().getBlob(context.getBlobIdent());
 				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s);", 
 						codeContainer.getMarkupId(), 
-						StringEscapeUtils.escapeEcmaScript(context.getBlob().getText().getContent()),
-						context.getState().file.path, 
+						StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
+						context.getBlobIdent().path, 
 						highlightToken,
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")), 
@@ -292,12 +295,12 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 
 	private String getBlameCommits() {
-		if (context.getState().blame) {
+		if (context.isBlame()) {
 			List<BlameCommit> commits = new ArrayList<>();
 			
-			String commitHash = context.getRepository().getObjectId(context.getState().file.revision).name();
+			String commitHash = context.getRepository().getObjectId(context.getBlobIdent().revision).name();
 			
-			for (Blame blame: context.getRepository().git().blame(commitHash, context.getState().file.path).values()) {
+			for (Blame blame: context.getRepository().git().blame(commitHash, context.getBlobIdent().path).values()) {
 				BlameCommit commit = new BlameCommit();
 				commit.authorDate = DateUtils.formatDate(blame.getCommit().getAuthor().getWhen());
 				commit.authorName = StringEscapeUtils.escapeHtml4(blame.getCommit().getAuthor().getName());

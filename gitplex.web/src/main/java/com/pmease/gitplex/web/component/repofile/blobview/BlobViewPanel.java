@@ -18,9 +18,10 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Blob;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -32,11 +33,15 @@ public abstract class BlobViewPanel extends Panel {
 	public BlobViewPanel(String id, BlobViewContext context) {
 		super(id);
 		
-		HistoryState state = context.getState();
-		Preconditions.checkArgument(state.file.revision != null 
-				&& state.file.path != null && state.file.mode != null);
+		BlobIdent blobIdent = context.getBlobIdent();
+		Preconditions.checkArgument(blobIdent.revision != null 
+				&& blobIdent.path != null && blobIdent.mode != null);
 		
 		this.context = context;
+	}
+	
+	private Blob getBlob() {
+		return context.getRepository().getBlob(context.getBlobIdent());
 	}
 	
 	@Override
@@ -47,7 +52,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return context.getBlob().getText().getLines().size() + " lines";
+				return getBlob().getText().getLines().size() + " lines";
 			}
 			
 		}) {
@@ -56,7 +61,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getBlob().getText() != null);
+				setVisible(getBlob().getText() != null);
 			}
 			
 		});
@@ -65,7 +70,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return context.getBlob().getText().getCharset().displayName();
+				return getBlob().getText().getCharset().displayName();
 			}
 			
 		}) {
@@ -74,15 +79,15 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getBlob().getText() != null);
+				setVisible(getBlob().getText() != null);
 			}
 			
 		});
 		
-		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getBlob().getSize())));
+		add(new Label("size", FileUtils.byteCountToDisplaySize(getBlob().getSize())));
 
 		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 
-				BlobResource.paramsOf(context.getRepository(), context.getState().file)));
+				BlobResource.paramsOf(context.getRepository(), context.getBlobIdent())));
 		
 		add(new AjaxLink<Void>("blame") {
 
@@ -94,7 +99,7 @@ public abstract class BlobViewPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						if (context.getState().blame)
+						if (context.isBlame())
 							return " active";
 						else
 							return " ";
@@ -107,7 +112,6 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				context.getState().blame = !context.getState().blame;
 				context.onBlameChange(target);
 				
 				// this blob view panel might be replaced with another panel
@@ -121,7 +125,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getBlob().getText() != null);
+				setVisible(getBlob().getText() != null);
 			}
 			
 		});
@@ -141,7 +145,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getState().file.revision))
+				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
 					tag.put("title", "Must on a branch to change or propose change of this file");
 			}
 			
@@ -154,14 +158,14 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getBlob().getText() != null);
+				setVisible(getBlob().getText() != null);
 			}
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getState().file.revision))
+				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
 					tag.put("disabled", "disabled");
 			}
 
@@ -178,7 +182,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getState().file.revision))
+				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
 					tag.put("disabled", "disabled");
 			}
 

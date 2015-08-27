@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.Submodule;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
@@ -20,12 +21,13 @@ public class GitLinkPanel extends BlobViewPanel {
 	public GitLinkPanel(String id, BlobViewContext context) {
 		super(id, context);
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Submodule submodule = Submodule.fromString(context.getBlob().getText().getContent()); 
+		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Submodule submodule = Submodule.fromString(blob.getText().getContent()); 
 		WebMarkupContainer link;
 		ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 		if (submodule.getUrl().startsWith(configManager.getSystemSetting().getServerUrl() + "/")) {

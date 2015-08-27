@@ -87,6 +87,8 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private static final String PARAM_COMPARE_PATH = "comparePath";
 	
+	private HistoryState state = new HistoryState();
+	
 	private String oldCommitHash;
 	
 	private String newCommitHash;
@@ -96,6 +98,18 @@ public class RequestComparePage extends RequestDetailPage {
 	private String comparePath;
 	
 	private Long commentId;
+	
+	private final IModel<PullRequestComment> commentModel = new LoadableDetachableModel<PullRequestComment>() {
+
+		@Override
+		protected PullRequestComment load() {
+			if (commentId != null)
+				return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
+			else
+				return null;
+		}
+		
+	};
 	
 	private WebMarkupContainer compareOptions;
 	
@@ -147,9 +161,36 @@ public class RequestComparePage extends RequestDetailPage {
 		
 	};
 	
-	public RequestComparePage(final PageParameters params) {
+	public RequestComparePage(PageParameters params) {
 		super(params);
-		initState(params);
+
+		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		state.oldCommitHash = params.get(PARAM_OLD_COMMIT).toString();
+		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
+		state.path = params.get(PARAM_PATH).toString();
+		state.comparePath = params.get(PARAM_COMPARE_PATH).toString();
+		
+		initWithState(state);
+	}
+	
+	private void initWithState(HistoryState state) {
+		commentId = state.commentId;
+		PullRequestComment comment = commentModel.getObject();
+		if (comment != null) {
+			oldCommitHash = comment.getOldCommitHash();
+			newCommitHash = comment.getNewCommitHash();
+			path = comment.getBlobIdent().path;
+			comparePath = comment.getCompareWith().path;
+		} else {
+			oldCommitHash = state.oldCommitHash;
+			newCommitHash = state.newCommitHash;
+			path = state.path;
+			comparePath = state.comparePath;
+			if (oldCommitHash == null)
+				oldCommitHash = getPullRequest().getBaseCommitHash();
+			if (newCommitHash == null)
+				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+		}
 	}
 	
 	@Override
@@ -359,8 +400,8 @@ public class RequestComparePage extends RequestDetailPage {
 				if (commentId != null) {
 					detachComment();
 				} else {
-					getPageParameters().set(PARAM_PATH, path);
-					getPageParameters().remove(PARAM_COMPARE_PATH);
+					state.path = path;
+					state.comparePath = null;
 				}
 				newCompareResult(target);
 				pushState(target);
@@ -390,8 +431,7 @@ public class RequestComparePage extends RequestDetailPage {
 				super.onEvent(event);
 
 				if (event.getPayload() instanceof PullRequestChanged) {
-					PageParameters params = getPageParameters();
-					if (params.get(PARAM_NEW_COMMIT).toString() == null) {
+					if (state.newCommitHash == null) {
 						setVisible(true);
 						PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 						pullRequestChanged.getTarget().add(this);
@@ -415,16 +455,16 @@ public class RequestComparePage extends RequestDetailPage {
 
 	private void detachComment() {
 		commentId = null;
-		PageParameters params = getPageParameters();
-		params.set(PARAM_OLD_COMMIT, oldCommitHash);
-		params.set(PARAM_NEW_COMMIT, newCommitHash);
-		params.set(PARAM_PATH, path);
-		params.set(PARAM_COMPARE_PATH, comparePath);
-		params.remove(PARAM_COMMENT);
+		state.oldCommitHash = oldCommitHash;
+		state.newCommitHash = newCommitHash;
+		state.path = path;
+		state.comparePath = comparePath;
+		state.commentId = null;
 	}
 	
 	@Override
 	public void onDetach() {
+		commentModel.detach();
 		commitsModel.detach();
 		
 		super.onDetach();
@@ -438,7 +478,18 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommitHash, 
+			@Nullable String newCommitHash) {
+		return paramsOf(request, oldCommitHash, newCommitHash, null);
+	}
+	
+	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommitHash, 
 			@Nullable String newCommitHash, @Nullable String path) {
+		return paramsOf(request, oldCommitHash, newCommitHash, path, null, null);
+	}
+	
+	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommitHash, 
+			@Nullable String newCommitHash, @Nullable String path, @Nullable String comparePath, 
+			@Nullable Long commentId) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 
 		if (oldCommitHash != null)
@@ -447,7 +498,10 @@ public class RequestComparePage extends RequestDetailPage {
 			params.set(PARAM_NEW_COMMIT, newCommitHash);
 		if (path != null)
 			params.set(PARAM_PATH,  path);
-		
+		if (comparePath != null)
+			params.set(PARAM_COMPARE_PATH,  path);
+		if (commentId != null)
+			params.set(PARAM_COMMENT, commentId);
 		return params;
 	}
 	
@@ -591,32 +645,12 @@ public class RequestComparePage extends RequestDetailPage {
 		}
 	}
 
-	private void initState(PageParameters params) {
-		commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		PullRequestComment comment = getComment();
-		if (comment != null) {
-			oldCommitHash = comment.getOldCommitHash();
-			newCommitHash = comment.getNewCommitHash();
-			path = comment.getBlobIdent().path;
-			comparePath = comment.getCompareWith().path;
-		} else {
-			oldCommitHash = params.get(PARAM_OLD_COMMIT).toString();
-			newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
-			path = params.get(PARAM_PATH).toString();
-			comparePath = params.get(PARAM_COMPARE_PATH).toString();
-			if (oldCommitHash == null)
-				oldCommitHash = getPullRequest().getBaseCommitHash();
-			if (newCommitHash == null)
-				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
-		}
-	}
-	
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 
-		initState((PageParameters) data);
-		getPageParameters().
+		HistoryState state = (HistoryState) data;
+		initWithState(state);
 		
 		target.add(compareOptions);
 		newCompareResult(target);
@@ -628,9 +662,10 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = getPageParameters();
+		PageParameters params = paramsOf(getPullRequest(), state.oldCommitHash, state.newCommitHash, 
+				state.path, state.comparePath, state.commentId);
 		CharSequence url = RequestCycle.get().urlFor(RequestComparePage.class, params);
-		pushState(target, url.toString(), params);
+		pushState(target, url.toString(), state);
 	}
 	
 	private void onStateChange(AjaxRequestTarget target) {
@@ -669,7 +704,7 @@ public class RequestComparePage extends RequestDetailPage {
 				
 				@Override
 				public InlineComment getConcernedComment() {
-					return getComment();
+					return commentModel.getObject();
 				}
 				
 				@Override
@@ -714,8 +749,8 @@ public class RequestComparePage extends RequestDetailPage {
 				if (commentId != null) {
 					detachComment();
 				} else {
-					getPageParameters().remove(PARAM_PATH);
-					getPageParameters().remove(PARAM_COMPARE_PATH);
+					state.path = null;
+					state.comparePath = null;
 				}
 				newCompareResult(target);
 				pushState(target);
@@ -738,11 +773,4 @@ public class RequestComparePage extends RequestDetailPage {
 				new CssResourceReference(RequestComparePage.class, "request-compare.css")));
 	}
 
-	private PullRequestComment getComment() {
-		if (commentId != null)
-			return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
-		else 
-			return null;
-	}
-	
 }

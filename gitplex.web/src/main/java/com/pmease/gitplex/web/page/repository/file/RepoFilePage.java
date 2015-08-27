@@ -62,6 +62,7 @@ import com.pmease.gitplex.web.component.repofile.blobsearch.advanced.AdvancedSea
 import com.pmease.gitplex.web.component.repofile.blobsearch.instant.InstantSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.source.SourceViewPanel;
@@ -131,7 +132,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		}
 	};
 	
-	private BlobIdent file = new BlobIdent();
+	private BlobIdent blobIdent = new BlobIdent();
 	
 	private TokenPosition tokenPos;
 	
@@ -156,27 +157,27 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 		
 		trait.repoId = getRepository().getId();
-		file.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
-		if (file.revision == null)
-			file.revision = getRepository().getDefaultBranch();
-		trait.revision = file.revision;
+		blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+		if (blobIdent.revision == null)
+			blobIdent.revision = getRepository().getDefaultBranch();
+		trait.revision = blobIdent.revision;
 		
-		file.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
-		if (file.path != null) {
+		blobIdent.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
+		if (blobIdent.path != null) {
 			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo)) {
 				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
+				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 				if (treeWalk == null) {
-					throw new ObjectNotExistException("Unable to find blob path '" + file.path
-							+ "' in revision '" + file.revision + "'");
+					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path
+							+ "' in revision '" + blobIdent.revision + "'");
 				}
-				file.mode = treeWalk.getRawMode(0);
+				blobIdent.mode = treeWalk.getRawMode(0);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
-			file.mode = FileMode.TREE.getBits();
+			blobIdent.mode = FileMode.TREE.getBits();
 		}
 		
 		blame = params.get(PARAM_BLAME).toBoolean(false);
@@ -185,7 +186,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private ObjectId getCommitId() {
-		return getRepository().getObjectId(file.revision);
+		return getRepository().getObjectId(blobIdent.revision);
 	}
 
 	@Override
@@ -202,16 +203,16 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 			@Override
 			public String getObject() {
-				return file.revision;
+				return blobIdent.revision;
 			}
 			
 		}) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				BlobIdent blobIdent = new BlobIdent(file.revision, hit.getBlobPath(), 
+				BlobIdent selected = new BlobIdent(blobIdent.revision, hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits()); 
-				RepoFilePage.this.onSelect(target, blobIdent, hit.getTokenPos());
+				RepoFilePage.this.onSelect(target, selected, hit.getTokenPos());
 			}
 			
 			@Override
@@ -229,7 +230,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 					@Override
 					public String getObject() {
-						return file.revision;
+						return blobIdent.revision;
 					}
 					
 				}) {
@@ -247,7 +248,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 					@Override
 					protected BlobIdent getCurrentBlob() {
-						return file;
+						return blobIdent;
 					}
 					
 				};
@@ -271,14 +272,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				super.onConfigure();
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				if (!indexManager.isIndexed(getRepository(), file.revision)) {
+				if (!indexManager.isIndexed(getRepository(), blobIdent.revision)) {
 					final Long repoId = getRepository().getId();
 					GitPlex.getInstance(UnitOfWork.class).asyncCall(new Runnable() {
 
 						@Override
 						public void run() {
 							Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
-							GitPlex.getInstance(IndexManager.class).index(repo, file.revision);
+							GitPlex.getInstance(IndexManager.class).index(repo, blobIdent.revision);
 						}
 						
 					});
@@ -320,24 +321,24 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void newRevisionSelector(@Nullable AjaxRequestTarget target) {
-		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, file.revision) {
+		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, blobIdent.revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				BlobIdent blobIdent = new BlobIdent();
-				blobIdent.revision = revision;
-				blobIdent.mode = FileMode.TREE.getBits();
+				BlobIdent selected = new BlobIdent();
+				selected.revision = revision;
+				selected.mode = FileMode.TREE.getBits();
 				
 				trait.revision = revision;
 				
-				if (file.path != null) {
+				if (selected.path != null) {
 					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 							RevWalk revWalk = new RevWalk(jgitRepo)) {
 						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, file.path, revTree);
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, selected.path, revTree);
 						if (treeWalk != null) {
-							blobIdent.path = file.path;
-							blobIdent.mode = treeWalk.getRawMode(0);
+							selected.path = blobIdent.path;
+							selected.mode = treeWalk.getRawMode(0);
 						}
 					} catch (IOException e) {
 						throw new RuntimeException(e);
@@ -346,7 +347,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 				requestId = null;
 				commentId = null;
-				RepoFilePage.this.onSelect(target, blobIdent, null);
+				RepoFilePage.this.onSelect(target, selected, null);
 				newRevisionSelector(target);
 				newCommentContext(target);
 				target.add(revisionIndexing);
@@ -401,7 +402,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void newFileNavigator(@Nullable AjaxRequestTarget target, @Nullable BlobNameChangeCallback callback) {
-		fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, file, callback) {
+		fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, blobIdent, callback) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
@@ -423,24 +424,24 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void onAddOrEditFile(AjaxRequestTarget target) {
-		ObjectId commitId = getRepository().getObjectId(file.revision);
+		ObjectId commitId = getRepository().getObjectId(blobIdent.revision);
 		
-		String refName = Git.REFS_HEADS + file.revision;
+		String refName = Git.REFS_HEADS + blobIdent.revision;
 		
-		final AtomicReference<String> newPathRef = new AtomicReference<>(file.isTree()?null:file.path);
+		final AtomicReference<String> newPathRef = new AtomicReference<>(blobIdent.isTree()?null:blobIdent.path);
 		
 		fileViewer = new FileEditPanel(
 				FILE_VIEWER_ID, repoModel, refName, 
-				file.isTree()?null:file.path, 
-				file.isTree()?"":getRepository().getBlob(file).getText().getContent(), 
+				blobIdent.isTree()?null:blobIdent.path, 
+						blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
 				commitId) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				getRepository().cacheObjectId(file.revision, newCommitId);
-				BlobIdent blobIdent = new BlobIdent(
-						file.revision, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
-				onSelect(target, blobIdent, null);
+				getRepository().cacheObjectId(blobIdent.revision, newCommitId);
+				BlobIdent committed = new BlobIdent(
+						blobIdent.revision, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
+				onSelect(target, committed, null);
 			}
 
 			@Override
@@ -457,14 +458,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			@Override
 			public void onChange(AjaxRequestTarget target, String blobName) {
 				String newPath;
-				if (file.isTree()) {
-					if (file.path != null)
-						newPath = file.path + "/" + blobName;
+				if (blobIdent.isTree()) {
+					if (blobIdent.path != null)
+						newPath = blobIdent.path + "/" + blobName;
 					else
 						newPath = blobName;
 				} else {
-					if (file.path.contains("/"))
-						newPath = StringUtils.substringBeforeLast(file.path, "/") + "/" + blobName;
+					if (blobIdent.path.contains("/"))
+						newPath = StringUtils.substringBeforeLast(blobIdent.path, "/") + "/" + blobName;
 					else
 						newPath = blobName;
 				}
@@ -499,7 +500,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				return new LastCommitPanel(markupId, repoModel, file);
+				return new LastCommitPanel(markupId, repoModel, blobIdent);
 			}
 		};
 		lastCommit.setOutputMarkupPlaceholderTag(true);
@@ -511,9 +512,19 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		}
 	}
 	
+	private BlobViewPanel renderBlobViewer(String panelId) {
+		for (BlobRenderer renderer: GitPlex.getExtensions(BlobRenderer.class)) {
+			BlobViewPanel panel = renderer.render(panelId, this);
+			if (panel != null)
+				return panel;
+		}
+				
+		throw new IllegalStateException("No applicable blob renderer found.");
+	}
+	
 	private void newFileViewer(@Nullable AjaxRequestTarget target) {
-		if (file.path == null || file.isTree()) {
-			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, file) {
+		if (blobIdent.path == null || blobIdent.isTree()) {
+			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, blobIdent) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
@@ -522,7 +533,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				
 			};
 		} else {
-			fileViewer = newBlobViewContext().render(FILE_VIEWER_ID);
+			fileViewer = renderBlobViewer(FILE_VIEWER_ID);
 		}
 		
 		if (target != null) {
@@ -535,13 +546,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), state);
+		PageParameters params = paramsOf(getRepository(), blobIdent.revision, blobIdent.path, 
+				blame, commentId, requestId);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		HistoryState state = new HistoryState();
 		state.blame = blame;
 		state.commentId = commentId;
 		state.requestId = requestId;
-		state.file = file;
+		state.file = blobIdent;
 		state.tokenPos = tokenPos;
 		pushState(target, url.toString(), state);
 	}
@@ -608,15 +620,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				if (hit.getBlobPath().equals(file.path) && fileViewer instanceof SourceViewPanel) {
+				if (hit.getBlobPath().equals(blobIdent.path) && fileViewer instanceof SourceViewPanel) {
 					tokenPos = hit.getTokenPos();
 					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-					BlobViewContext context = sourceViewer.getContext();
-					context.getState().tokenPos = tokenPos;
 					if (tokenPos != null || blame) {
 						sourceViewer.highlightToken(target, tokenPos);
 					} else {
-						BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
+						BlobViewPanel blobViewer = renderBlobViewer(FILE_VIEWER_ID);
 						if (blobViewer instanceof SourceViewPanel) {
 							sourceViewer.highlightToken(target, tokenPos);
 						} else {
@@ -628,9 +638,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					}
 					pushState(target);
 				} else {
-					BlobIdent blobIdent = new BlobIdent(file.revision, hit.getBlobPath(), 
+					BlobIdent selected = new BlobIdent(blobIdent.revision, hit.getBlobPath(), 
 							FileMode.REGULAR_FILE.getBits());
-					RepoFilePage.this.onSelect(target, blobIdent, hit.getTokenPos());
+					RepoFilePage.this.onSelect(target, selected, hit.getTokenPos());
 				}
 			}
 
@@ -651,13 +661,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		super.onPopState(target, data);
 		
 		HistoryState state = (HistoryState) data;
-		file = state.file;
+		blobIdent = state.file;
 		blame = state.blame;
 		commentId = state.commentId;
 		requestId = state.requestId;
 		tokenPos = state.tokenPos;
 		
-		trait.revision = file.revision;
+		trait.revision = blobIdent.revision;
 
 		target.add(revisionIndexing);
 		newRevisionSelector(target);
@@ -714,7 +724,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public BlobIdent getBlobIdent() {
-		return file;
+		return blobIdent;
 	}
 
 	@Override
@@ -729,7 +739,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
-		file = blobIdent; 
+		this.blobIdent = blobIdent; 
 		this.tokenPos = tokenPos;
 		blame = false;
 		
@@ -747,14 +757,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public void onBlameChange(AjaxRequestTarget target) {
-		blame = getState().blame;
+		blame = !blame;
 		
 		if (fileViewer instanceof SourceViewPanel) {
 			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
 			if (blame || tokenPos != null) {
 				sourceViewer.onBlameChange(target);
 			} else {
-				BlobViewPanel blobViewer = sourceViewer.getContext().render(FILE_VIEWER_ID);
+				BlobViewPanel blobViewer = renderBlobViewer(FILE_VIEWER_ID);
 				if (blobViewer instanceof SourceViewPanel) {
 					sourceViewer.onBlameChange(target);
 				} else {
@@ -773,9 +783,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public void onDelete(AjaxRequestTarget target) {
-		ObjectId commitId = getRepository().getObjectId(getState().file.revision);
+		ObjectId commitId = getRepository().getObjectId(blobIdent.revision);
 		
-		String refName = Git.REFS_HEADS + file.revision;
+		String refName = Git.REFS_HEADS + blobIdent.revision;
 
 		CancelListener cancelListener = new CancelListener() {
 
@@ -787,16 +797,16 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 			
 		};
-		fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, file.path, 
+		fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, blobIdent.path, 
 				null, commitId, cancelListener) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				getRepository().cacheObjectId(file.revision, newCommitId);
+				getRepository().cacheObjectId(blobIdent.revision, newCommitId);
 				try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 						RevWalk revWalk = new RevWalk(jgitRepo)) {
 					RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
-					String parentPath = StringUtils.substringBeforeLast(file.path, "/");
+					String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
 					while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
 						if (parentPath.contains("/")) {
 							parentPath = StringUtils.substringBeforeLast(parentPath, "/");
@@ -805,7 +815,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 							break;
 						}
 					}
-					BlobIdent parentBlobIdent = new BlobIdent(file.revision, parentPath, FileMode.TREE.getBits());
+					BlobIdent parentBlobIdent = new BlobIdent(blobIdent.revision, parentPath, 
+							FileMode.TREE.getBits());
 					onSelect(target, parentBlobIdent, null);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
