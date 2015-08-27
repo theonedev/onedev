@@ -616,6 +616,7 @@ public class RequestComparePage extends RequestDetailPage {
 		super.onPopState(target, data);
 
 		initState((PageParameters) data);
+		getPageParameters().
 		
 		target.add(compareOptions);
 		newCompareResult(target);
