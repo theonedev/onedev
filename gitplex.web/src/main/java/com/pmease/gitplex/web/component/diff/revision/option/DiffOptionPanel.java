@@ -44,17 +44,17 @@ public abstract class DiffOptionPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<String> newRevModel;
+	private final String newRev;
 	
 	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
 	
 	private DiffMode diffMode;
 	
-	public DiffOptionPanel(String id, IModel<Repository> repoModel, IModel<String> newRevModel) {
+	public DiffOptionPanel(String id, IModel<Repository> repoModel, String newRev) {
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.newRevModel = newRevModel;
+		this.newRev = newRev;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_DIFF_MODE);
@@ -149,7 +149,7 @@ public abstract class DiffOptionPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new PathSelector(id, repoModel, newRevModel.getObject(), FileMode.TYPE_TREE, 
+				return new PathSelector(id, repoModel, newRev, FileMode.TYPE_TREE, 
 						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
 					
 					@Override
@@ -179,7 +179,6 @@ public abstract class DiffOptionPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		newRevModel.detach();
 		
 		super.onDetach();
 	}

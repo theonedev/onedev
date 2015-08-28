@@ -15,4 +15,6 @@ class HistoryState implements Serializable {
 	public String comparePath;
 	
 	public Long commentId;
+	
+	public boolean previewIntegration;
 }

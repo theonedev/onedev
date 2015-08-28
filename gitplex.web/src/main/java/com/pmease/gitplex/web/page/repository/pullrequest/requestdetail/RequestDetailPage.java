@@ -401,11 +401,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				super.onInitialize();
 
 				PullRequest request = getPullRequest();
-				IntegrationPreview preview = request.getIntegrationPreview();
-				
-				PageParameters params = RequestComparePage.paramsOf(
-						request, request.getTarget().getHead(), 
-						preview!=null?preview.getIntegrated():null, null);
+				PageParameters params = RequestComparePage.paramsOfIntegrationPreview(request);
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params) {
 					
@@ -993,6 +989,31 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			onChange(request);
 		}
 
+		@Override
+		public void onIntegrationPreviewCalculated(PullRequest request) {
+			onChange(request);
+		}
+
+		@Override
+		public void onCommented(PullRequestComment comment) {
+			onChange(comment.getRequest());
+		}
+
+		@Override
+		public void onVerified(PullRequest request) {
+			onChange(request);
+		}
+
+		@Override
+		public void onAssigned(PullRequest request) {
+			onChange(request);
+		}
+
+		@Override
+		public void onCommentReplied(PullRequestCommentReply reply) {
+			onChange(reply.getComment().getRequest());
+		}
+
 		private void onChange(PullRequest request) {
 			/*
 			 * Make sure that pull request and associated objects are committed before
@@ -1020,31 +1041,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			});
 		}
 		
-		@Override
-		public void onIntegrationPreviewCalculated(PullRequest request) {
-			onChange(request);
-		}
-
-		@Override
-		public void onCommented(PullRequestComment comment) {
-			onChange(comment.getRequest());
-		}
-
-		@Override
-		public void onVerified(PullRequest request) {
-			onChange(request);
-		}
-
-		@Override
-		public void onAssigned(PullRequest request) {
-			onChange(request);
-		}
-
-		@Override
-		public void onCommentReplied(PullRequestCommentReply reply) {
-			onChange(reply.getComment().getRequest());
-		}
-
 		@Override
 		public void onReopened(PullRequest request, User user, String comment) {
 		}

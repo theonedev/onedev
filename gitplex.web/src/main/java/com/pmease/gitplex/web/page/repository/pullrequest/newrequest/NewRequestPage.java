@@ -332,14 +332,7 @@ public class NewRequestPage extends PullRequestPage {
 	private Component newComparePanel() {
 		final Fragment fragment = new Fragment(TAB_PANEL_ID, "compareFrag", this);
 		
-		diffOption = new DiffOptionPanel("diffOption", repoModel, new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getPullRequest().getLatestUpdate().getHeadCommitHash();
-			}
-			
-		}) {
+		diffOption = new DiffOptionPanel("diffOption", repoModel, getPullRequest().getLatestUpdate().getHeadCommitHash()) {
 
 			@Override
 			protected void onSelectPath(AjaxRequestTarget target, String path) {

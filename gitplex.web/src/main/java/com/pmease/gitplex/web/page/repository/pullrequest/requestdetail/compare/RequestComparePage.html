@@ -1,26 +1,31 @@
 <wicket:extend>
 	<div class="compare">
-		<div wicket:id="compareOptions" class="head clearfix">
-			<div class="pull-left btn-group">
-				<span class="btn btn-sm btn-default old" wicket:id="oldSelector">
-					<i class="fa fa-ext fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
-				</span>
-				<span wicket:id="comparisonSelector" class="btn btn-sm btn-default" title="Commonly used comparisons">
-					<i class="fa fa-arrow-left"></i> <i class="caret"></i> <i class="fa fa-arrow-right"></i>				
-				</span>
-				<span class="btn btn-sm btn-default new" wicket:id="newSelector">
-					<i class="fa fa-ext fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
-				</span>
+		<div wicket:id="compareHead" class="head">
+			<div wicket:id="options" class="options clearfix">
+				<div class="pull-left btn-group">
+					<span class="btn btn-sm btn-default old" wicket:id="oldSelector">
+						<i class="fa fa-ext fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
+					</span>
+					<span wicket:id="comparisonSelector" class="btn btn-sm btn-default" title="Commonly used comparisons">
+						<i class="fa fa-arrow-left"></i> <i class="caret"></i> <i class="fa fa-arrow-right"></i>				
+					</span>
+					<span class="btn btn-sm btn-default new" wicket:id="newSelector">
+						<i class="fa fa-ext fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
+					</span>
+				</div>
+				<div wicket:id="oldChoices"></div>
+				<div wicket:id="newChoices"></div>
+				<div wicket:id="comparisonChoices"></div>
+				<div wicket:id="diffOption" class="pull-right"></div>
 			</div>
-			<div wicket:id="oldChoices"></div>
-			<div wicket:id="newChoices"></div>
-			<div wicket:id="comparisonChoices"></div>
-			<div wicket:id="diffOption" class="pull-right"></div>
-		</div>
-		<div wicket:id="outdatedAlert" class="outdated alert alert-warning">
-			<a onclick="location.reload();">
-				<i class="fa fa-warning"></i> Page is outdated, click to refresh
-			</a>
+			<div class="alerts">
+				<div wicket:id="outdatedAlert" class="outdated alert alert-warning">
+					<a onclick="location.reload();">
+						<i class="fa fa-warning"></i> Page is outdated, click to refresh.
+					</a>
+				</div>
+				<div wicket:id="integrationPreviewAlert" class="integration-preview alert alert-warning"></div>
+			</div>
 		</div>
 		<div wicket:id="compareResult" class="body"></div>
 	</div>

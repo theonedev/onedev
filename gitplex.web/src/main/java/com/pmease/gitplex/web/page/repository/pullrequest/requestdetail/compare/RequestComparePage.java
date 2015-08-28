@@ -23,14 +23,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
@@ -76,8 +73,14 @@ public class RequestComparePage extends RequestDetailPage {
 	private static final String TARGET_BRANCH_HEAD = "Target Branch Head";
 	
 	private static final String INTEGRATION_PREVIEW = "Integration Preview";
+	
+	private static final String PULL_REQUEST_BASE = "Pull Request Base";
+	
+	private static final String LATEST_UPDATE_HEAD = "Latest Update Head";
 
 	private static final String PARAM_COMMENT = "comment";
+	
+	private static final String PARAM_PREVIEW_INTEGRATION = "previewIntegration";
 	
 	private static final String PARAM_OLD_COMMIT = "oldCommit";
 	
@@ -97,14 +100,12 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private String comparePath;
 	
-	private Long commentId;
-	
 	private final IModel<PullRequestComment> commentModel = new LoadableDetachableModel<PullRequestComment>() {
 
 		@Override
 		protected PullRequestComment load() {
-			if (commentId != null)
-				return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
+			if (state.commentId != null)
+				return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, state.commentId);
 			else
 				return null;
 		}
@@ -125,7 +126,7 @@ public class RequestComparePage extends RequestDetailPage {
 			LinkedHashMap<String, CommitDescription> choices = new LinkedHashMap<>();
 			PullRequest request = getPullRequest();
 
-			String name = "Pull Request Base";
+			String name = PULL_REQUEST_BASE;
 			CommitDescription description = new CommitDescription(name, request.getBaseCommit().getSubject());
 			choices.put(request.getBaseCommitHash(), description);
 			
@@ -134,7 +135,7 @@ public class RequestComparePage extends RequestDetailPage {
 				Commit commit = update.getHeadCommit();
 				int updateNo = i+1;
 				if (i == request.getSortedUpdates().size()-1)
-					name = "Latest Update Head";
+					name = LATEST_UPDATE_HEAD;
 				else
 					name = "Head of Update " + updateNo;
 				description = new CommitDescription(name, commit.getSubject());
@@ -169,27 +170,37 @@ public class RequestComparePage extends RequestDetailPage {
 		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
 		state.path = params.get(PARAM_PATH).toString();
 		state.comparePath = params.get(PARAM_COMPARE_PATH).toString();
+		state.previewIntegration = params.get(PARAM_PREVIEW_INTEGRATION).toBoolean(false);
 		
-		initWithState(state);
+		initFromState(state);
 	}
 	
-	private void initWithState(HistoryState state) {
-		commentId = state.commentId;
+	private void initFromState(HistoryState state) {
+		PullRequest request = getPullRequest();
 		PullRequestComment comment = commentModel.getObject();
 		if (comment != null) {
 			oldCommitHash = comment.getOldCommitHash();
 			newCommitHash = comment.getNewCommitHash();
 			path = comment.getBlobIdent().path;
 			comparePath = comment.getCompareWith().path;
+		} else if (state.previewIntegration) {
+			oldCommitHash = request.getTarget().getHead();
+			IntegrationPreview preview = request.getIntegrationPreview();
+			if (preview != null && preview.getIntegrated() != null)
+				newCommitHash = preview.getIntegrated();
+			else
+				newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+			path = state.path;
+			comparePath = state.comparePath;
 		} else {
 			oldCommitHash = state.oldCommitHash;
 			newCommitHash = state.newCommitHash;
 			path = state.path;
 			comparePath = state.comparePath;
 			if (oldCommitHash == null)
-				oldCommitHash = getPullRequest().getBaseCommitHash();
+				oldCommitHash = request.getBaseCommitHash();
 			if (newCommitHash == null)
-				newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+				newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 		}
 	}
 	
@@ -197,11 +208,15 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		compareOptions = new WebMarkupContainer("compareOptions");
-		compareOptions.add(new StickyBehavior());
+		WebMarkupContainer compareHead = new WebMarkupContainer("compareHead");
+		compareHead.add(new StickyBehavior());
 		
-		add(compareOptions);
+		add(compareHead);
 
+		compareOptions = new WebMarkupContainer("options");
+		compareOptions.setOutputMarkupId(true);
+		compareHead.add(compareOptions);
+		
 		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
 		compareOptions.add(oldSelector);
 		oldSelector.add(new Label("label", new LoadableDetachableModel<String>() {
@@ -237,7 +252,7 @@ public class RequestComparePage extends RequestDetailPage {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, String commitHash) {
 						oldCommitHash = commitHash;
-						detachComment();
+						freezeState();
 						hide(target);
 						onStateChange(target);
 					}
@@ -284,7 +299,7 @@ public class RequestComparePage extends RequestDetailPage {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, String commitHash) {
 						newCommitHash = commitHash;
-						detachComment();
+						freezeState();
 						hide(target);
 						onStateChange(target);
 					}
@@ -302,7 +317,7 @@ public class RequestComparePage extends RequestDetailPage {
 			protected List<MenuItem> getMenuItems() {
 				List<MenuItem> items = new ArrayList<>();
 				
-				items.add(new ComparisonChoiceItem("Base", "Latest Update") {
+				items.add(new ComparisonChoiceItem(PULL_REQUEST_BASE, LATEST_UPDATE_HEAD) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target) {
@@ -310,7 +325,14 @@ public class RequestComparePage extends RequestDetailPage {
 						
 						oldCommitHash = getPullRequest().getBaseCommitHash();
 						newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
-						detachComment();
+
+						state.commentId = null;
+						state.path = path;
+						state.comparePath = comparePath;
+						state.newCommitHash = null;
+						state.oldCommitHash = null;
+						state.previewIntegration = false;
+						
 						onStateChange(target);
 					}
 
@@ -320,58 +342,62 @@ public class RequestComparePage extends RequestDetailPage {
 				if (request.isOpen()) {
 					final IntegrationPreview preview = request.getIntegrationPreview();
 					if (preview != null && preview.getIntegrated() != null) {
-						try (FileRepository jgitRepo = getRepository().openAsJGitRepo();) {
-							List<DiffEntry> diffs = getRepository().getDiffs(
-									preview.getRequestHead(), preview.getIntegrated(), false);
-							if (!diffs.isEmpty()) {
-								items.add(new ComparisonChoiceItem("Target Branch", "Integration Preview") {
+						items.add(new ComparisonChoiceItem(TARGET_BRANCH_HEAD, INTEGRATION_PREVIEW) {
 
-									@Override
-									protected void onSelect(AjaxRequestTarget target) {
-										hide(target);
-										
-										oldCommitHash = getPullRequest().getTarget().getHead();
-										newCommitHash = preview.getIntegrated();
-										detachComment();
-										onStateChange(target);
-									}
-									
-								});
+							@Override
+							protected void onSelect(AjaxRequestTarget target) {
+								hide(target);
+								
+								oldCommitHash = getPullRequest().getTarget().getHead();
+								newCommitHash = preview.getIntegrated();
+								
+								state.commentId = null;
+								state.path = path;
+								state.comparePath = comparePath;
+								state.newCommitHash = null;
+								state.oldCommitHash = null;
+								state.previewIntegration = true;
+								
+								onStateChange(target);
 							}
-						}
+							
+						});
 					}
 				}
 
-				for (int i=0; i<getPullRequest().getSortedUpdates().size(); i++) {
-					PullRequestUpdate update = getPullRequest().getSortedUpdates().get(i);
-					final String baseCommit = update.getBaseCommitHash();
-					final String headCommit = update.getHeadCommitHash();
-					int index = i+1;
-					String oldLabel;
-					if (index > 1) 
-						oldLabel = "Update " + (index-1);
-					else
-						oldLabel = "Request Base";
-					
-					String newLabel;
-					if (index == getPullRequest().getSortedUpdates().size())
-						newLabel = "Latest Update";
-					else
-						newLabel = "Update " + index;
-					items.add(new ComparisonChoiceItem(oldLabel, newLabel) {
-
-						@Override
-						protected void onSelect(AjaxRequestTarget target) {
-							hide(target);
-
-							oldCommitHash = baseCommit;
-							newCommitHash = headCommit;
-							detachComment();
-							
-							onStateChange(target);
-						}
+				List<PullRequestUpdate> updates = getPullRequest().getSortedUpdates();
+				if (updates.size() > 1) {
+					for (int i=0; i<updates.size(); i++) {
+						PullRequestUpdate update = updates.get(i);
+						final String baseCommit = update.getBaseCommitHash();
+						final String headCommit = update.getHeadCommitHash();
+						int index = i+1;
+						String oldLabel;
+						if (index > 1) 
+							oldLabel = "Update " + (index-1);
+						else
+							oldLabel = PULL_REQUEST_BASE;
 						
-					});
+						String newLabel;
+						if (index == updates.size())
+							newLabel = LATEST_UPDATE_HEAD;
+						else
+							newLabel = "Update " + index;
+						items.add(new ComparisonChoiceItem(oldLabel, newLabel) {
+
+							@Override
+							protected void onSelect(AjaxRequestTarget target) {
+								hide(target);
+
+								oldCommitHash = baseCommit;
+								newCommitHash = headCommit;
+								freezeState();
+								
+								onStateChange(target);
+							}
+							
+						});
+					}
 				}
 				
 				return items;
@@ -384,21 +410,14 @@ public class RequestComparePage extends RequestDetailPage {
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
-		compareOptions.add(diffOption = new DiffOptionPanel("diffOption", repoModel, new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return newCommitHash;
-			}
-			
-		}) {
+		compareOptions.add(diffOption = new DiffOptionPanel("diffOption", repoModel, newCommitHash) {
 
 			@Override
 			protected void onSelectPath(AjaxRequestTarget target, String path) {
 				RequestComparePage.this.path = path;
 				comparePath = null;
-				if (commentId != null) {
-					detachComment();
+				if (state.commentId != null) {
+					freezeState();
 				} else {
 					state.path = path;
 					state.comparePath = null;
@@ -424,19 +443,37 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		});
 		
-		add(new WebMarkupContainer("outdatedAlert") {
+		compareHead.add(new WebMarkupContainer("outdatedAlert") {
 
 			@Override
 			public void onEvent(final IEvent<?> event) {
 				super.onEvent(event);
 
 				if (event.getPayload() instanceof PullRequestChanged) {
-					if (state.newCommitHash == null) {
-						setVisible(true);
-						PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-						pullRequestChanged.getTarget().add(this);
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					AjaxRequestTarget target = pullRequestChanged.getTarget();
+					PullRequest request = getPullRequest();
+					boolean outdated;
+					if (state.previewIntegration) {
+						if (!oldCommitHash.equals(request.getTarget().getHead())) {
+							outdated = true;
+						} else {
+							IntegrationPreview preview = request.getIntegrationPreview();
+							String previewCommitHash;
+							if (preview != null && preview.getIntegrated() != null)
+								previewCommitHash = preview.getIntegrated();
+							else
+								previewCommitHash = request.getLatestUpdate().getHeadCommitHash();
+							outdated = !newCommitHash.equals(previewCommitHash);
+						}
+					} else {
+						outdated = state.newCommitHash == null && !newCommitHash.equals(request.getLatestUpdate().getHeadCommitHash());						
 					}
-					
+					if (outdated) {
+						setVisible(true);
+						target.add(this);
+					}
+					target.add(compareOptions);
 				}
 			}
 
@@ -449,17 +486,50 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 
 		});
+		compareHead.add(new Label("integrationPreviewAlert", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequest request = getPullRequest();
+				String message;
+				if (request.isOpen()) {
+					IntegrationPreview preview = getPullRequest().getIntegrationPreview();
+					if (preview == null)
+						message = "Integration preview is being calculating";
+					else
+						message = "There are integration conflicts";
+				} else {
+					message = "Integration preview is not available for closed pull request";
+				}
+				return message + ", displaying comparison between target branch and request head instead.";
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				if (state.previewIntegration) {
+					IntegrationPreview preview = getPullRequest().getIntegrationPreview();
+					setVisible(preview == null || preview.getIntegrated() == null);
+				} else {
+					setVisible(false);
+				}
+			}
+			
+		});
 		
 		newCompareResult(null);
 	}
 
-	private void detachComment() {
-		commentId = null;
+	private void freezeState() {
 		state.oldCommitHash = oldCommitHash;
 		state.newCommitHash = newCommitHash;
 		state.path = path;
 		state.comparePath = comparePath;
 		state.commentId = null;
+		state.previewIntegration = false;
 	}
 	
 	@Override
@@ -477,6 +547,10 @@ public class RequestComparePage extends RequestDetailPage {
 		return params;
 	}
 
+	public static PageParameters paramsOfIntegrationPreview(PullRequest request) {
+		return paramsOf(request, null, null, null, null, null, true);
+	}
+	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommitHash, 
 			@Nullable String newCommitHash) {
 		return paramsOf(request, oldCommitHash, newCommitHash, null);
@@ -484,12 +558,12 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommitHash, 
 			@Nullable String newCommitHash, @Nullable String path) {
-		return paramsOf(request, oldCommitHash, newCommitHash, path, null, null);
+		return paramsOf(request, oldCommitHash, newCommitHash, path, null, null, false);
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, @Nullable String oldCommitHash, 
 			@Nullable String newCommitHash, @Nullable String path, @Nullable String comparePath, 
-			@Nullable Long commentId) {
+			@Nullable Long commentId, boolean previewIntegration) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 
 		if (oldCommitHash != null)
@@ -502,6 +576,8 @@ public class RequestComparePage extends RequestDetailPage {
 			params.set(PARAM_COMPARE_PATH,  path);
 		if (commentId != null)
 			params.set(PARAM_COMMENT, commentId);
+		if (previewIntegration)
+			params.set(PARAM_PREVIEW_INTEGRATION, true);
 		return params;
 	}
 	
@@ -515,8 +591,8 @@ public class RequestComparePage extends RequestDetailPage {
 			
 			// compare identifier instead of comment object as comment may have been deleted
 			// to cause LazyInitializationException
-			if (HibernateUtils.getId(comment).equals(commentId)) {
-				detachComment();
+			if (HibernateUtils.getId(comment).equals(state.commentId)) {
+				freezeState();
 				onStateChange(commentRemoved.getTarget());
 			}
 		}
@@ -650,7 +726,7 @@ public class RequestComparePage extends RequestDetailPage {
 		super.onPopState(target, data);
 
 		HistoryState state = (HistoryState) data;
-		initWithState(state);
+		initFromState(state);
 		
 		target.add(compareOptions);
 		newCompareResult(target);
@@ -663,7 +739,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getPullRequest(), state.oldCommitHash, state.newCommitHash, 
-				state.path, state.comparePath, state.commentId);
+				state.path, state.comparePath, state.commentId, state.previewIntegration);
 		CharSequence url = RequestCycle.get().urlFor(RequestComparePage.class, params);
 		pushState(target, url.toString(), state);
 	}
@@ -746,8 +822,8 @@ public class RequestComparePage extends RequestDetailPage {
 			protected void onClearPath(AjaxRequestTarget target) {
 				path = null;
 				comparePath = null;
-				if (commentId != null) {
-					detachComment();
+				if (state.commentId != null) {
+					freezeState();
 				} else {
 					state.path = null;
 					state.comparePath = null;
