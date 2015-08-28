@@ -55,17 +55,8 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	public void updateInlineInfo(PullRequestComment comment) {
 		Preconditions.checkNotNull(comment.getInlineInfo());
 		
-		System.err.println("updating inline info...");
-		
 		String latestCommitHash = comment.getRequest().getLatestUpdate().getHeadCommitHash();
-		if (!comment.getNewCommitHash().equals(latestCommitHash)) {
-			try {
-				System.err.println("sleeping...");
-				Thread.sleep(10000);
-				System.err.println("sleeped.");
-			} catch (InterruptedException e) {
-			}
-			
+		if (!latestCommitHash.equals(comment.getNewCommitHash())) {
 			List<DiffEntry> changes = comment.getRepository().getDiffs(comment.getNewCommitHash(), 
 					latestCommitHash, true);
 			String oldCommitHash = comment.getOldCommitHash();
@@ -117,7 +108,10 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 						}
 					}
 				} else {
-					comment.getCompareWith().revision = latestCommitHash;
+					BlobIdent compareWith = comment.getCompareWith();
+					compareWith.revision = latestCommitHash;
+					// call setCompareWith in order to clear some cached info in comment object
+					comment.setCompareWith(compareWith);
 				}
 			} else {
 				BlobIdent newBlobIdent = null;
@@ -173,7 +167,10 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 						comment.setCompareWith(newBlobIdent);
 					}
 				} else {
-					comment.getBlobIdent().revision = latestCommitHash;
+					BlobIdent blobIdent = comment.getBlobIdent();
+					blobIdent.revision = latestCommitHash;
+					// call setBlobInfo in order to clear some cached info in comment object
+					comment.setBlobIdent(blobIdent);
 				}
 			}
 			dao.persist(comment);		

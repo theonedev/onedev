@@ -392,7 +392,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 
 		};
-		commentContext.setOutputMarkupId(true);
+		commentContext.setOutputMarkupPlaceholderTag(true);
 		if (target != null) {
 			replace(commentContext);
 			target.add(commentContext);

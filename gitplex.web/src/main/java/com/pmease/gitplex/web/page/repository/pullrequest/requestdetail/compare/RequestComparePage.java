@@ -174,7 +174,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void initFromState(HistoryState state) {
 		PullRequest request = getPullRequest();
 		PullRequestComment comment = commentModel.getObject();
-		if (comment != null && comment.getId() != null) {
+		if (comment != null) {
 			oldCommitHash = comment.getOldCommitHash();
 			newCommitHash = comment.getNewCommitHash();
 			path = comment.getBlobIdent().path;

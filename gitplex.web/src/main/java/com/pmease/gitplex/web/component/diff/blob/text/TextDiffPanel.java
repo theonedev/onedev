@@ -89,10 +89,11 @@ public class TextDiffPanel extends Panel {
 		@Override
 		protected List<CommentAndPos> load() {
 			List<CommentAndPos> listOfCommentAndPos = new ArrayList<>();
-			if (requestModel.getObject() != null) {
-				PullRequest request = requestModel.getObject();
+			PullRequest request = requestModel.getObject();
+			if (request != null) {
 				for (PullRequestComment comment: request.getComments()) {
 					if (comment.getInlineInfo() != null) {
+						System.err.println(comment);
 						GitPlex.getInstance(PullRequestCommentManager.class).updateInlineInfo(comment);
 						BlobIdent blobIdent = comment.getBlobIdent();
 						if (blobIdent.equals(change.getOldBlobIdent())) {
@@ -429,7 +430,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendAddComment(StringBuilder builder, int oldLineNo, int newLineNo) {
-		if (commentModel.getObject() != null) {
+		if (requestModel.getObject() != null) {
 			builder.append("<span class='add-comment'>");
 			String script = String.format("document.getElementById('%s').addComment(%d, %d);", 
 					getMarkupId(), oldLineNo, newLineNo);

@@ -123,19 +123,15 @@ public class PullRequestComment extends AbstractEntity {
 	private Pair<String, String> getOldAndNew() {
 		String rev = getBlobIdent().revision;
 		if (oldAndNew == null) {
-			if (getCompareWith() != null) {
-				List<String> commitHashes = getRequest().getCommentables();
-				String compareRev = getCompareWith().revision;
-				int index = commitHashes.indexOf(rev);
-				int compareIndex = commitHashes.indexOf(compareRev);
-				Preconditions.checkState(index != -1 && compareIndex != -1);
-				if (index <= compareIndex)
-					oldAndNew = new Pair<>(rev, compareRev);
-				else 
-					oldAndNew = new Pair<>(compareRev, rev);
-			} else {
-				oldAndNew = new Pair<>(rev, rev);
-			}
+			List<String> commitHashes = getRequest().getCommentables();
+			String compareRev = getCompareWith().revision;
+			int index = commitHashes.indexOf(rev);
+			int compareIndex = commitHashes.indexOf(compareRev);
+			Preconditions.checkState(index != -1 && compareIndex != -1);
+			if (index <= compareIndex)
+				oldAndNew = new Pair<>(rev, compareRev);
+			else 
+				oldAndNew = new Pair<>(compareRev, rev);
 		}
 		return oldAndNew;
 	}
@@ -146,6 +142,7 @@ public class PullRequestComment extends AbstractEntity {
 
 	public void setInlineInfo(InlineInfo inlineInfo) {
 		this.inlineInfo = inlineInfo;
+		oldAndNew = null;
 	}
 
 	public String getOldCommitHash() {
@@ -164,6 +161,7 @@ public class PullRequestComment extends AbstractEntity {
 		if (inlineInfo == null)
 			inlineInfo = new InlineInfo();
 		inlineInfo.setBlobIdent(blobIdent);
+		oldAndNew = null;
 	}
 	
 	public BlobIdent getCompareWith() {
@@ -174,6 +172,7 @@ public class PullRequestComment extends AbstractEntity {
 		if (inlineInfo == null)
 			inlineInfo = new InlineInfo();
 		inlineInfo.setCompareWith(compareWith);
+		oldAndNew = null;
 	}
 
 	public int getLine() {
