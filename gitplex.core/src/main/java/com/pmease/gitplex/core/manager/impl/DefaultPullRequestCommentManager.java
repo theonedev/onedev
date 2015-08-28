@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.manager.impl;
 import static com.pmease.gitplex.core.model.PullRequestComment.DIFF_CONTEXT_SIZE;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -21,9 +22,11 @@ import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.comment.MentionParser;
+import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.User;
 
@@ -32,14 +35,17 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 
 	private final Dao dao;
 	
+	private final UserManager userManager;
+	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public DefaultPullRequestCommentManager(Dao dao, MarkdownManager markdownManager, 
+	public DefaultPullRequestCommentManager(Dao dao, UserManager userManager, MarkdownManager markdownManager, 
 			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
+		this.userManager = userManager;
 		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
 	}
@@ -49,10 +55,14 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	public void updateInlineInfo(PullRequestComment comment) {
 		Preconditions.checkNotNull(comment.getInlineInfo());
 		
+		System.err.println("updating inline info...");
+		
 		String latestCommitHash = comment.getRequest().getLatestUpdate().getHeadCommitHash();
 		if (!comment.getNewCommitHash().equals(latestCommitHash)) {
 			try {
+				System.err.println("sleeping...");
 				Thread.sleep(10000);
+				System.err.println("sleeped.");
 			} catch (InterruptedException e) {
 			}
 			
@@ -166,7 +176,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 					comment.getBlobIdent().revision = latestCommitHash;
 				}
 			}
-			dao.persist(comment);
+			dao.persist(comment);		
 		}
 	}
 	
@@ -191,4 +201,21 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 		}
 	}
 
+	@Transactional
+	@Override
+	public void addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content) {
+		User user = userManager.getCurrent();
+		Preconditions.checkNotNull(user);
+		PullRequestComment comment = new PullRequestComment();
+		request.getComments().add(comment);
+		comment.setUser(user);
+		comment.setDate(new Date());
+		comment.setContent(content);
+		comment.setRequest(request);
+		comment.setBlobIdent(blobInfo);
+		comment.setCompareWith(compareWith);
+		comment.setLine(line);
+		save(comment, true);
+	}
+	
 }

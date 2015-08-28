@@ -32,14 +32,15 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.pmease.commons.git.Blob;
-import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.BlobChange;
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
@@ -49,6 +50,10 @@ import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 public abstract class RevisionDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
+	
+	private final IModel<PullRequest> requestModel;
+	
+	private final IModel<PullRequestComment> commentModel;
 	
 	private final String oldRev;
 	
@@ -61,9 +66,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	private final LineProcessor lineProcessor;
 	
 	private final DiffMode diffMode;
-	
-	@Nullable
-	private final InlineCommentSupport commentSupport;
 	
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
@@ -167,19 +169,20 @@ public abstract class RevisionDiffPanel extends Panel {
 		}
 	};
 	
-	public RevisionDiffPanel(String id, IModel<Repository> repoModel, String oldRev, String newRev, 
-			@Nullable String path, @Nullable String comparePath, LineProcessor lineProcessor, 
-			DiffMode diffMode, @Nullable InlineCommentSupport commentSupport) {
+	public RevisionDiffPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+			IModel<PullRequestComment> commentModel, String oldRev, String newRev, @Nullable String path, 
+			@Nullable String comparePath, LineProcessor lineProcessor, DiffMode diffMode) {
 		super(id);
 		
 		this.repoModel = repoModel;
+		this.requestModel = requestModel;
+		this.commentModel = commentModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
 		this.path = path;
 		this.comparePath = comparePath;
 		this.lineProcessor = lineProcessor;
 		this.diffMode = diffMode;
-		this.commentSupport = commentSupport;
 	}
 
 	@Override
@@ -291,7 +294,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				item.setOutputMarkupId(true);
-				item.add(new BlobDiffPanel("change", repoModel, change, diffMode, commentSupport));
+				item.add(new BlobDiffPanel("change", repoModel, requestModel, commentModel, change, diffMode));
 			}
 			
 		});
@@ -309,6 +312,8 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onDetach() {
 		changesAndCountModel.detach();
 		repoModel.detach();
+		requestModel.detach();
+		commentModel.detach();
 		
 		super.onDetach();
 	}

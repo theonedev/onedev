@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.component.diff.blob;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -17,7 +15,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
@@ -31,20 +30,23 @@ public class BlobDiffPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
+	private final IModel<PullRequest> requestModel;
+	
+	private final IModel<PullRequestComment> commentModel;
+	
 	private final BlobChange change;
 	
 	private final DiffMode diffMode;
 	
-	private final InlineCommentSupport commentSupport;
-	
-	public BlobDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, 
-			DiffMode diffMode, @Nullable InlineCommentSupport commentSupport) {
+	public BlobDiffPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+			IModel<PullRequestComment> commentModel, BlobChange change, DiffMode diffMode) {
 		super(id);
 		
 		this.repoModel = repoModel;
+		this.requestModel = requestModel;
+		this.commentModel = commentModel;
 		this.change = change;
 		this.diffMode = diffMode;
-		this.commentSupport = commentSupport;
 	}
 	
 	private Fragment newFragment(String message, boolean warning) {
@@ -70,7 +72,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newFragment("Empty file added.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, repoModel, change, diffMode, commentSupport));
+				add(new TextDiffPanel(CONTENT_ID, repoModel, requestModel, commentModel, change, diffMode));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -105,7 +107,7 @@ public class BlobDiffPanel extends Panel {
 				} else if (change.getAdditions() + change.getDeletions() == 0) {
 					add(newFragment("File is identical if " + change.getLineProcessor().getName().toLowerCase() + ".", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, repoModel, change, diffMode, commentSupport));
+					add(new TextDiffPanel(CONTENT_ID, repoModel, requestModel, commentModel, change, diffMode));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));
@@ -134,6 +136,8 @@ public class BlobDiffPanel extends Panel {
 
 	protected void onDetach() {
 		repoModel.detach();
+		requestModel.detach();
+		commentModel.detach();
 		
 		super.onDetach();
 	}

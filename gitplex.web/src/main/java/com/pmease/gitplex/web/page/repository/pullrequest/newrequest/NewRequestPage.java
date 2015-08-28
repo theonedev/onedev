@@ -50,6 +50,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
+import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
@@ -368,9 +369,9 @@ public class NewRequestPage extends PullRequestPage {
 		PullRequest request = getPullRequest();
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
-				oldRev, newRev, path, null, diffOption.getLineProcessor(), 
-				diffOption.getDiffMode(), null) {
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, new Model<PullRequest>(null), 
+				new Model<PullRequestComment>(null), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
+				diffOption.getDiffMode()) {
 
 			@Override
 			protected void onClearPath(AjaxRequestTarget target) {

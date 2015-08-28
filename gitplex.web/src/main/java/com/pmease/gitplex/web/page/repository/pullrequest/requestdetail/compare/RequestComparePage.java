@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +28,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.google.common.base.Preconditions;
-import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -46,18 +41,12 @@ import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.InlineComment;
-import com.pmease.gitplex.core.comment.InlineCommentSupport;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.comment.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
@@ -113,7 +102,7 @@ public class RequestComparePage extends RequestDetailPage {
 		protected PullRequestComment load() {
 			if (state.commentId != null)
 				return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, state.commentId);
-			else
+			else 
 				return null;
 		}
 		
@@ -185,7 +174,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void initFromState(HistoryState state) {
 		PullRequest request = getPullRequest();
 		PullRequestComment comment = commentModel.getObject();
-		if (comment != null) {
+		if (comment != null && comment.getId() != null) {
 			oldCommitHash = comment.getOldCommitHash();
 			newCommitHash = comment.getNewCommitHash();
 			path = comment.getBlobIdent().path;
@@ -761,74 +750,26 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
-		InlineCommentSupport commentSupport;
-		
-		List<String> commentables = getPullRequest().getCommentables();
-		int oldCommitIndex = commentables.indexOf(oldCommitHash);
-		int newCommitIndex = commentables.indexOf(newCommitHash);
-		if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
-			commentSupport = null;
-		} else {
-			commentSupport = new InlineCommentSupport() {
-				
-				@Override
-				public Map<Integer, List<InlineComment>> getComments(BlobIdent blobIdent) {
-					Map<Integer, List<InlineComment>> comments = new HashMap<>();
-					for (PullRequestComment comment: getPullRequest().getComments()) {
-						if (comment.getInlineInfo() != null) {
-//							GitPlex.getInstance(PullRequestCommentManager.class).updateInlineInfo(comment);
-							if (comment.getBlobIdent().equals(blobIdent)) {
-								List<InlineComment> commentsAtLine = comments.get(comment.getLine());
-								if (commentsAtLine == null) {
-									commentsAtLine = new ArrayList<>();
-									comments.put(comment.getLine(), commentsAtLine);
-								}
-								commentsAtLine.add(comment);
-							}
-						}
-					}
-					return comments;
-				}
-				
-				@Override
-				public InlineComment getConcernedComment() {
-					return commentModel.getObject();
-				}
-				
-				@Override
-				public InlineComment addComment(BlobIdent blobInfo, BlobIdent compareWith, 
-						int line, String content) {
-					User user = GitPlex.getInstance(UserManager.class).getCurrent();
-					Preconditions.checkNotNull(user);
-					PullRequestComment comment = new PullRequestComment();
-					getPullRequest().getComments().add(comment);
-					comment.setUser(user);
-					comment.setDate(new Date());
-					comment.setContent(content);
-					comment.setRequest(getPullRequest());
-					comment.setBlobIdent(blobInfo);
-					comment.setCompareWith(compareWith);
-					comment.setLine(line);
-					InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPageId()));
-					try {
-						GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
-					} finally {
-						InheritableThreadLocalData.clear();
-					}
-					return comment;
-				}
+		IModel<PullRequest> requestModel = new LoadableDetachableModel<PullRequest>() {
 
-				@Override
-				public InlineComment loadComment(Long commentId) {
-					return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
+			@Override
+			protected PullRequest load() {
+				PullRequest request = getPullRequest();
+				List<String> commentables = request.getCommentables();
+				int oldCommitIndex = commentables.indexOf(oldCommitHash);
+				int newCommitIndex = commentables.indexOf(newCommitHash);
+				if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
+					// indicate that comment support is not available in text diff panel
+					return null;
+				} else {
+					return request;
 				}
-			};
+			}
+			
 		};
-		
-		compareResult = new RevisionDiffPanel("compareResult", 
-				repoModel, oldCommitHash, newCommitHash, path, comparePath, 
-				diffOption.getLineProcessor(), diffOption.getDiffMode(), 
-				commentSupport) {
+
+		compareResult = new RevisionDiffPanel("compareResult", repoModel, requestModel, commentModel, oldCommitHash, newCommitHash, 
+				path, comparePath, diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 
 			@Override
 			protected void onClearPath(AjaxRequestTarget target) {

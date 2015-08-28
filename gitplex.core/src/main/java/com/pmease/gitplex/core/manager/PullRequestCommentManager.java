@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
+import com.pmease.commons.git.BlobIdent;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 
 public interface PullRequestCommentManager {
@@ -14,4 +16,5 @@ public interface PullRequestCommentManager {
 	
 	void save(PullRequestComment comment, boolean notify);
 	
+	void addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content);
 }

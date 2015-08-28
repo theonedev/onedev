@@ -83,4 +83,5 @@ public interface PullRequestManager extends ConfigListener {
 	 */
 	@Nullable
 	Date getLastVisitDate(PullRequest request);
+	
 }

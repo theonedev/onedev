@@ -11,11 +11,10 @@ import javax.persistence.ManyToOne;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.CommentReply;
 
 @SuppressWarnings("serial")
 @Entity
-public class PullRequestCommentReply extends AbstractEntity implements CommentReply {
+public class PullRequestCommentReply extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -55,18 +54,15 @@ public class PullRequestCommentReply extends AbstractEntity implements CommentRe
 		this.content = content;
 	}
 
-	@Override
 	public void saveContent(String content) {
 		setContent(content);
 		GitPlex.getInstance(Dao.class).persist(this);
 	}
 
-	@Override
 	public void delete() {
 		GitPlex.getInstance(Dao.class).remove(this);
 	}
 	
-	@Override
 	public PullRequestComment getComment() {
 		return comment;
 	}

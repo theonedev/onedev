@@ -5,10 +5,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitplex.core.comment.Comment;
-import com.pmease.gitplex.core.comment.CommentReply;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.PullRequestCommentReply;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 
 @SuppressWarnings("serial")
@@ -29,7 +28,7 @@ class CommentActivityPanel extends Panel {
 		add(new CommentPanel("content", commentModel) {
 
 			@Override
-			protected Component newAdditionalCommentOperations(String id, final IModel<Comment> commentModel) {
+			protected Component newAdditionalCommentOperations(String id, final IModel<PullRequestComment> commentModel) {
 				return new SinceChangesLink(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
@@ -41,7 +40,7 @@ class CommentActivityPanel extends Panel {
 			}
 
 			@Override
-			protected Component newAdditionalReplyOperations(String id, CommentReply reply) {
+			protected Component newAdditionalReplyOperations(String id, PullRequestCommentReply reply) {
 				return new SinceChangesLink(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override

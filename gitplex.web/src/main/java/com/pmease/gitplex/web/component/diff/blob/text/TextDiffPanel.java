@@ -8,8 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -41,17 +39,20 @@ import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
+import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.gitplex.core.comment.Comment;
-import com.pmease.gitplex.core.comment.InlineComment;
-import com.pmease.gitplex.core.comment.InlineCommentSupport;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
@@ -73,38 +74,41 @@ public class TextDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
+	private final IModel<PullRequest> requestModel;
+	
+	private final IModel<PullRequestComment> commentModel;
+	
 	private final BlobChange change;
 	
 	private final Map<Integer, Integer> contextSizes = new HashMap<>();
 	
 	private final DiffMode diffMode;
 	
-	private final InlineCommentSupport commentSupport;
-	
 	private final IModel<List<CommentAndPos>> listOfCommentAndPosModel = new LoadableDetachableModel<List<CommentAndPos>>() {
 
 		@Override
 		protected List<CommentAndPos> load() {
 			List<CommentAndPos> listOfCommentAndPos = new ArrayList<>();
-			if (commentSupport != null) {
-				for (Map.Entry<Integer, List<InlineComment>> entry: 
-					commentSupport.getComments(change.getOldBlobIdent()).entrySet()) {
-					for (InlineComment each: entry.getValue()) {
-						CommentAndPos commentAndPos = new CommentAndPos();
-						commentAndPos.comment = each;
-						commentAndPos.oldLineNo = entry.getKey();
-						commentAndPos.newLineNo = -1;
-						listOfCommentAndPos.add(commentAndPos);
-					}
-				}
-				for (Map.Entry<Integer, List<InlineComment>> entry: 
-						commentSupport.getComments(change.getNewBlobIdent()).entrySet()) {
-					for (InlineComment each: entry.getValue()) {
-						CommentAndPos commentAndPos = new CommentAndPos();
-						commentAndPos.comment = each;
-						commentAndPos.oldLineNo = -1;
-						commentAndPos.newLineNo = entry.getKey();
-						listOfCommentAndPos.add(commentAndPos);
+			if (requestModel.getObject() != null) {
+				PullRequest request = requestModel.getObject();
+				for (PullRequestComment comment: request.getComments()) {
+					if (comment.getInlineInfo() != null) {
+						GitPlex.getInstance(PullRequestCommentManager.class).updateInlineInfo(comment);
+						BlobIdent blobIdent = comment.getBlobIdent();
+						if (blobIdent.equals(change.getOldBlobIdent())) {
+							CommentAndPos commentAndPos = new CommentAndPos();
+							commentAndPos.comment = comment;
+							commentAndPos.oldLineNo = comment.getLine();
+							commentAndPos.newLineNo = -1;
+							listOfCommentAndPos.add(commentAndPos);
+						}
+						if (blobIdent.equals(change.getNewBlobIdent())) {
+							CommentAndPos commentAndPos = new CommentAndPos();
+							commentAndPos.comment = comment;
+							commentAndPos.oldLineNo = -1;
+							commentAndPos.newLineNo = comment.getLine();
+							listOfCommentAndPos.add(commentAndPos);
+						}
 					}
 				}
 				Collections.sort(listOfCommentAndPos, new Comparator<CommentAndPos>() {
@@ -127,14 +131,15 @@ public class TextDiffPanel extends Panel {
 	
 	private RepeatingView commentRows;
 	
-	public TextDiffPanel(String id, IModel<Repository> repoModel, BlobChange change, DiffMode diffMode, 
-			@Nullable InlineCommentSupport commentSupport) {
+	public TextDiffPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+			IModel<PullRequestComment> commentModel, BlobChange change, DiffMode diffMode) {
 		super(id);
 		
 		this.repoModel = repoModel;
+		this.commentModel = commentModel;
+		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
-		this.commentSupport = commentSupport;
 	}
 
 	@Override
@@ -242,7 +247,13 @@ public class TextDiffPanel extends Panel {
 							lineNo = newLineNo;
 						}
 						
-						commentSupport.addComment(commentAt, compareWith, lineNo, input.getModelObject());
+						InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPage().getPageId()));
+						try {
+							GitPlex.getInstance(PullRequestCommentManager.class).addInline(
+									requestModel.getObject(), commentAt, compareWith, lineNo, input.getModelObject());
+						} finally {
+							InheritableThreadLocalData.clear();
+						}
 						
 						CommentAndPos lastComment = listOfCommentAndPosModel.getObject().get(listOfCommentAndPosModel.getObject().size()-1);
  						Component commentRow = newCommentRow(commentRows.newChildId(), lastComment);
@@ -418,7 +429,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendAddComment(StringBuilder builder, int oldLineNo, int newLineNo) {
-		if (commentSupport != null) {
+		if (commentModel.getObject() != null) {
 			builder.append("<span class='add-comment'>");
 			String script = String.format("document.getElementById('%s').addComment(%d, %d);", 
 					getMarkupId(), oldLineNo, newLineNo);
@@ -618,8 +629,8 @@ public class TextDiffPanel extends Panel {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				if (commentSupport.getConcernedComment() != null 
-						&& commentId.equals(commentSupport.getConcernedComment().getId())) {
+				PullRequestComment comment = commentModel.getObject();
+				if (comment != null && commentId.equals(comment.getId())) {
 					String script = String.format("$('#%s').closest('td').focus();", getMarkupId());
 					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
@@ -627,17 +638,15 @@ public class TextDiffPanel extends Panel {
 			
 		};
 		row.add(new UserLink("avatar", new UserModel(commentAndPos.comment.getUser()), AvatarMode.AVATAR));
-		row.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
+		row.add(new CommentPanel("detail", new LoadableDetachableModel<PullRequestComment>() {
 
 			@Override
-			protected Comment load() {
-				return commentSupport.loadComment(commentId);
+			protected PullRequestComment load() {
+				return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
 			}
 			
 		}));
 		
-		if (commentAndPos.comment.equals(commentSupport.getConcernedComment()))
-			row.add(AttributeAppender.append("class", " concerned"));
 		row.add(AttributeAppender.append("data-oldLineNo", commentAndPos.oldLineNo));
 		row.add(AttributeAppender.append("data-newLineNo", commentAndPos.newLineNo));
 		row.setOutputMarkupId(true);
@@ -648,6 +657,8 @@ public class TextDiffPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
+		requestModel.detach();
+		commentModel.detach();
 		listOfCommentAndPosModel.detach();
 		super.onDetach();
 	}

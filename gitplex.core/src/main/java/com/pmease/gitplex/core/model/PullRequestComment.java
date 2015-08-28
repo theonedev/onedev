@@ -25,15 +25,13 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.comment.CommentReply;
-import com.pmease.gitplex.core.comment.InlineComment;
 import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
 @Entity
-public class PullRequestComment extends AbstractEntity implements InlineComment {
+public class PullRequestComment extends AbstractEntity {
 	
 	public static final int DIFF_CONTEXT_SIZE = 3;
 
@@ -69,7 +67,6 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 	}
 
 	@Nullable
-	@Override
 	public User getUser() {
 		return user;
 	}
@@ -78,7 +75,6 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		this.user = user;
 	}
 
-	@Override
 	public String getContent() {
 		return content;
 	}
@@ -87,7 +83,6 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		this.content = content;
 	}
 
-	@Override
 	public Date getDate() {
 		return date;
 	}
@@ -96,29 +91,24 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		this.date = date;
 	}
 
-	@Override
 	public void saveContent(String content) {
 		setContent(content);
 		GitPlex.getInstance(Dao.class).persist(this);
 	}
 
-	@Override
 	public Repository getRepository() {
 		return request.getTargetRepo();
 	}
 
-	@Override
 	public void delete() {
 		GitPlex.getInstance(Dao.class).remove(this);
 	}
 
-	@Override
 	public Collection<PullRequestCommentReply> getReplies() {
 		return request.getCommentReplies(this);
 	}
 
-	@Override
-	public CommentReply addReply(String content) {
+	public PullRequestCommentReply addReply(String content) {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		Preconditions.checkNotNull(user);
 		PullRequestCommentReply reply = new PullRequestCommentReply();
@@ -166,7 +156,6 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		return getOldAndNew().getSecond();
 	}
 
-	@Override
 	public BlobIdent getBlobIdent() {
 		return Preconditions.checkNotNull(inlineInfo).getBlobIdent();
 	}
@@ -187,7 +176,6 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		inlineInfo.setCompareWith(compareWith);
 	}
 
-	@Override
 	public int getLine() {
 		return Preconditions.checkNotNull(inlineInfo).getLine();
 	}
@@ -198,14 +186,8 @@ public class PullRequestComment extends AbstractEntity implements InlineComment 
 		inlineInfo.setLine(line);
 	}
 	
-	@Override
 	public Date getLastVisitDate() {
 		return GitPlex.getInstance(PullRequestManager.class).getLastVisitDate(getRequest());
-	}
-
-	@Override
-	public CommentReply loadReply(Long replyId) {
-		return GitPlex.getInstance(Dao.class).load(PullRequestCommentReply.class, replyId);
 	}
 
 }

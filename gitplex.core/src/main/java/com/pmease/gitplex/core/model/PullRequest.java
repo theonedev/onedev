@@ -895,5 +895,5 @@ public class PullRequest extends AbstractEntity {
 		return GitPlex.getInstance().guessServerUrl() + "/" + getTargetRepo().getFQN() 
 				+ "/pull_requests/" + getId() + "/overview";
 	}
-	
+
 }

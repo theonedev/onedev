@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.comment;
+package com.pmease.gitplex.core;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,7 +14,6 @@ import org.jsoup.select.NodeTraversor;
 import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.util.JsoupUtils;
 import com.pmease.commons.util.TextNodeVisitor;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 

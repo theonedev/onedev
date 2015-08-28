@@ -49,7 +49,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.comment.MentionParser;
+import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
@@ -101,7 +101,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	
 	private final ReviewInvitationManager reviewInvitationManager;
 	
-	private final Set<Long> integrationPreviewRequestIds = new ConcurrentHashSet<>();
+	private final Set<Long> integrationPreviewCalculatingRequestIds = new ConcurrentHashSet<>();
 
 	private ThreadPoolExecutor integrationPreviewExecutor;
 
@@ -524,8 +524,8 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		public void run() {
 			unitOfWork.begin();
 			try {
-				if (!integrationPreviewRequestIds.contains(requestId)) {
-					integrationPreviewRequestIds.add(requestId);
+				if (!integrationPreviewCalculatingRequestIds.contains(requestId)) {
+					integrationPreviewCalculatingRequestIds.add(requestId);
 					try {
 						PullRequest request = dao.load(PullRequest.class, requestId);
 						IntegrationPreview preview = request.getLastIntegrationPreview();
@@ -602,7 +602,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 								listener.onIntegrationPreviewCalculated(request);
 						}
 					} finally {
-						integrationPreviewRequestIds.remove(requestId);
+						integrationPreviewCalculatingRequestIds.remove(requestId);
 					}
 				}
 			} catch (Exception e) {
