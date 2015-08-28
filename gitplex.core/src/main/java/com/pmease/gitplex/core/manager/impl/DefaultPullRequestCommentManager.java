@@ -51,6 +51,11 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 		
 		String latestCommitHash = comment.getRequest().getLatestUpdate().getHeadCommitHash();
 		if (!comment.getNewCommitHash().equals(latestCommitHash)) {
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+			}
+			
 			List<DiffEntry> changes = comment.getRepository().getDiffs(comment.getNewCommitHash(), 
 					latestCommitHash, true);
 			String oldCommitHash = comment.getOldCommitHash();

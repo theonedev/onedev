@@ -15,6 +15,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -91,7 +92,13 @@ public class RequestComparePage extends RequestDetailPage {
 	private static final String PARAM_COMPARE_PATH = "comparePath";
 	
 	private HistoryState state = new HistoryState();
-	
+
+	// below fields duplicates some members of state field, and they are serving different 
+	// purposes and may have different values. State members reflects url parameters, while 
+	// below fields records actual value used for comparison. For instance, newCommitHash 
+	// in state object can be null to display comparison against latest update, but also 
+	// serves as an indication that the out dated alert should be displayed when there are 
+	// new updates. 
 	private String oldCommitHash;
 	
 	private String newCommitHash;
@@ -112,7 +119,7 @@ public class RequestComparePage extends RequestDetailPage {
 		
 	};
 	
-	private WebMarkupContainer compareOptions;
+	private WebMarkupContainer compareHead;
 	
 	private DiffOptionPanel diffOption;
 	
@@ -208,17 +215,13 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer compareHead = new WebMarkupContainer("compareHead");
+		compareHead = new WebMarkupContainer("compareHead");
 		compareHead.add(new StickyBehavior());
 		
 		add(compareHead);
 
-		compareOptions = new WebMarkupContainer("options");
-		compareOptions.setOutputMarkupId(true);
-		compareHead.add(compareOptions);
-		
 		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
-		compareOptions.add(oldSelector);
+		compareHead.add(oldSelector);
 		oldSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -261,11 +264,11 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}; 
-		compareOptions.add(oldChoicesDropdown);
+		compareHead.add(oldChoicesDropdown);
 		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
 		
 		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector");
-		compareOptions.add(newSelector);
+		compareHead.add(newSelector);
 		newSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -308,7 +311,7 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}; 
-		compareOptions.add(newChoicesDropdown);
+		compareHead.add(newChoicesDropdown);
 		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
 
 		MenuPanel commonComparisons = new MenuPanel("comparisonChoices") {
@@ -404,13 +407,14 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		};
+		commonComparisons.add(AttributeAppender.append("class", " old-vs-new"));
 		
-		compareOptions.add(commonComparisons);
-		compareOptions.add(new WebMarkupContainer("comparisonSelector")
+		compareHead.add(commonComparisons);
+		compareHead.add(new WebMarkupContainer("comparisonSelector")
 				.add(new MenuBehavior(commonComparisons)
 				.alignWithTrigger(50, 100, 50, 0)));
 		
-		compareOptions.add(diffOption = new DiffOptionPanel("diffOption", repoModel, newCommitHash) {
+		compareHead.add(diffOption = new DiffOptionPanel("diffOption", repoModel, newCommitHash) {
 
 			@Override
 			protected void onSelectPath(AjaxRequestTarget target, String path) {
@@ -454,6 +458,7 @@ public class RequestComparePage extends RequestDetailPage {
 					AjaxRequestTarget target = pullRequestChanged.getTarget();
 					PullRequest request = getPullRequest();
 					boolean outdated;
+
 					if (state.previewIntegration) {
 						if (!oldCommitHash.equals(request.getTarget().getHead())) {
 							outdated = true;
@@ -467,13 +472,17 @@ public class RequestComparePage extends RequestDetailPage {
 							outdated = !newCommitHash.equals(previewCommitHash);
 						}
 					} else {
+						// only display out-dated alert if url (reflected by state field) does not contain
+						// new commit hash parameter, as otherwise refreshing will not have any effect. 
 						outdated = state.newCommitHash == null && !newCommitHash.equals(request.getLatestUpdate().getHeadCommitHash());						
 					}
-					if (outdated) {
+					if (outdated)
 						setVisible(true);
-						target.add(this);
-					}
-					target.add(compareOptions);
+					
+					// have to call this here as the sticky update logic in AbstractWicketConfig can 
+					// not be executed in a web socket call back
+					target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", compareHead.getMarkupId()));
+					target.add(compareHead);
 				}
 			}
 
@@ -501,7 +510,7 @@ public class RequestComparePage extends RequestDetailPage {
 				} else {
 					message = "Integration preview is not available for closed pull request";
 				}
-				return message + ", displaying comparison between target branch and request head instead.";
+				return "<i class='fa fa-warning'></i> " + message + ", displaying comparison between target branch and request head instead.";
 			}
 			
 		}) {
@@ -518,7 +527,7 @@ public class RequestComparePage extends RequestDetailPage {
 				}
 			}
 			
-		});
+		}.setEscapeModelStrings(false));
 		
 		newCompareResult(null);
 	}
@@ -725,10 +734,10 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 
-		HistoryState state = (HistoryState) data;
+		state = (HistoryState) data;
 		initFromState(state);
 		
-		target.add(compareOptions);
+		target.add(compareHead);
 		newCompareResult(target);
 	}
 	
@@ -747,7 +756,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void onStateChange(AjaxRequestTarget target) {
 		pushState(target);
 		
-		target.add(compareOptions);
+		target.add(compareHead);
 		newCompareResult(target);
 	}
 	
@@ -766,13 +775,16 @@ public class RequestComparePage extends RequestDetailPage {
 				public Map<Integer, List<InlineComment>> getComments(BlobIdent blobIdent) {
 					Map<Integer, List<InlineComment>> comments = new HashMap<>();
 					for (PullRequestComment comment: getPullRequest().getComments()) {
-						if (comment.getInlineInfo() != null && comment.getBlobIdent().equals(blobIdent)) {
-							List<InlineComment> commentsAtLine = comments.get(comment.getLine());
-							if (commentsAtLine == null) {
-								commentsAtLine = new ArrayList<>();
-								comments.put(comment.getLine(), commentsAtLine);
+						if (comment.getInlineInfo() != null) {
+//							GitPlex.getInstance(PullRequestCommentManager.class).updateInlineInfo(comment);
+							if (comment.getBlobIdent().equals(blobIdent)) {
+								List<InlineComment> commentsAtLine = comments.get(comment.getLine());
+								if (commentsAtLine == null) {
+									commentsAtLine = new ArrayList<>();
+									comments.put(comment.getLine(), commentsAtLine);
+								}
+								commentsAtLine.add(comment);
 							}
-							commentsAtLine.add(comment);
 						}
 					}
 					return comments;

@@ -216,7 +216,7 @@ public class CommentPanel extends Panel {
 				if (reply.getDate().after(lastReplyDate)) {
 					Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
 					repliesView.add(newReplyRow);
-					String script = String.format("$('#%s>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
+					String script = String.format("$('#%s>.comment>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
 							getMarkupId(), newReplyRow.getMarkupId());
 					target.prependJavaScript(script);
 					target.add(newReplyRow);

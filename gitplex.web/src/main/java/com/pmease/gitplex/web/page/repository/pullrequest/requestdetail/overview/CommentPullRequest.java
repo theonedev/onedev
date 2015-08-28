@@ -40,7 +40,7 @@ class CommentPullRequest implements RenderableActivity {
 			}
 			
 		}; 
-		if (getComment().getInlineInfo() != null) 
+		if (getComment().getInlineInfo() != null)
 			return new InlineCommentActivityPanel(panelId, commentModel);
 		else 
 			return new CommentActivityPanel(panelId, commentModel);
