@@ -107,7 +107,7 @@ public abstract class RepositoryPage extends AccountPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RepositorySelector(id, null) {
+				return new RepositorySelector(id, null, repoModel) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Repository repository) {

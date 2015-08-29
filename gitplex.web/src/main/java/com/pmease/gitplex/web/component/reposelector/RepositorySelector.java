@@ -43,8 +43,6 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -52,11 +50,14 @@ public abstract class RepositorySelector extends Panel {
 
 	private final IModel<Collection<Repository>> reposModel;
 	
+	private final IModel<Repository> currentRepoModel;
+	
 	private String accountSearch = "";
 	
 	private String repoSearch = "";
 	
-	public RepositorySelector(String id, @Nullable IModel<Collection<Repository>> reposModel) {
+	public RepositorySelector(String id, @Nullable IModel<Collection<Repository>> reposModel, 
+			IModel<Repository> currentRepoModel) {
 		super(id);
 		
 		if (reposModel != null) {
@@ -76,6 +77,7 @@ public abstract class RepositorySelector extends Panel {
 			
 			};
 		}
+		this.currentRepoModel = currentRepoModel;
 	}
 
 	@Override
@@ -191,17 +193,7 @@ public abstract class RepositorySelector extends Panel {
 
 					@Override
 					public int compare(User user1, User user2) {
-						if (getPage() instanceof AccountPage) {
-							User account = ((AccountPage)getPage()).getAccount();
-							if (user1.equals(account))
-								return -1;
-							else if (user2.equals(account))
-								return 1;
-							else 
-								return user1.getName().compareTo(user2.getName());
-						} else {
-							return user1.getName().compareTo(user2.getName());
-						}
+						return user1.getName().compareTo(user2.getName());
 					}
 					
 				});
@@ -228,17 +220,7 @@ public abstract class RepositorySelector extends Panel {
 
 							@Override
 							public int compare(Repository repo1, Repository repo2) {
-								if (getPage() instanceof RepositoryPage) {
-									Repository repo = ((RepositoryPage)getPage()).getRepository();
-									if (repo1.equals(repo))
-										return -1;
-									else if (repo2.equals(repo))
-										return 1;
-									else 
-										return repo1.getName().compareTo(repo2.getName());
-								} else {
-									return repo1.getName().compareTo(repo2.getName());
-								}
+								return repo1.getName().compareTo(repo2.getName());
 							}
 							
 						});
@@ -268,6 +250,8 @@ public abstract class RepositorySelector extends Panel {
 							
 						};
 						link.add(new Label("label", repository.getName()));
+						if (repository.equals(currentRepoModel.getObject())) 
+							link.add(AttributeAppender.append("class", " current"));
 						repoItem.add(link);
 						
 						if (repoItem.getIndex() == 0 && userItem.getIndex() == 0)
@@ -278,6 +262,14 @@ public abstract class RepositorySelector extends Panel {
 			}
 			
 		});
+	}
+
+	@Override
+	protected void onDetach() {
+		reposModel.detach();
+		currentRepoModel.detach();
+		
+		super.onDetach();
 	}
 
 	@Override

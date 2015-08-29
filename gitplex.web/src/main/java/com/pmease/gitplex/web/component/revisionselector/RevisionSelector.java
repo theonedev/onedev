@@ -310,6 +310,8 @@ public abstract class RevisionSelector extends Panel {
 					
 				};
 				link.add(new Label("label", item.getModelObject()));
+				if (item.getModelObject().equals(revision))
+					link.add(AttributeAppender.append("class", " current"));
 				item.add(link);
 				
 				if (activeRefIndex == item.getIndex())

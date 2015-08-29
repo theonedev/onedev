@@ -20,3 +20,16 @@
 .repository-selector ul.repositories {
 	margin: 0 0 8px 24px;
 }
+.repository-selector li.repository {
+	position: relative;
+}
+.repository-selector li.repository a {
+	padding-left: 20px;
+}
+.repository-selector a.current:before {
+	font-family: "FontAwesome"; 
+	content: "\f00c"; 
+	margin-right: 4px;	
+	position: absolute;
+	left: 4px;
+}
