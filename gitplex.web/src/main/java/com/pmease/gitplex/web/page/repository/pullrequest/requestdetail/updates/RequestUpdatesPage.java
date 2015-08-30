@@ -44,11 +44,11 @@ import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
 public class RequestUpdatesPage extends RequestDetailPage {

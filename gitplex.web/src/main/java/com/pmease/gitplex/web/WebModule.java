@@ -25,7 +25,7 @@ import com.pmease.gitplex.web.component.diff.blob.DiffRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
+import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -48,7 +48,7 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		
-		contribute(PullRequestListener.class, RequestDetailPage.Updater.class);
+		contribute(PullRequestListener.class, PullRequestChangeBroadcaster.class);
 		contribute(IndexListener.class, RepoFilePage.IndexedListener.class);
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);

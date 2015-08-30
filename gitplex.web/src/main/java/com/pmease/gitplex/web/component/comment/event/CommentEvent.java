@@ -1,15 +1,15 @@
-package com.pmease.gitplex.web.component.comment;
+package com.pmease.gitplex.web.component.comment.event;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.wicket.AjaxEvent;
 import com.pmease.gitplex.core.model.Comment;
 
-public class CommentRemoved extends AjaxEvent {
+public class CommentEvent extends AjaxEvent {
 
 	private final Comment comment;
 	
-	public CommentRemoved(AjaxRequestTarget target, Comment comment) {
+	public CommentEvent(AjaxRequestTarget target, Comment comment) {
 		super(target);
 		
 		this.comment = comment;

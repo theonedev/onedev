@@ -59,7 +59,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
-import com.pmease.gitplex.web.component.comment.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;

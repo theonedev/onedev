@@ -13,9 +13,6 @@ import static com.pmease.gitplex.core.model.PullRequestOperation.REOPEN;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -29,7 +26,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -50,13 +46,10 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
@@ -69,24 +62,16 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.model.PullRequestOperation;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
@@ -94,11 +79,12 @@ import com.pmease.gitplex.web.component.pullrequest.verificationstatus.Verificat
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.updates.RequestUpdatesPage;
+import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
+import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends PullRequestPage {
@@ -318,20 +304,11 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		add(new BackToTop("backToTop"));
 		
-		add(new WebSocketRenderBehavior() {
+		add(new PullRequestChangeRenderer() {
 
 			@Override
-			protected Object getTrait() {
-				PullRequestChangeTrait trait = new PullRequestChangeTrait();
-
-				// Do not call getPullRequest().getId() here to avoid unnecessary SQL query
-				trait.requestId = HibernateUtils.getId(getPullRequest());
-				return trait;
-			}
-
-			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
-				send(getPage(), Broadcast.BREADTH, new PullRequestChanged(handler, getPullRequest()));
+			protected PullRequest getPullRequest() {
+				return RequestDetailPage.this.getPullRequest();
 			}
 
 		});
@@ -942,139 +919,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		return requestModel.getObject();
 	}
 	
-	private static class PullRequestChangeTrait {
-		
-		private Long requestId;
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null || getClass() != obj.getClass())  
-				return false;  
-			PullRequestChangeTrait other = (PullRequestChangeTrait) obj;  
-		    return Objects.equal(requestId, other.requestId);
-		}
-		
-	}
-
-	public static class Updater implements PullRequestListener {
-		
-		private final Dao dao;
-		
-		@Inject
-		public Updater(Dao dao) {
-			this.dao = dao;
-		}
-		
-		@Override
-		public void onOpened(PullRequest request) {
-		}
-
-		@Override
-		public void onUpdated(PullRequestUpdate update) {
-			onChange(update.getRequest());
-		}
-
-		@Override
-		public void onReviewed(Review review, String comment) {
-			onChange(review.getUpdate().getRequest());
-		}
-
-		@Override
-		public void onIntegrated(PullRequest request, User user, String comment) {
-			onChange(request);
-		}
-
-		@Override
-		public void onDiscarded(PullRequest request, User user, String comment) {
-			onChange(request);
-		}
-
-		@Override
-		public void onIntegrationPreviewCalculated(PullRequest request) {
-			onChange(request);
-		}
-
-		@Override
-		public void onCommented(Comment comment) {
-			onChange(comment.getRequest());
-		}
-
-		@Override
-		public void onVerified(PullRequest request) {
-			onChange(request);
-		}
-
-		@Override
-		public void onAssigned(PullRequest request) {
-			onChange(request);
-		}
-
-		@Override
-		public void onCommentReplied(CommentReply reply) {
-			onChange(reply.getComment().getRequest());
-		}
-
-		private void onChange(PullRequest request) {
-			/*
-			 * Make sure that pull request and associated objects are committed before
-			 * sending render request; otherwise rendering request may not reflect
-			 * expected status as rendering happens in another thread which may get
-			 * executed before pull request modification is committed.
-			 */
-			final PullRequestChangeTrait trait = new PullRequestChangeTrait();
-			trait.requestId = request.getId();
-			dao.afterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					// Send web socket message in a thread in order not to blocking UI operations
-					GitPlex.getInstance(ExecutorService.class).execute(new Runnable() {
-
-						@Override
-						public void run() {
-							WebSocketRenderBehavior.requestToRender(trait, PageId.fromObj(InheritableThreadLocalData.get()));
-						}
-						
-					});
-				}
-				
-			});
-		}
-		
-		@Override
-		public void onReopened(PullRequest request, User user, String comment) {
-		}
-
-		@Override
-		public void onMentioned(PullRequest request, User user) {
-		}
-
-		@Override
-		public void onMentioned(Comment comment, User user) {
-		}
-
-		@Override
-		public void onMentioned(CommentReply reply, User user) {
-		}
-		
-		@Override
-		public void onInvitingReview(ReviewInvitation invitation) {
-		}
-
-		@Override
-		public void pendingIntegration(PullRequest request) {
-		}
-
-		@Override
-		public void pendingUpdate(PullRequest request) {
-		}
-
-		@Override
-		public void pendingApproval(PullRequest request) {
-		}
-
-	}
-
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

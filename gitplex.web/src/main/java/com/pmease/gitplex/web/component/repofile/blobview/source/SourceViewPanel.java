@@ -68,7 +68,8 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
-import com.pmease.gitplex.web.component.comment.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.CommentResized;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
@@ -392,7 +393,11 @@ public class SourceViewPanel extends BlobViewPanel {
 					commentRemoved.getTarget().appendJavaScript(script);
 					
 					send(SourceViewPanel.this, Broadcast.BUBBLE, commentRemoved);
-				} 
+				} else if (event.getPayload() instanceof CommentResized) {
+					CommentResized commentResized = (CommentResized) event.getPayload();
+					String script = String.format("gitplex.sourceview.commentResized('%s');", getMarkupId());
+					commentResized.getTarget().appendJavaScript(script);
+				}
 			}
 
 		};

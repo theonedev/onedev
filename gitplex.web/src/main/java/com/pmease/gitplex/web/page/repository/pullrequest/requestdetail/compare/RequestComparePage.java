@@ -47,12 +47,12 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.comment.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
-import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
+import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;

@@ -74,6 +74,7 @@ import com.pmease.gitplex.web.component.repofile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -307,6 +308,16 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 			
 		});
+		if (getPullRequest() != null) {
+			add(new PullRequestChangeRenderer() {
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return RepoFilePage.this.getPullRequest();
+				}
+	
+			});
+		}
 	}
 	
 	@Override

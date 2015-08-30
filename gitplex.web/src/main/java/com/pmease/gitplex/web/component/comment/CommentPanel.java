@@ -42,10 +42,12 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.comment.event.CommentResized;
+import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
 public class CommentPanel extends GenericPanel<Comment> {
@@ -128,6 +130,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(comment.getContent());
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
+						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 					@Override
@@ -145,6 +148,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(getComment().getContent());
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
+						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 				});
@@ -152,6 +156,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				fragment.setOutputMarkupId(true);
 				CommentPanel.this.replace(fragment);
 				target.add(fragment);
+				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
 
 			@Override
@@ -221,6 +226,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 							getMarkupId(), newReplyRow.getMarkupId());
 					target.prependJavaScript(script);
 					target.add(newReplyRow);
+					send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 				}
 			}
 			
@@ -274,6 +280,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 								CommentPanel.this.getMarkupId(), newReplyRow.getMarkupId());
 						target.prependJavaScript(script);
 						target.add(newReplyRow);
+						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 					@Override
@@ -291,12 +298,14 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Component addReply = newAddReply();
 						CommentPanel.this.replace(addReply);
 						target.add(addReply);
+						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 				}.add(new DirtyIgnoreBehavior()));
 
 				CommentPanel.this.replace(row);
 				target.add(row);
+				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
 			
 		});
@@ -363,6 +372,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(reply.getContent());
 						row.replace(fragment);
 						target.add(fragment);
+						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 					@Override
@@ -381,6 +391,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(reply.getContent());
 						row.replace(fragment);
 						target.add(fragment);
+						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 				});
@@ -388,6 +399,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				fragment.setOutputMarkupId(true);
 				row.replace(fragment);
 				target.add(fragment);
+				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
 
 			@Override
@@ -407,6 +419,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				reply.delete();
 				row.remove();
 				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
+				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
 			
 			@Override

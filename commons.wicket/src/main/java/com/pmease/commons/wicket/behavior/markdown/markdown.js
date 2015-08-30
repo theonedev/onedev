@@ -3,6 +3,9 @@ gitplex.markdown = {
 		var $input = $("#" + inputId);
 
 		$input.markdown({
+			onFullscreen: function(e) {
+				$("body").append($input.closest(".md-editor"));
+			},
 			onPreview: function(e) {
 				callback("markdownPreview", e.getContent());
 				return "";
@@ -23,6 +26,7 @@ gitplex.markdown = {
 			           icon: "fa fa-question",
 			           callback: function(e){
 			        	   $input.prevAll(".md-help").toggle();
+			        	   $input.trigger("resized");
 			           }
 		           }, {
 		        	   name: "cmdEmojis",
@@ -34,6 +38,7 @@ gitplex.markdown = {
 			        	   if ($emojis.find(".emoji").length == 0)
 			        		   callback("loadEmojis");
 			        	   $emojis.toggle();
+			        	   $input.trigger("resized");
 			           }
 		           }]			
 			}]], 
@@ -124,5 +129,6 @@ gitplex.markdown = {
 			
 			$input.caret(beforeChar + ":" + emojiName + ":" + afterChar);
 		});
+ 	   $input.trigger("resized");
 	}
 }

@@ -186,6 +186,14 @@ gitplex.sourceview = {
 		document.getElementById(commentId).lineWidget.clear();
 	},
 	
+	commentResized: function(commentId) {
+		var lineWidget = document.getElementById(commentId).lineWidget;
+		lineWidget.changed();
+		$("#" + commentId + " .md-editor").on("mouseup resized", function() {
+			lineWidget.changed();
+		});
+	},
+	
 	blame: function(cm, blameCommits) {
 		if (typeof cm === "string") 
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		

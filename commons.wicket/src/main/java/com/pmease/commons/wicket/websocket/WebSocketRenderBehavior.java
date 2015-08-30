@@ -54,6 +54,10 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		recentRenderedPages.put(pageId, new Date());
 	}
 	
+	protected Component getComponent() {
+		return component;
+	}
+	
 	public static void removePagesBefore(Date date) {
 		for (Iterator<Map.Entry<Integer, Date>> it = recentRenderedPages.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<Integer, Date> entry = it.next();

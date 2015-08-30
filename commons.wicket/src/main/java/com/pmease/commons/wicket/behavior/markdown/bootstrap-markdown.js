@@ -218,6 +218,7 @@
     } else {
       $editor.removeClass('md-fullscreen-mode');
       $('body').removeClass('md-nooverflow');
+      this.$options.onExitFullscreen(this);
     }
 
     this.$isFullscreen = mode;
@@ -1287,7 +1288,8 @@
     onBlur: function (e) {},
     onFocus: function (e) {},
     onChange: function(e) {},
-    onFullscreen: function(e) {}
+    onFullscreen: function(e) {},
+    onExitFullscreen: function(e) {}
   };
 
   $.fn.markdown.Constructor = Markdown;
