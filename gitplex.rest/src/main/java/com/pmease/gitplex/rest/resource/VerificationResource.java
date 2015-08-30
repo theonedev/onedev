@@ -25,7 +25,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.manager.VerificationManager;
-import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @Path("/verifications")
@@ -46,8 +46,8 @@ public class VerificationResource {
 	
     @GET
     @Path("/{id}")
-    public PullRequestVerification get(@PathParam("id") Long id) {
-    	PullRequestVerification verification  = dao.load(PullRequestVerification.class, id);
+    public Verification get(@PathParam("id") Long id) {
+    	Verification verification  = dao.load(Verification.class, id);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(verification.getRequest().getTargetRepo())))
     		throw new UnauthorizedException();
     	return verification;
@@ -55,11 +55,11 @@ public class VerificationResource {
     
     @ValidQueryParams
     @GET
-    public Collection<PullRequestVerification> query(
+    public Collection<Verification> query(
     		@QueryParam("requestId") Long requestId,
     		@QueryParam("configuration") String configuration, 
     		@QueryParam("commit") String commit) {
-		EntityCriteria<PullRequestVerification> criteria = EntityCriteria.of(PullRequestVerification.class);
+		EntityCriteria<Verification> criteria = EntityCriteria.of(Verification.class);
 		if (requestId != null)
 			criteria.add(Restrictions.eq("request.id", requestId));
 		if (configuration != null)
@@ -67,9 +67,9 @@ public class VerificationResource {
 		if (commit != null)
 			criteria.add(Restrictions.eq("commit", commit));
 		
-		List<PullRequestVerification> verifications = dao.query(criteria);
+		List<Verification> verifications = dao.query(criteria);
 		
-    	for (PullRequestVerification verification: verifications) {
+    	for (Verification verification: verifications) {
     		if (!SecurityUtils.getSubject().isPermitted(
     				ObjectPermission.ofRepoPull(verification.getRequest().getTargetRepo()))) {
     			throw new UnauthorizedException("Unauthorized access to verification " 
@@ -83,7 +83,7 @@ public class VerificationResource {
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
-    	PullRequestVerification verification = dao.load(PullRequestVerification.class, id);
+    	Verification verification = dao.load(Verification.class, id);
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(verification.getRequest().getTargetRepo())))
     		throw new UnauthorizedException();
     	
@@ -91,7 +91,7 @@ public class VerificationResource {
     }
 
     @POST
-    public Long save(@NotNull @Valid PullRequestVerification verification) {
+    public Long save(@NotNull @Valid Verification verification) {
     	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(verification.getRequest().getTargetRepo())))
     		throw new UnauthorizedException();
     	

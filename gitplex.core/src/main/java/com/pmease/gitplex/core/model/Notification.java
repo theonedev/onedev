@@ -17,7 +17,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"request", "user", "task"})
 })
-public class PullRequestNotification extends AbstractEntity {
+public class Notification extends AbstractEntity {
 
 	public enum Task {
 		REVIEW("Please review this pull request."), 

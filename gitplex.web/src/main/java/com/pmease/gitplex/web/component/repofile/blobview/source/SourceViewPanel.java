@@ -1,6 +1,8 @@
 package com.pmease.gitplex.web.component.repofile.blobview.source;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -11,6 +13,9 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -21,7 +26,10 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -40,6 +48,7 @@ import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
@@ -49,14 +58,22 @@ import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.CommentManager;
+import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
+import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.comment.CommentPanel;
+import com.pmease.gitplex.web.component.comment.CommentRemoved;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.component.userlink.UserLink;
+import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
@@ -67,17 +84,48 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
 	
+	private String symbol = "";
+	
+	private List<QueryHit> symbolHits = new ArrayList<>();
+	
+	private final List<Symbol> symbols = new ArrayList<>();
+	
+	private final IModel<List<Comment>> commentsModel = new LoadableDetachableModel<List<Comment>>() {
+
+		@Override
+		protected List<Comment> load() {
+			List<Comment> comments = new ArrayList<>();
+			PullRequest request = context.getPullRequest();
+			if (request != null) {
+				for (Comment comment: request.getComments()) {
+					if (comment.getInlineInfo() != null) {
+						GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
+						BlobIdent blobIdent = comment.getBlobIdent();
+						if (blobIdent.equals(context.getBlobIdent()))
+							comments.add(comment);
+					}
+				}
+				Collections.sort(comments, new Comparator<Comment>() {
+	
+					@Override
+					public int compare(Comment comment1, Comment comment2) {
+						return comment1.getDate().compareTo(comment2.getDate());
+					}
+					
+				});
+			}
+			return comments;
+		}
+		
+	};	
+	
 	private Component codeContainer;
 	
 	private OutlinePanel outlinePanel;
 	
 	private WebMarkupContainer symbolsContainer;
 	
-	private String symbol = "";
-	
-	private List<QueryHit> symbolHits = new ArrayList<>();
-	
-	private final List<Symbol> symbols = new ArrayList<>();
+	private RepeatingView commentRows;
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -226,6 +274,13 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		});
 		
+		commentRows = new RepeatingView("comments");
+		
+		for (Comment comment: commentsModel.getObject())
+			commentRows.add(newCommentRow(commentRows.newChildId(), comment));
+		
+		add(commentRows);
+		
 		add(new AbstractDefaultAjaxBehavior() {
 
 			@Override
@@ -272,14 +327,15 @@ public class SourceViewPanel extends BlobViewPanel {
 				} 
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
 				Blob blob = context.getRepository().getBlob(context.getBlobIdent());
-				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s);", 
+				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s, %d);", 
 						codeContainer.getMarkupId(), 
 						StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 						context.getBlobIdent().path, 
 						highlightToken,
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")), 
-						getBlameCommits());
+						getBlameCommits(), 
+						context.getComment()!=null?context.getComment().getId():-1);
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
@@ -321,6 +377,48 @@ public class SourceViewPanel extends BlobViewPanel {
 		}
 	}
 	
+	private Component newCommentRow(String id, Comment comment) {
+		final Long commentId = comment.getId();
+		WebMarkupContainer row = new WebMarkupContainer(id) {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				
+				if (event.getPayload() instanceof CommentRemoved) {
+					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
+					commentRows.remove(this);
+					String script = String.format("gitplex.sourceview.removeComment('%s');", getMarkupId());
+					commentRemoved.getTarget().appendJavaScript(script);
+					
+					send(SourceViewPanel.this, Broadcast.BUBBLE, commentRemoved);
+				} 
+			}
+
+		};
+		row.add(new UserLink("avatar", new UserModel(comment.getUser()), AvatarMode.AVATAR));
+		row.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
+
+			@Override
+			protected Comment load() {
+				return GitPlex.getInstance(Dao.class).load(Comment.class, commentId);
+			}
+			
+		}));
+		
+		row.add(AttributeAppender.append("data-lineNo", comment.getLine()));
+		row.setMarkupId("pullrequest-comment-" + comment.getId());
+		row.setOutputMarkupId(true);
+		
+		return row;
+	}
+	
+	@Override
+	protected void onDetach() {
+		commentsModel.detach();
+		super.onDetach();
+	}
+
 	@SuppressWarnings("unused")
 	private static class BlameCommit {
 		

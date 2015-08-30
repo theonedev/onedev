@@ -78,11 +78,11 @@ import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
@@ -432,16 +432,16 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				}) {
 
 					@Override
-					protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
+					protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
 						return new Label(id, new AbstractReadOnlyModel<String>() {
 
 							@Override
 							public String getObject() {
-								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
+								if (statusModel.getObject() == Verification.Status.PASSED)
 									return "successful <i class='caret'></i>";
-								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
+								else if (statusModel.getObject() == Verification.Status.ONGOING)
 									return "running <i class='caret'></i>";
-								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
+								else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
 									return "failed <i class='caret'></i>";
 								else 
 									return "";
@@ -453,11 +453,11 @@ public abstract class RequestDetailPage extends PullRequestPage {
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
 								
-								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
+								if (statusModel.getObject() == Verification.Status.PASSED)
 									tag.put("class", "label label-success");
-								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
+								else if (statusModel.getObject() == Verification.Status.ONGOING)
 									tag.put("class", "label label-warning");
-								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
+								else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
 									tag.put("class", "label label-danger");
 							}
 
@@ -995,7 +995,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		}
 
 		@Override
-		public void onCommented(PullRequestComment comment) {
+		public void onCommented(Comment comment) {
 			onChange(comment.getRequest());
 		}
 
@@ -1010,7 +1010,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		}
 
 		@Override
-		public void onCommentReplied(PullRequestCommentReply reply) {
+		public void onCommentReplied(CommentReply reply) {
 			onChange(reply.getComment().getRequest());
 		}
 
@@ -1050,11 +1050,11 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		}
 
 		@Override
-		public void onMentioned(PullRequestComment comment, User user) {
+		public void onMentioned(Comment comment, User user) {
 		}
 
 		@Override
-		public void onMentioned(PullRequestCommentReply reply, User user) {
+		public void onMentioned(CommentReply reply, User user) {
 		}
 		
 		@Override

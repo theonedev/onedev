@@ -20,7 +20,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
@@ -126,16 +126,16 @@ class UpdateActivityPanel extends Panel {
 				item.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 
 					@Override
-					protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
+					protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
 						return new Label(id, new AbstractReadOnlyModel<String>() {
 
 							@Override
 							public String getObject() {
-								if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
+								if (statusModel.getObject() == Verification.Status.PASSED)
 									return "<i class='fa fa-check'></i><i class='caret'></i> ";
-								else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
+								else if (statusModel.getObject() == Verification.Status.ONGOING)
 									return "<i class='fa fa-clock-o'></i><i class='caret'></i> ";
-								else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
+								else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
 									return "<i class='fa fa-times'></i><i class='caret'></i>";
 								else 
 									return "";
@@ -147,13 +147,13 @@ class UpdateActivityPanel extends Panel {
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
 								
-								if (statusModel.getObject() == PullRequestVerification.Status.PASSED) {
+								if (statusModel.getObject() == Verification.Status.PASSED) {
 									tag.put("class", "successful");
 									tag.put("title", "Build is successful");
-								} else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING) {
+								} else if (statusModel.getObject() == Verification.Status.ONGOING) {
 									tag.put("class", "running");
 									tag.put("title", "Build is running");
-								} else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) { 
+								} else if (statusModel.getObject() == Verification.Status.NOT_PASSED) { 
 									tag.put("class", "failed");
 									tag.put("title", "Build is failed");
 								}

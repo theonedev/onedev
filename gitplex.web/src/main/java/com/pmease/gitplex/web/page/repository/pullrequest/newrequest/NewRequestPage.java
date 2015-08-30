@@ -50,7 +50,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
@@ -370,7 +370,7 @@ public class NewRequestPage extends PullRequestPage {
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, new Model<PullRequest>(null), 
-				new Model<PullRequestComment>(null), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
+				new Model<Comment>(null), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
 			@Override

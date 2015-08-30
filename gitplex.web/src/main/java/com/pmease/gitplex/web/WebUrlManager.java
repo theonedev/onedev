@@ -6,8 +6,8 @@ import javax.inject.Singleton;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -37,12 +37,12 @@ public class WebUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(PullRequestComment comment) {
+	public String urlFor(Comment comment) {
 		return urlFor(comment.getRequest()) + "#comment" + comment.getId();
 	}
 
 	@Override
-	public String urlFor(PullRequestCommentReply reply) {
+	public String urlFor(CommentReply reply) {
 		return urlFor(reply.getComment().getRequest()) + "#reply" + reply.getId();
 	}
 

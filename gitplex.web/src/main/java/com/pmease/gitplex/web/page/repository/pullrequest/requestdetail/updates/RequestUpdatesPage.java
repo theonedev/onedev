@@ -30,7 +30,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -204,16 +204,16 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 
 							@Override
-							protected Component newStatusComponent(String id, final IModel<PullRequestVerification.Status> statusModel) {
+							protected Component newStatusComponent(String id, final IModel<Verification.Status> statusModel) {
 								return new Label(id, new AbstractReadOnlyModel<String>() {
 
 									@Override
 									public String getObject() {
-										if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
+										if (statusModel.getObject() == Verification.Status.PASSED)
 											return "build successful <i class='caret'></i>";
-										else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
+										else if (statusModel.getObject() == Verification.Status.ONGOING)
 											return "build running <i class='caret'></i>";
-										else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
+										else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
 											return "build failed <i class='caret'></i>";
 										else 
 											return "";
@@ -225,11 +225,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 									protected void onComponentTag(ComponentTag tag) {
 										super.onComponentTag(tag);
 										
-										if (statusModel.getObject() == PullRequestVerification.Status.PASSED)
+										if (statusModel.getObject() == Verification.Status.PASSED)
 											tag.put("class", "label label-success");
-										else if (statusModel.getObject() == PullRequestVerification.Status.ONGOING)
+										else if (statusModel.getObject() == Verification.Status.ONGOING)
 											tag.put("class", "label label-warning");
-										else if (statusModel.getObject() == PullRequestVerification.Status.NOT_PASSED) 
+										else if (statusModel.getObject() == Verification.Status.NOT_PASSED) 
 											tag.put("class", "label label-danger");
 									}
 

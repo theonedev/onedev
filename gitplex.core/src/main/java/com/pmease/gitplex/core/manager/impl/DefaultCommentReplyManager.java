@@ -15,13 +15,13 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
+import com.pmease.gitplex.core.manager.CommentReplyManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultPullRequestCommentReplyManager implements PullRequestCommentReplyManager {
+public class DefaultCommentReplyManager implements CommentReplyManager {
 
 	private final Dao dao;
 
@@ -30,7 +30,7 @@ public class DefaultPullRequestCommentReplyManager implements PullRequestComment
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultPullRequestCommentReplyManager(Dao dao, MarkdownManager markdownManager, 
+	public DefaultCommentReplyManager(Dao dao, MarkdownManager markdownManager, 
 			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.markdownManager = markdownManager;
@@ -39,7 +39,7 @@ public class DefaultPullRequestCommentReplyManager implements PullRequestComment
 
 	@Transactional
 	@Override
-	public void save(final PullRequestCommentReply reply) {
+	public void save(final CommentReply reply) {
 		boolean isNew = reply.isNew();
 		
 		dao.persist(reply);
@@ -59,8 +59,8 @@ public class DefaultPullRequestCommentReplyManager implements PullRequestComment
 
 	@Sessional
 	@Override
-	public Collection<PullRequestCommentReply> findBy(PullRequest request) {
-		EntityCriteria<PullRequestCommentReply> criteria = EntityCriteria.of(PullRequestCommentReply.class);
+	public Collection<CommentReply> findBy(PullRequest request) {
+		EntityCriteria<CommentReply> criteria = EntityCriteria.of(CommentReply.class);
 		criteria.createCriteria("comment").add(Restrictions.eq("request", request));
 		return dao.query(criteria);
 	}

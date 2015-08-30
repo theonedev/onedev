@@ -10,11 +10,11 @@ import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 
 @Singleton
@@ -26,14 +26,14 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
-	private final PullRequestCommentManager pullRequestCommentManager;
+	private final CommentManager pullRequestCommentManager;
 	
 	private final UnitOfWork unitOfWork;
 	
 	@Inject
 	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
 			Set<PullRequestListener> pullRequestListeners, UnitOfWork unitOfWork,
-			PullRequestCommentManager pullRequestCommentManager) {
+			CommentManager pullRequestCommentManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
 		this.pullRequestListeners = pullRequestListeners;
@@ -77,7 +77,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 					@Override
 					public void run() {
 						PullRequest request = dao.load(PullRequest.class, requestId);
-						for (PullRequestComment comment: request.getComments()) {
+						for (Comment comment: request.getComments()) {
 							if (comment.getInlineInfo() != null)
 								pullRequestCommentManager.updateInlineInfo(comment);
 						}

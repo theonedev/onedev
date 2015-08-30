@@ -66,11 +66,11 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<PullRequestComment> requestComments = new ArrayList<>();
+	private Collection<Comment> requestComments = new ArrayList<>();
 
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<PullRequestCommentReply> requestCommentReplies = new ArrayList<>();
+	private Collection<CommentReply> requestCommentReplies = new ArrayList<>();
 	
     @OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -82,7 +82,7 @@ public class User extends AbstractUser implements ProtectedObject {
 
     @OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-    private Collection<PullRequestNotification> requestNotifications = new ArrayList<>();
+    private Collection<Notification> requestNotifications = new ArrayList<>();
 
     @OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -178,20 +178,20 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.submittedRequests = submittedRequests;
 	}
 
-    public Collection<PullRequestComment> getRequestComments() {
+    public Collection<Comment> getRequestComments() {
 		return requestComments;
 	}
 
-	public void setRequestComments(Collection<PullRequestComment> requestComments) {
+	public void setRequestComments(Collection<Comment> requestComments) {
 		this.requestComments = requestComments;
 	}
 
-	public Collection<PullRequestCommentReply> getRequestCommentReplies() {
+	public Collection<CommentReply> getRequestCommentReplies() {
 		return requestCommentReplies;
 	}
 
 	public void setRequestCommentReplies(
-			Collection<PullRequestCommentReply> requestCommentReplies) {
+			Collection<CommentReply> requestCommentReplies) {
 		this.requestCommentReplies = requestCommentReplies;
 	}
 
@@ -203,11 +203,11 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.branchWatches = branchWatches;
 	}
 
-	public Collection<PullRequestNotification> getRequestNotifications() {
+	public Collection<Notification> getRequestNotifications() {
 		return requestNotifications;
 	}
 
-	public void setRequestNotifications(Collection<PullRequestNotification> requestNotifications) {
+	public void setRequestNotifications(Collection<Notification> requestNotifications) {
 		this.requestNotifications = requestNotifications;
 	}
 

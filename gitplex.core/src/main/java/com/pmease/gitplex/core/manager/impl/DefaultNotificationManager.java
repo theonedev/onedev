@@ -1,9 +1,9 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_INTEGRATE;
-import static com.pmease.gitplex.core.model.PullRequestNotification.Task.INTEGRATE;
-import static com.pmease.gitplex.core.model.PullRequestNotification.Task.REVIEW;
-import static com.pmease.gitplex.core.model.PullRequestNotification.Task.UPDATE;
+import static com.pmease.gitplex.core.model.Notification.Task.INTEGRATE;
+import static com.pmease.gitplex.core.model.Notification.Task.REVIEW;
+import static com.pmease.gitplex.core.model.Notification.Task.UPDATE;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,12 +18,12 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
+import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
-import com.pmease.gitplex.core.model.PullRequestNotification;
+import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.CommentReply;
+import com.pmease.gitplex.core.model.Notification;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
@@ -38,7 +38,7 @@ import com.pmease.gitplex.core.model.User;
  *
  */
 @Singleton
-public class DefaultPullRequestNotificationManager implements PullRequestNotificationManager {
+public class DefaultNotificationManager implements NotificationManager {
 
 	private final Dao dao;
 	
@@ -49,7 +49,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public DefaultPullRequestNotificationManager(Dao dao, MailManager mailManager, 
+	public DefaultNotificationManager(Dao dao, MailManager mailManager, 
 			UrlManager urlManager, MarkdownManager markdownManager) {
 		this.dao = dao;
 		this.mailManager = mailManager;
@@ -75,11 +75,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	}
 
 	@Override
-	public void onCommented(PullRequestComment comment) {
+	public void onCommented(Comment comment) {
 	}
 
 	@Override
-	public void onCommentReplied(PullRequestCommentReply reply) {
+	public void onCommentReplied(CommentReply reply) {
 	}
 	
 	@Transactional
@@ -150,11 +150,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 			query.setParameter("task", REVIEW);
 			query.executeUpdate();
 		} else {
-			PullRequestNotification notification = new PullRequestNotification();
+			Notification notification = new Notification();
 			notification.setRequest(request);
 			notification.setUser(user);
 			notification.setTask(REVIEW);
-			EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
+			EntityCriteria<Notification> criteria = EntityCriteria.of(Notification.class);
 			criteria.add(Restrictions.eq("request", request))
 					.add(Restrictions.eq("user", user))
 					.add(Restrictions.eq("task", notification.getTask()));
@@ -209,7 +209,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 
 	@Transactional
 	@Override
-	public void onMentioned(PullRequestComment comment, User user) {
+	public void onMentioned(Comment comment, User user) {
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				comment.getRequest().getId(), comment.getRequest().getTitle());
 		String url = urlManager.urlFor(comment);
@@ -224,7 +224,7 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	
 	@Transactional
 	@Override
-	public void onMentioned(PullRequestCommentReply reply, User user) {
+	public void onMentioned(CommentReply reply, User user) {
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				reply.getComment().getRequest().getId(), reply.getComment().getRequest().getTitle());
 		String url = urlManager.urlFor(reply);
@@ -246,11 +246,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 
 	private void requestIntegration(PullRequest request) {
 		User user = request.getAssignee();
-		PullRequestNotification notification = new PullRequestNotification();
+		Notification notification = new Notification();
 		notification.setRequest(request);
 		notification.setUser(user);
 		notification.setTask(INTEGRATE);
-		EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
+		EntityCriteria<Notification> criteria = EntityCriteria.of(Notification.class);
 		criteria.add(Restrictions.eq("request", notification.getRequest()))
 				.add(Restrictions.eq("user", user))
 				.add(Restrictions.eq("task", notification.getTask()));
@@ -277,11 +277,11 @@ public class DefaultPullRequestNotificationManager implements PullRequestNotific
 	@Transactional
 	@Override
 	public void pendingUpdate(PullRequest request) {
-		PullRequestNotification notification = new PullRequestNotification();
+		Notification notification = new Notification();
 		notification.setRequest(request);
 		notification.setUser(request.getSubmitter());
 		notification.setTask(UPDATE);
-		EntityCriteria<PullRequestNotification> criteria = EntityCriteria.of(PullRequestNotification.class);
+		EntityCriteria<Notification> criteria = EntityCriteria.of(Notification.class);
 		criteria.add(Restrictions.eq("request", notification.getRequest()))
 				.add(Restrictions.eq("user", notification.getUser()))
 				.add(Restrictions.eq("task", notification.getTask()));

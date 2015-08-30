@@ -20,8 +20,8 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestVerification;
-import com.pmease.gitplex.core.model.PullRequestVerification.Status;
+import com.pmease.gitplex.core.model.Verification;
+import com.pmease.gitplex.core.model.Verification.Status;
 
 @SuppressWarnings("serial")
 public abstract class VerificationStatusPanel extends Panel {
@@ -37,9 +37,9 @@ public abstract class VerificationStatusPanel extends Panel {
 		this.commitHashModel = commitHashModel;
 	}
 	
-	private List<PullRequestVerification> getVerifications() {
-		List<PullRequestVerification> verifications = new ArrayList<>();
-		for (PullRequestVerification verification: requestModel.getObject().getVerifications()) {
+	private List<Verification> getVerifications() {
+		List<Verification> verifications = new ArrayList<>();
+		for (Verification verification: requestModel.getObject().getVerifications()) {
 			if (verification.getCommit().equals(commitHashModel.getObject()))
 				verifications.add(verification);
 		}
@@ -56,25 +56,25 @@ public abstract class VerificationStatusPanel extends Panel {
 			protected Component newContent(String id) {
 				Fragment fragment = new Fragment(id, "detailFrag", VerificationStatusPanel.this);
 				
-				IModel<List<PullRequestVerification>> model = new AbstractReadOnlyModel<List<PullRequestVerification>>() {
+				IModel<List<Verification>> model = new AbstractReadOnlyModel<List<Verification>>() {
 
 					@Override
-					public List<PullRequestVerification> getObject() {
+					public List<Verification> getObject() {
 						return getVerifications();
 					}
 					
 				};
-				fragment.add(new ListView<PullRequestVerification>("verifications", model) {
+				fragment.add(new ListView<Verification>("verifications", model) {
 
 					@Override
-					protected void populateItem(ListItem<PullRequestVerification> item) {
-						PullRequestVerification verification = item.getModelObject();
+					protected void populateItem(ListItem<Verification> item) {
+						Verification verification = item.getModelObject();
 						item.add(new Label("configuration", verification.getConfiguration()));
 						item.add(new Label("message", verification.getMessage()).setEscapeModelStrings(false));
 						
-						if (verification.getStatus() == PullRequestVerification.Status.NOT_PASSED)
+						if (verification.getStatus() == Verification.Status.NOT_PASSED)
 							item.add(AttributeAppender.append("class", "not-passed"));
-						else if (verification.getStatus() == PullRequestVerification.Status.PASSED)
+						else if (verification.getStatus() == Verification.Status.PASSED)
 							item.add(AttributeAppender.append("class", "passed"));
 						else
 							item.add(AttributeAppender.append("class", "ongoing"));
@@ -88,19 +88,19 @@ public abstract class VerificationStatusPanel extends Panel {
 		};
 		add(dropdown);
 		
-		Component statusComponent = newStatusComponent("overall", new LoadableDetachableModel<PullRequestVerification.Status>() {
+		Component statusComponent = newStatusComponent("overall", new LoadableDetachableModel<Verification.Status>() {
 
 			@Override
 			protected Status load() {
-				PullRequestVerification.Status overallStatus = null;
-				for (PullRequestVerification verification: getVerifications()) {
-					if (verification.getStatus() == PullRequestVerification.Status.NOT_PASSED) {
-						overallStatus = PullRequestVerification.Status.NOT_PASSED;
+				Verification.Status overallStatus = null;
+				for (Verification verification: getVerifications()) {
+					if (verification.getStatus() == Verification.Status.NOT_PASSED) {
+						overallStatus = Verification.Status.NOT_PASSED;
 						break;
-					} else if (verification.getStatus() == PullRequestVerification.Status.ONGOING) {
-						overallStatus = PullRequestVerification.Status.ONGOING;
+					} else if (verification.getStatus() == Verification.Status.ONGOING) {
+						overallStatus = Verification.Status.ONGOING;
 					} else if (overallStatus == null) {
-						overallStatus = PullRequestVerification.Status.PASSED;
+						overallStatus = Verification.Status.PASSED;
 					}
 				}
 				return overallStatus;
@@ -111,7 +111,7 @@ public abstract class VerificationStatusPanel extends Panel {
 		add(statusComponent);
 	}
 	
-	protected abstract Component newStatusComponent(String id, IModel<PullRequestVerification.Status> statusModel);
+	protected abstract Component newStatusComponent(String id, IModel<Verification.Status> statusModel);
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {

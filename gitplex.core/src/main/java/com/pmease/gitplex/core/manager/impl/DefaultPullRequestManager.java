@@ -54,9 +54,9 @@ import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.PullRequestNotificationManager;
+import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -68,7 +68,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.RepoAndBranch;
@@ -87,7 +87,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final PullRequestCommentManager pullRequestCommentManager;
+	private final CommentManager pullRequestCommentManager;
 	
 	private final UserManager userManager;
 	
@@ -118,8 +118,8 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
 			StorageManager storageManager, ReviewInvitationManager reviewInvitationManager, 
-			UserManager userManager, PullRequestNotificationManager notificationManager, 
-			ConfigManager configManager, PullRequestCommentManager pullRequestCommentManager, 
+			UserManager userManager, NotificationManager notificationManager, 
+			ConfigManager configManager, CommentManager pullRequestCommentManager, 
 			MarkdownManager markdownManager, UnitOfWork unitOfWork, 
 			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
@@ -181,7 +181,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		dao.persist(activity);
 
 		if (comment != null) {
-			PullRequestComment requestComment = new PullRequestComment();
+			Comment requestComment = new Comment();
 			requestComment.setContent(comment);
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
@@ -210,7 +210,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		dao.persist(activity);
 
 		if (comment != null) {
-			PullRequestComment requestComment = new PullRequestComment();
+			Comment requestComment = new Comment();
 			requestComment.setContent(comment);
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
@@ -287,7 +287,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		dao.persist(activity);
 
 		if (comment != null) {
-			PullRequestComment requestComment = new PullRequestComment();
+			Comment requestComment = new Comment();
 			requestComment.setContent(comment);
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);

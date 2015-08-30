@@ -52,8 +52,8 @@ import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
@@ -106,12 +106,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private Long commentId;
 	
-	private final IModel<PullRequestComment> commentModel = new LoadableDetachableModel<PullRequestComment>() {
+	private final IModel<Comment> commentModel = new LoadableDetachableModel<Comment>() {
 
 		@Override
-		protected PullRequestComment load() {
+		protected Comment load() {
 			if (commentId != null)
-				return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
+				return GitPlex.getInstance(Dao.class).load(Comment.class, commentId);
 			else
 				return null;
 		}
@@ -122,7 +122,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 		@Override
 		protected PullRequest load() {
-			PullRequestComment comment = getComment();
+			Comment comment = getComment();
 			if (comment != null)
 				return comment.getRequest();
 			else if (requestId != null)
@@ -307,11 +307,10 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 			
 		});
-		
 	}
 	
 	@Override
-	public PullRequestComment getComment() {
+	public Comment getComment() {
 		return commentModel.getObject();
 	}
 	
@@ -382,7 +381,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					@Override
 					public String getObject() {
 						PullRequest request = getPullRequest();
-						String tooltip = String.format("Inline comments added/displayed in files of "
+						String tooltip = String.format("Inline comments added/displayed in "
 								+ "this commit belong to pull request #%d (%s)", 
 								request.getId(), request.getTitle());
 						return tooltip;
@@ -599,7 +598,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return paramsOf(request.getTargetRepo(), revision, path, false, null, request.getId());
 	}
 	
-	public static PageParameters paramsOf(PullRequestComment comment) {
+	public static PageParameters paramsOf(Comment comment) {
 		return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, 
 				comment.getBlobIdent().path, false, comment.getId(), null);
 	}

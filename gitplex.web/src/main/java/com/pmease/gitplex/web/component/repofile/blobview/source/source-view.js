@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blameCommits) {
+	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blameCommits, activeCommentId) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -128,6 +128,17 @@ gitplex.sourceview = {
 				    	gitplex.sourceview.blame(cm, blameCommits);
 			    	}, 10);
 			    }
+
+			    $sourceView.find(">.comment").each(function() {
+					var lineNo = $(this).data("lineno");
+					gitplex.sourceview.placeComment(cm, lineNo, this);
+				});
+			    if (activeCommentId != -1) {
+			    	$comment = $("#pullrequest-comment-" + activeCommentId);
+			    	cm.setCursor($comment.data("lineno"));
+			    	setTimeout(function() {$comment.focus();}, 10);
+			    }
+			    
 			    cm.focus();
 			} 
 			if (cm.getOption("fullScreen"))
@@ -163,6 +174,16 @@ gitplex.sourceview = {
 		} else {
 			cm.setCursor(0, 0);
 		}
+	},
+	
+	placeComment: function(cm, lineNo, comment) {
+		if (typeof cm === "string") 
+			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
+		comment.lineWidget = cm.addLineWidget(lineNo, comment);
+	},
+	
+	removeComment: function(commentId) {
+		document.getElementById(commentId).lineWidget.clear();
 	},
 	
 	blame: function(cm, blameCommits) {

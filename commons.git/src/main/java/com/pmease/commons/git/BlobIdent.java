@@ -84,8 +84,6 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		return new EqualsBuilder()
 			.append(revision, otherIdent.revision)
 			.append(path, otherIdent.path)
-			.append(mode, otherIdent.mode)
-			.append(id, otherIdent.id)
 			.isEquals();
 	}
 
@@ -94,8 +92,6 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		return new HashCodeBuilder(17, 37)
 			.append(revision)
 			.append(path)
-			.append(mode)
-			.append(id)
 			.toHashCode();
 	}		
 

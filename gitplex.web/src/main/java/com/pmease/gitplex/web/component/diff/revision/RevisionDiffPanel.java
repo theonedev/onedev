@@ -40,7 +40,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
@@ -53,7 +53,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final IModel<PullRequest> requestModel;
 	
-	private final IModel<PullRequestComment> commentModel;
+	private final IModel<Comment> commentModel;
 	
 	private final String oldRev;
 	
@@ -170,7 +170,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	};
 	
 	public RevisionDiffPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
-			IModel<PullRequestComment> commentModel, String oldRev, String newRev, @Nullable String path, 
+			IModel<Comment> commentModel, String oldRev, String newRev, @Nullable String path, 
 			@Nullable String comparePath, LineProcessor lineProcessor, DiffMode diffMode) {
 		super(id);
 		

@@ -8,7 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -26,16 +26,16 @@ class CommentPullRequest implements RenderableActivity {
 		return getComment().getUser();
 	}
 
-	public CommentPullRequest(PullRequestComment comment) {
+	public CommentPullRequest(Comment comment) {
 		this.commentId = comment.getId();
 	}
 	
 	@Override
 	public Panel render(String panelId) {
-		IModel<PullRequestComment> commentModel = new LoadableDetachableModel<PullRequestComment>(){
+		IModel<Comment> commentModel = new LoadableDetachableModel<Comment>(){
 			
 			@Override
-			protected PullRequestComment load() {
+			protected Comment load() {
 				return getComment();
 			}
 			
@@ -46,8 +46,8 @@ class CommentPullRequest implements RenderableActivity {
 			return new CommentActivityPanel(panelId, commentModel);
 	}
 
-	public PullRequestComment getComment() {
-		return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, commentId);
+	public Comment getComment() {
+		return GitPlex.getInstance(Dao.class).load(Comment.class, commentId);
 	}
 
 }

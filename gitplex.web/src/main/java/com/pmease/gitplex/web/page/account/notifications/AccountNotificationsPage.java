@@ -24,7 +24,7 @@ import com.pmease.commons.wicket.component.datatable.EntityDataProvider;
 import com.pmease.commons.wicket.component.datatable.SelectionColumn;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestNotification;
+import com.pmease.gitplex.core.model.Notification;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
@@ -48,8 +48,8 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		EntityDataProvider<PullRequestNotification> dataProvider = new EntityDataProvider<PullRequestNotification>(
-				PullRequestNotification.class, new SortParam<String>("date", false)) {
+		EntityDataProvider<Notification> dataProvider = new EntityDataProvider<Notification>(
+				Notification.class, new SortParam<String>("date", false)) {
 
 				@Override
 				protected void restrict(EntityCriteria<? extends AbstractEntity> criteria) {
@@ -58,19 +58,19 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 			
 		};
 		
-		final SelectionColumn<PullRequestNotification, String> selectionColumn;
+		final SelectionColumn<Notification, String> selectionColumn;
 		
-		List<IColumn<PullRequestNotification, String>> columns = new ArrayList<>();
-		selectionColumn = new SelectionColumn<PullRequestNotification, String>();
+		List<IColumn<Notification, String>> columns = new ArrayList<>();
+		selectionColumn = new SelectionColumn<Notification, String>();
 		if (getAccount().equals(getCurrentUser()))
 			columns.add(selectionColumn);
-		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("Pull Request"), "request") {
+		columns.add(new AbstractColumn<Notification, String>(Model.of("Pull Request"), "request") {
 
 			@Override
 			public void populateItem(
-					Item<ICellPopulator<PullRequestNotification>> cellItem,
-					String componentId, IModel<PullRequestNotification> rowModel) {
-				PullRequestNotification notification = rowModel.getObject();
+					Item<ICellPopulator<Notification>> cellItem,
+					String componentId, IModel<Notification> rowModel) {
+				Notification notification = rowModel.getObject();
 				cellItem.add(new RequestLink(componentId, new EntityModel<PullRequest>(notification.getRequest())) {
 
 					@Override
@@ -83,12 +83,12 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("To Branch")) {
+		columns.add(new AbstractColumn<Notification, String>(Model.of("To Branch")) {
 
 			@Override
 			public void populateItem(
-					Item<ICellPopulator<PullRequestNotification>> cellItem,
-					String componentId, IModel<PullRequestNotification> rowModel) {
+					Item<ICellPopulator<Notification>> cellItem,
+					String componentId, IModel<Notification> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
 				cellItem.add(new BranchLink(componentId, Model.of(request.getTarget())) {
 
@@ -102,12 +102,12 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("From Branch")) {
+		columns.add(new AbstractColumn<Notification, String>(Model.of("From Branch")) {
 
 			@Override
 			public void populateItem(
-					Item<ICellPopulator<PullRequestNotification>> cellItem,
-					String componentId, IModel<PullRequestNotification> rowModel) {
+					Item<ICellPopulator<Notification>> cellItem,
+					String componentId, IModel<Notification> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
 				if (request.getSource() != null) {
 					cellItem.add(new BranchLink(componentId, Model.of(request.getSource())) {
@@ -125,30 +125,30 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("Task"), "task") {
+		columns.add(new AbstractColumn<Notification, String>(Model.of("Task"), "task") {
 
 			@Override
 			public void populateItem(
-					Item<ICellPopulator<PullRequestNotification>> cellItem,
-					String componentId, IModel<PullRequestNotification> rowModel) {
-				PullRequestNotification notification = rowModel.getObject();
+					Item<ICellPopulator<Notification>> cellItem,
+					String componentId, IModel<Notification> rowModel) {
+				Notification notification = rowModel.getObject();
 				cellItem.add(new Label(componentId, notification.getTask().toString()));
 			}
 			
 		});
-		columns.add(new AbstractColumn<PullRequestNotification, String>(Model.of("When"), "date") {
+		columns.add(new AbstractColumn<Notification, String>(Model.of("When"), "date") {
 
 			@Override
 			public void populateItem(
-					Item<ICellPopulator<PullRequestNotification>> cellItem,
-					String componentId, IModel<PullRequestNotification> rowModel) {
-				PullRequestNotification notification = rowModel.getObject();
+					Item<ICellPopulator<Notification>> cellItem,
+					String componentId, IModel<Notification> rowModel) {
+				Notification notification = rowModel.getObject();
 				cellItem.add(new Label(componentId, DateUtils.formatAge(notification.getDate())));
 			}
 			
 		});
 		
-		add(new DefaultDataTable<PullRequestNotification, String>("notifications", 
+		add(new DefaultDataTable<Notification, String>("notifications", 
 				columns, dataProvider, Constants.DEFAULT_PAGE_SIZE));
 		
 		add(new Link<Void>("deleteSelected") {
@@ -158,7 +158,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 				if (selectionColumn.getSelections().isEmpty()) {
 					getSession().warn("Please select notifications to delete");
 				} else {
-					for (IModel<PullRequestNotification> model: selectionColumn.getSelections())
+					for (IModel<Notification> model: selectionColumn.getSelections())
 						GitPlex.getInstance(Dao.class).remove(model.getObject());
 				}
 				setResponsePage(AccountNotificationsPage.class, AccountNotificationsPage.paramsOf(getAccount()));

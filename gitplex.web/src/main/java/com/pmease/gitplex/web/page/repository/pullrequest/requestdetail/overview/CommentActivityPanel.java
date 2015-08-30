@@ -6,16 +6,16 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 
 @SuppressWarnings("serial")
 class CommentActivityPanel extends Panel {
 
-	private final IModel<PullRequestComment> commentModel;
+	private final IModel<Comment> commentModel;
 	
-	public CommentActivityPanel(String id, IModel<PullRequestComment> commentModel) {
+	public CommentActivityPanel(String id, IModel<Comment> commentModel) {
 		super(id);
 		
 		this.commentModel = commentModel;
@@ -28,7 +28,7 @@ class CommentActivityPanel extends Panel {
 		add(new CommentPanel("content", commentModel) {
 
 			@Override
-			protected Component newAdditionalCommentOperations(String id, final IModel<PullRequestComment> commentModel) {
+			protected Component newAdditionalCommentOperations(String id, final IModel<Comment> commentModel) {
 				return new SinceChangesLink(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
@@ -40,7 +40,7 @@ class CommentActivityPanel extends Panel {
 			}
 
 			@Override
-			protected Component newAdditionalReplyOperations(String id, PullRequestCommentReply reply) {
+			protected Component newAdditionalReplyOperations(String id, CommentReply reply) {
 				return new SinceChangesLink(id, new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override

@@ -34,8 +34,8 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.BranchWatch;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.Event;
-import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.PullRequestWatch;
@@ -126,7 +126,7 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 
 	@Transactional
 	@Override
-	public void onCommented(PullRequestComment comment) {
+	public void onCommented(Comment comment) {
 		watch(comment.getRequest(), comment.getUser(), 
 				"You are set to watch this pull request as you've commented.");
 		notify(comment.getRequest(), Sets.newHashSet(comment.getUser()), COMMENTED);
@@ -134,7 +134,7 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 
 	@Transactional
 	@Override
-	public void onCommentReplied(PullRequestCommentReply reply) {
+	public void onCommentReplied(CommentReply reply) {
 		watch(reply.getComment().getRequest(), reply.getUser(), 
 				"You are set to watch this pull request as you've commented.");
 		notify(reply.getComment().getRequest(), Sets.newHashSet(reply.getUser()), COMMENTED);
@@ -260,12 +260,12 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 	}
 
 	@Override
-	public void onMentioned(PullRequestComment comment, User user) {
+	public void onMentioned(Comment comment, User user) {
 		watch(comment.getRequest(), user, "You are set to watch this pull request as you are mentioned.");
 	}
 
 	@Override
-	public void onMentioned(PullRequestCommentReply reply, User user) {
+	public void onMentioned(CommentReply reply, User user) {
 		watch(reply.getComment().getRequest(), user, "You are set to watch this pull request as you are mentioned.");
 	}
 	

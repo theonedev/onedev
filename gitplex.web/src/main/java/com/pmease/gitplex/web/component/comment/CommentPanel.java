@@ -38,8 +38,8 @@ import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.PullRequestComment;
-import com.pmease.gitplex.core.model.PullRequestCommentReply;
+import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.userlink.UserLink;
@@ -48,7 +48,7 @@ import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestChanged;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
-public class CommentPanel extends GenericPanel<PullRequestComment> {
+public class CommentPanel extends GenericPanel<Comment> {
 
 	private static final String HEAD_ID = "head";
 	
@@ -60,15 +60,15 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 	
 	private RepeatingView repliesView;
 	
-	private final IModel<List<PullRequestCommentReply>> repliesModel = new LoadableDetachableModel<List<PullRequestCommentReply>>() {
+	private final IModel<List<CommentReply>> repliesModel = new LoadableDetachableModel<List<CommentReply>>() {
 
 		@Override
-		protected List<PullRequestCommentReply> load() {
-			List<PullRequestCommentReply> replies = new ArrayList<>(getComment().getReplies());
-			Collections.sort(replies, new Comparator<PullRequestCommentReply>() {
+		protected List<CommentReply> load() {
+			List<CommentReply> replies = new ArrayList<>(getComment().getReplies());
+			Collections.sort(replies, new Comparator<CommentReply>() {
 
 				@Override
-				public int compare(PullRequestCommentReply reply1, PullRequestCommentReply reply2) {
+				public int compare(CommentReply reply1, CommentReply reply2) {
 					return reply1.getDate().compareTo(reply2.getDate());
 				}
 				
@@ -78,11 +78,11 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 		
 	};
 	
-	public CommentPanel(String id, IModel<PullRequestComment> commentModel) {
+	public CommentPanel(String id, IModel<Comment> commentModel) {
 		super(id, commentModel);
 	}
 
-	private PullRequestComment getComment() {
+	private Comment getComment() {
 		return getModelObject();
 	}
 	
@@ -122,7 +122,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						PullRequestComment comment = getComment();
+						Comment comment = getComment();
 						comment.saveContent(input.getModelObject());
 
 						Fragment fragment = renderForView(comment.getContent());
@@ -180,10 +180,10 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 
 		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
 		
-		head.add(newAdditionalCommentOperations("additionalOperations", new AbstractReadOnlyModel<PullRequestComment>() {
+		head.add(newAdditionalCommentOperations("additionalOperations", new AbstractReadOnlyModel<Comment>() {
 
 			@Override
-			public PullRequestComment getObject() {
+			public Comment getObject() {
 				return getComment();
 			}
 			
@@ -205,15 +205,15 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			AjaxRequestTarget target = pullRequestChanged.getTarget();
-			List<PullRequestCommentReply> replies = repliesModel.getObject();
+			List<CommentReply> replies = repliesModel.getObject();
 			Date lastReplyDate;
 			if (repliesView.size() != 0) {
 				Component lastReplyRow = repliesView.get(repliesView.size()-1);
-				lastReplyDate = ((PullRequestCommentReply)lastReplyRow.getDefaultModelObject()).getDate();
+				lastReplyDate = ((CommentReply)lastReplyRow.getDefaultModelObject()).getDate();
 			} else {
 				lastReplyDate = getComment().getDate();
 			}
-			for (PullRequestCommentReply reply: replies) {
+			for (CommentReply reply: replies) {
 				if (reply.getDate().after(lastReplyDate)) {
 					Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
 					repliesView.add(newReplyRow);
@@ -261,7 +261,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 						CommentPanel.this.replace(addReply);
 						target.add(addReply);
 						
-						PullRequestCommentReply reply; 
+						CommentReply reply; 
 						InheritableThreadLocalData.set(new PageId(pageId));
 						try {
 							reply = getComment().addReply(input.getModelObject());
@@ -308,7 +308,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 	private RepeatingView newRepliesView() {
 		RepeatingView repliesView = new RepeatingView("replies");
 
-		for (PullRequestCommentReply reply: repliesModel.getObject())
+		for (CommentReply reply: repliesModel.getObject())
 			repliesView.add(newReplyRow(repliesView.newChildId(), reply));
 		
 		return repliesView;
@@ -321,13 +321,13 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 		super.onBeforeRender();
 	}
 
-	private Component newReplyRow(String id, PullRequestCommentReply reply) {
+	private Component newReplyRow(String id, CommentReply reply) {
 		final Long replyId = reply.getId();
-		final WebMarkupContainer row = new WebMarkupContainer(id, new LoadableDetachableModel<PullRequestCommentReply>() {
+		final WebMarkupContainer row = new WebMarkupContainer(id, new LoadableDetachableModel<CommentReply>() {
 
 			@Override
-			protected PullRequestCommentReply load() {
-				return GitPlex.getInstance(Dao.class).load(PullRequestCommentReply.class, replyId);
+			protected CommentReply load() {
+				return GitPlex.getInstance(Dao.class).load(CommentReply.class, replyId);
 			}
 			
 		});
@@ -347,7 +347,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				PullRequestCommentReply reply = (PullRequestCommentReply) row.getDefaultModelObject();
+				CommentReply reply = (CommentReply) row.getDefaultModelObject();
 				final CommentInput input = new CommentInput("input", Model.of(reply.getContent()));
 				input.setRequired(true);
 				form.add(input);
@@ -357,7 +357,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						PullRequestCommentReply reply = (PullRequestCommentReply) row.getDefaultModelObject();
+						CommentReply reply = (CommentReply) row.getDefaultModelObject();
 						reply.saveContent(input.getModelObject());
 
 						Fragment fragment = renderForView(reply.getContent());
@@ -377,7 +377,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						PullRequestCommentReply reply = (PullRequestCommentReply) row.getDefaultModelObject();
+						CommentReply reply = (CommentReply) row.getDefaultModelObject();
 						Fragment fragment = renderForView(reply.getContent());
 						row.replace(fragment);
 						target.add(fragment);
@@ -403,7 +403,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				PullRequestCommentReply reply = (PullRequestCommentReply) row.getDefaultModelObject();
+				CommentReply reply = (CommentReply) row.getDefaultModelObject();
 				reply.delete();
 				row.remove();
 				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
@@ -418,7 +418,7 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
-		row.add(newAdditionalReplyOperations("additionalOperations", (PullRequestCommentReply) row.getDefaultModelObject()));
+		row.add(newAdditionalReplyOperations("additionalOperations", (CommentReply) row.getDefaultModelObject()));
 		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "reply" + reply.getId())));		
 		
 		row.add(renderForView(reply.getContent()));
@@ -432,11 +432,11 @@ public class CommentPanel extends GenericPanel<PullRequestComment> {
 		return row;
 	}
 
-	protected Component newAdditionalCommentOperations(String id, IModel<PullRequestComment> comment) {
+	protected Component newAdditionalCommentOperations(String id, IModel<Comment> comment) {
 		return new WebMarkupContainer(id);
 	}
 	
-	protected Component newAdditionalReplyOperations(String id, PullRequestCommentReply reply) {
+	protected Component newAdditionalReplyOperations(String id, CommentReply reply) {
 		return new WebMarkupContainer(id);
 	}
 	

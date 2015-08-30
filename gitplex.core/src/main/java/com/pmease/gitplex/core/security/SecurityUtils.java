@@ -10,7 +10,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
@@ -50,7 +50,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 
-	public static boolean canModify(PullRequestComment comment) {
+	public static boolean canModify(Comment comment) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		if (currentUser == null) {
 			return false;

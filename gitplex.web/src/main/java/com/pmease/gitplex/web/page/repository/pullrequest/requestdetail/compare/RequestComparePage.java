@@ -44,7 +44,7 @@ import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.CommentRemoved;
@@ -96,12 +96,12 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private String comparePath;
 	
-	private final IModel<PullRequestComment> commentModel = new LoadableDetachableModel<PullRequestComment>() {
+	private final IModel<Comment> commentModel = new LoadableDetachableModel<Comment>() {
 
 		@Override
-		protected PullRequestComment load() {
+		protected Comment load() {
 			if (state.commentId != null)
-				return GitPlex.getInstance(Dao.class).load(PullRequestComment.class, state.commentId);
+				return GitPlex.getInstance(Dao.class).load(Comment.class, state.commentId);
 			else 
 				return null;
 		}
@@ -173,7 +173,7 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private void initFromState(HistoryState state) {
 		PullRequest request = getPullRequest();
-		PullRequestComment comment = commentModel.getObject();
+		Comment comment = commentModel.getObject();
 		if (comment != null) {
 			oldCommitHash = comment.getOldCommitHash();
 			newCommitHash = comment.getNewCommitHash();
@@ -538,7 +538,7 @@ public class RequestComparePage extends RequestDetailPage {
 		super.onDetach();
 	}
 	
-	public static PageParameters paramsOf(PullRequestComment comment) {
+	public static PageParameters paramsOf(Comment comment) {
 		PageParameters params = RequestDetailPage.paramsOf(comment.getRequest());
 		params.set(PARAM_COMMENT, comment.getId());
 		
@@ -585,7 +585,7 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		if (event.getPayload() instanceof CommentRemoved) {
 			CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-			PullRequestComment comment = (PullRequestComment) commentRemoved.getComment();
+			Comment comment = (Comment) commentRemoved.getComment();
 			
 			// compare identifier instead of comment object as comment may have been deleted
 			// to cause LazyInitializationException

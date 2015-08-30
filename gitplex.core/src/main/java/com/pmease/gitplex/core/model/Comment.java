@@ -25,13 +25,13 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.PullRequestCommentReplyManager;
+import com.pmease.gitplex.core.manager.CommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
 @Entity
-public class PullRequestComment extends AbstractEntity {
+public class Comment extends AbstractEntity {
 	
 	public static final int DIFF_CONTEXT_SIZE = 3;
 
@@ -51,7 +51,7 @@ public class PullRequestComment extends AbstractEntity {
 	
 	@OneToMany(mappedBy="comment")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<PullRequestCommentReply> replies = new ArrayList<>();
+	private Collection<CommentReply> replies = new ArrayList<>();
 	
 	@Embedded
 	private InlineInfo inlineInfo;
@@ -104,19 +104,19 @@ public class PullRequestComment extends AbstractEntity {
 		GitPlex.getInstance(Dao.class).remove(this);
 	}
 
-	public Collection<PullRequestCommentReply> getReplies() {
+	public Collection<CommentReply> getReplies() {
 		return request.getCommentReplies(this);
 	}
 
-	public PullRequestCommentReply addReply(String content) {
+	public CommentReply addReply(String content) {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		Preconditions.checkNotNull(user);
-		PullRequestCommentReply reply = new PullRequestCommentReply();
+		CommentReply reply = new CommentReply();
 		reply.setUser(user);
 		reply.setDate(new Date());
 		reply.setContent(content);
 		reply.setComment(this);
-		GitPlex.getInstance(PullRequestCommentReplyManager.class).save(reply);
+		GitPlex.getInstance(CommentReplyManager.class).save(reply);
 		return reply;
 	}
 

@@ -1,6 +1,6 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.model.PullRequestComment.DIFF_CONTEXT_SIZE;
+import static com.pmease.gitplex.core.model.Comment.DIFF_CONTEXT_SIZE;
 
 import java.util.Collection;
 import java.util.Date;
@@ -24,14 +24,14 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultPullRequestCommentManager implements PullRequestCommentManager {
+public class DefaultCommentManager implements CommentManager {
 
 	private final Dao dao;
 	
@@ -42,7 +42,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public DefaultPullRequestCommentManager(Dao dao, UserManager userManager, MarkdownManager markdownManager, 
+	public DefaultCommentManager(Dao dao, UserManager userManager, MarkdownManager markdownManager, 
 			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.userManager = userManager;
@@ -52,7 +52,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 
 	@Transactional
 	@Override
-	public void updateInlineInfo(PullRequestComment comment) {
+	public void updateInlineInfo(Comment comment) {
 		Preconditions.checkNotNull(comment.getInlineInfo());
 		
 		String latestCommitHash = comment.getRequest().getLatestUpdate().getHeadCommitHash();
@@ -179,7 +179,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	
 	@Transactional
 	@Override
-	public void save(PullRequestComment comment, boolean notify) {
+	public void save(Comment comment, boolean notify) {
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
 		
@@ -203,7 +203,7 @@ public class DefaultPullRequestCommentManager implements PullRequestCommentManag
 	public void addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content) {
 		User user = userManager.getCurrent();
 		Preconditions.checkNotNull(user);
-		PullRequestComment comment = new PullRequestComment();
+		Comment comment = new Comment();
 		request.getComments().add(comment);
 		comment.setUser(user);
 		comment.setDate(new Date());

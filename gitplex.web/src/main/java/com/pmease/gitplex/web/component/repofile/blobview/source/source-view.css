@@ -46,3 +46,23 @@
 .CodeMirror-activeline .CodeMirror-annotation {
 	background: #E8F2FE;	
 }
+pre+.CodeMirror-linewidget>.comment {
+	border-top: 1px solid #DDD;
+}
+.CodeMirror-linewidget>.comment {
+	border-bottom: 1px solid #DDD;
+	padding: 12px;
+	background: white;
+}
+.CodeMirror-linewidget>.comment>.detail {
+	margin-left: 36px;
+	font-size: 14px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.CodeMirror-linewidget>.comment>.avatar img {
+	width: 28px;
+	height: 28px;
+}
+.source-view>.comment {
+	display: none;
+}

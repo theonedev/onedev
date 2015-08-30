@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -88,11 +88,11 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		VerificationManager verificationManager = GitPlex.getInstance(VerificationManager.class);
 
 		int passedCount = 0;
-		Collection<PullRequestVerification> verifications = verificationManager.findBy(request, commit);
-		for (PullRequestVerification each: verifications) {
-			if (each.getStatus() == PullRequestVerification.Status.NOT_PASSED)
+		Collection<Verification> verifications = verificationManager.findBy(request, commit);
+		for (Verification each: verifications) {
+			if (each.getStatus() == Verification.Status.NOT_PASSED)
 				return failed(Lists.newArrayList("At least one build is not passed for the commit."));
-			else if (each.getStatus() == PullRequestVerification.Status.PASSED)
+			else if (each.getStatus() == Verification.Status.PASSED)
 				passedCount++;
 		}
 		int lacks = leastPassCount - passedCount;

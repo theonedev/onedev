@@ -17,8 +17,8 @@ import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestVerification;
-import com.pmease.gitplex.core.model.PullRequestVerification.Status;
+import com.pmease.gitplex.core.model.Verification;
+import com.pmease.gitplex.core.model.Verification.Status;
 
 @Singleton
 public class DefaultVerificationManager implements VerificationManager {
@@ -42,16 +42,16 @@ public class DefaultVerificationManager implements VerificationManager {
 
 	@Sessional
 	@Override
-	public Collection<PullRequestVerification> findBy(PullRequest request, String commit) {
-		return dao.query(EntityCriteria.of(PullRequestVerification.class)
+	public Collection<Verification> findBy(PullRequest request, String commit) {
+		return dao.query(EntityCriteria.of(Verification.class)
 				.add(Restrictions.eq("request", request))
 				.add(Restrictions.eq("commit", commit)), 0, 0);
 	}
 
 	@Sessional
 	@Override
-	public PullRequestVerification findBy(PullRequest request, String commit, String configuration) {
-		return dao.find(EntityCriteria.of(PullRequestVerification.class)
+	public Verification findBy(PullRequest request, String commit, String configuration) {
+		return dao.find(EntityCriteria.of(Verification.class)
 				.add(Restrictions.eq("request", request))
 				.add(Restrictions.eq("commit", commit))
 				.add(Restrictions.eq("configuration", configuration)));
@@ -59,7 +59,7 @@ public class DefaultVerificationManager implements VerificationManager {
 
 	@Transactional
 	@Override
-	public void save(PullRequestVerification verification) {
+	public void save(Verification verification) {
 		dao.persist(verification);
 
 		onVerificationChange(verification.getRequest());
@@ -67,7 +67,7 @@ public class DefaultVerificationManager implements VerificationManager {
 
 	@Transactional
 	@Override
-	public void delete(PullRequestVerification verification) {
+	public void delete(Verification verification) {
 		dao.remove(verification);
 		
 		onVerificationChange(verification.getRequest());
@@ -96,16 +96,16 @@ public class DefaultVerificationManager implements VerificationManager {
 	}
 
 	@Override
-	public Status getOverallStatus(Collection<PullRequestVerification> verifications) {
-		PullRequestVerification.Status overallStatus = null;
-		for (PullRequestVerification verification: verifications) {
-			if (verification.getStatus() == PullRequestVerification.Status.NOT_PASSED) {
-				overallStatus = PullRequestVerification.Status.NOT_PASSED;
+	public Status getOverallStatus(Collection<Verification> verifications) {
+		Verification.Status overallStatus = null;
+		for (Verification verification: verifications) {
+			if (verification.getStatus() == Verification.Status.NOT_PASSED) {
+				overallStatus = Verification.Status.NOT_PASSED;
 				break;
-			} else if (verification.getStatus() == PullRequestVerification.Status.ONGOING) {
-				overallStatus = PullRequestVerification.Status.ONGOING;
+			} else if (verification.getStatus() == Verification.Status.ONGOING) {
+				overallStatus = Verification.Status.ONGOING;
 			} else if (overallStatus == null) {
-				overallStatus = PullRequestVerification.Status.PASSED;
+				overallStatus = Verification.Status.PASSED;
 			}
 		}
 		return overallStatus;

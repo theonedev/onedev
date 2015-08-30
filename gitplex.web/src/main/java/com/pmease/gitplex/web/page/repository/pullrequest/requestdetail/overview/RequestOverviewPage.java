@@ -42,13 +42,13 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
+import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.PullRequestWatch;
@@ -173,7 +173,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		for (PullRequestUpdate update: request.getUpdates())
 			renderableActivities.add(new UpdatePullRequest(update));
 		
-		for (PullRequestComment comment: request.getComments()) 
+		for (Comment comment: request.getComments()) 
 			renderableActivities.add(new CommentPullRequest(comment));
 		
 		for (PullRequestActivity activity: request.getActivities()) {
@@ -313,13 +313,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				PullRequestComment comment = new PullRequestComment();
+				Comment comment = new Comment();
 				comment.setRequest(getPullRequest());
 				comment.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
 				comment.setContent(input.getModelObject());
 				InheritableThreadLocalData.set(new PageId(getPage().getPageId()));
 				try {
-					GitPlex.getInstance(PullRequestCommentManager.class).save(comment, true);
+					GitPlex.getInstance(CommentManager.class).save(comment, true);
 				} finally {
 					InheritableThreadLocalData.clear();
 				}

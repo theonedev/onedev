@@ -9,8 +9,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.PullRequestCommentManager;
-import com.pmease.gitplex.core.model.PullRequestComment;
+import com.pmease.gitplex.core.manager.CommentManager;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
@@ -18,9 +18,9 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.
 @SuppressWarnings("serial")
 class InlineCommentActivityPanel extends Panel {
 
-	private final IModel<PullRequestComment> commentModel;
+	private final IModel<Comment> commentModel;
 	
-	public InlineCommentActivityPanel(String id, IModel<PullRequestComment> commentModel) {
+	public InlineCommentActivityPanel(String id, IModel<Comment> commentModel) {
 		super(id);
 		
 		this.commentModel = commentModel;
@@ -40,8 +40,8 @@ class InlineCommentActivityPanel extends Panel {
 					@Override
 					public void onClick() {
 						PageParameters params;
-						PullRequestComment comment = commentModel.getObject();
-						GitPlex.getInstance(PullRequestCommentManager.class).updateInlineInfo(comment);
+						Comment comment = commentModel.getObject();
+						GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
 						if (comment.getBlobIdent().equals(comment.getCompareWith())) {
 							params = RepoFilePage.paramsOf(comment);
 							setResponsePage(RepoFilePage.class, params);

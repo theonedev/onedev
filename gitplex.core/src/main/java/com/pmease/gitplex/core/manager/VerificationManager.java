@@ -3,17 +3,17 @@ package com.pmease.gitplex.core.manager;
 import java.util.Collection;
 
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestVerification;
+import com.pmease.gitplex.core.model.Verification;
 
 public interface VerificationManager {
 	
-	void save(PullRequestVerification verification);
+	void save(Verification verification);
 	
-	void delete(PullRequestVerification verification);
+	void delete(Verification verification);
 	
-	Collection<PullRequestVerification> findBy(PullRequest request, String commit);
+	Collection<Verification> findBy(PullRequest request, String commit);
 	
-	PullRequestVerification findBy(PullRequest request, String commit, String configuration);
+	Verification findBy(PullRequest request, String commit, String configuration);
 	
-	PullRequestVerification.Status getOverallStatus(Collection<PullRequestVerification> verifications);
+	Verification.Status getOverallStatus(Collection<Verification> verifications);
 }

@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.GitPlex;
 
 @SuppressWarnings("serial")
 @Entity
-public class PullRequestCommentReply extends AbstractEntity {
+public class CommentReply extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -28,7 +28,7 @@ public class PullRequestCommentReply extends AbstractEntity {
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
-	private PullRequestComment comment;
+	private Comment comment;
 	
 	public User getUser() {
 		return user;
@@ -63,11 +63,11 @@ public class PullRequestCommentReply extends AbstractEntity {
 		GitPlex.getInstance(Dao.class).remove(this);
 	}
 	
-	public PullRequestComment getComment() {
+	public Comment getComment() {
 		return comment;
 	}
 
-	public void setComment(PullRequestComment comment) {
+	public void setComment(Comment comment) {
 		this.comment = comment;
 	}
 
