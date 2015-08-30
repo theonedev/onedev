@@ -4,7 +4,10 @@ gitplex.markdown = {
 
 		$input.markdown({
 			onFullscreen: function(e) {
-				$("body").append($input.closest(".md-editor"));
+				$input.trigger("fullscreen");
+			},
+			onExitFullscreen: function(e) {
+				$input.trigger("exitFullscreen");
 			},
 			onPreview: function(e) {
 				callback("markdownPreview", e.getContent());

@@ -187,10 +187,19 @@ gitplex.sourceview = {
 	},
 	
 	commentResized: function(commentId) {
-		var lineWidget = document.getElementById(commentId).lineWidget;
-		lineWidget.changed();
-		$("#" + commentId + " .md-editor").on("mouseup resized", function() {
-			lineWidget.changed();
+		var $comment = $("#" + commentId);
+		$comment[0].lineWidget.changed();
+		var $detail = $comment.find(">.detail");
+		$detail.on("mouseup resized", function() {
+			$comment[0].lineWidget.changed();
+		});
+		$detail.on("fullscreen", function() {
+			// full screen mode is abnormal if we do not do this
+			$("body").append($detail);
+		});
+		$detail.on("exitFullscreen", function() {
+			$comment.append($detail);
+			$comment[0].lineWidget.changed();
 		});
 	},
 	

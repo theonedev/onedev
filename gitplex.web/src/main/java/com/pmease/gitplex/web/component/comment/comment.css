@@ -1,6 +1,9 @@
 .comment .md-editor {
 	margin-bottom: 16px;
 }
+.comment>.body>form {
+	margin-bottom: 12px;
+}
 .reply>.activity {
 	padding: 8px;
 }
