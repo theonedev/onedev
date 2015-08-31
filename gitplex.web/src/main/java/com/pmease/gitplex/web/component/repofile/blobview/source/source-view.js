@@ -131,9 +131,16 @@ gitplex.sourceview = {
 			    if (scrollPos)
 			    	cm.scrollTo(scrollPos.left, scrollPos.top);
 			    
+			    var cursorTimer;
 			    cm.on("cursorActivity", function() {
-			    	pmease.commons.history.setCursor(cm.getCursor());
+		    		if (cursorTimer)
+		    			clearTimeout(cursorTimer);
+			    	cursorTimer = setTimeout(function() {
+			    		cursorTimer = undefined;
+				    	pmease.commons.history.setCursor(cm.getCursor());
+			    	}, 1000);
 			    });
+			    
 			    var cursor = pmease.commons.history.getCursor();
 			    if (cursor)
 			    	cm.setCursor(cursor);
