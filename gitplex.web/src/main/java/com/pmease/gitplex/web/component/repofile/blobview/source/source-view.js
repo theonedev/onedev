@@ -105,7 +105,7 @@ gitplex.sourceview = {
 		    			$ele.addClass("CodeMirror-addcomment");
 		    			$ele.attr("title", "Add inline comment");
 		    			var script = "document.getElementById(\"" + codeId + "\").addCommentCallback(" + line + ");";
-		        		$("<a href='javascript: " + script + "'><i class='fa fa-comment-o'></i></a>").appendTo($ele);
+		        		$("<a href='javascript: " + script + "'><i class='fa fa-plus-square-o'></i></a>").appendTo($ele);
 						cm.setGutterMarker(line, gutter, $ele[0]);
 					}
 				}
