@@ -25,6 +25,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -85,7 +86,10 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {
@@ -489,7 +493,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private Component newCommentWidget(String id, Comment comment) {
 		final Long commentId = comment.getId();
-		WebMarkupContainer widget = new WebMarkupContainer(id) {
+		final WebMarkupContainer widget = new WebMarkupContainer(id) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -506,7 +510,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					CommentResized commentResized = (CommentResized) event.getPayload();
 					String script = String.format("gitplex.sourceview.commentResized('%s');", getMarkupId());
 					commentResized.getTarget().appendJavaScript(script);
-				}
+				} 
 			}
 
 		};
@@ -515,6 +519,43 @@ public class SourceViewPanel extends BlobViewPanel {
 		// comment widget, in order not to break the already stored line widget reference at CodeMirror side
 		WebMarkupContainer wrapper = new WebMarkupContainer(WRAPPER_ID);
 		widget.add(wrapper);
+		WebMarkupContainer outdatedAlert = new WebMarkupContainer("outdatedAlert") {
+			
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					PullRequest request = context.getPullRequest();
+					if (!request.getLatestUpdate().getHeadCommitHash().equals(context.getBlobIdent().revision)) {
+						AjaxRequestTarget target = pullRequestChanged.getTarget();
+						setVisible(true);
+						target.add(this);
+						String script = String.format("gitplex.sourceview.commentResized('%s');", 
+								widget.getMarkupId());
+						target.appendJavaScript(script);
+					}
+ 				}				
+			}
+
+		};
+		outdatedAlert.add(new Link<Void>("refresh") {
+
+			@Override
+			public void onClick() {
+				Comment comment = GitPlex.getInstance(Dao.class).load(Comment.class, commentId);
+				GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
+				if (comment.getBlobIdent().equals(comment.getCompareWith()))
+					setResponsePage(RepoFilePage.class, RepoFilePage.paramsOf(comment));
+				else 
+					setResponsePage(RequestComparePage.class, RequestComparePage.paramsOf(comment));
+			}
+			
+		});
+		outdatedAlert.setOutputMarkupPlaceholderTag(true);
+		outdatedAlert.setVisible(false);
+		wrapper.add(outdatedAlert);
+		
 		wrapper.add(new UserLink("avatar", new UserModel(comment.getUser()), AvatarMode.AVATAR));
 		wrapper.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
 

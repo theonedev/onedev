@@ -168,7 +168,7 @@ gitplex.sourceview = {
 			    if (commentId != -1) {
 			    	$comment = $("#pullrequest-comment-" + commentId);
 			    	cm.setCursor($comment.data("lineno"));
-			    	setTimeout(function() {$comment.focus();}, 10);
+			    	setTimeout(function() {$comment.find(">div").focus();}, 10);
 			    }
 			    
 			    cm.focus();

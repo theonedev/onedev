@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
@@ -39,16 +38,12 @@ class InlineCommentActivityPanel extends Panel {
 
 					@Override
 					public void onClick() {
-						PageParameters params;
 						Comment comment = commentModel.getObject();
 						GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
-						if (comment.getBlobIdent().equals(comment.getCompareWith())) {
-							params = RepoFilePage.paramsOf(comment);
-							setResponsePage(RepoFilePage.class, params);
-						} else {
-							params = RequestComparePage.paramsOf(comment);
-							setResponsePage(RequestComparePage.class, params);
-						}
+						if (comment.getBlobIdent().equals(comment.getCompareWith())) 
+							setResponsePage(RepoFilePage.class, RepoFilePage.paramsOf(comment));
+						else 
+							setResponsePage(RequestComparePage.class, RequestComparePage.paramsOf(comment));
 					}
 					
 					@Override

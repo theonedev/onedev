@@ -107,6 +107,16 @@ public class DefaultCommentManager implements CommentManager {
 							}
 						}
 					}
+				} else if (comment.getCompareWith().equals(comment.getBlobIdent())){
+					BlobIdent blobIdent = comment.getBlobIdent();
+					blobIdent.revision = latestCommitHash;
+					// call setBlobIdent in order to clear some cached info in comment object
+					comment.setBlobIdent(blobIdent);
+					
+					BlobIdent compareWith = comment.getCompareWith();
+					compareWith.revision = latestCommitHash;
+					// call setCompareWith in order to clear some cached info in comment object
+					comment.setCompareWith(compareWith);
 				} else {
 					BlobIdent compareWith = comment.getCompareWith();
 					compareWith.revision = latestCommitHash;
