@@ -123,9 +123,17 @@ gitplex.sourceview = {
 			    if (tokenPos)
 			    	gitplex.sourceview.highlightToken(cm, tokenPos);
 
+			    // use scroll timer and cursor timer to minimize performance impact of 
+			    // remembering scroll and cursor position
+			    var scrollTimer;
 			    cm.on("scroll", function() {
-			    	var scrollInfo = cm.getScrollInfo();
-			    	pmease.commons.history.setScrollPos({left: scrollInfo.left, top: scrollInfo.top});
+			    	if (scrollTimer)
+			    		clearTimeout(scrollTimer);
+			    	scrollTimer = setTimeout(function() {
+			    		scrollTimer = undefined;
+				    	var scrollInfo = cm.getScrollInfo();
+				    	pmease.commons.history.setScrollPos({left: scrollInfo.left, top: scrollInfo.top});
+			    	}, 500);
 			    });
 			    var scrollPos = pmease.commons.history.getScrollPos();
 			    if (scrollPos)
@@ -138,7 +146,7 @@ gitplex.sourceview = {
 			    	cursorTimer = setTimeout(function() {
 			    		cursorTimer = undefined;
 				    	pmease.commons.history.setCursor(cm.getCursor());
-			    	}, 1000);
+			    	}, 500);
 			    });
 			    
 			    var cursor = pmease.commons.history.getCursor();
