@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -22,6 +23,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -30,6 +32,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -37,6 +40,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.lib.FileMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +58,13 @@ import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
+import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
@@ -67,6 +75,7 @@ import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
@@ -81,9 +90,11 @@ import com.pmease.gitplex.web.utils.DateUtils;
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {
 
+	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
+	
 	private static final int QUERY_ENTRIES = 20;
 	
-	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
+	private static final String WRAPPER_ID = "wrapper";
 	
 	private String symbol = "";
 	
@@ -126,7 +137,13 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private WebMarkupContainer symbolsContainer;
 	
-	private RepeatingView commentRows;
+	private RepeatingView newCommentForms;
+	
+	private RepeatingView commentWidgets;
+	
+	private AbstractDefaultAjaxBehavior addCommentBehavior;
+	
+	private AbstractDefaultAjaxBehavior querySymbolBehavior;
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -275,14 +292,16 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		});
 		
-		commentRows = new RepeatingView("comments");
+		add(newCommentForms = new RepeatingView("newComments"));
+		
+		commentWidgets = new RepeatingView("comments");
 		
 		for (Comment comment: commentsModel.getObject())
-			commentRows.add(newCommentRow(commentRows.newChildId(), comment));
+			commentWidgets.add(newCommentWidget(commentWidgets.newChildId(), comment));
 		
-		add(commentRows);
+		add(commentWidgets);
 		
-		add(new AbstractDefaultAjaxBehavior() {
+		add(querySymbolBehavior = new AbstractDefaultAjaxBehavior() {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -308,44 +327,133 @@ public class SourceViewPanel extends BlobViewPanel {
 				target.appendJavaScript(script);
 			}
 
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-
-				response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
-				response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
-				
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(SourceViewPanel.class, "source-view.js")));
-				response.render(CssHeaderItem.forReference(
-						new CssResourceReference(SourceViewPanel.class, "source-view.css")));
-				
-				String highlightToken;
-				try {
-					highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPos());
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				} 
-				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
-				Blob blob = context.getRepository().getBlob(context.getBlobIdent());
-				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s, %d, %d);", 
-						codeContainer.getMarkupId(), 
-						StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
-						context.getBlobIdent().path, 
-						highlightToken,
-						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
-						getCallbackFunction(CallbackParameter.explicit("symbol")), 
-						getBlameCommits(), 
-						context.getPullRequest()!=null?context.getPullRequest().getId():-1,
-						context.getComment()!=null?context.getComment().getId():-1);
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-			
 		});		
 		
+		if (context.getPullRequest() != null) {
+			add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
+				
+				@Override
+				protected void respond(AjaxRequestTarget target) {
+					IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+					final int lineNo = params.getParameterValue("lineNo").toInt();
+					
+					final Form<?> newCommentForm = new Form<Void>(newCommentForms.newChildId());
+					newCommentForm.setOutputMarkupId(true);
+					
+					final CommentInput input;
+					newCommentForm.add(input = new CommentInput("input", Model.of("")));
+					input.setRequired(true);
+					newCommentForm.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
+					
+					newCommentForm.add(new AjaxLink<Void>("cancel") {
+	
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							newCommentForm.remove();
+							String script = String.format("$('#%s').parent()[0].lineWidget.clear();", newCommentForm.getMarkupId());
+							target.appendJavaScript(script);
+						}
+						
+					}.add(new DirtyIgnoreBehavior()));
+					
+					newCommentForm.add(new AjaxSubmitLink("save") {
+	
+						@Override
+						protected void onError(AjaxRequestTarget target, Form<?> form) {
+							super.onError(target, form);
+							target.add(form);
+						}
+	
+						@Override
+						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+							super.onSubmit(target, form);
+							
+							BlobIdent commentAt = context.getBlobIdent();
+							BlobIdent compareWith = context.getBlobIdent();
+							
+							Comment comment;
+							InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPage().getPageId()));
+							try {
+								comment = GitPlex.getInstance(CommentManager.class).addInline(
+										context.getPullRequest(), commentAt, compareWith, lineNo, input.getModelObject());
+							} finally {
+								InheritableThreadLocalData.clear();
+							}
+							
+	 						Component commentWidget = newCommentWidget(commentWidgets.newChildId(), comment);
+							commentWidgets.add(commentWidget);
+							
+	 						Component wrapper = commentWidget.get(WRAPPER_ID);
+							wrapper.setMarkupId(newCommentForm.getMarkupId());
+							newCommentForm.remove();
+							target.add(wrapper);
+							
+							String script = String.format(""
+									+ "var $comment = $('#%s').parent();"
+									+ "$comment.attr('id', '%s'); "
+									+ "gitplex.sourceview.commentResized($comment);", 
+									wrapper.getMarkupId(), commentWidget.getMarkupId());
+							target.appendJavaScript(script);
+						}
+	
+					}.add(new DirtyIgnoreBehavior()));
+					
+					newCommentForms.add(newCommentForm);
+					
+					String script = String.format("gitplex.sourceview.placeComment('%s', %d, '%s');", 
+							codeContainer.getMarkupId(), lineNo, newCommentForm.getMarkupId());
+					target.prependJavaScript(script);
+					
+					target.add(newCommentForm);
+					script = String.format("gitplex.sourceview.commentResized($('#%s').parent());", 
+							newCommentForm.getMarkupId());
+					target.appendJavaScript(script);
+				}
+				
+			});		
+		}
 		setOutputMarkupId(true);
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
+		
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(SourceViewPanel.class, "source-view.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
+		
+		String highlightToken;
+		try {
+			highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPos());
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		} 
+		ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
+		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		
+		CharSequence addCommentCallback;
+		if (addCommentBehavior != null) 
+			addCommentCallback = addCommentBehavior.getCallbackFunction(CallbackParameter.explicit("lineNo"));
+		else
+			addCommentCallback = "undefined";
+		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s, %d, %s);", 
+				codeContainer.getMarkupId(), 
+				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
+				context.getBlobIdent().path, 
+				highlightToken,
+				RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
+				querySymbolBehavior.getCallbackFunction(CallbackParameter.explicit("symbol")), 
+				getBlameCommits(), 
+				context.getComment()!=null?context.getComment().getId():-1,
+				addCommentCallback);
+		response.render(OnDomReadyHeaderItem.forScript(script));
+	}
+
 	public void onBlameChange(AjaxRequestTarget target) {
 		String script = String.format("gitplex.sourceview.blame('%s', %s);", 
 				codeContainer.getMarkupId(), getBlameCommits());
@@ -379,9 +487,9 @@ public class SourceViewPanel extends BlobViewPanel {
 		}
 	}
 	
-	private Component newCommentRow(String id, Comment comment) {
+	private Component newCommentWidget(String id, Comment comment) {
 		final Long commentId = comment.getId();
-		WebMarkupContainer row = new WebMarkupContainer(id) {
+		WebMarkupContainer widget = new WebMarkupContainer(id) {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -389,8 +497,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				
 				if (event.getPayload() instanceof CommentRemoved) {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-					commentRows.remove(this);
-					String script = String.format("gitplex.sourceview.removeComment('%s');", getMarkupId());
+					commentWidgets.remove(this);
+					String script = String.format("document.getElementById('%s').lineWidget.clear();", getMarkupId());
 					commentRemoved.getTarget().appendJavaScript(script);
 					
 					send(SourceViewPanel.this, Broadcast.BUBBLE, commentRemoved);
@@ -402,8 +510,13 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 
 		};
-		row.add(new UserLink("avatar", new UserModel(comment.getUser()), AvatarMode.AVATAR));
-		row.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
+		
+		// after adding a new comment, the comment form will be replaced with this wrapper in stead of whole 
+		// comment widget, in order not to break the already stored line widget reference at CodeMirror side
+		WebMarkupContainer wrapper = new WebMarkupContainer(WRAPPER_ID);
+		widget.add(wrapper);
+		wrapper.add(new UserLink("avatar", new UserModel(comment.getUser()), AvatarMode.AVATAR));
+		wrapper.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
 
 			@Override
 			protected Comment load() {
@@ -412,11 +525,11 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		}));
 		
-		row.add(AttributeAppender.append("data-lineNo", comment.getLine()));
-		row.setMarkupId("pullrequest-comment-" + comment.getId());
-		row.setOutputMarkupId(true);
+		widget.add(AttributeAppender.append("data-lineNo", comment.getLine()));
+		widget.setMarkupId("pullrequest-comment-" + commentId);
+		widget.setOutputMarkupId(true);
 		
-		return row;
+		return widget;
 	}
 	
 	@Override

@@ -2,9 +2,19 @@
 	<div class="source-view autofit clearfix">
 		<div wicket:id="code" class="code pull-left"></div>
 		<div wicket:id="outline" class="outline pull-right"></div>
-		<div wicket:id="comments" class="comment clearfix" tabindex="0">
-			<div wicket:id="avatar" class="avatar pull-left"></div>
-			<div wicket:id="detail" class="detail"></div>
+		<form wicket:id="newComments" class="new-comment leave-confirm">
+			<textarea wicket:id="input" rows="10" class="form-control focusable"></textarea>
+			<div wicket:id="feedback"></div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware leave-confirm">Comment on this line</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Close form</button>
+			</div>
+		</form>
+		<div wicket:id="comments" class="comment">
+			<div wicket:id="wrapper" class="clearfix" tabindex="0">
+				<div wicket:id="avatar" class="avatar pull-left"></div>
+				<div wicket:id="detail" class="detail"></div>
+			</div>
 		</div>
 	</div>
 	<div wicket:id="symbols" class="hidden">

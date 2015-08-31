@@ -13,4 +13,5 @@ class CommentAndPos implements Serializable {
 	int oldLineNo;
 	
 	int newLineNo;
+	
 }

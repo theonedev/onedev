@@ -36,7 +36,7 @@ public class DefaultReviewManager implements ReviewManager {
 	
 	private final PullRequestManager pullRequestManager;
 	
-	private final CommentManager pullRequestCommentManager;
+	private final CommentManager commentManager;
 
 	private final UnitOfWork unitOfWork;
 	
@@ -44,11 +44,11 @@ public class DefaultReviewManager implements ReviewManager {
 	
 	@Inject
 	public DefaultReviewManager(Dao dao, PullRequestManager pullRequestManager,
-			CommentManager pullRequestCommentManager,
-			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
+			CommentManager commentManager, UnitOfWork unitOfWork, 
+			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestManager = pullRequestManager;
-		this.pullRequestCommentManager = pullRequestCommentManager;
+		this.commentManager = commentManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
 	}
@@ -90,7 +90,7 @@ public class DefaultReviewManager implements ReviewManager {
 			requestComment.setUser(reviewer);
 			requestComment.setContent(comment);
 			
-			pullRequestCommentManager.save(requestComment, false);
+			commentManager.save(requestComment, false);
 		}
 		
 		for (PullRequestListener listener: pullRequestListeners)

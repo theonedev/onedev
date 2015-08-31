@@ -95,15 +95,17 @@ gitplex.sourceview = {
 				cm = CodeMirror($code[0], options);
 				
 				if (addCommentCallback) {
-					var gutter = "CodeMirror-addcomment";
+					$code[0].addCommentCallback = addCommentCallback;
+					var gutter = "CodeMirror-addcomments";
 					var gutters = cm.getOption("gutters").slice();
 					gutters.push(gutter);
 					cm.setOption("gutters", gutters);
 					for (var line=0; line<cm.lineCount(); line++) {
 		    			var $ele = $(document.createElement("div"));
-		    			$ele.addClass(gutter);
+		    			$ele.addClass("CodeMirror-addcomment");
+		    			$ele.attr("title", "Add inline comment");
 		    			var script = "document.getElementById(\"" + codeId + "\").addCommentCallback(" + line + ");";
-		        		$("<a href='javascript: " + script + "'><i class='fa fa-plus'></i></a>").appendTo($ele);
+		        		$("<a href='javascript: " + script + "'><i class='fa fa-comment-o'></i></a>").appendTo($ele);
 						cm.setGutterMarker(line, gutter, $ele[0]);
 					}
 				}
@@ -194,26 +196,25 @@ gitplex.sourceview = {
 	placeComment: function(cm, lineNo, comment) {
 		if (typeof cm === "string") 
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
-		comment.lineWidget = cm.addLineWidget(lineNo, comment);
+		if (typeof comment === "string")
+			comment = $("<div class='comment'><div id='" + comment + "'></div></div>")[0];
+		comment.lineWidget = cm.addLineWidget(lineNo, comment, {coverGutter: true});
 	},
 	
-	removeComment: function(commentId) {
-		document.getElementById(commentId).lineWidget.clear();
-	},
-	
-	commentResized: function(commentId) {
-		var $comment = $("#" + commentId);
+	commentResized: function($comment) {
+		if (typeof $comment === "string") 
+			$comment = $("#" + $comment);
 		$comment[0].lineWidget.changed();
-		var $detail = $comment.find(">.detail");
-		$detail.on("mouseup resized", function() {
+		var $wrapper = $comment.find(">div");
+		$wrapper.on("mouseup resized", function() {
 			$comment[0].lineWidget.changed();
 		});
-		$detail.on("fullscreen", function() {
+		$wrapper.on("fullscreen", function() {
 			// full screen mode is abnormal if we do not do this
-			$("body").append($detail);
+			$("body").append($wrapper);
 		});
-		$detail.on("exitFullscreen", function() {
-			$comment.append($detail);
+		$wrapper.on("exitFullscreen", function() {
+			$comment.append($wrapper);
 			$comment[0].lineWidget.changed();
 		});
 	},

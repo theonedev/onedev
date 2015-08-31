@@ -200,7 +200,7 @@ public class DefaultCommentManager implements CommentManager {
 
 	@Transactional
 	@Override
-	public void addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content) {
+	public Comment addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content) {
 		User user = userManager.getCurrent();
 		Preconditions.checkNotNull(user);
 		Comment comment = new Comment();
@@ -213,6 +213,7 @@ public class DefaultCommentManager implements CommentManager {
 		comment.setCompareWith(compareWith);
 		comment.setLine(line);
 		save(comment, true);
+		return comment;
 	}
 	
 }

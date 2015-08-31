@@ -67,7 +67,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onUpdated(PullRequestUpdate update) {
-		Query query = dao.getSession().createQuery("delete from PullRequestNotification "
+		Query query = dao.getSession().createQuery("delete from Notification "
 				+ "where request=:request and task=:task");
 		query.setParameter("request", update.getRequest());
 		query.setParameter("task", UPDATE);
@@ -85,7 +85,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onReviewed(Review review, String comment) {
-		Query query = dao.getSession().createQuery("delete from PullRequestNotification "
+		Query query = dao.getSession().createQuery("delete from Notification "
 				+ "where request=:request and user=:user and task=:task");
 		query.setParameter("request", review.getUpdate().getRequest());
 		query.setParameter("user", review.getReviewer());
@@ -99,7 +99,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		Preconditions.checkNotNull(request.getAssignee());
 		
 		if (request.getStatus() == PENDING_INTEGRATE) {  
-			Query query = dao.getSession().createQuery("delete from PullRequestNotification "
+			Query query = dao.getSession().createQuery("delete from Notification "
 					+ "where request=:request and task=:task and user!=:user");
 			query.setParameter("request", request);
 			query.setParameter("task", INTEGRATE);
@@ -117,7 +117,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onIntegrated(PullRequest request, User user, String comment) {
-		Query query = dao.getSession().createQuery("delete from PullRequestNotification "
+		Query query = dao.getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
 		query.executeUpdate();
@@ -126,7 +126,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onDiscarded(PullRequest request, User user, String comment) {
-		Query query = dao.getSession().createQuery("delete from PullRequestNotification "
+		Query query = dao.getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
 		query.executeUpdate();
@@ -143,7 +143,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		PullRequest request = invitation.getRequest();
 		User user = invitation.getReviewer();
 		if (!invitation.isPreferred()) {
-			Query query = dao.getSession().createQuery("delete from PullRequestNotification "
+			Query query = dao.getSession().createQuery("delete from Notification "
 					+ "where request=:request and user=:user and task=:task");
 			query.setParameter("request", request);
 			query.setParameter("user", user);
@@ -184,7 +184,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void pendingApproval(PullRequest request) {
-		Query query = dao.getSession().createQuery("delete from PullRequestNotification "
+		Query query = dao.getSession().createQuery("delete from Notification "
 				+ "where request=:request and (task=:update or task=:integrate)");
 		query.setParameter("request", request);
 		query.setParameter("update", UPDATE);

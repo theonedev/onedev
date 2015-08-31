@@ -52,6 +52,7 @@ import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -436,7 +437,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private void onAddOrEditFile(AjaxRequestTarget target) {
 		ObjectId commitId = getRepository().getObjectId(blobIdent.revision);
 		
-		String refName = Git.REFS_HEADS + blobIdent.revision;
+		final String refName = Git.REFS_HEADS + blobIdent.revision;
 		
 		final AtomicReference<String> newPathRef = new AtomicReference<>(blobIdent.isTree()?null:blobIdent.path);
 		
@@ -452,6 +453,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				BlobIdent committed = new BlobIdent(
 						blobIdent.revision, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 				onSelect(target, committed, null);
+				
+	    		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+	    			listener.onRefUpdate(getRepository(), refName, newCommitId.name());
 			}
 
 			@Override
@@ -795,7 +799,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	public void onDelete(AjaxRequestTarget target) {
 		ObjectId commitId = getRepository().getObjectId(blobIdent.revision);
 		
-		String refName = Git.REFS_HEADS + blobIdent.revision;
+		final String refName = Git.REFS_HEADS + blobIdent.revision;
 
 		CancelListener cancelListener = new CancelListener() {
 
@@ -828,6 +832,10 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					BlobIdent parentBlobIdent = new BlobIdent(blobIdent.revision, parentPath, 
 							FileMode.TREE.getBits());
 					onSelect(target, parentBlobIdent, null);
+
+					for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+		    			listener.onRefUpdate(getRepository(), refName, newCommitId.name());
+					
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

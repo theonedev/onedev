@@ -214,9 +214,8 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
 	@Transactional
 	@Override
 	public void checkSanity() {
-		for (Repository repository: dao.query(EntityCriteria.of(Repository.class), 0, 0)) {
+		for (Repository repository: dao.query(EntityCriteria.of(Repository.class), 0, 0))
 			checkSanity(repository);
-		}
 	}
 	
 	@Transactional
@@ -248,7 +247,6 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
             FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
             gitPostReceiveHookFile.setExecutable(true);
         }
-		
 	}
 
 	@Sessional

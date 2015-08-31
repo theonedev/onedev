@@ -94,21 +94,9 @@ public class TextDiffPanel extends Panel {
 				for (Comment comment: request.getComments()) {
 					if (comment.getInlineInfo() != null) {
 						GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
-						BlobIdent blobIdent = comment.getBlobIdent();
-						if (blobIdent.equals(change.getOldBlobIdent())) {
-							CommentAndPos commentAndPos = new CommentAndPos();
-							commentAndPos.comment = comment;
-							commentAndPos.oldLineNo = comment.getLine();
-							commentAndPos.newLineNo = -1;
+						CommentAndPos commentAndPos = getCommentAndPos(comment);
+						if (commentAndPos != null)
 							listOfCommentAndPos.add(commentAndPos);
-						}
-						if (blobIdent.equals(change.getNewBlobIdent())) {
-							CommentAndPos commentAndPos = new CommentAndPos();
-							commentAndPos.comment = comment;
-							commentAndPos.oldLineNo = -1;
-							commentAndPos.newLineNo = comment.getLine();
-							listOfCommentAndPos.add(commentAndPos);
-						}
 					}
 				}
 				Collections.sort(listOfCommentAndPos, new Comparator<CommentAndPos>() {
@@ -247,16 +235,17 @@ public class TextDiffPanel extends Panel {
 							lineNo = newLineNo;
 						}
 						
+						Comment comment;
 						InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPage().getPageId()));
 						try {
-							GitPlex.getInstance(CommentManager.class).addInline(
+							comment = GitPlex.getInstance(CommentManager.class).addInline(
 									requestModel.getObject(), commentAt, compareWith, lineNo, input.getModelObject());
 						} finally {
 							InheritableThreadLocalData.clear();
 						}
 						
-						CommentAndPos lastComment = listOfCommentAndPosModel.getObject().get(listOfCommentAndPosModel.getObject().size()-1);
- 						Component commentRow = newCommentRow(commentRows.newChildId(), lastComment);
+						CommentAndPos commentAndPos = getCommentAndPos(comment);
+ 						Component commentRow = newCommentRow(commentRows.newChildId(), commentAndPos);
 						commentRows.add(commentRow);
 						commentRow.setMarkupId(newCommentForm.getMarkupId());
 						newCommentForm.remove();
@@ -605,6 +594,25 @@ public class TextDiffPanel extends Panel {
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		}
 		builder.append("</tr>");
+	}
+	
+	private CommentAndPos getCommentAndPos(Comment comment) {
+		BlobIdent blobIdent = comment.getBlobIdent();
+		if (blobIdent.equals(change.getOldBlobIdent())) {
+			CommentAndPos commentAndPos = new CommentAndPos();
+			commentAndPos.comment = comment;
+			commentAndPos.oldLineNo = comment.getLine();
+			commentAndPos.newLineNo = -1;
+			return commentAndPos;
+		} else if (blobIdent.equals(change.getNewBlobIdent())) {
+			CommentAndPos commentAndPos = new CommentAndPos();
+			commentAndPos.comment = comment;
+			commentAndPos.oldLineNo = -1;
+			commentAndPos.newLineNo = comment.getLine();
+			return commentAndPos;
+		} else {
+			return null;
+		}
 	}
 	
 	private Component newCommentRow(String id, CommentAndPos commentAndPos) {

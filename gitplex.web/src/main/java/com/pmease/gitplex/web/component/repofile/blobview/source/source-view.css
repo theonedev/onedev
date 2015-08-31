@@ -46,23 +46,35 @@
 .CodeMirror-activeline .CodeMirror-annotation {
 	background: #E8F2FE;	
 }
-pre+.CodeMirror-linewidget>.comment {
+pre+.CodeMirror-linewidget>.comment>div, pre+.CodeMirror-linewidget>.comment>form {
 	border-top: 1px solid #DDD;
 }
-.CodeMirror-linewidget>.comment {
+.CodeMirror-linewidget>.comment>div, .CodeMirror-linewidget>.comment>form {
 	border-bottom: 1px solid #DDD;
 	padding: 12px;
 	background: white;
 }
-.CodeMirror-linewidget>.comment>.detail {
+.CodeMirror-linewidget>.comment>div>.detail {
 	margin-left: 36px;
 	font-size: 14px;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.CodeMirror-linewidget>.comment>.avatar img {
+.CodeMirror-linewidget>.comment>div>.avatar img {
 	width: 28px;
 	height: 28px;
 }
 .source-view>.comment {
 	display: none;
+}
+.CodeMirror-addcomments {
+	width: 12px;
+}
+.CodeMirror-addcomment>a {
+	font-size: 12px;
+	color: #BBB;
+	background: white;
+}
+.CodeMirror-addcomment>a:hover {
+	color: black;
+	font-size: 14px;
 }

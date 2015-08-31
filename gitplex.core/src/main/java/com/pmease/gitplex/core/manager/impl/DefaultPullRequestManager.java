@@ -53,22 +53,20 @@ import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
-import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.CommentManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Config;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
-import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.RepoAndBranch;
@@ -83,11 +81,9 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	
 	private final Dao dao;
 	
-	private final ConfigManager configManager;
-	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final CommentManager pullRequestCommentManager;
+	private final CommentManager commentManager;
 	
 	private final UserManager userManager;
 	
@@ -103,35 +99,36 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	
 	private final Set<Long> integrationPreviewCalculatingRequestIds = new ConcurrentHashSet<>();
 
-	private ThreadPoolExecutor integrationPreviewExecutor;
-
-	@SuppressWarnings("serial")
-	private final BlockingDeque<Runnable> integrationPreviewQueue = new LinkedBlockingDeque<Runnable>() {
-
-		@Override
-		public boolean offer(Runnable e) {
-			return super.offerFirst(e);
-		}
-		
-	};
+	private final ThreadPoolExecutor integrationPreviewExecutor;
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
 			StorageManager storageManager, ReviewInvitationManager reviewInvitationManager, 
 			UserManager userManager, NotificationManager notificationManager, 
-			ConfigManager configManager, CommentManager pullRequestCommentManager, 
-			MarkdownManager markdownManager, UnitOfWork unitOfWork, 
-			Set<PullRequestListener> pullRequestListeners) {
+			CommentManager commentManager, MarkdownManager markdownManager, 
+			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.storageManager = storageManager;
 		this.reviewInvitationManager = reviewInvitationManager;
-		this.pullRequestCommentManager = pullRequestCommentManager;
+		this.commentManager = commentManager;
 		this.userManager = userManager;
 		this.unitOfWork = unitOfWork;
-		this.configManager = configManager;
 		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
+		
+		BlockingDeque<Runnable> queue = new LinkedBlockingDeque<Runnable>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean offer(Runnable e) {
+				return super.offerFirst(e);
+			}
+			
+		};
+		int workers = Runtime.getRuntime().availableProcessors();			
+		integrationPreviewExecutor = new ThreadPoolExecutor(workers, workers, 0L, TimeUnit.MILLISECONDS, queue);
 	}
 
 	@Transactional
@@ -186,7 +183,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
-			pullRequestCommentManager.save(requestComment, false);
+			commentManager.save(requestComment, false);
 		}
 
 		onSourceBranchUpdate(request, false);
@@ -216,7 +213,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
 			
-			pullRequestCommentManager.save(requestComment, false);
+			commentManager.save(requestComment, false);
 		}
 
 		request.setCloseStatus(CloseStatus.DISCARDED);
@@ -292,7 +289,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
-			pullRequestCommentManager.save(requestComment, false);
+			commentManager.save(requestComment, false);
 		}
 
 		request.setCloseStatus(CloseStatus.INTEGRATED);
@@ -483,22 +480,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		}
 	}
 
-	private int getIntegrationPreviewWorkers() {
-		Integer workers = configManager.getQosSetting().getIntegrationPreviewWorkers();
-		if (workers == null)
-			workers = Runtime.getRuntime().availableProcessors();
-		return workers;
-	}
-
-	@Override
-	public void onSave(Config config) {
-		if (config.getKey() == Config.Key.QOS && integrationPreviewExecutor != null) {
-			int integrationPreviewWorkers = getIntegrationPreviewWorkers();
-			integrationPreviewExecutor.setCorePoolSize(integrationPreviewWorkers);
-			integrationPreviewExecutor.setMaximumPoolSize(integrationPreviewWorkers);
-		}
-	}
-
 	@Override
 	public IntegrationPreview previewIntegration(PullRequest request) {
 		IntegrationPreview preview = request.getLastIntegrationPreview();
@@ -644,14 +625,10 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	}
 
 	@Override
-	public void systemStarting() {
-		int previewWorkers = getIntegrationPreviewWorkers();
-		integrationPreviewExecutor = new ThreadPoolExecutor(previewWorkers, previewWorkers, 
-				0L, TimeUnit.MILLISECONDS, integrationPreviewQueue);
-	}
-
-	@Override
 	public void systemStarted() {
+		logger.info("Checking pull requests...");
+		
+		checkSanity();
 	}
 
 	@Override
@@ -660,8 +637,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 	@Override
 	public void systemStopped() {
-		if (integrationPreviewExecutor != null)
-			integrationPreviewExecutor.shutdown();
+		integrationPreviewExecutor.shutdown();
 	}
 
 	@Transactional
@@ -769,6 +745,35 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		criteria.add(ofOpen());
 		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
 		return dao.query(criteria);
+	}
+
+	@Transactional
+	@Override
+	public void checkSanity() {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofOpen());
+		for (PullRequest request: dao.query(criteria)) {
+			if (request.getSource() == null) {
+				discard(request, "Source branch is deleted.");
+			} else {
+				String sourceHead = request.getSource().getHead(false);
+				if (sourceHead == null) 
+					discard(request, "Source branch is deleted.");
+				else if (!sourceHead.equals(request.getLatestUpdate().getHeadCommitHash()))
+					onSourceBranchUpdate(request, true);
+			}
+			String targetHead = request.getTarget().getHead(false);
+			if (targetHead == null)
+				discard(request, "Target branch is deleted.");
+			else 
+				onTargetBranchUpdate(request);
+		}
+	}
+
+	@Override
+	public void systemStarting() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

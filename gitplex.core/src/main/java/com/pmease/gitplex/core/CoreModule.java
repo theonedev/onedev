@@ -57,6 +57,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
+import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
@@ -158,10 +159,17 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(RepositoryListener.class, DefaultPullRequestManager.class);
 		contribute(PullRequestListener.class, DefaultNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
-		contribute(ConfigListener.class, DefaultPullRequestManager.class);
 		contribute(LifecycleListener.class, DefaultPullRequestManager.class);
 		contribute(LifecycleListener.class, DefaultUserManager.class);
 		contribute(LifecycleListener.class, DefaultRepositoryManager.class);
+		
+		contribute(ConfigListener.class, new ConfigListener() {
+
+			@Override
+			public void onSave(Config config) {
+			}
+			
+		});
 	}
 	
 	@Override

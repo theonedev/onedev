@@ -16,5 +16,5 @@ public interface CommentManager {
 	
 	void save(Comment comment, boolean notify);
 	
-	void addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content);
+	Comment addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content);
 }

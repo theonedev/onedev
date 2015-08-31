@@ -26,19 +26,19 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
-	private final CommentManager pullRequestCommentManager;
+	private final CommentManager commentManager;
 	
 	private final UnitOfWork unitOfWork;
 	
 	@Inject
 	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
 			Set<PullRequestListener> pullRequestListeners, UnitOfWork unitOfWork,
-			CommentManager pullRequestCommentManager) {
+			CommentManager commentManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
 		this.pullRequestListeners = pullRequestListeners;
 		this.unitOfWork = unitOfWork;
-		this.pullRequestCommentManager = pullRequestCommentManager;
+		this.commentManager = commentManager;
 	}
 
 	@Transactional
@@ -79,7 +79,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 						PullRequest request = dao.load(PullRequest.class, requestId);
 						for (Comment comment: request.getComments()) {
 							if (comment.getInlineInfo() != null)
-								pullRequestCommentManager.updateInlineInfo(comment);
+								commentManager.updateInlineInfo(comment);
 						}
 					}
 					

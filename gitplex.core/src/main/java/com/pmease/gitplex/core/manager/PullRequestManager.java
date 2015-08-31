@@ -6,14 +6,13 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.pmease.gitplex.core.listeners.ConfigListener;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 
-public interface PullRequestManager extends ConfigListener {
+public interface PullRequestManager {
     
     @Nullable 
     PullRequest findOpen(RepoAndBranch target, RepoAndBranch source);
@@ -84,4 +83,5 @@ public interface PullRequestManager extends ConfigListener {
 	@Nullable
 	Date getLastVisitDate(PullRequest request);
 	
+	void checkSanity();
 }

@@ -151,6 +151,7 @@ public class PullRequest extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Repository sourceRepo;
 	
+	@Column(nullable=false)
 	private String sourceBranch;
 	
 	@Column(nullable=false)
