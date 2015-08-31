@@ -328,7 +328,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				} 
 				ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
 				Blob blob = context.getRepository().getBlob(context.getBlobIdent());
-				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s, %d);", 
+				String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s, %d, %d);", 
 						codeContainer.getMarkupId(), 
 						StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 						context.getBlobIdent().path, 
@@ -336,6 +336,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
 						getCallbackFunction(CallbackParameter.explicit("symbol")), 
 						getBlameCommits(), 
+						context.getPullRequest()!=null?context.getPullRequest().getId():-1,
 						context.getComment()!=null?context.getComment().getId():-1);
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}

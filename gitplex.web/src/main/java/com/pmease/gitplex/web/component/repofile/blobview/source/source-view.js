@@ -1,5 +1,6 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, blameCommits, activeCommentId) {
+	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, 
+			blameCommits, commentId, addCommentCallback) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -93,6 +94,20 @@ gitplex.sourceview = {
 
 				cm = CodeMirror($code[0], options);
 				
+				if (addCommentCallback) {
+					var gutter = "CodeMirror-addcomment";
+					var gutters = cm.getOption("gutters").slice();
+					gutters.push(gutter);
+					cm.setOption("gutters", gutters);
+					for (var line=0; line<cm.lineCount(); line++) {
+		    			var $ele = $(document.createElement("div"));
+		    			$ele.addClass(gutter);
+		    			var script = "document.getElementById(\"" + codeId + "\").addCommentCallback(" + line + ");";
+		        		$("<a href='javascript: " + script + "'><i class='fa fa-plus'></i></a>").appendTo($ele);
+						cm.setGutterMarker(line, gutter, $ele[0]);
+					}
+				}
+				
 			    var modeInfo = CodeMirror.findModeByFileName(filePath);
 			    if (modeInfo) {
 			    	// specify mode via mime does not work for gfm (github flavored markdown)
@@ -133,8 +148,8 @@ gitplex.sourceview = {
 					var lineNo = $(this).data("lineno");
 					gitplex.sourceview.placeComment(cm, lineNo, this);
 				});
-			    if (activeCommentId != -1) {
-			    	$comment = $("#pullrequest-comment-" + activeCommentId);
+			    if (commentId != -1) {
+			    	$comment = $("#pullrequest-comment-" + commentId);
 			    	cm.setCursor($comment.data("lineno"));
 			    	setTimeout(function() {$comment.focus();}, 10);
 			    }
@@ -208,7 +223,9 @@ gitplex.sourceview = {
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
 		if (blameCommits) {
-    		cm.setOption("gutters", ["CodeMirror-annotations", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
+			var gutters = cm.getOption("gutters").slice();
+			gutters.splice(0, 0, "CodeMirror-annotations");
+			cm.setOption("gutters", gutters);
     		for (var i in blameCommits) {
     			var commit = blameCommits[i];
         		for (var j in commit.ranges) {
@@ -230,7 +247,9 @@ gitplex.sourceview = {
     		}    		
 		} else {
 			cm.clearGutter("CodeMirror-annotations");
-			cm.setOption("gutters", ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
+			var gutters = cm.getOption("gutters").slice();
+			gutters.splice(0, 1);
+			cm.setOption("gutters", gutters);
 		}
 	}
 	
