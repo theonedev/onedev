@@ -137,7 +137,13 @@ public class TextDiffPanel extends Panel {
 		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		add(new BlobDiffTitle("title", change));
 		
-		PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), change.getBlobIdent());
+		PageParameters params;
+		if (requestModel.getObject() != null) {
+			params = RepoFilePage.paramsOf(requestModel.getObject(), 
+					change.getBlobIdent().revision, change.getBlobIdent().path);
+		} else {
+			params = RepoFilePage.paramsOf(repoModel.getObject(), change.getBlobIdent());
+		}
 		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
 		
 		add(new Label("diffLines", new LoadableDetachableModel<String>() {
