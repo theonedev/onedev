@@ -83,7 +83,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			List<BlobChange> diffableChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
 	    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
-		    		diffableChanges.add(new BlobChange(oldCommitHash, newCommitHash, entry) {
+		    		diffableChanges.add(new BlobChange(oldCommitHash, newCommitHash, entry, oldRev, newRev) {
 
 						@Override
 						public Blob getBlob(BlobIdent blobIdent) {

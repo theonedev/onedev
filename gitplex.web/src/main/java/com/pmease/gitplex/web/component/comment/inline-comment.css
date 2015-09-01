@@ -3,12 +3,11 @@
 	font-size: 14px;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.inline-comment>.alert {
+.inline-comment>.outdated {
 	margin-bottom: 12px;
-	padding: 8px;
 }
-.inline-comment>.alert>a {
-	color: #8a6d3b;
+.inline-comment>.outdated>a {
+	font-size: 14px;
 }
 .inline-comment>.avatar img {
 	width: 28px;

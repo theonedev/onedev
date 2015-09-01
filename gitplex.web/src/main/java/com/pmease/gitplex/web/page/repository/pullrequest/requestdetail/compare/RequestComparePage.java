@@ -54,6 +54,7 @@ import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
+import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -139,16 +140,17 @@ public class RequestComparePage extends RequestDetailPage {
 				choices.put(commit.getHash(), description);
 			}
 
-			String targetHead = request.getTarget().getHead();
-			if (!choices.containsKey(targetHead)) {
-				description = new CommitDescription(TARGET_BRANCH_HEAD, 
-						getRepository().getCommit(targetHead).getSubject());
-				choices.put(targetHead, description);
-			}
-
 			if (request.isOpen()) {
+				String targetHead = request.getTarget().getHead();
+				if (!choices.containsKey(targetHead)) {
+					description = new CommitDescription(TARGET_BRANCH_HEAD, 
+							getRepository().getCommit(targetHead).getSubject());
+					choices.put(targetHead, description);
+				}
+
 				IntegrationPreview preview = request.getIntegrationPreview();
-				if (preview != null && preview.getIntegrated() != null && !preview.getIntegrated().equals(preview.getRequestHead())) {
+				if (preview != null && preview.getIntegrated() != null && 
+						!preview.getIntegrated().equals(preview.getRequestHead())) {
 					Commit commit = getRepository().getCommit(preview.getIntegrated());
 					choices.put(commit.getHash(), new CommitDescription(INTEGRATION_PREVIEW, commit.getSubject()));
 				}
@@ -437,7 +439,54 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		});
 		
-		compareHead.add(new Label("noIntegrationPreviewAlert", new LoadableDetachableModel<String>() {
+		compareHead.add(new WebMarkupContainer("outdatedAlert") {
+
+			@Override
+			public void onEvent(final IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					AjaxRequestTarget target = ((PullRequestChanged) event.getPayload()).getTarget();
+					PullRequest request = getPullRequest();
+
+					if (state.previewIntegration) {
+						if (!oldCommitHash.equals(request.getTarget().getHead())) {
+							setVisible(true);
+						} else {
+							IntegrationPreview preview = request.getIntegrationPreview();
+							String previewCommitHash;
+							if (preview != null && preview.getIntegrated() != null)
+								previewCommitHash = preview.getIntegrated();
+							else
+								previewCommitHash = request.getLatestUpdate().getHeadCommitHash();
+							setVisible(!newCommitHash.equals(previewCommitHash));
+						}
+					} else {
+						setVisible(state.commentId == null 
+								&& state.newCommitHash == null
+								&& !newCommitHash.equals(request.getLatestUpdate().getHeadCommitHash()));						
+					}
+
+					// have to call this here as the sticky update logic in AbstractWicketConfig can 
+					// not be executed in a web socket call back
+					String script = String.format("$('#%s').trigger('sticky_kit:detach');", 
+							compareHead.getMarkupId());
+					target.prependJavaScript(script);
+					target.add(compareHead);
+				}
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				setVisible(false);
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+		});
+		
+		Label noIntegrationPreviewAlert = new Label("noIntegrationPreviewAlert", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -446,41 +495,28 @@ public class RequestComparePage extends RequestDetailPage {
 				if (request.isOpen()) {
 					IntegrationPreview preview = getPullRequest().getIntegrationPreview();
 					if (preview == null)
-						message = "Integration preview is being calculating";
+						message = "Integration preview calculation is ongoing";
 					else
 						message = "There are integration conflicts";
 				} else {
 					message = "Integration preview is not available for closed pull request";
 				}
-				return "<i class='fa fa-warning'></i> " + message + ", displaying comparison between target branch and request head instead.";
+				return "<i class='fa fa-warning'></i> " + message + ", displaying comparison "
+						+ "between target branch and request head instead.";
 			}
 			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				if (state.previewIntegration) {
-					IntegrationPreview preview = getPullRequest().getIntegrationPreview();
-					setVisible(preview == null || preview.getIntegrated() == null);
-				} else {
-					setVisible(false);
-				}
-			}
-			
-		}.setEscapeModelStrings(false));
+		});
+		if (state.previewIntegration) {
+			IntegrationPreview preview = getPullRequest().getIntegrationPreview();
+			noIntegrationPreviewAlert.setVisible(preview == null || preview.getIntegrated() == null);
+		} else {
+			noIntegrationPreviewAlert.setVisible(false);
+		}
+		noIntegrationPreviewAlert.setEscapeModelStrings(false);
+		compareHead.add(noIntegrationPreviewAlert);
 		
-		WebMarkupContainer noCommentContextAlert = new WebMarkupContainer("noCommentContextAlert") {
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
-				setVisible(state.commentId != null && oldCommitHash.equals(newCommitHash));
-			}
-			
-		};
+		WebMarkupContainer noCommentContextAlert = new WebMarkupContainer("noCommentContextAlert");
+		noCommentContextAlert.setVisible(state.commentId != null && oldCommitHash.equals(newCommitHash));
 		noCommentContextAlert.add(new InlineCommentLink("link", commentModel, 
 				Model.of("Commented line is no longer in diff scope, click to display in file view.")));
 		compareHead.add(noCommentContextAlert);
@@ -735,8 +771,24 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 
-		compareResult = new RevisionDiffPanel("compareResult", repoModel, requestModel, commentModel, oldCommitHash, newCommitHash, 
-				path, comparePath, diffOption.getLineProcessor(), diffOption.getDiffMode()) {
+		String oldRev = oldCommitHash;
+		String newRev = newCommitHash;
+		PullRequest request = getPullRequest();
+		if (request.isOpen()) {
+			// use branch ref if possible for purpose of file editing 
+			if (oldRev.equals(request.getSource().getHead())) 
+				oldRev = request.getSourceRef();
+			else if (oldRev.equals(request.getTarget().getHead()))
+				oldRev = request.getTargetRef();
+
+			if (newRev.equals(request.getSource().getHead())) 
+				newRev = request.getSourceRef();
+			else if (newRev.equals(request.getTarget().getHead()))
+				newRev = request.getTargetRef();
+		} 
+		compareResult = new RevisionDiffPanel("compareResult", repoModel, requestModel, 
+				commentModel, oldRev, newRev, path, comparePath, 
+				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 
 			@Override
 			protected void onClearPath(AjaxRequestTarget target) {

@@ -369,9 +369,9 @@ public class NewRequestPage extends PullRequestPage {
 		PullRequest request = getPullRequest();
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, new Model<PullRequest>(null), 
-				new Model<Comment>(null), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
-				diffOption.getDiffMode()) {
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
+				new Model<PullRequest>(null), new Model<Comment>(null), oldRev, newRev, 
+				path, null, diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 
 			@Override
 			protected void onClearPath(AjaxRequestTarget target) {
