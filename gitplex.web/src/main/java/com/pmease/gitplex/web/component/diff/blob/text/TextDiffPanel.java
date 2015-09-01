@@ -133,14 +133,32 @@ public class TextDiffPanel extends Panel {
 		
 		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		add(new BlobDiffTitle("title", change));
+
+		Repository repo = repoModel.getObject();
+		String revision;
+		String path;
 		
+		/*
+		 * below logic tries to use branch ref instead of commit hash in order to 
+		 * make file editable online
+		 */
+		if (change.getNewBlobIdent().path != null) {
+			path = change.getNewBlobIdent().path;
+			revision = change.getNewRef();
+			if (revision == null)
+				revision = change.getNewBlobIdent().revision;
+		} else {
+			path = change.getOldBlobIdent().path;
+			revision = change.getOldRef();
+			if (revision == null)
+				revision = change.getOldBlobIdent().revision;
+		}
 		PageParameters params;
 		PullRequest request = requestModel.getObject();
-		if (request != null) {
-			params = RepoFilePage.paramsOf(request, change.getBlobIdent().revision, change.getBlobIdent().path);
-		} else { 
-			params = RepoFilePage.paramsOf(repoModel.getObject(), change.getBlobIdent());
-		}
+		if (request != null) 
+			params = RepoFilePage.paramsOf(request, revision, path);
+		else 
+			params = RepoFilePage.paramsOf(repo, revision, path);
 		
 		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
 		

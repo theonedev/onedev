@@ -31,6 +31,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
@@ -368,7 +369,17 @@ public class NewRequestPage extends PullRequestPage {
 	protected RevisionDiffPanel newRevDiffPanel() {
 		PullRequest request = getPullRequest();
 		String oldRev = request.getBaseCommitHash();
-		String newRev = request.getLatestUpdate().getHeadCommitHash();
+		String newRev = request.getSourceBranch();
+		
+		/*
+		 * pass branch ref instead of commit hash to revision diff panel in order 
+		 * to make the file editable online, and to make revision diff panel 
+		 * displays changes consistently when doing actions such as changing path
+		 * filter, changing diff mode, we need to cache the commit hash against 
+		 * the branch ref
+		 */
+		getRepository().cacheObjectId(newRev, ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()));
+		
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
 				new Model<PullRequest>(null), new Model<Comment>(null), oldRev, newRev, 
 				path, null, diffOption.getLineProcessor(), diffOption.getDiffMode()) {

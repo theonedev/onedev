@@ -139,13 +139,16 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(newCustomActions("customActions"));
 		
+		String revision = context.getBlobIdent().revision;
+		final boolean editable = context.getRepository().getRefs(Git.REFS_HEADS).containsKey(revision);
+		
 		WebMarkupContainer changeActions = new WebMarkupContainer("changeActions") {
 			
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
+				if (!editable)
 					tag.put("title", "Must on a branch to change or propose change of this file");
 			}
 			
@@ -165,7 +168,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
+				if (!editable)
 					tag.put("disabled", "disabled");
 			}
 
@@ -182,7 +185,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.getRepository().getRefs(Git.REFS_HEADS).containsKey(context.getBlobIdent().revision))
+				if (!editable)
 					tag.put("disabled", "disabled");
 			}
 

@@ -200,8 +200,15 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						commitItem.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 						
 						commitItem.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+
+						PullRequest request = getPullRequest();
+						String revision = commit.getHash();
+						if (request.isOpen() && request.getSourceRepo() != null 
+								&& revision.equals(request.getSource().getHead(false))) {
+							revision = request.getSourceBranch();
+						}
 						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-								RepoFilePage.paramsOf(getPullRequest(), commit.getHash(), null)));
+								RepoFilePage.paramsOf(getPullRequest(), revision, null)));
 						
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 

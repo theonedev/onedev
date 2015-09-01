@@ -771,20 +771,15 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 
+		// use branch ref if possible to make file editable online
 		String oldRev = oldCommitHash;
 		String newRev = newCommitHash;
 		PullRequest request = getPullRequest();
 		if (request.isOpen()) {
-			// use branch ref if possible for purpose of file editing 
 			if (oldRev.equals(request.getSource().getHead())) 
-				oldRev = request.getSourceRef();
-			else if (oldRev.equals(request.getTarget().getHead()))
-				oldRev = request.getTargetRef();
-
+				oldRev = request.getSourceBranch();
 			if (newRev.equals(request.getSource().getHead())) 
-				newRev = request.getSourceRef();
-			else if (newRev.equals(request.getTarget().getHead()))
-				newRev = request.getTargetRef();
+				newRev = request.getSourceBranch();
 		} 
 		compareResult = new RevisionDiffPanel("compareResult", repoModel, requestModel, 
 				commentModel, oldRev, newRev, path, comparePath, 

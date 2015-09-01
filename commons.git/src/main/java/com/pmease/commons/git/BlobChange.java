@@ -25,22 +25,22 @@ public abstract class BlobChange implements Serializable {
 	protected final BlobIdent newBlobIdent;
 
 	/*
-	 * oldRev and newRev can be used to record branch name so that we can 
+	 * oldRef and newRef can be used to record branch name so that we can 
 	 * switch to branch name for file editing while comparing branches
 	 */
-	protected final String oldRev;
+	protected final String oldRef;
 	
-	protected final String newRev;
+	protected final String newRef;
 	
 	private transient List<DiffBlock<List<CmToken>>> diffBlocks;
 	
 	public BlobChange(String oldCommitHash, String newCommitHash, DiffEntry diffEntry, 
-			@Nullable String oldRev, @Nullable String newRev) {
+			@Nullable String oldRef, @Nullable String newRef) {
 		type = diffEntry.getChangeType();
 		oldBlobIdent = GitUtils.getOldBlobIdent(diffEntry, oldCommitHash);
 		newBlobIdent = GitUtils.getNewBlobIdent(diffEntry, newCommitHash);
-		this.oldRev = oldRev;
-		this.newRev = newRev;
+		this.oldRef = oldRef;
+		this.newRef = newRef;
 	}
 	
 	public ChangeType getType() {
@@ -111,12 +111,12 @@ public abstract class BlobChange implements Serializable {
 		return diffBlocks;
 	}
 	
-	public String getOldRev() {
-		return oldRev;
+	public String getOldRef() {
+		return oldRef;
 	}
 
-	public String getNewRev() {
-		return newRev;
+	public String getNewRef() {
+		return newRef;
 	}
 
 	public int getAdditions() {
