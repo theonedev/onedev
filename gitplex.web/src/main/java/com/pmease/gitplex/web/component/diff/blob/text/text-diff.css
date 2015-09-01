@@ -165,15 +165,6 @@
 	font-style: italic;
 	font-size: 16px;
 }
-.text-diff>.body>tbody>tr.comment>td.content.comment>div>.detail {
-	margin-left: 36px;
-	font-size: 14px;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-.text-diff>.body>tbody>tr.comment>td.content.comment>div>.avatar img {
-	width: 28px;
-	height: 28px;
-}
 .text-diff>.comment {
 	display: none;
 }

@@ -9,14 +9,21 @@ public class PullRequestChanged extends AjaxEvent {
 
 	private final PullRequest request;
 	
-	public PullRequestChanged(AjaxRequestTarget target, PullRequest request) {
+	private final PullRequest.Event event;
+	
+	public PullRequestChanged(AjaxRequestTarget target, PullRequest request, PullRequest.Event event) {
 		super(target);
 		
 		this.request = request;
+		this.event = event;
 	}
 
 	public PullRequest getRequest() {
 		return request;
+	}
+
+	public PullRequest.Event getEvent() {
+		return event;
 	}
 
 }

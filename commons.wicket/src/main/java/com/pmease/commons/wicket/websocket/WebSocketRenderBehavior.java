@@ -83,7 +83,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		
 		ConnectionData data = connections.get(connection);
 		if (data == null) { 
-			List<Object> traits = new ArrayList<>();
+			List<WebSocketTrait> traits = new ArrayList<>();
 			traits.add(getTrait());
 			Integer pageId;
 			if (message.getKey() instanceof PageIdKey) {
@@ -116,7 +116,7 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		 * 
 		 */
 		final PageId connectionPageId = data.getPageId();
-		final List<Object> connectionTraits = data.getTraits();
+		final List<WebSocketTrait> connectionTraits = data.getTraits();
 		AppLoader.getInstance(ExecutorService.class).execute(new Runnable() {
 
 			@Override
@@ -128,22 +128,23 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 						for (Iterator<Map.Entry<RenderData, Date>> it = recentSentMessages.entrySet().iterator(); it.hasNext();) {
 							Map.Entry<RenderData, Date> entry = it.next();
 							PageId pageId = entry.getKey().getPageId();
-							Object trait = entry.getKey().getTrait();
-							if ((pageId == null || !pageId.equals(connectionPageId)) 
-									&& connectionTraits.contains(trait)
-									&& entry.getValue().after(renderDate)) {
-								try {
-									connection.sendMessage(asMessage(trait));
-								} catch (IOException e) {
-									throw new RuntimeException(e);
+							WebSocketTrait trait = entry.getKey().getTrait();
+							if ((pageId == null || !pageId.equals(connectionPageId)) && entry.getValue().after(renderDate)) {
+								for (WebSocketTrait each: connectionTraits) {
+									if (trait.is(each)) {
+										try {
+											connection.sendMessage(asMessage(trait));
+										} catch (IOException e) {
+											throw new RuntimeException(e);
+										}
+										break;
+									}
 								}
 							}
-							
 						}
 					}
 				}
 			}
-			
 		});
 	}	
 	
@@ -155,9 +156,9 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 	 * @return 
 	 * 			trait of this behavior
 	 */
-	protected abstract Object getTrait();
+	protected abstract WebSocketTrait getTrait();
 	
-	protected void onRender(WebSocketRequestHandler handler) {
+	protected void onRender(WebSocketRequestHandler handler, WebSocketTrait trait) {
 		handler.add(component);
 	}
 
@@ -174,12 +175,12 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		}
 		
 		if (webSocketMessage.getType().equals(WebSocketMessage.RENDER_CALLBACK) 
-				&& webSocketMessage.getPayload().equals(getTrait())) {
-			onRender(handler);
+				&& ((WebSocketTrait)webSocketMessage.getPayload()).is(getTrait())) {
+			onRender(handler, (WebSocketTrait) webSocketMessage.getPayload());
 		}
 	}
 	
-	private static String asMessage(Object trait) {
+	private static String asMessage(WebSocketTrait trait) {
 		try {
 			ObjectMapper mapper = AppLoader.getInstance(ObjectMapper.class);
 			WebSocketMessage webSocketMessage = new WebSocketMessage(WebSocketMessage.RENDER_CALLBACK, trait);
@@ -189,15 +190,15 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		}
 	}
 
-	public static void requestToRender(Object trait) {
+	public static void requestToRender(WebSocketTrait trait) {
 		requestToRender(trait, (PageId)null);
 	}
 	
-	public static void requestToRender(Object trait, Page page) {
+	public static void requestToRender(WebSocketTrait trait, Page page) {
 		requestToRender(trait, PageId.fromObj(page.getId()));
 	}
 	
-	public static void requestToRender(Object trait, @Nullable PageId pageId) {
+	public static void requestToRender(WebSocketTrait trait, @Nullable PageId pageId) {
 		String message = asMessage(trait); 
 		
 		for (Iterator<Map.Entry<IWebSocketConnection, ConnectionData>> it = connections.entrySet().iterator(); it.hasNext();) {
@@ -220,13 +221,13 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		recentSentMessages.put(new RenderData(trait, pageId), new Date());
 	}
 	
-	private static class RenderData extends Pair<Object, PageId> {
+	private static class RenderData extends Pair<WebSocketTrait, PageId> {
 		
-		RenderData(Object trait, PageId pageId) {
+		RenderData(WebSocketTrait trait, PageId pageId) {
 			super(trait, pageId);
 		}
 
-		public Object getTrait() {
+		public WebSocketTrait getTrait() {
 			return getFirst();
 		}
 
@@ -240,9 +241,9 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 		
 		private final PageId pageId;
 		
-		private final List<Object> traits;
+		private final List<WebSocketTrait> traits;
 		
-		ConnectionData(@Nullable final PageId pageId, final List<Object> traits) {
+		ConnectionData(@Nullable final PageId pageId, final List<WebSocketTrait> traits) {
 			this.pageId = pageId;
 			this.traits = traits;
 		}
@@ -251,12 +252,12 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 			return pageId;
 		}
 
-		public List<Object> getTraits() {
+		public List<WebSocketTrait> getTraits() {
 			return traits;
 		}
 		
-		ConnectionData addTrait(final Object trait) {
-			List<Object> copyOfTraits = new ArrayList<>(getTraits());
+		ConnectionData addTrait(final WebSocketTrait trait) {
+			List<WebSocketTrait> copyOfTraits = new ArrayList<>(getTraits());
 			copyOfTraits.add(trait);
 			return new ConnectionData(getPageId(), copyOfTraits);
 		}

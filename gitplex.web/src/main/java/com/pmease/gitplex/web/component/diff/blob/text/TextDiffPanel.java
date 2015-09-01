@@ -52,19 +52,16 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.comment.CommentPanel;
+import com.pmease.gitplex.web.component.comment.InlineCommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
-import com.pmease.gitplex.web.component.userlink.UserLink;
-import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -651,8 +648,8 @@ public class TextDiffPanel extends Panel {
 			}
 			
 		};
-		row.add(new UserLink("avatar", new UserModel(commentAndPos.comment.getUser()), AvatarMode.AVATAR));
-		row.add(new CommentPanel("detail", new LoadableDetachableModel<Comment>() {
+
+		row.add(new InlineCommentPanel("inlineComment", new LoadableDetachableModel<Comment>() {
 
 			@Override
 			protected Comment load() {

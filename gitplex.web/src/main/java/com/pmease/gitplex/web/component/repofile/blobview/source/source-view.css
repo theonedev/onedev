@@ -54,22 +54,6 @@ pre+.CodeMirror-linewidget>.comment>div, pre+.CodeMirror-linewidget>.comment>for
 	padding: 12px;
 	background: white;
 }
-.CodeMirror-linewidget>.comment>div>.alert {
-	margin-bottom: 12px;
-	padding: 8px;
-}
-.CodeMirror-linewidget>.comment>div>.alert>a {
-	color: #8a6d3b;
-}
-.CodeMirror-linewidget>.comment>div>.detail {
-	margin-left: 36px;
-	font-size: 14px;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-.CodeMirror-linewidget>.comment>div>.avatar img {
-	width: 28px;
-	height: 28px;
-}
 .source-view>.comment {
 	display: none;
 }

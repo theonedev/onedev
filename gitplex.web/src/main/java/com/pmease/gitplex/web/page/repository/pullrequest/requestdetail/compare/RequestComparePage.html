@@ -19,12 +19,10 @@
 				<div wicket:id="diffOption" class="pull-right"></div>
 			</div>
 			<div class="alerts">
-				<div wicket:id="outdatedAlert" class="outdated alert alert-warning">
-					<a onclick="location.reload();">
-						<i class="fa fa-warning"></i> Page is outdated, click to refresh.
-					</a>
+				<div wicket:id="noCommentContextAlert" class="no-comment-context alert alert-warning">
+					<i class="fa fa-warning"></i> <a wicket:id="link"></a>
 				</div>
-				<div wicket:id="integrationPreviewAlert" class="integration-preview alert alert-warning"></div>
+				<div wicket:id="noIntegrationPreviewAlert" class="no-integration-preview alert alert-warning"></div>
 			</div>
 		</div>
 		<div wicket:id="compareResult" class="body"></div>

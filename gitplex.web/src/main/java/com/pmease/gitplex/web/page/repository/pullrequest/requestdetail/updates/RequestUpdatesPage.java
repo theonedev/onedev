@@ -29,6 +29,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ReviewManager;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Repository;
@@ -123,7 +124,8 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							protected void onAvatarRemove(AjaxRequestTarget target) {
 								GitPlex.getInstance(ReviewManager.class).delete(review);
 								target.add(reviewsContainer);
-								send(getPage(), Broadcast.BREADTH, new PullRequestChanged(target, getPullRequest()));								
+								send(getPage(), Broadcast.BREADTH, 
+										new PullRequestChanged(target, getPullRequest(), PullRequest.Event.REVIEW_REMOVED));								
 							}
 							
 							@Override

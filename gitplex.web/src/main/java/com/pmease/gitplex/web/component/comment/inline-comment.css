@@ -1,0 +1,16 @@
+.inline-comment>.detail {
+	margin-left: 36px;
+	font-size: 14px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.inline-comment>.alert {
+	margin-bottom: 12px;
+	padding: 8px;
+}
+.inline-comment>.alert>a {
+	color: #8a6d3b;
+}
+.inline-comment>.avatar img {
+	width: 28px;
+	height: 28px;
+}

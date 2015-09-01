@@ -24,6 +24,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -42,17 +43,17 @@ import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.comment.InlineCommentLink;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
-import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
@@ -436,55 +437,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		});
 		
-		compareHead.add(new WebMarkupContainer("outdatedAlert") {
-
-			@Override
-			public void onEvent(final IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					AjaxRequestTarget target = pullRequestChanged.getTarget();
-					PullRequest request = getPullRequest();
-					boolean outdated;
-
-					if (state.previewIntegration) {
-						if (!oldCommitHash.equals(request.getTarget().getHead())) {
-							outdated = true;
-						} else {
-							IntegrationPreview preview = request.getIntegrationPreview();
-							String previewCommitHash;
-							if (preview != null && preview.getIntegrated() != null)
-								previewCommitHash = preview.getIntegrated();
-							else
-								previewCommitHash = request.getLatestUpdate().getHeadCommitHash();
-							outdated = !newCommitHash.equals(previewCommitHash);
-						}
-					} else {
-						// only display out-dated alert if url (reflected by state field) does not contain
-						// new commit hash parameter, as otherwise refreshing will not have any effect. 
-						outdated = state.newCommitHash == null && !newCommitHash.equals(request.getLatestUpdate().getHeadCommitHash());						
-					}
-					if (outdated)
-						setVisible(true);
-					
-					// have to call this here as the sticky update logic in AbstractWicketConfig can 
-					// not be executed in a web socket call back
-					target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", compareHead.getMarkupId()));
-					target.add(compareHead);
-				}
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				setVisible(false);
-				setOutputMarkupPlaceholderTag(true);
-			}
-
-		});
-		compareHead.add(new Label("integrationPreviewAlert", new LoadableDetachableModel<String>() {
+		compareHead.add(new Label("noIntegrationPreviewAlert", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -517,6 +470,20 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		}.setEscapeModelStrings(false));
+		
+		WebMarkupContainer noCommentContextAlert = new WebMarkupContainer("noCommentContextAlert") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				setVisible(state.commentId != null && oldCommitHash.equals(newCommitHash));
+			}
+			
+		};
+		noCommentContextAlert.add(new InlineCommentLink("link", commentModel, 
+				Model.of("Commented line is no longer in diff scope, click to display in file view.")));
+		compareHead.add(noCommentContextAlert);
 		
 		newCompareResult(null);
 	}

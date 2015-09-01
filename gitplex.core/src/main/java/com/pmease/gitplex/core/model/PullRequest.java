@@ -112,10 +112,16 @@ public class PullRequest extends AbstractEntity {
 		VERIFIED("Build verification is finished for"), 
 		UPDATED("New commits in"), 
 		COMMENTED("New comments in"), 
+		INTEGRATION_STRATEGY_CHANGED("Integration strategy is changed"),
 		INTEGRATED("Integration is done for"), 
 		DISCARDED("Discarded"), 
-		REOPENED("Reopened");
-
+		REOPENED("Reopened"),
+		INTEGRATION_PREVIEW_CALCULATED("Integration preview is calculated"),
+		ASSIGNED("Assigned"),
+		REVIEWER_CHANGED("Reviewer changed"),
+		REVIEW_REMOVED("Review removed"),
+		COMMENT_REPLIED("Comment is replied");
+		
 		private final String displayName;
 		
 		Event(String displayName) {

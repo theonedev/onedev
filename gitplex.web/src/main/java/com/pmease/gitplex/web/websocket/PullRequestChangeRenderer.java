@@ -6,13 +6,14 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 
 import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
+import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.model.PullRequest;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestChangeRenderer extends WebSocketRenderBehavior {
 
 	@Override
-	protected Object getTrait() {
+	protected WebSocketTrait getTrait() {
 		// Do not call getPullRequest().getId() here to avoid unnecessary SQL query
 		PullRequestChangeTrait trait = new PullRequestChangeTrait();
 		trait.requestId = HibernateUtils.getId(getPullRequest());
@@ -20,10 +21,13 @@ public abstract class PullRequestChangeRenderer extends WebSocketRenderBehavior 
 	}
 
 	@Override
-	protected void onRender(WebSocketRequestHandler handler) {
+	protected void onRender(WebSocketRequestHandler handler, WebSocketTrait trait) {
 		Component component = getComponent();
-		component.send(component.getPage(), Broadcast.BREADTH, new PullRequestChanged(handler, getPullRequest()));
+		PullRequestChangeTrait pullRequestChangeTrait = (PullRequestChangeTrait) trait;
+		component.send(component.getPage(), Broadcast.BREADTH, 
+				new PullRequestChanged(handler, getPullRequest(), pullRequestChangeTrait.requestEvent));
 	}
 
 	protected abstract PullRequest getPullRequest();
+	
 }

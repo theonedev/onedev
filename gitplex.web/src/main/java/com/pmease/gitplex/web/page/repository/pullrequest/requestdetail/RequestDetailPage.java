@@ -377,10 +377,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			protected void onInitialize() {
 				super.onInitialize();
 
-				PullRequest request = getPullRequest();
-				PageParameters params = RequestComparePage.paramsOfIntegrationPreview(request);
-				
-				Link<Void> link = new BookmarkablePageLink<Void>("preview", RequestComparePage.class, params) {
+				Link<Void> link = new Link<Void>("preview") {
 					
 					@Override
 					protected void onConfigure() {
@@ -389,6 +386,13 @@ public abstract class RequestDetailPage extends PullRequestPage {
 						PullRequest request = getPullRequest();
 						IntegrationPreview preview = request.getIntegrationPreview();
 						setVisible(!preview.getIntegrated().equals(preview.getRequestHead()));
+					}
+
+					@Override
+					public void onClick() {
+						PullRequest request = getPullRequest();
+						PageParameters params = RequestComparePage.paramsOfIntegrationPreview(request);
+						setResponsePage(RequestComparePage.class, params);
 					}
 					
 				};

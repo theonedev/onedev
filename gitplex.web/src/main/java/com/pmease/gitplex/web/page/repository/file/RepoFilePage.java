@@ -51,6 +51,7 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
+import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.model.Comment;
@@ -298,12 +299,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		add(new WebSocketRenderBehavior() {
 			
 			@Override
-			protected Object getTrait() {
+			protected WebSocketTrait getTrait() {
 				return trait;
 			}
 
 			@Override
-			protected void onRender(WebSocketRequestHandler handler) {
+			protected void onRender(WebSocketRequestHandler handler, WebSocketTrait trait) {
 				handler.add(revisionIndexing);
 				handler.appendJavaScript("$(window).resize();");
 			}
@@ -316,7 +317,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				protected PullRequest getPullRequest() {
 					return RepoFilePage.this.getPullRequest();
 				}
-	
+
 			});
 		}
 	}
@@ -696,17 +697,17 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		setResponsePage(RepoFilePage.class, paramsOf(repository));
 	}
 	
-	private static class RevisionIndexed implements Serializable {
+	private static class RevisionIndexed implements WebSocketTrait {
 
 		Long repoId;
 		
 		volatile String revision;
 		
 		@Override
-		public boolean equals(Object obj) {
-			if (obj == null || !(obj instanceof RevisionIndexed))  
+		public boolean is(WebSocketTrait trait) {
+			if (trait == null || !(trait instanceof RevisionIndexed))  
 				return false;  
-			RevisionIndexed other = (RevisionIndexed) obj;  
+			RevisionIndexed other = (RevisionIndexed) trait;  
 		    return Objects.equal(repoId, other.repoId) && Objects.equal(revision, other.revision);
 		}
 		
