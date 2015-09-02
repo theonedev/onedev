@@ -41,23 +41,7 @@
 	font-size: 12px; 
 	color: #999;
 } 
-.old-vs-new.menu>.content {
+.common-comparisons.menu>.content {
 	max-height: 400px; 
 	overflow-y: scroll;
-}
-table.old-vs-new td {
-	padding: 0 8px;
-}
-table.old-vs-new td.old {
-	width: 160px; 
-	text-align: left;
-}
-table.old-vs-new td.new {
-	width: 160px; 
-	text-align: right;
-}
-table.old-vs-new td.vs {
-	width: 1px; 
-	text-align: center; 
-	font-weight: bold;
 }

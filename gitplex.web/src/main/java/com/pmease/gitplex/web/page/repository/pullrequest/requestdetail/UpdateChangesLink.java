@@ -9,6 +9,10 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage.*;
+
+import java.util.List;
+
 @SuppressWarnings("serial")
 public class UpdateChangesLink extends BookmarkablePageLink<Void> {
 	
@@ -20,9 +24,12 @@ public class UpdateChangesLink extends BookmarkablePageLink<Void> {
 
 	private static PageParameters paramsOf(PullRequestUpdate update) {
 		PullRequest request = update.getRequest();
-		PageParameters params = RequestComparePage.paramsOf(
-				request, update.getBaseCommitHash(), update.getHeadCommitHash(), null);
-		return params;
+		List<PullRequestUpdate> updates = request.getSortedUpdates();
+		int index = request.getSortedUpdates().indexOf(update);
+		if (index == updates.size()-1)
+			return RequestComparePage.paramsOf(request, REV_LAST_UPDATE_PREFIX+2, REV_LAST_UPDATE_PREFIX+1);
+		else 
+			return RequestComparePage.paramsOf(request, REV_UPDATE_PREFIX+index, REV_UPDATE_PREFIX+(index+1));
 	}
 
 	public IModel<?> getBody() {

@@ -6,15 +6,13 @@ class HistoryState implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public String oldCommitHash;
+	public String oldRev;
 	
-	public String newCommitHash;
+	public String newRev;
 	
 	public String path;
 	
 	public String comparePath;
 	
 	public Long commentId;
-	
-	public boolean previewIntegration;
 }

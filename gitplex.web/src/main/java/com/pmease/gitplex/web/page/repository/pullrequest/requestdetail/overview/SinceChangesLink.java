@@ -21,20 +21,20 @@ class SinceChangesLink extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	
-	private final IModel<String> oldCommitModel = new LoadableDetachableModel<String>() {
+	private final IModel<String> oldRevModel = new LoadableDetachableModel<String>() {
 
 		@Override
 		protected String load() {
 			PullRequest request = requestModel.getObject();
-			String oldCommit = request.getBaseCommitHash();
+			String revision = RequestComparePage.REV_BASE;
 			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
 				if (update.getDate().before(sinceDate)) {
-					oldCommit = update.getHeadCommitHash();
+					revision = RequestComparePage.REV_UPDATE_PREFIX + (i+1);
 					break;
 				}
 			}
-			return oldCommit;
+			return revision;
 		}
 		
 	};
@@ -60,8 +60,8 @@ class SinceChangesLink extends Panel {
 			@Override
 			public void onClick() {
 				PullRequest request = requestModel.getObject();
-				PageParameters params = RequestComparePage.paramsOf(request, oldCommitModel.getObject(), 
-						request.getLatestUpdate().getHeadCommitHash(), null);
+				PageParameters params = RequestComparePage.paramsOf(request, oldRevModel.getObject(), 
+						RequestComparePage.REV_LAST_UPDATE_PREFIX+1, null);
 				setResponsePage(RequestComparePage.class, params);
 			}
 			
@@ -86,13 +86,13 @@ class SinceChangesLink extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!oldCommitModel.getObject().equals(requestModel.getObject().getLatestUpdate().getHeadCommitHash()));
+		setVisible(!oldRevModel.getObject().equals(requestModel.getObject().getLatestUpdate().getHeadCommitHash()));
 	}
 
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
-		oldCommitModel.detach();
+		oldRevModel.detach();
 		
 		super.onDetach();
 	}

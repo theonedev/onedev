@@ -298,7 +298,23 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
-		tabs.add(new RequestTab("Compare", RequestComparePage.class));
+		tabs.add(new RequestTab("Compare", RequestComparePage.class) {
+
+			@Override
+			public Component render(String componentId) {
+				return new PageTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						PageParameters params = RequestComparePage.paramsOf(getPullRequest(), 
+								RequestComparePage.REV_BASE, RequestComparePage.REV_LAST_UPDATE_PREFIX+"1");
+						return new BookmarkablePageLink<Void>(linkId, pageClass, params);
+					}
+					
+				};
+			}
+			
+		});
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
@@ -391,7 +407,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 					@Override
 					public void onClick() {
 						PullRequest request = getPullRequest();
-						PageParameters params = RequestComparePage.paramsOfIntegrationPreview(request);
+						PageParameters params = RequestComparePage.paramsOf(request, 
+								RequestComparePage.REV_TARGET_BRANCH, RequestComparePage.REV_INTEGRATION_PREVIEW);
 						setResponsePage(RequestComparePage.class, params);
 					}
 					
