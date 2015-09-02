@@ -13,7 +13,7 @@ class HistoryState implements Serializable {
 	
 	public Long commentId;
 	
-	public BlobIdent file = new BlobIdent();
+	public BlobIdent blobIdent = new BlobIdent();
 	
 	public TokenPosition tokenPos;
 	

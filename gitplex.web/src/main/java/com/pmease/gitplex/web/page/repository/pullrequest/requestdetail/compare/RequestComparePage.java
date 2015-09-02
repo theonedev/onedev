@@ -193,14 +193,12 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private String getRevision(String commitHash) {
 		PullRequest request = getPullRequest();
-		if (request.getLatestUpdate().getHeadCommitHash().equals(commitHash)) {
-			return REV_LAST_UPDATE_PREFIX+1;
-		} else if (request.getBaseCommitHash().equals(commitHash)) {
+		if (request.getBaseCommitHash().equals(commitHash)) {
 			return REV_BASE;
 		} else {
 			List<PullRequestUpdate> updates = request.getSortedUpdates();
 			for (int i=0; i<updates.size(); i++) {
-				if (updates.get(i).getHeadCommit().equals(commitHash))
+				if (updates.get(i).getHeadCommitHash().equals(commitHash))
 					return REV_UPDATE_PREFIX + (i+1);
 			}
 			if (commitHash.equals(request.getTarget().getHead(false))) {
@@ -380,7 +378,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (request.isOpen()) {
 					final IntegrationPreview preview = request.getIntegrationPreview();
 					if (preview != null && preview.getIntegrated() != null) {
-						items.add(new ComparisonChoiceItem("Target branch and Integration preview") {
+						items.add(new ComparisonChoiceItem("Changes of integration preview") {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target) {
@@ -401,37 +399,25 @@ public class RequestComparePage extends RequestDetailPage {
 				for (int i=0; i<updates.size(); i++) {
 					final int updateNo = i+1;
 					
-					if (updateNo == updates.size()) {
-						items.add(new ComparisonChoiceItem("Changes of latest update") {
+					String label;
+					if (updateNo == updates.size()) 
+						label = "Changes of latest update";
+					else 
+						label = "Changes of update " + updateNo;
+					items.add(new ComparisonChoiceItem(label) {
 
-							@Override
-							protected void onSelect(AjaxRequestTarget target) {
-								hide(target);
+						@Override
+						protected void onSelect(AjaxRequestTarget target) {
+							hide(target);
 
-								state.commentId = null;
-								state.oldRev = REV_LAST_UPDATE_PREFIX + "2";
-								state.newRev = REV_LAST_UPDATE_PREFIX + "1";
-								initFromState(state);
-								onStateChange(target);
-							}
-							
-						});
-					} else {
-						items.add(new ComparisonChoiceItem("Changes of update " + updateNo) {
-
-							@Override
-							protected void onSelect(AjaxRequestTarget target) {
-								hide(target);
-
-								state.commentId = null;
-								state.oldRev = REV_LAST_UPDATE_PREFIX + (updateNo-1);
-								state.newRev = REV_LAST_UPDATE_PREFIX + updateNo;
-								initFromState(state);
-								onStateChange(target);
-							}
-							
-						});						
-					}
+							state.commentId = null;
+							state.oldRev = REV_UPDATE_PREFIX + (updateNo-1);
+							state.newRev = REV_UPDATE_PREFIX + updateNo;
+							initFromState(state);
+							onStateChange(target);
+						}
+						
+					});						
 				}
 				
 				return items;
@@ -768,36 +754,8 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
-		IModel<PullRequest> requestModel = new LoadableDetachableModel<PullRequest>() {
-
-			@Override
-			protected PullRequest load() {
-				PullRequest request = getPullRequest();
-				List<String> commentables = request.getCommentables();
-				int oldCommitIndex = commentables.indexOf(oldCommitHash);
-				int newCommitIndex = commentables.indexOf(newCommitHash);
-				if (oldCommitIndex == -1 || newCommitIndex == -1 || oldCommitIndex > newCommitIndex) {
-					// indicate that comment support is not available in text diff panel
-					return null;
-				} else {
-					return request;
-				}
-			}
-			
-		};
-
-		// use branch ref if possible to make file editable online
-		String oldRev = oldCommitHash;
-		String newRev = newCommitHash;
-		PullRequest request = getPullRequest();
-		if (request.isOpen()) {
-			if (oldRev.equals(request.getSource().getHead())) 
-				oldRev = request.getSourceBranch();
-			if (newRev.equals(request.getSource().getHead())) 
-				newRev = request.getSourceBranch();
-		} 
 		compareResult = new RevisionDiffPanel("compareResult", repoModel, requestModel, 
-				commentModel, oldRev, newRev, path, comparePath, 
+				commentModel, oldCommitHash, newCommitHash, path, comparePath, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 
 			@Override

@@ -110,6 +110,8 @@ public class TextDiffPanel extends Panel {
 		
 	};
 	
+	private final boolean commentable;
+	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
 	private RepeatingView newCommentForms;
@@ -125,6 +127,17 @@ public class TextDiffPanel extends Panel {
 		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
+
+		PullRequest request = requestModel.getObject();
+		if (request != null) {
+			List<String> commentables = request.getCommentables();
+			int oldCommitIndex = commentables.indexOf(change.getOldBlobIdent().revision);
+			int newCommitIndex = commentables.indexOf(change.getNewBlobIdent().revision);
+			commentable = oldCommitIndex != -1 && newCommitIndex != -1 && oldCommitIndex < newCommitIndex;
+		} else {
+			commentable = false;
+		}
+		
 	}
 
 	@Override
@@ -135,30 +148,13 @@ public class TextDiffPanel extends Panel {
 		add(new BlobDiffTitle("title", change));
 
 		Repository repo = repoModel.getObject();
-		String revision;
-		String path;
 		
-		/*
-		 * below logic tries to use branch ref instead of commit hash in order to 
-		 * make file editable online
-		 */
-		if (change.getNewBlobIdent().path != null) {
-			path = change.getNewBlobIdent().path;
-			revision = change.getNewRef();
-			if (revision == null)
-				revision = change.getNewBlobIdent().revision;
-		} else {
-			path = change.getOldBlobIdent().path;
-			revision = change.getOldRef();
-			if (revision == null)
-				revision = change.getOldBlobIdent().revision;
-		}
 		PageParameters params;
 		PullRequest request = requestModel.getObject();
 		if (request != null) 
-			params = RepoFilePage.paramsOf(request, revision, path);
+			params = RepoFilePage.paramsOf(request, change.getBlobIdent());
 		else 
-			params = RepoFilePage.paramsOf(repo, revision, path);
+			params = RepoFilePage.paramsOf(repo, change.getBlobIdent());
 		
 		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
 		
@@ -440,7 +436,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendAddComment(StringBuilder builder, int oldLineNo, int newLineNo) {
-		if (requestModel.getObject() != null) {
+		if (commentable) {
 			builder.append("<span class='add-comment'>");
 			String script = String.format("document.getElementById('%s').addComment(%d, %d);", 
 					getMarkupId(), oldLineNo, newLineNo);

@@ -31,9 +31,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
+import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
@@ -201,14 +201,8 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						
 						commitItem.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
 
-						PullRequest request = getPullRequest();
-						String revision = commit.getHash();
-						if (request.isOpen() && request.getSourceRepo() != null 
-								&& revision.equals(request.getSource().getHead(false))) {
-							revision = request.getSourceBranch();
-						}
 						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-								RepoFilePage.paramsOf(getPullRequest(), revision, null)));
+								RepoFilePage.paramsOf(getPullRequest(), commit.getHash(), null)));
 						
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 

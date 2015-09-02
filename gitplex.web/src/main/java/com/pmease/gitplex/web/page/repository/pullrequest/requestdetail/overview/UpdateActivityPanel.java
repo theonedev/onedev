@@ -16,6 +16,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -180,8 +181,9 @@ class UpdateActivityPanel extends Panel {
 					item.add(AttributeAppender.append("title", "This commit has been rebased"));
 				}
 				
-				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-						RepoFilePage.paramsOf(updateModel.getObject().getRequest(), commit.getHash(), null)));
+				PageParameters params = RepoFilePage.paramsOf(
+						updateModel.getObject().getRequest(), commit.getHash(), null);
+				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, params));
 			}
 			
 		});

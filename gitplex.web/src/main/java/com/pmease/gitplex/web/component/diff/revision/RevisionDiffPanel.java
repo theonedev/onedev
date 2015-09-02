@@ -39,8 +39,8 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
@@ -83,7 +83,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			List<BlobChange> diffableChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
 	    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
-		    		diffableChanges.add(new BlobChange(oldCommitHash, newCommitHash, entry, oldRev, newRev) {
+		    		diffableChanges.add(new BlobChange(oldRev, newRev, entry) {
 
 						@Override
 						public Blob getBlob(BlobIdent blobIdent) {
@@ -94,7 +94,7 @@ public abstract class RevisionDiffPanel extends Panel {
 						public LineProcessor getLineProcessor() {
 							return lineProcessor;
 						}
-		    			
+
 		    		});
 	    		} else {
 	    			break;
