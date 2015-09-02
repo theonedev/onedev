@@ -73,7 +73,7 @@ import com.pmease.gitplex.core.model.PullRequestOperation;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.branchlink.BranchLink;
+import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.EntityModel;
@@ -780,30 +780,11 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			
 		};
 		integratedNoteContainer.add(squashedContainer);
-		squashedContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
-
-			@Override
-			protected RepoAndBranch load() {
-				return getPullRequest().getTarget();
-			}
-			
-		}));
-		squashedContainer.add(new BranchLink("source", new LoadableDetachableModel<RepoAndBranch>() {
-
-			@Override
-			protected RepoAndBranch load() {
-				return getPullRequest().getSource();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getSource() != null);
-			}
-			
-		});
+		squashedContainer.add(new BranchLink("target", getPullRequest().getTarget()));
+		if (getPullRequest().getSourceRepo() != null) 
+			squashedContainer.add(new BranchLink("source", getPullRequest().getSource()));
+		else 
+			squashedContainer.add(new WebMarkupContainer("source").setVisible(false));
 		
 		WebMarkupContainer sourceRebasedContainer = new WebMarkupContainer("sourceRebased") {
 
@@ -820,30 +801,11 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			
 		};
 		integratedNoteContainer.add(sourceRebasedContainer);
-		sourceRebasedContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
-
-			@Override
-			protected RepoAndBranch load() {
-				return getPullRequest().getTarget();
-			}
-			
-		}));
-		sourceRebasedContainer.add(new BranchLink("source", new LoadableDetachableModel<RepoAndBranch>() {
-
-			@Override
-			protected RepoAndBranch load() {
-				return getPullRequest().getSource();
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getSource() != null);
-			}
-			
-		});
+		sourceRebasedContainer.add(new BranchLink("target", getPullRequest().getTarget()));
+		if (getPullRequest().getSourceRepo() != null) 
+			sourceRebasedContainer.add(new BranchLink("source", getPullRequest().getSource()));
+		else
+			sourceRebasedContainer.add(new WebMarkupContainer("source")).setVisible(false);
 		
 		WebMarkupContainer targetRebasedContainer = new WebMarkupContainer("targetRebased") {
 
@@ -860,14 +822,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			
 		};
 		integratedNoteContainer.add(targetRebasedContainer);
-		targetRebasedContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
-
-			@Override
-			protected RepoAndBranch load() {
-				return getPullRequest().getTarget();
-			}
-			
-		}));
+		targetRebasedContainer.add(new BranchLink("target", getPullRequest().getTarget()));
 		
 		return integratedNoteContainer;
 	}

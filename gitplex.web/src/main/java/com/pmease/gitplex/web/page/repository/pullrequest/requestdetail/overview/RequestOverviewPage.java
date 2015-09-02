@@ -45,23 +45,22 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
-import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.PullRequestWatch;
-import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
@@ -357,32 +356,12 @@ public class RequestOverviewPage extends RequestDetailPage {
 		WebMarkupContainer basicInfoContainer = new WebMarkupContainer("basicInfo");
 		basicInfoContainer.add(new AvatarByUser("submitter", new UserModel(request.getSubmitter()), true));
 		
-		basicInfoContainer.add(new BranchLink("target", new LoadableDetachableModel<RepoAndBranch>() {
-
-			@Override
-			protected RepoAndBranch load() {
-				return getPullRequest().getTarget();
-			}
-			
-		}));
-		basicInfoContainer.add(new BranchLink("sourceLink", new LoadableDetachableModel<RepoAndBranch>() {
-
-			@Override
-			protected RepoAndBranch load() {
-				return getPullRequest().getSource();	
-			}
-
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				PullRequest request = getPullRequest();
-				setVisible(request.getSourceRepo() != null && request.getSource().getHead(false) != null);
-			}
-			
-		});
+		basicInfoContainer.add(new BranchLink("target", getPullRequest().getTarget()));
+		
+		if (getPullRequest().getSourceRepo() != null && getPullRequest().getSource().getHead(false) != null) 
+			basicInfoContainer.add(new BranchLink("sourceLink", getPullRequest().getSource()));	
+		else
+			basicInfoContainer.add(new WebMarkupContainer("sourceLink").setVisible(false));
 		basicInfoContainer.add(new Label("sourceName", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -394,7 +373,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					else
 						return request.getSource().getFQN() + " (removed)";
 				} else {
-					return "unknown repository";
+					return "<i>unknown</i>";
 				}
 			}
 			
@@ -408,7 +387,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				setVisible(request.getSourceRepo() == null || request.getSource().getHead(false) == null);
 			}
 			
-		});
+		}.setEscapeModelStrings(false));
 		
 		basicInfoContainer.add(new Link<Void>("restoreSource") {
 

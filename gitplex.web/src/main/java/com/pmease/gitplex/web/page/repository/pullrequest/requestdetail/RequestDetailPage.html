@@ -26,16 +26,16 @@
 					Head commit of this request was merged into target branch outside of this pull request.
 				</div>
 				<div wicket:id="squashed">
-					<p>Per the integration strategy, commits in this pull request from source branch <span wicket:id="source"></span> 
-					was squashed before merging into target branch <span wicket:id="target"></span>.</p> 
+					<p>Per the integration strategy, commits in this pull request from source branch <a wicket:id="source"></a> 
+					was squashed before merging into target branch <a wicket:id="target"></a>.</p> 
 					<p>If you have a local branch whose upstream tracking branch 
 					points to source branch, please run this command to do the sync:
 					<kbd>git fetch origin && git rebase</kbd>
 					</p>
 				</div>
 				<div wicket:id="sourceRebased">
-					<p>Per the integration strategy, source branch <span wicket:id="source"></span> was rebased on top 
-					of target branch <span wicket:id="target"></span>, and then target 
+					<p>Per the integration strategy, source branch <a wicket:id="source"></a> was rebased on top 
+					of target branch <a wicket:id="target"></a>, and then target 
 					branch was fast forwarded to the rebase result.</p> 
 					<p>If you have a local branch whose upstream tracking branch 
 					points to source branch, please run this command to do the sync:
@@ -43,7 +43,7 @@
 					</p>
 				</div>
 				<div wicket:id="targetRebased">
-					<p>Per the integration strategy, target branch <span wicket:id="target"></span> was rebased on top of this request.</p>
+					<p>Per the integration strategy, target branch <a wicket:id="target"></a> was rebased on top of this request.</p>
 					<p>If you have a local branch whose upstream tracking 
 					branch points to target branch, please run this command to do the sync:
 					<kbd>git fetch origin && git rebase</kbd>

@@ -43,8 +43,8 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.component.pullrequest.requeststatus.RequestStatusPanel;
 import com.pmease.gitplex.web.component.userlink.UserLink;
@@ -223,8 +223,8 @@ public class RequestListPage extends PullRequestPage {
 					}
 					
 				}, AvatarMode.NAME));
-				fragment.add(new BranchLink("targetBranch", Model.of(request.getTarget())));
-				fragment.add(new BranchLink("source", Model.of(request.getSource())));
+				fragment.add(new BranchLink("targetBranch", request.getTarget()));
+				fragment.add(new BranchLink("source", request.getSource()));
 				fragment.add(new Label("age", DateUtils.formatAge(request.getCreateDate())));
 				fragment.add(new UserLink("assignee", new LoadableDetachableModel<User>() {
 

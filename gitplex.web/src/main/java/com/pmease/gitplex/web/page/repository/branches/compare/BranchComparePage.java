@@ -30,8 +30,8 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
-import com.pmease.gitplex.web.component.branchlink.BranchLink;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
@@ -323,8 +323,8 @@ public class BranchComparePage extends RepositoryPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new BranchLink("sourceBranch", sourceModel));
-				add(new BranchLink("targetBranch", targetModel));
+				add(new BranchLink("sourceBranch", sourceModel.getObject()));
+				add(new BranchLink("targetBranch", targetModel.getObject()));
 			}
 
 		});

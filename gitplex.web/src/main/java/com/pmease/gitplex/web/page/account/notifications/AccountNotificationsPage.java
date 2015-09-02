@@ -26,7 +26,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Notification;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.branchlink.BranchLink;
+import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
@@ -90,7 +90,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 					Item<ICellPopulator<Notification>> cellItem,
 					String componentId, IModel<Notification> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
-				cellItem.add(new BranchLink(componentId, Model.of(request.getTarget())) {
+				cellItem.add(new BranchLink(componentId, request.getTarget()) {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -110,7 +110,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 					String componentId, IModel<Notification> rowModel) {
 				PullRequest request = rowModel.getObject().getRequest();
 				if (request.getSource() != null) {
-					cellItem.add(new BranchLink(componentId, Model.of(request.getSource())) {
+					cellItem.add(new BranchLink(componentId, request.getSource()) {
 	
 						@Override
 						protected void onComponentTag(ComponentTag tag) {
