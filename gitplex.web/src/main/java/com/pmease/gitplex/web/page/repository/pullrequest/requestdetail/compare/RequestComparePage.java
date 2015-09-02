@@ -754,7 +754,20 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
-		compareResult = new RevisionDiffPanel("compareResult", repoModel, requestModel, 
+		IModel<Comment> commentModel = new LoadableDetachableModel<Comment>() {
+
+			@Override
+			protected Comment load() {
+				Comment comment = RequestComparePage.this.commentModel.getObject();
+				if (comment == null) {
+					comment = new Comment();
+					comment.setRequest(getPullRequest());
+				}
+				return comment;
+			}
+			
+		};
+		compareResult = new RevisionDiffPanel("compareResult", repoModel,  
 				commentModel, oldCommitHash, newCommitHash, path, comparePath, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 

@@ -71,8 +71,6 @@ public class TextDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
-	private final IModel<PullRequest> requestModel;
-	
 	private final IModel<Comment> commentModel;
 	
 	private final BlobChange change;
@@ -86,31 +84,48 @@ public class TextDiffPanel extends Panel {
 		@Override
 		protected List<CommentAndPos> load() {
 			List<CommentAndPos> listOfCommentAndPos = new ArrayList<>();
-			PullRequest request = requestModel.getObject();
-			if (request != null) {
-				for (Comment comment: request.getComments()) {
-					if (comment.getInlineInfo() != null) {
-						GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
-						CommentAndPos commentAndPos = getCommentAndPos(comment);
-						if (commentAndPos != null)
-							listOfCommentAndPos.add(commentAndPos);
+			if (commentableModel.getObject()) {
+				PullRequest request = commentModel.getObject().getRequest();
+				if (request != null) {
+					for (Comment comment: request.getComments()) {
+						if (comment.getInlineInfo() != null) {
+							GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
+							CommentAndPos commentAndPos = getCommentAndPos(comment);
+							if (commentAndPos != null)
+								listOfCommentAndPos.add(commentAndPos);
+						}
 					}
+					Collections.sort(listOfCommentAndPos, new Comparator<CommentAndPos>() {
+		
+						@Override
+						public int compare(CommentAndPos commentAndPos1, CommentAndPos commentAndPos2) {
+							return commentAndPos1.comment.getDate().compareTo(commentAndPos2.comment.getDate());
+						}
+						
+					});
 				}
-				Collections.sort(listOfCommentAndPos, new Comparator<CommentAndPos>() {
-	
-					@Override
-					public int compare(CommentAndPos commentAndPos1, CommentAndPos commentAndPos2) {
-						return commentAndPos1.comment.getDate().compareTo(commentAndPos2.comment.getDate());
-					}
-					
-				});
 			}
 			return listOfCommentAndPos;
 		}
 		
 	};
 	
-	private final boolean commentable;
+	private final IModel<Boolean> commentableModel = new LoadableDetachableModel<Boolean>() {
+
+		@Override
+		protected Boolean load() {
+			Comment comment = commentModel.getObject();
+			if (comment != null && comment.getRequest().getId() != null) {
+				List<String> commentables = comment.getRequest().getCommentables();
+				int oldCommitIndex = commentables.indexOf(change.getOldBlobIdent().revision);
+				int newCommitIndex = commentables.indexOf(change.getNewBlobIdent().revision);
+				return oldCommitIndex != -1 && newCommitIndex != -1 && oldCommitIndex < newCommitIndex;
+			} else {
+				return false;
+			}
+		}
+		
+	};
 	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
@@ -118,26 +133,14 @@ public class TextDiffPanel extends Panel {
 	
 	private RepeatingView commentRows;
 	
-	public TextDiffPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
-			IModel<Comment> commentModel, BlobChange change, DiffMode diffMode) {
+	public TextDiffPanel(String id, IModel<Repository> repoModel, IModel<Comment> commentModel, 
+			BlobChange change, DiffMode diffMode) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.commentModel = commentModel;
-		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
-
-		PullRequest request = requestModel.getObject();
-		if (request != null) {
-			List<String> commentables = request.getCommentables();
-			int oldCommitIndex = commentables.indexOf(change.getOldBlobIdent().revision);
-			int newCommitIndex = commentables.indexOf(change.getNewBlobIdent().revision);
-			commentable = oldCommitIndex != -1 && newCommitIndex != -1 && oldCommitIndex < newCommitIndex;
-		} else {
-			commentable = false;
-		}
-		
 	}
 
 	@Override
@@ -150,9 +153,9 @@ public class TextDiffPanel extends Panel {
 		Repository repo = repoModel.getObject();
 		
 		PageParameters params;
-		PullRequest request = requestModel.getObject();
-		if (request != null) 
-			params = RepoFilePage.paramsOf(request, change.getBlobIdent());
+		Comment comment = commentModel.getObject();
+		if (comment != null)
+			params = RepoFilePage.paramsOf(comment.getRequest(), change.getBlobIdent());
 		else 
 			params = RepoFilePage.paramsOf(repo, change.getBlobIdent());
 		
@@ -257,7 +260,8 @@ public class TextDiffPanel extends Panel {
 						InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPage().getPageId()));
 						try {
 							comment = GitPlex.getInstance(CommentManager.class).addInline(
-									requestModel.getObject(), commentAt, compareWith, lineNo, input.getModelObject());
+									commentModel.getObject().getRequest(), commentAt, compareWith, 
+									lineNo, input.getModelObject());
 						} finally {
 							InheritableThreadLocalData.clear();
 						}
@@ -436,7 +440,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendAddComment(StringBuilder builder, int oldLineNo, int newLineNo) {
-		if (commentable) {
+		if (commentableModel.getObject()) {
 			builder.append("<span class='add-comment'>");
 			String script = String.format("document.getElementById('%s').addComment(%d, %d);", 
 					getMarkupId(), oldLineNo, newLineNo);
@@ -655,8 +659,7 @@ public class TextDiffPanel extends Panel {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				Comment comment = commentModel.getObject();
-				if (comment != null && commentId.equals(comment.getId())) {
+				if (commentId.equals(commentModel.getObject().getId())) {
 					String script = String.format("$('#%s').closest('td').focus();", getMarkupId());
 					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
@@ -683,8 +686,8 @@ public class TextDiffPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
-		requestModel.detach();
 		commentModel.detach();
+		commentableModel.detach();
 		listOfCommentAndPosModel.detach();
 		super.onDetach();
 	}

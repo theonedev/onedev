@@ -31,7 +31,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
@@ -47,11 +46,11 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
@@ -369,20 +368,13 @@ public class NewRequestPage extends PullRequestPage {
 	protected RevisionDiffPanel newRevDiffPanel() {
 		PullRequest request = getPullRequest();
 		String oldRev = request.getBaseCommitHash();
-		String newRev = request.getSourceBranch();
+		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
-		/*
-		 * pass branch ref instead of commit hash to revision diff panel in order 
-		 * to make the file editable online, and to make revision diff panel 
-		 * displays changes consistently when doing actions such as changing path
-		 * filter, changing diff mode, we need to cache the commit hash against 
-		 * the branch ref
-		 */
-		getRepository().cacheObjectId(newRev, ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()));
-		
+		Comment comment = new Comment();
+		comment.setRequest(request);
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
-				new Model<PullRequest>(null), new Model<Comment>(null), oldRev, newRev, 
-				path, null, diffOption.getLineProcessor(), diffOption.getDiffMode()) {
+				Model.of(comment), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
+				diffOption.getDiffMode()) {
 
 			@Override
 			protected void onClearPath(AjaxRequestTarget target) {
