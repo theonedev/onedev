@@ -22,6 +22,7 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -140,7 +141,12 @@ public abstract class BlobViewPanel extends Panel {
 		add(newCustomActions("customActions"));
 		
 		String revision = context.getBlobIdent().revision;
-		final boolean editable = context.getRepository().getRefs(Git.REFS_HEADS).containsKey(revision);
+		PullRequest request = context.getPullRequest();
+
+		final boolean onBranch = context.getRepository().getRefs(Git.REFS_HEADS).containsKey(revision);
+		final boolean isSourceBranchCommit = request != null 
+				&& request.getSourceRepo() != null 
+				&& revision.equals(request.getSource().getHead(false)); 
 		
 		WebMarkupContainer changeActions = new WebMarkupContainer("changeActions") {
 			
@@ -148,7 +154,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!editable)
+				if (!onBranch && !isSourceBranchCommit)
 					tag.put("title", "Must on a branch to change or propose change of this file");
 			}
 			
@@ -156,6 +162,16 @@ public abstract class BlobViewPanel extends Panel {
 		add(changeActions);
 		
 		changeActions.add(new AjaxLink<Void>("edit") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				if (isSourceBranchCommit)
+					add(new Label("label", "Edit on source branch"));
+				else
+					add(new Label("label", "Edit"));
+			}
 
 			@Override
 			protected void onConfigure() {
@@ -168,7 +184,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!editable)
+				if (!onBranch && !isSourceBranchCommit)
 					tag.put("disabled", "disabled");
 			}
 
@@ -182,10 +198,20 @@ public abstract class BlobViewPanel extends Panel {
 		changeActions.add(new AjaxLink<Void>("delete") {
 
 			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				if (isSourceBranchCommit)
+					add(new Label("label", "Delete from source branch"));
+				else
+					add(new Label("label", "Delete"));
+			}
+			
+			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!editable)
+				if (!onBranch && !isSourceBranchCommit)
 					tag.put("disabled", "disabled");
 			}
 

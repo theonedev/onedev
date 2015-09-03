@@ -114,7 +114,7 @@ public class TextDiffPanel extends Panel {
 		@Override
 		protected Boolean load() {
 			PullRequest request = requestModel.getObject();
-			if (request != null && request.getId() != null) {
+			if (request != null) {
 				List<String> commentables = request.getCommentables();
 				int oldCommitIndex = commentables.indexOf(change.getOldBlobIdent().revision);
 				int newCommitIndex = commentables.indexOf(change.getNewBlobIdent().revision);
