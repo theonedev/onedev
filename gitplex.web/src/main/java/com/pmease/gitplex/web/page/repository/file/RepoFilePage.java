@@ -87,8 +87,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	private static final String PARAM_REVISION = "revision";
 	
-	private static final String PARAM_COMMIT = "commit";
-	
 	private static final String PARAM_PATH = "path";
 	
 	private static final String PARAM_BLAME = "blame";
@@ -185,9 +183,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			blobIdent.mode = FileMode.TREE.getBits();
 		}
 		
-		String commitHash = params.get(PARAM_COMMIT).toString();
-		if (commitHash != null) 
-			getRepository().cacheObjectId(blobIdent.revision, ObjectId.fromString(commitHash));
 		blame = params.get(PARAM_BLAME).toBoolean(false);
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		requestId = params.get(PARAM_REQUEST).toOptionalLong();
@@ -566,7 +561,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), blobIdent.revision, null, blobIdent.path, 
+		PageParameters params = paramsOf(getRepository(), blobIdent.revision, blobIdent.path, 
 				blame, commentId, requestId);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		HistoryState state = new HistoryState();
@@ -596,24 +591,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String commitHash, @Nullable String path) {
-		if (request.getSourceRepo() != null && commitHash.equals(request.getSource().getHead(false))) {
-			return paramsOf(request.getSourceRepo(), request.getSourceBranch(), commitHash, 
-					path, false, null, request.getId());
-		} else {
-			return paramsOf(request.getTargetRepo(), commitHash, null, path, false, null, request.getId());
-		}
+		return paramsOf(request.getTargetRepo(), commitHash, path, false, null, request.getId());
 	}
 	
 	public static PageParameters paramsOf(Comment comment) {
-		String revision = comment.getBlobIdent().revision;
-		PullRequest request = comment.getRequest();
-		if (request.getSourceRepo() != null && revision.equals(request.getSource().getHead(false))) {
-			return paramsOf(request.getSourceRepo(), request.getSourceBranch(), revision, 
-					comment.getBlobIdent().path, false, comment.getId(), null);
-		} else {
-			return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, null,
-					comment.getBlobIdent().path, false, comment.getId(), null);
-		}
+		return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, 
+				comment.getBlobIdent().path, false, comment.getId(), null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
@@ -621,17 +604,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
-		return paramsOf(repository, revision, null, path, false, null, null);
+		return paramsOf(repository, revision, path, false, null, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, 
-			@Nullable String commitHash, @Nullable String path, boolean blame, 
-			@Nullable Long commentId, @Nullable Long requestId) {
+			@Nullable String path, boolean blame, @Nullable Long commentId, @Nullable Long requestId) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
-		if (commitHash != null)
-			params.set(PARAM_COMMIT, commitHash);
 		if (path != null)
 			params.set(PARAM_PATH, path);
 		if (blame)

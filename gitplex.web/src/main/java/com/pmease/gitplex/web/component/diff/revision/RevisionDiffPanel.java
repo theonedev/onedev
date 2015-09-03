@@ -40,6 +40,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
@@ -50,6 +51,8 @@ public abstract class RevisionDiffPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
+	private final IModel<PullRequest> requestModel;
+
 	private final IModel<Comment> commentModel;
 	
 	private final String oldRev;
@@ -166,12 +169,13 @@ public abstract class RevisionDiffPanel extends Panel {
 		}
 	};
 	
-	public RevisionDiffPanel(String id, IModel<Repository> repoModel, IModel<Comment> commentModel, 
-			String oldRev, String newRev, @Nullable String path, @Nullable String comparePath, 
-			LineProcessor lineProcessor, DiffMode diffMode) {
+	public RevisionDiffPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+			IModel<Comment> commentModel, String oldRev, String newRev, @Nullable String path, 
+			@Nullable String comparePath, LineProcessor lineProcessor, DiffMode diffMode) {
 		super(id);
 		
 		this.repoModel = repoModel;
+		this.requestModel = requestModel;
 		this.commentModel = commentModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
@@ -290,7 +294,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				item.setOutputMarkupId(true);
-				item.add(new BlobDiffPanel("change", repoModel, commentModel, change, diffMode));
+				item.add(new BlobDiffPanel("change", repoModel, requestModel, commentModel, change, diffMode));
 			}
 			
 		});
@@ -308,6 +312,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onDetach() {
 		changesAndCountModel.detach();
 		repoModel.detach();
+		requestModel.detach();
 		commentModel.detach();
 		
 		super.onDetach();

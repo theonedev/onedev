@@ -528,7 +528,7 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 			
 		});
-		if (state.oldRev.equals(REV_INTEGRATION_PREVIEW) || state.newRev.equals(REV_INTEGRATION_PREVIEW)) {
+		if (REV_INTEGRATION_PREVIEW.equals(state.oldRev) || REV_INTEGRATION_PREVIEW.equals(state.newRev)) {
 			IntegrationPreview preview = getPullRequest().getIntegrationPreview();
 			noIntegrationPreviewAlert.setVisible(preview == null || preview.getIntegrated() == null);
 		} else {
@@ -754,21 +754,8 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
-		IModel<Comment> commentModel = new LoadableDetachableModel<Comment>() {
-
-			@Override
-			protected Comment load() {
-				Comment comment = RequestComparePage.this.commentModel.getObject();
-				if (comment == null) {
-					comment = new Comment();
-					comment.setRequest(getPullRequest());
-				}
-				return comment;
-			}
-			
-		};
 		compareResult = new RevisionDiffPanel("compareResult", repoModel,  
-				commentModel, oldCommitHash, newCommitHash, path, comparePath, 
+				requestModel, commentModel, oldCommitHash, newCommitHash, path, comparePath, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 
 			@Override
