@@ -267,7 +267,7 @@ public abstract class EditSavePanel extends Panel {
 				}
 			}
 			
-		}.add(new DirtyIgnoreBehavior()));
+		}.add(new DirtyIgnoreBehavior("$('form.leave-confirm')")));
 		
 		form.add(new AjaxLink<Void>("cancel") {
 

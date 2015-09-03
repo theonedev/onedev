@@ -436,27 +436,38 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void onAddOrEditFile(AjaxRequestTarget target) {
-		ObjectId commitId = getRepository().getObjectId(blobIdent.revision);
-		
-		final String refName = Git.REFS_HEADS + blobIdent.revision;
+		final String refName = getEditRefName();
 		
 		final AtomicReference<String> newPathRef = new AtomicReference<>(blobIdent.isTree()?null:blobIdent.path);
-		
+
+		IModel<Repository> repoModel = new LoadableDetachableModel<Repository>() {
+
+			@Override
+			protected Repository load() {
+				return getEditRepository();
+			}
+			
+		};
 		fileViewer = new FileEditPanel(
 				FILE_VIEWER_ID, repoModel, refName, 
 				blobIdent.isTree()?null:blobIdent.path, 
-						blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
-				commitId) {
+				blobIdent.isTree()?"":getEditRepository().getBlob(blobIdent).getText().getContent(), 
+				getEditCommitId()) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				getRepository().cacheObjectId(blobIdent.revision, newCommitId);
+				Repository editRepository = getEditRepository();
+				String editBranch = getEditBranch();
+				editRepository.cacheObjectId(getEditBranch(), newCommitId);
 				BlobIdent committed = new BlobIdent(
-						blobIdent.revision, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
-				onSelect(target, committed, null);
-				
+						editBranch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 	    		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
-	    			listener.onRefUpdate(getRepository(), refName, newCommitId.name());
+	    			listener.onRefUpdate(editRepository, refName, newCommitId.name());
+
+	    		if (isOnBranch()) 
+	    			onSelect(target, committed, null);
+	    		else
+	    			setResponsePage(RepoFilePage.class, paramsOf(editRepository, committed));
 			}
 
 			@Override
@@ -608,8 +619,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, 
-			@Nullable String path, boolean blame, @Nullable Long commentId, 
-			@Nullable Long requestId) {
+			@Nullable String path, boolean blame, @Nullable Long commentId, @Nullable Long requestId) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
@@ -803,9 +813,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public void onDelete(AjaxRequestTarget target) {
-		ObjectId commitId = getRepository().getObjectId(blobIdent.revision);
-		
-		final String refName = Git.REFS_HEADS + blobIdent.revision;
+		final String refName = getEditRefName();
 
 		CancelListener cancelListener = new CancelListener() {
 
@@ -817,13 +825,24 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 			
 		};
+		
+		IModel<Repository> repoModel = new LoadableDetachableModel<Repository>() {
+
+			@Override
+			protected Repository load() {
+				return getEditRepository();
+			}
+			
+		};		
 		fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, blobIdent.path, 
-				null, commitId, cancelListener) {
+				null, getEditCommitId(), cancelListener) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				getRepository().cacheObjectId(blobIdent.revision, newCommitId);
-				try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+				Repository editRepository = getEditRepository();
+				String editBranch = getEditBranch();
+				editRepository.cacheObjectId(editBranch, newCommitId);
+				try (	FileRepository jgitRepo = editRepository.openAsJGitRepo();
 						RevWalk revWalk = new RevWalk(jgitRepo)) {
 					RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
 					String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
@@ -835,13 +854,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 							break;
 						}
 					}
-					BlobIdent parentBlobIdent = new BlobIdent(blobIdent.revision, parentPath, 
-							FileMode.TREE.getBits());
-					onSelect(target, parentBlobIdent, null);
-
 					for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
-		    			listener.onRefUpdate(getRepository(), refName, newCommitId.name());
-					
+		    			listener.onRefUpdate(editRepository, refName, newCommitId.name());
+					BlobIdent parentBlobIdent = new BlobIdent(editBranch, parentPath, FileMode.TREE.getBits());
+					if (isOnBranch())
+						onSelect(target, parentBlobIdent, null);
+					else
+						setResponsePage(RepoFilePage.class, paramsOf(editRepository, parentBlobIdent));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -858,6 +877,46 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	@Override
 	public void onEdit(AjaxRequestTarget target) {
 		onAddOrEditFile(target);
+	}
+
+	@Override
+	public boolean isOnBranch() {
+		return getRepository().getRefs(Git.REFS_HEADS).containsKey(blobIdent.revision);
+	}
+
+	private Repository getEditRepository() {
+		if (isOnBranch())
+			return getRepository();
+		else
+			return requestModel.getObject().getSourceRepo();
+	}
+	
+	private String getEditRefName() {
+		if (isOnBranch()) 
+			return GitUtils.branch2ref(blobIdent.revision);
+		else 
+			return requestModel.getObject().getSourceRef();
+	}
+	
+	private String getEditBranch() {
+		if (isOnBranch()) 
+			return blobIdent.revision;
+		else 
+			return requestModel.getObject().getSourceBranch();
+	}
+	
+	private ObjectId getEditCommitId() {
+		if (isOnBranch())
+			return getRepository().getObjectId(blobIdent.revision);
+		else 
+			return ObjectId.fromString(blobIdent.revision);
+	}
+	
+	@Override
+	public boolean isAtSourceBranchHead() {
+		PullRequest request = getPullRequest();
+		return request != null && request.getSourceRepo() != null 
+				&& blobIdent.revision.equals(request.getSource().getHead(false)); 
 	}
 	
 }

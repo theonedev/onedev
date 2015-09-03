@@ -422,11 +422,10 @@ pmease.commons = {
 			var $trigger = $("#" + triggerId);
 			$trigger.closest("form.leave-confirm").addClass("dirty").find(".dirty-aware").removeAttr("disabled");
 		},
-		markClean: function(triggerId) {
-			var $trigger = $("#" + triggerId);
-			$trigger.closest("form.leave-confirm").removeClass("dirty").find(".dirty-aware").attr("disabled", "disabled");
+		markClean: function($forms) {
+			$forms.removeClass("dirty").find(".dirty-aware").attr("disabled", "disabled");
 		},
-		removeDirty: function(triggerId) {
+		removeDirty: function(triggerId, $forms) {
 			$(function() {
 				var $trigger = $("#" + triggerId);
 				
@@ -442,7 +441,7 @@ pmease.commons = {
 				$trigger.unbind('click');
 
 				$trigger.click(function(event){
-					pmease.commons.form.markClean(triggerId);
+					pmease.commons.form.markClean($forms);
 					previousClick(event);
 				});
 			});

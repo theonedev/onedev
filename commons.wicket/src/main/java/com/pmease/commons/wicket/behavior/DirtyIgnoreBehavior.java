@@ -10,6 +10,8 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
 @SuppressWarnings("serial")
 public class DirtyIgnoreBehavior extends Behavior {
+
+	private String $forms;
 	
 	private boolean decorated;
 	
@@ -17,8 +19,18 @@ public class DirtyIgnoreBehavior extends Behavior {
 	public void bind(Component component) {
 		super.bind(component);
 		component.setOutputMarkupId(true);
+		
+		if ($forms == null) 
+			$forms = String.format("$('#%s').closest('form.leave-confirm')", component.getMarkupId());
 	}
 
+	public DirtyIgnoreBehavior(String $forms) {
+		this.$forms = $forms;
+	}
+	
+	public DirtyIgnoreBehavior() {
+	}
+	
 	@Override
 	public void onConfigure(Component component) {
 		super.onConfigure(component);
@@ -46,8 +58,8 @@ public class DirtyIgnoreBehavior extends Behavior {
 								}
 							}
 			
-							String decoratedScript = String.format(
-									"pmease.commons.form.markClean('%s');", component.getMarkupId(true));
+							String decoratedScript = String.format("pmease.commons.form.markClean(%s);%s", 
+									$forms, script);
 							tag.put("onclick", decoratedScript);
 						}
 					}
@@ -61,9 +73,8 @@ public class DirtyIgnoreBehavior extends Behavior {
 						super.renderHead(component, response);
 
 						if (component.isEnabled()) {
-							String script;
-							
-							script = String.format("pmease.commons.form.removeDirty('%s')", component.getMarkupId(true));
+							String script = String.format("pmease.commons.form.removeDirty('%s', %s)", 
+										component.getMarkupId(true), $forms);
 							AjaxRequestTarget target = component.getRequestCycle().find(AjaxRequestTarget.class);
 							if (target == null) 
 								response.render(OnDomReadyHeaderItem.forScript(script));
