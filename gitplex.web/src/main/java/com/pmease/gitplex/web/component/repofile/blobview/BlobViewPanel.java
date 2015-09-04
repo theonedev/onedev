@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -98,7 +99,7 @@ public abstract class BlobViewPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						if (context.isBlame())
+						if (context.getMode() == Mode.BLAME)
 							return " active";
 						else
 							return " ";

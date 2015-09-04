@@ -9,12 +9,14 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
 
 public interface BlobViewContext extends Serializable {
+
+	public enum Mode {BLAME, EDIT}
 	
 	Repository getRepository();
 
@@ -29,7 +31,7 @@ public interface BlobViewContext extends Serializable {
 	@Nullable
 	TokenPosition getTokenPos();
 	
-	boolean isBlame();
+	Mode getMode();
 	
 	boolean isOnBranch();
 	

@@ -62,6 +62,7 @@ import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -152,14 +153,27 @@ public class TextDiffPanel extends Panel {
 
 		Repository repo = repoModel.getObject();
 		
-		PageParameters params;
 		PullRequest request = requestModel.getObject();
-		if (request != null)
-			params = RepoFilePage.paramsOf(request, change.getBlobIdent());
-		else 
-			params = RepoFilePage.paramsOf(repo, change.getBlobIdent());
-		
-		add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
+		if (request != null) {
+			PageParameters params = RepoFilePage.paramsOf(request, change.getBlobIdent());
+			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
+			params = RepoFilePage.paramsOf(repo, request.getSourceBranch(), change.getPath(), Mode.EDIT);
+			add(new BookmarkablePageLink<Void>("editFile", RepoFilePage.class, params) {
+	
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					PullRequest request = requestModel.getObject();
+					setVisible(request.getSourceRepo() != null 
+							&& change.getBlobIdent().revision.equals(request.getSource().getHead(false)));
+				}
+				
+			});
+		} else {
+			PageParameters params = RepoFilePage.paramsOf(repo, change.getBlobIdent());
+			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
+			add(new WebMarkupContainer("editFile").setVisible(false));
+		}
 		
 		add(new Label("diffLines", new LoadableDetachableModel<String>() {
 

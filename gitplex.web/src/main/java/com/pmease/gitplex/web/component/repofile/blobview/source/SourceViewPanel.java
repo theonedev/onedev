@@ -81,6 +81,7 @@ import com.pmease.gitplex.web.component.comment.event.CommentResized;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
@@ -458,7 +459,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 
 	private String getBlameCommits() {
-		if (context.isBlame()) {
+		if (context.getMode() == Mode.BLAME) {
 			List<BlameCommit> commits = new ArrayList<>();
 			
 			String commitHash = context.getRepository().getObjectId(context.getBlobIdent().revision).name();

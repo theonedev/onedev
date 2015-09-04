@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 
 class HistoryState implements Serializable {
 
@@ -17,6 +18,6 @@ class HistoryState implements Serializable {
 	
 	public TokenPosition tokenPos;
 	
-	public boolean blame;
+	public Mode mode;
 	
 }

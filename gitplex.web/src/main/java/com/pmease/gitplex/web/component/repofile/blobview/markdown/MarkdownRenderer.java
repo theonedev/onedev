@@ -4,6 +4,7 @@ import com.pmease.commons.git.Blob;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.source.SourceViewPanel;
 
 public class MarkdownRenderer implements BlobRenderer {
@@ -14,7 +15,7 @@ public class MarkdownRenderer implements BlobRenderer {
 		if (context.getBlobIdent().isFile() 
 				&& blob.getText() != null 
 				&& context.getBlobIdent().path.endsWith(".md")) { 
-			if (context.getTokenPos() != null || context.isBlame())
+			if (context.getTokenPos() != null || context.getMode() == Mode.BLAME)
 				return new SourceViewPanel(panelId, context);
 			else
 				return new MarkdownViewPanel(panelId, context);
