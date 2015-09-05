@@ -75,7 +75,7 @@ gitplex.fileEdit = {
 			$fileEdit.outerHeight(height);
 			
 			height = $fileEdit.height()-$head.outerHeight();
-			$body.outerWidth(width).outerHeight(height);
+			$body.outerWidth(width).outerHeight(height-1);
 			
 			if ($edit.is(":visible")) {
 				$body.css("overflow", "hidden");

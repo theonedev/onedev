@@ -32,6 +32,12 @@ public abstract class BlobChange implements Serializable {
 		newBlobIdent = GitUtils.getNewBlobIdent(diffEntry, newRev);
 	}
 	
+	public BlobChange(ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent) {
+		this.type = type;
+		this.oldBlobIdent = oldBlobIdent;
+		this.newBlobIdent = newBlobIdent;
+	}
+	
 	public ChangeType getType() {
 		return type;
 	}

@@ -33,3 +33,9 @@
 .file-edit>.body>.save>.edit-save {
 	overflow: hidden;	
 }
+.file-edit>.body>.preview>div>.no-diff, .file-edit>.body>.preview>div>.text-diff {
+	border: none;
+}  
+.file-edit>.body>.preview>div>.no-diff>.head, .file-edit>.body>.preview>div>.text-diff>.head {
+	display: none;
+}  

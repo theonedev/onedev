@@ -106,7 +106,7 @@ public class BlobDiffPanel extends Panel {
 				} else if (change.getAdditions() + change.getDeletions() > Constants.MAX_SINGLE_FILE_DIFF_LINES) {
 					add(newFragment("Diff is too large to be displayed.", true));
 				} else if (change.getAdditions() + change.getDeletions() == 0) {
-					add(newFragment("File is identical if " + change.getLineProcessor().getName().toLowerCase() + ".", false));
+					add(newFragment("File is identical", false));
 				} else {
 					add(new TextDiffPanel(CONTENT_ID, repoModel, requestModel, commentModel, change, diffMode));
 				}
