@@ -27,8 +27,18 @@ gitplex.fileEdit = {
 			}
 		});
 		
+		var $submit = $(".edit-save input[type=submit]");
+		$submit.attr("disabled", "disabled");
+		var originalDocValue = cm.doc.getValue();
 		cm.on("change", function() {
-			$body.find(">form.edit").addClass("dirty");
+			var $form = $body.find(">form.edit");
+			if (cm.doc.getValue() != originalDocValue) {
+				$form.addClass("dirty");
+				$submit.removeAttr("disabled");
+			} else {
+				$form.removeClass("dirty");
+				$submit.attr("disabled", "disabled");
+			}
 		});
 		cm.focus();
 		
