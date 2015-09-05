@@ -424,7 +424,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * diffs of multiple blob changes concurrently, and this method will be 
 	 * accessed concurrently in that special case.
 	 * 
-	 * @param ident
+	 * @param blobIdent
 	 * 			ident of the blob
 	 * @return
 	 * 			blob of specified blob ident
@@ -432,50 +432,50 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * 			ObjectNotExistException if blob of specified ident can not be found in repository 
 	 * 			
 	 */
-	public Blob getBlob(BlobIdent ident) {
-		Preconditions.checkArgument(ident.revision!=null && ident.path!=null && ident.mode!=null, 
+	public Blob getBlob(BlobIdent blobIdent) {
+		Preconditions.checkArgument(blobIdent.revision!=null && blobIdent.path!=null && blobIdent.mode!=null, 
 				"Revision, path and mode of ident param should be specified");
 		
-		Blob blob = getBlobCache().get(ident);
+		Blob blob = getBlobCache().get(blobIdent);
 		if (blob == null) {
-			if (ident.id != null) {
+			if (blobIdent.id != null) {
 				try (FileRepository jgitRepo = openAsJGitRepo()) {
-					if (ident.isGitLink()) {
-						String url = getSubmodules(ident.revision).get(ident.path);
+					if (blobIdent.isGitLink()) {
+						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 						if (url == null)
-							throw new ObjectNotExistException("Unable to find submodule '" + ident.path + "' in .gitmodules");
-						blob = new Blob(ident, new Submodule(url, ident.id).toString().getBytes());
-					} else if (ident.isTree()) {
-						throw new NotFileException("Path '" + ident.path + "' is a tree");
+							throw new ObjectNotExistException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
+						blob = new Blob(blobIdent, new Submodule(url, blobIdent.id).toString().getBytes());
+					} else if (blobIdent.isTree()) {
+						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = jgitRepo.open(ObjectId.fromString(ident.id), Constants.OBJ_BLOB);
-						blob = readBlob(objectLoader, ident);
+						ObjectLoader objectLoader = jgitRepo.open(ObjectId.fromString(blobIdent.id), Constants.OBJ_BLOB);
+						blob = readBlob(objectLoader, blobIdent);
 					}
-					getBlobCache().put(ident, blob);
+					getBlobCache().put(blobIdent, blob);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else {
 				try (FileRepository jgitRepo = openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)) {
-					ObjectId commitId = getObjectId(ident.revision);
+					ObjectId commitId = getObjectId(blobIdent.revision);
 					RevTree revTree = revWalk.parseCommit(commitId).getTree();
-					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
+					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 					if (treeWalk != null) {
-						if (ident.isGitLink()) {
-							String url = getSubmodules(ident.revision).get(ident.path);
+						if (blobIdent.isGitLink()) {
+							String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 							if (url == null)
-								throw new ObjectNotExistException("Unable to find submodule '" + ident.path + "' in .gitmodules");
+								throw new ObjectNotExistException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
 							String hash = treeWalk.getObjectId(0).name();
-							blob = new Blob(ident, new Submodule(url, hash).toString().getBytes());
-						} else if (ident.isTree()) {
-							throw new NotFileException("Path '" + ident.path + "' is a tree");
+							blob = new Blob(blobIdent, new Submodule(url, hash).toString().getBytes());
+						} else if (blobIdent.isTree()) {
+							throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 						} else {
 							ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
-							blob = readBlob(objectLoader, ident);
+							blob = readBlob(objectLoader, blobIdent);
 						}
-						getBlobCache().put(ident, blob);
+						getBlobCache().put(blobIdent, blob);
 					} else {
-						throw new ObjectNotExistException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
+						throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path + "' in revision '" + blobIdent.revision + "'");
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
