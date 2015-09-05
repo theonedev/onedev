@@ -72,7 +72,7 @@ public class FileEdit implements Serializable {
 					if (name.equals(currentNewPath)) {
 						newPathFound = true;
 						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
-						entries.add(new TreeFormatterEntry(name, FileMode.REGULAR_FILE, blobId));
+						entries.add(new TreeFormatterEntry(name, treeWalk.getFileMode(0), blobId));
 					}
 				} else if (name.equals(currentNewPath)) {
 					throw new ObjectAlreadyExistException("Path already exist: " + treeWalk.getPathString());
