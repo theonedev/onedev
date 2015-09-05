@@ -471,7 +471,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	    		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
 	    			listener.onRefUpdate(editRepository, refName, newCommitId.name());
 
-	    		if (isOnBranch()) 
+	    		if (editRepository.equals(getRepository())) 
 	    			onSelect(target, committed, null);
 	    		else
 	    			setResponsePage(RepoFilePage.class, paramsOf(editRepository, committed));
@@ -879,7 +879,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
 		    			listener.onRefUpdate(editRepository, refName, newCommitId.name());
 					BlobIdent parentBlobIdent = new BlobIdent(editBranch, parentPath, FileMode.TREE.getBits());
-					if (isOnBranch())
+					if (editRepository.equals(getRepository()))
 						onSelect(target, parentBlobIdent, null);
 					else
 						setResponsePage(RepoFilePage.class, paramsOf(editRepository, parentBlobIdent));

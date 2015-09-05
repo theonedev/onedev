@@ -485,7 +485,25 @@ pmease.commons = {
 				
 				$component.closest("form.ays-inited").not($component).trigger("checkform.areYouSure");
 			});
+
 			
+			if (Wicket && Wicket.Ajax) {
+				var processAjaxResponse = Wicket.Ajax.Call.prototype.processAjaxResponse;
+				Wicket.Ajax.Call.prototype.processAjaxResponse = function (data, textStatus, jqXHR, context) {
+					if (jqXHR.readyState === 4) {
+						var redirectUrl;
+						try {
+							redirectUrl = jqXHR.getResponseHeader('Ajax-Location');
+						} catch (ignore) { // might happen in older mozilla
+						}
+
+						if (typeof(redirectUrl) !== "undefined" && redirectUrl !== null && redirectUrl !== "") {
+							$("form.leave-confirm").removeClass("dirty");
+						}
+					}
+					processAjaxResponse.call(this, data, textStatus, jqXHR, context);					
+				}
+			}
 		},
 		confirmLeave: function(containerId) {
 			var $container;
