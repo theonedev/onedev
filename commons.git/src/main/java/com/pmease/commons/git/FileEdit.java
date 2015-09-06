@@ -40,8 +40,6 @@ public class FileEdit implements Serializable {
 	
 	private final PathAndContent newFile;
 	
-	private Integer modeBits = FileMode.TREE.getBits();
-	
 	public FileEdit(@Nullable String oldPath, @Nullable PathAndContent newFile) {
 		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.newFile = newFile;
@@ -59,28 +57,22 @@ public class FileEdit implements Serializable {
 	}
 
 	private ObjectId insertTree(RevTree revTree, TreeWalk treeWalk, ObjectInserter inserter, 
-			@Nullable String currentOldPath, @Nullable String currentNewPath) {
+			@Nullable String currentOldPath, @Nullable String currentNewPath, FileMode newFileMode) {
         try {
-    		boolean oldPathFound = false;
     		boolean newPathFound = false;
     		
     		List<TreeFormatterEntry> entries = new ArrayList<>();
     		while (treeWalk.next()) {
 				String name = treeWalk.getNameString();
 				if (name.equals(currentOldPath)) {
-					modeBits = treeWalk.getFileMode(0).getBits();
-					if ((modeBits & FileMode.TYPE_FILE) == 0)
-						throw new NotFileException("Path does not represent a file: " + treeWalk.getPathString());
-					oldPathFound = true;
 					if (name.equals(currentNewPath)) {
 						newPathFound = true;
 						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
-						entries.add(new TreeFormatterEntry(name, FileMode.fromBits(modeBits), blobId));
+						entries.add(new TreeFormatterEntry(name, newFileMode, blobId));
 					}
 				} else if (name.equals(currentNewPath)) {
 					throw new ObjectAlreadyExistException("Path already exist: " + treeWalk.getPathString());
 				} else if (currentOldPath != null && currentOldPath.startsWith(name + "/")) {
-					oldPathFound = true;
 					TreeWalk childTreeWalk = TreeWalk.forPath(treeWalk.getObjectReader(), treeWalk.getPathString(), revTree);
 					Preconditions.checkNotNull(childTreeWalk);
 					childTreeWalk.enterSubtree();
@@ -93,7 +85,7 @@ public class FileEdit implements Serializable {
 						childNewPath = null;
 					}
 					ObjectId childTreeId = insertTree(revTree, childTreeWalk, inserter, 
-							childOldPath, childNewPath);
+							childOldPath, childNewPath, newFileMode);
 					if (childTreeId != null) 
 						entries.add(new TreeFormatterEntry(name, FileMode.TREE, childTreeId));
 				} else if (currentNewPath != null && currentNewPath.startsWith(name + "/")) {
@@ -105,16 +97,13 @@ public class FileEdit implements Serializable {
 					Preconditions.checkNotNull(childTreeWalk);
 					childTreeWalk.enterSubtree();
 					String childNewPath = currentNewPath.substring(name.length()+1);
-					ObjectId childTreeId = insertTree(revTree, childTreeWalk, inserter, null, childNewPath);
+					ObjectId childTreeId = insertTree(revTree, childTreeWalk, inserter, null, childNewPath, newFileMode);
 					if (childTreeId != null)  
 						entries.add(new TreeFormatterEntry(name, treeWalk.getFileMode(0), childTreeId));
 				} else {
 					entries.add(new TreeFormatterEntry(name, treeWalk.getFileMode(0), treeWalk.getObjectId(0)));
 				}
 			}
-			
-			if (currentOldPath != null && !oldPathFound) 
-				throw new ObjectNotExistException("Path not exist: " + oldPath);
 			
 			if (currentNewPath != null && !newPathFound) {
 				List<String> splitted = Splitter.on('/').splitToList(currentNewPath);
@@ -127,7 +116,7 @@ public class FileEdit implements Serializable {
 					if (childId == null) {
 						childName = splitted.get(i);
 						childId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
-						childMode = FileMode.fromBits(modeBits);
+						childMode = newFileMode;
 					} else {
 						TreeFormatter childFormatter = new TreeFormatter();
 						childFormatter.append(childName, childMode, childId);
@@ -199,8 +188,25 @@ public class FileEdit implements Serializable {
 			RevTree revTree = revWalk.parseCommit(parentCommitId).getTree();
 			treeWalk.addTree(revTree);
 
-	        ObjectId treeId = insertTree(revTree, treeWalk, inserter, oldPath, 
-	        		newFile!=null?newFile.getPath():null);
+			FileMode newFileMode;
+			if (oldPath != null) {
+				TreeWalk oldPathTreeWalk = TreeWalk.forPath(repo, oldPath, revTree);
+				if (oldPathTreeWalk == null)
+					throw new ObjectNotExistException("Path not exist: " + oldPath);
+				newFileMode = oldPathTreeWalk.getFileMode(0);
+				
+				if ((newFileMode.getBits() & FileMode.TYPE_FILE) == 0)
+					throw new NotFileException("Path does not represent a file: " + oldPath);
+			} else {
+				newFileMode = FileMode.REGULAR_FILE;
+			}
+
+			String newPath;
+			if (newFile != null)
+				newPath = GitUtils.normalizePath(newFile.getPath());
+			else
+				newPath = null;
+	        ObjectId treeId = insertTree(revTree, treeWalk, inserter, oldPath, newPath, newFileMode);
 	        
 	        if (treeId != null)
 	        	commit.setTreeId(treeId);
