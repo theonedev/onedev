@@ -134,7 +134,7 @@ public abstract class EditSavePanel extends Panel {
 		if (target != null) {
 			replace(changedContainer);
 			target.add(changedContainer);
-			String script = String.format("$('#%s .edit-save input[type=submit]').val('Commit and overwrite change');", 
+			String script = String.format("$('#%s .edit-save input[type=submit]').val('Commit and overwrite');", 
 					getMarkupId());
 			target.appendJavaScript(script);
 		} else {

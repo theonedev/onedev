@@ -40,6 +40,8 @@ public class FileEdit implements Serializable {
 	
 	private final PathAndContent newFile;
 	
+	private Integer modeBits = FileMode.TREE.getBits();
+	
 	public FileEdit(@Nullable String oldPath, @Nullable PathAndContent newFile) {
 		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.newFile = newFile;
@@ -66,13 +68,14 @@ public class FileEdit implements Serializable {
     		while (treeWalk.next()) {
 				String name = treeWalk.getNameString();
 				if (name.equals(currentOldPath)) {
-					if ((treeWalk.getFileMode(0).getBits() & FileMode.TYPE_FILE) == 0)
+					modeBits = treeWalk.getFileMode(0).getBits();
+					if ((modeBits & FileMode.TYPE_FILE) == 0)
 						throw new NotFileException("Path does not represent a file: " + treeWalk.getPathString());
 					oldPathFound = true;
 					if (name.equals(currentNewPath)) {
 						newPathFound = true;
 						ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
-						entries.add(new TreeFormatterEntry(name, treeWalk.getFileMode(0), blobId));
+						entries.add(new TreeFormatterEntry(name, FileMode.fromBits(modeBits), blobId));
 					}
 				} else if (name.equals(currentNewPath)) {
 					throw new ObjectAlreadyExistException("Path already exist: " + treeWalk.getPathString());
@@ -124,7 +127,7 @@ public class FileEdit implements Serializable {
 					if (childId == null) {
 						childName = splitted.get(i);
 						childId = inserter.insert(Constants.OBJ_BLOB, newFile.getContent());
-						childMode = FileMode.REGULAR_FILE;
+						childMode = FileMode.fromBits(modeBits);
 					} else {
 						TreeFormatter childFormatter = new TreeFormatter();
 						childFormatter.append(childName, childMode, childId);
