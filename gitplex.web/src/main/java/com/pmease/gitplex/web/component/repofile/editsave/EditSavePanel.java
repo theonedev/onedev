@@ -41,7 +41,6 @@ import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
-import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -53,6 +52,8 @@ import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
 
+import jersey.repackaged.com.google.common.base.Objects;
+
 @SuppressWarnings("serial")
 public abstract class EditSavePanel extends Panel {
 
@@ -60,9 +61,7 @@ public abstract class EditSavePanel extends Panel {
 	
 	private final String refName;
 	
-	private final String oldPath;
-	
-	private final PathAndContent newFile;
+	private FileEdit fileEdit;
 	
 	private final CancelListener cancelListener;
 	
@@ -83,19 +82,20 @@ public abstract class EditSavePanel extends Panel {
 	
 		this.repoModel = repoModel;
 		this.refName = refName;
-		this.oldPath = oldPath;
-		this.newFile = newFile;
+		this.fileEdit = new FileEdit(oldPath, newFile);
 		this.cancelListener = cancelListener;
 		this.prevCommitId = prevCommitId;
 	}
 
 	private String getDefaultCommitMessage() {
+		String oldPath = fileEdit.getOldPath();
 		String oldName;
 		if (oldPath != null && oldPath.contains("/"))
 			oldName = StringUtils.substringAfterLast(oldPath, "/");
 		else
 			oldName = oldPath;
 		
+		PathAndContent newFile = fileEdit.getNewFile();
 		if (newFile == null) { 
 			return "Delete " + oldName;
 		} else {
@@ -134,6 +134,9 @@ public abstract class EditSavePanel extends Panel {
 		if (target != null) {
 			replace(changedContainer);
 			target.add(changedContainer);
+			String script = String.format("$('#%s .edit-save input[type=submit]').val('Commit and overwrite change');", 
+					getMarkupId());
+			target.appendJavaScript(script);
 		} else {
 			add(changedContainer);		
 		}
@@ -199,11 +202,20 @@ public abstract class EditSavePanel extends Panel {
 		form.add(new AjaxSubmitLink("save") {
 
 			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+
+				if (fileEdit.getOldPath() != null && fileEdit.getNewFile() != null)
+					tag.put("disabled", "disabled");
+			}
+
+			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
 				change = null;
 				
+				PathAndContent newFile = fileEdit.getNewFile();
 				if (newFile != null && StringUtils.isBlank(newFile.getPath())) {
 					EditSavePanel.this.error("Please specify file name.");
 					target.add(feedback);
@@ -216,11 +228,10 @@ public abstract class EditSavePanel extends Panel {
 							commitMessage += "\n\n" + detailCommitMessage;
 						User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
 
-						FileEdit edit = new FileEdit(oldPath, newFile);
 						ObjectId newCommitId = null;
 						while(newCommitId == null) {
 							try {
-								newCommitId = edit.commit(jgitRepo, refName, 
+								newCommitId = fileEdit.commit(jgitRepo, refName, 
 										prevCommitId, prevCommitId, user.asPerson(), commitMessage);
 							} catch (ObsoleteCommitException e) {
 								currentCommitId = e.getOldCommitId();
@@ -229,8 +240,9 @@ public abstract class EditSavePanel extends Panel {
 									RevCommit currentCommit = revWalk.parseCommit(currentCommitId);
 									prevCommitId = currentCommitId;
 
-									if (edit.getOldPath() != null) {
-										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getOldPath(), 
+									String oldPath = fileEdit.getOldPath();
+									if (oldPath != null) {
+										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, oldPath, 
 												prevCommit.getTree().getId(), currentCommit.getTree().getId());
 										if (treeWalk != null) {
 											if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
@@ -238,8 +250,8 @@ public abstract class EditSavePanel extends Panel {
 												// mark changed if original file exists and content or mode has been modified
 												// by others
 												if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-													if (edit.getNewFile() != null) {
-														edit = new FileEdit(null, edit.getNewFile());
+													if (newFile != null) {
+														fileEdit = new FileEdit(null, newFile);
 														change = getChange(treeWalk, prevCommit, currentCommit);
 														break;
 													} else {
@@ -253,8 +265,8 @@ public abstract class EditSavePanel extends Panel {
 											}
 										}
 									}
-									if (edit.getNewFile() != null && !edit.getNewFile().getPath().equals(edit.getOldPath())) { 
-										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, edit.getNewFile().getPath(), 
+									if (newFile != null && !newFile.getPath().equals(oldPath)) { 
+										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, newFile.getPath(), 
 												prevCommit.getTree().getId(), currentCommit.getTree().getId());
 										if (treeWalk != null) {
 											if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
@@ -289,7 +301,7 @@ public abstract class EditSavePanel extends Panel {
 				}
 			}
 			
-		}.add(new DirtyIgnoreBehavior("$('form.leave-confirm')")));
+		});
 		
 		form.add(new AjaxLink<Void>("cancel") {
 
@@ -352,14 +364,18 @@ public abstract class EditSavePanel extends Panel {
 				new JavaScriptResourceReference(EditSavePanel.class, "edit-save.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(EditSavePanel.class, "edit-save.css")));
-		response.render(OnDomReadyHeaderItem.forScript(String.format("gitplex.editSave.init('%s');", getMarkupId())));
+		
+		String script = String.format("gitplex.editsave.init('%s');", getMarkupId());
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);
 	
 	public void onNewPathChange(AjaxRequestTarget target) {
-		target.appendJavaScript(String.format("gitplex.editSave.updateDefaultCommitMessage('%s', '%s');", 
-				getMarkupId(), StringEscapeUtils.escapeEcmaScript(getDefaultCommitMessage())));
+		String script = String.format("gitplex.editsave.onPathChange('%s', '%s', %b);", 
+				getMarkupId(), StringEscapeUtils.escapeEcmaScript(getDefaultCommitMessage()), 
+				Objects.equal(fileEdit.getNewFile().getPath(), fileEdit.getOldPath()));
+		target.appendJavaScript(script);
 	}
 	
 	@Override

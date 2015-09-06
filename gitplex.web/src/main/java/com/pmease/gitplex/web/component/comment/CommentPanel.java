@@ -32,7 +32,6 @@ import org.apache.wicket.util.time.Duration;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
-import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
@@ -42,8 +41,8 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.comment.event.CommentResized;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
+import com.pmease.gitplex.web.component.comment.event.CommentResized;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -289,7 +288,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						target.add(form);
 					}
 					
-				}.add(new DirtyIgnoreBehavior()));
+				});
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
@@ -301,7 +300,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
-				}.add(new DirtyIgnoreBehavior()));
+				});
 
 				CommentPanel.this.replace(row);
 				target.add(row);

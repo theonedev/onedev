@@ -37,7 +37,6 @@ import org.apache.wicket.util.time.Duration;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
-import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
@@ -342,7 +341,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				target.add(form);
 			}
 
-		}.add(new DirtyIgnoreBehavior()));
+		});
 		
 		add(newBasicInfoContainer());
 		add(newIntegrationStrategyContainer());

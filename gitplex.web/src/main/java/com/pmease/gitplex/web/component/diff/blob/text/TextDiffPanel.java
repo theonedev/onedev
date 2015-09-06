@@ -47,7 +47,6 @@ import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -242,7 +241,7 @@ public class TextDiffPanel extends Panel {
 						target.appendJavaScript(script);
 					}
 					
-				}.add(new DirtyIgnoreBehavior()));
+				});
 				
 				newCommentForm.add(new AjaxSubmitLink("save") {
 
@@ -289,7 +288,7 @@ public class TextDiffPanel extends Panel {
 						target.add(commentRow);
 					}
 
-				}.add(new DirtyIgnoreBehavior()));
+				});
 				
 				newCommentForms.add(newCommentForm);
 				

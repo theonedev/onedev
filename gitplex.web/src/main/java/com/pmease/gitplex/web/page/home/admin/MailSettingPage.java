@@ -1,9 +1,11 @@
 package com.pmease.gitplex.web.page.home.admin;
 
+import java.io.Serializable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.SubmitLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.behavior.testform.TestFormBehavior;
 import com.pmease.commons.wicket.behavior.testform.TestResult;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
@@ -25,43 +28,39 @@ public class MailSettingPage extends AdministrationPage {
 	
 	private MailSetting mailSetting;
 	
+	private BeanEditor<Serializable> editor;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		setOutputMarkupId(true);
-		
 		mailSetting = GitPlex.getInstance(ConfigManager.class).getMailSetting();
 		if (mailSetting == null)
 			mailSetting = new MailSetting();
-
-		Form<?> form = new Form<Void>("form") {
+		
+		Form<?> form = new Form<Void>("form");
+		form.add(editor = BeanContext.editBean("editor", mailSetting));
+				
+		// use ajax in order not to clean form dirty state in case there are field errors 
+		form.add(new AjaxButton("update") {
 
 			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
 				GitPlex.getInstance(ConfigManager.class).saveMailSetting(mailSetting);
+				getSession().success("Mail setting has been updated");
+				
+				setResponsePage(MailSettingPage.class);
 			}
 
 			@Override
-			protected void onError() {
-				super.onError();
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				
+				target.add(editor);
 				getSession().error("Fix errors below");
 			}
-			
-		};
-		form.setOutputMarkupId(true);
-		form.add(BeanContext.editBean("editor", mailSetting));
-				
-		form.add(new SubmitLink("update") {
 
-			@Override
-			public void onSubmit() {
-				super.onSubmit();
-				getSession().success("Mail setting has been updated");
-			}
-			
 		});
 		form.add(new AjaxSubmitLink("test") {
 
@@ -95,14 +94,14 @@ public class MailSettingPage extends AdministrationPage {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				target.add(form);
+				target.add(editor);
 				target.focusComponent(null);
 				testBehavior.requestTest(target);
 			}
 
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				target.add(form);
+				target.add(editor);
 			}
 
 		});

@@ -27,17 +27,15 @@ gitplex.fileEdit = {
 			}
 		});
 		
-		var $submit = $(".edit-save input[type=submit]");
-		$submit.attr("disabled", "disabled");
 		var originalDocValue = cm.doc.getValue();
 		cm.on("change", function() {
 			var $form = $body.find(">form.edit");
 			if (cm.doc.getValue() != originalDocValue) {
 				$form.addClass("dirty");
-				$submit.removeAttr("disabled");
+				$fileEdit.data("contentChanged", true);
 			} else {
 				$form.removeClass("dirty");
-				$submit.attr("disabled", "disabled");
+				$fileEdit.data("contentChanged", false);
 			}
 		});
 		cm.focus();
@@ -135,14 +133,17 @@ gitplex.fileEdit = {
     		else
     			$(".hideable").hide();
     	}
-    	var $body = $tab.closest(".file-edit").find(">.body");
+    	var $fileEdit = $tab.closest(".file-edit");
+    	var $body = $fileEdit.find(">.body");
 		$body.find(">div").hide();
-		if ($tab.hasClass("edit")) 
+		if ($tab.hasClass("edit")) {
 			$body.find(">div.edit").show().find(">.CodeMirror")[0].CodeMirror.focus();
-		else if ($tab.hasClass("preview"))
+		} else if ($tab.hasClass("preview")) {
 			$body.find(">div.preview").show();
-		else
+		} else {
 			$body.find(">div.save").show();
+			$body.find(">div.save>.edit-save").trigger("contentEdit", [$fileEdit.data("contentChanged")]);
+		}
 		$(window).resize();
 	}
 }

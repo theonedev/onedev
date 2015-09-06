@@ -61,7 +61,6 @@ import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.behavior.DirtyIgnoreBehavior;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
@@ -80,8 +79,8 @@ import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
-import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
@@ -352,7 +351,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							target.appendJavaScript(script);
 						}
 						
-					}.add(new DirtyIgnoreBehavior()));
+					});
 					
 					newCommentForm.add(new AjaxSubmitLink("save") {
 	
@@ -394,7 +393,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							target.appendJavaScript(script);
 						}
 	
-					}.add(new DirtyIgnoreBehavior()));
+					});
 					
 					newCommentForms.add(newCommentForm);
 					

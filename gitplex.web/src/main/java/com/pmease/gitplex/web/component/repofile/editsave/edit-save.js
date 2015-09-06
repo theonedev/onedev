@@ -1,4 +1,4 @@
-gitplex.editSave = {
+gitplex.editsave = {
 	init: function(containerId) {
 		var $editSave = $("#" + containerId + ">.edit-save");
 		$editSave.scroll(function() {
@@ -25,8 +25,26 @@ gitplex.editSave = {
 				$editSave.scrollTop(scrollPos.top);
 			}
 		});
+		
+		$editSave.on("contentEdit", function(event, contentChanged) {
+			event.stopPropagation();
+			$editSave.data("contentChanged", contentChanged);
+			gitplex.editsave.updateSubmitBtnState($editSave);
+		});
+	}, 
+	
+	updateSubmitBtnState: function($editSave) {
+		var $submitBtn = $editSave.find("input[type=submit]");
+		if ($editSave.data("contentChanged") === true || $editSave.data("pathChanged") === true)
+			$submitBtn.removeAttr("disabled");
+		else
+			$submitBtn.attr("disabled", "disabled");
 	},
-	updateDefaultCommitMessage: function(containerId, placeholder) {
-		$("#" + containerId + " .summary-commit-message").attr("placeholder", placeholder);
+	
+	onPathChange: function(containerId, defaultCommitMessage, equalsOldPath) {
+		var $editSave = $("#" + containerId + ">.edit-save");
+		$editSave.find(".summary-commit-message").attr("placeholder", defaultCommitMessage);
+		$editSave.data("pathChanged", !equalsOldPath);
+		gitplex.editsave.updateSubmitBtnState($editSave);
 	}
 }
