@@ -297,8 +297,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * @return
 	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise
 	 */
-	public static boolean isValid(Git git) {
-        File updateHook = new File(git.repoDir(), "hooks/update");
+	public boolean isValid() {
+        File updateHook = new File(git().repoDir(), "hooks/update");
         if (!updateHook.exists()) 
         	return false;
         

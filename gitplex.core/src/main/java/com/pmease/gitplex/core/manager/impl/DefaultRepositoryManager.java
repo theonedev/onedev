@@ -236,7 +236,7 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
             git.init(true);
         }
         
-        if (!Repository.isValid(git)) {
+        if (!repository.isValid()) {
             File hooksDir = new File(repository.git().repoDir(), "hooks");
 
             File gitUpdateHookFile = new File(hooksDir, "update");

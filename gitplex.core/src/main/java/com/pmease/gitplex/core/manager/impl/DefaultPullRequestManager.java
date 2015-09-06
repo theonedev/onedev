@@ -753,27 +753,44 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		for (PullRequest request: dao.query(criteria)) {
-			if (request.getSource() == null) {
-				discard(request, "Source branch is deleted.");
-			} else {
-				String sourceHead = request.getSource().getHead(false);
-				if (sourceHead == null) 
-					discard(request, "Source branch is deleted.");
-				else if (!sourceHead.equals(request.getLatestUpdate().getHeadCommitHash()))
-					onSourceBranchUpdate(request, true);
+			Repository sourceRepo = request.getSourceRepo();
+			if (sourceRepo == null) {
+				discard(request, "Source repository is deleted.");
+			} else if (sourceRepo.isValid()) {
+				String latestUpdateHead = request.getLatestUpdate().getHeadCommitHash();
+				
+				// only modifies pull request status if source repository is the repository we
+				// previously worked with. This avoids disaster of closing all pull requests
+				// if repository storage points to a different location by mistake
+				if (sourceRepo.getObjectId(latestUpdateHead, false) != null) { 
+					String sourceHead = request.getSource().getHead(false);
+					if (sourceHead == null) 
+						discard(request, "Source branch is deleted.");
+					else if (!sourceHead.equals(latestUpdateHead))
+						onSourceBranchUpdate(request, true);
+				}
 			}
-			String targetHead = request.getTarget().getHead(false);
-			if (targetHead == null)
-				discard(request, "Target branch is deleted.");
-			else 
-				onTargetBranchUpdate(request);
+
+			Repository targetRepo = request.getTargetRepo();
+			if (targetRepo.isValid()) {
+				String latestUpdateHead = request.getLatestUpdate().getHeadCommitHash();
+				
+				// only modifies pull request status if target repository is the repository we
+				// previously worked with. This avoids disaster of closing all pull requests
+				// if repository storage points to a different location by mistake
+				if (targetRepo.getObjectId(latestUpdateHead, false) != null) {
+					String targetHead = request.getTarget().getHead(false);
+					if (targetHead == null)
+						discard(request, "Target branch is deleted.");
+					else 
+						onTargetBranchUpdate(request);
+				}
+			}
 		}
 	}
 
 	@Override
 	public void systemStarting() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
