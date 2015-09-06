@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -23,6 +24,7 @@ public class CommentReply extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
+	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
 

@@ -114,8 +114,6 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
     	
         dao.remove(repository);
 
-        FileUtils.deleteDir(storageManager.getRepoDir(repository));
-        
 		dao.afterCommit(new Runnable() {
 
 			@Override
@@ -126,6 +124,7 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
 				} finally {
 					idLock.writeLock().unlock();
 				}
+		        FileUtils.deleteDir(storageManager.getRepoDir(repository));
 			}
 			
 		});

@@ -18,6 +18,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
@@ -140,6 +141,7 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable=false)
 	private String title;
 	
+	@Lob
 	@Column(length=65535)
 	private String description;
 	
