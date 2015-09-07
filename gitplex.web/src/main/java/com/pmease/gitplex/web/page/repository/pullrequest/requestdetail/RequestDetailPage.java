@@ -275,12 +275,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				}
 			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-//				setVisible(getPullRequest().getStatus() != Status.DISCARDED);
-			}
-			
 		};
 		summaryContainer.setOutputMarkupPlaceholderTag(true);
 		add(summaryContainer);
