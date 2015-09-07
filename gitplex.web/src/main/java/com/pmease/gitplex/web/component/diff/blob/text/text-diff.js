@@ -1,11 +1,81 @@
 gitplex.textdiff = {
-	init: function(containerId, addCommentCallback) {
+	init: function(containerId, addCommentCallback, symbolQuery) {
 		var $container = $("#" + containerId);
 		$container[0].addComment = addCommentCallback;
 		$container.find(">.text-diff>.comment").each(function() {
 			var oldLineNo = $(this).data("oldlineno");
 			var newLineNo = $(this).data("newlineno");
 			gitplex.textdiff.placeComment($container, oldLineNo, newLineNo, $(this));
+		});
+		
+		var tooltip;
+		var prepareToHide = function() {
+			if (tooltip) {
+				if (tooltip.hideTimer) 
+					clearTimeout(tooltip.hideTimer);
+				tooltip.hideTimer = setTimeout(function(){
+					if (tooltip) {
+						$(tooltip).remove();
+						tooltip = null;
+					}
+				}, 200);
+			}
+		};
+		var cancelHide = function() {
+			if (tooltip && tooltip.hideTimer) {
+				clearTimeout(tooltip.hideTimer);
+				tooltip.hideTimer = null;				
+			} 
+		};
+		var showTimer;
+		var cancelShow = function() {
+			if (showTimer) {
+				clearTimeout(showTimer);
+				showTimer = null;
+			}
+		}
+		
+		var $symbols = $container.find(".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta"); 
+		$symbols.mouseOver(function() {
+			if (!gitplex.mouseState.pressed && gitplex.mouseState.moved && !showTimer) {
+				var $symbol = $(this);
+				showTimer = setTimeout(function() {
+					if (!tooltip) {  
+						tooltip = document.createElement("div");
+						var $tooltip = $(tooltip);
+						$tooltip.html("<img src=" + ajaxIndicatorUrl + "></img>");
+						$tooltip.attr("id", containerId + "-symbolstooltip");
+						symbolQuery($symbol.text());
+						
+						$tooltip.addClass("diff-tokentooltip");
+						
+						document.body.appendChild(tooltip);
+						
+						tooltip.alignment = {x: 0, y:0, offset:2, showIndicator: false, target: {element: node, x: 0, y: 100}};
+						$tooltip.align();
+						
+						$tooltip.mouseover(function() {
+							cancelHide();
+						});
+						$tooltip.mouseout(function(event) {
+							if (event.pageX<$tooltip.offset().left+5 || event.pageX>$tooltip.offset().left+$tooltip.width()-5 
+									|| event.pageY<$tooltip.offset().top+5 || event.pageY>$tooltip.offset().top+$tooltip.height()-5) {
+								prepareToHide();
+							}
+						});
+						cancelHide();
+					}
+					state.showTimeout = null;
+				}, 500);				
+			}
+		});
+		$symbols.on("mouseout mousedown mouseup", function() {
+			prepareToHide();
+			cancelShow();
+		});
+		$symbols.on("mousemove", function() {
+			if (tooltip)
+				cancelHide();
 		});
 	},
 	removeComment: function(commentId) {

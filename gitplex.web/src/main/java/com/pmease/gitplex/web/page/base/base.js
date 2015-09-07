@@ -20,9 +20,8 @@ var gitplex = {
 	}, 
 	
 	expandable: {
-		mouseDown: false,
 		check: function() {
-			if (gitplex.expandable.getScrollTop && !gitplex.expandable.mouseDown && $(".CodeMirror-fullscreen").length == 0) {
+			if (gitplex.expandable.getScrollTop && !gitplex.mouseState.pressed && $(".CodeMirror-fullscreen").length == 0) {
 				var scrollTop = gitplex.expandable.getScrollTop();
 				var $hideable = $(".hideable");
 				if ($hideable.is(":visible")) {
@@ -45,17 +44,28 @@ var gitplex = {
 			}
 			setTimeout(gitplex.expandable.check, 100);
 		}
+	},
+	
+	mouseState: {
+		pressed: false, 
+		moved: false
 	}
 };
 
 $(document).ready(function() {
 	$(window).load(function() {
 		$(document).mousedown(function() { 
-			gitplex.expandable.mouseDown = true;
+			gitplex.mouseState.pressed = true;
 		});
 		$(document).mouseup(function() {
-			gitplex.expandable.mouseDown = false;
-		});		
+			gitplex.mouseState.pressed = false;
+		});	
+		$(document).mouseMove(function() {
+			gitplex.mouseState.moved = true;
+		});
+		$(document).scroll(function() {
+			gitplex.mouseState.moved = false;
+		});
 		gitplex.expandable.check();
 	});
 });
