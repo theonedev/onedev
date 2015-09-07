@@ -206,18 +206,23 @@ public abstract class WebSocketRenderBehavior extends WebSocketBehavior {
 			IWebSocketConnection connection = entry.getKey();
 			if (connection != null && connection.isOpen()) {
 				ConnectionData data = entry.getValue();
-				if ((pageId == null || !pageId.equals(data.getPageId())) && data.getTraits().contains(trait)) {
-					try {
-						connection.sendMessage(message);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+				if ((pageId == null || !pageId.equals(data.getPageId()))) {
+					for (WebSocketTrait each: data.getTraits()) {
+						if (trait.is(each)) {
+							try {
+								connection.sendMessage(message);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+							break;
+						}
 					}
 				}
 			} else {
 				it.remove();
 			}
 		}
-		
+
 		recentSentMessages.put(new RenderData(trait, pageId), new Date());
 	}
 	
