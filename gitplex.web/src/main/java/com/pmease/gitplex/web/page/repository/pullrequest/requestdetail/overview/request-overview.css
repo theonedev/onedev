@@ -139,7 +139,6 @@
 	border-bottom: 1px dotted #BBB; 
 	margin-bottom: 16px; 
 	padding-bottom: 16px; 
-	font-size: 13px; 
 	color: #666;
 }
 #request-detail .info>div>div:last-child {
@@ -170,15 +169,14 @@
 	width: 20px; 
 	height: 20px;
 }
-
+#request-detail .info .branch {
+	font-weight: bold;
+}
 #request-detail .info .basic .submitter, #request-detail .info .basic .target {
 	margin-bottom: 4px;
 }
 #request-detail .info .basic span, #request-detail .info .basic a {
 	white-space: nowrap;
-}
-#request-detail .info .basic .source>a {
-	margin-left: 4px;
 }
 
 #request-detail .info .reviewers ul {
