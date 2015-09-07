@@ -154,9 +154,10 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		Preconditions.checkState(!request.isOpen() && request.getSourceRepo() != null);
 
 		if (request.getSource().getHead(false) == null) {
+			String latestCommitHash = request.getLatestUpdate().getHeadCommitHash();
 			request.getSourceRepo().git().createBranch(
-					request.getSourceBranch(), 
-					request.getLatestUpdate().getHeadCommitHash());
+					request.getSourceBranch(), latestCommitHash);
+			request.getSourceRepo().cacheObjectId(request.getSourceBranch(), ObjectId.fromString(latestCommitHash));
 		}
 	}
 

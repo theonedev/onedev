@@ -403,6 +403,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			public void onClick() {
 				GitPlex.getInstance(PullRequestManager.class).restoreSourceBranch(requestModel.getObject());
+				setResponsePage(RequestOverviewPage.class, paramsOf(getPullRequest()));
 			}
 			
 		});

@@ -39,6 +39,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
@@ -208,27 +209,28 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-			AjaxRequestTarget target = pullRequestChanged.getTarget();
-			List<CommentReply> replies = repliesModel.getObject();
-			Date lastReplyDate;
-			if (repliesView.size() != 0) {
-				Component lastReplyRow = repliesView.get(repliesView.size()-1);
-				lastReplyDate = ((CommentReply)lastReplyRow.getDefaultModelObject()).getDate();
-			} else {
-				lastReplyDate = getComment().getDate();
-			}
-			for (CommentReply reply: replies) {
-				if (reply.getDate().after(lastReplyDate)) {
-					Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
-					repliesView.add(newReplyRow);
-					String script = String.format("$('#%s>.comment>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
-							getMarkupId(), newReplyRow.getMarkupId());
-					target.prependJavaScript(script);
-					target.add(newReplyRow);
-					send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
+			if (pullRequestChanged.getEvent() == PullRequest.Event.COMMENT_REPLIED) {
+				AjaxRequestTarget target = pullRequestChanged.getTarget();
+				List<CommentReply> replies = repliesModel.getObject();
+				Date lastReplyDate;
+				if (repliesView.size() != 0) {
+					Component lastReplyRow = repliesView.get(repliesView.size()-1);
+					lastReplyDate = ((CommentReply)lastReplyRow.getDefaultModelObject()).getDate();
+				} else {
+					lastReplyDate = getComment().getDate();
+				}
+				for (CommentReply reply: replies) {
+					if (reply.getDate().after(lastReplyDate)) {
+						Component newReplyRow = newReplyRow(repliesView.newChildId(), reply); 
+						repliesView.add(newReplyRow);
+						String script = String.format("$('#%s>.comment>.replies>table>tbody').append(\"<tr id='%s' class='reply'></tr>\");", 
+								getMarkupId(), newReplyRow.getMarkupId());
+						target.prependJavaScript(script);
+						target.add(newReplyRow);
+						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
+					}
 				}
 			}
-			
 		}
 	}
 
