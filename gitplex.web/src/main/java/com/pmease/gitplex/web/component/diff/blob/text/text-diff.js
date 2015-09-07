@@ -1,5 +1,5 @@
 gitplex.textdiff = {
-	init: function(containerId, addCommentCallback, symbolQuery) {
+	init: function(containerId, addCommentCallback, symbolQueryId, oldRev, newRev, ajaxIndicatorUrl) {
 		var $container = $("#" + containerId);
 		$container[0].addComment = addCommentCallback;
 		$container.find(">.text-diff>.comment").each(function() {
@@ -36,23 +36,23 @@ gitplex.textdiff = {
 		}
 		
 		var $symbols = $container.find(".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta"); 
-		$symbols.mouseOver(function() {
+		$symbols.mouseover(function() {
 			if (!gitplex.mouseState.pressed && gitplex.mouseState.moved && !showTimer) {
 				var $symbol = $(this);
 				showTimer = setTimeout(function() {
 					if (!tooltip) {  
-						tooltip = document.createElement("div");
-						var $tooltip = $(tooltip);
-						$tooltip.html("<img src=" + ajaxIndicatorUrl + "></img>");
-						$tooltip.attr("id", containerId + "-symbolstooltip");
-						symbolQuery($symbol.text());
-						
-						$tooltip.addClass("diff-tokentooltip");
-						
-						document.body.appendChild(tooltip);
-						
-						tooltip.alignment = {x: 0, y:0, offset:2, showIndicator: false, target: {element: node, x: 0, y: 100}};
-						$tooltip.align();
+						var revision;
+						if ($symbol.hasClass("delete")) {
+							revision = oldRev;
+						} else {
+							var $td = $symbol.closest("td");
+							if ($td.hasClass("old") && !$td.hasClass("new"))
+								revision = oldRev;
+							else
+								revision = newRev;
+						}
+						var $tooltip = document.getElementById(symbolQueryId).query(revision, $symbol);
+						tooltip = $tooltip[0];
 						
 						$tooltip.mouseover(function() {
 							cancelHide();
@@ -65,7 +65,7 @@ gitplex.textdiff = {
 						});
 						cancelHide();
 					}
-					state.showTimeout = null;
+					showTimer = null;
 				}, 500);				
 			}
 		});

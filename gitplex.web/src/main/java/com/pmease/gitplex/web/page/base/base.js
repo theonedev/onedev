@@ -60,7 +60,7 @@ $(document).ready(function() {
 		$(document).mouseup(function() {
 			gitplex.mouseState.pressed = false;
 		});	
-		$(document).mouseMove(function() {
+		$(document).mousemove(function() {
 			gitplex.mouseState.moved = true;
 		});
 		$(document).scroll(function() {

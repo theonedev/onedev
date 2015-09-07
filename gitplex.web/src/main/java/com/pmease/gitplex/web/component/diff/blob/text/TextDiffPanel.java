@@ -35,6 +35,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.git.BlobChange;
@@ -42,7 +44,6 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
-import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
@@ -55,9 +56,7 @@ import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.InlineCommentPanel;
@@ -66,6 +65,7 @@ import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
+import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -129,16 +129,6 @@ public class TextDiffPanel extends Panel {
 		}
 		
 	};
-	
-	private String symbol = "";
-	
-	private List<QueryHit> symbolHits = new ArrayList<>();
-	
-	private final List<Symbol> symbols = new ArrayList<>();
-	
-	private WebMarkupContainer symbolsContainer;
-	
-	private AbstractDefaultAjaxBehavior querySymbolBehavior;
 	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
@@ -228,34 +218,6 @@ public class TextDiffPanel extends Panel {
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
-		});
-		
-		add(querySymbolBehavior = new AbstractDefaultAjaxBehavior() {
-
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-				symbol = params.getParameterValue("symbol").toString();
-				if (symbol.startsWith("@"))
-					symbol = symbol.substring(1);
-				try {
-					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
-					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(context.getRepository(), context.getBlobIdent().revision, query);
-					if (symbolHits.size() < QUERY_ENTRIES) {
-						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
-						symbolHits.addAll(searchManager.search(context.getRepository(), 
-								context.getBlobIdent().revision, query));
-					}
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}								
-				target.add(symbolsContainer);
-				String script = String.format("gitplex.sourceview.symbolsQueried('%s', '%s');", 
-						codeContainer.getMarkupId(), symbolsContainer.getMarkupId());
-				target.appendJavaScript(script);
-			}
-
 		});
 		
 		add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
@@ -362,11 +324,26 @@ public class TextDiffPanel extends Panel {
 		
 		add(commentRows);
 		
+		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbols", repoModel) {
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+			}
+
+			@Override
+			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
+			}
+			
+		};
+		add(symbolTooltip);
+		
 		// do not call init script via onDomReady as otherwise there will be a noticeable delay 
 		// between displaying diffs and comments if there are many diff files  
 		CharSequence addCommentCallback = addCommentBehavior.getCallbackFunction(
 				CallbackParameter.explicit("oldLineNo"), CallbackParameter.explicit("newLineNo"));
-		String script = String.format("gitplex.textdiff.init('%s', %s);", getMarkupId(), addCommentCallback);
+		String script = String.format("gitplex.textdiff.init('%s', %s, '%s', '%s', '%s');", 
+				getMarkupId(), addCommentCallback, symbolTooltip.getMarkupId(), 
+				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision);
 		add(new Label("script", script).setEscapeModelStrings(false));
 		
 		setOutputMarkupId(true);
