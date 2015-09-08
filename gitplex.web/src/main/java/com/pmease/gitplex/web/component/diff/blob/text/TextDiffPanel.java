@@ -66,7 +66,6 @@ import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
-import com.pmease.gitplex.web.page.repository.file.Highlight;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -325,37 +324,25 @@ public class TextDiffPanel extends Panel {
 		
 		add(commentRows);
 		
-		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbols", repoModel) {
+		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbols", repoModel, requestModel) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, String revision, QueryHit hit) {
-				Long requestId;
-				if (requestModel.getObject() != null)
-					requestId = requestModel.getObject().getId();
-				else
-					requestId = null;
-				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), revision, 
-						hit.getBlobPath(), null, new Highlight(hit.getTokenPos()), null, requestId);
-				setResponsePage(RepoFilePage.class, params);
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				setResponsePage(RepoFilePage.class, getQueryHitParams(hit));
 			}
 
 			@Override
-			protected void onOccurrencesQueried(AjaxRequestTarget target, String revision, List<QueryHit> hits) {
-				Long requestId;
-				if (requestModel.getObject() != null)
-					requestId = requestModel.getObject().getId();
-				else
-					requestId = null;
-				
-				String blobPath;
-				if (revision.equals(change.getNewBlobIdent().revision))
-					blobPath = change.getNewBlobIdent().path;
-				else
-					blobPath = change.getOldBlobIdent().path;
-				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), revision, 
-						blobPath, null, null, null, requestId);
+			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
 				WebSession.get().setMetaData(RepoFilePage.SEARCH_RESULT_KEY, (Serializable)hits);
-				setResponsePage(RepoFilePage.class, params);
+				setResponsePage(RepoFilePage.class, getFindOccurrencesParams());
+			}
+
+			@Override
+			protected String getBlobPath() {
+				if (getRevision().equals(change.getNewBlobIdent().revision))
+					return change.getNewBlobIdent().path;
+				else
+					return change.getOldBlobIdent().path;
 			}
 			
 		};

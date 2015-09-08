@@ -61,7 +61,10 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
+import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.search.query.BlobQuery;
+import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.repofile.blobsearch.advanced.AdvancedSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.instant.InstantSearchPanel;
@@ -104,6 +107,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private static final String PARAM_MODE = "mode";
 	
 	private static final String PARAM_HIGHLIGHT = "highlight";
+	
+	private static final String PARAM_QUERY_SYMBOL = "query_symbol";
 	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
@@ -148,6 +153,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private BlobIdent blobIdent = new BlobIdent();
 	
 	private Highlight highlight;
+	
+	private String querySymbol;
 	
 	private Mode mode;
 	
@@ -199,6 +206,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		String highlightStr = params.get(PARAM_HIGHLIGHT).toString();
 		if (highlightStr != null)
 			highlight = new Highlight(highlightStr);
+		
+		querySymbol = params.get(PARAM_QUERY_SYMBOL).toString();
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		requestId = params.get(PARAM_REQUEST).toOptionalLong();
 	}
@@ -317,6 +326,16 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		List<QueryHit> hits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
 		WebSession.get().setMetaData(SEARCH_RESULT_KEY, null);
 		
+		if (hits == null && querySymbol != null) {
+			BlobQuery blobQuery = new TextQuery(querySymbol, false, true, true, 
+					null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
+			try {
+				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+				hits = searchManager.search(repoModel.getObject(), blobIdent.revision, blobQuery);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}								
+		}
 		if (hits != null) 
 			add(newSearchResult(hits));
 		else 
@@ -606,7 +625,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getRepository(), blobIdent.revision, blobIdent.path, 
-				mode, highlight, commentId, requestId);
+				mode, highlight, null, commentId, requestId);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		HistoryState state = new HistoryState();
 		state.mode = mode;
@@ -635,12 +654,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String commitHash, @Nullable String path) {
-		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, null, request.getId());
+		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, 
+				null, null, request.getId());
 	}
 	
 	public static PageParameters paramsOf(Comment comment) {
 		return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, 
-				comment.getBlobIdent().path, null, null, comment.getId(), null);
+				comment.getBlobIdent().path, null, null, null, comment.getId(), null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
@@ -653,12 +673,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, 
 			@Nullable String path, @Nullable Mode mode) {
-		return paramsOf(repository, revision, path, mode, null, null, null);
+		return paramsOf(repository, revision, path, mode, null, null, null, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
 			@Nullable String path, Mode mode, @Nullable Highlight highlight, 
-			@Nullable Long commentId, @Nullable Long requestId) {
+			@Nullable String querySymbol,@Nullable Long commentId, @Nullable Long requestId) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
@@ -668,6 +688,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			params.set(PARAM_MODE, mode.name().toLowerCase());
 		if (highlight != null)
 			params.set(PARAM_HIGHLIGHT, highlight.toString());
+		if (querySymbol != null)
+			params.set(PARAM_QUERY_SYMBOL, querySymbol);
 		if (commentId != null)
 			params.set(PARAM_COMMENT, commentId);
 		if (requestId != null)

@@ -10,6 +10,7 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -32,6 +33,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -39,6 +41,8 @@ import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
+import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
@@ -47,16 +51,19 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
-	private String revision;
+	private final IModel<PullRequest> requestModel;
+	
+	private String revision = "";
 	
 	private String symbol = "";
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	public SymbolTooltipPanel(String id, IModel<Repository> repoModel) {
+	public SymbolTooltipPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
+		this.requestModel = requestModel;
 	}
 
 	@Override
@@ -94,10 +101,13 @@ public abstract class SymbolTooltipPanel extends Panel {
 						String script = String.format("gitplex.symboltooltip.removeTooltip(document.getElementById('%s'));", 
 								SymbolTooltipPanel.this.getMarkupId());
 						target.prependJavaScript(script);						
-						onSelect(target, revision, hit);
+						onSelect(target, hit);
 					}
 					
 				};
+
+				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, getQueryHitParams(hit));
+				link.add(AttributeAppender.replace("href", url.toString()));
 				link.add(hit.render("label"));
 				link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 				
@@ -133,7 +143,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(repoModel.getObject(), revision, query);
-							onOccurrencesQueried(target, revision, hits);
+							onOccurrencesQueried(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}								
@@ -141,6 +151,15 @@ public abstract class SymbolTooltipPanel extends Panel {
 					}
 					
 				});
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+
+				// set href in onComponentTag in order to keep it up to date with symbol value
+				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, getFindOccurrencesParams());
+				tag.put("href", url.toString());
 			}
 
 			@Override
@@ -199,14 +218,43 @@ public abstract class SymbolTooltipPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
+	private Long getRequestId() {
+		if (requestModel.getObject() != null)
+			return requestModel.getObject().getId();
+		else
+			return null;
+	}
+	
+	public PageParameters getQueryHitParams(QueryHit hit) {
+		return RepoFilePage.paramsOf(
+				repoModel.getObject(), revision, hit.getBlobPath(), null, 
+				new Highlight(hit.getTokenPos()), null, null, getRequestId());
+	}
+	
+	public PageParameters getFindOccurrencesParams() {
+		return RepoFilePage.paramsOf(repoModel.getObject(), revision, 
+				getBlobPath(), null, null, symbol, null, getRequestId());
+	}
+	
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public String getRevision() {
+		return revision;
+	}
+	
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
+		requestModel.detach();
 		super.onDetach();
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, String revision, QueryHit hit);
+	protected abstract String getBlobPath();
+	
+	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 
-	protected abstract void onOccurrencesQueried(AjaxRequestTarget target, String revision, List<QueryHit> hits);
+	protected abstract void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits);
 	
 }

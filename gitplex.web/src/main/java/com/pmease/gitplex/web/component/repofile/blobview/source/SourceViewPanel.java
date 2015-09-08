@@ -187,18 +187,30 @@ public class SourceViewPanel extends BlobViewPanel {
 				return context.getRepository();
 			}
 			
+		}, new AbstractReadOnlyModel<PullRequest>() {
+
+			@Override
+			public PullRequest getObject() {
+				return context.getPullRequest();
+			}
+			
 		}) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, String revision, QueryHit hit) {
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
-						revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
+						getRevision(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 				context.onSelect(target, blobIdent, hit.getTokenPos());
 			}
 
 			@Override
-			protected void onOccurrencesQueried(AjaxRequestTarget target, String revision, List<QueryHit> hits) {
+			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
 				context.onSearchComplete(target, hits);
+			}
+
+			@Override
+			protected String getBlobPath() {
+				return context.getBlobIdent().path;
 			}
 			
 		});
