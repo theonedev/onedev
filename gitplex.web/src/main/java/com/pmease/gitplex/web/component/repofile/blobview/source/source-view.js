@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, tokenPos, symbolTooltipId, revision, 
+	init: function(codeId, fileContent, filePath, highlight, symbolTooltipId, revision, 
 			blameCommits, commentId, addCommentCallback) {
 		var cm;
 		
@@ -70,16 +70,6 @@ gitplex.sourceview = {
 					matchBrackets: true,
 					scrollbarStyle: "simple",
 					highlightIdentifiers: {delay: 500},
-					tokenHover: {
-						getTooltip: function(tokenEl) {
-							var tooltip = document.createElement("div");
-							var $tooltip = $(tooltip);
-							$tooltip.html("<img src=" + ajaxIndicatorUrl + "></img>");
-							$tooltip.attr("id", codeId + "-symbolstooltip");
-							symbolQuery($(tokenEl).text());
-							return tooltip;
-						} 
-					},
 					gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 					extraKeys: {
 						"F11": function(cm) {
@@ -120,8 +110,8 @@ gitplex.sourceview = {
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
 
-			    if (tokenPos)
-			    	gitplex.sourceview.highlightToken(cm, tokenPos);
+			    if (highlight)
+			    	gitplex.sourceview.highlight(cm, highlight);
 
 			    // use scroll timer and cursor timer to minimize performance impact of 
 			    // remembering scroll and cursor position
@@ -188,30 +178,22 @@ gitplex.sourceview = {
 		});
 	}, 
 		
-	symbolsQueried: function(codeId, symbolsId) {
-		var $symbols = $("#" + symbolsId);
-		var $tooltip = $("#" + codeId + "-symbolstooltip");
-		$tooltip.children().remove();
-		$symbols.children().appendTo($tooltip);
-		$tooltip.align();
-	},
-	
-	highlightToken: function(cm, tokenPos) {
+	highlight: function(cm, highlight) {
 		if (typeof cm === "string") 
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
-		if (tokenPos) {
+		if (highlight) {
 			var h = cm.getScrollInfo().clientHeight;
-			var coords = cm.charCoords({line: tokenPos.line, ch: 0}, "local");
+			var coords = cm.charCoords({line: highlight.fromLine, ch: 0}, "local");
 			cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
 			
-			if (tokenPos.range) {
-				var anchor = {line: tokenPos.line, ch: tokenPos.range.start};
-				var head = {line: tokenPos.line, ch: tokenPos.range.end}; 
-				cm.setSelection(anchor, head);
-			} else {
-				cm.setCursor(tokenPos.line);
-			}
+			var allMarks = cm.getAllMarks();
+			for (var i=0; i<allMarks.length; i++) 
+				allMarks[i].clear();
+			cm.markText(
+					{line: highlight.fromLine, ch: highlight.fromChar}, 
+					{line: highlight.toLine, ch: highlight.toChar},
+					{className: "CodeMirror-highlight"});
 		} else {
 			cm.setCursor(0, 0);
 		}

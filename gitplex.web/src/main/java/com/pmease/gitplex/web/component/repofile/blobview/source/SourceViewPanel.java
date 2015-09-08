@@ -51,7 +51,6 @@ import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
-import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
@@ -72,6 +71,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.file.Highlight;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -147,18 +147,18 @@ public class SourceViewPanel extends BlobViewPanel {
 		return fragment;
 	}
 
-	public void highlightToken(AjaxRequestTarget target, @Nullable TokenPosition tokenPos) {
+	public void highlight(AjaxRequestTarget target, @Nullable Highlight highlight) {
 		String json;
-		if (tokenPos != null) {
+		if (highlight != null) {
 			try {
-				json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(tokenPos);
+				json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(highlight);
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
 			json = "undefined";
 		}
-		String script = String.format("gitplex.sourceview.highlightToken('%s', %s);", 
+		String script = String.format("gitplex.sourceview.highlight('%s', %s);", 
 				codeContainer.getMarkupId(), json);
 		target.appendJavaScript(script);
 	}
@@ -174,7 +174,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Symbol symbol) {
-				highlightToken(target, symbol.getPos());
+				highlight(target, new Highlight(symbol.getPos()));
 			}
 			
 		});
@@ -312,9 +312,9 @@ public class SourceViewPanel extends BlobViewPanel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
 		
-		String highlightToken;
+		String highlight;
 		try {
-			highlightToken = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getTokenPos());
+			highlight = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getHighlight());
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		} 
@@ -329,7 +329,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				codeContainer.getMarkupId(), 
 				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 				context.getBlobIdent().path, 
-				highlightToken,
+				highlight,
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
 				getBlameCommits(), 

@@ -95,6 +95,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private static final String PARAM_MODE = "mode";
 	
+	private static final String PARAM_HIGHLIGHT = "highlight";
+	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
@@ -137,7 +139,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private BlobIdent blobIdent = new BlobIdent();
 	
-	private TokenPosition tokenPos;
+	private Highlight highlight;
 	
 	private Mode mode;
 	
@@ -587,14 +589,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getRepository(), blobIdent.revision, blobIdent.path, 
-				mode, commentId, requestId);
+				mode, highlight, commentId, requestId);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		HistoryState state = new HistoryState();
 		state.mode = mode;
 		state.commentId = commentId;
 		state.requestId = requestId;
 		state.blobIdent = blobIdent;
-		state.tokenPos = tokenPos;
+		state.highlight = highlight;
 		pushState(target, url.toString(), state);
 	}
 
@@ -616,12 +618,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String commitHash, @Nullable String path) {
-		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, request.getId());
+		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, null, request.getId());
 	}
 	
 	public static PageParameters paramsOf(Comment comment) {
 		return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, 
-				comment.getBlobIdent().path, null, comment.getId(), null);
+				comment.getBlobIdent().path, null, null, comment.getId(), null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
@@ -634,11 +636,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, 
 			@Nullable String path, @Nullable Mode mode) {
-		return paramsOf(repository, revision, path, mode, null, null);
+		return paramsOf(repository, revision, path, mode, null, null, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
-			@Nullable String path, Mode mode, @Nullable Long commentId, @Nullable Long requestId) {
+			@Nullable String path, Mode mode, @Nullable Highlight highlight, 
+			@Nullable Long commentId, @Nullable Long requestId) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
@@ -646,6 +649,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			params.set(PARAM_PATH, path);
 		if (mode != null)
 			params.set(PARAM_MODE, mode.name().toLowerCase());
+		if (highlight != null)
+			params.set(PARAM_HIGHLIGHT, highlight.toString());
 		if (commentId != null)
 			params.set(PARAM_COMMENT, commentId);
 		if (requestId != null)
@@ -670,14 +675,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				if (hit.getBlobPath().equals(blobIdent.path) && fileViewer instanceof SourceViewPanel) {
-					tokenPos = hit.getTokenPos();
+					highlight = new Highlight(hit.getTokenPos());
 					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-					if (tokenPos != null || mode == Mode.BLAME) {
-						sourceViewer.highlightToken(target, tokenPos);
+					if (highlight != null || mode == Mode.BLAME) {
+						sourceViewer.highlight(target, highlight);
 					} else {
 						BlobViewPanel blobViewer = renderBlobViewer(FILE_VIEWER_ID);
 						if (blobViewer instanceof SourceViewPanel) {
-							sourceViewer.highlightToken(target, tokenPos);
+							sourceViewer.highlight(target, highlight);
 						} else {
 							fileViewer.replaceWith(blobViewer);
 							fileViewer = blobViewer;
@@ -714,7 +719,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		mode = state.mode;
 		commentId = state.commentId;
 		requestId = state.requestId;
-		tokenPos = state.tokenPos;
+		highlight = state.highlight;
 		
 		trait.revision = blobIdent.revision;
 
@@ -777,8 +782,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public TokenPosition getTokenPos() {
-		return tokenPos;
+	public Highlight getHighlight() {
+		return highlight;
 	}
 
 	@Override
@@ -789,7 +794,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
 		this.blobIdent = blobIdent; 
-		this.tokenPos = tokenPos;
+		this.highlight = new Highlight(tokenPos);
 		mode = null;
 		
 		newFileNavigator(target, null);
@@ -813,7 +818,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		
 		if (fileViewer instanceof SourceViewPanel) {
 			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-			if (Mode.BLAME == mode || tokenPos != null) {
+			if (Mode.BLAME == mode || highlight != null) {
 				sourceViewer.onBlameChange(target);
 			} else {
 				BlobViewPanel blobViewer = renderBlobViewer(FILE_VIEWER_ID);
