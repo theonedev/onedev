@@ -183,7 +183,7 @@ public abstract class InstantSearchPanel extends Panel {
 												null, null, SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
 										hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
 									}
-									onSearchComplete(target, hits);
+									onMoreQueried(target, hits);
 								} catch (TooGeneralQueryException e) {
 									// this is impossible as we already queried part of the result
 									throw new IllegalStateException();
@@ -281,7 +281,7 @@ public abstract class InstantSearchPanel extends Panel {
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-									onSearchComplete(target, hits);
+									onMoreQueried(target, hits);
 								} catch (TooGeneralQueryException e) {
 									// this is impossible as we already queried part of the result
 									throw new IllegalStateException();
@@ -475,7 +475,7 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 	
-	protected abstract void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
+	protected abstract void onMoreQueried(AjaxRequestTarget target, List<QueryHit> hits);
 	
 	private static class MoreSymbolHit extends QueryHit {
 

@@ -226,7 +226,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 			
 			@Override
-			protected void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
+			protected void onMoreQueried(AjaxRequestTarget target, List<QueryHit> hits) {
 				renderSearchResult(target, hits);
 			}
 			

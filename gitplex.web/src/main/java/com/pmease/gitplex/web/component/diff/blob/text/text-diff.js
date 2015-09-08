@@ -1,5 +1,5 @@
 gitplex.textdiff = {
-	init: function(containerId, addCommentCallback, symbolQueryId, oldRev, newRev, ajaxIndicatorUrl) {
+	init: function(containerId, addCommentCallback, symbolTooltipId, oldRev, newRev) {
 		var $container = $("#" + containerId);
 		$container[0].addComment = addCommentCallback;
 		$container.find(">.text-diff>.comment").each(function() {
@@ -8,74 +8,20 @@ gitplex.textdiff = {
 			gitplex.textdiff.placeComment($container, oldLineNo, newLineNo, $(this));
 		});
 		
-		var tooltip;
-		var prepareToHide = function() {
-			if (tooltip) {
-				if (tooltip.hideTimer) 
-					clearTimeout(tooltip.hideTimer);
-				tooltip.hideTimer = setTimeout(function(){
-					if (tooltip) {
-						$(tooltip).remove();
-						tooltip = null;
-					}
-				}, 200);
-			}
-		};
-		var cancelHide = function() {
-			if (tooltip && tooltip.hideTimer) {
-				clearTimeout(tooltip.hideTimer);
-				tooltip.hideTimer = null;				
-			} 
-		};
-		var showTimer;
-		var cancelShow = function() {
-			if (showTimer) {
-				clearTimeout(showTimer);
-				showTimer = null;
-			}
-		}
-		
 		var $symbols = $container.find(".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta"); 
 		$symbols.mouseover(function() {
-			if (!gitplex.mouseState.pressed && gitplex.mouseState.moved && !showTimer) {
-				var $symbol = $(this);
-				showTimer = setTimeout(function() {
-					if (!tooltip) {  
-						var revision;
-						if ($symbol.hasClass("delete")) {
-							revision = oldRev;
-						} else {
-							var $td = $symbol.closest("td");
-							if ($td.hasClass("old") && !$td.hasClass("new"))
-								revision = oldRev;
-							else
-								revision = newRev;
-						}
-						var $tooltip = document.getElementById(symbolQueryId).query(revision, $symbol);
-						tooltip = $tooltip[0];
-						
-						$tooltip.mouseover(function() {
-							cancelHide();
-						});
-						$tooltip.mouseout(function(event) {
-							if (event.pageX<$tooltip.offset().left+5 || event.pageX>$tooltip.offset().left+$tooltip.width()-5 
-									|| event.pageY<$tooltip.offset().top+5 || event.pageY>$tooltip.offset().top+$tooltip.height()-5) {
-								prepareToHide();
-							}
-						});
-						cancelHide();
-					}
-					showTimer = null;
-				}, 500);				
+			var revision;
+			var $symbol = $(this);
+			if ($symbol.hasClass("delete")) {
+				revision = oldRev;
+			} else {
+				var $td = $symbol.closest("td");
+				if ($td.hasClass("old") && !$td.hasClass("new"))
+					revision = oldRev;
+				else
+					revision = newRev;
 			}
-		});
-		$symbols.on("mouseout mousedown mouseup", function() {
-			prepareToHide();
-			cancelShow();
-		});
-		$symbols.on("mousemove", function() {
-			if (tooltip)
-				cancelHide();
+			document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, this);
 		});
 	},
 	removeComment: function(commentId) {

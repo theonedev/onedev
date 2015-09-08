@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, tokenPos, ajaxIndicatorUrl, symbolQuery, 
+	init: function(codeId, fileContent, filePath, tokenPos, symbolTooltipId, revision, 
 			blameCommits, commentId, addCommentCallback) {
 		var cm;
 		
@@ -127,6 +127,7 @@ gitplex.sourceview = {
 			    // remembering scroll and cursor position
 			    var scrollTimer;
 			    cm.on("scroll", function() {
+			    	gitplex.mouseState.moved = false;			    	
 			    	if (scrollTimer)
 			    		clearTimeout(scrollTimer);
 			    	scrollTimer = setTimeout(function() {
@@ -170,6 +171,14 @@ gitplex.sourceview = {
 			    	cm.setCursor($comment.data("lineno"));
 			    	setTimeout(function() {$comment.find(">div").focus();}, 10);
 			    }
+			    
+			    $code.mouseover(function(e) {
+					var node = e.target || e.srcElement, $node = $(node);
+					if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
+							|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def") || $node.hasClass("cm-meta")) {
+						document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, node);
+					}
+			    });
 			    
 			    cm.focus();
 			} 

@@ -91,6 +91,9 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
+						String script = String.format("gitplex.symboltooltip.removeTooltip(document.getElementById('%s'));", 
+								SymbolTooltipPanel.this.getMarkupId());
+						target.prependJavaScript(script);						
 						onSelect(target, hit);
 					}
 					
@@ -121,6 +124,10 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
+						String script = String.format("gitplex.symboltooltip.removeTooltip(document.getElementById('%s'));", 
+								SymbolTooltipPanel.this.getMarkupId());
+						target.prependJavaScript(script);						
+						
 						BlobQuery query = new TextQuery(symbol, false, true, true, 
 									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 						try {
@@ -201,4 +208,5 @@ public abstract class SymbolTooltipPanel extends Panel {
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 
 	protected abstract void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits);
+	
 }

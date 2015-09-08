@@ -22,11 +22,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -38,8 +34,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.lib.FileMode;
 import org.slf4j.Logger;
@@ -61,26 +55,22 @@ import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.search.SearchManager;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.BlobQuery;
-import com.pmease.gitplex.search.query.SymbolQuery;
-import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.InlineCommentPanel;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
-import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
@@ -89,13 +79,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
 	
-	private static final int QUERY_ENTRIES = 20;
-	
 	private static final String INLINE_COMMENT_ID = "inlineComment";
-	
-	private String symbol = "";
-	
-	private List<QueryHit> symbolHits = new ArrayList<>();
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
@@ -131,16 +115,14 @@ public class SourceViewPanel extends BlobViewPanel {
 	private Component codeContainer;
 	
 	private OutlinePanel outlinePanel;
-	
-	private WebMarkupContainer symbolsContainer;
+
+	private SymbolTooltipPanel symbolTooltip;
 	
 	private RepeatingView newCommentForms;
 	
 	private RepeatingView commentWidgets;
 	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
-	
-	private AbstractDefaultAjaxBehavior querySymbolBehavior;
 	
 	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
@@ -198,97 +180,31 @@ public class SourceViewPanel extends BlobViewPanel {
 		});
 		outlinePanel.setVisible(!symbols.isEmpty());
 		
-		add(symbolsContainer = new WebMarkupContainer("symbols"));
-		symbolsContainer.setOutputMarkupId(true);
-		symbolsContainer.add(new ListView<QueryHit>("declarations", new AbstractReadOnlyModel<List<QueryHit>>() {
+		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip", new AbstractReadOnlyModel<Repository>() {
 
 			@Override
-			public List<QueryHit> getObject() {
-				return symbolHits;
+			public Repository getObject() {
+				return context.getRepository();
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<QueryHit> item) {
-				final QueryHit hit = item.getModelObject();
-				item.add(new Image("icon", hit.getIcon()) {
-
-					@Override
-					protected boolean shouldAddAntiCacheParameter() {
-						return false;
-					}
-					
-				});
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						String script = String.format(
-								"$('#%s .CodeMirror')[0].CodeMirror.hideTokenHover();", 
-								codeContainer.getMarkupId());
-						target.prependJavaScript(script);
-						BlobIdent blobIdent = new BlobIdent(
-								context.getBlobIdent().revision, 
-								hit.getBlobPath(), 
-								FileMode.REGULAR_FILE.getBits());
-						context.onSelect(target, blobIdent, hit.getTokenPos());
-					}
-					
-				};
-				link.add(hit.render("label"));
-				link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
-				
-				item.add(link);
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				BlobIdent blobIdent = new BlobIdent(
+						context.getBlobIdent().revision, 
+						hit.getBlobPath(), 
+						FileMode.REGULAR_FILE.getBits());
+				context.onSelect(target, blobIdent, hit.getTokenPos());
 			}
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!symbolHits.isEmpty());
+			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
+				context.onSearchComplete(target, hits);
 			}
 			
 		});
-		
-		symbolsContainer.add(new AjaxLink<Void>("findOccurrences") {
 
-			private RunTaskBehavior runTaskBehavior;
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(runTaskBehavior = new RunTaskBehavior() {
-					
-					@Override
-					protected void runTask(AjaxRequestTarget target) {
-						BlobQuery query = new TextQuery(symbol, false, true, true, 
-									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
-						try {
-							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							List<QueryHit> hits = searchManager.search(context.getRepository(), 
-									context.getBlobIdent().revision, query);
-							String script = String.format(
-									"$('#%s .CodeMirror')[0].CodeMirror.hideTokenHover();", 
-									codeContainer.getMarkupId());
-							target.prependJavaScript(script);
-							context.onSearchComplete(target, hits);
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}								
-						
-					}
-					
-				});
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				runTaskBehavior.requestRun(target);
-			}
-			
-		});
-		
 		add(newCommentForms = new RepeatingView("newComments"));
 		
 		commentWidgets = new RepeatingView("comments");
@@ -297,34 +213,6 @@ public class SourceViewPanel extends BlobViewPanel {
 			commentWidgets.add(newCommentWidget(commentWidgets.newChildId(), comment));
 		
 		add(commentWidgets);
-		
-		add(querySymbolBehavior = new AbstractDefaultAjaxBehavior() {
-
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-				symbol = params.getParameterValue("symbol").toString();
-				if (symbol.startsWith("@"))
-					symbol = symbol.substring(1);
-				try {
-					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
-					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(context.getRepository(), context.getBlobIdent().revision, query);
-					if (symbolHits.size() < QUERY_ENTRIES) {
-						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
-						symbolHits.addAll(searchManager.search(context.getRepository(), 
-								context.getBlobIdent().revision, query));
-					}
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}								
-				target.add(symbolsContainer);
-				String script = String.format("gitplex.sourceview.symbolsQueried('%s', '%s');", 
-						codeContainer.getMarkupId(), symbolsContainer.getMarkupId());
-				target.appendJavaScript(script);
-			}
-
-		});		
 		
 		if (context.getPullRequest() != null) {
 			add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
@@ -430,7 +318,6 @@ public class SourceViewPanel extends BlobViewPanel {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		} 
-		ResourceReference ajaxIndicator =  new PackageResourceReference(SourceViewPanel.class, "ajax-indicator.gif");
 		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
 		
 		CharSequence addCommentCallback;
@@ -438,13 +325,13 @@ public class SourceViewPanel extends BlobViewPanel {
 			addCommentCallback = addCommentBehavior.getCallbackFunction(CallbackParameter.explicit("lineNo"));
 		else
 			addCommentCallback = "undefined";
-		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', %s, %s, %d, %s);", 
+		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %d, %s);", 
 				codeContainer.getMarkupId(), 
 				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 				context.getBlobIdent().path, 
 				highlightToken,
-				RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()), 
-				querySymbolBehavior.getCallbackFunction(CallbackParameter.explicit("symbol")), 
+				symbolTooltip.getMarkupId(), 
+				context.getBlobIdent().revision, 
 				getBlameCommits(), 
 				context.getComment()!=null?context.getComment().getId():-1,
 				addCommentCallback);
