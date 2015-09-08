@@ -18,6 +18,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -39,7 +40,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
@@ -58,9 +58,6 @@ import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
 @SuppressWarnings("serial")
 public class RequestComparePage extends RequestDetailPage {
@@ -255,7 +252,20 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		add(compareHead);
 
-		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector");
+		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				CommitDescription description = commitsModel.getObject().get(oldCommitHash);
+				if (description != null) 
+					tag.put("title", description.getSubject());
+				else 
+					tag.put("title", getRepository().getCommit(oldCommitHash).getSubject());
+			}
+			
+		};
 		compareHead.add(oldSelector);
 		oldSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
@@ -268,18 +278,7 @@ public class RequestComparePage extends RequestDetailPage {
 					return GitUtils.abbreviateSHA(oldCommitHash);
 			}
 			
-		}).add(new TooltipBehavior(new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(oldCommitHash);
-				if (description != null) 
-					return description.getSubject();
-				else 
-					return getRepository().getCommit(oldCommitHash).getSubject();
-			}
-			
-		}, new TooltipConfig().withPlacement(Placement.top))));
+		}));
 		
 		DropdownPanel oldChoicesDropdown = new DropdownPanel("oldChoices", false) {
 
@@ -304,7 +303,20 @@ public class RequestComparePage extends RequestDetailPage {
 		compareHead.add(oldChoicesDropdown);
 		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
 		
-		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector");
+		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+
+				CommitDescription description = commitsModel.getObject().get(newCommitHash);
+				if (description != null)
+					tag.put("title", description.getSubject());
+				else
+					tag.put("title", getRepository().getCommit(newCommitHash).getSubject());
+			}
+			
+		};
 		compareHead.add(newSelector);
 		newSelector.add(new Label("label", new LoadableDetachableModel<String>() {
 
@@ -317,18 +329,7 @@ public class RequestComparePage extends RequestDetailPage {
 					return GitUtils.abbreviateSHA(newCommitHash);
 			}
 			
-		}).add(new TooltipBehavior(new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				CommitDescription description = commitsModel.getObject().get(newCommitHash);
-				if (description != null)
-					return description.getSubject();
-				else
-					return getRepository().getCommit(newCommitHash).getSubject();
-			}
-			
-		}, new TooltipConfig().withPlacement(Placement.top))));
+		}));
 		
 		DropdownPanel newChoicesDropdown = new DropdownPanel("newChoices", false) {
 

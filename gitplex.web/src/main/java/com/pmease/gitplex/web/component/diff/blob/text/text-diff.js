@@ -16,7 +16,9 @@ gitplex.textdiff = {
 				revision = oldRev;
 			} else {
 				var $td = $symbol.closest("td");
-				if ($td.hasClass("old") && !$td.hasClass("new"))
+				
+				// if is deleted line or if it is on left side of split view
+				if ($td.hasClass("old") && !$td.hasClass("new") || $td.next().is("td"))
 					revision = oldRev;
 				else
 					revision = newRev;
