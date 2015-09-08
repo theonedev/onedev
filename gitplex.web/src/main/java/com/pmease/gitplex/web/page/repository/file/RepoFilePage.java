@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.repository.file;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,6 +10,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -60,6 +62,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.repofile.blobsearch.advanced.AdvancedSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.instant.InstantSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
@@ -85,6 +88,11 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIR
 @SuppressWarnings("serial")
 public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
+	private static class SearchResultKey extends MetaDataKey<ArrayList<QueryHit>> {
+	};
+	
+	public static final SearchResultKey SEARCH_RESULT_KEY = new SearchResultKey();		
+	
 	private static final String PARAM_REVISION = "revision";
 	
 	private static final String PARAM_PATH = "path";
@@ -154,7 +162,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private Component fileViewer;
 	
 	private final RevisionIndexed trait = new RevisionIndexed();
-	
+
 	public RepoFilePage(final PageParameters params) {
 		super(params);
 		
@@ -188,6 +196,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		String modeStr = params.get(PARAM_MODE).toString();
 		if (modeStr != null)
 			mode = Mode.valueOf(modeStr.toUpperCase());
+		String highlightStr = params.get(PARAM_HIGHLIGHT).toString();
+		if (highlightStr != null)
+			highlight = new Highlight(highlightStr);
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		requestId = params.get(PARAM_REQUEST).toOptionalLong();
 	}
@@ -302,8 +313,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 			
 		});
+
+		List<QueryHit> hits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
+		WebSession.get().setMetaData(SEARCH_RESULT_KEY, null);
 		
-		add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
+		if (hits != null) 
+			add(newSearchResult(hits));
+		else 
+			add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
 		
 		add(new WebSocketRenderBehavior() {
 			
@@ -674,28 +691,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				if (hit.getBlobPath().equals(blobIdent.path) && fileViewer instanceof SourceViewPanel) {
-					highlight = new Highlight(hit.getTokenPos());
-					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-					if (highlight != null || mode == Mode.BLAME) {
-						sourceViewer.highlight(target, highlight);
-					} else {
-						BlobViewPanel blobViewer = renderBlobViewer(FILE_VIEWER_ID);
-						if (blobViewer instanceof SourceViewPanel) {
-							sourceViewer.highlight(target, highlight);
-						} else {
-							fileViewer.replaceWith(blobViewer);
-							fileViewer = blobViewer;
-							target.add(fileViewer);
-							target.appendJavaScript("$(window).resize();");
-						}
-					}
-					pushState(target);
-				} else {
-					BlobIdent selected = new BlobIdent(blobIdent.revision, hit.getBlobPath(), 
-							FileMode.REGULAR_FILE.getBits());
-					RepoFilePage.this.onSelect(target, selected, hit.getTokenPos());
-				}
+				BlobIdent selected = new BlobIdent(blobIdent.revision, hit.getBlobPath(), 
+						FileMode.REGULAR_FILE.getBits());
+				RepoFilePage.this.onSelect(target, selected, hit.getTokenPos());
 			}
 
 			@Override
@@ -792,16 +790,37 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos) {
-		this.blobIdent = blobIdent; 
-		this.highlight = new Highlight(tokenPos);
-		mode = null;
-		
-		newFileNavigator(target, null);
-		newLastCommit(target);
-		newFileViewer(target);
-		
-		pushState(target);
+	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
+		if (tokenPos != null)
+			highlight = new Highlight(tokenPos);
+		else
+			highlight = null;
+		if (fileViewer instanceof SourceViewPanel && this.blobIdent.path.equals(blobIdent.path)) {
+			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
+			if (highlight == null && mode != Mode.BLAME) {
+				BlobViewPanel blobViewer = renderBlobViewer(FILE_VIEWER_ID);
+				if (blobViewer instanceof SourceViewPanel) {
+					sourceViewer.highlight(target, highlight);
+				} else {
+					fileViewer.replaceWith(blobViewer);
+					fileViewer = blobViewer;
+					target.add(fileViewer);
+					target.appendJavaScript("$(window).resize();");
+				}
+			} else {
+				sourceViewer.highlight(target, highlight);
+			}
+			pushState(target);
+		} else {
+			this.blobIdent = blobIdent; 
+			mode = null;
+			
+			newFileNavigator(target, null);
+			newLastCommit(target);
+			newFileViewer(target);
+			
+			pushState(target);
+		}
 	}
 
 	@Override

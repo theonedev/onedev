@@ -38,7 +38,7 @@ public interface BlobViewContext extends Serializable {
 	
 	boolean isAtSourceBranchHead();
 	
-	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, TokenPosition tokenPos);
+	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos);
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	

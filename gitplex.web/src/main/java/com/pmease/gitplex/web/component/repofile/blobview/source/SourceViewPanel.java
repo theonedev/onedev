@@ -174,7 +174,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Symbol symbol) {
-				highlight(target, new Highlight(symbol.getPos()));
+				context.onSelect(target, context.getBlobIdent(), symbol.getPos());
 			}
 			
 		});
@@ -190,16 +190,14 @@ public class SourceViewPanel extends BlobViewPanel {
 		}) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+			protected void onSelect(AjaxRequestTarget target, String revision, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
-						context.getBlobIdent().revision, 
-						hit.getBlobPath(), 
-						FileMode.REGULAR_FILE.getBits());
+						revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 				context.onSelect(target, blobIdent, hit.getTokenPos());
 			}
 
 			@Override
-			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
+			protected void onOccurrencesQueried(AjaxRequestTarget target, String revision, List<QueryHit> hits) {
 				context.onSearchComplete(target, hits);
 			}
 			

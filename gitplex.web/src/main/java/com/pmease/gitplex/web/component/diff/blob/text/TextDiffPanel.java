@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.component.diff.blob.text;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,6 +31,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -64,6 +66,7 @@ import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
+import com.pmease.gitplex.web.page.repository.file.Highlight;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -325,11 +328,34 @@ public class TextDiffPanel extends Panel {
 		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbols", repoModel) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+			protected void onSelect(AjaxRequestTarget target, String revision, QueryHit hit) {
+				Long requestId;
+				if (requestModel.getObject() != null)
+					requestId = requestModel.getObject().getId();
+				else
+					requestId = null;
+				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), revision, 
+						hit.getBlobPath(), null, new Highlight(hit.getTokenPos()), null, requestId);
+				setResponsePage(RepoFilePage.class, params);
 			}
 
 			@Override
-			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
+			protected void onOccurrencesQueried(AjaxRequestTarget target, String revision, List<QueryHit> hits) {
+				Long requestId;
+				if (requestModel.getObject() != null)
+					requestId = requestModel.getObject().getId();
+				else
+					requestId = null;
+				
+				String blobPath;
+				if (revision.equals(change.getNewBlobIdent().revision))
+					blobPath = change.getNewBlobIdent().path;
+				else
+					blobPath = change.getOldBlobIdent().path;
+				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), revision, 
+						blobPath, null, null, null, requestId);
+				WebSession.get().setMetaData(RepoFilePage.SEARCH_RESULT_KEY, (Serializable)hits);
+				setResponsePage(RepoFilePage.class, params);
 			}
 			
 		};

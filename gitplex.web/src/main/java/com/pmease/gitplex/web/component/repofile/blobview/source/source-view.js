@@ -110,9 +110,6 @@ gitplex.sourceview = {
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
 
-			    if (highlight)
-			    	gitplex.sourceview.highlight(cm, highlight);
-
 			    // use scroll timer and cursor timer to minimize performance impact of 
 			    // remembering scroll and cursor position
 			    var scrollTimer;
@@ -144,6 +141,9 @@ gitplex.sourceview = {
 			    if (cursor)
 			    	cm.setCursor(cursor);
 			    
+			    if (highlight)
+			    	gitplex.sourceview.highlight(cm, highlight);
+
 			    if (blameCommits) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
 			    	// blame gutter becomes much wider than expected

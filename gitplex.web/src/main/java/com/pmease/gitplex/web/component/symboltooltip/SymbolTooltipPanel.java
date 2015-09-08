@@ -94,7 +94,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						String script = String.format("gitplex.symboltooltip.removeTooltip(document.getElementById('%s'));", 
 								SymbolTooltipPanel.this.getMarkupId());
 						target.prependJavaScript(script);						
-						onSelect(target, hit);
+						onSelect(target, revision, hit);
 					}
 					
 				};
@@ -133,7 +133,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 							List<QueryHit> hits = searchManager.search(repoModel.getObject(), revision, query);
-							onOccurrencesQueried(target, hits);
+							onOccurrencesQueried(target, revision, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}								
@@ -205,8 +205,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 		super.onDetach();
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
+	protected abstract void onSelect(AjaxRequestTarget target, String revision, QueryHit hit);
 
-	protected abstract void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits);
+	protected abstract void onOccurrencesQueried(AjaxRequestTarget target, String revision, List<QueryHit> hits);
 	
 }
