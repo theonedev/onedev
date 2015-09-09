@@ -158,8 +158,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private Mode mode;
 	
-	private Component revisionSelector;
-	
 	private Component fileNavigator;
 	
 	private Component revisionIndexing;
@@ -223,7 +221,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		newRevisionSelector(null);
 		newCommentContext(null);
 		newLastCommit(null);
 		
@@ -383,49 +380,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return requestModel.getObject();
 	}
 	
-	private void newRevisionSelector(@Nullable AjaxRequestTarget target) {
-		revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, blobIdent.revision) {
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, String revision) {
-				BlobIdent selected = new BlobIdent();
-				selected.revision = revision;
-				selected.mode = FileMode.TREE.getBits();
-				
-				trait.revision = revision;
-				
-				if (selected.path != null) {
-					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-							RevWalk revWalk = new RevWalk(jgitRepo)) {
-						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, selected.path, revTree);
-						if (treeWalk != null) {
-							selected.path = blobIdent.path;
-							selected.mode = treeWalk.getRawMode(0);
-						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-				requestId = null;
-				commentId = null;
-				RepoFilePage.this.onSelect(target, selected, null);
-				newRevisionSelector(target);
-				newCommentContext(target);
-				target.add(revisionIndexing);
-			}
-
-		};
-		
-		if (target != null) {
-			replace(revisionSelector);
-			target.add(revisionSelector);
-		} else {
-			add(revisionSelector);
-		}
-	}
-	
 	private void newCommentContext(@Nullable AjaxRequestTarget target) {
 		Component commentContext = new WebMarkupContainer("commentContext") {
 
@@ -487,7 +441,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void onAddOrEditFile(@Nullable AjaxRequestTarget target) {
-		final String refName = getEditRefName();
+		final String refName = GitUtils.branch2ref(blobIdent.revision);
 		
 		final AtomicReference<String> newPathRef = new AtomicReference<>(blobIdent.isTree()?null:blobIdent.path);
 
@@ -495,7 +449,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				FILE_VIEWER_ID, repoModel, refName, 
 				blobIdent.isTree()?null:blobIdent.path, 
 				blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
-				getEditCommitId()) {
+						getRepository().getObjectId(blobIdent.revision)) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -519,6 +473,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				target.add(lastCommit);
 				newFileViewer(target);
 				newFileNavigator(target, null);
+				mode = null;
+				pushState(target);
 			}
 			
 		};
@@ -635,7 +591,245 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		state.highlight = highlight;
 		pushState(target, url.toString(), state);
 	}
+	
+	private HistoryState getState() {
+		HistoryState state = new HistoryState();
+		state.blobIdent = new BlobIdent(blobIdent);
+		state.commentId = commentId;
+		state.highlight = new Highlight(highlight);
+		state.mode = mode;
+		state.requestId = requestId;
+		return state;
+	}
+	
+	private void onStateChange(@Nullable AjaxRequestTarget target, HistoryState state) {
+		if (!state.blobIdent.revision.equals(blobIdent.revision)) {
+			blobIdent.revision = state.blobIdent.revision;
+			Component revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, blobIdent.revision) {
 
+				@Override
+				protected void onSelect(AjaxRequestTarget target, String revision) {
+					BlobIdent selected = new BlobIdent();
+					selected.revision = revision;
+					selected.mode = FileMode.TREE.getBits();
+					
+					trait.revision = revision;
+					
+					if (selected.path != null) {
+						try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+								RevWalk revWalk = new RevWalk(jgitRepo)) {
+							RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
+							TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, selected.path, revTree);
+							if (treeWalk != null) {
+								selected.path = blobIdent.path;
+								selected.mode = treeWalk.getRawMode(0);
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+
+					requestId = null;
+					commentId = null;
+					RepoFilePage.this.onSelect(target, selected, null);
+					newRevisionSelector(target);
+					newCommentContext(target);
+					target.add(revisionIndexing);
+				}
+
+			};
+			
+			if (target != null) {
+				replace(revisionSelector);
+				target.add(revisionSelector);
+			} else {
+				add(revisionSelector);
+			}			
+		}
+		
+		newCommentContext(target);
+		newLastCommit(target);
+		
+		if (mode == Mode.EDIT) {
+			final String refName = GitUtils.branch2ref(blobIdent.revision);
+			final AtomicReference<String> newPathRef = new AtomicReference<>(blobIdent.isTree()?null:blobIdent.path);
+
+			fileViewer = new FileEditPanel(
+					FILE_VIEWER_ID, repoModel, refName, 
+					blobIdent.isTree()?null:blobIdent.path, 
+					blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
+							getRepository().getObjectId(blobIdent.revision)) {
+
+				@Override
+				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+					Repository repository = getRepository();
+					String branch = blobIdent.revision;
+					repository.cacheObjectId(branch, newCommitId);
+					BlobIdent committed = new BlobIdent(
+							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
+		    		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+		    			listener.onRefUpdate(repository, refName, newCommitId.name());
+
+		    		if (repository.equals(getRepository())) 
+		    			onSelect(target, committed, null);
+		    		else
+		    			setResponsePage(RepoFilePage.class, paramsOf(repository, committed));
+				}
+
+				@Override
+				protected void onCancel(AjaxRequestTarget target) {
+					lastCommit.setVisibilityAllowed(true);
+					target.add(lastCommit);
+					newFileViewer(target);
+					newFileNavigator(target, null);
+					mode = null;
+					pushState(target);
+				}
+				
+			};
+			final BlobNameChangeCallback callback = new BlobNameChangeCallback() {
+
+				@Override
+				public void onChange(AjaxRequestTarget target, String blobName) {
+					String newPath;
+					if (blobIdent.isTree()) {
+						if (blobIdent.path != null)
+							newPath = blobIdent.path + "/" + blobName;
+						else
+							newPath = blobName;
+					} else {
+						if (blobIdent.path.contains("/"))
+							newPath = StringUtils.substringBeforeLast(blobIdent.path, "/") + "/" + blobName;
+						else
+							newPath = blobName;
+					}
+					newPathRef.set(GitUtils.normalizePath(newPath));
+					((FileEditPanel)fileViewer).onNewPathChange(target, newPathRef.get());
+				}
+				
+			};
+			if (target != null) {
+				replace(fileViewer);
+				target.add(fileViewer);
+				lastCommit.setVisibilityAllowed(false);
+				target.add(lastCommit);
+				mode = Mode.EDIT;
+				pushState(target);
+			} else {
+				add(fileViewer);
+			}
+			
+			newFileNavigator(target, callback);
+		} else if (mode == Mode.DELETE) {
+			newFileNavigator(null, null);
+			final String refName = GitUtils.branch2ref(blobIdent.revision);
+
+			CancelListener cancelListener = new CancelListener() {
+
+				@Override
+				public void onCancel(AjaxRequestTarget target) {
+					lastCommit.setVisibilityAllowed(true);
+					target.add(lastCommit);
+					newFileViewer(target);
+					mode = null;
+					pushState(target);
+				}
+				
+			};
+			
+			fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, blobIdent.path, 
+					null, getRepository().getObjectId(blobIdent.revision), cancelListener) {
+
+				@Override
+				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+					Repository repository = getRepository();
+					String branch = blobIdent.revision;
+					repository.cacheObjectId(branch, newCommitId);
+					try (	FileRepository jgitRepo = repository.openAsJGitRepo();
+							RevWalk revWalk = new RevWalk(jgitRepo)) {
+						RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
+						String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
+						while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
+							if (parentPath.contains("/")) {
+								parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+							} else {
+								parentPath = null;
+								break;
+							}
+						}
+						for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+			    			listener.onRefUpdate(repository, refName, newCommitId.name());
+						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
+						if (repository.equals(getRepository()))
+							onSelect(target, parentBlobIdent, null);
+						else
+							setResponsePage(RepoFilePage.class, paramsOf(repository, parentBlobIdent));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				
+			};
+			if (target != null) {
+				lastCommit.setVisibilityAllowed(false);
+				target.add(lastCommit);
+				replace(fileViewer);
+				target.add(fileViewer);
+				mode = Mode.DELETE;
+				pushState(target);
+			} else {
+				add(fileViewer);
+			}
+		} else {
+			newFileNavigator(null, null);
+			newFileViewer(null);
+		}
+		
+		add(new InstantSearchPanel("instantSearch", repoModel, requestModel, new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return blobIdent.revision;
+			}
+			
+		}) {
+			
+			@Override
+			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
+				BlobIdent selected = new BlobIdent(blobIdent.revision, hit.getBlobPath(), 
+						FileMode.REGULAR_FILE.getBits()); 
+				RepoFilePage.this.onSelect(target, selected, hit.getTokenPos());
+			}
+			
+			@Override
+			protected void onMoreQueried(AjaxRequestTarget target, List<QueryHit> hits) {
+				renderSearchResult(target, hits);
+			}
+			
+		});
+		
+		List<QueryHit> hits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
+		WebSession.get().setMetaData(SEARCH_RESULT_KEY, null);
+		
+		if (hits == null && querySymbol != null) {
+			BlobQuery blobQuery = new TextQuery(querySymbol, false, true, true, 
+					null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
+			try {
+				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+				hits = searchManager.search(repoModel.getObject(), blobIdent.revision, blobQuery);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}								
+		}
+		if (hits != null) 
+			add(newSearchResult(hits));
+		else 
+			add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
+		
+		if (target != null)
+			target.appendJavaScript("$(window).resize();");
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -741,7 +935,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		trait.revision = blobIdent.revision;
 
 		target.add(revisionIndexing);
-		newRevisionSelector(target);
 		newCommentContext(target);
 		newFileNavigator(target, null);
 		newLastCommit(target);
@@ -878,7 +1071,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public void onDelete(@Nullable AjaxRequestTarget target) {
-		final String refName = getEditRefName();
+		final String refName = GitUtils.branch2ref(blobIdent.revision);
 
 		CancelListener cancelListener = new CancelListener() {
 
@@ -887,12 +1080,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				lastCommit.setVisibilityAllowed(true);
 				target.add(lastCommit);
 				newFileViewer(target);
+				mode = null;
+				pushState(target);
 			}
 			
 		};
 		
 		fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, blobIdent.path, 
-				null, getEditCommitId(), cancelListener) {
+				null, getRepository().getObjectId(blobIdent.revision), cancelListener) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -947,20 +1142,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return getRepository().getRefs(Git.REFS_HEADS).containsKey(blobIdent.revision);
 	}
 
-	private String getEditRefName() {
-		if (isOnBranch()) 
-			return GitUtils.branch2ref(blobIdent.revision);
-		else 
-			return requestModel.getObject().getSourceRef();
-	}
-	
-	private ObjectId getEditCommitId() {
-		if (isOnBranch())
-			return getRepository().getObjectId(blobIdent.revision);
-		else 
-			return ObjectId.fromString(blobIdent.revision);
-	}
-	
 	@Override
 	public boolean isAtSourceBranchHead() {
 		PullRequest request = getPullRequest();

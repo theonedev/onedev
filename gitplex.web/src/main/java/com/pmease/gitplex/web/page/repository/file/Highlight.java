@@ -21,6 +21,13 @@ public class Highlight implements Serializable {
 		this.endChar = endChar;
 	}
 	
+	public Highlight(Highlight highlight) {
+		this.beginLine = highlight.beginLine;
+		this.beginChar = highlight.beginChar;
+		this.endLine = highlight.endLine;
+		this.endChar = highlight.endChar;
+	}
+	
 	public Highlight(TokenPosition tokenPos) {
 		this(tokenPos.getLine(), tokenPos.getRange().getStart(), 
 				tokenPos.getLine(), tokenPos.getRange().getEnd());
