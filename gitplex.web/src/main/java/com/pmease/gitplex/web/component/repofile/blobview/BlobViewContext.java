@@ -17,7 +17,7 @@ import com.pmease.gitplex.web.page.repository.file.Highlight;
 
 public interface BlobViewContext extends Serializable {
 
-	public enum Mode {BLAME, EDIT}
+	public enum Mode {BLAME, EDIT, DELETE}
 	
 	Repository getRepository();
 

@@ -154,13 +154,12 @@ public class TextDiffPanel extends Panel {
 		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		add(new BlobDiffTitle("title", change));
 
-		Repository repo = repoModel.getObject();
-		
 		PullRequest request = requestModel.getObject();
 		if (request != null) {
 			PageParameters params = RepoFilePage.paramsOf(request, change.getBlobIdent());
 			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
-			params = RepoFilePage.paramsOf(repo, request.getSourceBranch(), change.getPath(), Mode.EDIT);
+			params = RepoFilePage.paramsOf(request.getSourceRepo(), request.getSourceBranch(), 
+					change.getPath(), Mode.EDIT);
 			add(new BookmarkablePageLink<Void>("editFile", RepoFilePage.class, params) {
 	
 				@Override
@@ -173,7 +172,7 @@ public class TextDiffPanel extends Panel {
 				
 			});
 		} else {
-			PageParameters params = RepoFilePage.paramsOf(repo, change.getBlobIdent());
+			PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), change.getBlobIdent());
 			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
 			add(new WebMarkupContainer("editFile").setVisible(false));
 		}

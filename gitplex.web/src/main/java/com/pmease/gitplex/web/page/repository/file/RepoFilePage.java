@@ -210,6 +210,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		querySymbol = params.get(PARAM_QUERY_SYMBOL).toString();
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		requestId = params.get(PARAM_REQUEST).toOptionalLong();
+		
+		if ((requestId != null || commentId != null) && !GitUtils.isHash(blobIdent.revision))
+			throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
 	}
 	
 	private ObjectId getCommitId() {
@@ -224,11 +227,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		newCommentContext(null);
 		newLastCommit(null);
 		
-		if (mode != Mode.EDIT) {
+		if (mode == Mode.EDIT) {
+			onAddOrEditFile(null);
+		} else if (mode == Mode.DELETE) {
+			newFileNavigator(null, null);
+			onDelete(null);
+		} else {
 			newFileNavigator(null, null);
 			newFileViewer(null);
-		} else {
-			onAddOrEditFile(null);
 		}
 		
 		add(new InstantSearchPanel("instantSearch", repoModel, requestModel, new AbstractReadOnlyModel<String>() {
@@ -877,7 +883,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onDelete(AjaxRequestTarget target) {
+	public void onDelete(@Nullable AjaxRequestTarget target) {
 		final String refName = getEditRefName();
 
 		CancelListener cancelListener = new CancelListener() {
@@ -932,11 +938,15 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			}
 			
 		};
-		lastCommit.setVisibilityAllowed(false);
-		target.add(lastCommit);
-		replace(fileViewer);
-		target.add(fileViewer);
-		target.appendJavaScript("$(window).resize();");
+		if (target != null) {
+			lastCommit.setVisibilityAllowed(false);
+			target.add(lastCommit);
+			replace(fileViewer);
+			target.add(fileViewer);
+			target.appendJavaScript("$(window).resize();");
+		} else {
+			add(fileViewer);
+		}
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
@@ -22,6 +23,7 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -175,13 +177,19 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (!context.isOnBranch() && !context.isAtSourceBranchHead())
+				if (!context.isOnBranch() && !context.isAtSourceBranchHead()) 
 					tag.put("disabled", "disabled");
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				context.onEdit(target);
+				if (context.isOnBranch()) {
+					context.onEdit(target);
+				} else {
+					PageParameters params = RepoFilePage.paramsOf(context.getRepository(), 
+							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.EDIT);
+					setResponsePage(RepoFilePage.class, params);
+				}
 			}
 			
 		});
@@ -208,7 +216,13 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				context.onDelete(target);
+				if (context.isOnBranch()) {
+					context.onDelete(target);
+				} else {
+					PageParameters params = RepoFilePage.paramsOf(context.getRepository(), 
+							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.DELETE);
+					setResponsePage(RepoFilePage.class, params);
+				}
 			}
 
 		});
