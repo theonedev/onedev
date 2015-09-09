@@ -85,7 +85,7 @@
 }
 #repo-file>.last-commit {
 	padding: 6px 12px;
-	background: #EEE;
+	background: #F2F2F2;
 	max-height: 600px;
 	overflow: auto;
 }

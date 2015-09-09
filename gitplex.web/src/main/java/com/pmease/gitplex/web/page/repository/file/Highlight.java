@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.page.repository.file;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.pmease.commons.lang.extractors.TokenPosition;
@@ -10,13 +12,13 @@ public class Highlight implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final int fromLine, fromChar, toLine, toChar;
+	private final int beginLine, beginChar, endLine, endChar;
 	
-	public Highlight(int fromLine, int fromChar, int toLine, int toChar) {
-		this.fromLine = fromLine;
-		this.fromChar = fromChar;
-		this.toLine = toLine;
-		this.toChar = toChar;
+	public Highlight(int beginLine, int beginChar, int endLine, int endChar) {
+		this.beginLine = beginLine;
+		this.beginChar = beginChar;
+		this.endLine = endLine;
+		this.endChar = endChar;
 	}
 	
 	public Highlight(TokenPosition tokenPos) {
@@ -25,33 +27,39 @@ public class Highlight implements Serializable {
 	}
 
 	public Highlight(String str) {
-		String from = StringUtils.substringBefore(str, "-");
-		String to = StringUtils.substringAfter(str, "-");
-		fromLine = Integer.parseInt(StringUtils.substringBefore(from, ","))-1;
-		fromChar = Integer.parseInt(StringUtils.substringAfter(from, ","))-1;
-		toLine = Integer.parseInt(StringUtils.substringBefore(to, ","))-1;
-		toChar = Integer.parseInt(StringUtils.substringAfter(to, ","))-1;
+		String begin = StringUtils.substringBefore(str, "-");
+		String end = StringUtils.substringAfter(str, "-");
+		beginLine = Integer.parseInt(StringUtils.substringBefore(begin, ","))-1;
+		beginChar = Integer.parseInt(StringUtils.substringAfter(begin, ","))-1;
+		endLine = Integer.parseInt(StringUtils.substringBefore(end, ","))-1;
+		endChar = Integer.parseInt(StringUtils.substringAfter(end, ","))-1;
 	}
 	
-	public int getFromLine() {
-		return fromLine;
+	public int getBeginLine() {
+		return beginLine;
 	}
 
-	public int getFromChar() {
-		return fromChar;
+	public int getBeginChar() {
+		return beginChar;
 	}
 
-	public int getToLine() {
-		return toLine;
+	public int getEndLine() {
+		return endLine;
 	}
 
-	public int getToChar() {
-		return toChar;
+	public int getEndChar() {
+		return endChar;
 	}
 
 	@Override
 	public String toString() {
-		return (fromLine+1) + "," + (fromChar+1) + "-" + (toLine+1) + "," + (toChar+1);
+		return (beginLine+1) + "," + (beginChar+1) + "-" + (endLine+1) + "," + (endChar+1);
 	}
 	
+	public static @Nullable Highlight of(@Nullable TokenPosition tokenPos) {
+		if (tokenPos != null)
+			return new Highlight(tokenPos);
+		else
+			return null;
+	}
 }

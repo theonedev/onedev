@@ -158,7 +158,9 @@ gitplex.sourceview = {
 				});
 			    if (commentId != -1) {
 			    	$comment = $("#pullrequest-comment-" + commentId);
-			    	cm.setCursor($comment.data("lineno"));
+			    	var lineNo = $comment.data("lineno");
+					gitplex.sourceview.centerLine(cm, lineNo);
+			    	cm.setCursor(lineNo);
 			    	setTimeout(function() {$comment.find(">div").focus();}, 10);
 			    }
 			    
@@ -169,7 +171,8 @@ gitplex.sourceview = {
 						document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, node);
 					}
 			    });
-			    
+			    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
+			    	
 			    cm.focus();
 			} 
 			if (cm.getOption("fullScreen"))
@@ -177,22 +180,26 @@ gitplex.sourceview = {
 			cm.setSize($code.width(), $code.height());
 		});
 	}, 
-		
+
+	centerLine: function(cm, line) {
+		var h = cm.getScrollInfo().clientHeight;
+		var coords = cm.charCoords({line: line, ch: 0}, "local");
+		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+	},
+	
 	highlight: function(cm, highlight) {
 		if (typeof cm === "string") 
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
 		if (highlight) {
-			var h = cm.getScrollInfo().clientHeight;
-			var coords = cm.charCoords({line: highlight.fromLine, ch: 0}, "local");
-			cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+			centerLine(cm, highlight.beginLine);
 			
 			var allMarks = cm.getAllMarks();
 			for (var i=0; i<allMarks.length; i++) 
 				allMarks[i].clear();
 			cm.markText(
-					{line: highlight.fromLine, ch: highlight.fromChar}, 
-					{line: highlight.toLine, ch: highlight.toChar},
+					{line: highlight.beginLine, ch: highlight.beginChar}, 
+					{line: highlight.endLine, ch: highlight.endChar},
 					{className: "CodeMirror-highlight"});
 		} else {
 			cm.setCursor(0, 0);

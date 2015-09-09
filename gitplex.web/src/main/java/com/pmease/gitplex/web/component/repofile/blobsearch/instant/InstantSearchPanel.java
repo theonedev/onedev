@@ -157,17 +157,9 @@ public abstract class InstantSearchPanel extends Panel {
 						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
 
-						Long requestId;
-						if (requestModel.getObject() != null)
-							requestId = requestModel.getObject().getId();
-						else
-							requestId = null;
+						Long requestId = PullRequest.idOf(requestModel.getObject());
 						
-						Highlight highlight;
-						if (hit.getTokenPos() != null)
-							highlight = new Highlight(hit.getTokenPos());
-						else
-							highlight = null;
+						Highlight highlight = Highlight.of(hit.getTokenPos());
 						PageParameters params = RepoFilePage.paramsOf(
 								repoModel.getObject(), revisionModel.getObject(), 
 								hit.getBlobPath(), highlight, requestId);
@@ -291,17 +283,8 @@ public abstract class InstantSearchPanel extends Panel {
 						if (item.getIndex() + symbolHits.size() == activeHitIndex)
 							item.add(AttributeModifier.append("class", " active"));
 						
-						Long requestId;
-						if (requestModel.getObject() != null)
-							requestId = requestModel.getObject().getId();
-						else
-							requestId = null;
-						
-						Highlight highlight;
-						if (hit.getTokenPos() != null)
-							highlight = new Highlight(hit.getTokenPos());
-						else
-							highlight = null;
+						Long requestId = PullRequest.idOf(requestModel.getObject());
+						Highlight highlight = Highlight.of(hit.getTokenPos());
 						PageParameters params = RepoFilePage.paramsOf(
 								repoModel.getObject(), revisionModel.getObject(), 
 								hit.getBlobPath(), highlight, requestId);

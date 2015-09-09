@@ -38,6 +38,7 @@ import org.eclipse.jgit.lib.FileMode;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
@@ -376,11 +377,7 @@ public abstract class SearchResultPanel extends Panel {
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
 						
-						Long requestId;
-						if (context.getPullRequest() != null)
-							requestId = context.getPullRequest().getId();
-						else
-							requestId = null;
+						Long requestId = PullRequest.idOf(context.getPullRequest());
 						PageParameters params = RepoFilePage.paramsOf(
 								context.getRepository(), context.getBlobIdent().revision, 
 								blobPath, null, requestId);
@@ -438,14 +435,11 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
-								Long requestId;
-								if (context.getPullRequest() != null)
-									requestId = context.getPullRequest().getId();
-								else
-									requestId = null;
+								Long requestId = PullRequest.idOf(context.getPullRequest());
+								Highlight highlight = Highlight.of(hit.getTokenPos());
 								PageParameters params = RepoFilePage.paramsOf(
 										context.getRepository(), context.getBlobIdent().revision, 
-										hit.getBlobPath(), new Highlight(hit.getTokenPos()), requestId);
+										hit.getBlobPath(), highlight, requestId);
 								CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));
 								

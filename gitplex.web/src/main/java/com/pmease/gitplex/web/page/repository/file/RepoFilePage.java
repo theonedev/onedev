@@ -491,34 +491,26 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		
 		final AtomicReference<String> newPathRef = new AtomicReference<>(blobIdent.isTree()?null:blobIdent.path);
 
-		IModel<Repository> repoModel = new LoadableDetachableModel<Repository>() {
-
-			@Override
-			protected Repository load() {
-				return getEditRepository();
-			}
-			
-		};
 		fileViewer = new FileEditPanel(
 				FILE_VIEWER_ID, repoModel, refName, 
 				blobIdent.isTree()?null:blobIdent.path, 
-				blobIdent.isTree()?"":getEditRepository().getBlob(blobIdent).getText().getContent(), 
+				blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
 				getEditCommitId()) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				Repository editRepository = getEditRepository();
-				String editBranch = getEditBranch();
-				editRepository.cacheObjectId(getEditBranch(), newCommitId);
+				Repository repository = getRepository();
+				String branch = blobIdent.revision;
+				repository.cacheObjectId(branch, newCommitId);
 				BlobIdent committed = new BlobIdent(
-						editBranch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
+						branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 	    		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
-	    			listener.onRefUpdate(editRepository, refName, newCommitId.name());
+	    			listener.onRefUpdate(repository, refName, newCommitId.name());
 
-	    		if (editRepository.equals(getRepository())) 
+	    		if (repository.equals(getRepository())) 
 	    			onSelect(target, committed, null);
 	    		else
-	    			setResponsePage(RepoFilePage.class, paramsOf(editRepository, committed));
+	    			setResponsePage(RepoFilePage.class, paramsOf(repository, committed));
 			}
 
 			@Override
@@ -899,23 +891,15 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 		};
 		
-		IModel<Repository> repoModel = new LoadableDetachableModel<Repository>() {
-
-			@Override
-			protected Repository load() {
-				return getEditRepository();
-			}
-			
-		};		
 		fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, blobIdent.path, 
 				null, getEditCommitId(), cancelListener) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				Repository editRepository = getEditRepository();
-				String editBranch = getEditBranch();
-				editRepository.cacheObjectId(editBranch, newCommitId);
-				try (	FileRepository jgitRepo = editRepository.openAsJGitRepo();
+				Repository repository = getRepository();
+				String branch = blobIdent.revision;
+				repository.cacheObjectId(branch, newCommitId);
+				try (	FileRepository jgitRepo = repository.openAsJGitRepo();
 						RevWalk revWalk = new RevWalk(jgitRepo)) {
 					RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
 					String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
@@ -928,12 +912,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 						}
 					}
 					for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
-		    			listener.onRefUpdate(editRepository, refName, newCommitId.name());
-					BlobIdent parentBlobIdent = new BlobIdent(editBranch, parentPath, FileMode.TREE.getBits());
-					if (editRepository.equals(getRepository()))
+		    			listener.onRefUpdate(repository, refName, newCommitId.name());
+					BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
+					if (repository.equals(getRepository()))
 						onSelect(target, parentBlobIdent, null);
 					else
-						setResponsePage(RepoFilePage.class, paramsOf(editRepository, parentBlobIdent));
+						setResponsePage(RepoFilePage.class, paramsOf(repository, parentBlobIdent));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -963,25 +947,11 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return getRepository().getRefs(Git.REFS_HEADS).containsKey(blobIdent.revision);
 	}
 
-	private Repository getEditRepository() {
-		if (isOnBranch())
-			return getRepository();
-		else
-			return requestModel.getObject().getSourceRepo();
-	}
-	
 	private String getEditRefName() {
 		if (isOnBranch()) 
 			return GitUtils.branch2ref(blobIdent.revision);
 		else 
 			return requestModel.getObject().getSourceRef();
-	}
-	
-	private String getEditBranch() {
-		if (isOnBranch()) 
-			return blobIdent.revision;
-		else 
-			return requestModel.getObject().getSourceBranch();
 	}
 	
 	private ObjectId getEditCommitId() {

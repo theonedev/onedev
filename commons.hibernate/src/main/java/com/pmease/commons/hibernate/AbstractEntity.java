@@ -82,8 +82,10 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	 * @param entity
 	 * @return
 	 */
-	public static @Nullable Long idOf(AbstractEntity entity) {
-		if (entity instanceof HibernateProxy) {
+	public static @Nullable Long idOf(@Nullable AbstractEntity entity) {
+		if (entity == null) {
+			return null;
+		} else if (entity instanceof HibernateProxy) {
 			HibernateProxy proxy = (HibernateProxy) entity;
 			return (Long) proxy.getHibernateLazyInitializer().getIdentifier();
 		} else {

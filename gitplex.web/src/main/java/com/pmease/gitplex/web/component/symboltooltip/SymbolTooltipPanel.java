@@ -218,22 +218,15 @@ public abstract class SymbolTooltipPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private Long getRequestId() {
-		if (requestModel.getObject() != null)
-			return requestModel.getObject().getId();
-		else
-			return null;
-	}
-	
 	public PageParameters getQueryHitParams(QueryHit hit) {
 		return RepoFilePage.paramsOf(
 				repoModel.getObject(), revision, hit.getBlobPath(), 
-				new Highlight(hit.getTokenPos()), getRequestId());
+				Highlight.of(hit.getTokenPos()), PullRequest.idOf(requestModel.getObject()));
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
 		return RepoFilePage.paramsOf(repoModel.getObject(), revision, 
-				getBlobPath(), null, symbol, null, getRequestId(), null);
+				getBlobPath(), null, symbol, null, PullRequest.idOf(requestModel.getObject()), null);
 	}
 	
 	public String getSymbol() {
