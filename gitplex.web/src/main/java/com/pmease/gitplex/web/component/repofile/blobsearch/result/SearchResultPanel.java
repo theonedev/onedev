@@ -30,14 +30,20 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.lib.FileMode;
 
+import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
+import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
@@ -51,6 +57,8 @@ public abstract class SearchResultPanel extends Panel {
 	private static final String EXPAND_LINK_ID = "expandLink";
 	
 	private static final String NAV_CHANNEL = "blob-search-result-nav";
+	
+	private final BlobViewContext context;
 	
 	private final List<MatchedBlob> blobs;
 	
@@ -66,8 +74,10 @@ public abstract class SearchResultPanel extends Panel {
 
 	private AjaxLink<Void> nextMatchLink;
 	
-	public SearchResultPanel(String id, List<QueryHit> hits) {
+	public SearchResultPanel(String id, BlobViewContext context, List<QueryHit> hits) {
 		super(id);
+		
+		this.context = context;
 		
 		hasMore = (hits.size() == MAX_QUERY_ENTRIES);
 		
@@ -119,10 +129,16 @@ public abstract class SearchResultPanel extends Panel {
 		target.add(nextMatchLink);
 		
 		MatchedBlob activeBlob = blobs.get(activeBlobIndex);
+		
+		QueryHit hit;
 		if (activeHitIndex != -1)
-			onSelect(target, activeBlob.getHits().get(activeHitIndex));
+			hit = activeBlob.getHits().get(activeHitIndex);
 		else 
-			onSelect(target, new FileHit(activeBlob.getBlobPath()));
+			hit = new FileHit(activeBlob.getBlobPath());
+		
+		BlobIdent selected = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
+				FileMode.REGULAR_FILE.getBits());
+		context.onSelect(target, selected, hit.getTokenPos());
 	}
 	
 	private void onPrevMatch(AjaxRequestTarget target) {
@@ -354,10 +370,22 @@ public abstract class SearchResultPanel extends Panel {
 					protected void onInitialize() {
 						super.onInitialize();
 						
-						add(new Label("label", blobItem.getModelObject().getBlobPath()));
+						String blobPath = blobItem.getModelObject().getBlobPath();
+						add(new Label("label", blobPath));
 						
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
+						
+						Long requestId;
+						if (context.getPullRequest() != null)
+							requestId = context.getPullRequest().getId();
+						else
+							requestId = null;
+						PageParameters params = RepoFilePage.paramsOf(
+								context.getRepository(), context.getBlobIdent().revision, 
+								blobPath, null, requestId);
+						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+						add(AttributeAppender.replace("href", url.toString()));
 						
 						setMarkupId(SearchResultPanel.this.getMarkupId() + "-" + blobItem.getIndex());
 					}
@@ -410,6 +438,17 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
+								Long requestId;
+								if (context.getPullRequest() != null)
+									requestId = context.getPullRequest().getId();
+								else
+									requestId = null;
+								PageParameters params = RepoFilePage.paramsOf(
+										context.getRepository(), context.getBlobIdent().revision, 
+										hit.getBlobPath(), new Highlight(hit.getTokenPos()), requestId);
+								CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+								add(AttributeAppender.replace("href", url.toString()));
+								
 								setMarkupId(SearchResultPanel.this.getMarkupId() 
 										+ "-" + blobItem.getIndex() + "-" + hitItem.getIndex());
 							}
@@ -484,8 +523,6 @@ public abstract class SearchResultPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-
-	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);
 
 	protected abstract void onClose(AjaxRequestTarget target);
 

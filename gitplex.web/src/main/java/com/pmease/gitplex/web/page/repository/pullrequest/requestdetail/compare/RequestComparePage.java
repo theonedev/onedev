@@ -35,7 +35,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
@@ -596,7 +595,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 			// compare identifier instead of comment object as comment may have been deleted
 			// to cause LazyInitializationException
-			if (HibernateUtils.getId(comment).equals(state.commentId)) {
+			if (Comment.idOf(comment).equals(state.commentId)) {
 				state.commentId = null;
 				state.oldRev = getRevision(oldCommitHash);
 				state.newRev = getRevision(newCommitHash);

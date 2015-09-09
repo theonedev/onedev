@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 
-import com.pmease.commons.hibernate.HibernateUtils;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -16,7 +15,7 @@ public abstract class PullRequestChangeRenderer extends WebSocketRenderBehavior 
 	protected WebSocketTrait getTrait() {
 		// Do not call getPullRequest().getId() here to avoid unnecessary SQL query
 		PullRequestChangeTrait trait = new PullRequestChangeTrait();
-		trait.requestId = HibernateUtils.getId(getPullRequest());
+		trait.requestId = PullRequest.idOf(getPullRequest());
 		return trait;
 	}
 

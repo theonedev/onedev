@@ -2,6 +2,7 @@ package com.pmease.commons.hibernate;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -9,6 +10,7 @@ import javax.persistence.MappedSuperclass;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.proxy.HibernateProxy;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -73,4 +75,20 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	public boolean isNew() {
 		return getId() == null;
 	}
+	
+	/**
+	 * This method is created to get identifier of entity without triggering 
+	 * lazy load the whole entity object.
+	 * @param entity
+	 * @return
+	 */
+	public static @Nullable Long idOf(AbstractEntity entity) {
+		if (entity instanceof HibernateProxy) {
+			HibernateProxy proxy = (HibernateProxy) entity;
+			return (Long) proxy.getHibernateLazyInitializer().getIdentifier();
+		} else {
+			return entity.getId();
+		}
+	}
+	
 }

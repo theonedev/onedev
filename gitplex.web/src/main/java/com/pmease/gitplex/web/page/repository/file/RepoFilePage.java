@@ -231,7 +231,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			onAddOrEditFile(null);
 		}
 		
-		add(new InstantSearchPanel("instantSearch", repoModel, new AbstractReadOnlyModel<String>() {
+		add(new InstantSearchPanel("instantSearch", repoModel, requestModel, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -625,7 +625,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getRepository(), blobIdent.revision, blobIdent.path, 
-				mode, highlight, null, commentId, requestId);
+				highlight, null, commentId, requestId, mode);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		HistoryState state = new HistoryState();
 		state.mode = mode;
@@ -654,38 +654,40 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String commitHash, @Nullable String path) {
-		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, 
-				null, null, request.getId());
+		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, null, request.getId(), null);
 	}
 	
 	public static PageParameters paramsOf(Comment comment) {
 		return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, 
-				comment.getBlobIdent().path, null, null, null, comment.getId(), null);
+				comment.getBlobIdent().path, null, null, comment.getId(), null, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
-		return paramsOf(repository, blobIdent.revision, blobIdent.path, null);
+		return paramsOf(repository, blobIdent.revision, blobIdent.path);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
-		return paramsOf(repository, revision, path, null);
+		return paramsOf(repository, revision, path, null, null, null, null, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, 
 			@Nullable String path, @Nullable Mode mode) {
-		return paramsOf(repository, revision, path, mode, null, null, null, null);
+		return paramsOf(repository, revision, path, null, null, null, null, mode);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
-			@Nullable String path, Mode mode, @Nullable Highlight highlight, 
-			@Nullable String querySymbol,@Nullable Long commentId, @Nullable Long requestId) {
+			@Nullable String path, @Nullable Highlight highlight, @Nullable Long requestId) {
+		return paramsOf(repository, revision, path, highlight, null, null, requestId, null);
+	}
+	
+	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
+			@Nullable String path, @Nullable Highlight highlight, @Nullable String querySymbol, 
+			@Nullable Long commentId, @Nullable Long requestId, @Nullable Mode mode) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
 		if (path != null)
 			params.set(PARAM_PATH, path);
-		if (mode != null)
-			params.set(PARAM_MODE, mode.name().toLowerCase());
 		if (highlight != null)
 			params.set(PARAM_HIGHLIGHT, highlight.toString());
 		if (querySymbol != null)
@@ -694,6 +696,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			params.set(PARAM_COMMENT, commentId);
 		if (requestId != null)
 			params.set(PARAM_REQUEST, requestId);
+		if (mode != null)
+			params.set(PARAM_MODE, mode.name().toLowerCase());
 		return params;
 	}
 	
@@ -709,15 +713,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private Component newSearchResult(List<QueryHit> hits) {
-		return new SearchResultPanel(SEARCH_RESULD_ID, hits) {
+		return new SearchResultPanel(SEARCH_RESULD_ID, this, hits) {
 			
-			@Override
-			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				BlobIdent selected = new BlobIdent(blobIdent.revision, hit.getBlobPath(), 
-						FileMode.REGULAR_FILE.getBits());
-				RepoFilePage.this.onSelect(target, selected, hit.getTokenPos());
-			}
-
 			@Override
 			protected void onClose(AjaxRequestTarget target) {
 				WebMarkupContainer searchResult = new WebMarkupContainer(SEARCH_RESULD_ID);

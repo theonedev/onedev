@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -29,6 +30,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
@@ -40,6 +42,7 @@ import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -49,6 +52,8 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
+import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class InstantSearchPanel extends Panel {
@@ -56,6 +61,8 @@ public abstract class InstantSearchPanel extends Panel {
 	private static final int MAX_QUERY_ENTRIES = 15;
 	
 	final IModel<Repository> repoModel;
+	
+	private final IModel<PullRequest> requestModel;
 	
 	final IModel<String> revisionModel;
 	
@@ -77,10 +84,12 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	private int activeHitIndex;
 	
-	public InstantSearchPanel(String id, IModel<Repository> repoModel, IModel<String> revisionModel) {
+	public InstantSearchPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+			IModel<String> revisionModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
+		this.requestModel = requestModel;
 		this.revisionModel = revisionModel;
 	}
 
@@ -147,6 +156,18 @@ public abstract class InstantSearchPanel extends Panel {
 						link.add(hit.render("label"));
 						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
+
+						Long requestId;
+						if (requestModel.getObject() != null)
+							requestId = requestModel.getObject().getId();
+						else
+							requestId = null;
+						PageParameters params = RepoFilePage.paramsOf(
+								repoModel.getObject(), revisionModel.getObject(), 
+								hit.getBlobPath(), new Highlight(hit.getTokenPos()), 
+								requestId);
+						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+						link.add(AttributeAppender.replace("href", url.toString()));
 
 						if (item.getIndex() == activeHitIndex)
 							item.add(AttributeModifier.append("class", "active"));
@@ -264,6 +285,18 @@ public abstract class InstantSearchPanel extends Panel {
 
 						if (item.getIndex() + symbolHits.size() == activeHitIndex)
 							item.add(AttributeModifier.append("class", " active"));
+						
+						Long requestId;
+						if (requestModel.getObject() != null)
+							requestId = requestModel.getObject().getId();
+						else
+							requestId = null;
+						PageParameters params = RepoFilePage.paramsOf(
+								repoModel.getObject(), revisionModel.getObject(), 
+								hit.getBlobPath(), new Highlight(hit.getTokenPos()), 
+								requestId);
+						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+						link.add(AttributeAppender.replace("href", url.toString()));
 					}
 					
 				});
@@ -462,6 +495,7 @@ public abstract class InstantSearchPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
+		requestModel.detach();
 		revisionModel.detach();
 		
 		super.onDetach();

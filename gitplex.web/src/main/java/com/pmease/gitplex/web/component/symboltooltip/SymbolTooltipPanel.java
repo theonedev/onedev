@@ -227,13 +227,13 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
 		return RepoFilePage.paramsOf(
-				repoModel.getObject(), revision, hit.getBlobPath(), null, 
-				new Highlight(hit.getTokenPos()), null, null, getRequestId());
+				repoModel.getObject(), revision, hit.getBlobPath(), 
+				new Highlight(hit.getTokenPos()), getRequestId());
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
 		return RepoFilePage.paramsOf(repoModel.getObject(), revision, 
-				getBlobPath(), null, null, symbol, null, getRequestId());
+				getBlobPath(), null, symbol, null, getRequestId(), null);
 	}
 	
 	public String getSymbol() {
