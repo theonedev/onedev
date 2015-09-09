@@ -556,6 +556,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			target.add(fileViewer);
 			lastCommit.setVisibilityAllowed(false);
 			target.add(lastCommit);
+			mode = Mode.EDIT;
+			pushState(target);
 		} else {
 			add(fileViewer);
 		}
@@ -944,6 +946,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			replace(fileViewer);
 			target.add(fileViewer);
 			target.appendJavaScript("$(window).resize();");
+			mode = Mode.DELETE;
+			pushState(target);
 		} else {
 			add(fileViewer);
 		}

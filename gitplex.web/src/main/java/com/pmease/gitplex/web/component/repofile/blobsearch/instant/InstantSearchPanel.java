@@ -162,10 +162,15 @@ public abstract class InstantSearchPanel extends Panel {
 							requestId = requestModel.getObject().getId();
 						else
 							requestId = null;
+						
+						Highlight highlight;
+						if (hit.getTokenPos() != null)
+							highlight = new Highlight(hit.getTokenPos());
+						else
+							highlight = null;
 						PageParameters params = RepoFilePage.paramsOf(
 								repoModel.getObject(), revisionModel.getObject(), 
-								hit.getBlobPath(), new Highlight(hit.getTokenPos()), 
-								requestId);
+								hit.getBlobPath(), highlight, requestId);
 						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 						link.add(AttributeAppender.replace("href", url.toString()));
 
@@ -291,10 +296,15 @@ public abstract class InstantSearchPanel extends Panel {
 							requestId = requestModel.getObject().getId();
 						else
 							requestId = null;
+						
+						Highlight highlight;
+						if (hit.getTokenPos() != null)
+							highlight = new Highlight(hit.getTokenPos());
+						else
+							highlight = null;
 						PageParameters params = RepoFilePage.paramsOf(
 								repoModel.getObject(), revisionModel.getObject(), 
-								hit.getBlobPath(), new Highlight(hit.getTokenPos()), 
-								requestId);
+								hit.getBlobPath(), highlight, requestId);
 						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 						link.add(AttributeAppender.replace("href", url.toString()));
 					}
