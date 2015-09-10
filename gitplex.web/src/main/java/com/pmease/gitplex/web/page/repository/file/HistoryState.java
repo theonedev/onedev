@@ -17,8 +17,6 @@ class HistoryState implements Serializable {
 	
 	public Highlight highlight;
 	
-	public String querySymbol;
-	
 	public Mode mode;
 	
 }

@@ -62,10 +62,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
-import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.search.query.BlobQuery;
-import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.repofile.blobsearch.advanced.AdvancedSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.instant.InstantSearchPanel;
@@ -108,8 +105,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private static final String PARAM_MODE = "mode";
 	
 	private static final String PARAM_HIGHLIGHT = "highlight";
-	
-	private static final String PARAM_QUERY_SYMBOL = "query_symbol";
 	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
@@ -154,8 +149,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private BlobIdent blobIdent = new BlobIdent();
 	
 	private Highlight highlight;
-	
-	private String querySymbol;
 	
 	private Mode mode;
 	
@@ -206,7 +199,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		if (highlightStr != null)
 			highlight = new Highlight(highlightStr);
 		
-		querySymbol = params.get(PARAM_QUERY_SYMBOL).toString();
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		
@@ -281,7 +273,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		add(advancedSearchModal);
 		add(new WebMarkupContainer("advancedSearch").add(new ModalBehavior(advancedSearchModal)));
 		
-		add(newRevisionSelector(blobIdent.revision));
+		add(newRevisionSelector());
 		
 		add(commentContext = new WebMarkupContainer("commentContext") {
 
@@ -355,12 +347,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
 		
 		List<QueryHit> hits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
-		if (hits != null) 
+		if (hits != null) { 
 			WebSession.get().setMetaData(SEARCH_RESULT_KEY, null);
-		else if (querySymbol != null) 
-			hits = queryOccurrences(querySymbol);
-		
-		if (hits != null) {
 			searchResultContainer.add(newSearchResult(hits));
 		} else {
 			searchResultContainer.add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
@@ -403,6 +391,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return requestModel.getObject();
 	}
 	
+	private void updateFileNavigator(AjaxRequestTarget target) {
+		Component fileNavigator = newFileNavigator();
+		replace(fileNavigator);
+		target.add(fileNavigator);
+	}
+	
 	private Component newFileNavigator() {
 		final BlobNameChangeCallback callback;
 		
@@ -442,21 +436,21 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			@Override
 			protected void onNewFile(AjaxRequestTarget target) {
 				mode = Mode.EDIT;
-				querySymbol = null;
 				
-				Component fileNavigator = newFileNavigator();
-				replace(fileNavigator);
-				target.add(fileNavigator);
-				
-				Component fileViewer = newFileViewer();
-				replace(fileViewer);
-				target.add(fileViewer);
+				updateFileNavigator(target);
+				updateFileViewer(target);
 				
 				pushState(target);
-				resize(target);
+				resizeWindow(target);
 			}
 			
 		};
+	}
+	
+	private void updateLastCommit(AjaxRequestTarget target) {
+		Component lastCommit = newLastCommit();
+		replace(lastCommit);
+		target.add(lastCommit);
 	}
 	
 	private Component newLastCommit() {
@@ -499,6 +493,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		throw new IllegalStateException("No applicable blob renderer found.");
 	}
 	
+	private void updateFileViewer(AjaxRequestTarget target) {
+		Component fileViewer = newFileViewer();
+		replace(fileViewer);
+		target.add(fileViewer);
+	}
+	
 	private Component newFileViewer() {
 		if (mode == Mode.EDIT) {
 			final String refName = GitUtils.branch2ref(blobIdent.revision);
@@ -520,8 +520,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		    			listener.onRefUpdate(repository, refName, newCommitId.name());
 
 		    		if (repository.equals(getRepository())) {
-		    			blobIdent.revision = null; // clear this to let applyState updates everything
-		    			onSelect(target, committed, null);
+		    			HistoryState state = getState();
+		    			state.blobIdent = committed;
+		    			state.mode = null;
+		    			applyState(target, state);
+		    			pushState(target);
+		    			resizeWindow(target);
 		    		} else {
 		    			setResponsePage(RepoFilePage.class, paramsOf(repository, committed));
 		    		}
@@ -529,9 +533,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 				@Override
 				protected void onCancel(AjaxRequestTarget target) {
-					HistoryState state = getState();
-					state.mode = null;
-					applyState(target, state);
+					mode = null;
+					pushState(target);
+					resizeWindow(target);
 				}
 				
 			};
@@ -542,9 +546,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 				@Override
 				public void onCancel(AjaxRequestTarget target) {
-					HistoryState state = getState();
-					state.mode = null;
-					applyState(target, state);
+					mode = null;
+
+					updateFileViewer(target);
+					
+					pushState(target);
+					resizeWindow(target);
 				}
 				
 			};
@@ -573,8 +580,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			    			listener.onRefUpdate(repository, refName, newCommitId.name());
 						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 						if (repository.equals(getRepository())) {
-			    			blobIdent.revision = null; // clear this to let applyState updates everything
-							onSelect(target, parentBlobIdent, null);
+							HistoryState state = getState();
+							state.blobIdent = parentBlobIdent;
+							state.mode = null;
+							applyState(target, state);
+							pushState(target);
+							resizeWindow(target);
 						} else {
 							setResponsePage(RepoFilePage.class, paramsOf(repository, parentBlobIdent));
 						}
@@ -600,7 +611,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getRepository(), blobIdent.revision, blobIdent.path, 
-				highlight, querySymbol, commentId, requestId, mode);
+				highlight, commentId, requestId, mode);
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		pushState(target, url.toString(), getState());
 	}
@@ -612,7 +623,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		state.highlight = new Highlight(highlight);
 		state.mode = mode;
 		state.requestId = requestId;
-		state.querySymbol = querySymbol;
 		return state;
 	}
 	
@@ -622,11 +632,16 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		highlight = state.highlight;
 		mode = state.mode;
 		requestId = state.requestId;
-		querySymbol = state.querySymbol;
 	}
 	
-	private Component newRevisionSelector(String revision) {
-		return new RevisionSelector(REVISION_SELECTOR_ID, repoModel, revision) {
+	private void updateRevisionSelector(AjaxRequestTarget target) {
+		Component revisionSelector = newRevisionSelector();
+		replace(revisionSelector);
+		target.add(revisionSelector);
+	}
+	
+	private Component newRevisionSelector() {
+		return new RevisionSelector(REVISION_SELECTOR_ID, repoModel, blobIdent.revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
@@ -635,7 +650,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				state.requestId = null;
 				state.commentId = null;
 				state.mode = null;
-				state.querySymbol = null;
 				state.highlight = null;
 				
 				if (state.blobIdent.path != null) {
@@ -655,17 +669,31 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				}
 
 				applyState(target, state);
+				pushState(target);
+				resizeWindow(target);
 			}
 
 		};
 	}
 
 	private void applyState(AjaxRequestTarget target, HistoryState state) {
-		applyState(target, state, true);
-	}
-	
-	private void applyState(AjaxRequestTarget target, HistoryState state, boolean pushState) {
-		boolean resize = false;
+		setState(state);
+		trait.revision = blobIdent.revision;
+
+		updateRevisionSelector(target);
+		
+		target.add(commentContext);
+		
+		updateFileNavigator(target);
+		
+		target.add(revisionIndexing);
+		
+		updateLastCommit(target);
+		updateFileViewer(target);
+		
+		resizeWindow(target);
+		
+		/*
 		if (!Objects.equal(state.blobIdent.revision, blobIdent.revision) 
 				|| !Objects.equal(state.requestId, requestId)
 				|| !Objects.equal(state.commentId, commentId)) {
@@ -798,17 +826,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			target.appendJavaScript("$(window).resize();");
 		if (pushState)
 			pushState(target, state);
-	}
-	
-	private List<QueryHit> queryOccurrences(String symbol) {
-		BlobQuery blobQuery = new TextQuery(querySymbol, false, true, true, 
-				null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
-		try {
-			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-			return searchManager.search(repoModel.getObject(), blobIdent.revision, blobQuery);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}								
+		*/
 	}
 	
 	@Override
@@ -829,12 +847,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String commitHash, @Nullable String path) {
-		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, null, request.getId(), null);
+		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, request.getId(), null);
 	}
 	
 	public static PageParameters paramsOf(Comment comment) {
 		return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, 
-				comment.getBlobIdent().path, null, null, comment.getId(), null, null);
+				comment.getBlobIdent().path, null, comment.getId(), null, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
@@ -842,22 +860,22 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
-		return paramsOf(repository, revision, path, null, null, null, null, null);
+		return paramsOf(repository, revision, path, null, null, null, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision, 
 			@Nullable String path, @Nullable Mode mode) {
-		return paramsOf(repository, revision, path, null, null, null, null, mode);
+		return paramsOf(repository, revision, path, null, null, null, mode);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
 			@Nullable String path, @Nullable Highlight highlight, @Nullable Long requestId) {
-		return paramsOf(repository, revision, path, highlight, null, null, requestId, null);
+		return paramsOf(repository, revision, path, highlight, null, requestId, null);
 	}
 	
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
-			@Nullable String path, @Nullable Highlight highlight, @Nullable String querySymbol, 
-			@Nullable Long commentId, @Nullable Long requestId, @Nullable Mode mode) {
+			@Nullable String path, @Nullable Highlight highlight, @Nullable Long commentId, 
+			@Nullable Long requestId, @Nullable Mode mode) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
@@ -865,8 +883,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			params.set(PARAM_PATH, path);
 		if (highlight != null)
 			params.set(PARAM_HIGHLIGHT, highlight.toString());
-		if (querySymbol != null)
-			params.set(PARAM_QUERY_SYMBOL, querySymbol);
 		if (commentId != null)
 			params.set(PARAM_COMMENT, commentId);
 		if (requestId != null)
@@ -892,45 +908,25 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 			@Override
 			protected void onClose(AjaxRequestTarget target) {
-				if (querySymbol != null) {
-					HistoryState state = getState();
-					state.querySymbol = null;
-					applyState(target, state);
-				} else {
-					updateSearchResult(target, null);
-				}
+				Component searchResult = new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true);
+				target.appendJavaScript("$('#repo-file>.search-result').hide();");
+				searchResultContainer.replace(searchResult);
+				target.add(searchResult);
+				resizeWindow(target);
 			}
 			
 		};
-	}
-	
-	private void updateSearchResult(AjaxRequestTarget target, @Nullable List<QueryHit> hits) {
-		Component searchResult;
-		if (hits != null) {
-			searchResult = newSearchResult(hits);
-			target.appendJavaScript(""
-					+ "$('#repo-file>.search-result').show();"
-					+ "$('#repo-file .search-result>.body').focus();"
-					+ "$(window).resize();");
-		} else {
-			searchResult = new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true);
-			target.appendJavaScript(""
-					+ "$('#repo-file>.search-result').hide(); "
-					+ "$(window).resize();");
-		}
-		searchResultContainer.replace(searchResult);
-		target.add(searchResult);
 	}
 	
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		
-		HistoryState state = (HistoryState) data;
-		applyState(target, state, false);
+		applyState(target, (HistoryState) data);
+		resizeWindow(target);
 	}
 	
-	private void resize(AjaxRequestTarget target) {
+	private void resizeWindow(AjaxRequestTarget target) {
 		target.appendJavaScript("$(window).resize();");
 	}
 	
@@ -996,11 +992,36 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
-		HistoryState state = getState();
-		state.blobIdent = blobIdent;
-		state.highlight = Highlight.of(tokenPos);
-		state.mode = null;
-		applyState(target, state);
+		highlight = Highlight.of(tokenPos);
+		Component fileViewer = get(FILE_VIEWER_ID);
+		if (fileViewer instanceof SourceViewPanel && this.blobIdent.path.equals(blobIdent.path)) {
+			SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
+			if (highlight == null && mode != Mode.BLAME) {
+				BlobViewPanel blobViewer = renderBlobViewer(FILE_VIEWER_ID);
+				if (blobViewer instanceof SourceViewPanel) {
+					sourceViewer.highlight(target, highlight);
+				} else {
+					fileViewer.replaceWith(blobViewer);
+					fileViewer = blobViewer;
+					target.add(fileViewer);
+					resizeWindow(target);
+				}
+			} else {
+				sourceViewer.highlight(target, highlight);
+			}
+			pushState(target);
+		} else {
+			this.blobIdent = blobIdent; 
+			mode = null;
+			
+			updateFileNavigator(target);
+			updateLastCommit(target);
+			
+			updateFileViewer(target);
+			
+			pushState(target);
+			resizeWindow(target);
+		}
 	}
 
 	@Override
@@ -1027,31 +1048,27 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	@Override
 	public void onDelete(AjaxRequestTarget target) {
 		mode = Mode.EDIT;
-		querySymbol = null;
 		
 		Component fileViewer = newFileViewer();
 		replace(fileViewer);
 		target.add(fileViewer);
 		
 		pushState(target);
-		resize(target);
+		resizeWindow(target);
 	}
 
 	@Override
 	public void onEdit(AjaxRequestTarget target) {
 		mode = Mode.EDIT;
-		querySymbol = null;
 		
-		Component fileNavigator = newFileNavigator();
-		replace(fileNavigator);
-		target.add(fileNavigator);
+		updateFileNavigator(target);
 		
 		Component fileViewer = newFileViewer();
 		replace(fileViewer);
 		target.add(fileViewer);
 		
 		pushState(target);
-		resize(target);
+		resizeWindow(target);
 	}
 
 	@Override
