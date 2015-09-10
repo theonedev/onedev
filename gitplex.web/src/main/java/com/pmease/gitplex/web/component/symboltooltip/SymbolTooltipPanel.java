@@ -226,7 +226,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	public PageParameters getFindOccurrencesParams() {
 		return RepoFilePage.paramsOf(repoModel.getObject(), revision, 
-				getBlobPath(), null, symbol, null, PullRequest.idOf(requestModel.getObject()), null);
+				getBlobPath(), null, null, PullRequest.idOf(requestModel.getObject()), null, symbol);
 	}
 	
 	public String getSymbol() {
