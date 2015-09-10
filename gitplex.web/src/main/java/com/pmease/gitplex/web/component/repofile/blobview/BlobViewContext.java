@@ -40,7 +40,7 @@ public interface BlobViewContext extends Serializable {
 	
 	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos);
 	
-	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
+	void onSearchComplete(AjaxRequestTarget target, String querySymbol, List<QueryHit> hits);
 	
 	void onBlameChange(AjaxRequestTarget target);
 	

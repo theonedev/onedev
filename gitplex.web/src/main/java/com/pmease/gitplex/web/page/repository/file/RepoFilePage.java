@@ -221,9 +221,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		newCommentContext(null);
-		newLastCommit(null);
-		
 		if (mode == Mode.EDIT) {
 			onAddOrEditFile(null);
 		} else if (mode == Mode.DELETE) {
@@ -326,24 +323,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 		});
 
-		List<QueryHit> hits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
-		WebSession.get().setMetaData(SEARCH_RESULT_KEY, null);
-		
-		if (hits == null && querySymbol != null) {
-			BlobQuery blobQuery = new TextQuery(querySymbol, false, true, true, 
-					null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
-			try {
-				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-				hits = searchManager.search(repoModel.getObject(), blobIdent.revision, blobQuery);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}								
-		}
-		if (hits != null) 
-			add(newSearchResult(hits));
-		else 
-			add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
-		
 		add(new WebSocketRenderBehavior() {
 			
 			@Override
@@ -380,8 +359,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return requestModel.getObject();
 	}
 	
-	private void newCommentContext(@Nullable AjaxRequestTarget target) {
-		Component commentContext = new WebMarkupContainer("commentContext") {
+	private Component newCommentContext() {
+		return new WebMarkupContainer("commentContext") {
 
 			@Override
 			protected void onConfigure() {
@@ -406,16 +385,11 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					}
 					
 				}, new TooltipConfig().withPlacement(Placement.bottom)));
+				
+				setOutputMarkupPlaceholderTag(true);
 			}
 
 		};
-		commentContext.setOutputMarkupPlaceholderTag(true);
-		if (target != null) {
-			replace(commentContext);
-			target.add(commentContext);
-		} else {
-			add(commentContext);
-		}
 	}
 	
 	private void newFileNavigator(@Nullable AjaxRequestTarget target, @Nullable BlobNameChangeCallback callback) {
@@ -516,33 +490,30 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			target.appendJavaScript("$(window).resize();");
 	}
 	
-	private void newLastCommit(@Nullable AjaxRequestTarget target) {
-		lastCommit = new AjaxLazyLoadPanel(LAST_COMMIT_ID) {
-			
-			@Override
-			public Component getLoadingComponent(String markupId) {
-				IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractDefaultAjaxBehavior.INDICATOR);
-				String html = "<img src='" + RequestCycle.get().urlFor(handler) + "' class='loading'/> Loading latest commit...";
-				return new Label(markupId, html).setEscapeModelStrings(false);
-			}
-
-			@Override
-			protected void onComponentLoaded(Component component, AjaxRequestTarget target) {
-				super.onComponentLoaded(component, target);
-				target.appendJavaScript("$(window).resize();");
-			}
-
-			@Override
-			public Component getLazyLoadComponent(String markupId) {
-				return new LastCommitPanel(markupId, repoModel, blobIdent);
-			}
-		};
-		lastCommit.setOutputMarkupPlaceholderTag(true);
-		if (target != null) {
-			replace(lastCommit);
-			target.add(lastCommit);
+	private Component newLastCommit() {
+		if (mode != Mode.EDIT) {
+			return new AjaxLazyLoadPanel(LAST_COMMIT_ID) {
+				
+				@Override
+				public Component getLoadingComponent(String markupId) {
+					IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractDefaultAjaxBehavior.INDICATOR);
+					String html = "<img src='" + RequestCycle.get().urlFor(handler) + "' class='loading'/> Loading latest commit...";
+					return new Label(markupId, html).setEscapeModelStrings(false);
+				}
+	
+				@Override
+				protected void onComponentLoaded(Component component, AjaxRequestTarget target) {
+					super.onComponentLoaded(component, target);
+					target.appendJavaScript("$(window).resize();");
+				}
+	
+				@Override
+				public Component getLazyLoadComponent(String markupId) {
+					return new LastCommitPanel(markupId, repoModel, blobIdent);
+				}
+			};
 		} else {
-			add(lastCommit);
+			return new WebMarkupContainer(LAST_COMMIT_ID).setOutputMarkupId(true);
 		}
 	}
 	
@@ -602,53 +573,80 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return state;
 	}
 	
-	private void onStateChange(@Nullable AjaxRequestTarget target, HistoryState state) {
-		if (!state.blobIdent.revision.equals(blobIdent.revision)) {
-			blobIdent.revision = state.blobIdent.revision;
-			Component revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, blobIdent.revision) {
+	private Component newRevisionSelector(String revision) {
+		return new RevisionSelector(REVISION_SELECTOR_ID, repoModel, revision) {
 
-				@Override
-				protected void onSelect(AjaxRequestTarget target, String revision) {
-					BlobIdent selected = new BlobIdent();
-					selected.revision = revision;
-					selected.mode = FileMode.TREE.getBits();
-					
-					trait.revision = revision;
-					
-					if (selected.path != null) {
-						try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-								RevWalk revWalk = new RevWalk(jgitRepo)) {
-							RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-							TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, selected.path, revTree);
-							if (treeWalk != null) {
-								selected.path = blobIdent.path;
-								selected.mode = treeWalk.getRawMode(0);
-							}
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+			@Override
+			protected void onSelect(AjaxRequestTarget target, String revision) {
+				HistoryState state = getState();
+				state.blobIdent.revision = revision;
+				state.requestId = null;
+				state.commentId = null;
+				state.mode = null;
+				state.querySymbol = null;
+				state.highlight = null;
+				
+				if (state.blobIdent.path != null) {
+					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+							RevWalk revWalk = new RevWalk(jgitRepo)) {
+						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
+						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
+						if (treeWalk != null) {
+							state.blobIdent.mode = treeWalk.getRawMode(0);
+						} else {
+							state.blobIdent.path = null;
+							state.blobIdent.mode = FileMode.TREE.getBits();
 						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
-
-					requestId = null;
-					commentId = null;
-					RepoFilePage.this.onSelect(target, selected, null);
-					newRevisionSelector(target);
-					newCommentContext(target);
-					target.add(revisionIndexing);
 				}
 
-			};
-			
+				onStateChange(target, state);
+			}
+
+		};
+	}
+	
+	private void onStateChange(@Nullable AjaxRequestTarget target, HistoryState state) {
+		boolean resize = false;
+		
+		if (!Objects.equal(state.blobIdent.revision, blobIdent.revision)) {
+			resize = true;
+			blobIdent.revision = state.blobIdent.revision;
+			trait.revision = blobIdent.revision;
+			Component revisionSelector = newRevisionSelector(blobIdent.revision);
 			if (target != null) {
 				replace(revisionSelector);
 				target.add(revisionSelector);
+				target.add(revisionIndexing);
 			} else {
 				add(revisionSelector);
-			}			
+			}
 		}
 		
-		newCommentContext(target);
-		newLastCommit(target);
+		if (!Objects.equal(state.requestId, requestId)) {
+			resize = true;
+			Component commentContext = newCommentContext();
+			if (target != null) {
+				replace(commentContext);
+				target.add(commentContext);
+			} else {
+				add(commentContext);
+			}
+		}
+		
+		if (!Objects.equal(state.blobIdent.revision, blobIdent.revision) 
+				|| !Objects.equal(state.blobIdent.path, blobIdent.path)) {
+			resize = true;
+			Component lastCommit = newLastCommit();
+			if (target != null) {
+				replace(lastCommit);
+				target.add(lastCommit);
+			} else {
+				add(lastCommit);
+			}
+		}
 		
 		if (mode == Mode.EDIT) {
 			final String refName = GitUtils.branch2ref(blobIdent.revision);
@@ -784,49 +782,40 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			newFileNavigator(null, null);
 			newFileViewer(null);
 		}
-		
-		add(new InstantSearchPanel("instantSearch", repoModel, requestModel, new AbstractReadOnlyModel<String>() {
 
-			@Override
-			public String getObject() {
-				return blobIdent.revision;
+		if (!Objects.equal(state.querySymbol, querySymbol)) {
+			resize = true;
+			List<QueryHit> hits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
+			WebSession.get().setMetaData(SEARCH_RESULT_KEY, null);
+			
+			if (hits == null && querySymbol != null) {
+				BlobQuery blobQuery = new TextQuery(querySymbol, false, true, true, 
+						null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
+				try {
+					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+					hits = searchManager.search(repoModel.getObject(), blobIdent.revision, blobQuery);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}								
 			}
-			
-		}) {
-			
-			@Override
-			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				BlobIdent selected = new BlobIdent(blobIdent.revision, hit.getBlobPath(), 
-						FileMode.REGULAR_FILE.getBits()); 
-				RepoFilePage.this.onSelect(target, selected, hit.getTokenPos());
+			Component searchResult = newSearchResult(hits);
+			searchResult.setOutputMarkupId(true);
+			if (target != null) {
+				replace(searchResult);
+				target.add(searchResult);
+				if (querySymbol == null) {
+					target.appendJavaScript("$('#repo-file>.search-result').hide();");				
+				} else {
+					target.appendJavaScript(""
+							+ "$('#repo-file>.search-result').show();"
+							+ "$('#repo-file .search-result>.body').focus();");
+				}
+			} else {
+				add(searchResult);
 			}
-			
-			@Override
-			protected void onMoreQueried(AjaxRequestTarget target, List<QueryHit> hits) {
-				renderSearchResult(target, hits);
-			}
-			
-		});
-		
-		List<QueryHit> hits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
-		WebSession.get().setMetaData(SEARCH_RESULT_KEY, null);
-		
-		if (hits == null && querySymbol != null) {
-			BlobQuery blobQuery = new TextQuery(querySymbol, false, true, true, 
-					null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
-			try {
-				SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-				hits = searchManager.search(repoModel.getObject(), blobIdent.revision, blobQuery);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}								
 		}
-		if (hits != null) 
-			add(newSearchResult(hits));
-		else 
-			add(new WebMarkupContainer(SEARCH_RESULD_ID).setOutputMarkupId(true));
 		
-		if (target != null)
+		if (target != null && resize)
 			target.appendJavaScript("$(window).resize();");
 	}
 	
@@ -906,19 +895,21 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				+ "$(window).resize();");
 	}
 	
-	private Component newSearchResult(List<QueryHit> hits) {
-		return new SearchResultPanel(SEARCH_RESULD_ID, this, hits) {
-			
-			@Override
-			protected void onClose(AjaxRequestTarget target) {
-				WebMarkupContainer searchResult = new WebMarkupContainer(SEARCH_RESULD_ID);
-				searchResult.setOutputMarkupId(true);
-				getPage().replace(searchResult);
-				target.add(searchResult);
-				target.appendJavaScript("$('#repo-file>.search-result').hide(); $(window).resize();");
-			}
-			
-		};
+	private Component newSearchResult(@Nullable List<QueryHit> hits) {
+		if (hits != null) {
+			return new SearchResultPanel(SEARCH_RESULD_ID, this, hits) {
+				
+				@Override
+				protected void onClose(AjaxRequestTarget target) {
+					HistoryState state = getState();
+					state.querySymbol = null;
+					onStateChange(target, state);
+				}
+				
+			};
+		} else {
+			return new WebMarkupContainer(SEARCH_RESULD_ID);
+		}
 	}
 	
 	@Override
@@ -935,9 +926,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		trait.revision = blobIdent.revision;
 
 		target.add(revisionIndexing);
-		newCommentContext(target);
 		newFileNavigator(target, null);
-		newLastCommit(target);
 		newFileViewer(target);
 	}
 	
@@ -1028,7 +1017,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			mode = null;
 			
 			newFileNavigator(target, null);
-			newLastCommit(target);
 			newFileViewer(target);
 			
 			pushState(target);
@@ -1036,7 +1024,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
+	public void onSearchComplete(AjaxRequestTarget target, String querySymbol, List<QueryHit> hits) {
+		HistoryState state = getState();
 		renderSearchResult(target, hits);
 	}
 
