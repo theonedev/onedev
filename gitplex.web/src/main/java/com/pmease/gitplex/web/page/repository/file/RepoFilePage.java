@@ -545,6 +545,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				@Override
 				protected void onCancel(AjaxRequestTarget target) {
 					mode = null;
+					newFileNavigator(target);
+					newFileViewer(target);
 					pushState(target);
 					resizeWindow(target);
 				}
@@ -633,7 +635,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		HistoryState state = new HistoryState();
 		state.blobIdent = new BlobIdent(blobIdent);
 		state.commentId = commentId;
-		state.highlight = new Highlight(highlight);
+		state.highlight = highlight;
 		state.mode = mode;
 		state.requestId = requestId;
 		return state;
@@ -923,7 +925,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public void onDelete(AjaxRequestTarget target) {
-		mode = Mode.EDIT;
+		mode = Mode.DELETE;
 
 		newFileViewer(target);
 		pushState(target);

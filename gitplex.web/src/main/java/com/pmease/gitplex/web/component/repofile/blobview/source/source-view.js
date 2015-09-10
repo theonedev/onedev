@@ -192,7 +192,7 @@ gitplex.sourceview = {
 			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
 		
 		if (highlight) {
-			centerLine(cm, highlight.beginLine);
+			gitplex.sourceview.centerLine(cm, highlight.beginLine);
 			
 			var allMarks = cm.getAllMarks();
 			for (var i=0; i<allMarks.length; i++) 
