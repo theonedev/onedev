@@ -21,9 +21,6 @@ $(window).load(function() {
 		}
 	});
 	
-	if ($searchResult.find(".search-result").length != 0)
-		$searchResult.show();
-	
 	$(window).resize(function(e) {
 		e.stopPropagation();
 		

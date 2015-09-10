@@ -5,6 +5,8 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.pmease.commons.lang.extractors.TokenPosition;
 
@@ -61,6 +63,31 @@ public class Highlight implements Serializable {
 	@Override
 	public String toString() {
 		return (beginLine+1) + "," + (beginChar+1) + "-" + (endLine+1) + "," + (endChar+1);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof Highlight))
+			return false;
+		if (this == other)
+			return true;
+		Highlight otherHighlight = (Highlight) other;
+		return new EqualsBuilder()
+				.append(beginLine, otherHighlight.beginLine)
+				.append(beginChar, otherHighlight.beginChar)
+				.append(endLine, otherHighlight.endLine)
+				.append(endChar, otherHighlight.endChar)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+				.append(beginLine)
+				.append(beginChar)
+				.append(endLine)
+				.append(endChar)
+				.toHashCode();
 	}
 	
 	public static @Nullable Highlight of(@Nullable TokenPosition tokenPos) {

@@ -330,31 +330,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		} 
 		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
 		
-		CharSequence addCommentCallback;
-		if (addCommentBehavior != null) 
-			addCommentCallback = addCommentBehavior.getCallbackFunction(CallbackParameter.explicit("lineNo"));
-		else
-			addCommentCallback = "undefined";
-		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %d, %s);", 
-				codeContainer.getMarkupId(), 
-				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
-				context.getBlobIdent().path, 
-				highlight,
-				symbolTooltip.getMarkupId(), 
-				context.getBlobIdent().revision, 
-				getBlameCommits(), 
-				context.getComment()!=null?context.getComment().getId():-1,
-				addCommentCallback);
-		response.render(OnDomReadyHeaderItem.forScript(script));
-	}
-
-	public void onBlameChange(AjaxRequestTarget target) {
-		String script = String.format("gitplex.sourceview.blame('%s', %s);", 
-				codeContainer.getMarkupId(), getBlameCommits());
-		target.appendJavaScript(script);
-	}
-
-	private String getBlameCommits() {
+		String blameCommitsJson;
 		if (context.getMode() == Mode.BLAME) {
 			List<BlameCommit> commits = new ArrayList<>();
 			
@@ -372,15 +348,32 @@ public class SourceViewPanel extends BlobViewPanel {
 				commits.add(commit);
 			}
 			try {
-				return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commits);
+				blameCommitsJson = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commits);
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
-			return "undefined";
+			blameCommitsJson = "undefined";
 		}
+		
+		CharSequence addCommentCallback;
+		if (addCommentBehavior != null) 
+			addCommentCallback = addCommentBehavior.getCallbackFunction(CallbackParameter.explicit("lineNo"));
+		else
+			addCommentCallback = "undefined";
+		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %d, %s);", 
+				codeContainer.getMarkupId(), 
+				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
+				context.getBlobIdent().path, 
+				highlight,
+				symbolTooltip.getMarkupId(), 
+				context.getBlobIdent().revision, 
+				blameCommitsJson, 
+				context.getComment()!=null?context.getComment().getId():-1,
+				addCommentCallback);
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
-	
+
 	private Component newCommentWidget(String id, Comment comment) {
 		final Long commentId = comment.getId();
 		final WebMarkupContainer widget = new WebMarkupContainer(id) {
