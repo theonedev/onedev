@@ -137,6 +137,7 @@ gitplex.sourceview = {
 			    	}, 500);
 			    });
 			    
+			    console.log("check cursor");
 			    var cursor = pmease.commons.history.getCursor();
 			    if (cursor)
 			    	cm.setCursor(cursor);

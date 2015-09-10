@@ -35,6 +35,14 @@ gitplex.symboltooltip = {
 			cancelShow();
 			cancelHide();
 
+			var $symbol = $(symbolEl);
+			var onSymbolMouseOutOrUpOrDown = function(e) {
+				prepareToHide();
+				cancelShow();
+				$symbol.off("mouseout mousedown mouseup", onSymbolMouseOutOrUpOrDown);
+			};
+			$symbol.on("mouseout mousedown mouseup", onSymbolMouseOutOrUpOrDown);
+			
 			if (container.tooltip) {
 				if (container.tooltip.symbolEl == symbolEl)
 					return;
@@ -42,7 +50,6 @@ gitplex.symboltooltip = {
 					gitplex.symboltooltip.removeTooltip(container);
 			}
 
-			var $symbol = $(symbolEl);
 			showTimer = setTimeout(function() {
 				if (container.tooltip || !$symbol.is(":visible")) 
 					return;
@@ -69,13 +76,6 @@ gitplex.symboltooltip = {
 				
 				showTimer = null;
 			}, 500);
-
-			var onSymbolMouseOutOrUpOrDown = function(e) {
-				prepareToHide();
-				cancelShow();
-				$symbol.off("mouseout mousedown mouseup", onSymbolMouseOutOrUpOrDown);
-			};
-			$symbol.on("mouseout mousedown mouseup", onSymbolMouseOutOrUpOrDown);
 		};
 	},
 	doneQuery: function(contentId) {

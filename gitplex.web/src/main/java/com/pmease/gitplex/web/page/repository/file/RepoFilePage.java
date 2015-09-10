@@ -385,7 +385,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			@Override
 			protected void onRender(WebSocketRequestHandler handler, WebSocketTrait trait) {
 				handler.add(revisionIndexing);
-				handler.appendJavaScript("$(window).resize();");
+				resizeWindow(handler);
 			}
 			
 		});
@@ -480,18 +480,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			@Override
 			protected void onComponentLoaded(Component component, AjaxRequestTarget target) {
 				super.onComponentLoaded(component, target);
-				target.appendJavaScript("$(window).resize();");
+				resizeWindow(target);
 			}
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
 				return new LastCommitPanel(markupId, repoModel, blobIdent);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(mode != Mode.EDIT);
 			}
 
 		};
@@ -921,6 +915,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			mode = null;
 		newFileViewer(target);
 		pushState(target);
+		resizeWindow(target);
 	}
 
 	@Override

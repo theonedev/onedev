@@ -890,6 +890,7 @@ pmease.commons = {
 			};
 		},
 		pushState: function(data, url) {
+			console.log("pushState");
 			var state = {data: data};
 			pmease.commons.history.current = {state: state, url: url};
 			history.pushState(state, '', url);
