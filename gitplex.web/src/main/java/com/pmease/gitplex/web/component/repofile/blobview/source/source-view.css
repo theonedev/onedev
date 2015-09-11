@@ -10,6 +10,10 @@
 .source-view>.outline .tree-node {
 	line-height: 1.6;
 }
+.selection-permalink {
+	margin-left: 16px;
+	display: none;
+}
 
 .CodeMirror-annotations {
 	width: 240px;

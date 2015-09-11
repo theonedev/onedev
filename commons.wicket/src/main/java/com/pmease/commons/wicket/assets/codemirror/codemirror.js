@@ -9,7 +9,7 @@ gitplex.codemirror = {
     			cursorTimer = undefined;
     			var cursor = cm.getCursor();
 		    	pmease.commons.history.setCursor(cursor);
-		    	$(".preserve-cm-state").each(function() {
+		    	$("a.preserve-cm-state").each(function() {
 		    		var clientState = $(this).data("client_state");
 		    		if (!clientState)
 		    			clientState = {};
@@ -21,6 +21,21 @@ gitplex.codemirror = {
 		    		uri.addSearch("client_state", JSON.stringify(clientState));
 		    		$(this).attr("href", uri.href());
 		    	});
+		    	
+		    	var $selectionPermalink = $(".selection-permalink");
+		    	if (cm.somethingSelected()) {
+		    		$selectionPermalink.show();
+		    		var fromCursor = cm.getCursor("from");
+		    		var toCursor = cm.getCursor("to");
+		    		var highlight = (fromCursor.line+1) + "," + (fromCursor.ch+1) + "-" 
+		    				+ (toCursor.line+1) + "," + (toCursor.ch+1);
+		    		var uri = new URI($selectionPermalink[0]);
+		    		uri.removeSearch("highlight");
+		    		uri.addSearch("highlight", highlight);
+		    		$selectionPermalink.attr("href", uri.href());
+		    	} else {
+		    		$selectionPermalink.hide();
+		    	}
 	    	}, 500);
 	    });
 	    
@@ -39,7 +54,7 @@ gitplex.codemirror = {
 		    	var scrollInfo = cm.getScrollInfo();
 		    	var scroll = {left: scrollInfo.left, top: scrollInfo.top};
 		    	pmease.commons.history.setScroll(scroll);
-		    	$(".preserve-cm-state").each(function() {
+		    	$("a.preserve-cm-state").each(function() {
 		    		var clientState = $(this).data("client_state");
 		    		if (!clientState)
 		    			clientState = {};

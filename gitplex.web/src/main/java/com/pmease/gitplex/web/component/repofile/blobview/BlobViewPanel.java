@@ -91,6 +91,8 @@ public abstract class BlobViewPanel extends Panel {
 		});
 		
 		add(new Label("size", FileUtils.byteCountToDisplaySize(getBlob().getSize())));
+		
+		add(newLeftActions("leftActions"));
 
 		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 
 				BlobResource.paramsOf(context.getRepository(), context.getBlobIdent())));
@@ -143,7 +145,7 @@ public abstract class BlobViewPanel extends Panel {
 			
 		});
 		
-		add(newCustomActions("customActions"));
+		add(newRightActions("rightActions"));
 		
 		WebMarkupContainer changeActions = new WebMarkupContainer("changeActions") {
 			
@@ -268,7 +270,11 @@ public abstract class BlobViewPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	protected WebMarkupContainer newCustomActions(String id) {
+	protected WebMarkupContainer newLeftActions(String id) {
+		return new WebMarkupContainer(id);
+	}
+	
+	protected WebMarkupContainer newRightActions(String id) {
 		return new WebMarkupContainer(id);
 	}
 	

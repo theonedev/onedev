@@ -72,6 +72,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -145,8 +146,22 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 	
 	@Override
-	protected WebMarkupContainer newCustomActions(String id) {
-		Fragment fragment = new Fragment(id, "actionsFrag", this);
+	protected WebMarkupContainer newLeftActions(String id) {
+		Fragment fragment = new Fragment(id, "leftActionsFrag", this);
+		PageParameters params = RepoFilePage.paramsOf(
+				context.getRepository(), 
+				context.getBlobIdent().revision, 
+				context.getBlobIdent().path, 
+				null, PullRequest.idOf(context.getPullRequest()));
+		String url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
+		fragment.add(new WebMarkupContainer("selectionPermalink")
+				.add(AttributeAppender.replace("href", url)));
+		return fragment;
+	}
+	
+	@Override
+	protected WebMarkupContainer newRightActions(String id) {
+		Fragment fragment = new Fragment(id, "rightActionsFrag", this);
 		fragment.setVisible(!symbols.isEmpty());
 		return fragment;
 	}
