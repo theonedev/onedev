@@ -12,18 +12,19 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
-public class CodeMirrorResourceReference extends WebjarsJavaScriptResourceReference {
+public class CodeMirrorResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final CodeMirrorResourceReference INSTANCE = new CodeMirrorResourceReference();
 	
 	private CodeMirrorResourceReference() {
-		super("codemirror/current/mode/meta.js");
+		super(CodeMirrorResourceReference.class, "codemirror.js");
 	}
 
 	@Override
@@ -54,6 +55,8 @@ public class CodeMirrorResourceReference extends WebjarsJavaScriptResourceRefere
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "gotoline.js")),
 					
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js")),
+					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/mode/meta.js")),
+					JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE),
 					
 					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/lib/codemirror.css")),
 					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/dialog/dialog.css")),
