@@ -890,7 +890,6 @@ pmease.commons = {
 			};
 		},
 		pushState: function(data, url) {
-			console.log("pushState");
 			var state = {data: data};
 			pmease.commons.history.current = {state: state, url: url};
 			history.pushState(state, '', url);
@@ -902,11 +901,11 @@ pmease.commons = {
 			history.replaceState(state, '', url);
 			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:'');
 		},
-		setScrollPos: function(scrollPos) {
+		setScroll: function(scroll) {
 			var state = history.state;
 			if (!state)
 				state = {};
-			var newState = {scrollPos: scrollPos, cursor: state.cursor, data: state.data};
+			var newState = {scroll: scroll, cursor: state.cursor, data: state.data};
 			history.replaceState(newState, '', window.location.href );
 			pmease.commons.history.current = {
 				state: newState,
@@ -917,16 +916,16 @@ pmease.commons = {
 			var state = history.state;
 			if (!state)
 				state = {};
-			var newState = {cursor: cursor, scrollPos: state.scrollPos, data: state.data};
+			var newState = {cursor: cursor, scroll: state.scroll, data: state.data};
 			history.replaceState(newState, '', window.location.href );
 			pmease.commons.history.current = {
 				state: newState,
 				url: window.location.href
 			};
 		}, 
-		getScrollPos: function() {
-			if (history.state && history.state.scrollPos)
-				return history.state.scrollPos;
+		getScroll: function() {
+			if (history.state && history.state.scroll)
+				return history.state.scroll;
 			else
 				return undefined;
 		},

@@ -8,7 +8,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 public class BinaryRenderer implements BlobRenderer {
 
 	@Override
-	public BlobViewPanel render(String panelId, BlobViewContext context) {
+	public BlobViewPanel render(String panelId, BlobViewContext context, String clientState) {
 		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
 		
 		if (blob.getText() == null 

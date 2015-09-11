@@ -1,6 +1,6 @@
 gitplex.sourceview = {
 	init: function(codeId, fileContent, filePath, highlight, symbolTooltipId, revision, 
-			blameCommits, commentId, addCommentCallback) {
+			blameCommits, commentId, addCommentCallback, cmState) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -110,37 +110,7 @@ gitplex.sourceview = {
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
 
-			    // use scroll timer and cursor timer to minimize performance impact of 
-			    // remembering scroll and cursor position
-			    var scrollTimer;
-			    cm.on("scroll", function() {
-			    	gitplex.mouseState.moved = false;			    	
-			    	if (scrollTimer)
-			    		clearTimeout(scrollTimer);
-			    	scrollTimer = setTimeout(function() {
-			    		scrollTimer = undefined;
-				    	var scrollInfo = cm.getScrollInfo();
-				    	pmease.commons.history.setScrollPos({left: scrollInfo.left, top: scrollInfo.top});
-			    	}, 500);
-			    });
-			    var scrollPos = pmease.commons.history.getScrollPos();
-			    if (scrollPos)
-			    	cm.scrollTo(scrollPos.left, scrollPos.top);
-			    
-			    var cursorTimer;
-			    cm.on("cursorActivity", function() {
-		    		if (cursorTimer)
-		    			clearTimeout(cursorTimer);
-			    	cursorTimer = setTimeout(function() {
-			    		cursorTimer = undefined;
-				    	pmease.commons.history.setCursor(cm.getCursor());
-			    	}, 500);
-			    });
-			    
-			    console.log("check cursor");
-			    var cursor = pmease.commons.history.getCursor();
-			    if (cursor)
-			    	cm.setCursor(cursor);
+			    gitplex.codemirror.initState(cm, cmState);
 			    
 			    if (highlight)
 			    	gitplex.sourceview.highlight(cm, highlight);

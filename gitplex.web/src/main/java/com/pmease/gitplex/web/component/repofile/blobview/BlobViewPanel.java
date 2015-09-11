@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.repofile.blobview;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -22,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
+import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.resource.BlobResource;
@@ -91,7 +94,7 @@ public abstract class BlobViewPanel extends Panel {
 		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 
 				BlobResource.paramsOf(context.getRepository(), context.getBlobIdent())));
 		
-		add(new AjaxLink<Void>("blame") {
+		add(new ClientStateAwareAjaxLink<Void>("blame") {
 
 			@Override
 			protected void onInitialize() {
@@ -113,8 +116,8 @@ public abstract class BlobViewPanel extends Panel {
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				context.onBlameChange(target);
+			public void onClick(AjaxRequestTarget target, @Nullable String clientState) {
+				context.onBlameChange(target, clientState);
 				
 				// this blob view panel might be replaced with another panel
 				if (findPage() != null) {
@@ -154,7 +157,7 @@ public abstract class BlobViewPanel extends Panel {
 		};
 		add(changeActions);
 		
-		changeActions.add(new AjaxLink<Void>("edit") {
+		changeActions.add(new ClientStateAwareAjaxLink<Void>("edit") {
 
 			@Override
 			protected void onInitialize() {
@@ -182,9 +185,9 @@ public abstract class BlobViewPanel extends Panel {
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
+			public void onClick(AjaxRequestTarget target, String state) {
 				if (context.isOnBranch()) {
-					context.onEdit(target);
+					context.onEdit(target, state);
 				} else {
 					PageParameters params = RepoFilePage.paramsOf(context.getRepository(), 
 							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.EDIT);

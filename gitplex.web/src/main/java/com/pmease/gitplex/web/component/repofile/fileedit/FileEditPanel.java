@@ -60,6 +60,8 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final ObjectId prevCommitId;
 	
+	private final String clientState;
+	
 	private AbstractDefaultAjaxBehavior previewBehavior;
 	
 	private AbstractDefaultAjaxBehavior saveBehavior;
@@ -67,13 +69,15 @@ public abstract class FileEditPanel extends Panel {
 	private EditSavePanel editSavePanel;
 	
 	public FileEditPanel(String id, IModel<Repository> repoModel, String refName, 
-			@Nullable String oldPath, String content, ObjectId prevCommitId) {
+			@Nullable String oldPath, String content, ObjectId prevCommitId, 
+			@Nullable String clientState) {
 		super(id);
 		this.repoModel = repoModel;
 		this.refName = refName;
 		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.content = content;
 		this.prevCommitId = prevCommitId;
+		this.clientState = clientState;
 		
 		newPath = this.oldPath;
 	}
@@ -213,10 +217,11 @@ public abstract class FileEditPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(FileEditPanel.class, "file-edit.css")));
 		
-		String script = String.format("gitplex.fileEdit.init('%s', '%s', '%s', %s, %s);", 
+		String script = String.format("gitplex.fileEdit.init('%s', '%s', '%s', %s, %s, %s);", 
 				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
-				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")));
+				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
+				clientState!=null?"'"+clientState+"'":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

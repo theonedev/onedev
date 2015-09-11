@@ -83,6 +83,8 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
+	private final String clientState;
+	
 	private final IModel<List<Comment>> commentsModel = new LoadableDetachableModel<List<Comment>>() {
 
 		@Override
@@ -124,7 +126,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
-	public SourceViewPanel(String id, BlobViewContext context) {
+	public SourceViewPanel(String id, BlobViewContext context, @Nullable String clientState) {
 		super(id, context);
 		
 		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
@@ -138,6 +140,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				logger.debug("Error extracting symbols from blob: " + context.getBlobIdent(), e);
 			}
 		}
+		
+		this.clientState = clientState;
 	}
 	
 	@Override
@@ -361,7 +365,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			addCommentCallback = addCommentBehavior.getCallbackFunction(CallbackParameter.explicit("lineNo"));
 		else
 			addCommentCallback = "undefined";
-		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %d, %s);", 
+		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %d, %s, %s);", 
 				codeContainer.getMarkupId(), 
 				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 				context.getBlobIdent().path, 
@@ -370,7 +374,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				context.getBlobIdent().revision, 
 				blameCommitsJson, 
 				context.getComment()!=null?context.getComment().getId():-1,
-				addCommentCallback);
+				addCommentCallback, 
+				clientState!=null?"'"+clientState+"'":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

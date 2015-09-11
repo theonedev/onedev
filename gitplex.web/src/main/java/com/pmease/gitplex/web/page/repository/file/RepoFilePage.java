@@ -369,7 +369,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		});
 
 		newLastCommit(null);
-		newFileViewer(null);
+		newFileViewer(null, null);
 
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
 		
@@ -452,7 +452,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				mode = Mode.EDIT;
 				
 				newFileNavigator(target);
-				newFileViewer(target);
+				newFileViewer(target, null);
 				
 				pushState(target);
 				resizeWindow(target);
@@ -497,9 +497,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		}
 	}
 	
-	private BlobViewPanel renderBlobViewer(String panelId) {
+	private BlobViewPanel renderBlobViewer(String panelId, @Nullable String clientState) {
 		for (BlobRenderer renderer: GitPlex.getExtensions(BlobRenderer.class)) {
-			BlobViewPanel panel = renderer.render(panelId, this);
+			BlobViewPanel panel = renderer.render(panelId, this, clientState);
 			if (panel != null)
 				return panel;
 		}
@@ -507,7 +507,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		throw new IllegalStateException("No applicable blob renderer found.");
 	}
 	
-	private void newFileViewer(@Nullable AjaxRequestTarget target) {
+	private void newFileViewer(@Nullable AjaxRequestTarget target, @Nullable String clientState) {
 		Component fileViewer;
 		if (mode == Mode.EDIT) {
 			final String refName = GitUtils.branch2ref(blobIdent.revision);
@@ -516,7 +516,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					FILE_VIEWER_ID, repoModel, refName, 
 					blobIdent.isTree()?null:blobIdent.path, 
 					blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
-							getRepository().getObjectId(blobIdent.revision)) {
+							getRepository().getObjectId(blobIdent.revision), clientState) {
  
 				@Override
 				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -540,7 +540,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				protected void onCancel(AjaxRequestTarget target) {
 					mode = null;
 					newFileNavigator(target);
-					newFileViewer(target);
+					newFileViewer(target, null);
 					pushState(target);
 					resizeWindow(target);
 				}
@@ -555,7 +555,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				public void onCancel(AjaxRequestTarget target) {
 					mode = null;
 
-					newFileViewer(target);
+					newFileViewer(target, null);
 					
 					pushState(target);
 					resizeWindow(target);
@@ -608,7 +608,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				
 			};
 		} else {
-			fileViewer = renderBlobViewer(FILE_VIEWER_ID);
+			fileViewer = renderBlobViewer(FILE_VIEWER_ID, clientState);
 		}
 		if (target != null) {
 			replace(fileViewer);
@@ -701,7 +701,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		target.add(revisionIndexing);
 		
 		newLastCommit(target);
-		newFileViewer(target);
+		newFileViewer(target, null);
 	}
 	
 	@Override
@@ -885,7 +885,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
 				sourceViewer.highlight(target, highlight);
 			} else {
-				newFileViewer(target);
+				newFileViewer(target, null);
 				resizeWindow(target);
 			}
 		} else {
@@ -894,7 +894,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 			newFileNavigator(target);
 			newLastCommit(target);
-			newFileViewer(target);
+			newFileViewer(target, null);
 			
 			resizeWindow(target);
 		}
@@ -908,12 +908,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onBlameChange(AjaxRequestTarget target) {
+	public void onBlameChange(AjaxRequestTarget target, @Nullable String clientState) {
 		if (mode == null)
 			mode = Mode.BLAME;
 		else
 			mode = null;
-		newFileViewer(target);
+		newFileViewer(target, clientState);
 		pushState(target);
 		resizeWindow(target);
 	}
@@ -922,17 +922,17 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	public void onDelete(AjaxRequestTarget target) {
 		mode = Mode.DELETE;
 
-		newFileViewer(target);
+		newFileViewer(target, null);
 		pushState(target);
 		resizeWindow(target);
 	}
 
 	@Override
-	public void onEdit(AjaxRequestTarget target) {
+	public void onEdit(AjaxRequestTarget target, @Nullable String clientState) {
 		mode = Mode.EDIT;
 		
 		newFileNavigator(target);
-		newFileViewer(target);
+		newFileViewer(target, clientState);
 		pushState(target);
 		resizeWindow(target);
 	}

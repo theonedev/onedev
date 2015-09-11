@@ -1,5 +1,5 @@
 gitplex.fileEdit = {
-	init: function(containerId, filePath, fileContent, previewCallback, saveCallback) {
+	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, cmState) {
 		var $container = $("#" + containerId);
 		var $fileEdit = $container.find(">.file-edit");
 		var $head = $fileEdit.find(">.head");
@@ -40,37 +40,8 @@ gitplex.fileEdit = {
 		});
 		cm.focus();
 		
-	    // use scroll timer and cursor timer to minimize performance impact of 
-	    // remembering scroll and cursor position
-	    var scrollTimer;
-	    cm.on("scroll", function() {
-	    	if (scrollTimer)
-	    		clearTimeout(scrollTimer);
-	    	scrollTimer = setTimeout(function() {
-	    		scrollTimer = undefined;
-		    	var scrollInfo = cm.getScrollInfo();
-		    	pmease.commons.history.setScrollPos({left: scrollInfo.left, top: scrollInfo.top});
-	    	}, 500);
-	    });
-	    var scrollPos = pmease.commons.history.getScrollPos();
-	    if (scrollPos)
-	    	cm.scrollTo(scrollPos.left, scrollPos.top);
+	    gitplex.codemirror.initState(cm, cmState);
 	    
-	    var cursorTimer;
-	    cm.on("cursorActivity", function() {
-    		if (cursorTimer)
-    			clearTimeout(cursorTimer);
-	    	cursorTimer = setTimeout(function() {
-	    		cursorTimer = undefined;
-		    	pmease.commons.history.setCursor(cm.getCursor());
-	    	}, 500);
-	    });
-	    
-	    console.log("check cursor");
-	    var cursor = pmease.commons.history.getCursor();
-	    if (cursor)
-	    	cm.setCursor(cursor);
-		
 		gitplex.fileEdit.setMode(cm, filePath);
 		
 	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";

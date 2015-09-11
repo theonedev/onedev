@@ -3,7 +3,7 @@ gitplex.blobView = function(containerId) {
 	var $head = $blobView.find(">.head");
 	var $body = $blobView.find(">.body");
 	$body.scroll(function() {
-    	pmease.commons.history.setScrollPos({left: $body.scrollLeft(), top: $body.scrollTop()});
+    	pmease.commons.history.setScroll({left: $body.scrollLeft(), top: $body.scrollTop()});
 	});
 
 	gitplex.expandable.getScrollTop = function() {
@@ -22,10 +22,10 @@ gitplex.blobView = function(containerId) {
 		$body.outerWidth(width).outerHeight(height);
 		$body.closestDescendant(".autofit:visible").trigger("autofit", [$body.width(), $body.height()]);
 
-		var scrollPos = pmease.commons.history.getScrollPos();
-		if (scrollPos) {
-		    $body.scrollLeft(scrollPos.left);
-		    $body.scrollTop(scrollPos.top);
+		var scroll = pmease.commons.history.getScroll();
+		if (scroll) {
+		    $body.scrollLeft(scroll.left);
+		    $body.scrollTop(scroll.top);
 		}
 	});
 }
