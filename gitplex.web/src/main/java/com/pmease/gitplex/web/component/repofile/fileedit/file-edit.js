@@ -5,46 +5,7 @@ gitplex.fileEdit = {
 		var $head = $fileEdit.find(">.head");
 		var $body = $fileEdit.find(">.body");
 		var $edit = $body.find(">div.edit");
-		var cm = CodeMirror($edit[0], {
-			value: fileContent, 
-			theme: "eclipse",
-			lineNumbers: true,
-			lineWrapping: true,
-			styleActiveLine: true,
-			styleSelectedText: true,
-			foldGutter: true,
-			matchBrackets: true,
-			scrollbarStyle: "simple",
-			highlightIdentifiers: {delay: 500},
-			extraKeys: {
-				"F11": function(cm) {
-					cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-				},
-				"Esc": function(cm) {
-					if (cm.getOption("fullScreen"))
-						cm.setOption("fullScreen", false);
-		        }
-			}
-		});
-		
-		var originalDocValue = cm.doc.getValue();
-		cm.on("change", function() {
-			var $form = $body.find(">form.edit");
-			if (cm.doc.getValue() != originalDocValue) {
-				$form.addClass("dirty");
-				$fileEdit.data("contentChanged", true);
-			} else {
-				$form.removeClass("dirty");
-				$fileEdit.data("contentChanged", false);
-			}
-		});
-		cm.focus();
-		
-	    gitplex.codemirror.initState(cm, cmState);
-	    
-		gitplex.fileEdit.setMode(cm, filePath);
-		
-	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
+		var cm;
 		
 	    $head.find("a.edit").click(function() {
 	    	gitplex.fileEdit.selectTab($(this));
@@ -63,6 +24,51 @@ gitplex.fileEdit = {
 			
 			height = $fileEdit.height()-$head.outerHeight();
 			$body.outerWidth(width).outerHeight(height-1);
+
+			/*
+			 * initialize codemirror here when we know the container width and height
+			 * as otherwise the annotatescrollbar addon is inaccurate when window 
+			 * initially loads
+			 */ 
+			var initState = !cm;
+			if (!cm) {
+				cm = CodeMirror($edit[0], {
+					value: fileContent, 
+					theme: "eclipse",
+					lineNumbers: true,
+					lineWrapping: true,
+					styleActiveLine: true,
+					styleSelectedText: true,
+					foldGutter: true,
+					matchBrackets: true,
+					scrollbarStyle: "simple",
+					highlightIdentifiers: {delay: 500},
+					extraKeys: {
+						"F11": function(cm) {
+							cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+						},
+						"Esc": function(cm) {
+							if (cm.getOption("fullScreen"))
+								cm.setOption("fullScreen", false);
+				        }
+					}
+				});
+				
+				var originalDocValue = cm.doc.getValue();
+				cm.on("change", function() {
+					var $form = $body.find(">form.edit");
+					if (cm.doc.getValue() != originalDocValue) {
+						$form.addClass("dirty");
+						$fileEdit.data("contentChanged", true);
+					} else {
+						$form.removeClass("dirty");
+						$fileEdit.data("contentChanged", false);
+					}
+				});
+				gitplex.fileEdit.setMode(cm, filePath);
+			    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
+				cm.focus();
+			}
 			
 			if ($edit.is(":visible")) {
 				$body.css("overflow", "hidden");
@@ -71,6 +77,8 @@ gitplex.fileEdit = {
 				if (cm.getOption("fullScreen"))
 					cm.setOption("fullScreen", false);
 				cm.setSize($edit.width(), $edit.height());
+				if (initState)
+					gitplex.codemirror.initState(cm, cmState);
 			} else {
 				$body.css("overflow", "auto");
 			}

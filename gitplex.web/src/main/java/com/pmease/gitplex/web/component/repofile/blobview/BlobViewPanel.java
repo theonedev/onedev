@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -112,18 +113,18 @@ public abstract class BlobViewPanel extends Panel {
 					
 				}));
 				
+				PageParameters params = RepoFilePage.paramsOf(context.getRepository(), 
+						context.getBlobIdent().revision, context.getBlobIdent().path, 
+						context.getMode()==null?Mode.BLAME:null);
+				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+				add(AttributeAppender.replace("href", url.toString()));
+				
 				setOutputMarkupId(true);
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target, @Nullable String clientState) {
 				context.onBlameChange(target, clientState);
-				
-				// this blob view panel might be replaced with another panel
-				if (findPage() != null) {
-					target.add(this);
-					target.focusComponent(null);
-				}
 			}
 
 			@Override

@@ -57,6 +57,7 @@ gitplex.sourceview = {
 			 * as otherwise the annotatescrollbar addon is inaccurate when window 
 			 * initially loads
 			 */ 
+			var initState = !cm;
 			if (!cm) {
 				var options = {
 					value: fileContent, 
@@ -110,8 +111,6 @@ gitplex.sourceview = {
 					CodeMirror.autoLoadMode(cm, modeInfo.mode);
 			    }
 
-			    gitplex.codemirror.initState(cm, cmState);
-			    
 			    if (highlight)
 			    	gitplex.sourceview.highlight(cm, highlight);
 
@@ -149,6 +148,8 @@ gitplex.sourceview = {
 			if (cm.getOption("fullScreen"))
 				cm.setOption("fullScreen", false);
 			cm.setSize($code.width(), $code.height());
+			if (initState)
+				gitplex.codemirror.initState(cm, cmState);
 		});
 	}, 
 

@@ -86,6 +86,7 @@ var gitplex = {
 		    		scrollTimer = undefined;
 			    	var scrollInfo = cm.getScrollInfo();
 			    	var scroll = {left: scrollInfo.left, top: scrollInfo.top};
+			    	console.log(scroll.top);
 			    	pmease.commons.history.setScroll(scroll);
 			    	$(".preserve-cm-state").each(function() {
 			    		var state = $(this).data("state");
@@ -104,7 +105,7 @@ var gitplex = {
 		    	var state = JSON.parse(stateStr);
 		    	if (state.cursor)
 		    		cm.setCursor(state.cursor);
-		    	if (state.scroll)
+		    	if (state.scroll) 
 		    		cm.scrollTo(state.scroll.left, state.scroll.top);
 		    }
 		    
@@ -134,6 +135,6 @@ $(document).ready(function() {
 		$(document).scroll(function() {
 			gitplex.mouseState.moved = false;
 		});
-		gitplex.expandable.check();
+//		gitplex.expandable.check();
 	});
 });
