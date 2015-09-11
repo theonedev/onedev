@@ -1,5 +1,5 @@
 gitplex.codemirror = {
-	initState: function(cm, stateStr) {
+	initState: function(cm, clientStateStr) {
 	    // use timer to minimize performance impact 
 	    var cursorTimer;
 	    cm.on("cursorActivity", function() {
@@ -10,15 +10,16 @@ gitplex.codemirror = {
     			var cursor = cm.getCursor();
 		    	pmease.commons.history.setCursor(cursor);
 		    	$(".preserve-cm-state").each(function() {
-		    		var state = $(this).data("state");
-		    		if (!state)
-		    			state = {};
-		    		state.cursor = cursor;
-		    		$(this).data("state", state);
-		    		var uri = new URI(this);
-		    		uri.removeSearch("state");
-		    		uri.addSearch("state", JSON.stringify(state));
+		    		var clientState = $(this).data("client_state");
+		    		if (!clientState)
+		    			clientState = {};
+		    		clientState.cursor = cursor;
+		    		$(this).data("client_state", clientState);
 		    		
+		    		var uri = new URI(this);
+		    		uri.removeSearch("client_state");
+		    		uri.addSearch("client_state", JSON.stringify(clientState));
+		    		$(this).attr("href", uri.href());
 		    	});
 	    	}, 500);
 	    });
@@ -37,14 +38,18 @@ gitplex.codemirror = {
 	    		scrollTimer = undefined;
 		    	var scrollInfo = cm.getScrollInfo();
 		    	var scroll = {left: scrollInfo.left, top: scrollInfo.top};
-		    	console.log(scroll.top);
 		    	pmease.commons.history.setScroll(scroll);
 		    	$(".preserve-cm-state").each(function() {
-		    		var state = $(this).data("state");
-		    		if (!state)
-		    			state = {};
-		    		state.scroll = scroll;
-		    		$(this).data("state", state);
+		    		var clientState = $(this).data("client_state");
+		    		if (!clientState)
+		    			clientState = {};
+		    		clientState.scroll = scroll;
+		    		$(this).data("client_state", clientState);
+		    		
+		    		var uri = new URI(this);
+		    		uri.removeSearch("client_state");
+		    		uri.addSearch("client_state", JSON.stringify(clientState));
+		    		$(this).attr("href", uri.href());
 		    	});
 	    	}, 500);
 	    });
@@ -52,12 +57,12 @@ gitplex.codemirror = {
 	    if (scroll)
 	    	cm.scrollTo(scroll.left, scroll.top);
 	    
-	    if (stateStr) {
-	    	var state = JSON.parse(stateStr);
-	    	if (state.cursor)
-	    		cm.setCursor(state.cursor);
-	    	if (state.scroll) 
-	    		cm.scrollTo(state.scroll.left, state.scroll.top);
+	    if (clientStateStr) {
+	    	var clientState = JSON.parse(clientStateStr);
+	    	if (clientState.cursor)
+	    		cm.setCursor(clientState.cursor);
+	    	if (clientState.scroll) 
+	    		cm.scrollTo(clientState.scroll.left, clientState.scroll.top);
 	    }
 	    
 	}		

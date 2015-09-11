@@ -8,6 +8,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -29,7 +30,8 @@ public class CodeMirrorResourceReference extends JavaScriptResourceReference {
 
 	@Override
 	public Iterable<? extends HeaderItem> getDependencies() {
-		String modeBase = StringUtils.substringBeforeLast(RequestCycle.get().urlFor(this, new PageParameters()).toString(), "/");
+		ResourceReference meta = new WebjarsJavaScriptResourceReference("codemirror/current/mode/meta.js");
+		String modeBase = StringUtils.substringBeforeLast(RequestCycle.get().urlFor(meta, new PageParameters()).toString(), "/");
 		return Iterables.concat(super.getDependencies(), ImmutableList.<HeaderItem>of(
 					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/lib/codemirror.js")),
 					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/mode/loadmode.js")),
@@ -55,7 +57,7 @@ public class CodeMirrorResourceReference extends JavaScriptResourceReference {
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "gotoline.js")),
 					
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js")),
-					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/mode/meta.js")),
+					JavaScriptHeaderItem.forReference(meta),
 					JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE),
 					
 					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/lib/codemirror.css")),

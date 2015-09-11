@@ -168,6 +168,20 @@ public abstract class BlobViewPanel extends Panel {
 					add(new Label("label", "Edit on source branch"));
 				else
 					add(new Label("label", "Edit"));
+				
+				PageParameters params;
+				if (context.isOnBranch()) {
+					params = RepoFilePage.paramsOf(context.getRepository(), 
+							context.getBlobIdent().revision, context.getBlobIdent().path, Mode.EDIT);
+				} else if (context.isAtSourceBranchHead()) {
+					params = getEditSourceBranchParams(null);
+				} else {
+					params = null;
+				}
+				if (params != null) {
+					CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+					add(AttributeAppender.replace("href", url.toString()));
+				}
 			}
 
 			@Override
@@ -186,14 +200,19 @@ public abstract class BlobViewPanel extends Panel {
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target, String state) {
+			public void onClick(AjaxRequestTarget target, String clientState) {
 				if (context.isOnBranch()) {
-					context.onEdit(target, state);
+					context.onEdit(target, clientState);
 				} else {
-					PageParameters params = RepoFilePage.paramsOf(context.getRepository(), 
-							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.EDIT);
+					PageParameters params = getEditSourceBranchParams(clientState);
 					setResponsePage(RepoFilePage.class, params);
 				}
+			}
+			
+			private PageParameters getEditSourceBranchParams(String clientState) {
+				return RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), 
+						context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, 
+						null, null, null, Mode.EDIT, null, clientState);
 			}
 			
 		});
@@ -208,6 +227,21 @@ public abstract class BlobViewPanel extends Panel {
 					add(new Label("label", "Delete from source branch"));
 				else
 					add(new Label("label", "Delete"));
+				
+				PageParameters params;
+				if (context.isOnBranch()) {
+					params = RepoFilePage.paramsOf(context.getRepository(), 
+							context.getBlobIdent().revision, context.getBlobIdent().path, Mode.EDIT);
+				} else if (context.isAtSourceBranchHead()) {
+					params = RepoFilePage.paramsOf(context.getRepository(), 
+							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.DELETE);
+				} else {
+					params = null;
+				}
+				if (params != null) {
+					CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+					add(AttributeAppender.replace("href", url.toString()));
+				}
 			}
 			
 			@Override
@@ -223,7 +257,7 @@ public abstract class BlobViewPanel extends Panel {
 				if (context.isOnBranch()) {
 					context.onDelete(target);
 				} else {
-					PageParameters params = RepoFilePage.paramsOf(context.getRepository(), 
+					PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), 
 							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.DELETE);
 					setResponsePage(RepoFilePage.class, params);
 				}

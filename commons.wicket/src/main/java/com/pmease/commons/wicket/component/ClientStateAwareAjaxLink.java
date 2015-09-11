@@ -23,9 +23,9 @@ public abstract class ClientStateAwareAjaxLink<T> extends AjaxLink<T> {
 		attributes.setMethod(Method.POST);
 		
 		String script = String.format(""
-				+ "var state = $('#%s').data('state');"
-				+ "return state?JSON.stringify(state):'';", getMarkupId());
-		attributes.getDynamicExtraParameters().add("return {state: function() {" + script + "}}");
+				+ "var clientState = $('#%s').data('client_state');"
+				+ "return clientState?JSON.stringify(clientState):'';", getMarkupId());
+		attributes.getDynamicExtraParameters().add("return {client_state: function() {" + script + "}}");
 	}
 
 	public ClientStateAwareAjaxLink(String id, IModel<T> model) {
@@ -34,7 +34,8 @@ public abstract class ClientStateAwareAjaxLink<T> extends AjaxLink<T> {
 	
 	@Override
 	public final void onClick(AjaxRequestTarget target) {
-		String value = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("state").toString();
+		String value = RequestCycle.get().getRequest().getRequestParameters()
+				.getParameterValue("client_state").toString();
 		if (StringUtils.isNotBlank(value))
 			onClick(target, value);
 		else 

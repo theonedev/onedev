@@ -110,6 +110,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private static final String PARAM_QUERY = "query";
 	
+	private static final String PARAM_CLIENT_STATE = "client_state";
+	
 	private static final String PARAM_HIGHLIGHT = "highlight";
 	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
@@ -169,6 +171,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private final RevisionIndexed trait = new RevisionIndexed();
 	
 	private transient List<QueryHit> queryHits;
+	
+	// client state holding CodeMirror cursor, scroll, marks, etc.
+	private transient String clientState;
 
 	public RepoFilePage(final PageParameters params) {
 		super(params);
@@ -229,6 +234,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				}								
 			}
 		}
+		
+		clientState = params.get(PARAM_CLIENT_STATE).toString();
 	}
 	
 	private ObjectId getCommitId() {
@@ -369,7 +376,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		});
 
 		newLastCommit(null);
-		newFileViewer(null, null);
+		newFileViewer(null, clientState);
 
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
 		
@@ -752,6 +759,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
 			@Nullable String path, @Nullable Highlight highlight, @Nullable Long commentId, 
 			@Nullable Long requestId, @Nullable Mode mode, @Nullable String query) {
+		return paramsOf(repository, revision, path, highlight, commentId, requestId, mode, 
+				query, null);
+	}
+	
+	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
+			@Nullable String path, @Nullable Highlight highlight, @Nullable Long commentId, 
+			@Nullable Long requestId, @Nullable Mode mode, @Nullable String query, 
+			@Nullable String clientState) {
 		PageParameters params = paramsOf(repository);
 		if (revision != null)
 			params.set(PARAM_REVISION, revision);
@@ -767,6 +782,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			params.set(PARAM_MODE, mode.name().toLowerCase());
 		if (query != null)
 			params.set(PARAM_QUERY, query);
+		if (clientState != null)
+			params.set(PARAM_CLIENT_STATE, clientState);
 		return params;
 	}
 	
@@ -908,12 +925,12 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onBlameChange(AjaxRequestTarget target, @Nullable String clientState) {
+	public void onBlameChange(AjaxRequestTarget target, @Nullable String cmState) {
 		if (mode == null)
 			mode = Mode.BLAME;
 		else
 			mode = null;
-		newFileViewer(target, clientState);
+		newFileViewer(target, cmState);
 		pushState(target);
 		resizeWindow(target);
 	}
@@ -928,11 +945,11 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onEdit(AjaxRequestTarget target, @Nullable String clientState) {
+	public void onEdit(AjaxRequestTarget target, @Nullable String cmState) {
 		mode = Mode.EDIT;
 		
 		newFileNavigator(target);
-		newFileViewer(target, clientState);
+		newFileViewer(target, cmState);
 		pushState(target);
 		resizeWindow(target);
 	}
