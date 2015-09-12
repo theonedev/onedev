@@ -13,6 +13,10 @@
 .selection-permalink {
 	margin-left: 16px;
 	display: none;
+	color: #333;
+}
+.selection-permalink:hover {
+	color: #333;
 }
 
 .CodeMirror-annotations {
