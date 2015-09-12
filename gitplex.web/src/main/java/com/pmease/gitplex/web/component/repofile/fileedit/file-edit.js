@@ -1,5 +1,5 @@
-gitplex.fileEdit = {
-	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, cmState) {
+gitplex.fileedit = {
+	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, highlight, cmState) {
 		var $container = $("#" + containerId);
 		var $fileEdit = $container.find(">.file-edit");
 		var $head = $fileEdit.find(">.head");
@@ -8,7 +8,7 @@ gitplex.fileEdit = {
 		var cm;
 		
 	    $head.find("a.edit").click(function() {
-	    	gitplex.fileEdit.selectTab($(this));
+	    	gitplex.fileedit.selectTab($(this));
 	    });
 	    $head.find("a.preview").click(function() {
 	    	previewCallback(cm.getValue());
@@ -65,9 +65,10 @@ gitplex.fileEdit = {
 						$fileEdit.data("contentChanged", false);
 					}
 				});
-				gitplex.fileEdit.setMode(cm, filePath);
-			    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
-				cm.focus();
+				pmease.commons.codemirror.setMode(cm, filePath);
+				
+			    if (highlight) 
+			    	pmease.commons.codemirror.highlight(cm, highlight);
 			}
 			
 			if ($edit.is(":visible")) {
@@ -78,46 +79,25 @@ gitplex.fileEdit = {
 					cm.setOption("fullScreen", false);
 				cm.setSize($edit.width(), $edit.height());
 				if (initState)
-					gitplex.codemirror.initState(cm, cmState);
+					pmease.commons.codemirror.initState(cm, cmState);
 			} else {
 				$body.css("overflow", "auto");
 			}
 		});
-		
-		gitplex.expandable.getScrollTop = function() {
-			if ($edit.is(":visible"))
-				return cm.getScrollInfo().top;
-			else
-				return $body.scrollTop();
-		};
-		
-		gitplex.expandable.setScrollTop = function(scrollTop) {
-			if ($edit.is(":visible"))
-				cm.scrollTo(undefined, scrollTop);
-			else
-				$body.scrollTop(scrollTop);
-		};
-		
 	},
 	save: function(containerId) {
-		gitplex.fileEdit.selectTab($("#" + containerId + ">.file-edit>.head>.save"));
+		gitplex.fileedit.selectTab($("#" + containerId + ">.file-edit>.head>.save"));
 	},
 	preview: function(containerId) {
-		gitplex.fileEdit.selectTab($("#" + containerId + ">.file-edit>.head>.preview"));
+		gitplex.fileedit.selectTab($("#" + containerId + ">.file-edit>.head>.preview"));
 	},
-	setMode: function(cm, filePath) {
-		if (typeof cm === "string") 
-			cm = $("#"+ cm + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
-
-	    var modeInfo = CodeMirror.findModeByFileName(filePath);
-	    if (modeInfo) {
-	    	// specify mode via mime does not work for gfm (github flavored markdown)
-	    	if (modeInfo.mode === "gfm")
-	    		cm.setOption("mode", "gfm");
-	    	else
-	    		cm.setOption("mode", modeInfo.mime);
-			CodeMirror.autoLoadMode(cm, modeInfo.mode);
-	    }
+	setMode: function(containerId, filePath) {
+		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
+		pmease.commons.codemirror.setMode(cm, filePath);
+	},
+	highlight: function(containerId, highlight) {
+		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
+		pmease.commons.codemirror.highlight(cm, highlight);
 	},
 	selectTab: function($tab) {
     	var $active = $tab.parent().find("a.tab.active");

@@ -1,4 +1,31 @@
-gitplex.codemirror = {
+pmease.commons.codemirror = {
+	centerLine: function(cm, line) {
+		var h = cm.getScrollInfo().clientHeight;
+		var coords = cm.charCoords({line: line, ch: 0}, "local");
+		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
+	},
+	highlight: function(cm, highlight) {
+		pmease.commons.codemirror.centerLine(cm, highlight.beginLine);
+		
+		var allMarks = cm.getAllMarks();
+		for (var i=0; i<allMarks.length; i++) 
+			allMarks[i].clear();
+		cm.markText(
+				{line: highlight.beginLine, ch: highlight.beginChar}, 
+				{line: highlight.endLine, ch: highlight.endChar},
+				{className: "CodeMirror-highlight"});
+	},
+	setMode: function(cm, filePath) {
+	    var modeInfo = CodeMirror.findModeByFileName(filePath);
+	    if (modeInfo) {
+	    	// specify mode via mime does not work for gfm (github flavored markdown)
+	    	if (modeInfo.mode === "gfm")
+	    		cm.setOption("mode", "gfm");
+	    	else
+	    		cm.setOption("mode", modeInfo.mime);
+			CodeMirror.autoLoadMode(cm, modeInfo.mode);
+	    }
+	},
 	initState: function(cm, clientStateStr) {
 	    // use timer to minimize performance impact 
 	    var cursorTimer;
@@ -80,5 +107,7 @@ gitplex.codemirror = {
 	    		cm.scrollTo(clientState.scroll.left, clientState.scroll.top);
 	    }
 	    
+	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
+	    cm.focus();
 	}		
 };

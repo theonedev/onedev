@@ -65,9 +65,3 @@ pre+.CodeMirror-linewidget>.comment>div, pre+.CodeMirror-linewidget>.comment>for
 	color: black;
 	font-size: 14px;
 }
-.CodeMirror-highlight {
-	background: #D4A7F3;
-}
-.CodeMirror-highlight.cm-identifierhighlight {
-	background: #ACF0A6;
-}

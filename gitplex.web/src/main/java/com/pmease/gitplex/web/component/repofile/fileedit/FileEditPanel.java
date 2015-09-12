@@ -35,6 +35,7 @@ import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
+import com.pmease.commons.wicket.assets.diffmatchpatch.DiffMatchPatchResourceReference;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -42,6 +43,7 @@ import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
 import com.pmease.gitplex.web.component.repofile.editsave.EditSavePanel;
+import com.pmease.gitplex.web.page.repository.file.Highlight;
 
 @SuppressWarnings("serial")
 public abstract class FileEditPanel extends Panel {
@@ -60,6 +62,8 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final ObjectId prevCommitId;
 	
+	private final Highlight highlight;
+	
 	private final String clientState;
 	
 	private AbstractDefaultAjaxBehavior previewBehavior;
@@ -70,13 +74,14 @@ public abstract class FileEditPanel extends Panel {
 	
 	public FileEditPanel(String id, IModel<Repository> repoModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
-			@Nullable String clientState) {
+			@Nullable Highlight highlight, @Nullable String clientState) {
 		super(id);
 		this.repoModel = repoModel;
 		this.refName = refName;
 		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.content = content;
 		this.prevCommitId = prevCommitId;
+		this.highlight = highlight;
 		this.clientState = clientState;
 		
 		newPath = this.oldPath;
@@ -139,7 +144,7 @@ public abstract class FileEditPanel extends Panel {
 				replace(preview);
 				target.add(preview);
 				
-				target.appendJavaScript(String.format("gitplex.fileEdit.preview('%s');", getMarkupId()));
+				target.appendJavaScript(String.format("gitplex.fileedit.preview('%s');", getMarkupId()));
 			}
 			
 		};
@@ -157,7 +162,7 @@ public abstract class FileEditPanel extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				content = params.getParameterValue("content").toString();
-				target.appendJavaScript(String.format("gitplex.fileEdit.save('%s');", getMarkupId()));
+				target.appendJavaScript(String.format("gitplex.fileedit.save('%s');", getMarkupId()));
 			}
 			
 		};
@@ -211,16 +216,18 @@ public abstract class FileEditPanel extends Panel {
 
 		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(ClosestDescendantResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(DiffMatchPatchResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(FileEditPanel.class, "file-edit.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(FileEditPanel.class, "file-edit.css")));
 		
-		String script = String.format("gitplex.fileEdit.init('%s', '%s', '%s', %s, %s, %s);", 
+		String script = String.format("gitplex.fileedit.init('%s', '%s', '%s', %s, %s, %s, %s);", 
 				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
+				highlight!=null?highlight.toJSON():"undefined",
 				clientState!=null?"'"+clientState+"'":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
@@ -243,8 +250,14 @@ public abstract class FileEditPanel extends Panel {
 		this.newPath = GitUtils.normalizePath(newPath);
 		
 		editSavePanel.onNewPathChange(target);
-		target.appendJavaScript(String.format("gitplex.fileEdit.setMode('%s', '%s');", 
+		target.appendJavaScript(String.format("gitplex.fileedit.setMode('%s', '%s');", 
 				getMarkupId(), getNewPathParam()));
+	}
+	
+	public void highlight(AjaxRequestTarget target, Highlight highlight) {
+		String script = String.format("gitplex.fileedit.highlight('%s', %s);", 
+				getMarkupId(), highlight.toJSON());
+		target.appendJavaScript(script);
 	}
 
 	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);

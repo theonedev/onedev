@@ -1,6 +1,12 @@
 .cm-identifierhighlight {
 	background: #ACF0A6;
 }
+.CodeMirror-highlight {
+	background: #D4A7F3;
+}
+.CodeMirror-highlight.cm-identifierhighlight {
+	background: #ACF0A6;
+}
 .CodeMirror {
 	font-size: 13px;
 }

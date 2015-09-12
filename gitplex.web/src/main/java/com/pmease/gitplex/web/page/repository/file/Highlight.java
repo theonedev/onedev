@@ -8,7 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.gitplex.core.GitPlex;
 
 public class Highlight implements Serializable {
 	
@@ -59,7 +62,7 @@ public class Highlight implements Serializable {
 	public int getEndChar() {
 		return endChar;
 	}
-
+	
 	@Override
 	public String toString() {
 		return (beginLine+1) + "," + (beginChar+1) + "-" + (endLine+1) + "," + (endChar+1);
@@ -96,4 +99,13 @@ public class Highlight implements Serializable {
 		else
 			return null;
 	}
+	
+	public String toJSON() {
+		try {
+			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		} 
+	}
+	
 }

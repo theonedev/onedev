@@ -523,7 +523,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					FILE_VIEWER_ID, repoModel, refName, 
 					blobIdent.isTree()?null:blobIdent.path, 
 					blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
-							getRepository().getObjectId(blobIdent.revision), clientState) {
+							getRepository().getObjectId(blobIdent.revision), highlight, clientState) {
  
 				@Override
 				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -854,13 +854,18 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		
 		highlight = Highlight.of(tokenPos);
 		if (blobIdent.equals(this.blobIdent)) {
-			Component fileViewer = get(FILE_VIEWER_ID);
-			if (fileViewer instanceof SourceViewPanel) {
-				SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-				sourceViewer.highlight(target, highlight);
-			} else {
-				newFileViewer(target, null);
-				resizeWindow(target);
+			if (highlight != null) {
+				Component fileViewer = get(FILE_VIEWER_ID);
+				if (fileViewer instanceof SourceViewPanel) {
+					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
+					sourceViewer.highlight(target, highlight);
+				} else if (fileViewer instanceof FileEditPanel) {
+					FileEditPanel fileEditor = (FileEditPanel) fileViewer;
+					fileEditor.highlight(target, highlight);
+				} else {
+					newFileViewer(target, null);
+					resizeWindow(target);
+				}
 			}
 		} else {
 			this.blobIdent = blobIdent; 

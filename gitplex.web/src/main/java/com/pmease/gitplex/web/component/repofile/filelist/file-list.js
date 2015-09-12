@@ -3,13 +3,6 @@ gitplex.filelist = {
 		var $container = $("#" + containerId);
 		var $fileList = $container.find(">.file-list");
 		
-		gitplex.expandable.getScrollTop = function() {
-			return $fileList.scrollTop();
-		};
-		gitplex.expandable.setScrollTop = function(scrollTop) {
-			$fileList.scrollTop(scrollTop);
-		};
-		
 		$fileList.on("autofit", function(event, width, height) {
 			event.stopPropagation();
 			$fileList.outerWidth(width);

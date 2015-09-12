@@ -5,13 +5,6 @@ gitplex.editsave = {
 	    	pmease.commons.history.setScroll({left: $editSave.scrollLeft(), top: $editSave.scrollTop()});
 		});
 
-		gitplex.expandable.getScrollTop = function() {
-			return $editSave.scrollTop();			
-		};
-		gitplex.expandable.setScrollTop = function(scrollTop) {
-			$editSave.scrollTop(scrollTop);
-		};
-
 		$editSave.on("autofit", function(event, width, height) {
 			event.stopPropagation();
 			

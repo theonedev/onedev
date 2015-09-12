@@ -26,18 +26,6 @@ gitplex.sourceview = {
 			});
 		}
 		
-		gitplex.expandable.getScrollTop = function() {
-			if (cm)
-				return cm.getScrollInfo().top;
-			else
-				return 0;
-		};
-		
-		gitplex.expandable.setScrollTop = function(scrollTop) {
-			if (cm)
-				cm.scrollTo(undefined, scrollTop);
-		};
-		
 		$sourceView.on("autofit", function(event, width, height) {
 			event.stopPropagation();
 			$sourceView.outerWidth(width);
@@ -100,19 +88,11 @@ gitplex.sourceview = {
 						cm.setGutterMarker(line, gutter, $ele[0]);
 					}
 				}
-				
-			    var modeInfo = CodeMirror.findModeByFileName(filePath);
-			    if (modeInfo) {
-			    	// specify mode via mime does not work for gfm (github flavored markdown)
-			    	if (modeInfo.mode === "gfm")
-			    		cm.setOption("mode", "gfm");
-			    	else
-			    		cm.setOption("mode", modeInfo.mime);
-					CodeMirror.autoLoadMode(cm, modeInfo.mode);
-			    }
+
+				pmease.commons.codemirror.setMode(cm, filePath);
 
 			    if (highlight)
-			    	gitplex.sourceview.highlight(cm, highlight);
+			    	pmease.commons.codemirror.highlight(cm, highlight);
 
 			    if (blameCommits) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
@@ -129,7 +109,7 @@ gitplex.sourceview = {
 			    if (commentId != -1) {
 			    	$comment = $("#pullrequest-comment-" + commentId);
 			    	var lineNo = $comment.data("lineno");
-					gitplex.sourceview.centerLine(cm, lineNo);
+					pmease.commons.codemirror.centerLine(cm, lineNo);
 			    	cm.setCursor(lineNo);
 			    	setTimeout(function() {$comment.find(">div").focus();}, 10);
 			    }
@@ -141,41 +121,18 @@ gitplex.sourceview = {
 						document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, node);
 					}
 			    });
-			    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
-			    	
-			    cm.focus();
 			} 
 			if (cm.getOption("fullScreen"))
 				cm.setOption("fullScreen", false);
 			cm.setSize($code.width(), $code.height());
 			if (initState)
-				gitplex.codemirror.initState(cm, cmState);
+				pmease.commons.codemirror.initState(cm, cmState);
 		});
 	}, 
 
-	centerLine: function(cm, line) {
-		var h = cm.getScrollInfo().clientHeight;
-		var coords = cm.charCoords({line: line, ch: 0}, "local");
-		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
-	},
-	
-	highlight: function(cm, highlight) {
-		if (typeof cm === "string") 
-			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
-		
-		if (highlight) {
-			gitplex.sourceview.centerLine(cm, highlight.beginLine);
-			
-			var allMarks = cm.getAllMarks();
-			for (var i=0; i<allMarks.length; i++) 
-				allMarks[i].clear();
-			cm.markText(
-					{line: highlight.beginLine, ch: highlight.beginChar}, 
-					{line: highlight.endLine, ch: highlight.endChar},
-					{className: "CodeMirror-highlight"});
-		} else {
-			cm.setCursor(0, 0);
-		}
+	highlight: function(codeId, highlight) {
+		var cm = $("#"+ codeId + ">.CodeMirror")[0].CodeMirror;		
+		pmease.commons.codemirror.highlight(cm, highlight);
 	},
 	
 	placeComment: function(cm, lineNo, comment) {

@@ -167,19 +167,9 @@ public class SourceViewPanel extends BlobViewPanel {
 		return fragment;
 	}
 
-	public void highlight(AjaxRequestTarget target, @Nullable Highlight highlight) {
-		String json;
-		if (highlight != null) {
-			try {
-				json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(highlight);
-			} catch (JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			json = "undefined";
-		}
+	public void highlight(AjaxRequestTarget target, Highlight highlight) {
 		String script = String.format("gitplex.sourceview.highlight('%s', %s);", 
-				codeContainer.getMarkupId(), json);
+				codeContainer.getMarkupId(), highlight.toJSON());
 		target.appendJavaScript(script);
 	}
 	
@@ -342,12 +332,6 @@ public class SourceViewPanel extends BlobViewPanel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
 		
-		String highlight;
-		try {
-			highlight = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(context.getHighlight());
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		} 
 		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
 		
 		String blameCommitsJson;
@@ -385,7 +369,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				codeContainer.getMarkupId(), 
 				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 				context.getBlobIdent().path, 
-				highlight,
+				context.getHighlight()!=null?context.getHighlight().toJSON():"undefined",
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
 				blameCommitsJson, 
