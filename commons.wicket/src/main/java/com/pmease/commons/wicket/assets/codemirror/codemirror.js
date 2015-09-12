@@ -50,7 +50,7 @@ pmease.commons.codemirror = {
 		    	});
 		    	
 		    	var $selectionPermalink = $(".selection-permalink");
-		    	if (cm.somethingSelected()) {
+		    	if (cm.somethingSelected() && $selectionPermalink.length != 0) {
 		    		$selectionPermalink.show();
 		    		var fromCursor = cm.getCursor("from");
 		    		var toCursor = cm.getCursor("to");

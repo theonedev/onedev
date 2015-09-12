@@ -717,6 +717,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		response.render(JavaScriptHeaderItem.forReference(ClosestDescendantResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JQueryUIResizableJavaScriptReference.asHeaderItem());
+		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(RepoFilePage.class, "repo-file.js")));
 		response.render(CssHeaderItem.forReference(

@@ -43,6 +43,7 @@ import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
+import com.pmease.gitplex.web.page.repository.file.ConfirmSwitchFileListener;
 import com.pmease.gitplex.web.page.repository.file.Highlight;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -365,7 +366,7 @@ public abstract class SearchResultPanel extends Panel {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
-						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+						attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener());
 					}
 					
 					@Override
@@ -454,7 +455,7 @@ public abstract class SearchResultPanel extends Panel {
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 								super.updateAjaxAttributes(attributes);
 								attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
-								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+								attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener());
 							}
 							
 							@Override

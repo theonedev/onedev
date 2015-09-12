@@ -47,7 +47,7 @@ public class TextHitPanel extends Panel {
 			protected void populateItem(ListItem<Segment> item) {
 				item.add(new Label("segment", item.getModelObject().text));
 				if (item.getModelObject().matched)
-					item.add(AttributeModifier.append("style", "background: #CECCF7;"));
+					item.add(AttributeModifier.append("style", "background: #E2C7F3;"));
 			}
 			
 		});

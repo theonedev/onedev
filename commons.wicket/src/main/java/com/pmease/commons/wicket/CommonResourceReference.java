@@ -12,6 +12,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.assets.Assets;
+import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 
 import de.agilecoders.wicket.core.Bootstrap;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -87,6 +88,8 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.STICKY_JS));
 
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ARE_YOU_SURE_JS));
+		
+		dependencies.add(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
 		
 		dependencies.add(CssHeaderItem.forReference(Assets.COMMON_CSS));
 

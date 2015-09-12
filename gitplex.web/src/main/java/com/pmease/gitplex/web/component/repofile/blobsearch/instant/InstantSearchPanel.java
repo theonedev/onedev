@@ -36,7 +36,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
@@ -52,6 +51,7 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
+import com.pmease.gitplex.web.page.repository.file.ConfirmSwitchFileListener;
 import com.pmease.gitplex.web.page.repository.file.Highlight;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -137,7 +137,7 @@ public abstract class InstantSearchPanel extends Panel {
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+								attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener());
 							}
 							
 							@Override
@@ -260,7 +260,7 @@ public abstract class InstantSearchPanel extends Panel {
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+								attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener());
 							}
 							
 							@Override

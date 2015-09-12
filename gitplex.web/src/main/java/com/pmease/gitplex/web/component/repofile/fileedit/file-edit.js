@@ -54,10 +54,10 @@ gitplex.fileedit = {
 					}
 				});
 				
-				var originalDocValue = cm.doc.getValue();
+				cm.oldDocValue = cm.doc.getValue();
 				cm.on("change", function() {
 					var $form = $body.find(">form.edit");
-					if (cm.doc.getValue() != originalDocValue) {
+					if (cm.doc.getValue() != cm.oldDocValue) {
 						$form.addClass("dirty");
 						$fileEdit.data("contentChanged", true);
 					} else {
@@ -97,7 +97,70 @@ gitplex.fileedit = {
 	},
 	highlight: function(containerId, highlight) {
 		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
-		pmease.commons.codemirror.highlight(cm, highlight);
+		if (cm.oldDocValue) {
+			var dmp = new diff_match_patch();
+			var diffs = dmp.diff_main(cm.oldDocValue, cm.doc.getValue());
+			
+			var beginLine = highlight.beginLine, beginChar = highlight.beginChar;
+			var endLine = highlight.endLine, endChar = highlight.endChar;
+			var newBeginLine, newBeginChar, newEndLine, newEndChar;
+			var oldLine = oldChar = newLine = newChar = 0;
+			for (var i=0; i<diffs.length; i++) {
+				var diff = diffs[i];
+				var chars = diff[1];
+				var quit = false;
+				for (var j=0; j<chars.length; j++) {
+					var char = chars[j];
+					if (diff[0] == -1) {
+						if (char == '\n') {
+							oldLine++;
+							oldChar = 0;
+						} else {
+							oldChar++;
+						}
+					} else if (diff[0] == 1) {
+						if (char == '\n') {
+							newLine++;
+							newChar = 0;
+						} else {
+							newChar++;
+						}
+					} else {
+						if (oldLine == beginLine && oldChar == beginChar) {
+							newBeginLine = newLine;
+							newBeginChar = newChar;
+						} else if (oldLine == endLine && oldChar == endChar) {
+							newEndLine = newLine;
+							newEndChar = newChar;
+						} 
+
+						if (char == '\n') {
+							oldLine++;
+							oldChar = 0;
+							newLine++;
+							newChar = 0;
+						} else {
+							oldChar++;
+							newChar++;
+						}
+					}
+					if (oldLine>beginLine && !newBeginLine || oldLine>endLine) {
+						quite = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if (newBeginLine && newEndLine) {
+			var newHighlight = {
+				beginLine: newBeginLine, 
+				beginChar: newBeginChar, 
+				endLine: newEndLine, 
+				endChar: newEndChar
+			};
+			pmease.commons.codemirror.highlight(cm, newHighlight);
+		}
 	},
 	selectTab: function($tab) {
     	var $active = $tab.parent().find("a.tab.active");
