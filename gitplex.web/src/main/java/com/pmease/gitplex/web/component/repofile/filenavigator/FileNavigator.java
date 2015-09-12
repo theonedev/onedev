@@ -47,9 +47,11 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -57,17 +59,20 @@ public abstract class FileNavigator extends Panel {
 
 	private final static String LAST_SEGMENT_ID = "lastSegment";
 	
+	private final IModel<PullRequest> requestModel;
+	
 	private final IModel<Repository> repoModel;
 	
 	private final BlobIdent file;
 	
 	private final BlobNameChangeCallback callback;
 	
-	public FileNavigator(String id, IModel<Repository> repoModel, BlobIdent file, 
-			@Nullable BlobNameChangeCallback callback) {
+	public FileNavigator(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+			BlobIdent file, @Nullable BlobNameChangeCallback callback) {
 		super(id);
 
 		this.repoModel = repoModel;
+		this.requestModel = requestModel;
 		this.file = file;
 		this.callback = callback;
 	}
@@ -122,7 +127,10 @@ public abstract class FileNavigator extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), blobIdent);
+						HistoryState state = new HistoryState();
+						state.blobIdent = blobIdent;
+						state.requestId = PullRequest.idOf(requestModel.getObject());
+						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
 						tag.put("href", urlFor(RepoFilePage.class, params));
 					}
 					
@@ -234,7 +242,10 @@ public abstract class FileNavigator extends Panel {
 									protected void onComponentTag(ComponentTag tag) {
 										super.onComponentTag(tag);
 										
-										PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), model.getObject());
+										HistoryState state = new HistoryState();
+										state.blobIdent = model.getObject();
+										state.requestId = PullRequest.idOf(requestModel.getObject());
+										PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
 										tag.put("href", urlFor(RepoFilePage.class, params));
 									}
 									
@@ -364,6 +375,7 @@ public abstract class FileNavigator extends Panel {
 	@Override
 	protected void onDetach() {
 		repoModel.detach();
+		requestModel.detach();
 		
 		super.onDetach();
 	}

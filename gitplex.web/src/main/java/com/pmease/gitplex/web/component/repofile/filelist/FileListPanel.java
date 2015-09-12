@@ -36,7 +36,9 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -45,6 +47,8 @@ public abstract class FileListPanel extends Panel {
 	private static final String README_NAME = "readme.md";
 	
 	private final IModel<Repository> repoModel;
+	
+	private final IModel<PullRequest> requestModel;
 	
 	private final BlobIdent directory;
 	
@@ -108,10 +112,11 @@ public abstract class FileListPanel extends Panel {
 		
 	};
 	
-	public FileListPanel(String id, IModel<Repository> repoModel, BlobIdent directory) {
+	public FileListPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, BlobIdent directory) {
 		super(id);
 
 		this.repoModel = repoModel;
+		this.requestModel = requestModel;
 		this.directory = directory;
 	}
 
@@ -151,7 +156,10 @@ public abstract class FileListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), parentIdent); 
+				HistoryState state = new HistoryState();
+				state.blobIdent = parentIdent;
+				state.requestId = PullRequest.idOf(requestModel.getObject());
+				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state); 
 				tag.put("href", urlFor(RepoFilePage.class, params));
 			}
 			
@@ -184,7 +192,10 @@ public abstract class FileListPanel extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), blobIdent); 
+						HistoryState state = new HistoryState();
+						state.blobIdent = blobIdent;
+						state.requestId = PullRequest.idOf(requestModel.getObject());
+						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state); 
 						tag.put("href", urlFor(RepoFilePage.class, params));
 					}
 
@@ -271,6 +282,7 @@ public abstract class FileListPanel extends Panel {
 		childrenModel.detach();
 		readmeModel.detach();		
 		repoModel.detach();
+		requestModel.detach();
 		
 		super.onDetach();
 	}

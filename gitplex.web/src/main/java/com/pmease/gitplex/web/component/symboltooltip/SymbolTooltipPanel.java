@@ -42,6 +42,7 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -219,14 +220,21 @@ public abstract class SymbolTooltipPanel extends Panel {
 	}
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
-		return RepoFilePage.paramsOf(
-				repoModel.getObject(), revision, hit.getBlobPath(), 
-				Highlight.of(hit.getTokenPos()), PullRequest.idOf(requestModel.getObject()));
+		HistoryState state = new HistoryState();
+		state.blobIdent.revision = revision;
+		state.blobIdent.path = hit.getBlobPath();
+		state.highlight = Highlight.of(hit.getTokenPos());
+		state.requestId = PullRequest.idOf(requestModel.getObject());
+		return RepoFilePage.paramsOf(repoModel.getObject(), state);
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
-		return RepoFilePage.paramsOf(repoModel.getObject(), revision, 
-				getBlobPath(), null, null, PullRequest.idOf(requestModel.getObject()), null, symbol);
+		HistoryState state = new HistoryState();
+		state.blobIdent.revision = revision;
+		state.blobIdent.path = getBlobPath();
+		state.requestId = PullRequest.idOf(requestModel.getObject());
+		state.query = symbol;
+		return RepoFilePage.paramsOf(repoModel.getObject(), state);
 	}
 	
 	public String getSymbol() {

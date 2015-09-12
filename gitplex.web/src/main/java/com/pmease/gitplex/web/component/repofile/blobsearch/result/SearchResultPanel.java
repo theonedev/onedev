@@ -44,6 +44,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -377,10 +378,11 @@ public abstract class SearchResultPanel extends Panel {
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
 						
-						Long requestId = PullRequest.idOf(context.getPullRequest());
-						PageParameters params = RepoFilePage.paramsOf(
-								context.getRepository(), context.getBlobIdent().revision, 
-								blobPath, null, requestId);
+						HistoryState state = new HistoryState();
+						state.blobIdent.revision = context.getBlobIdent().revision;
+						state.blobIdent.path = blobPath;
+						state.requestId = PullRequest.idOf(context.getPullRequest());
+						PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
 						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 						add(AttributeAppender.replace("href", url.toString()));
 						
@@ -435,11 +437,12 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
-								Long requestId = PullRequest.idOf(context.getPullRequest());
-								Highlight highlight = Highlight.of(hit.getTokenPos());
-								PageParameters params = RepoFilePage.paramsOf(
-										context.getRepository(), context.getBlobIdent().revision, 
-										hit.getBlobPath(), highlight, requestId);
+								HistoryState state = new HistoryState();
+								state.requestId = PullRequest.idOf(context.getPullRequest());
+								state.highlight = Highlight.of(hit.getTokenPos());
+								state.blobIdent.revision = context.getBlobIdent().revision;
+								state.blobIdent.path = hit.getBlobPath();
+								PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
 								CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));
 								

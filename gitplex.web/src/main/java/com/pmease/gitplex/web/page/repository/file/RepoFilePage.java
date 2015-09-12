@@ -447,7 +447,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			callback = null;
 		}
 		
-		Component fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, blobIdent, callback) {
+		Component fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, requestModel, blobIdent, callback) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
@@ -606,7 +606,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				
 			};
 		} else if (blobIdent.path == null || blobIdent.isTree()) {
-			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, blobIdent) {
+			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, requestModel, blobIdent) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
@@ -626,8 +626,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), blobIdent.revision, blobIdent.path, 
-				highlight, commentId, requestId, mode, null);
+		PageParameters params = paramsOf(getRepository(), getState());
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		pushState(target, url.toString(), getState());
 	}
@@ -724,66 +723,24 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				new CssResourceReference(RepoFilePage.class, "repo-file.css")));
 	}
 
-	public static PageParameters paramsOf(PullRequest request, BlobIdent blobIdent) {
-		return paramsOf(request, blobIdent.revision, blobIdent.path);
-	}
-	
-	public static PageParameters paramsOf(PullRequest request, String commitHash, @Nullable String path) {
-		return paramsOf(request.getTargetRepo(), commitHash, path, null, null, 
-				request.getId(), null, null);
-	}
-	
-	public static PageParameters paramsOf(Comment comment) {
-		return paramsOf(comment.getRepository(), comment.getBlobIdent().revision, 
-				comment.getBlobIdent().path, null, comment.getId(), null, null, null);
-	}
-	
-	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
-		return paramsOf(repository, blobIdent.revision, blobIdent.path);
-	}
-	
-	public static PageParameters paramsOf(Repository repository, @Nullable String revision, @Nullable String path) {
-		return paramsOf(repository, revision, path, null, null, null, null, null);
-	}
-	
-	public static PageParameters paramsOf(Repository repository, @Nullable String revision, 
-			@Nullable String path, @Nullable Mode mode) {
-		return paramsOf(repository, revision, path, null, null, null, mode, null);
-	}
-	
-	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
-			@Nullable String path, @Nullable Highlight highlight, @Nullable Long requestId) {
-		return paramsOf(repository, revision, path, highlight, null, requestId, null, null);
-	}
-	
-	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
-			@Nullable String path, @Nullable Highlight highlight, @Nullable Long commentId, 
-			@Nullable Long requestId, @Nullable Mode mode, @Nullable String query) {
-		return paramsOf(repository, revision, path, highlight, commentId, requestId, mode, 
-				query, null);
-	}
-	
-	public static PageParameters paramsOf(Repository repository, @Nullable String revision,
-			@Nullable String path, @Nullable Highlight highlight, @Nullable Long commentId, 
-			@Nullable Long requestId, @Nullable Mode mode, @Nullable String query, 
-			@Nullable String clientState) {
+	public static PageParameters paramsOf(Repository repository, HistoryState state) {
 		PageParameters params = paramsOf(repository);
-		if (revision != null)
-			params.set(PARAM_REVISION, revision);
-		if (path != null)
-			params.set(PARAM_PATH, path);
-		if (highlight != null)
-			params.set(PARAM_HIGHLIGHT, highlight.toString());
-		if (commentId != null)
-			params.set(PARAM_COMMENT, commentId);
-		if (requestId != null)
-			params.set(PARAM_REQUEST, requestId);
-		if (mode != null)
-			params.set(PARAM_MODE, mode.name().toLowerCase());
-		if (query != null)
-			params.set(PARAM_QUERY, query);
-		if (clientState != null)
-			params.set(PARAM_CLIENT_STATE, clientState);
+		if (state.blobIdent.revision != null)
+			params.set(PARAM_REVISION, state.blobIdent.revision);
+		if (state.blobIdent.path != null)
+			params.set(PARAM_PATH, state.blobIdent.path);
+		if (state.highlight != null)
+			params.set(PARAM_HIGHLIGHT, state.highlight.toString());
+		if (state.commentId != null)
+			params.set(PARAM_COMMENT, state.commentId);
+		if (state.requestId != null)
+			params.set(PARAM_REQUEST, state.requestId);
+		if (state.mode != null)
+			params.set(PARAM_MODE, state.mode.name().toLowerCase());
+		if (state.query != null)
+			params.set(PARAM_QUERY, state.query);
+		if (state.clientState != null)
+			params.set(PARAM_CLIENT_STATE, state.clientState);
 		return params;
 	}
 	

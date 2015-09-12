@@ -22,6 +22,7 @@ import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
@@ -85,8 +86,11 @@ public class CommitListPanel extends Panel {
 				item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 				
 				item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+				
+				HistoryState state = new HistoryState();
+				state.blobIdent.revision = commit.getHash();
 				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-						RepoFilePage.paramsOf(repoModel.getObject(), commit.getHash(), null)));
+						RepoFilePage.paramsOf(repoModel.getObject(), state)));
 			}
 			
 		});

@@ -27,6 +27,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
@@ -115,9 +116,10 @@ public abstract class BlobViewPanel extends Panel {
 					
 				}));
 				
-				PageParameters params = RepoFilePage.paramsOf(context.getRepository(), 
-						context.getBlobIdent().revision, context.getBlobIdent().path, 
-						context.getMode()==null?Mode.BLAME:null);
+				HistoryState state = new HistoryState();
+				state.blobIdent = context.getBlobIdent();
+				state.mode = context.getMode()==null?Mode.BLAME:null;
+				PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
 				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 				add(AttributeAppender.replace("href", url.toString()));
 				
@@ -173,8 +175,10 @@ public abstract class BlobViewPanel extends Panel {
 				
 				PageParameters params;
 				if (context.isOnBranch()) {
-					params = RepoFilePage.paramsOf(context.getRepository(), 
-							context.getBlobIdent().revision, context.getBlobIdent().path, Mode.EDIT);
+					HistoryState state = new HistoryState();
+					state.blobIdent = context.getBlobIdent();
+					state.mode = Mode.EDIT;
+					params = RepoFilePage.paramsOf(context.getRepository(), state);
 				} else if (context.isAtSourceBranchHead()) {
 					params = getEditSourceBranchParams(null);
 				} else {
@@ -212,9 +216,12 @@ public abstract class BlobViewPanel extends Panel {
 			}
 			
 			private PageParameters getEditSourceBranchParams(String clientState) {
-				return RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), 
-						context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, 
-						null, null, null, Mode.EDIT, null, clientState);
+				HistoryState state = new HistoryState();
+				state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+				state.blobIdent.path = context.getBlobIdent().path;
+				state.mode = Mode.EDIT;
+				state.clientState = clientState;
+				return RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
 			}
 			
 		});
@@ -232,11 +239,16 @@ public abstract class BlobViewPanel extends Panel {
 				
 				PageParameters params;
 				if (context.isOnBranch()) {
-					params = RepoFilePage.paramsOf(context.getRepository(), 
-							context.getBlobIdent().revision, context.getBlobIdent().path, Mode.EDIT);
+					HistoryState state = new HistoryState();
+					state.blobIdent = context.getBlobIdent();
+					state.mode = Mode.EDIT;
+					params = RepoFilePage.paramsOf(context.getRepository(), state);
 				} else if (context.isAtSourceBranchHead()) {
-					params = RepoFilePage.paramsOf(context.getRepository(), 
-							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.DELETE);
+					HistoryState state = new HistoryState();
+					state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+					state.blobIdent.path = context.getBlobIdent().path;
+					state.mode = Mode.DELETE;
+					params = RepoFilePage.paramsOf(context.getRepository(), state);
 				} else {
 					params = null;
 				}
@@ -259,8 +271,11 @@ public abstract class BlobViewPanel extends Panel {
 				if (context.isOnBranch()) {
 					context.onDelete(target);
 				} else {
-					PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), 
-							context.getPullRequest().getSourceBranch(), context.getBlobIdent().path, Mode.DELETE);
+					HistoryState state = new HistoryState();
+					state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+					state.blobIdent.path = context.getBlobIdent().path;
+					state.mode = Mode.DELETE;
+					PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
 					setResponsePage(RepoFilePage.class, params);
 				}
 			}

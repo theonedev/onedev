@@ -15,7 +15,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -24,7 +23,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
@@ -36,7 +34,6 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.BlobIcon;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
 public abstract class PathSelector extends Panel {
@@ -150,14 +147,6 @@ public abstract class PathSelector extends Panel {
 							onSelect(target, model.getObject());
 						}
 	
-						@Override
-						protected void onComponentTag(ComponentTag tag) {
-							super.onComponentTag(tag);
-							
-							PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), model.getObject());
-							tag.put("href", urlFor(RepoFilePage.class, params));
-						}
-						
 					};
 				} else {
 					link = new WebMarkupContainer("link");

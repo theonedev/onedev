@@ -44,6 +44,7 @@ import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
@@ -201,8 +202,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						
 						commitItem.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
 
+						HistoryState state = new HistoryState();
+						state.requestId = getPullRequest().getId();
+						state.blobIdent.revision = commit.getHash();
 						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-								RepoFilePage.paramsOf(getPullRequest(), commit.getHash(), null)));
+								RepoFilePage.paramsOf(getPullRequest().getTargetRepo(), state)));
 						
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 
