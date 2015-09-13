@@ -26,6 +26,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -167,7 +168,7 @@ public class TextDiffPanel extends Panel {
 			state.blobIdent.path = change.getPath();
 			state.mode = Mode.EDIT;
 			params = RepoFilePage.paramsOf(request.getSourceRepo(), state);
-			add(new BookmarkablePageLink<Void>("editFile", RepoFilePage.class, params) {
+			Link<Void> editFileLink = new BookmarkablePageLink<Void>("editFile", RepoFilePage.class, params) {
 	
 				@Override
 				protected void onConfigure() {
@@ -177,7 +178,9 @@ public class TextDiffPanel extends Panel {
 							&& change.getBlobIdent().revision.equals(request.getSource().getHead(false)));
 				}
 				
-			});
+			};
+			editFileLink.add(AttributeAppender.append("target", "_blank"));
+			add(editFileLink);
 		} else {
 			HistoryState state = new HistoryState();
 			state.blobIdent = change.getBlobIdent();

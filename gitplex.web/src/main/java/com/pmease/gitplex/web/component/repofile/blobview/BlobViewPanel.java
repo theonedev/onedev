@@ -13,6 +13,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -163,129 +164,98 @@ public abstract class BlobViewPanel extends Panel {
 		};
 		add(changeActions);
 		
-		changeActions.add(new ClientStateAwareAjaxLink<Void>("edit") {
+		WebMarkupContainer editLink;
+		if (context.isAtSourceBranchHead()) {
+			HistoryState state = new HistoryState();
+			state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+			state.blobIdent.path = context.getBlobIdent().path;
+			state.mode = Mode.EDIT;
+			state.highlight = context.getHighlight();
+			PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
+			
+			editLink = new BookmarkablePageLink<Void>("edit", RepoFilePage.class, params);
+			editLink.add(new Label("label", "Edit on source branch"));
+			
+			// open in a new tab by default to make sure user can continue to add reply to 
+			// comments on current page after committing code
+			editLink.add(AttributeAppender.append("target", "_blank"));
+		} else if (context.isOnBranch()) {
+			editLink = new ClientStateAwareAjaxLink<Void>("edit") {
 
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				if (context.isAtSourceBranchHead()) {
-					add(new Label("label", "Edit on source branch"));
-					add(AttributeAppender.append("target", "_blank"));
-				} else {
-					add(new Label("label", "Edit"));
-				}
-				
-				PageParameters params;
-				if (context.isOnBranch()) {
-					HistoryState state = new HistoryState();
-					state.blobIdent = context.getBlobIdent();
-					state.mode = Mode.EDIT;
-					state.highlight = context.getHighlight();
-					params = RepoFilePage.paramsOf(context.getRepository(), state);
-				} else if (context.isAtSourceBranchHead()) {
-					params = getEditSourceBranchParams(null);
-				} else {
-					params = null;
-				}
-				if (params != null) {
-					CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
-					add(AttributeAppender.replace("href", url.toString()));
-				}
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(getBlob().getText() != null);
-			}
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				
-				if (!context.isOnBranch() && !context.isAtSourceBranchHead()) 
-					tag.put("disabled", "disabled");
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target, String clientState) {
-				if (context.isOnBranch()) {
+				@Override
+				public void onClick(AjaxRequestTarget target, String clientState) {
 					context.onEdit(target, clientState);
-				} else {
-					PageParameters params = getEditSourceBranchParams(clientState);
-					setResponsePage(RepoFilePage.class, params);
 				}
-			}
+			};
+			editLink.add(new Label("label", "Edit"));
 			
-			private PageParameters getEditSourceBranchParams(String clientState) {
-				HistoryState state = new HistoryState();
-				state.blobIdent.revision = context.getPullRequest().getSourceBranch();
-				state.blobIdent.path = context.getBlobIdent().path;
-				state.mode = Mode.EDIT;
-				state.clientState = clientState;
-				state.highlight = context.getHighlight();
-				return RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
-			}
-			
-		});
+			PageParameters params;
+			HistoryState state = new HistoryState();
+			state.blobIdent = context.getBlobIdent();
+			state.mode = Mode.EDIT;
+			state.highlight = context.getHighlight();
+			params = RepoFilePage.paramsOf(context.getRepository(), state);
+			CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+			editLink.add(AttributeAppender.replace("href", url.toString()));
+		} else {
+			editLink = new WebMarkupContainer("edit");
+			editLink.add(new Label("label", "Edit"));
+			editLink.add(AttributeAppender.append("disabled", "disabled"));
+		}
+		editLink.setVisible(getBlob().getText() != null);
+		changeActions.add(editLink);
 		
-		changeActions.add(new AjaxLink<Void>("delete") {
+		WebMarkupContainer deleteLink;
+		if (context.isAtSourceBranchHead()) {
+			HistoryState state = new HistoryState();
+			state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+			state.blobIdent.path = context.getBlobIdent().path;
+			state.mode = Mode.DELETE;
+			PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+			deleteLink = new BookmarkablePageLink<Void>("delete", RepoFilePage.class, params);
+			deleteLink.add(new Label("label", "Delete from source branch"));
+			deleteLink.add(AttributeAppender.append("target", "_blank"));
+		} else if (context.isOnBranch()) {
+			deleteLink = new AjaxLink<Void>("delete") {
 
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				if (context.isAtSourceBranchHead())
-					add(new Label("label", "Delete from source branch"));
-				else
-					add(new Label("label", "Delete"));
-				
-				PageParameters params;
-				if (context.isOnBranch()) {
-					HistoryState state = new HistoryState();
-					state.blobIdent = context.getBlobIdent();
-					state.mode = Mode.EDIT;
-					params = RepoFilePage.paramsOf(context.getRepository(), state);
-				} else if (context.isAtSourceBranchHead()) {
-					HistoryState state = new HistoryState();
-					state.blobIdent.revision = context.getPullRequest().getSourceBranch();
-					state.blobIdent.path = context.getBlobIdent().path;
-					state.mode = Mode.DELETE;
-					params = RepoFilePage.paramsOf(context.getRepository(), state);
-				} else {
-					params = null;
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					
+					if (!context.isOnBranch() && !context.isAtSourceBranchHead())
+						tag.put("disabled", "disabled");
 				}
-				if (params != null) {
-					CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
-					add(AttributeAppender.replace("href", url.toString()));
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					if (context.isOnBranch()) {
+						context.onDelete(target);
+					} else {
+						HistoryState state = new HistoryState();
+						state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+						state.blobIdent.path = context.getBlobIdent().path;
+						state.mode = Mode.DELETE;
+						PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
+						setResponsePage(RepoFilePage.class, params);
+					}
 				}
-			}
+
+			};
+			deleteLink.add(new Label("label", "Delete"));
 			
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				
-				if (!context.isOnBranch() && !context.isAtSourceBranchHead())
-					tag.put("disabled", "disabled");
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				if (context.isOnBranch()) {
-					context.onDelete(target);
-				} else {
-					HistoryState state = new HistoryState();
-					state.blobIdent.revision = context.getPullRequest().getSourceBranch();
-					state.blobIdent.path = context.getBlobIdent().path;
-					state.mode = Mode.DELETE;
-					PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
-					setResponsePage(RepoFilePage.class, params);
-				}
-			}
-
-		});
+			HistoryState state = new HistoryState();
+			state.blobIdent = context.getBlobIdent();
+			state.mode = Mode.EDIT;
+			PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+			CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+			deleteLink.add(AttributeAppender.replace("href", url.toString()));
+		} else {
+			deleteLink = new WebMarkupContainer("delete");
+			deleteLink.add(new Label("label", "Delete"));
+			deleteLink.add(AttributeAppender.append("disabled", "disabled"));
+		}
+		deleteLink.setVisible(getBlob().getText() != null);
+		changeActions.add(deleteLink);
 
 		setOutputMarkupId(true);
 	}
