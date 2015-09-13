@@ -2,6 +2,7 @@ gitplex.blobInstantSearch = {
 	init: function(inputId, dropdownId, callback) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
+		
 		$dropdown.on("hide", function() {
 			if (!$input.is(":focus") && $input.is(":visible")) {
 				// in case user clicks advanced button while the 
@@ -92,5 +93,11 @@ gitplex.blobInstantSearch = {
 		$dropdown.bind("keydown", "down", function(e) {
 			keydown(e);
 		});
+	},
+	adjustDropdownHeight: function(inputId, dropdownId) {
+		var $input = $("#" + inputId);
+		var $dropdown = $("#" + dropdownId);
+		var dropdownSpace = $(window).height() - $input.offset().top - $input.height() - 45;
+		$dropdown.find(".instant-search-result").css("max-height", dropdownSpace);
 	}
 };

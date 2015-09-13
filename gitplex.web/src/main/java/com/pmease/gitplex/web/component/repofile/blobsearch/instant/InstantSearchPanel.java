@@ -362,8 +362,12 @@ public abstract class InstantSearchPanel extends Panel {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				if (searchResult != null)
+				if (searchResult != null) {
 					target.add(searchResult);
+					String script = String.format("gitplex.blobInstantSearch.adjustDropdownHeight('%s', '%s');", 
+							searchField.getMarkupId(), searchDropdown.getMarkupId());
+					target.appendJavaScript(script);
+				}
 				
 				searchInput = searchField.getInput();
 
