@@ -218,12 +218,12 @@ public class RepoBranchesPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				return new RepoAndBranch(getRepository(), getBaseBranch()).getId();
+				return getBaseBranch();
 			}
 
 			@Override
 			public void setObject(String object) {
-				baseBranch = new RepoAndBranch(object).getBranch();
+				baseBranch = object;
 			}
 			
 		}, new BranchChoiceProvider(repoModel), false).add(new AjaxFormComponentUpdatingBehavior("change") {

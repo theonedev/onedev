@@ -182,12 +182,29 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 		
 		trait.repoId = getRepository().getId();
-		blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
-		if (blobIdent.revision == null)
-			blobIdent.revision = getRepository().getDefaultBranch();
+		
+		commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		blobIdent.revision = params.get(PARAM_REVISION).toString();
+		blobIdent.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
+		
+		Comment comment = commentModel.getObject();
+		if (comment != null) {
+			if (blobIdent.revision != null || blobIdent.path != null)
+				throw new IllegalArgumentException("Revision or path should not be specified if comment is specified");
+			blobIdent = comment.getBlobIdent();
+		} else {
+			requestId = params.get(PARAM_REQUEST).toOptionalLong();
+			
+			blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+			if (blobIdent.revision == null)
+				blobIdent.revision = getRepository().getDefaultBranch();
+
+			if (requestId != null && !GitUtils.isHash(blobIdent.revision))
+				throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
+		}
+		
 		trait.revision = blobIdent.revision;
 		
-		blobIdent.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
 		if (blobIdent.path != null) {
 			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo)) {
@@ -211,12 +228,6 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		String highlightStr = params.get(PARAM_HIGHLIGHT).toString();
 		if (highlightStr != null)
 			highlight = new Highlight(highlightStr);
-		
-		commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		requestId = params.get(PARAM_REQUEST).toOptionalLong();
-		
-		if ((requestId != null || commentId != null) && !GitUtils.isHash(blobIdent.revision))
-			throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
 		
 		queryHits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
 		if (queryHits != null) { 
