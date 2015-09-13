@@ -43,7 +43,7 @@ public class BranchProtection extends AbstractGateKeeper {
 
 	@Editable(name="Restrict Write Access to Below Teams", order=200)
 	@TeamChoice(excludes={Team.ANONYMOUS, Team.LOGGEDIN})
-	@Size(min=1)
+	@Size(min=1, message="Please select teams")
 	@NotNull
 	public List<Long> getTeamIds() {
 		return teamIds;

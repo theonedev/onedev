@@ -105,8 +105,12 @@ public enum PullRequestOperation {
 	
 	private static boolean canReview(PullRequest request) {
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
+		
+		// call request.getStatus() in order to trigger generation of review
+		// integrations which will be used in else condition 
 		if (user == null  
-				|| !request.isOpen() 
+				|| request.getStatus() == PullRequest.Status.INTEGRATED 
+				|| request.getStatus() == PullRequest.Status.DISCARDED
 				|| request.isReviewEffective(user)) { 
 			return false;
 		} else {
