@@ -89,14 +89,3 @@ $(window).load(function() {
 	});
 	$(window).resize();
 });
-
-gitplex.repofile = {
-	confirmSwitchFile: function(linkId) {
-		var linkURI = new URI(document.getElementById(linkId));
-		var currentURI = new URI(window.location.href);
-		if (linkURI.search(true).path != currentURI.search(true).path)
-			return pmease.commons.form.confirmLeave();
-		else
-			return true;
-	}
-};

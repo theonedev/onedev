@@ -1,29 +1,8 @@
 var gitplex = {
-	utils: {
-		/**
-		 * Trigger a callback when the selected images are loaded:
-		 * @param {String} selector
-		 * @param {Function} callback
-		 */
-		 onImageLoad: function(selector, callback){
-		    $(selector).each(function(){
-		        if (this.complete || /*for IE 10-*/ $(this).height() > 0) {
-		            callback.apply(this);
-		        }
-		        else {
-		            $(this).on('load', function(){
-		                callback.apply(this);
-		            });
-		        }
-		    });
-		}
-	}, 
-	
 	mouseState: {
 		pressed: false, 
 		moved: false
 	}
-	
 };
 
 $(document).ready(function() {

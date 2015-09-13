@@ -13,6 +13,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
@@ -55,6 +56,7 @@ public class CodeMirrorResourceReference extends JavaScriptResourceReference {
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "simplescrollbars.js")),
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "gotoline.js")),
 					
+					JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE),
 					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js")),
 					JavaScriptHeaderItem.forReference(meta),
 					

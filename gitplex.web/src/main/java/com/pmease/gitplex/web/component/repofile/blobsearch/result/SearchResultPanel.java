@@ -10,17 +10,14 @@ import java.util.Map;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
@@ -28,7 +25,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -36,14 +32,12 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
-import com.pmease.gitplex.web.page.repository.file.ConfirmSwitchFileListener;
 import com.pmease.gitplex.web.page.repository.file.Highlight;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -124,7 +118,7 @@ public abstract class SearchResultPanel extends Panel {
 		String script = String.format(""
 				+ "$('#%s').find('.selectable').removeClass('active');"
 				+ "$('#%s').addClass('active');"
-				+ "gitplex.blobSearchResult.scrollIfNecessary('%s');", 
+				+ "gitplex.searchresult.scrollIfNecessary('%s');", 
 				getMarkupId(), activeLinkId, getMarkupId());
 		target.appendJavaScript(script);
 		
@@ -144,45 +138,78 @@ public abstract class SearchResultPanel extends Panel {
 		context.onSelect(target, selected, hit.getTokenPos());
 	}
 	
-	private void onPrevMatch(AjaxRequestTarget target) {
-		if (prevMatchLink.isEnabled()) {		
-			if (activeHitIndex>0) {
-				activeHitIndex--;
+	private String getActiveBlobPath(ActiveIndex activeIndex) {
+		MatchedBlob activeBlob = blobs.get(activeIndex.blob);
+		if (activeIndex.hit != -1)
+			return activeBlob.getHits().get(activeIndex.hit).getBlobPath();
+		else
+			return activeBlob.getBlobPath();
+	}
+	
+	private ActiveIndex getPrevMatch() {
+		if (prevMatchLink.isEnabled()) {
+			ActiveIndex activeIndex = new ActiveIndex(activeBlobIndex, activeHitIndex);
+			if (activeIndex.hit>0) {
+				activeIndex.hit--;
+				return activeIndex;
 			} else {
-				activeBlobIndex--;
-				MatchedBlob activeBlob = blobs.get(activeBlobIndex);
+				activeIndex.blob--;
+				MatchedBlob activeBlob = blobs.get(activeIndex.blob);
 				if (activeBlob.getHits().isEmpty())
-					activeHitIndex = -1;
+					activeIndex.hit = -1;
 				else
-					activeHitIndex = activeBlob.getHits().size()-1;
+					activeIndex.hit = activeBlob.getHits().size()-1;
+				return activeIndex;
 			}
-			
+		} else {
+			return null;
+		}
+	}
+	
+	private void onPrevMatch(AjaxRequestTarget target) {
+		ActiveIndex activeIndex = getPrevMatch();
+		
+		if (activeIndex != null) {
+			activeBlobIndex = activeIndex.blob;
+			activeHitIndex = activeIndex.hit;
 			onActiveIndexChange(target);
 		}
 	}
 	
-	private void onNextMatch(AjaxRequestTarget target) {
+	private ActiveIndex getNextMatch() {
 		if (nextMatchLink.isEnabled()) {
-			if (activeBlobIndex == -1) {
-				activeBlobIndex = 0;
-				MatchedBlob activeBlob = blobs.get(activeBlobIndex);
+			ActiveIndex activeIndex = new ActiveIndex(activeBlobIndex, activeHitIndex);
+			if (activeIndex.blob == -1) {
+				activeIndex.blob = 0;
+				MatchedBlob activeBlob = blobs.get(activeIndex.blob);
 				if (activeBlob.getHits().isEmpty())
-					activeHitIndex = -1;
+					activeIndex.hit = -1;
 				else
-					activeHitIndex = 0;
+					activeIndex.hit = 0;
 			} else {
-				MatchedBlob activeBlob = blobs.get(activeBlobIndex);
-				activeHitIndex++;
-				if (activeHitIndex==activeBlob.getHits().size()) {
-					activeBlobIndex++;
-					activeBlob = blobs.get(activeBlobIndex);
+				MatchedBlob activeBlob = blobs.get(activeIndex.blob);
+				activeIndex.hit++;
+				if (activeIndex.hit==activeBlob.getHits().size()) {
+					activeIndex.blob++;
+					activeBlob = blobs.get(activeIndex.blob);
 					if (activeBlob.getHits().isEmpty())
-						activeHitIndex = -1;
+						activeIndex.hit = -1;
 					else
-						activeHitIndex = 0;
+						activeIndex.hit = 0;
 				}
 			}
-			
+			return activeIndex;
+		} else {
+			return null;
+		}
+	}
+	
+	private void onNextMatch(AjaxRequestTarget target) {
+		ActiveIndex activeIndex = getNextMatch();
+		
+		if (activeIndex != null) {
+			activeBlobIndex = activeIndex.blob;
+			activeHitIndex = activeIndex.hit;
 			onActiveIndexChange(target);
 		}
 	}
@@ -199,7 +226,9 @@ public abstract class SearchResultPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				ActiveIndex activeIndex = getPrevMatch();
+				if (activeIndex != null)
+					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(getActiveBlobPath(activeIndex)));
 			}
 
 			@Override
@@ -222,7 +251,9 @@ public abstract class SearchResultPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				ActiveIndex activeIndex = getNextMatch();
+				if (activeIndex != null)
+					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(getActiveBlobPath(activeIndex)));
 			}
 			
 			@Override
@@ -476,49 +507,6 @@ public abstract class SearchResultPanel extends Panel {
 		
 		add(new WebMarkupContainer("noMatchingResult").setVisible(blobs.isEmpty()));
 		
-		add(new AbstractDefaultAjaxBehavior() {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
-			}
-			
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-				String key = params.getParameterValue("key").toString();
-				
-				if (key.equals("up")) 
-					onPrevMatch(target);
-				else if (key.equals("down")) 
-					onNextMatch(target);
-				else 
-					throw new IllegalStateException("Unrecognized key: " + key);
-			}
-
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(SearchResultPanel.class, "search-result.js")));
-				response.render(CssHeaderItem.forReference(
-						new CssResourceReference(SearchResultPanel.class, "search-result.css")));
-				
-				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-				
-				String script = String.format(""
-						+ "var $body = $('#%s>.search-result>.body');"
-						+ "var callback = %s;"
-						+ "$body.bind('keydown', 'up', function(e) {e.preventDefault(); if (pmease.commons.form.confirmLeave()) callback('up');});"
-						+ "$body.bind('keydown', 'down', function(e) {e.preventDefault(); if (pmease.commons.form.confirmLeave()) callback('down');});", 
-						getMarkupId(), getCallbackFunction(CallbackParameter.explicit("key")));
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-			
-		});
-		
 		setOutputMarkupId(true);
 	}
 
@@ -527,4 +515,29 @@ public abstract class SearchResultPanel extends Panel {
 	private static class ExpandStatusKey extends MetaDataKey<ExpandStatus> {
 		static final ExpandStatusKey INSTANCE = new ExpandStatusKey();		
 	};
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+
+		// to be used by ConfirmSwitchFileListener
+		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
+		
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(SearchResultPanel.class, "search-result.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(SearchResultPanel.class, "search-result.css")));
+	}
+
+	private static class ActiveIndex {
+		int blob;
+		
+		int hit;
+		
+		public ActiveIndex(int blob, int hit) {
+			this.blob = blob;
+			this.hit = hit;
+		}
+	}
+	
 }

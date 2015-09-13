@@ -169,10 +169,12 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				if (context.isAtSourceBranchHead())
+				if (context.isAtSourceBranchHead()) {
 					add(new Label("label", "Edit on source branch"));
-				else
+					add(AttributeAppender.append("target", "_blank"));
+				} else {
 					add(new Label("label", "Edit"));
+				}
 				
 				PageParameters params;
 				if (context.isOnBranch()) {

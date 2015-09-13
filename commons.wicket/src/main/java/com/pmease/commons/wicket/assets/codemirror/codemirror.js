@@ -14,6 +14,10 @@ pmease.commons.codemirror = {
 				{line: highlight.beginLine, ch: highlight.beginChar}, 
 				{line: highlight.endLine, ch: highlight.endChar},
 				{className: "CodeMirror-highlight"});
+		cm.setCursor({line:highlight.beginLine, ch:highlight.beginChar});
+		setTimeout(function() {
+			cm.focus();
+		}, 10);
 	},
 	setMode: function(cm, filePath) {
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);

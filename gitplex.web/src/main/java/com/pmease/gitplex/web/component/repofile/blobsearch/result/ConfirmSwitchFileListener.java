@@ -1,11 +1,19 @@
-package com.pmease.gitplex.web.page.repository.file;
+package com.pmease.gitplex.web.component.repofile.blobsearch.result;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 
-public class ConfirmSwitchFileListener implements IAjaxCallListener {
+class ConfirmSwitchFileListener implements IAjaxCallListener {
 
+	private final String path;
+	
 	public ConfirmSwitchFileListener() {
+		path = null;
+	}
+	
+	public ConfirmSwitchFileListener(String path) {
+		this.path = path;
 	}
 	
 	@Override
@@ -15,8 +23,13 @@ public class ConfirmSwitchFileListener implements IAjaxCallListener {
 
 	@Override
 	public CharSequence getPrecondition(Component component) {
-		return String.format("return gitplex.repofile.confirmSwitchFile('%s');", 
-				component.getMarkupId(true));
+		if (path != null) {
+			return String.format("return gitplex.searchresult.confirmSwitchFileByPath('%s');", 
+					StringEscapeUtils.escapeEcmaScript(path));
+		} else {
+			return String.format("return gitplex.searchresult.confirmSwitchFileByLink('%s');", 
+					component.getMarkupId(true));
+		}
 	}
 
 	@Override
