@@ -58,7 +58,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		addSecurityPages();
 		
 		add(new MountedMapper("/test", TestPage.class));
-		add(new MountedMapper("run-mode", RunModePage.class));
+		add(new MountedMapper("runmode", RunModePage.class));
 		
 		addResources();
 	}

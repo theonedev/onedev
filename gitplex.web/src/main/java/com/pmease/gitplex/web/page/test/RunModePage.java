@@ -31,7 +31,7 @@ public class RunModePage extends CommonPage {
 		response.render(CssHeaderItem.forReference(
 				new WebjarsCssResourceReference("codemirror/current/lib/codemirror.css")));
 
-		File file = new File("W:\\commons\\commons.tokenizer\\src\\test\\java\\com\\pmease\\commons\\tokenizer\\testfiles\\test.json");
+		File file = new File("W:\\commons\\commons.lang\\src\\test\\java\\com\\pmease\\commons\\lang\\tokenizers\\javascript\\test2.js");
 		
 		try {
 			response.render(OnDomReadyHeaderItem.forScript(String.format(

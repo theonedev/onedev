@@ -147,7 +147,12 @@ public class StringStream {
 	
 	public boolean match(String match, boolean consume, boolean caseInsensitive) {
 		String casedMatch = caseInsensitive?match.toLowerCase():match;
-		String substr = string.substring(pos, match.length()+pos);
+		String substr;
+		int end = match.length() + pos;
+		if (end <= string.length())
+			substr = string.substring(pos, end);
+		else
+			substr = string.substring(pos);
 		String casedSubstr = caseInsensitive?substr.toLowerCase():substr;
 		if (casedMatch.equals(casedSubstr)) {
 			if (consume)
