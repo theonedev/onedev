@@ -62,7 +62,22 @@ public abstract class AbstractTokenizerTest {
 				}
 				
 			}).omitEmptyStrings().splitToList(fileContent);
-	        Assert.assertEquals(callback.getTokenizedLines().toString(), tokenizer.tokenize(lines).toString());
+
+	        StringBuilder expected = new StringBuilder();
+	        for (List<CmToken> line: callback.getTokenizedLines()) {
+	        	for (CmToken token: line) 
+	        		expected.append(token.getText() + "^" + token.getType() + "^");
+	        	expected.append("\n");
+	        }
+	        
+	        StringBuilder actual = new StringBuilder();
+	        for (List<CmToken> line: tokenizer.tokenize(lines)) {
+	        	for (CmToken token: line) 
+	        		actual.append(token.getText() + "^" + token.getType() + "^");
+	        	actual.append("\n");
+	        }
+	        
+	        Assert.assertEquals(expected, actual);
 	    } catch (IOException | ScriptException e) {
 			throw new RuntimeException(e);
 		} 
