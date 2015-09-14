@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.lang.tokenizers.Tokenizers;
 import com.pmease.commons.lang.tokenizers.clike.JavaTokenizer;
@@ -18,6 +19,22 @@ import com.pmease.commons.loader.AppLoaderMocker;
 
 public class DiffUtilsTest extends AppLoaderMocker {
 
+	private String toString(DiffBlock<List<CmToken>> block) {
+		StringBuffer buffer = new StringBuffer();
+		for (List<CmToken> line: block.getUnits()) {
+			if (block.getOperation() == Operation.INSERT)
+				buffer.append("+");
+			else if (block.getOperation() == Operation.DELETE)
+				buffer.append("-");
+			else
+				buffer.append(" ");
+			for (CmToken token: line) 
+				buffer.append(token.getText());
+			buffer.append("\n");
+		}
+		return buffer.toString();
+	}
+	
 	@Test
 	public void testDiff() {
 		List<String> oldLines = Lists.newArrayList(
@@ -35,19 +52,19 @@ public class DiffUtilsTest extends AppLoaderMocker {
 				"}");
 		List<DiffBlock<List<CmToken>>> diffBlocks = DiffUtils.diff(oldLines, "test.java", newLines, "test.java");
 		assertEquals(""
-				+ "-public class HelloRobin {\n", diffBlocks.get(0).toString());
+				+ "-public class HelloRobin {\n", toString(diffBlocks.get(0)));
 		assertEquals(""
 				+ "+package test;\n"
-				+ "+public class HelloTim {\n", diffBlocks.get(1).toString());
+				+ "+public class HelloTim {\n", toString(diffBlocks.get(1)));
 		assertEquals(""
-				+ " 	public static void main(String[] args) {\n", diffBlocks.get(2).toString());
+				+ " 	public static void main(String[] args) {\n", toString(diffBlocks.get(2)));
 		assertEquals(""
-				+ "-		System.out.println(\"hello robin\");\n", diffBlocks.get(3).toString());
+				+ "-		System.out.println(\"hello robin\");\n", toString(diffBlocks.get(3)));
 		assertEquals(""
-				+ "+		System.out.println(\"hello tim\");\n", diffBlocks.get(4).toString());
+				+ "+		System.out.println(\"hello tim\");\n", toString(diffBlocks.get(4)));
 		assertEquals(""
 				+ " 	}\n"
-				+ " }\n", diffBlocks.get(5).toString());
+				+ " }\n", toString(diffBlocks.get(5)));
 		assertEquals(0, diffBlocks.get(0).getOldStart());
 		assertEquals(0, diffBlocks.get(0).getNewStart());
 		assertEquals(1, diffBlocks.get(1).getOldStart());

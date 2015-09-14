@@ -53,20 +53,4 @@ public class DiffBlock<T> implements Serializable {
 			return newStart + units.size();
 	}
 	
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		for (T unit: units) {
-			if (operation == Operation.INSERT)
-				buffer.append("+");
-			else if (operation == Operation.DELETE)
-				buffer.append("-");
-			else
-				buffer.append(" ");
-			buffer.append(unit);
-			buffer.append("\n");
-		}
-		return buffer.toString();
-	}
-	
 }

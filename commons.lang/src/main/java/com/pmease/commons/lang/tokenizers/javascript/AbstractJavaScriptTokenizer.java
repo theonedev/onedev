@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import com.google.common.collect.Sets;
 import com.pmease.commons.lang.tokenizers.AbstractTokenizer;
 import com.pmease.commons.lang.tokenizers.StringStream;
+import com.pmease.commons.lang.tokenizers.TokenizerUtils;
 
 public abstract class AbstractJavaScriptTokenizer extends AbstractTokenizer<AbstractJavaScriptTokenizer.State> {
 
@@ -700,7 +701,7 @@ public abstract class AbstractJavaScriptTokenizer extends AbstractTokenizer<Abst
 		boolean combine(StringStream stream, State state, String type, String value) {
 		    if (!type.equals("quasi")) 
 		    	return pass(state);
-		    if (!value.substring(value.length() - 2).equals("${")) 
+		    if (!TokenizerUtils.slice(value, value.length() - 2).equals("${")) 
 		    	return cont(state, new Quasi());
 		    return cont(state, new Expression(), new ContinueQuasi());
 		}

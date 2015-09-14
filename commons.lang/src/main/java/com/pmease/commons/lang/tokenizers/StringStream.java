@@ -147,12 +147,7 @@ public class StringStream {
 	
 	public boolean match(String match, boolean consume, boolean caseInsensitive) {
 		String casedMatch = caseInsensitive?match.toLowerCase():match;
-		String substr;
-		int end = match.length() + pos;
-		if (end <= string.length())
-			substr = string.substring(pos, end);
-		else
-			substr = string.substring(pos);
+		String substr = TokenizerUtils.substr(string, pos, match.length());
 		String casedSubstr = caseInsensitive?substr.toLowerCase():substr;
 		if (casedMatch.equals(casedSubstr)) {
 			if (consume)
@@ -168,7 +163,7 @@ public class StringStream {
 	}
 
 	public List<String> match(Pattern pattern, boolean consume) {
-		Matcher matcher = pattern.matcher(string.substring(pos));
+		Matcher matcher = pattern.matcher(TokenizerUtils.slice(string, pos));
 		if (matcher.find()) {
 			if (matcher.start() > 0)
 				return new ArrayList<>();
@@ -189,7 +184,7 @@ public class StringStream {
 	}
 	
 	public String current() {
-		return string.substring(start, pos);
+		return TokenizerUtils.slice(string, start, pos);
 	}
 
 	public <T> Object hideFirstChars(int n, Callable<T> inner) {
