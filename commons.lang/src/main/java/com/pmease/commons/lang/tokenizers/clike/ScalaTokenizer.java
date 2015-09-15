@@ -42,14 +42,16 @@ public class ScalaTokenizer extends ClikeTokenizer {
 
 	private static Map<String, Processor> HOOKS = Maps.newHashMap();
 
-	private static Pattern PATTERN = Pattern.compile("[\\w\\$_]");
+	private static Pattern PATTERN1 = Pattern.compile("[\\w\\$_]");
+	
+	private static Pattern PATTERN2 = Pattern.compile("[\\w\\$_\\xa1-\\uffff]");
 
 	static {
 		HOOKS.put("@", new Processor() {
 
 			@Override
 			public String process(StringStream stream, State state) {
-				stream.eatWhile(PATTERN);
+				stream.eatWhile(PATTERN1);
 				return "meta";
 			}
 
@@ -62,6 +64,15 @@ public class ScalaTokenizer extends ClikeTokenizer {
 		        	return "";
 		        state.tokenize = new TokenTripleString();
 		        return state.tokenize.process(stream, state);
+			}
+			
+		});
+		HOOKS.put("'", new Processor() {
+
+			@Override
+			public String process(StringStream stream, State state) {
+		        stream.eatWhile(PATTERN2);
+		        return "atom";
 			}
 			
 		});

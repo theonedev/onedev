@@ -24,7 +24,7 @@ public class RunModePage extends CommonPage {
 		super.renderHead(response);
 		
 		String mode = "clike/clike.js";
-		String fileName = "clike/test.c";
+		String fileName = "clike/test.scala";
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new WebjarsJavaScriptResourceReference("codemirror/current/addon/runmode/runmode-standalone.js")));
