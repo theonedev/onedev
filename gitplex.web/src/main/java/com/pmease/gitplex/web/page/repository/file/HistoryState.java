@@ -15,7 +15,7 @@ public class HistoryState implements Serializable {
 	
 	public BlobIdent blobIdent = new BlobIdent();
 	
-	public Highlight highlight;
+	public Mark mark;
 	
 	public Mode mode;
 	

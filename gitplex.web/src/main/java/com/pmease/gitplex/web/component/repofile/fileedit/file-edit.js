@@ -1,5 +1,5 @@
 gitplex.fileedit = {
-	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, highlight, cmState) {
+	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, mark, cmState) {
 		var $container = $("#" + containerId);
 		var $fileEdit = $container.find(">.file-edit");
 		var $head = $fileEdit.find(">.head");
@@ -67,8 +67,8 @@ gitplex.fileedit = {
 				});
 				pmease.commons.codemirror.setMode(cm, filePath);
 				
-			    if (highlight) 
-			    	pmease.commons.codemirror.highlight(cm, highlight);
+			    if (mark) 
+			    	pmease.commons.codemirror.mark(cm, mark);
 			}
 			
 			if ($edit.is(":visible")) {
@@ -95,14 +95,14 @@ gitplex.fileedit = {
 		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.setMode(cm, filePath);
 	},
-	highlight: function(containerId, highlight) {
+	mark: function(containerId, mark) {
 		var cm = $("#"+ containerId + ">.file-edit>.body>div.edit>.CodeMirror")[0].CodeMirror;		
 		if (cm.oldDocValue) {
 			var dmp = new diff_match_patch();
 			var diffs = dmp.diff_main(cm.oldDocValue, cm.doc.getValue());
 			
-			var beginLine = highlight.beginLine, beginChar = highlight.beginChar;
-			var endLine = highlight.endLine, endChar = highlight.endChar;
+			var beginLine = mark.beginLine, beginChar = mark.beginChar;
+			var endLine = mark.endLine, endChar = mark.endChar;
 			var newBeginLine, newBeginChar, newEndLine, newEndChar;
 			var oldLine = oldChar = newLine = newChar = 0;
 			for (var i=0; i<diffs.length; i++) {
@@ -153,13 +153,13 @@ gitplex.fileedit = {
 		}
 		
 		if (newBeginLine && newEndLine) {
-			var newHighlight = {
+			var newMark = {
 				beginLine: newBeginLine, 
 				beginChar: newBeginChar, 
 				endLine: newEndLine, 
 				endChar: newEndChar
 			};
-			pmease.commons.codemirror.highlight(cm, newHighlight);
+			pmease.commons.codemirror.mark(cm, newMark);
 		}
 	},
 	selectTab: function($tab) {

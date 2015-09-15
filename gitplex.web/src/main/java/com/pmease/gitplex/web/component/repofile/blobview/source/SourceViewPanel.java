@@ -71,7 +71,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
-import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.Mark;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -167,9 +167,9 @@ public class SourceViewPanel extends BlobViewPanel {
 		return fragment;
 	}
 
-	public void highlight(AjaxRequestTarget target, Highlight highlight) {
-		String script = String.format("gitplex.sourceview.highlight('%s', %s);", 
-				codeContainer.getMarkupId(), highlight.toJSON());
+	public void mark(AjaxRequestTarget target, Mark mark) {
+		String script = String.format("gitplex.sourceview.mark('%s', %s);", 
+				codeContainer.getMarkupId(), mark.toJSON());
 		target.appendJavaScript(script);
 	}
 	
@@ -369,7 +369,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				codeContainer.getMarkupId(), 
 				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 				context.getBlobIdent().path, 
-				context.getHighlight()!=null?context.getHighlight().toJSON():"undefined",
+				context.getMark()!=null?context.getMark().toJSON():"undefined",
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
 				blameCommitsJson, 

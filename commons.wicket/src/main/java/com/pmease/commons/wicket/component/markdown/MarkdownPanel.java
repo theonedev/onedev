@@ -2,15 +2,17 @@ package com.pmease.commons.wicket.component.markdown;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
+import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
+import com.pmease.commons.wicket.behavior.markdown.MarkdownCssResourceReference;
 
 @SuppressWarnings("serial")
 public class MarkdownPanel extends GenericPanel<String> {
@@ -39,7 +41,11 @@ public class MarkdownPanel extends GenericPanel<String> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(MarkdownBehavior.class, "markdown.css")));
+		response.render(JavaScriptHeaderItem.forReference(HighlightResourceReference.INSTANCE));
+		response.render(CssHeaderItem.forReference(MarkdownCssResourceReference.INSTANCE));
+		
+		String script = String.format("pmease.commons.highlight($('#%s>.md-preview'));", getMarkupId(true));
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 }

@@ -112,7 +112,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private static final String PARAM_CLIENT_STATE = "client_state";
 	
-	private static final String PARAM_HIGHLIGHT = "highlight";
+	private static final String PARAM_MARK = "mark";
 	
 	private static final String REVISION_SELECTOR_ID = "revisionSelector";
 	
@@ -156,7 +156,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private BlobIdent blobIdent = new BlobIdent();
 	
-	private Highlight highlight;
+	private Mark mark;
 	
 	private Mode mode;
 	
@@ -225,9 +225,9 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		String modeStr = params.get(PARAM_MODE).toString();
 		if (modeStr != null)
 			mode = Mode.valueOf(modeStr.toUpperCase());
-		String highlightStr = params.get(PARAM_HIGHLIGHT).toString();
-		if (highlightStr != null)
-			highlight = new Highlight(highlightStr);
+		String markStr = params.get(PARAM_MARK).toString();
+		if (markStr != null)
+			mark = new Mark(markStr);
 		
 		queryHits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
 		if (queryHits != null) { 
@@ -534,7 +534,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					FILE_VIEWER_ID, repoModel, refName, 
 					blobIdent.isTree()?null:blobIdent.path, 
 					blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
-							getRepository().getObjectId(blobIdent.revision), highlight, clientState) {
+							getRepository().getObjectId(blobIdent.revision), mark, clientState) {
  
 				@Override
 				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -646,7 +646,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		HistoryState state = new HistoryState();
 		state.blobIdent = new BlobIdent(blobIdent);
 		state.commentId = commentId;
-		state.highlight = highlight;
+		state.mark = mark;
 		state.mode = mode;
 		state.requestId = requestId;
 		return state;
@@ -655,7 +655,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	private void setState(HistoryState state) {
 		blobIdent = new BlobIdent(state.blobIdent);
 		commentId = state.commentId;
-		highlight = state.highlight;
+		mark = state.mark;
 		mode = state.mode;
 		requestId = state.requestId;
 	}
@@ -670,7 +670,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				state.requestId = null;
 				state.commentId = null;
 				state.mode = null;
-				state.highlight = null;
+				state.mark = null;
 				
 				if (state.blobIdent.path != null) {
 					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
@@ -741,8 +741,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			params.set(PARAM_REVISION, state.blobIdent.revision);
 		if (state.blobIdent.path != null)
 			params.set(PARAM_PATH, state.blobIdent.path);
-		if (state.highlight != null)
-			params.set(PARAM_HIGHLIGHT, state.highlight.toString());
+		if (state.mark != null)
+			params.set(PARAM_MARK, state.mark.toString());
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.requestId != null)
@@ -851,8 +851,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 
 	@Override
-	public Highlight getHighlight() {
-		return highlight;
+	public Mark getMark() {
+		return mark;
 	}
 
 	@Override
@@ -864,16 +864,16 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
 		Preconditions.checkArgument(blobIdent.revision.equals(this.blobIdent.revision));
 		
-		highlight = Highlight.of(tokenPos);
+		mark = Mark.of(tokenPos);
 		if (blobIdent.equals(this.blobIdent)) {
-			if (highlight != null) {
+			if (mark != null) {
 				Component fileViewer = get(FILE_VIEWER_ID);
 				if (fileViewer instanceof SourceViewPanel) {
 					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-					sourceViewer.highlight(target, highlight);
+					sourceViewer.mark(target, mark);
 				} else if (fileViewer instanceof FileEditPanel) {
 					FileEditPanel fileEditor = (FileEditPanel) fileViewer;
-					fileEditor.highlight(target, highlight);
+					fileEditor.mark(target, mark);
 				} else {
 					newFileViewer(target, null);
 					resizeWindow(target);

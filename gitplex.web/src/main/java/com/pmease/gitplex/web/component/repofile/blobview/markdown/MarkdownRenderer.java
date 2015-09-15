@@ -15,7 +15,7 @@ public class MarkdownRenderer implements BlobRenderer {
 		if (context.getBlobIdent().isFile() 
 				&& blob.getText() != null 
 				&& context.getBlobIdent().path.endsWith(".md")) { 
-			if (context.getHighlight() != null || context.getMode() == Mode.BLAME)
+			if (context.getMark() != null || context.getMode() == Mode.BLAME)
 				return new SourceViewPanel(panelId, context, clientState);
 			else
 				return new MarkdownViewPanel(panelId, context);

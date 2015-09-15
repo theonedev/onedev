@@ -31,6 +31,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.wicket.assets.atwho.AtWhoResourceReference;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
+import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
 
 @SuppressWarnings("serial")
 public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
@@ -52,7 +53,10 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			} else { 
 				preview = "<i>Nothing to preview.</i>";
 			}
-			String script = String.format("$('#%s~.md-preview').html('%s');", 
+			String script = String.format(""
+					+ "var $preview=$('#%s~.md-preview');"
+					+ "$preview.html('%s');"
+					+ "pmease.commons.highlight($preview);", 
 					getComponent().getMarkupId(), preview);
 			target.appendJavaScript(script);
 		} else if (type.equals("emojiQuery")){
@@ -145,11 +149,11 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 				new CssResourceReference(MarkdownBehavior.class, "bootstrap-markdown.min.css")));
 		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(AtWhoResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(HighlightResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(MarkdownBehavior.class, "markdown.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(MarkdownBehavior.class, "markdown.css")));
+		response.render(CssHeaderItem.forReference(MarkdownCssResourceReference.INSTANCE));
 		
 		String script = String.format("gitplex.markdown.setup('%s', %s, %s);", 
 				component.getMarkupId(true), ATWHO_LIMIT,

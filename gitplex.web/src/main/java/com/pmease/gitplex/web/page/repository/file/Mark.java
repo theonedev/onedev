@@ -13,32 +13,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.gitplex.core.GitPlex;
 
-public class Highlight implements Serializable {
+public class Mark implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private final int beginLine, beginChar, endLine, endChar;
 	
-	public Highlight(int beginLine, int beginChar, int endLine, int endChar) {
+	public Mark(int beginLine, int beginChar, int endLine, int endChar) {
 		this.beginLine = beginLine;
 		this.beginChar = beginChar;
 		this.endLine = endLine;
 		this.endChar = endChar;
 	}
 	
-	public Highlight(Highlight highlight) {
-		this.beginLine = highlight.beginLine;
-		this.beginChar = highlight.beginChar;
-		this.endLine = highlight.endLine;
-		this.endChar = highlight.endChar;
+	public Mark(Mark mark) {
+		this.beginLine = mark.beginLine;
+		this.beginChar = mark.beginChar;
+		this.endLine = mark.endLine;
+		this.endChar = mark.endChar;
 	}
 	
-	public Highlight(TokenPosition tokenPos) {
+	public Mark(TokenPosition tokenPos) {
 		this(tokenPos.getLine(), tokenPos.getRange().getStart(), 
 				tokenPos.getLine(), tokenPos.getRange().getEnd());
 	}
 
-	public Highlight(String str) {
+	public Mark(String str) {
 		String begin = StringUtils.substringBefore(str, "-");
 		String end = StringUtils.substringAfter(str, "-");
 		beginLine = Integer.parseInt(StringUtils.substringBefore(begin, ","))-1;
@@ -70,16 +70,16 @@ public class Highlight implements Serializable {
 	
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof Highlight))
+		if (!(other instanceof Mark))
 			return false;
 		if (this == other)
 			return true;
-		Highlight otherHighlight = (Highlight) other;
+		Mark otherMark = (Mark) other;
 		return new EqualsBuilder()
-				.append(beginLine, otherHighlight.beginLine)
-				.append(beginChar, otherHighlight.beginChar)
-				.append(endLine, otherHighlight.endLine)
-				.append(endChar, otherHighlight.endChar)
+				.append(beginLine, otherMark.beginLine)
+				.append(beginChar, otherMark.beginChar)
+				.append(endLine, otherMark.endLine)
+				.append(endChar, otherMark.endChar)
 				.isEquals();
 	}
 
@@ -93,9 +93,9 @@ public class Highlight implements Serializable {
 				.toHashCode();
 	}
 	
-	public static @Nullable Highlight of(@Nullable TokenPosition tokenPos) {
+	public static @Nullable Mark of(@Nullable TokenPosition tokenPos) {
 		if (tokenPos != null)
-			return new Highlight(tokenPos);
+			return new Mark(tokenPos);
 		else
 			return null;
 	}

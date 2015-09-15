@@ -43,7 +43,7 @@ import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
 import com.pmease.gitplex.web.component.repofile.editsave.EditSavePanel;
-import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.Mark;
 
 @SuppressWarnings("serial")
 public abstract class FileEditPanel extends Panel {
@@ -62,7 +62,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final ObjectId prevCommitId;
 	
-	private final Highlight highlight;
+	private final Mark mark;
 	
 	private final String clientState;
 	
@@ -74,14 +74,14 @@ public abstract class FileEditPanel extends Panel {
 	
 	public FileEditPanel(String id, IModel<Repository> repoModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
-			@Nullable Highlight highlight, @Nullable String clientState) {
+			@Nullable Mark mark, @Nullable String clientState) {
 		super(id);
 		this.repoModel = repoModel;
 		this.refName = refName;
 		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.content = content;
 		this.prevCommitId = prevCommitId;
-		this.highlight = highlight;
+		this.mark = mark;
 		this.clientState = clientState;
 		
 		newPath = this.oldPath;
@@ -227,7 +227,7 @@ public abstract class FileEditPanel extends Panel {
 				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
-				highlight!=null?highlight.toJSON():"undefined",
+				mark!=null?mark.toJSON():"undefined",
 				clientState!=null?"'"+clientState+"'":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
@@ -254,9 +254,9 @@ public abstract class FileEditPanel extends Panel {
 				getMarkupId(), getNewPathParam()));
 	}
 	
-	public void highlight(AjaxRequestTarget target, Highlight highlight) {
-		String script = String.format("gitplex.fileedit.highlight('%s', %s);", 
-				getMarkupId(), highlight.toJSON());
+	public void mark(AjaxRequestTarget target, Mark mark) {
+		String script = String.format("gitplex.fileedit.mark('%s', %s);", 
+				getMarkupId(), mark.toJSON());
 		target.appendJavaScript(script);
 	}
 

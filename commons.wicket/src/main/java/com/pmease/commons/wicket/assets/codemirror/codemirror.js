@@ -4,17 +4,17 @@ pmease.commons.codemirror = {
 		var coords = cm.charCoords({line: line, ch: 0}, "local");
 		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
 	},
-	highlight: function(cm, highlight) {
-		pmease.commons.codemirror.centerLine(cm, highlight.beginLine);
+	mark: function(cm, mark) {
+		pmease.commons.codemirror.centerLine(cm, mark.beginLine);
 		
 		var allMarks = cm.getAllMarks();
 		for (var i=0; i<allMarks.length; i++) 
 			allMarks[i].clear();
 		cm.markText(
-				{line: highlight.beginLine, ch: highlight.beginChar}, 
-				{line: highlight.endLine, ch: highlight.endChar},
-				{className: "CodeMirror-highlight"});
-		cm.setCursor({line:highlight.beginLine, ch:highlight.beginChar});
+				{line: mark.beginLine, ch: mark.beginChar}, 
+				{line: mark.endLine, ch: mark.endChar},
+				{className: "CodeMirror-mark"});
+		cm.setCursor({line:mark.beginLine, ch:mark.beginChar});
 		setTimeout(function() {
 			cm.focus();
 		}, 10);
@@ -58,11 +58,11 @@ pmease.commons.codemirror = {
 		    		$selectionPermalink.show();
 		    		var fromCursor = cm.getCursor("from");
 		    		var toCursor = cm.getCursor("to");
-		    		var highlight = (fromCursor.line+1) + "," + (fromCursor.ch+1) + "-" 
+		    		var mark = (fromCursor.line+1) + "," + (fromCursor.ch+1) + "-" 
 		    				+ (toCursor.line+1) + "," + (toCursor.ch+1);
 		    		var uri = new URI($selectionPermalink[0]);
-		    		uri.removeSearch("highlight");
-		    		uri.addSearch("highlight", highlight);
+		    		uri.removeSearch("mark");
+		    		uri.addSearch("mark", mark);
 		    		$selectionPermalink.attr("href", uri.href());
 		    	} else {
 		    		$selectionPermalink.hide();
@@ -113,5 +113,5 @@ pmease.commons.codemirror = {
 	    
 	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
 	    cm.focus();
-	}		
+	} 
 };

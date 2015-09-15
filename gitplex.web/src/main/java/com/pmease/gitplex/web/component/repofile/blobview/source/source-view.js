@@ -1,5 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, highlight, symbolTooltipId, revision, 
+	init: function(codeId, fileContent, filePath, mark, symbolTooltipId, revision, 
 			blameCommits, commentId, addCommentCallback, cmState) {
 		var cm;
 		
@@ -91,8 +91,8 @@ gitplex.sourceview = {
 
 				pmease.commons.codemirror.setMode(cm, filePath);
 
-			    if (highlight)
-			    	pmease.commons.codemirror.highlight(cm, highlight);
+			    if (mark)
+			    	pmease.commons.codemirror.mark(cm, mark);
 
 			    if (blameCommits) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
@@ -130,9 +130,9 @@ gitplex.sourceview = {
 		});
 	}, 
 
-	highlight: function(codeId, highlight) {
+	mark: function(codeId, mark) {
 		var cm = $("#"+ codeId + ">.CodeMirror")[0].CodeMirror;		
-		pmease.commons.codemirror.highlight(cm, highlight);
+		pmease.commons.codemirror.mark(cm, mark);
 	},
 	
 	placeComment: function(cm, lineNo, comment) {

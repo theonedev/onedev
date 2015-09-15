@@ -38,7 +38,7 @@ import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
-import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.Mark;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
@@ -471,7 +471,7 @@ public abstract class SearchResultPanel extends Panel {
 
 								HistoryState state = new HistoryState();
 								state.requestId = PullRequest.idOf(context.getPullRequest());
-								state.highlight = Highlight.of(hit.getTokenPos());
+								state.mark = Mark.of(hit.getTokenPos());
 								state.blobIdent.revision = context.getBlobIdent().revision;
 								state.blobIdent.path = hit.getBlobPath();
 								PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);

@@ -52,7 +52,7 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
-import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.Mark;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
@@ -161,7 +161,7 @@ public abstract class InstantSearchPanel extends Panel {
 						HistoryState state = new HistoryState();
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
-						state.highlight = Highlight.of(hit.getTokenPos());
+						state.mark = Mark.of(hit.getTokenPos());
 						state.requestId = PullRequest.idOf(requestModel.getObject());
 						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
 						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
@@ -287,7 +287,7 @@ public abstract class InstantSearchPanel extends Panel {
 						HistoryState state = new HistoryState();
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
-						state.highlight = Highlight.of(hit.getTokenPos());
+						state.mark = Mark.of(hit.getTokenPos());
 						state.requestId = PullRequest.idOf(requestModel.getObject());
 						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
 						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);

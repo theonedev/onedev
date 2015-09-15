@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.web.page.repository.file.Highlight;
+import com.pmease.gitplex.web.page.repository.file.Mark;
 
 public interface BlobViewContext extends Serializable {
 
@@ -30,7 +30,7 @@ public interface BlobViewContext extends Serializable {
 	BlobIdent getBlobIdent();
 	
 	@Nullable
-	Highlight getHighlight();
+	Mark getMark();
 	
 	Mode getMode();
 	

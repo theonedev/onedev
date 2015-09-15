@@ -120,7 +120,7 @@ public abstract class BlobViewPanel extends Panel {
 				HistoryState state = new HistoryState();
 				state.blobIdent = context.getBlobIdent();
 				state.mode = context.getMode()==null?Mode.BLAME:null;
-				state.highlight = context.getHighlight();
+				state.mark = context.getMark();
 				PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
 				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 				add(AttributeAppender.replace("href", url.toString()));
@@ -170,7 +170,7 @@ public abstract class BlobViewPanel extends Panel {
 			state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 			state.blobIdent.path = context.getBlobIdent().path;
 			state.mode = Mode.EDIT;
-			state.highlight = context.getHighlight();
+			state.mark = context.getMark();
 			PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
 			
 			editLink = new BookmarkablePageLink<Void>("edit", RepoFilePage.class, params);
@@ -193,7 +193,7 @@ public abstract class BlobViewPanel extends Panel {
 			HistoryState state = new HistoryState();
 			state.blobIdent = context.getBlobIdent();
 			state.mode = Mode.EDIT;
-			state.highlight = context.getHighlight();
+			state.mark = context.getMark();
 			params = RepoFilePage.paramsOf(context.getRepository(), state);
 			CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 			editLink.add(AttributeAppender.replace("href", url.toString()));
