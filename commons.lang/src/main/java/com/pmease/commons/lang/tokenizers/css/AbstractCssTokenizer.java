@@ -192,7 +192,7 @@ public abstract class AbstractCssTokenizer extends AbstractTokenizer<AbstractCss
 		    "inline-block", "inline-flex", "inline-table", "inset", "inside", "intrinsic", "invert",
 		    "italic", "justify", "kannada", "katakana", "katakana-iroha", "keep-all", "khmer",
 		    "landscape", "lao", "large", "larger", "left", "level", "lighter",
-		    "line-through", "linear", "lines", "list-item", "listbox", "listitem",
+		    "line-through", "linear", "linear-gradient", "lines", "list-item", "listbox", "listitem",
 		    "local", "logical", "loud", "lower", "lower-alpha", "lower-armenian",
 		    "lower-greek", "lower-hexadecimal", "lower-latin", "lower-norwegian",
 		    "lower-roman", "lowercase", "ltr", "malayalam", "match",

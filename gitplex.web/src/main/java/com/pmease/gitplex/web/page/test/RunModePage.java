@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -22,22 +23,25 @@ public class RunModePage extends CommonPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		String mode = "clike/clike.js";
+		String fileName = "clike/test.c";
+		
 		response.render(JavaScriptHeaderItem.forReference(
 				new WebjarsJavaScriptResourceReference("codemirror/current/addon/runmode/runmode-standalone.js")));
 		response.render(JavaScriptHeaderItem.forReference(
 				new WebjarsJavaScriptResourceReference("codemirror/current/mode/meta.js")));
 		response.render(JavaScriptHeaderItem.forReference(
-				new WebjarsJavaScriptResourceReference("codemirror/current/mode/javascript/javascript.js")));
+				new WebjarsJavaScriptResourceReference("codemirror/current/mode/" + mode)));
 		response.render(CssHeaderItem.forReference(
 				new WebjarsCssResourceReference("codemirror/current/lib/codemirror.css")));
 
-		File file = new File("W:\\commons\\commons.lang\\src\\test\\java\\com\\pmease\\commons\\lang\\tokenizers\\javascript\\test2.js");
-		
 		try {
+			File file = new File("W:/commons/commons.lang/src/test/java/com/pmease/commons/lang/tokenizers/" + fileName);
+			String fileContent = FileUtils.readFileToString(file, Charset.forName("UTF-8"));
 			response.render(OnDomReadyHeaderItem.forScript(String.format(
 					"var mime = CodeMirror.findModeByFileName('%s').mime;"
 					+ "CodeMirror.runMode('%s', mime, document.getElementById('code'));", 
-					file.getName(), StringEscapeUtils.escapeEcmaScript(FileUtils.readFileToString(file)))));
+					fileName, StringEscapeUtils.escapeEcmaScript(fileContent))));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

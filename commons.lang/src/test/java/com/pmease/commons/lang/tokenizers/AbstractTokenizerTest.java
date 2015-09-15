@@ -14,7 +14,6 @@ import javax.script.ScriptException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.io.Resources;
 
@@ -54,28 +53,12 @@ public abstract class AbstractTokenizerTest {
 	        engine.eval("var mime = CodeMirror.findModeByFileName(fileName).mime;"
 	        		+ "CodeMirror.runMode(fileContent, mime, function(text, style) {callback.token(style, text);});");
 	        
-	        List<String> lines = Splitter.on(new CharMatcher() {
-				
-				@Override
-				public boolean matches(char c) {
-					return c == '\r' || c == '\n';
-				}
-				
-			}).omitEmptyStrings().splitToList(fileContent);
+	        List<String> lines = new ArrayList<>();
+	        for (String line: Splitter.on('\n').splitToList(fileContent))
+	        	lines.add(StringUtils.stripEnd(line, "\r"));
 
-	        StringBuilder expected = new StringBuilder();
-	        for (List<CmToken> line: callback.getTokenizedLines()) {
-	        	for (CmToken token: line) 
-	        		expected.append(token.getText() + "^" + token.getType() + "^");
-	        	expected.append("\n");
-	        }
-	        
-	        StringBuilder actual = new StringBuilder();
-	        for (List<CmToken> line: tokenizer.tokenize(lines)) {
-	        	for (CmToken token: line) 
-	        		actual.append(token.getText() + "^" + token.getType() + "^");
-	        	actual.append("\n");
-	        }
+	        String expected = toString(callback.getTokenizedLines());
+	        String actual = toString(tokenizer.tokenize(lines));
 	        
 	        Assert.assertEquals(expected, actual);
 	    } catch (IOException | ScriptException e) {
@@ -93,10 +76,8 @@ public abstract class AbstractTokenizerTest {
 			if (style == null || style.equals("null") || style.equals("undefined"))
 				style = "";
 			if (text.equals("\n")) {
-				if (!currentLine.isEmpty()) {
-					tokenizedLines.add(currentLine);
-					currentLine = new ArrayList<>();
-				}
+				tokenizedLines.add(currentLine);
+				currentLine = new ArrayList<>();
 			} else {
 				currentLine.add(new CmToken(style, text));
 			}
@@ -108,5 +89,15 @@ public abstract class AbstractTokenizerTest {
 				copy.add(currentLine);
 			return copy;
 		}
+	}
+	
+	private String toString(List<List<CmToken>> lines) {
+		StringBuilder builder = new StringBuilder();
+        for (int i=0; i<lines.size(); i++) {
+        	for (CmToken token: lines.get(i)) 
+        		builder.append(token.toString());
+    		builder.append("\n");
+        }
+		return StringUtils.stripEnd(builder.toString(), "\n");
 	}
 }
