@@ -1,10 +1,13 @@
 package com.pmease.commons.util;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.safety.Whitelist;
 
 import com.google.common.collect.Lists;
@@ -88,4 +91,19 @@ public class JsoupUtils {
 		return Jsoup.clean(bodyHtml, WHITE_LIST);
 	}
 	
+	public static void appendReplacement(Matcher matcher, Node node, String replacement) {
+		StringBuffer buffer = new StringBuffer();
+		matcher.appendReplacement(buffer, "");
+		if (buffer.length() != 0)
+			node.before(new TextNode(buffer.toString(), node.baseUri()));
+		node.before(new DataNode(replacement, node.baseUri()));
+	}
+	
+	public static void appendTail(Matcher matcher, Node node) {
+		StringBuffer buffer = new StringBuffer();
+		matcher.appendTail(buffer);
+		if (buffer.length() != 0)
+			node.before(new TextNode(buffer.toString(), node.baseUri()));
+		node.remove();
+	}
 }

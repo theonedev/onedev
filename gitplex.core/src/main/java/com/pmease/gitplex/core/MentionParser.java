@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
@@ -47,7 +46,6 @@ public class MentionParser {
 		UserManager userManager = GitPlex.getInstance(UserManager.class);
 		
 		for (TextNode node : visitor.getMatchedNodes()) {
-			StringBuffer buffer = new StringBuffer();
 			Matcher matcher = PATTERN.matcher(node.getWholeText());
 			while (matcher.find()) {
 				String userName = matcher.group(2);
@@ -59,12 +57,9 @@ public class MentionParser {
 				} else {
 					userTag = "@" + userName;
 				}
-				matcher.appendReplacement(buffer, matcher.group(1) + userTag + matcher.group(3));
+				JsoupUtils.appendReplacement(matcher, node, matcher.group(1) + userTag + matcher.group(3));
 			}
-			matcher.appendTail(buffer);
-			
-			DataNode newNode = new DataNode(buffer.toString(), node.baseUri());
-			node.replaceWith(newNode);
+			JsoupUtils.appendTail(matcher, node);
 		}
 
 		return mentions;

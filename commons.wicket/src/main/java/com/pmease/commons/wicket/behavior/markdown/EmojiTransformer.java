@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
@@ -40,7 +39,6 @@ public class EmojiTransformer implements HtmlTransformer {
 		traversor.traverse(body);
 		
 		for (TextNode node : visitor.getMatchedNodes()) {
-			StringBuffer buffer = new StringBuffer();
 			Matcher matcher = PATTERN.matcher(node.getWholeText());
 			while (matcher.find()) {
 				String emojiName = matcher.group(2);
@@ -58,12 +56,9 @@ public class EmojiTransformer implements HtmlTransformer {
 				} else {
 					emojiTag = emojiName;
 				}
-				matcher.appendReplacement(buffer, matcher.group(1) + emojiTag + matcher.group(3));
+				JsoupUtils.appendReplacement(matcher, node, matcher.group(1) + emojiTag + matcher.group(3));
 			}
-			matcher.appendTail(buffer);
-			
-			DataNode newNode = new DataNode(buffer.toString(), node.baseUri());
-			node.replaceWith(newNode);
+			JsoupUtils.appendTail(matcher, node);
 		}
 		
 		return body;
