@@ -1,7 +1,9 @@
-.cm-s-eclipse span.cm-meta {
-	color: #888;
+pre.highlight {
+	padding: 8px;
+	border: 1px dashed #BBB;
+	background: #F9F9F9;
 }
-.cm-s-eclipse .CodeMirror-matchingbracket {
-	outline: none;
-	background: #69B7F7;
+pre.highlight>code>.CodeMirror {
+	height: auto;
+	background: #F9F9F9;
 }

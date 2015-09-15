@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -48,8 +49,6 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			String preview;
 			if (StringUtils.isNotBlank(markdown)) {
 				preview = AppLoader.getInstance(MarkdownManager.class).parseAndProcess(markdown);
-				preview = StringUtils.replace(preview, "'", "\\'");
-				preview = StringUtils.replace(preview, "\n", " ");
 			} else { 
 				preview = "<i>Nothing to preview.</i>";
 			}
@@ -57,7 +56,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 					+ "var $preview=$('#%s~.md-preview');"
 					+ "$preview.html('%s');"
 					+ "pmease.commons.highlight($preview);", 
-					getComponent().getMarkupId(), preview);
+					getComponent().getMarkupId(), StringEscapeUtils.escapeEcmaScript(preview));
 			target.appendJavaScript(script);
 		} else if (type.equals("emojiQuery")){
 			List<String> emojiNames = new ArrayList<>();

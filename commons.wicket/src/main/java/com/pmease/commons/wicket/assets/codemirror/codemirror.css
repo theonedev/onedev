@@ -1,5 +1,5 @@
 .cm-identifierhighlight {
-	background: #ACF0A6;
+	background: #CCC;
 }
 .CodeMirror-mark {
 	background: #E2C7F3;
@@ -42,9 +42,9 @@
   opacity: .5;
 }
 .CodeMirror-search-match2 {
-  background: #68E55D;
-  border-top: 1px solid #68E55D;
-  border-bottom: 1px solid #68E55D;
+  background: #666;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   opacity: .5;

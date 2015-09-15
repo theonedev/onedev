@@ -23,6 +23,7 @@ public class HighlightResourceReference extends JavaScriptResourceReference {
 	public Iterable<? extends HeaderItem> getDependencies() {
 		return Iterables.concat(super.getDependencies(), ImmutableList.<HeaderItem>of(
 					JavaScriptHeaderItem.forReference(CodeMirrorCoreResourceReference.INSTANCE),
+					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js")),
 					CssHeaderItem.forReference(new CssResourceReference(HighlightResourceReference.class, "highlight.css"))
 				));		
 	}
