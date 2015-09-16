@@ -1,0 +1,18 @@
+<wicket:extend>
+	<div class="attachments">
+		<form wicket:id="form">
+			<div class="fileinput fileinput-new input-group" data-provides="fileinput">
+			  <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+			  <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file to upload</span><span class="fileinput-exists">Change</span><input wicket:id="fileUpload" type="file" name="..."></span>
+			  <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+			</div>			
+		</form>
+		<table class="table table-condensed table-striped">
+			<tr wicket:id="attachment">
+				<td class="link"><a wicket:id="link"><span wicket:id="name"></span></a></td>
+				<td class="size"><span wicket:id="size"></span></td>
+				<td class="operations"><a wicket:id="delete"><i class="fa fa-trash"></i></a></td>
+			</tr>
+		</table>
+	</div>
+</wicket:extend>
