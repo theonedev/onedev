@@ -59,7 +59,7 @@ public class RepositoryResource {
     
 	@ValidQueryParams
 	@GET
-	public Collection<?> query(@QueryParam("userId") Long userId, @QueryParam("name") String name, 
+	public Collection<Repository> query(@QueryParam("userId") Long userId, @QueryParam("name") String name, 
 			@QueryParam("path") String path) {
 		
 		List<Repository> repositories = new ArrayList<>();
@@ -78,9 +78,8 @@ public class RepositoryResource {
 		}
 		
 		for (Repository repository: repositories) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) 
 				throw new UnauthorizedException("Unauthorized access to repository " + repository.getFQN());
-			}
 		}
 		return repositories;
 	}

@@ -15,7 +15,13 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.Serializers;
+import com.fasterxml.jackson.databind.ser.std.CollectionSerializer;
+import com.fasterxml.jackson.databind.ser.std.MapSerializer;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 
@@ -45,6 +51,36 @@ public class HibernateObjectMapperModule extends Module {
 		        else
 		        	return null;
 		    }
+
+			@Override
+			public JsonSerializer<?> findCollectionSerializer(SerializationConfig config, CollectionType type,
+					BeanDescription beanDesc, TypeSerializer elementTypeSerializer,
+					JsonSerializer<Object> elementValueSerializer) {
+				// without this logic, Jackson will not be able to handle collections containing 
+				// hibernate proxies
+				if (AbstractEntity.class.isAssignableFrom(type.getContentType().getRawClass())) {
+					return new CollectionSerializer(type.getContentType(), false, 
+							elementTypeSerializer, null, elementValueSerializer);
+				} else {
+					return null;
+				}
+			}
+
+			@Override
+			public JsonSerializer<?> findMapSerializer(SerializationConfig config, MapType type,
+					BeanDescription beanDesc, JsonSerializer<Object> keySerializer,
+					TypeSerializer elementTypeSerializer, JsonSerializer<Object> elementValueSerializer) {
+				// without this logic, Jackson will not be able to handle maps containing 
+				// hibernate proxies
+				if (AbstractEntity.class.isAssignableFrom(type.getContentType().getRawClass())) {
+	                Object filterId = config.getAnnotationIntrospector().findFilterId((Annotated)beanDesc.getClassInfo());
+	                return MapSerializer.construct(config.getAnnotationIntrospector().findPropertiesToIgnore(beanDesc.getClassInfo()),
+	                    type, false, elementTypeSerializer,
+	                    keySerializer, elementValueSerializer, filterId);
+				} else {
+					return null;
+				}
+			}
 			
 		});
 		
