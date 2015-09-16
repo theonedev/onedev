@@ -74,11 +74,11 @@ public class UrlMapper extends CompoundRequestMapper {
 			}
 			
 		});
-		add(new ResourceMapper("${user}/${repo}/pulls/${request}/attachments/{attachment}", new AttachmentResourceReference()) {
+		add(new ResourceMapper("${user}/${repo}/pulls/${request}/attachments/${attachment}", new AttachmentResourceReference()) {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
-				return 3;
+				return 8;
 			}
 			
 		});
