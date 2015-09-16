@@ -43,6 +43,13 @@ gitplex.markdown = {
 			        	   $emojis.toggle();
 			        	   $input.trigger("resized");
 			           }
+		           }, {
+		        	   name: "cmdImage2",
+		        	   title: "Image2",
+		               icon: "fa fa-picture-o",
+		               callback: function(e){
+		            	   
+		               }
 		           }]			
 			}]], 
 			iconlibrary: "fa"
@@ -59,7 +66,10 @@ gitplex.markdown = {
 				"  <div class='loading'>Loading emojis...</div>" +
 				"</div>");
 
-		$input.parent().find(".md-header .btn-group:nth-child(2)").append($input.parent().find(".md-header .fa-smile-o").parent()); 	
+		var $btnGroup2 = $input.parent().find(".md-header .btn-group:nth-child(2)");
+		$btnGroup2.find(".fa-picture-o").parent().remove();
+		$btnGroup2.append($input.parent().find(".md-header .fa-picture-o").parent()); 	
+		$btnGroup2.append($input.parent().find(".md-header .fa-smile-o").parent()); 	
 		
 		$input[0].cachedEmojis = [];
 
