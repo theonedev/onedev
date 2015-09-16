@@ -7,7 +7,6 @@ import java.io.Serializable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.PageReference;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
@@ -35,10 +34,6 @@ public abstract class CommonPage extends WebPage {
 
 	private FeedbackPanel sessionFeedback;
 	
-	private static final String PARAM_PREV_PAGE = "prevPage";
-	
-	protected PageReference prevPageRef;
-	
 	public CommonPage() {
 	}
 
@@ -48,10 +43,6 @@ public abstract class CommonPage extends WebPage {
 
 	public CommonPage(PageParameters params) {
 		super(params);
-		
-		Integer prevPageId = params.get(PARAM_PREV_PAGE).toOptionalInteger();
-		if (prevPageId != null)
-			prevPageRef = new PageReference(prevPageId);
 	}
 
 	@Override
@@ -107,15 +98,6 @@ public abstract class CommonPage extends WebPage {
 		super.onBeforeRender();
 	}
 
-	protected void backToPrevPage() {
-		if (prevPageRef != null)
-			setResponsePage(prevPageRef.getPage());
-	}
-	
-	protected void addPrevPageParam(PageParameters params) {
-		params.set(PARAM_PREV_PAGE, getPage().getId());
-	}
-	
 	public void pushState(AjaxRequestTarget target, String url, Serializable data) {
 		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
 		target.prependJavaScript(String.format("pmease.commons.history.pushState('%s', '%s');", encodedData, url));

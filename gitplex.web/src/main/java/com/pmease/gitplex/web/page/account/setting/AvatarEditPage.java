@@ -1,14 +1,11 @@
 package com.pmease.gitplex.web.page.account.setting;
 
-import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.avatar.avatarpicker.AvatarPicker;
 
 @SuppressWarnings("serial")
@@ -23,21 +20,11 @@ public class AvatarEditPage extends AccountSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-	
-		Form<?> form = new Form<Void>("form") {
 
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				
-				GitPlex.getInstance(AvatarManager.class).useAvatar(getAccount(), upload);
-				Session.get().success("Avatar has been changed");
-				backToPrevPage();
-			}
-			
-		};
+		Form<?> form = new Form<Void>("form");
 		add(form);
-		add(new FeedbackPanel("feedback", form));
+		form.add(new FeedbackPanel("feedback", form));
+		form.setOutputMarkupId(true);
 		
 		form.add(new AvatarPicker("avatarPicker", accountModel, new IModel<FileUpload>() {
 

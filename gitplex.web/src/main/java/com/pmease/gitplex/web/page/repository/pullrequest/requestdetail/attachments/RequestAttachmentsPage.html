@@ -1,25 +1,27 @@
 <wicket:extend>
 	<div class="attachments">
-		<form wicket:id="form">
-			<!-- div class="fileupload fileupload-new pull-left" data-provides="fileupload">
-				<div class="fileupload-preview thumbnail" data-trigger="fileupload"></div>
-				<div class="actions">
-					<a class="btn btn-default btn-file"><span class="fileupload-new">Select file to upload</span><span class="fileupload-exists">Change file</span>
-					<input type="file" wicket:id="fileUpload" name="..."></a>
-				</div>
-			</div-->	
-			<div class="fileinput fileinput-new input-group" data-provides="fileinput">
-			  <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
-			  <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Select file to upload</span><span class="fileinput-exists">Change</span><input wicket:id="fileUpload" type="file" name="..."></span>
-			  <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
-			</div>			
-		</form>
-		<!-- table class="table table-condensed table-striped">
-			<tr wicket:id="attachment">
-				<td class="link"><a wicket:id="link"><span wicket:id="name"></span></a></td>
+		<div class="upload">
+			<div class="title">Select file to upload</div>
+			<form wicket:id="form">
+				<input wicket:id="fileUpload" type="file" class="btn btn-default"></input>
+				<div wicket:id="feedback" class="feedback"></div>
+			</form>
+		</div>
+		<table wicket:id="available" class="available table table-striped">
+			<thead>
+				<tr>
+					<th>Attachment</th>
+					<th>Size</th>
+					<th>Uploaded</th>
+					<th>&nbsp;</th>
+				</tr>
+			</thead>
+			<tr wicket:id="attachments">
+				<td class="attachment"><a wicket:id="link"><span wicket:id="label"></span></a></td>
 				<td class="size"><span wicket:id="size"></span></td>
+				<td class="date"><span wicket:id="date"></span></td>
 				<td class="operations"><a wicket:id="delete"><i class="fa fa-trash"></i></a></td>
 			</tr>
-		</table-->
+		</table>
 	</div>
 </wicket:extend>

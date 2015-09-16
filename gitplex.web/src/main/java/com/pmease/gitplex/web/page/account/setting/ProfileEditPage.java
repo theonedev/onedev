@@ -74,7 +74,6 @@ public class ProfileEditPage extends AccountSettingPage {
 					userManager.save(account);
 					Session.get().success("Profile has been updated");
 					setResponsePage(ProfileEditPage.class, AccountPage.paramsOf(account));
-					backToPrevPage();
 				}
 			}
 			

@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.component.avatar.avatarpicker;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -44,7 +45,31 @@ public class AvatarPicker extends FormComponentPanel<FileUpload> {
 		
 		add(new AvatarByUser("currentAvatar", userModel, false));
 		
-		add(uploadField = new BootstrapFileInputField("fileInput"));
+		add(uploadField = new BootstrapFileInputField("fileInput") {
+
+			@Override
+			protected AjaxFormSubmitBehavior newAjaxFormSubmitBehavior(String event) {
+		        
+				return new AjaxFormSubmitBehavior(getForm(), event) {
+					
+		            @Override
+		            protected void onSubmit(AjaxRequestTarget target) {
+		            	GitPlex.getInstance(AvatarManager.class).useAvatar(userModel.getObject(), uploadField.getFileUpload());
+		            	success("Avatar has been changed");
+		                target.add(getForm());
+		            }
+
+					@Override
+					protected void onError(AjaxRequestTarget target) {
+						super.onError(target);
+						target.add(getForm());
+					}
+		            
+		        };
+		        
+			}
+			
+		});
 		add(new AjaxLink<Void>("reset") {
 
 			@Override

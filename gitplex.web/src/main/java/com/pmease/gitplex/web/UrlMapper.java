@@ -32,6 +32,7 @@ import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
+import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.attachments.RequestAttachmentsPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.updates.RequestUpdatesPage;
@@ -46,6 +47,7 @@ import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
 import com.pmease.gitplex.web.page.test.RunModePage;
 import com.pmease.gitplex.web.page.test.TestPage;
+import com.pmease.gitplex.web.resource.AttachmentResourceReference;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
 public class UrlMapper extends CompoundRequestMapper {
@@ -65,6 +67,14 @@ public class UrlMapper extends CompoundRequestMapper {
 
 	private void addResources() {
 		add(new ResourceMapper("${user}/${repo}/raw", new BlobResourceReference()) {
+
+			@Override
+			public int getCompatibilityScore(Request request) {
+				return 3;
+			}
+			
+		});
+		add(new ResourceMapper("${user}/${repo}/pulls/${request}/attachments/{attachment}", new AttachmentResourceReference()) {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
@@ -159,6 +169,8 @@ public class UrlMapper extends CompoundRequestMapper {
 				"${user}/${repo}/pulls/${request}/updates", RequestUpdatesPage.class));
 		add(new MountedMapper(
 				"${user}/${repo}/pulls/${request}/compare", RequestComparePage.class));
+		add(new MountedMapper(
+				"${user}/${repo}/pulls/${request}/attachments", RequestAttachmentsPage.class));
 
 		add(new MountedMapper("${user}/${repo}/setting", GeneralSettingPage.class));
 		add(new MountedMapper("${user}/${repo}/setting/general", GeneralSettingPage.class));

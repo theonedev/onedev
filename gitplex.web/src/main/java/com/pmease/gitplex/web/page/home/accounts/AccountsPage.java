@@ -149,7 +149,6 @@ public class AccountsPage extends LayoutPage {
 					@Override
 					public void onClick() {
 						PageParameters params = AccountPage.paramsOf(item.getModelObject());
-						addPrevPageParam(params);
 						setResponsePage(ProfileEditPage.class, params);
 					}
 

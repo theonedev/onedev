@@ -34,7 +34,6 @@ public class PasswordEditPage extends AccountSettingPage {
 
 				GitPlex.getInstance(UserManager.class).save(getAccount());
 				Session.get().success("Password has been changed");
-				backToPrevPage();
 			}
 			
 		};

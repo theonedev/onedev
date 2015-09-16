@@ -74,7 +74,6 @@ public class GeneralSettingPage extends RepoSettingPage {
 					repositoryManager.save(repository);
 					Session.get().success("General setting has been updated");
 					setResponsePage(GeneralSettingPage.class, paramsOf(repository));
-					backToPrevPage();
 				}
 			}
 			

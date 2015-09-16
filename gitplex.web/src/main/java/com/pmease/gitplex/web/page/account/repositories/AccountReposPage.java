@@ -148,7 +148,6 @@ public class AccountReposPage extends AccountLayoutPage {
 					@Override
 					public void onClick() {
 						PageParameters params = GeneralSettingPage.paramsOf(item.getModelObject());
-						addPrevPageParam(params);
 						setResponsePage(GeneralSettingPage.class, params);
 					}
 
