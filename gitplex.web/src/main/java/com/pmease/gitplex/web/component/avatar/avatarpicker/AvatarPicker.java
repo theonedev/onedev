@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.component.avatar.avatarpicker;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -11,11 +12,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.lang.Bytes;
 
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.avatar.AvatarResourceReference;
 
-import de.agilecoders.wicket.extensions.javascript.jasny.FileUploadField;
+import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.fileinput.BootstrapFileInputField;
 
 @SuppressWarnings("serial")
 public class AvatarPicker extends FormComponentPanel<FileUpload> {
@@ -24,7 +27,7 @@ public class AvatarPicker extends FormComponentPanel<FileUpload> {
 	
 	private final IModel<User> userModel;
 	
-	private FileUploadField uploadField;
+	private BootstrapFileInputField uploadField;
 	
 	public AvatarPicker(String id, IModel<User> userModel, IModel<FileUpload> model) {
 		super(id, model);
@@ -41,7 +44,7 @@ public class AvatarPicker extends FormComponentPanel<FileUpload> {
 		
 		add(new AvatarByUser("currentAvatar", userModel, false));
 		
-		add(uploadField = new FileUploadField("fileInput"));
+		add(uploadField = new BootstrapFileInputField("fileInput"));
 		add(new AjaxLink<Void>("reset") {
 
 			@Override
@@ -52,8 +55,9 @@ public class AvatarPicker extends FormComponentPanel<FileUpload> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				userModel.getObject().setAvatarUploadDate(null);
+				GitPlex.getInstance(AvatarManager.class).useAvatar(userModel.getObject(), null);
 				target.add(AvatarPicker.this);
+				Session.get().success("Avatar has been reset");
 			}
 			
 		});

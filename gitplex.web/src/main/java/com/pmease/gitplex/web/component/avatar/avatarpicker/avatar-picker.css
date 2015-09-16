@@ -1,12 +1,10 @@
-.avatar-picker>.fileupload>.fileupload-preview {
-	width: 220px; 
-	height: 220px;
-}
-.avatar-picker>.fileupload>.actions a.btn-file {
-	margin-right: 12px;
-}
 .avatar-picker>.current-avatar {
-	width: 258px;
-	height: 258px;
-	margin-right: 20px;
+	width: 200px;
+	height: 200px;
+}
+.avatar-picker>.upload {
+	margin-top: 16px;
+}
+.avatar-picker>.reset {
+	margin-top: 16px;
 }

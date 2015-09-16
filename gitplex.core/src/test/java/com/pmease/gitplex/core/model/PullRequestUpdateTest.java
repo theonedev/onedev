@@ -57,6 +57,11 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 			public File getIndexDir(Repository repository) {
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public File getAttachmentsDir(PullRequest request) {
+				throw new UnsupportedOperationException();
+			}
 		});
     }
     

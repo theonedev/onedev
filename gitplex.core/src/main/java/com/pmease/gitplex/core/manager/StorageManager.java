@@ -16,6 +16,8 @@ public interface StorageManager {
     
     File getCacheDir(PullRequest request);
     
+    File getAttachmentsDir(PullRequest request);
+    
     File getCacheDir(PullRequestUpdate update);
 
 }

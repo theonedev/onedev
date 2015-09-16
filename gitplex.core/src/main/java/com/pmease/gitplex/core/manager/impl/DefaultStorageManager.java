@@ -58,4 +58,12 @@ public class DefaultStorageManager implements StorageManager {
         return createIfNotExist(new File(storageDir, "indexes/repositories/" + repository.getId()));
 	}
 
+	@Override
+	public File getAttachmentsDir(PullRequest request) {
+    	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
+    	File repoDir = new File(storageDir, "attachments/repositories/" + request.getTargetRepo().getId());
+    	File requestDir = new File(repoDir, "requests/" + request.getId());
+        return createIfNotExist(requestDir);
+	}
+
 }
