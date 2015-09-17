@@ -1,7 +1,8 @@
 package com.pmease.gitplex.web.page.test;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.upload.FileUploadField;
 
 import com.pmease.gitplex.web.page.base.BasePage;
 
@@ -11,14 +12,20 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new Link<Void>("test") {
+
+		final FileUploadField uploadField = new FileUploadField("file");
+
+		Form<Void> form = new Form<Void>("form") {
 
 			@Override
-			public void onClick() {
+			protected void onSubmit() {
+				super.onSubmit();
+				System.out.println(uploadField.getFileUpload().getClientFileName());
 			}
 			
-		});
+		};
+		form.add(uploadField);
+		add(form);
 	}		
 
 	@Override

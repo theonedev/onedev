@@ -88,7 +88,7 @@ public class CommentInput extends TextArea<String> {
 				
 				response.render(JavaScriptHeaderItem.forReference(
 						new JavaScriptResourceReference(CommentInput.class, "comment-input.js")));
-				String script = String.format("gitplex.markdown.comment('%s', %s, %s);", 
+				String script = String.format("gitplex.comment('%s', %s, %s);", 
 						component.getMarkupId(true), ATWHO_LIMIT,
 						getCallbackFunction(CallbackParameter.explicit("type"), CallbackParameter.explicit("param")));
 				response.render(OnDomReadyHeaderItem.forScript(script));

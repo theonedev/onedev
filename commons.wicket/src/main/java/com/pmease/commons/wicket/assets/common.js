@@ -88,8 +88,8 @@ pmease.commons = {
 				"		<p>" + message + "</p>" +
 				"	</div>" +
 				"	<div class='modal-footer'>" +
-				"		<button class='btn btn-default' onclick='$(this).closest(\".modal\").modal(\"hide\").remove();'>Cancel</button>" +
 				"		<button class='btn btn-primary'>Ok</button>" +
+				"		<button class='btn btn-default' onclick='$(this).closest(\".modal\").modal(\"hide\").remove();'>Cancel</button>" +
 				"	</div>" +
 				"</div></div></div>";
 			

@@ -81,3 +81,9 @@
 	color: #333;
 	background: rgba(0, 0, 0, 0.04);
 }
+.specify-image-url>form>input {
+	margin-bottom: 16px;
+}
+.specify-image-url .btn-primary {
+	margin-right: 4px;
+}

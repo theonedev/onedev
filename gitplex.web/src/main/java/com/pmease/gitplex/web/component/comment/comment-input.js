@@ -1,4 +1,4 @@
-gitplex.markdown.comment = function(inputId, atWhoLimit, callback) {
+gitplex.comment = function(inputId, atWhoLimit, callback) {
 	var $input = $("#" + inputId);
 
 	$input.prevAll(".md-help").html(

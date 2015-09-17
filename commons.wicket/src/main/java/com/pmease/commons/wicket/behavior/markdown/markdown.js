@@ -1,4 +1,4 @@
-gitplex.markdown = {
+pmease.commons.markdown = {
 	setup: function(inputId, atWhoLimit, callback) {
 		var $input = $("#" + inputId);
 
@@ -48,7 +48,21 @@ gitplex.markdown = {
 		        	   title: "Image2",
 		               icon: "fa fa-picture-o",
 		               callback: function(e){
-		            	   
+		            	   var $modal = $("" +
+		            	   		"<div class='modal'>" +
+		            	   		"<div class='modal-dialog'>" +
+		            	   		"<div class='modal-content'>" +
+		            	   		"<div id='" + inputId + "-imageprovider'></div>" +
+		            	   		"</div>" +
+		            	   		"</div>" +
+		            	   		"</div>");
+		            	   $input.after($modal);
+		            	   $modal.modal({show: true, backdrop: "static", keyboard: true});
+		            	   $modal.on('hidden.bs.modal', function (e) {
+		            		   $modal.remove();
+		            	   });
+		            	   $modal.data("event", e);
+		            	   callback("provideImage");
 		               }
 		           }]			
 			}]], 
@@ -143,5 +157,34 @@ gitplex.markdown = {
 			$input.caret(beforeChar + ":" + emojiName + ":" + afterChar);
 		});
  	   $input.trigger("resized");
+	},
+	
+	insertImage: function(inputId, imageUrl) {
+		var $modal = $("#" + inputId + "-imageprovider").closest(".modal");
+		var e = $modal.data("event");
+        // Give ![] surround the selection and prepend the image link
+        var chunk, cursor, selected = e.getSelection(), content = e.getContent();
+
+        if (selected.length === 0) {
+			// Give extra word
+			chunk = e.__localize('enter image description here');
+        } else {
+        	chunk = selected.text;
+        }
+
+        if (imageUrl !== null && imageUrl !== '' && imageUrl !== 'http://' && imageUrl.substr(0,4) === 'http') {
+        	var sanitizedLink = $('<div>'+imageUrl+'</div>').text();
+
+        	// transform selection and set the cursor into chunked text
+        	e.replaceSelection('!['+chunk+']('+sanitizedLink+' "'+e.__localize('enter image title here')+'")');
+        	cursor = selected.start+2;
+
+        	// Set the next tab
+        	e.setNextTab(e.__localize('enter image title here'));
+
+        	// Set the cursor
+        	e.setSelection(cursor,cursor+chunk.length);
+        }
+        $modal.modal("hide");
 	}
 }

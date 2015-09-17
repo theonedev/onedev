@@ -19,6 +19,7 @@ import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -34,6 +35,8 @@ public abstract class CommonPage extends WebPage {
 
 	private FeedbackPanel sessionFeedback;
 	
+	private RepeatingView components;
+	
 	public CommonPage() {
 	}
 
@@ -48,7 +51,6 @@ public abstract class CommonPage extends WebPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
 		
 		add(new AbstractDefaultAjaxBehavior() {
 			
@@ -86,6 +88,8 @@ public abstract class CommonPage extends WebPage {
 		int sessionTimeout = AppLoader.getInstance(SessionManager.class).getMaxInactiveInterval();
 		add(new WebMarkupContainer("keepSessionAlive").add(
 				new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
+		
+		add(components = new RepeatingView("components"));
 	}
 	
 	public FeedbackPanel getSessionFeedback() {
@@ -119,4 +123,7 @@ public abstract class CommonPage extends WebPage {
 		
 	}
 	
+	public RepeatingView getComponents() {
+		return components;
+	}
 }

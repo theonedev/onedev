@@ -1,3 +1,12 @@
 <wicket:extend>
-	<a wicket:id="test">test</a>
+	<form wicket:id="form">
+		<input type="file" wicket:id="file"></input>
+		<input type="submit" value="upload"></input>
+	</form>
+	<div class="modal" id="hello"><div class="modal-dialog"><div class="modal-content">hello</div></div></div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#hello").modal("show");
+		});
+	</script>
 </wicket:extend>

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
+import com.pmease.commons.wicket.CommonPage;
 import com.pmease.commons.wicket.assets.atwho.AtWhoResourceReference;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
@@ -123,12 +124,45 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 				throw new RuntimeException(e);
 			}
 
-			String script = String.format("gitplex.markdown.onEmojisLoaded('%s', %s);", 
+			String script = String.format("pmease.commons.markdown.onEmojisLoaded('%s', %s);", 
 					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
+		} else if (type.equals("provideImage")) {
+			CommonPage page = (CommonPage) getComponent().getPage();
+			Component urlProvider = newImageProvider(page.getComponents().newChildId());
+			urlProvider.setOutputMarkupId(true);
+			page.getComponents().add(urlProvider);
+			urlProvider.setMarkupId(getComponent().getMarkupId() + "-imageprovider");
+			target.add(urlProvider);
 		} else {
 			throw new IllegalStateException("Unknown callback type: " + type);
 		}
+	}
+	
+	protected Component newImageProvider(String id) {
+		return new SpecifyImageUrl(id) {
+
+			@Override
+			public void onInsert(AjaxRequestTarget target, String url) {
+				CommonPage page = (CommonPage) getComponent().getPage();
+				page.getComponents().remove(this);
+
+				String script = String.format("pmease.commons.markdown.insertImage('%s', '%s');", 
+						getComponent().getMarkupId(), url);
+				target.appendJavaScript(script);
+			}
+
+			@Override
+			public void onCancel(AjaxRequestTarget target) {
+				CommonPage page = (CommonPage) getComponent().getPage();
+				page.getComponents().remove(this);
+
+				String script = String.format("$('#%s-imageprovider').closest('.modal').modal('hide');", 
+						getComponent().getMarkupId());
+				target.appendJavaScript(script);
+			}
+			
+		};
 	}
 
 	@Override
@@ -154,7 +188,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 				new JavaScriptResourceReference(MarkdownBehavior.class, "markdown.js")));
 		response.render(CssHeaderItem.forReference(MarkdownCssResourceReference.INSTANCE));
 		
-		String script = String.format("gitplex.markdown.setup('%s', %s, %s);", 
+		String script = String.format("pmease.commons.markdown.setup('%s', %s, %s);", 
 				component.getMarkupId(true), ATWHO_LIMIT,
 				getCallbackFunction(CallbackParameter.explicit("type"), CallbackParameter.explicit("param")));
 		response.render(OnDomReadyHeaderItem.forScript(script));

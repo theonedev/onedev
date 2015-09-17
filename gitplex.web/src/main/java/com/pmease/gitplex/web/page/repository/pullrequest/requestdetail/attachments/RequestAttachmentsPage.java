@@ -45,7 +45,7 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.fileinput.Boo
 @SuppressWarnings("serial")
 public class RequestAttachmentsPage extends RequestDetailPage {
 
-	private static final int MAX_FILE_SIZE = 50; 
+	public static final int MAX_FILE_SIZE = 50; 
 	
 	private static final int BUFFER_SIZE = 1024*64;
 			
