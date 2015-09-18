@@ -1,6 +1,8 @@
 <wicket:extend>
-	<form wicket:id="form">
-		<input type="file" wicket:id="file"></input>
-		<input wicket:id="submit" type="submit" value="upload"></input>
+	<div style="width: 200px; height: 200px; background: grey"
+		id="pasteTarget">Click and paste here.</div>
+	<form action="upload" method="POST">
+	<input type="file" id="file" name="file"/>
+	<input type="text" id="text"></input>
 	</form>
 </wicket:extend>

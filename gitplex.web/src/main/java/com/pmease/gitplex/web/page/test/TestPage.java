@@ -1,13 +1,9 @@
 package com.pmease.gitplex.web.page.test;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.upload.FileUploadField;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.gitplex.web.page.base.BasePage;
 
@@ -17,30 +13,17 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		final FileUploadField uploadField = new FileUploadField("file");
-
-		Form<Void> form = new Form<Void>("form");
-		form.add(uploadField);
 		
-		form.add(new AjaxSubmitLink("submit") {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				try {
-					uploadField.getFileUpload().writeTo(new File("w:\\temp\\a.jpg"));
-				} catch (IOException e) {
-				}
-			}
-			
-		});
-		add(form);
+//		System.out.println(RequestCycle.get().getUrlRenderer().renderRelativeUrl(Url.parse("upload")));
 	}		
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(TestPage.class, "test.js")));
+		response.render(OnDomReadyHeaderItem.forScript("initUpload('/upload');"));
 	}
 	
 }
