@@ -62,7 +62,7 @@ pmease.commons.markdown = {
 		            		   $modal.remove();
 		            	   });
 		            	   $modal.data("event", e);
-		            	   callback("provideImage");
+		            	   callback("insertImage");
 		               }
 		           }]			
 			}]], 

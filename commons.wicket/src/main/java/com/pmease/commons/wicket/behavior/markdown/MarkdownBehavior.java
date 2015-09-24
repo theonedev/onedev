@@ -40,6 +40,8 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 
 	protected static final int ATWHO_LIMIT = 5;
 	
+	private InsertImagePanel imageInserter;
+	
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
@@ -127,25 +129,25 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			String script = String.format("pmease.commons.markdown.onEmojisLoaded('%s', %s);", 
 					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
-		} else if (type.equals("provideImage")) {
+		} else if (type.equals("insertImage")) {
 			CommonPage page = (CommonPage) getComponent().getPage();
-			Component insertImagePanel = newInsertImagePanel(page.getComponents().newChildId());
-			insertImagePanel.setOutputMarkupId(true);
-			page.getComponents().add(insertImagePanel);
-			insertImagePanel.setMarkupId(getComponent().getMarkupId() + "-imageinserter");
-			target.add(insertImagePanel);
+			imageInserter = newInsertImagePanel(page.getComponents().newChildId());
+			imageInserter.setOutputMarkupId(true);
+			page.getComponents().add(imageInserter);
+			imageInserter.setMarkupId(getComponent().getMarkupId() + "-imageinserter");
+			target.add(imageInserter);
 		} else {
 			throw new IllegalStateException("Unknown callback type: " + type);
 		}
 	}
 	
-	protected Component newInsertImagePanel(String id) {
+	protected InsertImagePanel newInsertImagePanel(String id) {
 		return new InsertImagePanel(id, this);
 	}
 
 	public void insertImage(AjaxRequestTarget target, String url) {
-		CommonPage page = (CommonPage) getComponent().getPage();
-		page.getComponents().remove(this);
+		CommonPage page = (CommonPage) imageInserter.getPage();
+		page.getComponents().remove(imageInserter);
 
 		String script = String.format("pmease.commons.markdown.insertImage('%s', '%s');", 
 				getComponent().getMarkupId(), url);
@@ -153,8 +155,8 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 	}
 
 	public void cancelInsertImage(AjaxRequestTarget target) {
-		CommonPage page = (CommonPage) getComponent().getPage();
-		page.getComponents().remove(this);
+		CommonPage page = (CommonPage) imageInserter.getPage();
+		page.getComponents().remove(imageInserter);
 
 		String script = String.format("$('#%s-imageinserter').closest('.modal').modal('hide');", 
 				getComponent().getMarkupId());

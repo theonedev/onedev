@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Date;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -82,7 +81,7 @@ public class AttachmentResource extends AbstractResource {
 			throw new RuntimeException(e);
 		}
 
-		response.setFileName(getDownloadName(attachment));
+		response.setFileName(attachment);
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override
@@ -105,35 +104,6 @@ public class AttachmentResource extends AbstractResource {
 		params.set(PARAM_ATTACHMENT, attachment);
 		
 		return params;
-	}
-	
-	public static String getFileName(String uploadName) {
-		if (uploadName.contains(".")) {
-			String nameWithoutExt = StringUtils.substringBeforeLast(uploadName, ".");
-			String ext = StringUtils.substringAfterLast(uploadName, ".");
-			return nameWithoutExt + "-" + System.currentTimeMillis() + "." + ext;
-		} else {
-			return uploadName + "-" + System.currentTimeMillis();
-		}
-	}
-	
-	public static String getDownloadName(String fileName) {
-		if (fileName.contains(".")) {
-			String nameWithoutExt = StringUtils.substringBeforeLast(fileName, ".");
-			String ext = StringUtils.substringAfterLast(fileName, ".");
-			return StringUtils.substringBeforeLast(nameWithoutExt, "-") + "." + ext;
-		} else {
-			return StringUtils.substringBeforeLast(fileName, "-");
-		}
-	}
-	
-	public static Date getUploadDate(String fileName) {
-		if (fileName.contains(".")) {
-			String nameWithoutExt = StringUtils.substringBeforeLast(fileName, ".");
-			return new Date(Long.parseLong(StringUtils.substringAfterLast(nameWithoutExt, "-")));
-		} else {
-			return new Date(Long.parseLong(StringUtils.substringAfterLast(fileName, "-")));
-		}
 	}
 	
 }

@@ -33,7 +33,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
+import com.pmease.commons.wicket.component.markdown.MarkdownViewPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -90,7 +90,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 	
 	private Fragment renderForView(String content) {
 		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
-		fragment.add(new MarkdownViewer("comment", Model.of(content)));
+		fragment.add(new MarkdownViewPanel("comment", Model.of(content)));
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}

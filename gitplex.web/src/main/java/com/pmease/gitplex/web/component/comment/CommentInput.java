@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.component.comment;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -31,12 +29,9 @@ import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.behavior.markdown.InsertImagePanel;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.resource.AttachmentResource;
-import com.pmease.gitplex.web.resource.AttachmentResourceReference;
 
 @SuppressWarnings("serial")
 public class CommentInput extends TextArea<String> {
@@ -98,24 +93,18 @@ public class CommentInput extends TextArea<String> {
 			}
 
 			@Override
-			protected Component newInsertImagePanel(String id) {
+			protected InsertImagePanel newInsertImagePanel(String id) {
 				return new InsertImagePanel(id, this) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new AttachmentSupport() {
-
-							@Override
-							public File getStoreDir() {
-								return GitPlex.getInstance(StorageManager.class).getAttachmentsDir(requestModel.getObject());
-							}
-
-							@Override
-							public String getAttachmentUrl(String attachment) {
-								PageParameters params = AttachmentResource.paramsOf(requestModel.getObject(), attachment);
-								return RequestCycle.get().urlFor(new AttachmentResourceReference(), params).toString();
-							}
+						return new CommentAttachmentSupport() {
 							
+							@Override
+							protected PullRequest getRequest() {
+								return requestModel.getObject();
+							}
+
 						};
 					}
 					

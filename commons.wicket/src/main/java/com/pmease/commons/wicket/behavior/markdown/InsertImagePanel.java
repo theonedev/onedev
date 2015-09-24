@@ -1,6 +1,5 @@
 package com.pmease.commons.wicket.behavior.markdown;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +8,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -78,7 +77,7 @@ public class InsertImagePanel extends Panel {
 		
 		final AttachmentSupport attachmentSupport = getAttachmentSupport();
 		if (attachmentSupport != null) {
-			Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
+			final Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
 			fragment.setOutputMarkupId(true);
 			
 			final IModel<List<List<String>>> rowsModel = new LoadableDetachableModel<List<List<String>>>() {
@@ -87,11 +86,9 @@ public class InsertImagePanel extends Panel {
 				protected List<List<String>> load() {
 					List<List<String>> rows = new ArrayList<>();
 					List<String> images = new ArrayList<>();
-					if (attachmentSupport.getStoreDir().exists()) {
-						for (File file: attachmentSupport.getStoreDir().listFiles()) {
-							if (ImageUtils.isWebSafe(file.getName()))
-								images.add(file.getName());
-						}
+					for (String attachment: attachmentSupport.getAttachments()) {
+						if (ImageUtils.isWebSafe(attachment))
+							images.add(attachment);
 					}
 					for (List<String> row: Iterables.partition(images, IMAGE_COLS)) {
 						rows.add(row);
@@ -100,7 +97,7 @@ public class InsertImagePanel extends Panel {
 				}
 				
 			};
-			fragment.add(new ListView<List<String>>("rows") {
+			fragment.add(new ListView<List<String>>("rows", rowsModel) {
 
 				@Override
 				protected void populateItem(ListItem<List<String>> rowItem) {
@@ -132,16 +129,23 @@ public class InsertImagePanel extends Panel {
 				}
 				
 			});
+			
+			Form<?> fileForm = new Form<Void>("form");
+			fragment.add(fileForm);
 			final FileUploadField uploadField = new FileUploadField("file");
-			uploadField.add(new OnChangeAjaxBehavior() {
-				
+			uploadField.add(new AjaxFormSubmitBehavior("change") {
+
 				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					System.out.println(uploadField.getFileUpload().getClientFileName());
+				protected void onSubmit(AjaxRequestTarget target) {
+					super.onSubmit(target);
+					if (uploadField.getFileUpload() != null) {
+						attachmentSupport.saveAttachment(uploadField.getFileUpload());
+						target.add(fragment);
+					}
 				}
 				
 			});
-			fragment.add(uploadField);
+			fileForm.add(uploadField);
 			add(fragment);
 		} else {
 			add(new WebMarkupContainer("attachments"));

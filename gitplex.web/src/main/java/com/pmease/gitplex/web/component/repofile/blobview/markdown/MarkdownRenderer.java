@@ -18,7 +18,7 @@ public class MarkdownRenderer implements BlobRenderer {
 			if (context.getMark() != null || context.getMode() == Mode.BLAME)
 				return new SourceViewPanel(panelId, context, clientState);
 			else
-				return new MarkdownViewPanel(panelId, context);
+				return new MarkdownFilePanel(panelId, context);
 		} else {
 			return null;
 		}

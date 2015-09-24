@@ -81,9 +81,16 @@
 	color: #333;
 	background: rgba(0, 0, 0, 0.04);
 }
-.specify-image-url>form>input {
-	margin-bottom: 16px;
+
+.insert-image .image-info {
+	margin-bottom: 20px;
 }
-.specify-image-url .btn-primary {
-	margin-right: 4px;
+.insert-image .thumbnails {
+	max-height: 512px;
+	overflow: auto;
+}
+.insert-image .thumbnails img {
+	width: 256px;
+	height: 256px;
+	margin-bottom: 20px;
 }

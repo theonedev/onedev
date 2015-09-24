@@ -1,23 +1,31 @@
 <wicket:panel>
 	<div class="modal-body insert-image">
-		<form wicket:id="form">
+		<form wicket:id="form" class="image-info">
 			<div wicket:id="feedback" class="feedback"></div>
 			<div class="form-group">
 				<label>Image URL</label>
 				<input wicket:id="url" class="form-control"></input>
-			</div>			
-			<button wicket:id="insert" type="submit" class="btn btn-primary">Insert</button>
-			<button wicket:id="cancel" class="btn btn-default" type="button">Cancel</button>	
+			</div>		
+			<div class="actions">
+				<button wicket:id="insert" type="submit" class="btn btn-primary">Insert</button>
+				<button wicket:id="cancel" class="btn btn-default" type="button">Cancel</button>	
+			</div>	
 		</form>
 		<div wicket:id="attachments"></div>
 	</div>
 	<wicket:fragment wicket:id="attachmentsFrag">
 		<div class="thumbnails">
-			<div wicket:id="rows" class="rows">
-				<div wicket:id="columns" class="columns"><a wicket:id="link" tabindex="0"><img wicket:id="img"></img></a></div>
+			<div wicket:id="rows" class="row clearfix">
+				<div wicket:id="columns" class="column pull-left">
+				<a wicket:id="link" tabindex="0">
+					<img wicket:id="image"></img>
+				</a>
+				</div>
 			</div>
 			<div wicket:id="noImages" class="no-images">No existing images</div>
 		</div>
+		<form wicket:id="form">
 			<input wicket:id="file" type="file"></input>
+		</form>
 	</wicket:fragment>
 </wicket:panel>
