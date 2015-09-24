@@ -12,7 +12,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
+import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -39,7 +39,7 @@ class OpenActivityPanel extends Panel {
 
 		String description = requestModel.getObject().getDescription();
 		if (StringUtils.isNotBlank(description))
-			fragment.add(new MarkdownPanel("description", Model.of(description)));
+			fragment.add(new MarkdownViewer("description", Model.of(description)));
 		else
 			fragment.add(new Label("description", "<i>No description</i>").setEscapeModelStrings(false));
 		fragment.setOutputMarkupId(true);
@@ -64,7 +64,8 @@ class OpenActivityPanel extends Panel {
 				form.setOutputMarkupId(true);
 				fragment.add(form);
 
-				final CommentInput input = new CommentInput("input", Model.of(requestModel.getObject().getDescription()));
+				final CommentInput input = new CommentInput("input", requestModel, 
+						Model.of(requestModel.getObject().getDescription()));
 				form.add(input);
 				
 				form.add(new AjaxSubmitLink("save") {

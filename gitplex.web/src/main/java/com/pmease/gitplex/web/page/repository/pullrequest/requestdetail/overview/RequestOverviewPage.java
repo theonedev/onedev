@@ -299,7 +299,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		Form<?> form = new Form<Void>("form");
 		addComment.add(form);
 		
-		final CommentInput input = new CommentInput("input", Model.of(""));
+		final CommentInput input = new CommentInput("input", requestModel, Model.of(""));
 		input.setRequired(true);
 		form.add(input);
 		

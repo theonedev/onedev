@@ -45,8 +45,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
@@ -604,7 +602,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		form.add(deleteSourceCheck);
 		if (operation != INTEGRATE) {
-			form.add(noteInput = new CommentInput("note", Model.of("")));
+			form.add(noteInput = new CommentInput("note", requestModel, Model.of("")));
 			noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
 			deleteSourceCheck.setVisible(false);
 		} else {
@@ -617,7 +615,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			if (strategy == REBASE_SOURCE_ONTO_TARGET 
 					|| strategy == REBASE_TARGET_ONTO_SOURCE
 					|| preview.getIntegrated().equals(preview.getRequestHead())) {
-				form.add(noteInput = new CommentInput("note", Model.of("")));
+				form.add(noteInput = new CommentInput("note", requestModel, Model.of("")));
 				noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
 			} else {
 				form.add(noteInput = new TextArea<String>("note", Model.of("")));

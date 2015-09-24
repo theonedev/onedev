@@ -52,7 +52,7 @@ pmease.commons.markdown = {
 		            	   		"<div class='modal'>" +
 		            	   		"<div class='modal-dialog'>" +
 		            	   		"<div class='modal-content'>" +
-		            	   		"<div id='" + inputId + "-imageprovider'></div>" +
+		            	   		"<div id='" + inputId + "-imageinserter'></div>" +
 		            	   		"</div>" +
 		            	   		"</div>" +
 		            	   		"</div>");
@@ -160,7 +160,7 @@ pmease.commons.markdown = {
 	},
 	
 	insertImage: function(inputId, imageUrl) {
-		var $modal = $("#" + inputId + "-imageprovider").closest(".modal");
+		var $modal = $("#" + inputId + "-imageinserter").closest(".modal");
 		var e = $modal.data("event");
         // Give ![] surround the selection and prepend the image link
         var chunk, cursor, selected = e.getSelection(), content = e.getContent();

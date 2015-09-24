@@ -35,7 +35,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
+import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
@@ -238,7 +238,7 @@ public abstract class FileListPanel extends Panel {
 			}
 			
 		}));
-		readmeContainer.add(new MarkdownPanel("body", new LoadableDetachableModel<String>() {
+		readmeContainer.add(new MarkdownViewer("body", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {

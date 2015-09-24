@@ -539,7 +539,7 @@ public class NewRequestPage extends PullRequestPage {
 			
 		}));
 
-		form.add(new CommentInput("comment", new IModel<String>() {
+		form.add(new CommentInput("comment", requestModel, new IModel<String>() {
 
 			@Override
 			public void detach() {

@@ -246,7 +246,14 @@ public class SourceViewPanel extends BlobViewPanel {
 					newCommentForm.setOutputMarkupId(true);
 					
 					final CommentInput input;
-					newCommentForm.add(input = new CommentInput("input", Model.of("")));
+					newCommentForm.add(input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
+
+						@Override
+						public PullRequest getObject() {
+							return context.getPullRequest();
+						}
+						
+					}, Model.of("")));
 					input.setRequired(true);
 					newCommentForm.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 					

@@ -15,10 +15,10 @@ import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownCssResourceReference;
 
 @SuppressWarnings("serial")
-public class MarkdownPanel extends GenericPanel<String> {
+public class MarkdownViewer extends GenericPanel<String> {
 	private static final long serialVersionUID = 1L;
 
-	public MarkdownPanel(String id, IModel<String> model) {
+	public MarkdownViewer(String id, IModel<String> model) {
 		super(id, model);
 	}
 	
@@ -31,7 +31,7 @@ public class MarkdownPanel extends GenericPanel<String> {
 			@Override
 			protected String load() {
 				return AppLoader.getInstance(MarkdownManager.class)
-						.parseAndProcess(MarkdownPanel.this.getModelObject());
+						.parseAndProcess(MarkdownViewer.this.getModelObject());
 			}
 		}).setEscapeModelStrings(false));
 

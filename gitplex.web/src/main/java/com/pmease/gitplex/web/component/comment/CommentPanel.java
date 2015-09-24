@@ -33,7 +33,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.commons.wicket.component.markdown.MarkdownPanel;
+import com.pmease.commons.wicket.component.markdown.MarkdownViewer;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -90,7 +90,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 	
 	private Fragment renderForView(String content) {
 		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
-		fragment.add(new MarkdownPanel("comment", Model.of(content)));
+		fragment.add(new MarkdownViewer("comment", Model.of(content)));
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}
@@ -115,7 +115,14 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				final CommentInput input = new CommentInput("input", Model.of(getComment().getContent()));
+				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
+
+					@Override
+					public PullRequest getObject() {
+						return getComment().getRequest();
+					}
+					
+				}, Model.of(getComment().getContent()));
 				input.setRequired(true);
 				form.add(input);
 				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
@@ -253,7 +260,14 @@ public class CommentPanel extends GenericPanel<Comment> {
 				
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
-				final CommentInput input = new CommentInput("input", Model.of(""));
+				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
+
+					@Override
+					public PullRequest getObject() {
+						return getComment().getRequest();
+					}
+					
+				}, Model.of(""));
 				input.setRequired(true);
 				form.add(input);
 
@@ -358,7 +372,14 @@ public class CommentPanel extends GenericPanel<Comment> {
 				Form<?> form = new Form<Void>("form");
 				fragment.add(form);
 				CommentReply reply = (CommentReply) row.getDefaultModelObject();
-				final CommentInput input = new CommentInput("input", Model.of(reply.getContent()));
+				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
+
+					@Override
+					public PullRequest getObject() {
+						return getComment().getRequest();
+					}
+					
+				}, Model.of(reply.getContent()));
 				input.setRequired(true);
 				form.add(input);
 				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));

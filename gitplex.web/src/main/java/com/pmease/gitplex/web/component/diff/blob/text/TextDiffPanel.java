@@ -243,7 +243,7 @@ public class TextDiffPanel extends Panel {
 				newCommentForm.setOutputMarkupId(true);
 				
 				final CommentInput input;
-				newCommentForm.add(input = new CommentInput("input", Model.of("")));
+				newCommentForm.add(input = new CommentInput("input", requestModel, Model.of("")));
 				input.setRequired(true);
 				newCommentForm.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 				

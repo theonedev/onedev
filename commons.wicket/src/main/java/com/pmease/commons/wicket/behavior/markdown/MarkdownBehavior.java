@@ -129,42 +129,38 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			target.appendJavaScript(script);
 		} else if (type.equals("provideImage")) {
 			CommonPage page = (CommonPage) getComponent().getPage();
-			Component urlProvider = newImageProvider(page.getComponents().newChildId());
-			urlProvider.setOutputMarkupId(true);
-			page.getComponents().add(urlProvider);
-			urlProvider.setMarkupId(getComponent().getMarkupId() + "-imageprovider");
-			target.add(urlProvider);
+			Component insertImagePanel = newInsertImagePanel(page.getComponents().newChildId());
+			insertImagePanel.setOutputMarkupId(true);
+			page.getComponents().add(insertImagePanel);
+			insertImagePanel.setMarkupId(getComponent().getMarkupId() + "-imageinserter");
+			target.add(insertImagePanel);
 		} else {
 			throw new IllegalStateException("Unknown callback type: " + type);
 		}
 	}
 	
-	protected Component newImageProvider(String id) {
-		return new SpecifyImageUrl(id) {
-
-			@Override
-			public void onInsert(AjaxRequestTarget target, String url) {
-				CommonPage page = (CommonPage) getComponent().getPage();
-				page.getComponents().remove(this);
-
-				String script = String.format("pmease.commons.markdown.insertImage('%s', '%s');", 
-						getComponent().getMarkupId(), url);
-				target.appendJavaScript(script);
-			}
-
-			@Override
-			public void onCancel(AjaxRequestTarget target) {
-				CommonPage page = (CommonPage) getComponent().getPage();
-				page.getComponents().remove(this);
-
-				String script = String.format("$('#%s-imageprovider').closest('.modal').modal('hide');", 
-						getComponent().getMarkupId());
-				target.appendJavaScript(script);
-			}
-			
-		};
+	protected Component newInsertImagePanel(String id) {
+		return new InsertImagePanel(id, this);
 	}
 
+	public void insertImage(AjaxRequestTarget target, String url) {
+		CommonPage page = (CommonPage) getComponent().getPage();
+		page.getComponents().remove(this);
+
+		String script = String.format("pmease.commons.markdown.insertImage('%s', '%s');", 
+				getComponent().getMarkupId(), url);
+		target.appendJavaScript(script);
+	}
+
+	public void cancelInsertImage(AjaxRequestTarget target) {
+		CommonPage page = (CommonPage) getComponent().getPage();
+		page.getComponents().remove(this);
+
+		String script = String.format("$('#%s-imageinserter').closest('.modal').modal('hide');", 
+				getComponent().getMarkupId());
+		target.appendJavaScript(script);
+	}
+	
 	@Override
 	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 		super.updateAjaxAttributes(attributes);
