@@ -1,22 +1,24 @@
 <wicket:panel>
+	<div class="modal-header">
+		<h4 class="modal-title">Insert Image</h4>
+	</div>
 	<div class="modal-body insert-image">
+		<div wicket:id="feedback" class="feedback"></div>
 		<form wicket:id="form" class="image-info">
-			<div wicket:id="feedback" class="feedback"></div>
 			<div class="form-group">
-				<label>Image URL</label>
-				<input wicket:id="url" class="form-control"></input>
+				<input wicket:id="url" class="form-control focusable"></input>
 			</div>		
-			<div class="actions">
-				<button wicket:id="insert" type="submit" class="btn btn-primary">Insert</button>
-				<button wicket:id="cancel" class="btn btn-default" type="button">Cancel</button>	
-			</div>	
 		</form>
 		<div wicket:id="attachments"></div>
 	</div>
+	<div class="modal-footer">
+		<button wicket:id="insert" type="submit" class="btn btn-primary">Insert</button>
+		<button wicket:id="cancel" class="btn btn-default" type="button">Cancel</button>	
+	</div>
 	<wicket:fragment wicket:id="attachmentsFrag">
 		<div class="thumbnails">
-			<div wicket:id="rows" class="row clearfix">
-				<div wicket:id="columns" class="column pull-left">
+			<div wicket:id="rows" class="image-row clearfix">
+				<div wicket:id="columns" class="image-column pull-left">
 				<a wicket:id="link" tabindex="0">
 					<img wicket:id="image"></img>
 				</a>
@@ -25,7 +27,13 @@
 			<div wicket:id="noImages" class="no-images">No existing images</div>
 		</div>
 		<form wicket:id="form">
-			<input wicket:id="file" type="file"></input>
+		    <span class="btn btn-default btn-file">
+		        Select local image (jpeg, png, gif)... <input wicket:id="file" type="file" accept=".png, .jpg, .jpeg, .gif"></input>
+		    </span>		
 		</form>
+		<div class="alert alert-info">
+			<i class="fa fa-info-circle"></i> Note: you may drag and drop to insert image directly 
+			without opening this dialog, or paste image from clipboard if using Chrome.    
+		</div>
 	</wicket:fragment>
 </wicket:panel>

@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -14,7 +17,7 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.*;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -25,6 +28,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.util.crypt.Base64;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -131,7 +135,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			target.appendJavaScript(script);
 		} else if (type.equals("insertImage")) {
 			CommonPage page = (CommonPage) getComponent().getPage();
-			imageInserter = newInsertImagePanel(page.getComponents().newChildId());
+			imageInserter = new InsertImagePanel(page.getComponents().newChildId(), this);
 			imageInserter.setOutputMarkupId(true);
 			page.getComponents().add(imageInserter);
 			imageInserter.setMarkupId(getComponent().getMarkupId() + "-imageinserter");
@@ -141,10 +145,6 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 		}
 	}
 	
-	protected InsertImagePanel newInsertImagePanel(String id) {
-		return new InsertImagePanel(id, this);
-	}
-
 	public void insertImage(AjaxRequestTarget target, String url) {
 		CommonPage page = (CommonPage) imageInserter.getPage();
 		page.getComponents().remove(imageInserter);
@@ -161,6 +161,12 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 		String script = String.format("$('#%s-imageinserter').closest('.modal').modal('hide');", 
 				getComponent().getMarkupId());
 		target.appendJavaScript(script);
+	}
+	
+	public boolean isWebSafeImage(String fileName) {
+		fileName = fileName.toLowerCase();
+		return fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") 
+				|| fileName.endsWith(".gif") || fileName.endsWith(".png");
 	}
 	
 	@Override
@@ -186,10 +192,25 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 				new JavaScriptResourceReference(MarkdownBehavior.class, "markdown.js")));
 		response.render(CssHeaderItem.forReference(MarkdownCssResourceReference.INSTANCE));
 		
-		String script = String.format("pmease.commons.markdown.setup('%s', %s, %s);", 
+		String encodedAttachmentSupport;
+		AttachmentSupport attachmentSupport = getAttachmentSupport();
+		if (attachmentSupport != null) {
+			encodedAttachmentSupport = Base64.encodeBase64String(SerializationUtils.serialize(attachmentSupport));
+			encodedAttachmentSupport = StringEscapeUtils.escapeEcmaScript(encodedAttachmentSupport);
+			encodedAttachmentSupport = "'" + encodedAttachmentSupport + "'";
+		} else {
+			encodedAttachmentSupport = "undefined";
+		}
+		String script = String.format("pmease.commons.markdown.init('%s', %s, %s, %s);", 
 				component.getMarkupId(true), ATWHO_LIMIT,
-				getCallbackFunction(CallbackParameter.explicit("type"), CallbackParameter.explicit("param")));
+				getCallbackFunction(explicit("type"), explicit("param")), 
+				encodedAttachmentSupport);
 		response.render(OnDomReadyHeaderItem.forScript(script));
+	}
+
+	@Nullable
+	public AttachmentSupport getAttachmentSupport() {
+		return null;
 	}
 
 }

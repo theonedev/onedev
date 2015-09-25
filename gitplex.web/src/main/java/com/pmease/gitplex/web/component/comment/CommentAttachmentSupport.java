@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tika.io.IOUtils;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
@@ -23,18 +24,25 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.resource.AttachmentResource;
 import com.pmease.gitplex.web.resource.AttachmentResourceReference;
 
-public abstract class CommentAttachmentSupport implements AttachmentSupport {
+public class CommentAttachmentSupport implements AttachmentSupport {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_FILE_SIZE = 50; 
+	private static final int MAX_FILE_SIZE = 50*1024*1024; // mega bytes
 	
 	private static final int BUFFER_SIZE = 1024*64;
-			
+	
+	private final Long requestId;
+	
+	public CommentAttachmentSupport(Long requestId) {
+		this.requestId = requestId;
+	}
+	
 	@Override
 	public String getAttachmentUrl(String attachment) {
 		PageParameters params = AttachmentResource.paramsOf(getRequest(), attachment);
-		return RequestCycle.get().urlFor(new AttachmentResourceReference(), params).toString();
+		String url = RequestCycle.get().urlFor(new AttachmentResourceReference(), params).toString();
+		return RequestCycle.get().getUrlRenderer().renderFullUrl(Url.parse(url));
 	}
 	
 	@Override
@@ -49,33 +57,6 @@ public abstract class CommentAttachmentSupport implements AttachmentSupport {
 		return attachments;
 	}
 
-	@Override
-	public String saveAttachment(FileUpload upload) {
-		String clientFileName = upload.getClientFileName();
-		String fileName = clientFileName;
-		File attachmentsDir = getAttachmentsDir();
-		int index = 2;
-		while (new File(attachmentsDir, fileName).exists()) {
-			if (clientFileName.contains(".")) {
-				String nameBeforeExt = StringUtils.substringBeforeLast(clientFileName, ".");
-				String ext = StringUtils.substringAfterLast(clientFileName, ".");
-				fileName = nameBeforeExt + "-" + index + "." + ext;
-			} else {
-				fileName = clientFileName + "-" + index;
-			}
-			index++;
-		}
-		
-		File file = new File(attachmentsDir, fileName);
-		try (	InputStream is = upload.getInputStream();
-				OutputStream os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
-			IOUtils.copy(is, os);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} 
-		return file.getName();
-	}
-
 	private File getAttachmentsDir() {
 		return GitPlex.getInstance(StorageManager.class).getAttachmentsDir(getRequest());
 	}
@@ -88,9 +69,41 @@ public abstract class CommentAttachmentSupport implements AttachmentSupport {
 	}
 
 	@Override
-	public int getAttachmentMaxSize() {
+	public long getAttachmentMaxSize() {
 		return MAX_FILE_SIZE;
 	}
 
-	protected abstract PullRequest getRequest();
+	@Override
+	public long getAttachmentSize(String attachment) {
+		return new File(getAttachmentsDir(), attachment).length();
+	}
+
+	private PullRequest getRequest() {
+		return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
+	}
+
+	@Override
+	public String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream) {
+		String attachmentName = suggestedAttachmentName;
+		File attachmentsDir = getAttachmentsDir();
+		int index = 2;
+		while (new File(attachmentsDir, attachmentName).exists()) {
+			if (suggestedAttachmentName.contains(".")) {
+				String nameBeforeExt = StringUtils.substringBeforeLast(suggestedAttachmentName, ".");
+				String ext = StringUtils.substringAfterLast(suggestedAttachmentName, ".");
+				attachmentName = nameBeforeExt + "_" + index + "." + ext;
+			} else {
+				attachmentName = suggestedAttachmentName + "_" + index;
+			}
+			index++;
+		}
+		
+		File file = new File(attachmentsDir, attachmentName);
+		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
+			IOUtils.copy(attachmentStream, os);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} 
+		return file.getName();
+	}
 }

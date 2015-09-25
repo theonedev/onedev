@@ -1,5 +1,5 @@
 pmease.commons.markdown = {
-	setup: function(inputId, atWhoLimit, callback) {
+	init: function(inputId, atWhoLimit, callback, attachmentSupport) {
 		var $input = $("#" + inputId);
 
 		$input.markdown({
@@ -66,7 +66,8 @@ pmease.commons.markdown = {
 		               }
 		           }]			
 			}]], 
-			iconlibrary: "fa"
+			iconlibrary: "fa", 
+			resize: "vertical"
 		});
 		
 		$input.css({resize: "vertical"});
@@ -109,6 +110,63 @@ pmease.commons.markdown = {
 	        insertTpl: ':${name}:', 
 	        limit: atWhoLimit
 	    });		
+	    
+	    if (attachmentSupport) {
+	    	var input = $input[0];
+	    	
+			input.addEventListener("paste", function(e) {
+				for (var i = 0; i < e.clipboardData.items.length; i++) {
+					var item = e.clipboardData.items[i];
+					if (item.type.indexOf("image") != -1) {
+						var file = item.getAsFile();
+						uploadFile(file);
+					}
+					break;
+				}
+			});
+			
+			input.addEventListener("dragover", function(e) {
+				e.stopPropagation();
+				e.preventDefault();		
+			}, false);
+			
+			input.addEventListener("dragleave", function(e) {
+				e.stopPropagation();
+				e.preventDefault();		
+			}, false);
+			
+			input.addEventListener("drop", function(e) {
+				e.stopPropagation();
+				e.preventDefault();		
+				var files = e.target.files || e.dataTransfer.files;
+				if (files && files.length != 0)
+					uploadFile(files[0]);
+			}, false);
+			
+			function uploadFile(file) {
+				var xhr = new XMLHttpRequest();
+				xhr.upload.onprogress = function(e) {
+					var percentComplete = (e.loaded / e.total) * 100;
+					console.log("Uploaded: " + percentComplete + "%");
+				};
+				xhr.onload = function() {
+					if (xhr.status == 200) {
+						alert("Sucess! Upload completed.\n\n" + xhr.responseText);
+					} else {
+						alert("Error! Upload failed");
+					}
+				};
+				xhr.onerror = function() {
+					alert("Error! Upload failed. Can not connect to server.");
+				};
+				xhr.open("POST", url, true);
+				xhr.setRequestHeader("Content-Type", file.type);
+				if (file.name)
+					xhr.setRequestHeader("File-Name", file.name);
+				xhr.setRequestHeader("Attachment-Support", attachmentSupport);
+				xhr.send(file);
+			}
+	    }
 	},
 	onEmojisLoaded: function(inputId, emojis) {
 		var $input = $("#" + inputId);

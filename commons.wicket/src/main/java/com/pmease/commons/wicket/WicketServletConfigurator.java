@@ -8,6 +8,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.pmease.commons.jetty.ServletConfigurator;
+import com.pmease.commons.wicket.behavior.markdown.AttachmentUploadServlet;
 
 @Singleton
 public class WicketServletConfigurator implements ServletConfigurator {
@@ -28,6 +29,7 @@ public class WicketServletConfigurator implements ServletConfigurator {
 		 * match a path pattern
 		 */
 		context.addServlet(servletHolder, "/");
+		context.addServlet(AttachmentUploadServlet.class, "/attachment_upload");
 	}
 
 }

@@ -26,7 +26,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.pmease.commons.wicket.behavior.markdown.InsertImagePanel;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -38,13 +37,10 @@ public class CommentInput extends TextArea<String> {
 
 	private final IModel<PullRequest> requestModel;
 	
-	private final IModel<String> contentModel;
-	
 	public CommentInput(String id, IModel<PullRequest> requestModel, IModel<String> contentModel) {
-		super(id);
+		super(id, contentModel);
 		
 		this.requestModel = requestModel;
-		this.contentModel = contentModel;
 	}
 
 	@Override
@@ -93,22 +89,8 @@ public class CommentInput extends TextArea<String> {
 			}
 
 			@Override
-			protected InsertImagePanel newInsertImagePanel(String id) {
-				return new InsertImagePanel(id, this) {
-
-					@Override
-					protected AttachmentSupport getAttachmentSupport() {
-						return new CommentAttachmentSupport() {
-							
-							@Override
-							protected PullRequest getRequest() {
-								return requestModel.getObject();
-							}
-
-						};
-					}
-					
-				};
+			public AttachmentSupport getAttachmentSupport() {
+				return new CommentAttachmentSupport(requestModel.getObject().getId());
 			}
 
 			@Override
@@ -140,7 +122,6 @@ public class CommentInput extends TextArea<String> {
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
-		contentModel.detach();
 		
 		super.onDetach();
 	}	

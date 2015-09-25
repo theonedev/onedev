@@ -252,3 +252,24 @@ input.clearable::-ms-clear {display: none;}
 #websocket-error {display: none; position: fixed; left: 50%; top: 0; background: #f2dede; 
 	border: 1px solid #ebccd1; color: #a94442; padding: 4px 8px; margin-left: -120px;}	
 #websocket-error span {width: 16px; height: 16px; background: url("error.png") 0 0 no-repeat;}
+
+/* FILE INPUT */
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}

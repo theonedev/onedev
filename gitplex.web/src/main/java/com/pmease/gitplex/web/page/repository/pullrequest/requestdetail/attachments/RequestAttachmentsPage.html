@@ -1,9 +1,10 @@
 <wicket:extend>
 	<div class="attachments">
 		<div class="upload">
-			<div class="title">Select file to upload</div>
 			<form wicket:id="form">
-				<input wicket:id="fileUpload" type="file" class="btn btn-default"></input>
+			    <span class="btn btn-primary btn-file">
+			        Select file to upload... <input wicket:id="file" type="file"></input>
+			    </span>		
 				<div wicket:id="feedback" class="feedback"></div>
 			</form>
 		</div>

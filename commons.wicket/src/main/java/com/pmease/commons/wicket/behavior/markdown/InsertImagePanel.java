@@ -1,10 +1,12 @@
 package com.pmease.commons.wicket.behavior.markdown;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import javax.annotation.Nullable;
-
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,6 +17,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -22,17 +25,19 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.util.lang.Bytes;
+import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
+import org.apache.wicket.util.upload.FileUploadException;
 
 import com.google.common.collect.Iterables;
-import com.pmease.commons.wicket.ImageUtils;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 
 @SuppressWarnings("serial")
-public class InsertImagePanel extends Panel {
+class InsertImagePanel extends Panel {
 
 	private static final int IMAGE_COLS = 2;
 	
-	private String url = "http://";
+	private String url;
 	
 	private final MarkdownBehavior markdownBehavior;
 	
@@ -45,16 +50,9 @@ public class InsertImagePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Form<?> form = new Form<Void>("form") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				
-			}
-			
-		};
-		form.add(new FeedbackPanel("feedback", form));
+		add(new FeedbackPanel("feedback", this));
+		
+		Form<?> form = new Form<Void>("form");
 		
 		final TextField<String> urlField = new TextField<String>("url", new IModel<String>() {
 
@@ -73,10 +71,12 @@ public class InsertImagePanel extends Panel {
 			}
 			
 		}); 
+		urlField.setOutputMarkupId(true);
 		form.add(urlField);
 		
-		final AttachmentSupport attachmentSupport = getAttachmentSupport();
+		final AttachmentSupport attachmentSupport = markdownBehavior.getAttachmentSupport();
 		if (attachmentSupport != null) {
+			urlField.add(AttributeAppender.append("placeholder", "Input image url here or select image below"));
 			final Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
 			fragment.setOutputMarkupId(true);
 			
@@ -87,7 +87,7 @@ public class InsertImagePanel extends Panel {
 					List<List<String>> rows = new ArrayList<>();
 					List<String> images = new ArrayList<>();
 					for (String attachment: attachmentSupport.getAttachments()) {
-						if (ImageUtils.isWebSafe(attachment))
+						if (markdownBehavior.isWebSafeImage(attachment))
 							images.add(attachment);
 					}
 					for (List<String> row: Iterables.partition(images, IMAGE_COLS)) {
@@ -130,7 +130,17 @@ public class InsertImagePanel extends Panel {
 				
 			});
 			
-			Form<?> fileForm = new Form<Void>("form");
+			Form<?> fileForm = new Form<Void>("form") {
+				
+				@Override
+				protected void onFileUploadException(FileUploadException e, Map<String, Object> model) {
+					if (e instanceof SizeLimitExceededException) 
+					    error("Upload must be less than " + FileUtils.byteCountToDisplaySize(getMaxSize().bytes()));
+				}
+				
+			};
+			fileForm.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
+			fileForm.setMultiPart(true);
 			fragment.add(fileForm);
 			final FileUploadField uploadField = new FileUploadField("file");
 			uploadField.add(new AjaxFormSubmitBehavior("change") {
@@ -138,37 +148,55 @@ public class InsertImagePanel extends Panel {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target) {
 					super.onSubmit(target);
-					if (uploadField.getFileUpload() != null) {
-						attachmentSupport.saveAttachment(uploadField.getFileUpload());
-						target.add(fragment);
+					FileUpload upload = uploadField.getFileUpload();
+					if (upload != null) {
+						String attachment;						
+						try (InputStream is = upload.getInputStream()) {
+							attachment = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						target.add(InsertImagePanel.this);
+						String imageUrl = attachmentSupport.getAttachmentUrl(attachment);						
+						String script = String.format("$('#%s').val('%s');", 
+								urlField.getMarkupId(), 
+								StringEscapeUtils.escapeEcmaScript(imageUrl));
+						target.appendJavaScript(script);
 					}
+				}
+
+				@Override
+				protected void onError(AjaxRequestTarget target) {
+					super.onError(target);
+					target.add(InsertImagePanel.this);
 				}
 				
 			});
 			fileForm.add(uploadField);
 			add(fragment);
 		} else {
+			urlField.add(AttributeAppender.append("placeholder", "Input image url here"));
 			add(new WebMarkupContainer("attachments"));
 		}
 		
-		form.add(new AjaxButton("insert") {
+		add(new AjaxButton("insert", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				if (StringUtils.isBlank(url)) {
-					form.error("Url should not be empty");
-					target.add(form);
+					form.error("Image url should be specified");
+					target.add(InsertImagePanel.this);
 				} else if (!url.startsWith("http://") && !url.startsWith("https://")) {
-					form.error("Url should start with http:// or https://");
-					target.add(form);
+					form.error("Image url should start with http:// or https://");
+					target.add(InsertImagePanel.this);
 				} else {
 					markdownBehavior.insertImage(target, url);
 				}
 			}
 			
 		});
-		form.add(new AjaxLink<Void>("cancel") {
+		add(new AjaxLink<Void>("cancel") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -176,13 +204,9 @@ public class InsertImagePanel extends Panel {
 			}
 			
 		});
-		form.setOutputMarkupId(true);
 		add(form);
-	}
-
-	@Nullable
-	protected AttachmentSupport getAttachmentSupport() {
-		return null;
+		
+		setOutputMarkupId(true);
 	}
 
 }

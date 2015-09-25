@@ -1,19 +1,20 @@
 package com.pmease.commons.wicket.behavior.markdown;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 
-import org.apache.wicket.markup.html.form.upload.FileUpload;
-
 public interface AttachmentSupport extends Serializable {
 	
-	int getAttachmentMaxSize();
+	long getAttachmentMaxSize();
 	
 	List<String> getAttachments();
 	
-	String getAttachmentUrl(String attachment);
+	String getAttachmentUrl(String attachmentName);
 	
-	String saveAttachment(FileUpload upload);
+	String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream);
 	
-	void deleteAttachemnt(String attachment);
+	void deleteAttachemnt(String attachmentName);
+	
+	long getAttachmentSize(String attachmentName);
 }

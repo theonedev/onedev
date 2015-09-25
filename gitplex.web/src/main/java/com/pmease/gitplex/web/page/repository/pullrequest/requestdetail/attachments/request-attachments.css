@@ -1,5 +1,4 @@
-#request-detail>.attachments>.upload>.title {
-	font-size: 17px;
+#request-detail>.attachments>.upload {
 	margin-bottom: 8px;
 }
 #request-detail>.attachments>.upload>form>.feedback {
