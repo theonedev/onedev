@@ -23,6 +23,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -44,7 +45,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 
 	protected static final int ATWHO_LIMIT = 5;
 	
-	private InsertImagePanel imageInserter;
+	private SelectImagePanel imageSelector;
 	
 	@Override
 	protected void respond(AjaxRequestTarget target) {
@@ -133,34 +134,49 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			String script = String.format("pmease.commons.markdown.onEmojisLoaded('%s', %s);", 
 					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
-		} else if (type.equals("insertImage")) {
+		} else if (type.equals("selectImage")) {
 			CommonPage page = (CommonPage) getComponent().getPage();
-			imageInserter = new InsertImagePanel(page.getComponents().newChildId(), this);
-			imageInserter.setOutputMarkupId(true);
-			page.getComponents().add(imageInserter);
-			imageInserter.setMarkupId(getComponent().getMarkupId() + "-imageinserter");
-			target.add(imageInserter);
+			imageSelector = new SelectImagePanel(page.getComponents().newChildId(), this);
+			imageSelector.setOutputMarkupId(true);
+			page.getComponents().add(imageSelector);
+			imageSelector.setMarkupId(getComponent().getMarkupId() + "-imageinserter");
+			target.add(imageSelector);
+		} else if (type.equals("insertImage")) {
+			String attachmentName = params.getParameterValue("param").toString();
+			String attachmentUrl = getAttachmentSupport().getAttachmentUrl(attachmentName);
+			insertImage(target, attachmentUrl);
 		} else {
 			throw new IllegalStateException("Unknown callback type: " + type);
 		}
 	}
 	
 	public void insertImage(AjaxRequestTarget target, String url) {
-		CommonPage page = (CommonPage) imageInserter.getPage();
-		page.getComponents().remove(imageInserter);
-
-		String script = String.format("pmease.commons.markdown.insertImage('%s', '%s');", 
-				getComponent().getMarkupId(), url);
+		String script;
+		if (imageSelector != null) {
+			CommonPage page = (CommonPage) imageSelector.getPage();
+			page.getComponents().remove(imageSelector);
+			imageSelector = null;
+	
+			script = String.format(""
+					+ "pmease.commons.markdown.insertImage('%s', '%s');"
+					+ "$('#%s-imageinserter').closest('.modal').modal('hide');", 
+					getComponent().getMarkupId(), url, getComponent().getMarkupId());
+		} else {
+			script = String.format("pmease.commons.markdown.insertImage('%s', '%s');",
+					getComponent().getMarkupId(), url);
+		}
 		target.appendJavaScript(script);
 	}
 
 	public void cancelInsertImage(AjaxRequestTarget target) {
-		CommonPage page = (CommonPage) imageInserter.getPage();
-		page.getComponents().remove(imageInserter);
-
-		String script = String.format("$('#%s-imageinserter').closest('.modal').modal('hide');", 
-				getComponent().getMarkupId());
-		target.appendJavaScript(script);
+		if (imageSelector != null) {
+			CommonPage page = (CommonPage) imageSelector.getPage();
+			page.getComponents().remove(imageSelector);
+			imageSelector = null;
+			String script = String.format("$('#%s-imageinserter').closest('.modal').modal('hide');", 
+					getComponent().getMarkupId());
+			target.appendJavaScript(script);
+		}
 	}
 	
 	public boolean isWebSafeImage(String fileName) {
@@ -196,14 +212,18 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 		AttachmentSupport attachmentSupport = getAttachmentSupport();
 		if (attachmentSupport != null) {
 			encodedAttachmentSupport = Base64.encodeBase64String(SerializationUtils.serialize(attachmentSupport));
+			encodedAttachmentSupport = StringUtils.deleteWhitespace(encodedAttachmentSupport);
 			encodedAttachmentSupport = StringEscapeUtils.escapeEcmaScript(encodedAttachmentSupport);
 			encodedAttachmentSupport = "'" + encodedAttachmentSupport + "'";
 		} else {
 			encodedAttachmentSupport = "undefined";
 		}
-		String script = String.format("pmease.commons.markdown.init('%s', %s, %s, %s);", 
-				component.getMarkupId(true), ATWHO_LIMIT,
+		String uploadUrl = RequestCycle.get().getUrlRenderer().renderRelativeUrl(Url.parse("attachment_upload"));
+		String script = String.format("pmease.commons.markdown.init('%s', %s, %s, '%s', %s);", 
+				component.getMarkupId(true), 
+				ATWHO_LIMIT,
 				getCallbackFunction(explicit("type"), explicit("param")), 
+				uploadUrl, 
 				encodedAttachmentSupport);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

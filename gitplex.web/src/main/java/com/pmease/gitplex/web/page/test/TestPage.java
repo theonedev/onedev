@@ -10,8 +10,6 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-//		System.out.println(RequestCycle.get().getUrlRenderer().renderRelativeUrl(Url.parse("upload")));
 	}		
 
 	@Override

@@ -16,13 +16,10 @@ public class AttachmentUploadServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String fileName = request.getHeader("File-Name");
-		if (fileName == null) {
-			request.getHeader("Content-Type");
-		}
 		AttachmentSupport attachmentSuppport = (AttachmentSupport) SerializationUtils
 				.deserialize(Base64.decodeBase64(request.getHeader("Attachment-Support")));
 		String attachmentName = attachmentSuppport.saveAttachment(fileName, request.getInputStream());
-		response.getWriter().print(attachmentSuppport.getAttachmentUrl(attachmentName));
+		response.getWriter().print(attachmentName);
 		response.setStatus(HttpServletResponse.SC_OK);
 	}
 	

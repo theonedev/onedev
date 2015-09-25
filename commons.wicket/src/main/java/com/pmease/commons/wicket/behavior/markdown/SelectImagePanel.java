@@ -33,7 +33,7 @@ import com.google.common.collect.Iterables;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 
 @SuppressWarnings("serial")
-class InsertImagePanel extends Panel {
+class SelectImagePanel extends Panel {
 
 	private static final int IMAGE_COLS = 2;
 	
@@ -41,7 +41,7 @@ class InsertImagePanel extends Panel {
 	
 	private final MarkdownBehavior markdownBehavior;
 	
-	public InsertImagePanel(String id, MarkdownBehavior markdownBehavior) {
+	public SelectImagePanel(String id, MarkdownBehavior markdownBehavior) {
 		super(id);
 		this.markdownBehavior = markdownBehavior;
 	}
@@ -156,7 +156,7 @@ class InsertImagePanel extends Panel {
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						target.add(InsertImagePanel.this);
+						target.add(SelectImagePanel.this);
 						String imageUrl = attachmentSupport.getAttachmentUrl(attachment);						
 						String script = String.format("$('#%s').val('%s');", 
 								urlField.getMarkupId(), 
@@ -168,7 +168,7 @@ class InsertImagePanel extends Panel {
 				@Override
 				protected void onError(AjaxRequestTarget target) {
 					super.onError(target);
-					target.add(InsertImagePanel.this);
+					target.add(SelectImagePanel.this);
 				}
 				
 			});
@@ -186,10 +186,10 @@ class InsertImagePanel extends Panel {
 				super.onSubmit(target, form);
 				if (StringUtils.isBlank(url)) {
 					form.error("Image url should be specified");
-					target.add(InsertImagePanel.this);
+					target.add(SelectImagePanel.this);
 				} else if (!url.startsWith("http://") && !url.startsWith("https://")) {
 					form.error("Image url should start with http:// or https://");
-					target.add(InsertImagePanel.this);
+					target.add(SelectImagePanel.this);
 				} else {
 					markdownBehavior.insertImage(target, url);
 				}

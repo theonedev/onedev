@@ -1,8 +1,11 @@
 pmease.commons.markdown = {
-	init: function(inputId, atWhoLimit, callback, attachmentSupport) {
+	init: function(inputId, atWhoLimit, callback, uploadUrl, attachmentSupport) {
 		var $input = $("#" + inputId);
 
 		$input.markdown({
+			onShow: function(e) {
+				$input.data("markdown", e);
+			},
 			onFullscreen: function(e) {
 				$input.trigger("fullscreen");
 			},
@@ -52,7 +55,7 @@ pmease.commons.markdown = {
 		            	   		"<div class='modal'>" +
 		            	   		"<div class='modal-dialog'>" +
 		            	   		"<div class='modal-content'>" +
-		            	   		"<div id='" + inputId + "-imageinserter'></div>" +
+		            	   		"<div id='" + inputId + "-imageselector'></div>" +
 		            	   		"</div>" +
 		            	   		"</div>" +
 		            	   		"</div>");
@@ -61,8 +64,7 @@ pmease.commons.markdown = {
 		            	   $modal.on('hidden.bs.modal', function (e) {
 		            		   $modal.remove();
 		            	   });
-		            	   $modal.data("event", e);
-		            	   callback("insertImage");
+		            	   callback("selectImage");
 		               }
 		           }]			
 			}]], 
@@ -119,7 +121,15 @@ pmease.commons.markdown = {
 					var item = e.clipboardData.items[i];
 					if (item.type.indexOf("image") != -1) {
 						var file = item.getAsFile();
-						uploadFile(file);
+						if (item.type.indexOf("jpeg") != -1 || item.type.indexOf("jpg") != -1)
+							file.name = "clipboard.png";
+						else if (item.type.indexOf("png") != -1)
+							file.name = "clipboard.png";
+						else if (item.type.indexOf("gif") != -1)
+							file.name = "clipboard.gif";
+						
+						if (file.name)
+							uploadFile(file);
 					}
 					break;
 				}
@@ -151,7 +161,7 @@ pmease.commons.markdown = {
 				};
 				xhr.onload = function() {
 					if (xhr.status == 200) {
-						alert("Sucess! Upload completed.\n\n" + xhr.responseText);
+						callback("insertImage", xhr.responseText);
 					} else {
 						alert("Error! Upload failed");
 					}
@@ -159,10 +169,8 @@ pmease.commons.markdown = {
 				xhr.onerror = function() {
 					alert("Error! Upload failed. Can not connect to server.");
 				};
-				xhr.open("POST", url, true);
-				xhr.setRequestHeader("Content-Type", file.type);
-				if (file.name)
-					xhr.setRequestHeader("File-Name", file.name);
+				xhr.open("POST", uploadUrl, true);
+				xhr.setRequestHeader("File-Name", file.name);
 				xhr.setRequestHeader("Attachment-Support", attachmentSupport);
 				xhr.send(file);
 			}
@@ -218,8 +226,7 @@ pmease.commons.markdown = {
 	},
 	
 	insertImage: function(inputId, imageUrl) {
-		var $modal = $("#" + inputId + "-imageinserter").closest(".modal");
-		var e = $modal.data("event");
+		var e = $("#" + inputId).data("markdown");
         // Give ![] surround the selection and prepend the image link
         var chunk, cursor, selected = e.getSelection(), content = e.getContent();
 
@@ -243,6 +250,5 @@ pmease.commons.markdown = {
         	// Set the cursor
         	e.setSelection(cursor,cursor+chunk.length);
         }
-        $modal.modal("hide");
 	}
 }
