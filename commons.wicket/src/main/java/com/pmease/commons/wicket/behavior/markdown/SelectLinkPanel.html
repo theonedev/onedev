@@ -1,6 +1,6 @@
 <wicket:panel>
 	<div class="modal-header">
-		<h4 class="modal-title">Insert Image</h4>
+		<h4 class="modal-title">Insert Link</h4>
 	</div>
 	<div class="modal-body select-url">
 		<div wicket:id="feedback" class="feedback"></div>
@@ -16,22 +16,20 @@
 		<button wicket:id="cancel" class="btn btn-default" type="button">Cancel</button>	
 	</div>
 	<wicket:fragment wicket:id="attachmentsFrag">
-		<div class="attachments">
-			<div wicket:id="rows" class="image-row clearfix">
-				<div wicket:id="columns" class="image-column pull-left">
-				<a wicket:id="link"><img wicket:id="image"></img></a>
-				</div>
-			</div>
-			<div wicket:id="noImages" class="no-images">No uploaded images</div>
-		</div>
+		<ul class="attachments list-unstyled">
+			<li wicket:id="attachments" class="attachment">
+				<a wicket:id="link"><span wicket:id="name"></span></a>
+			</li>
+		</ul>
+		<div wicket:id="noAttachments" class="no-attachments">No uploaded files</div>
 		<form wicket:id="form">
 		    <span class="btn btn-default btn-file">
-		        Select local image (jpeg, png, gif)... <input wicket:id="file" type="file" accept=".png, .jpg, .jpeg, .gif"></input>
+		        Select local file... <input wicket:id="file" type="file"></input>
 		    </span>		
 		</form>
 		<div class="alert alert-info">
-			<i class="fa fa-info-circle"></i> Note: you may drag and drop to insert image directly 
-			without opening this dialog, or paste image from clipboard if using Chrome.    
+			<i class="fa fa-info-circle"></i> Note: you may drag and drop to attach file directly 
+			without opening this dialog.    
 		</div>
 	</wicket:fragment>
 </wicket:panel>

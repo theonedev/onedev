@@ -60,6 +60,8 @@ public class CommentPanel extends GenericPanel<Comment> {
 	
 	private static final String ADD_REPLY_ID = "addReply";
 	
+	private static final String FORM_ID = "form";
+	
 	private RepeatingView repliesView;
 	
 	private final IModel<List<CommentReply>> repliesModel = new LoadableDetachableModel<List<CommentReply>>() {
@@ -113,7 +115,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(BODY_ID, "editFrag", CommentPanel.this);
 
-				Form<?> form = new Form<Void>("form");
+				Form<?> form = new Form<Void>(FORM_ID);
 				fragment.add(form);
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
 
@@ -137,6 +139,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(comment.getContent());
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
+						target.add(head);
 						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
@@ -155,6 +158,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(getComment().getContent());
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
+						target.add(head);
 						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
@@ -163,6 +167,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				fragment.setOutputMarkupId(true);
 				CommentPanel.this.replace(fragment);
 				target.add(fragment);
+				target.add(head);
 				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
 
@@ -170,7 +175,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(SecurityUtils.canModify(getComment()));
+				setVisible(SecurityUtils.canModify(getComment()) && CommentPanel.this.get(BODY_ID).get(FORM_ID) == null);
 			}
 
 		});
@@ -258,7 +263,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				Fragment fragment = new Fragment(CONTENT_ID, "editFrag", CommentPanel.this);
 				row.add(fragment);
 				
-				Form<?> form = new Form<Void>("form");
+				Form<?> form = new Form<Void>(FORM_ID);
 				fragment.add(form);
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
 
@@ -360,16 +365,21 @@ public class CommentPanel extends GenericPanel<Comment> {
 		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
 		avatarColumn.add(new UserLink("avatar", new UserModel(reply.getUser()), AvatarMode.AVATAR));
 		row.add(avatarColumn);
-		row.add(new UserLink("user", new UserModel(reply.getUser()), AvatarMode.NAME));
-		row.add(new Label("age", DateUtils.formatAge(reply.getDate())));
+		
+		final WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
+		row.add(head);
+		
+		head.add(new UserLink("user", new UserModel(reply.getUser()), AvatarMode.NAME));
+		head.add(new Label("age", DateUtils.formatAge(reply.getDate())));
 
-		row.add(new AjaxLink<Void>("edit") {
+		head.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(BODY_ID, "editFrag", CommentPanel.this);
 
-				Form<?> form = new Form<Void>("form");
+				Form<?> form = new Form<Void>(FORM_ID);
 				fragment.add(form);
 				CommentReply reply = (CommentReply) row.getDefaultModelObject();
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
@@ -394,6 +404,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(reply.getContent());
 						row.replace(fragment);
 						target.add(fragment);
+						target.add(head);
 						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
@@ -413,6 +424,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						Fragment fragment = renderForView(reply.getContent());
 						row.replace(fragment);
 						target.add(fragment);
+						target.add(head);
 						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
@@ -421,6 +433,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				fragment.setOutputMarkupId(true);
 				row.replace(fragment);
 				target.add(fragment);
+				target.add(head);
 				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
 
@@ -428,12 +441,12 @@ public class CommentPanel extends GenericPanel<Comment> {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(SecurityUtils.canModify(getComment()));
+				setVisible(SecurityUtils.canModify(getComment()) && row.get(BODY_ID).get(FORM_ID) == null);
 			}
 
 		});
 		
-		row.add(new AjaxLink<Void>("delete") {
+		head.add(new AjaxLink<Void>("delete") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -453,8 +466,8 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
-		row.add(newAdditionalReplyOperations("additionalOperations", (CommentReply) row.getDefaultModelObject()));
-		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "reply" + reply.getId())));		
+		head.add(newAdditionalReplyOperations("additionalOperations", (CommentReply) row.getDefaultModelObject()));
+		head.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "reply" + reply.getId())));		
 		
 		row.add(renderForView(reply.getContent()));
 		

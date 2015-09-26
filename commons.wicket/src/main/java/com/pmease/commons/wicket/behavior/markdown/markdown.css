@@ -85,29 +85,34 @@
 	max-width: 100%;
 }
 
-.select-image .image-info {
+.select-url form.url {
 	margin-bottom: 20px;
 }
-.select-image .thumbnails {
+.select-url .attachments {
 	max-height: 360px;
 	overflow: auto;
 	margin-bottom: 20px;
+	border: 1px solid #CCC;
+	border-radius: 4px;
+	padding: 4px;
 }
-.select-image .thumbnails img {
+.select-url .attachments img {
 	max-width: 265px;
 	max-height: 180px;
 }
-.select-image .image-row {
+.select-url .image-row {
 	margin-bottom: 20px;
 }
-.select-image .image-row:last-child {
+.select-url .image-row:last-child {
 	margin-bottom: 0;
 }
-.select-image .image-column:FIRST-CHILD {
+.select-url .image-column:FIRST-CHILD {
 	margin-right: 20px;
 }
-.select-image .alert {
+.select-url .alert {
 	margin-bottom: 0;
+}
+.select-url .alert-info {
 	margin-top: 20px;
 }
 .md-input.drag-over {

@@ -418,9 +418,8 @@ pmease.commons = {
 		 * called if underlying data has been changed but no form fields are updated, for instance 
 		 * when sorting the elements inside a form. 
 		 */
-		markDirty: function(triggerId) {
-			var $trigger = $("#" + triggerId);
-			$trigger.closest("form.leave-confirm").addClass("dirty").find(".dirty-aware").removeAttr("disabled");
+		markDirty: function($forms) {
+			$forms.addClass("dirty").find(".dirty-aware").removeAttr("disabled");
 		},
 		markClean: function($forms) {
 			$forms.removeClass("dirty").find(".dirty-aware").attr("disabled", "disabled");

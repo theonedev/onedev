@@ -1026,7 +1026,6 @@
         },{
           name: 'cmdImage',
           title: 'Image',
-          hotkey: 'Ctrl+G',
           icon: { glyph: 'glyphicon glyphicon-picture', fa: 'fa fa-picture-o', 'fa-3': 'icon-picture' },
           callback: function(e){
             // Give ![] surround the selection and prepend the image link

@@ -2,6 +2,26 @@ pmease.commons.markdown = {
 	init: function(inputId, atWhoLimit, callback, uploadUrl, attachmentSupport) {
 		var $input = $("#" + inputId);
 
+		function onSelectUrl(isImage) {
+     	   var $modal = $("" +
+       	   		"<div class='modal'>" +
+       	   		"<div class='modal-dialog'>" +
+       	   		"<div class='modal-content'>" +
+       	   		"<div id='" + inputId + "-urlselector'></div>" +
+       	   		"</div>" +
+       	   		"</div>" +
+       	   		"</div>");
+       	   $input.closest("form").after($modal);
+       	   $modal.modal({show: true, backdrop: "static", keyboard: true});
+       	   $modal.on('hidden.bs.modal', function (e) {
+       		   $modal.remove();
+       	   });
+       	   if (isImage)
+       		   callback("selectImage");
+       	   else
+       		   callback("selectLink");
+		}
+		
 		$input.markdown({
 			onFullscreen: function(e) {
 				$input.trigger("fullscreen");
@@ -44,24 +64,20 @@ pmease.commons.markdown = {
 			        	   $input.trigger("resized");
 			           }
 		           }, {
+		        	   name: "cmdURL2",
+		        	   title: "Image",
+		               hotkey: 'Ctrl+L',
+		               icon: "fa fa-link",
+		               callback: function(e){
+		            	   onSelectUrl(false);
+		               }
+		           }, {
 		        	   name: "cmdImage2",
-		        	   title: "Image2",
+		        	   title: "Image",
+		               hotkey: 'Ctrl+G',
 		               icon: "fa fa-picture-o",
 		               callback: function(e){
-		            	   var $modal = $("" +
-		            	   		"<div class='modal'>" +
-		            	   		"<div class='modal-dialog'>" +
-		            	   		"<div class='modal-content'>" +
-		            	   		"<div id='" + inputId + "-imageselector'></div>" +
-		            	   		"</div>" +
-		            	   		"</div>" +
-		            	   		"</div>");
-		            	   $input.after($modal);
-		            	   $modal.modal({show: true, backdrop: "static", keyboard: true});
-		            	   $modal.on('hidden.bs.modal', function (e) {
-		            		   $modal.remove();
-		            	   });
-		            	   callback("selectImage");
+		            	   onSelectUrl(true);
 		               }
 		           }]			
 			}]], 
@@ -81,7 +97,9 @@ pmease.commons.markdown = {
 				"</div>");
 
 		var $btnGroup2 = $input.parent().find(".md-header .btn-group:nth-child(2)");
+		$btnGroup2.find(".fa-link").parent().remove();
 		$btnGroup2.find(".fa-picture-o").parent().remove();
+		$btnGroup2.append($input.parent().find(".md-header .fa-link").parent()); 	
 		$btnGroup2.append($input.parent().find(".md-header .fa-picture-o").parent()); 	
 		$btnGroup2.append($input.parent().find(".md-header .fa-smile-o").parent()); 	
 		
@@ -169,8 +187,8 @@ pmease.commons.markdown = {
 					appendAndSelect("Uploaded: " + percentComplete + "%");
 				};
 				xhr.onload = function() {
-					if (xhr.status == 200)
-						callback("insertImage", xhr.responseText);
+					if (xhr.status == 200) 
+						callback("insertUrl", xhr.responseText);
 					else 
 						appendAndSelect("!!" + xhr.responseText + "!!");
 				};
@@ -233,21 +251,28 @@ pmease.commons.markdown = {
  	   $input.trigger("resized");
 	},
 	
-	insertImage: function(inputId, imageUrl, imageName) {
+	insertUrl: function(inputId, isImage, url, name) {
 		var $input = $("#" + inputId);
 
-    	var sanitizedLink = $('<div>'+imageUrl+'</div>').text();
+    	var sanitizedUrl = $('<div>'+url+'</div>').text();
     	var message;
-    	if (imageName)
-    		message = '!['+imageName+']('+sanitizedLink+')';
+    	var defaultDescription = "Enter description here";
+    	if (name)
+    		message = '['+name+']('+sanitizedUrl+')';
     	else
-    		message = '![image]('+sanitizedLink+')';
+    		message = '[' + defaultDescription + ']('+sanitizedUrl+')';
 
+    	if (isImage)
+    		message = "!" + message;
+    	
     	if ($input.range().length == 0) {
 			$input.caret(message);
 		} else {
 			$input.range(message);
 	    	$input.caret($input.caret()+message.length);
 		}
+    	if (!name)
+    		$input.range($input.caret()-message.length+2, $input.caret()-message.length+defaultDescription.length+2);
+    	pmease.commons.form.markDirty($input.closest("form.leave-confirm"));
 	}
 }

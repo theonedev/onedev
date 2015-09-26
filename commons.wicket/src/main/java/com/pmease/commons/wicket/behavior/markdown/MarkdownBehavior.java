@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket.behavior.markdown;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,7 +19,6 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.*;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -137,27 +138,34 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			SelectImagePanel imageSelector = new SelectImagePanel(page.getComponents().newChildId(), this);
 			imageSelector.setOutputMarkupId(true);
 			page.getComponents().add(imageSelector);
-			imageSelector.setMarkupId(getComponent().getMarkupId() + "-imageselector");
+			imageSelector.setMarkupId(getComponent().getMarkupId() + "-urlselector");
 			target.add(imageSelector);
-		} else if (type.equals("insertImage")) {
-			String imageName = params.getParameterValue("param").toString();
-			String imageUrl = getAttachmentSupport().getAttachmentUrl(imageName);
-			insertImage(target, imageUrl, imageName);
+		} else if (type.equals("selectLink")) {
+			CommonPage page = (CommonPage) getComponent().getPage();
+			SelectLinkPanel linkSelector = new SelectLinkPanel(page.getComponents().newChildId(), this);
+			linkSelector.setOutputMarkupId(true);
+			page.getComponents().add(linkSelector);
+			linkSelector.setMarkupId(getComponent().getMarkupId() + "-urlselector");
+			target.add(linkSelector);
+		} else if (type.equals("insertUrl")) {
+			String name = params.getParameterValue("param").toString();
+			String url = getAttachmentSupport().getAttachmentUrl(name);
+			insertUrl(target, isWebSafeImage(name), url, name);
 		} else {
 			throw new IllegalStateException("Unknown callback type: " + type);
 		}
 	}
 	
-	public void insertImage(AjaxRequestTarget target, String imageUrl, @Nullable String imageName) {
-		String script = String.format("pmease.commons.markdown.insertImage('%s', '%s', %s);",
-				getComponent().getMarkupId(), imageUrl, imageName!=null?"'"+imageName+"'":"undefined");
+	public void insertUrl(AjaxRequestTarget target, boolean isImage, String url, @Nullable String name) {
+		String script = String.format("pmease.commons.markdown.insertUrl('%s', %s, '%s', %s);",
+				getComponent().getMarkupId(), isImage, url, name!=null?"'"+name+"'":"undefined");
 		target.appendJavaScript(script);
 	}
 	
-	public void closeImageSelector(AjaxRequestTarget target, SelectImagePanel imageSelector) {
-		CommonPage page = (CommonPage) imageSelector.getPage();
-		page.getComponents().remove(imageSelector);
-		String script = String.format("$('#%s-imageselector').closest('.modal').modal('hide');", 
+	public void closeUrlSelector(AjaxRequestTarget target, Component urlSelector) {
+		CommonPage page = (CommonPage) urlSelector.getPage();
+		page.getComponents().remove(urlSelector);
+		String script = String.format("$('#%s-urlselector').closest('.modal').modal('hide');", 
 				getComponent().getMarkupId());
 		target.appendJavaScript(script);
 	}

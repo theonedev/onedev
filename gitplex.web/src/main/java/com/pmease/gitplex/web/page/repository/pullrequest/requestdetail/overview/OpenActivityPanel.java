@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -26,6 +27,8 @@ import com.pmease.gitplex.web.utils.DateUtils;
 class OpenActivityPanel extends Panel {
 
 	private static final String BODY_ID = "body";
+	
+	private static final String FORM_ID = "form";
 	
 	private IModel<PullRequest> requestModel;
 	
@@ -51,16 +54,20 @@ class OpenActivityPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserLink("user", new UserModel(requestModel.getObject().getSubmitter()), AvatarMode.NAME));
-		add(new Label("age", DateUtils.formatAge(requestModel.getObject().getCreateDate())));
+		final WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
+		add(head);
 		
-		add(new AjaxLink<Void>("edit") {
+		head.add(new UserLink("user", new UserModel(requestModel.getObject().getSubmitter()), AvatarMode.NAME));
+		head.add(new Label("age", DateUtils.formatAge(requestModel.getObject().getCreateDate())));
+		
+		head.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(BODY_ID, "editFrag", OpenActivityPanel.this);
 				
-				Form<?> form = new Form<Void>("form");
+				Form<?> form = new Form<Void>(FORM_ID);
 				form.setOutputMarkupId(true);
 				fragment.add(form);
 
@@ -85,6 +92,7 @@ class OpenActivityPanel extends Panel {
 						Fragment fragment = renderForView();
 						OpenActivityPanel.this.replace(fragment);
 						target.add(fragment);
+						target.add(head);
 					}
 					
 				});
@@ -96,6 +104,7 @@ class OpenActivityPanel extends Panel {
 						Fragment fragment = renderForView();
 						OpenActivityPanel.this.replace(fragment);
 						target.add(fragment);
+						target.add(head);
 					}
 					
 				});
@@ -103,13 +112,15 @@ class OpenActivityPanel extends Panel {
 				OpenActivityPanel.this.replace(fragment);
 				
 				target.add(fragment);
+				target.add(head);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(SecurityUtils.canModify(requestModel.getObject()));
+				setVisible(SecurityUtils.canModify(requestModel.getObject()) 
+						&& OpenActivityPanel.this.get(BODY_ID).get(FORM_ID) == null);
 			}
 
 		});

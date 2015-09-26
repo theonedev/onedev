@@ -2,7 +2,6 @@ package com.pmease.commons.wicket.behavior.markdown;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +14,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -29,22 +29,19 @@ import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
 import org.apache.wicket.util.upload.FileUploadException;
 
-import com.google.common.collect.Iterables;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 
 @SuppressWarnings("serial")
-class SelectImagePanel extends Panel {
+class SelectLinkPanel extends Panel {
 
-	private static final int IMAGE_COLS = 2;
+	private String linkName;
 	
-	private String imageName;
-	
-	private String imageUrl;
+	private String linkUrl;
 	
 	private final MarkdownBehavior markdownBehavior;
 	
-	public SelectImagePanel(String id, MarkdownBehavior markdownBehavior) {
+	public SelectLinkPanel(String id, MarkdownBehavior markdownBehavior) {
 		super(id);
 		this.markdownBehavior = markdownBehavior;
 	}
@@ -65,12 +62,12 @@ class SelectImagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return imageUrl;
+				return linkUrl;
 			}
 
 			@Override
 			public void setObject(String object) {
-				imageUrl = object;
+				linkUrl = object;
 			}
 			
 		}); 
@@ -78,7 +75,7 @@ class SelectImagePanel extends Panel {
 
 			@Override
 			protected void onInput(AjaxRequestTarget target) {
-				imageName = null;
+				linkName = null;
 			}
 
 		});
@@ -87,63 +84,47 @@ class SelectImagePanel extends Panel {
 		
 		final AttachmentSupport attachmentSupport = markdownBehavior.getAttachmentSupport();
 		if (attachmentSupport != null) {
-			urlField.add(AttributeAppender.append("placeholder", "Input image url here or select image below"));
+			urlField.add(AttributeAppender.append("placeholder", "Input link url here or select link below"));
 			final Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
 			fragment.setOutputMarkupId(true);
 			
-			final IModel<List<List<String>>> rowsModel = new LoadableDetachableModel<List<List<String>>>() {
+			final IModel<List<String>> attachmentsModel = new LoadableDetachableModel<List<String>>() {
 
 				@Override
-				protected List<List<String>> load() {
-					List<List<String>> rows = new ArrayList<>();
-					List<String> images = new ArrayList<>();
-					for (String attachment: attachmentSupport.getAttachments()) {
-						if (markdownBehavior.isWebSafeImage(attachment))
-							images.add(attachment);
-					}
-					for (List<String> row: Iterables.partition(images, IMAGE_COLS)) {
-						rows.add(row);
-					}
-					return rows;
+				protected List<String> load() {
+					return attachmentSupport.getAttachments();
 				}
 				
 			};
-			fragment.add(new ListView<List<String>>("rows", rowsModel) {
+			fragment.add(new ListView<String>("attachments", attachmentsModel) {
 
 				@Override
-				protected void populateItem(ListItem<List<String>> rowItem) {
-					rowItem.add(new ListView<String>("columns", rowItem.getModel()) {
+				protected void populateItem(final ListItem<String> item) {
+					final String imageUrl = attachmentSupport.getAttachmentUrl(item.getModelObject());
+					AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 						@Override
-						protected void populateItem(final ListItem<String> columnItem) {
-							final String imageUrl = attachmentSupport.getAttachmentUrl(columnItem.getModelObject());
-							AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									imageName = columnItem.getModelObject();
-									String script = String.format("$('#%s').val('%s');", 
-											urlField.getMarkupId(), 
-											StringEscapeUtils.escapeEcmaScript(imageUrl));
-									target.appendJavaScript(script);
-								}
-								
-							};
-							link.add(new WebMarkupContainer("image").add(AttributeAppender.append("src", imageUrl)));
-							columnItem.add(link);
+						public void onClick(AjaxRequestTarget target) {
+							linkName = item.getModelObject();
+							String script = String.format("$('#%s').val('%s');", 
+									urlField.getMarkupId(), 
+									StringEscapeUtils.escapeEcmaScript(imageUrl));
+							target.appendJavaScript(script);
 						}
 						
-					});
+					};
+					link.add(new Label("name", item.getModelObject()));
+					item.add(link);
 				}
 				
 			});
-			fragment.add(new WebMarkupContainer("noImages") {
+			fragment.add(new WebMarkupContainer("noAttachments") {
 
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
 					
-					setVisible(rowsModel.getObject().isEmpty());
+					setVisible(attachmentsModel.getObject().isEmpty());
 				}
 				
 			});
@@ -169,15 +150,15 @@ class SelectImagePanel extends Panel {
 					FileUpload upload = uploadField.getFileUpload();
 					if (upload != null) {
 						try (InputStream is = upload.getInputStream()) {
-							imageName = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
+							linkName = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						target.add(SelectImagePanel.this);
-						String imageUrl = attachmentSupport.getAttachmentUrl(imageName);	
+						target.add(SelectLinkPanel.this);
+						String linkUrl = attachmentSupport.getAttachmentUrl(linkName);	
 						String script = String.format("$('#%s').val('%s');", 
 								urlField.getMarkupId(), 
-								StringEscapeUtils.escapeEcmaScript(imageUrl));
+								StringEscapeUtils.escapeEcmaScript(linkUrl));
 						target.appendJavaScript(script);
 					}
 				}
@@ -185,14 +166,14 @@ class SelectImagePanel extends Panel {
 				@Override
 				protected void onError(AjaxRequestTarget target) {
 					super.onError(target);
-					target.add(SelectImagePanel.this);
+					target.add(SelectLinkPanel.this);
 				}
 				
 			});
 			fileForm.add(uploadField);
 			add(fragment);
 		} else {
-			urlField.add(AttributeAppender.append("placeholder", "Input image url here"));
+			urlField.add(AttributeAppender.append("placeholder", "Input link url here"));
 			add(new WebMarkupContainer("attachments"));
 		}
 		
@@ -201,17 +182,17 @@ class SelectImagePanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				if (StringUtils.isBlank(imageUrl)
-						|| imageUrl.startsWith("http://") && imageUrl.length() == 7
-						|| imageUrl.startsWith("https://") && imageUrl.length() == 8) {
-					error("Image url should be specified");
-					target.add(SelectImagePanel.this);
-				} else if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
-					error("Image url should start with http:// or https://");
-					target.add(SelectImagePanel.this);
+				if (StringUtils.isBlank(linkUrl)
+						|| linkUrl.startsWith("http://") && linkUrl.length() == 7
+						|| linkUrl.startsWith("https://") && linkUrl.length() == 8) {
+					error("Link url should be specified");
+					target.add(SelectLinkPanel.this);
+				} else if (!linkUrl.startsWith("http://") && !linkUrl.startsWith("https://")) {
+					error("Link url should start with http:// or https://");
+					target.add(SelectLinkPanel.this);
 				} else {
-					markdownBehavior.insertUrl(target, true, imageUrl, imageName);
-					markdownBehavior.closeUrlSelector(target, SelectImagePanel.this);
+					markdownBehavior.insertUrl(target, false, linkUrl, linkName);
+					markdownBehavior.closeUrlSelector(target, SelectLinkPanel.this);
 				}
 			}
 			
@@ -220,7 +201,7 @@ class SelectImagePanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				markdownBehavior.closeUrlSelector(target, SelectImagePanel.this);
+				markdownBehavior.closeUrlSelector(target, SelectLinkPanel.this);
 			}
 			
 		});

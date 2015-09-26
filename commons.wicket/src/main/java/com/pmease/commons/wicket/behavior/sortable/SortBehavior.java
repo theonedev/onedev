@@ -121,7 +121,9 @@ public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 				.getParameterValue("toItem").toInt();
 		if (fromList != toList || fromItem != toItem) {
 			onSort(target, new SortPosition(fromList, fromItem), new SortPosition(toList, toItem));
-			target.appendJavaScript(String.format("pmease.commons.form.markDirty('%s');", getComponent().getMarkupId(true)));
+			String script = String.format("pmease.commons.form.markDirty($('#%s').closest('form.leave-confirm'));", 
+					getComponent().getMarkupId(true));
+			target.appendJavaScript(script);
 			
 			for (Component each: target.getComponents()) {
 				if (each == getComponent()) {
