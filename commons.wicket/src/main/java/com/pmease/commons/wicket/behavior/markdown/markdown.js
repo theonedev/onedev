@@ -3,9 +3,6 @@ pmease.commons.markdown = {
 		var $input = $("#" + inputId);
 
 		$input.markdown({
-			onShow: function(e) {
-				$input.data("markdown", e);
-			},
 			onFullscreen: function(e) {
 				$input.trigger("fullscreen");
 			},
@@ -136,16 +133,19 @@ pmease.commons.markdown = {
 			});
 			
 			input.addEventListener("dragover", function(e) {
+				$input.addClass("drag-over");
 				e.stopPropagation();
 				e.preventDefault();		
 			}, false);
 			
 			input.addEventListener("dragleave", function(e) {
+				$input.removeClass("drag-over");
 				e.stopPropagation();
 				e.preventDefault();		
 			}, false);
 			
 			input.addEventListener("drop", function(e) {
+				$input.removeClass("drag-over");
 				e.stopPropagation();
 				e.preventDefault();		
 				var files = e.target.files || e.dataTransfer.files;
@@ -153,21 +153,29 @@ pmease.commons.markdown = {
 					uploadFile(files[0]);
 			}, false);
 			
+			function appendAndSelect(message) {
+				if ($input.range().length == 0) {
+					$input.caret(message);
+					$input.range($input.caret()-message.length, $input.caret());
+				} else {
+					$input.range(message);
+				}
+			}
+			
 			function uploadFile(file) {
 				var xhr = new XMLHttpRequest();
 				xhr.upload.onprogress = function(e) {
 					var percentComplete = (e.loaded / e.total) * 100;
-					console.log("Uploaded: " + percentComplete + "%");
+					appendAndSelect("Uploaded: " + percentComplete + "%");
 				};
 				xhr.onload = function() {
-					if (xhr.status == 200) {
+					if (xhr.status == 200)
 						callback("insertImage", xhr.responseText);
-					} else {
-						alert("Error! Upload failed");
-					}
+					else 
+						appendAndSelect("!!" + xhr.responseText + "!!");
 				};
 				xhr.onerror = function() {
-					alert("Error! Upload failed. Can not connect to server.");
+					appendAndSelect("!!Unable to connect to server!!");
 				};
 				xhr.open("POST", uploadUrl, true);
 				xhr.setRequestHeader("File-Name", file.name);
@@ -225,30 +233,21 @@ pmease.commons.markdown = {
  	   $input.trigger("resized");
 	},
 	
-	insertImage: function(inputId, imageUrl) {
-		var e = $("#" + inputId).data("markdown");
-        // Give ![] surround the selection and prepend the image link
-        var chunk, cursor, selected = e.getSelection(), content = e.getContent();
+	insertImage: function(inputId, imageUrl, imageName) {
+		var $input = $("#" + inputId);
 
-        if (selected.length === 0) {
-			// Give extra word
-			chunk = e.__localize('enter image description here');
-        } else {
-        	chunk = selected.text;
-        }
+    	var sanitizedLink = $('<div>'+imageUrl+'</div>').text();
+    	var message;
+    	if (imageName)
+    		message = '!['+imageName+']('+sanitizedLink+')';
+    	else
+    		message = '![image]('+sanitizedLink+')';
 
-        if (imageUrl !== null && imageUrl !== '' && imageUrl !== 'http://' && imageUrl.substr(0,4) === 'http') {
-        	var sanitizedLink = $('<div>'+imageUrl+'</div>').text();
-
-        	// transform selection and set the cursor into chunked text
-        	e.replaceSelection('!['+chunk+']('+sanitizedLink+' "'+e.__localize('enter image title here')+'")');
-        	cursor = selected.start+2;
-
-        	// Set the next tab
-        	e.setNextTab(e.__localize('enter image title here'));
-
-        	// Set the cursor
-        	e.setSelection(cursor,cursor+chunk.length);
-        }
+    	if ($input.range().length == 0) {
+			$input.caret(message);
+		} else {
+			$input.range(message);
+	    	$input.caret($input.caret()+message.length);
+		}
 	}
 }

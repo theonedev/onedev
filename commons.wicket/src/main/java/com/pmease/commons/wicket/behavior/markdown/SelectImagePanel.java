@@ -30,6 +30,7 @@ import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
 import org.apache.wicket.util.upload.FileUploadException;
 
 import com.google.common.collect.Iterables;
+import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 
 @SuppressWarnings("serial")
@@ -37,7 +38,9 @@ class SelectImagePanel extends Panel {
 
 	private static final int IMAGE_COLS = 2;
 	
-	private String url;
+	private String imageName;
+	
+	private String imageUrl;
 	
 	private final MarkdownBehavior markdownBehavior;
 	
@@ -62,15 +65,23 @@ class SelectImagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return url;
+				return imageUrl;
 			}
 
 			@Override
 			public void setObject(String object) {
-				url = object;
+				imageUrl = object;
 			}
 			
 		}); 
+		urlField.add(new FormComponentInputBehavior() {
+
+			@Override
+			protected void onInput(AjaxRequestTarget target) {
+				imageName = null;
+			}
+
+		});
 		urlField.setOutputMarkupId(true);
 		form.add(urlField);
 		
@@ -104,13 +115,20 @@ class SelectImagePanel extends Panel {
 					rowItem.add(new ListView<String>("columns", rowItem.getModel()) {
 
 						@Override
-						protected void populateItem(ListItem<String> columnItem) {
-							String imageUrl = attachmentSupport.getAttachmentUrl(columnItem.getModelObject());
-							WebMarkupContainer link = new WebMarkupContainer("link");
-							String script = String.format("$('#%s').val('%s');", 
-									urlField.getMarkupId(true), 
-									StringEscapeUtils.escapeEcmaScript(imageUrl));
-							link.add(AttributeAppender.append("onclick", script));
+						protected void populateItem(final ListItem<String> columnItem) {
+							final String imageUrl = attachmentSupport.getAttachmentUrl(columnItem.getModelObject());
+							AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									imageName = columnItem.getModelObject();
+									String script = String.format("$('#%s').val('%s');", 
+											urlField.getMarkupId(), 
+											StringEscapeUtils.escapeEcmaScript(imageUrl));
+									target.appendJavaScript(script);
+								}
+								
+							};
 							link.add(new WebMarkupContainer("image").add(AttributeAppender.append("src", imageUrl)));
 							columnItem.add(link);
 						}
@@ -150,14 +168,13 @@ class SelectImagePanel extends Panel {
 					super.onSubmit(target);
 					FileUpload upload = uploadField.getFileUpload();
 					if (upload != null) {
-						String attachment;						
 						try (InputStream is = upload.getInputStream()) {
-							attachment = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
+							imageName = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
 						target.add(SelectImagePanel.this);
-						String imageUrl = attachmentSupport.getAttachmentUrl(attachment);						
+						String imageUrl = attachmentSupport.getAttachmentUrl(imageName);	
 						String script = String.format("$('#%s').val('%s');", 
 								urlField.getMarkupId(), 
 								StringEscapeUtils.escapeEcmaScript(imageUrl));
@@ -184,14 +201,15 @@ class SelectImagePanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				if (StringUtils.isBlank(url)) {
+				if (StringUtils.isBlank(imageUrl)) {
 					form.error("Image url should be specified");
 					target.add(SelectImagePanel.this);
-				} else if (!url.startsWith("http://") && !url.startsWith("https://")) {
+				} else if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
 					form.error("Image url should start with http:// or https://");
 					target.add(SelectImagePanel.this);
 				} else {
-					markdownBehavior.insertImage(target, url);
+					markdownBehavior.insertImage(target, imageUrl, imageName);
+					markdownBehavior.closeImageSelector(target, SelectImagePanel.this);
 				}
 			}
 			
@@ -200,7 +218,7 @@ class SelectImagePanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				markdownBehavior.cancelInsertImage(target);
+				markdownBehavior.closeImageSelector(target, SelectImagePanel.this);
 			}
 			
 		});

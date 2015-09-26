@@ -1,15 +1,12 @@
 package com.pmease.gitplex.web.component.comment;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tika.io.IOUtils;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -23,6 +20,8 @@ import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.resource.AttachmentResource;
 import com.pmease.gitplex.web.resource.AttachmentResourceReference;
+
+import jersey.repackaged.com.google.common.base.Throwables;
 
 public class CommentAttachmentSupport implements AttachmentSupport {
 
@@ -98,12 +97,29 @@ public class CommentAttachmentSupport implements AttachmentSupport {
 			index++;
 		}
 		
+		Exception ex = null;
 		File file = new File(attachmentsDir, attachmentName);
-		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
-			IOUtils.copy(attachmentStream, os);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		try (OutputStream os = new FileOutputStream(file)) {
+			byte[] buffer = new byte[BUFFER_SIZE];
+	        long count = 0;
+	        int n = 0;
+	        while (-1 != (n = attachmentStream.read(buffer))) {
+	            count += n;
+		        if (count > getAttachmentMaxSize()) {
+		        	throw new RuntimeException("Upload must be less than " 
+		        			+ FileUtils.byteCountToDisplaySize(getAttachmentMaxSize()));
+		        }
+	            os.write(buffer, 0, n);
+	        }
+		} catch (Exception e) {
+			ex = e;
 		} 
-		return file.getName();
+		if (ex != null) {
+			if (file.exists())
+				FileUtils.deleteFile(file);
+			throw Throwables.propagate(ex);
+		} else {
+			return file.getName();
+		}
 	}
 }

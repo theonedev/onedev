@@ -45,8 +45,6 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 
 	protected static final int ATWHO_LIMIT = 5;
 	
-	private SelectImagePanel imageSelector;
-	
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
@@ -136,47 +134,32 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			target.appendJavaScript(script);
 		} else if (type.equals("selectImage")) {
 			CommonPage page = (CommonPage) getComponent().getPage();
-			imageSelector = new SelectImagePanel(page.getComponents().newChildId(), this);
+			SelectImagePanel imageSelector = new SelectImagePanel(page.getComponents().newChildId(), this);
 			imageSelector.setOutputMarkupId(true);
 			page.getComponents().add(imageSelector);
-			imageSelector.setMarkupId(getComponent().getMarkupId() + "-imageinserter");
+			imageSelector.setMarkupId(getComponent().getMarkupId() + "-imageselector");
 			target.add(imageSelector);
 		} else if (type.equals("insertImage")) {
-			String attachmentName = params.getParameterValue("param").toString();
-			String attachmentUrl = getAttachmentSupport().getAttachmentUrl(attachmentName);
-			insertImage(target, attachmentUrl);
+			String imageName = params.getParameterValue("param").toString();
+			String imageUrl = getAttachmentSupport().getAttachmentUrl(imageName);
+			insertImage(target, imageUrl, imageName);
 		} else {
 			throw new IllegalStateException("Unknown callback type: " + type);
 		}
 	}
 	
-	public void insertImage(AjaxRequestTarget target, String url) {
-		String script;
-		if (imageSelector != null) {
-			CommonPage page = (CommonPage) imageSelector.getPage();
-			page.getComponents().remove(imageSelector);
-			imageSelector = null;
-	
-			script = String.format(""
-					+ "pmease.commons.markdown.insertImage('%s', '%s');"
-					+ "$('#%s-imageinserter').closest('.modal').modal('hide');", 
-					getComponent().getMarkupId(), url, getComponent().getMarkupId());
-		} else {
-			script = String.format("pmease.commons.markdown.insertImage('%s', '%s');",
-					getComponent().getMarkupId(), url);
-		}
+	public void insertImage(AjaxRequestTarget target, String imageUrl, @Nullable String imageName) {
+		String script = String.format("pmease.commons.markdown.insertImage('%s', '%s', %s);",
+				getComponent().getMarkupId(), imageUrl, imageName!=null?"'"+imageName+"'":"undefined");
 		target.appendJavaScript(script);
 	}
-
-	public void cancelInsertImage(AjaxRequestTarget target) {
-		if (imageSelector != null) {
-			CommonPage page = (CommonPage) imageSelector.getPage();
-			page.getComponents().remove(imageSelector);
-			imageSelector = null;
-			String script = String.format("$('#%s-imageinserter').closest('.modal').modal('hide');", 
-					getComponent().getMarkupId());
-			target.appendJavaScript(script);
-		}
+	
+	public void closeImageSelector(AjaxRequestTarget target, SelectImagePanel imageSelector) {
+		CommonPage page = (CommonPage) imageSelector.getPage();
+		page.getComponents().remove(imageSelector);
+		String script = String.format("$('#%s-imageselector').closest('.modal').modal('hide');", 
+				getComponent().getMarkupId());
+		target.appendJavaScript(script);
 	}
 	
 	public boolean isWebSafeImage(String fileName) {
