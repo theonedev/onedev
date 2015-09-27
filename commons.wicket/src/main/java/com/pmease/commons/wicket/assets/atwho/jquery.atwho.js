@@ -172,6 +172,8 @@ App = (function() {
       case KEY_CODE.ESC:
         e.preventDefault();
         if ((_ref = this.controller()) != null) {
+            if (_ref.view.visible())
+          	  this.$inputor.data("ignoreEsc", true);
           _ref.view.hide();
         }
         break;
@@ -201,6 +203,7 @@ App = (function() {
       case KEY_CODE.ESC:
         e.preventDefault();
         view.hide(e);
+        this.$inputor.data("ignoreEsc", true);
         break;
       case KEY_CODE.UP:
         e.preventDefault();

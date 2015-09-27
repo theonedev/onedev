@@ -786,7 +786,10 @@
           blocked = false;
           break;
         case 27: // escape
-          if (this.$isFullscreen) this.setFullscreen(false);
+	    	if (this.$element.data("ignoreEsc"))
+	    		this.$element.data("ignoreEsc", false);
+	    	else if (this.$isFullscreen) 
+	    		this.setFullscreen(false);
           blocked = false;
           break;
 

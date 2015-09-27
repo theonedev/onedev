@@ -17,6 +17,14 @@ pmease.commons.markdown = {
        		   $modal.remove();
        		   $input.focus();
        	   });
+       	   $modal.keydown(function(e) {
+       		   if (e.keyCode == 27)
+       			   $input.data("ignoreEsc", true);
+       	   });
+       	   $modal.keyup(function(e) {
+       		   if (e.keyCode == 27)
+       			   $input.data("ignoreEsc", true);
+       	   });
        	   if (isImage)
        		   callback("selectImage");
        	   else
