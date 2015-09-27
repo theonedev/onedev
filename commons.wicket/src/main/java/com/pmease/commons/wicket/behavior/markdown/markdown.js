@@ -17,7 +17,7 @@ pmease.commons.markdown = {
        		   $input.focus();
        	   });
        	   $modal.keydown(function(e) {
-       		   if (e.keyCode == 27)
+       		   if (e.keyCode == 27) 
        			   $input.data("ignoreEsc", true);
        	   });
        	   $modal.keyup(function(e) {
@@ -34,7 +34,7 @@ pmease.commons.markdown = {
 			onShow: function(e) {
 				var $mdEditor = $input.closest(".md-editor");
 				$mdEditor.attr("tabindex", "0");
-				$mdEditor.bind("keydown", "Alt+P", function(e) {
+				$mdEditor.bind("keydown", "Ctrl+E", function(e) {
 					$mdEditor.find(">.md-header .fa-search").parent().click();
 					e.preventDefault();
 					e.stopPropagation();
@@ -91,7 +91,7 @@ pmease.commons.markdown = {
 		           }, {
 		        	   name: "cmdURL2",
 		        	   title: "Image",
-		               hotkey: 'Alt+L',
+		               hotkey: 'Ctrl+L',
 		               icon: "fa fa-link",
 		               callback: function(e){
 		            	   onSelectUrl(false);
@@ -99,7 +99,7 @@ pmease.commons.markdown = {
 		           }, {
 		        	   name: "cmdImage2",
 		        	   title: "Image",
-		               hotkey: 'Alt+G',
+		               hotkey: 'Ctrl+G',
 		               icon: "fa fa-picture-o",
 		               callback: function(e){
 		            	   onSelectUrl(true);
@@ -161,15 +161,15 @@ pmease.commons.markdown = {
 					var item = e.clipboardData.items[i];
 					if (item.type.indexOf("image") != -1) {
 						var file = item.getAsFile();
-						if (item.type.indexOf("jpeg") != -1 || item.type.indexOf("jpg") != -1)
-							file.name = "clipboard.png";
-						else if (item.type.indexOf("png") != -1)
-							file.name = "clipboard.png";
-						else if (item.type.indexOf("gif") != -1)
-							file.name = "clipboard.gif";
-						
-						if (file.name)
-							uploadFile(file);
+						if (!file.name) {
+							if (item.type.indexOf("png") != -1)
+								file.name = "image.png";
+							else if (item.type.indexOf("gif") != -1)
+								file.name = "image.gif";
+							else
+								file.name = "image.jpg";
+						}
+						uploadFile(file);
 						break;
 					}
 				}

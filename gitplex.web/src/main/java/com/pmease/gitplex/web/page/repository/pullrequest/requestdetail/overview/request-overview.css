@@ -5,13 +5,14 @@
 #request-detail .activities>table {
 	margin-bottom: 20px; 
 	border-bottom: 1px solid #E5E5E5;
+	table-layout: fixed;
 }
 #request-detail .activities>table>tbody>tr.discussion>td {
 	border-top: 1px solid #E5E5E5; 
 	padding: 12px 0;
 }
 #request-detail .activities>table>tbody>tr.discussion>td.avatar {
-	width: 1px; 
+	width: 40px; 
 }
 #request-detail .activities>table>tbody>tr.discussion>td.detail {
 	padding-left: 12px;
