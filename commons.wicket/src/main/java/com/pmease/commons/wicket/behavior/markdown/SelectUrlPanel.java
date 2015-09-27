@@ -114,7 +114,7 @@ class SelectUrlPanel extends Panel {
 			final Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
 			fragment.setOutputMarkupId(true);
 			
-			final IModel<List<String>> attachmentsModel = new LoadableDetachableModel<List<String>>() {
+			fragment.add(new ListView<String>("attachments", new LoadableDetachableModel<List<String>>() {
 
 				@Override
 				protected List<String> load() {
@@ -126,8 +126,7 @@ class SelectUrlPanel extends Panel {
 					return attachmentNames;
 				}
 				
-			};
-			fragment.add(new ListView<String>("attachments", attachmentsModel) {
+			}) {
 
 				@Override
 				protected void populateItem(final ListItem<String> item) {
@@ -153,15 +152,11 @@ class SelectUrlPanel extends Panel {
 						
 					}.setEscapeModelStrings(false));
 				}
-				
-			});
-			fragment.add(new WebMarkupContainer("noAttachments") {
 
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					
-					setVisible(attachmentsModel.getObject().isEmpty());
+					setVisible(!getModelObject().isEmpty());
 				}
 				
 			});

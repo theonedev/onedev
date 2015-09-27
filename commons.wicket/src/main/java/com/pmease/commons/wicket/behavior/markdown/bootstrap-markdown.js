@@ -916,7 +916,7 @@
         name: 'groupFont',
         data: [{
           name: 'cmdBold',
-          hotkey: 'Ctrl+B',
+          hotkey: 'Alt+B',
           title: 'Bold',
           icon: { glyph: 'glyphicon glyphicon-bold', fa: 'fa fa-bold', 'fa-3': 'icon-bold' },
           callback: function(e){
@@ -947,7 +947,7 @@
         },{
           name: 'cmdItalic',
           title: 'Italic',
-          hotkey: 'Ctrl+I',
+          hotkey: 'Alt+I',
           icon: { glyph: 'glyphicon glyphicon-italic', fa: 'fa fa-italic', 'fa-3': 'icon-italic' },
           callback: function(e){
             // Give/remove * surround the selection
@@ -977,7 +977,7 @@
         },{
           name: 'cmdHeading',
           title: 'Heading',
-          hotkey: 'Ctrl+H',
+          hotkey: 'Alt+H',
           icon: { glyph: 'glyphicon glyphicon-header', fa: 'fa fa-header', 'fa-3': 'icon-font' },
           callback: function(e){
             // Append/remove ### surround the selection
@@ -1014,7 +1014,7 @@
         data: [{
           name: 'cmdUrl',
           title: 'URL/Link',
-          hotkey: 'Ctrl+L',
+          hotkey: 'Alt+L',
           icon: { glyph: 'glyphicon glyphicon-link', fa: 'fa fa-link', 'fa-3': 'icon-link' },
           callback: function(e){
             // Give [] surround the selection and prepend the link
@@ -1043,7 +1043,7 @@
         },{
           name: 'cmdImage',
           title: 'Image',
-          hotkey: 'Ctrl+G',
+          hotkey: 'Alt+G',
           icon: { glyph: 'glyphicon glyphicon-picture', fa: 'fa fa-picture-o', 'fa-3': 'icon-picture' },
           callback: function(e){
             // Give ![] surround the selection and prepend the image link
@@ -1077,7 +1077,7 @@
         name: 'groupMisc',
         data: [{
           name: 'cmdList',
-          hotkey: 'Ctrl+U',
+          hotkey: 'Alt+U',
           title: 'Unordered List',
           icon: { glyph: 'glyphicon glyphicon-list', fa: 'fa fa-list', 'fa-3': 'icon-list-ul' },
           callback: function(e){
@@ -1123,7 +1123,7 @@
         },
         {
           name: 'cmdListO',
-          hotkey: 'Ctrl+O',
+          hotkey: 'Alt+O',
           title: 'Ordered List',
           icon: { glyph: 'glyphicon glyphicon-th-list', fa: 'fa fa-list-ol', 'fa-3': 'icon-list-ol' },
           callback: function(e) {
@@ -1169,7 +1169,7 @@
         },
         {
           name: 'cmdCode',
-          hotkey: 'Ctrl+K',
+          hotkey: 'Alt+K',
           title: 'Code',
           icon: { glyph: 'glyphicon glyphicon-asterisk', fa: 'fa fa-code', 'fa-3': 'icon-code' },
           callback: function(e) {
@@ -1208,7 +1208,7 @@
         },
         {
           name: 'cmdQuote',
-          hotkey: 'Ctrl+Q',
+          hotkey: 'Alt+Q',
           title: 'Quote',
           icon: { glyph: 'glyphicon glyphicon-comment', fa: 'fa fa-quote-left', 'fa-3': 'icon-quote-left' },
           callback: function(e) {
@@ -1258,7 +1258,7 @@
         data: [{
           name: 'cmdPreview',
           toggle: true,
-          hotkey: 'Ctrl+P',
+          hotkey: 'Alt+P',
           title: 'Preview',
           btnText: 'Preview',
           btnClass: 'btn btn-primary btn-sm',

@@ -34,16 +34,18 @@ pmease.commons.markdown = {
 			onShow: function(e) {
 				var $mdEditor = $input.closest(".md-editor");
 				$mdEditor.attr("tabindex", "0");
-				$mdEditor.bind("keydown", "Ctrl+P", function(e) {
+				$mdEditor.bind("keydown", "Alt+P", function(e) {
 					$mdEditor.find(">.md-header .fa-search").parent().click();
 					e.preventDefault();
-				});
+					e.stopPropagation();
+			 	});
 				$input.bind("keydown", "F11", function(e) {
 					if ($mdEditor.hasClass("md-fullscreen-mode"))
 						$mdEditor.find(".exit-fullscreen").click();
 					else
 						$mdEditor.find(".md-control-fullscreen").click();
 					e.preventDefault();
+					e.stopPropagation();
 				});
 			},
 			onFullscreen: function(e) {
@@ -89,7 +91,7 @@ pmease.commons.markdown = {
 		           }, {
 		        	   name: "cmdURL2",
 		        	   title: "Image",
-		               hotkey: 'Ctrl+L',
+		               hotkey: 'Alt+L',
 		               icon: "fa fa-link",
 		               callback: function(e){
 		            	   onSelectUrl(false);
@@ -97,7 +99,7 @@ pmease.commons.markdown = {
 		           }, {
 		        	   name: "cmdImage2",
 		        	   title: "Image",
-		               hotkey: 'Ctrl+G',
+		               hotkey: 'Alt+G',
 		               icon: "fa fa-picture-o",
 		               callback: function(e){
 		            	   onSelectUrl(true);

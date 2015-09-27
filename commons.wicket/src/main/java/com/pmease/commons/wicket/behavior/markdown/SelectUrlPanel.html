@@ -14,12 +14,13 @@
 		<div wicket:id="attachments"></div>
 	</div>
 	<wicket:fragment wicket:id="attachmentsFrag">
+		<wicket:enclosure child="attachments">
 		<ul class="attachments list-unstyled">
 			<li wicket:id="attachments" class="attachment selectable">
 				<a wicket:id="link"></a>
 			</li>
 		</ul>
-		<div wicket:id="noAttachments" class="no-attachments">No uploaded files</div>
+		</wicket:enclosure>
 		<form wicket:id="form">
 			<div wicket:id="feedback" class="feedback"></div>
 		    <span class="btn btn-default btn-file">
