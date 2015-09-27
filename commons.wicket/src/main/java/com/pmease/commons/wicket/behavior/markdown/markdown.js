@@ -1,7 +1,6 @@
 pmease.commons.markdown = {
 	init: function(inputId, atWhoLimit, callback, uploadUrl, attachmentSupport) {
 		var $input = $("#" + inputId);
-
 		function onSelectUrl(isImage) {
      	   var $modal = $("" +
        	   		"<div class='modal'>" +
@@ -32,6 +31,21 @@ pmease.commons.markdown = {
 		}
 		
 		$input.markdown({
+			onShow: function(e) {
+				var $mdEditor = $input.closest(".md-editor");
+				$mdEditor.attr("tabindex", "0");
+				$mdEditor.bind("keydown", "Ctrl+P", function(e) {
+					$mdEditor.find(">.md-header .fa-search").parent().click();
+					e.preventDefault();
+				});
+				$input.bind("keydown", "F11", function(e) {
+					if ($mdEditor.hasClass("md-fullscreen-mode"))
+						$mdEditor.find(".exit-fullscreen").click();
+					else
+						$mdEditor.find(".md-control-fullscreen").click();
+					e.preventDefault();
+				});
+			},
 			onFullscreen: function(e) {
 				$input.trigger("fullscreen");
 			},
