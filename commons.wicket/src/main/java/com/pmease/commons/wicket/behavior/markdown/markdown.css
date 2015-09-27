@@ -49,6 +49,10 @@
 	display: none;
 }
 
+/* original value is 99999 which will hide image/link dialogs */
+.md-editor.md-fullscreen-mode {
+    z-index: 100 !important;
+}
 .md-editor .md-preview {
 	padding: 8px;
 }
@@ -88,8 +92,11 @@
 .select-url form.url {
 	margin-bottom: 20px;
 }
+.select-url input.url {
+	width: 500px;
+}
 .select-url .attachments {
-	max-height: 360px;
+	max-height: 300px;
 	overflow: auto;
 	margin-bottom: 20px;
 	border: 1px solid #CCC;
@@ -97,17 +104,7 @@
 	padding: 4px;
 }
 .select-url .attachments img {
-	max-width: 265px;
-	max-height: 180px;
-}
-.select-url .image-row {
-	margin-bottom: 20px;
-}
-.select-url .image-row:last-child {
-	margin-bottom: 0;
-}
-.select-url .image-column:FIRST-CHILD {
-	margin-right: 20px;
+	max-width: 100%;
 }
 .select-url .alert {
 	margin-bottom: 0;

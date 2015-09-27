@@ -2,6 +2,7 @@ package com.pmease.commons.wicket.behavior.markdown;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +14,9 @@ import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -25,34 +27,35 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
 import org.apache.wicket.util.upload.FileUploadException;
 
-import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 
 @SuppressWarnings("serial")
-class SelectLinkPanel extends Panel {
+class SelectUrlPanel extends Panel {
 
-	private String linkName;
-	
-	private String linkUrl;
+	private String url;
 	
 	private final MarkdownBehavior markdownBehavior;
 	
-	public SelectLinkPanel(String id, MarkdownBehavior markdownBehavior) {
+	private final boolean isImage;
+	
+	public SelectUrlPanel(String id, MarkdownBehavior markdownBehavior, boolean isImage) {
 		super(id);
 		this.markdownBehavior = markdownBehavior;
+		this.isImage = isImage;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new FeedbackPanel("feedback", this));
-		
-		Form<?> form = new Form<Void>("form");
+		Form<?> urlForm = new Form<Void>("form");
+		add(urlForm);
+		urlForm.add(new FeedbackPanel("feedback", urlForm));
 		
 		final TextField<String> urlField = new TextField<String>("url", new IModel<String>() {
 
@@ -62,29 +65,52 @@ class SelectLinkPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return linkUrl;
+				return url;
 			}
 
 			@Override
 			public void setObject(String object) {
-				linkUrl = object;
+				url = object;
 			}
 			
-		}); 
-		urlField.add(new FormComponentInputBehavior() {
+		}) {
 
 			@Override
-			protected void onInput(AjaxRequestTarget target) {
-				linkName = null;
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				String script = String.format("$('#%s').closest('.select-url').bind('keydown', 'esc', function(e) {console.log('esc');e.preventDefault(); return false;});", getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
-
-		});
+			
+		}; 
 		urlField.setOutputMarkupId(true);
-		form.add(urlField);
+		urlForm.add(urlField);
+		
+		urlForm.add(new AjaxButton("insert", urlForm) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				if (StringUtils.isBlank(url)
+						|| url.startsWith("http://") && url.length() == 7
+						|| url.startsWith("https://") && url.length() == 8) {
+					error("Url should be specified");
+					target.add(SelectUrlPanel.this);
+				} else if (!url.startsWith("http://") && !url.startsWith("https://")) {
+					error("Url should start with http:// or https://");
+					target.add(SelectUrlPanel.this);
+				} else {
+					markdownBehavior.insertUrl(target, isImage, url, null);
+					markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
+				}
+			}
+			
+		});
 		
 		final AttachmentSupport attachmentSupport = markdownBehavior.getAttachmentSupport();
 		if (attachmentSupport != null) {
-			urlField.add(AttributeAppender.append("placeholder", "Input link url here or select link below"));
+			urlField.add(AttributeAppender.append("placeholder", "Input url here or select below"));
 			final Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
 			fragment.setOutputMarkupId(true);
 			
@@ -92,7 +118,12 @@ class SelectLinkPanel extends Panel {
 
 				@Override
 				protected List<String> load() {
-					return attachmentSupport.getAttachments();
+					List<String> attachmentNames = new ArrayList<>();
+					for (String attachmentName: attachmentSupport.getAttachments()) {
+						if (!isImage || markdownBehavior.isWebSafeImage(attachmentName))
+							attachmentNames.add(attachmentName);
+					}
+					return attachmentNames;
 				}
 				
 			};
@@ -100,21 +131,27 @@ class SelectLinkPanel extends Panel {
 
 				@Override
 				protected void populateItem(final ListItem<String> item) {
-					final String imageUrl = attachmentSupport.getAttachmentUrl(item.getModelObject());
-					AjaxLink<Void> link = new AjaxLink<Void>("link") {
+					final String attachmentName = item.getModelObject();
+					final String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
+					item.add(new AjaxLink<Void>("link") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							linkName = item.getModelObject();
-							String script = String.format("$('#%s').val('%s');", 
-									urlField.getMarkupId(), 
-									StringEscapeUtils.escapeEcmaScript(imageUrl));
-							target.appendJavaScript(script);
+							markdownBehavior.insertUrl(target, isImage, attachmentUrl, attachmentName);
+							markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
+						}
+
+						@Override
+						public IModel<?> getBody() {
+							String body;
+							if (isImage) 
+								body = "<img src='" + StringEscapeUtils.escapeHtml4(attachmentUrl) + "'></img>";
+							else 
+								body = "<span>" + StringEscapeUtils.escapeHtml4(item.getModelObject()) + "<span>";
+							return Model.of(body);
 						}
 						
-					};
-					link.add(new Label("name", item.getModelObject()));
-					item.add(link);
+					}.setEscapeModelStrings(false));
 				}
 				
 			});
@@ -138,6 +175,7 @@ class SelectLinkPanel extends Panel {
 				}
 				
 			};
+			fileForm.add(new FeedbackPanel("feedback", fileForm));
 			fileForm.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
 			fileForm.setMultiPart(true);
 			fragment.add(fileForm);
@@ -149,63 +187,40 @@ class SelectLinkPanel extends Panel {
 					super.onSubmit(target);
 					FileUpload upload = uploadField.getFileUpload();
 					if (upload != null) {
+						String attachmentName;
 						try (InputStream is = upload.getInputStream()) {
-							linkName = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
+							attachmentName = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						target.add(SelectLinkPanel.this);
-						String linkUrl = attachmentSupport.getAttachmentUrl(linkName);	
-						String script = String.format("$('#%s').val('%s');", 
-								urlField.getMarkupId(), 
-								StringEscapeUtils.escapeEcmaScript(linkUrl));
-						target.appendJavaScript(script);
+						markdownBehavior.insertUrl(target, isImage, 
+								attachmentSupport.getAttachmentUrl(attachmentName), attachmentName);
+						markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
 					}
 				}
 
 				@Override
 				protected void onError(AjaxRequestTarget target) {
 					super.onError(target);
-					target.add(SelectLinkPanel.this);
+					target.add(SelectUrlPanel.this);
 				}
 				
 			});
 			fileForm.add(uploadField);
 			add(fragment);
 		} else {
-			urlField.add(AttributeAppender.append("placeholder", "Input link url here"));
+			urlField.add(AttributeAppender.append("placeholder", "Input url here"));
 			add(new WebMarkupContainer("attachments"));
 		}
 		
-		add(new AjaxButton("insert", form) {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				if (StringUtils.isBlank(linkUrl)
-						|| linkUrl.startsWith("http://") && linkUrl.length() == 7
-						|| linkUrl.startsWith("https://") && linkUrl.length() == 8) {
-					error("Link url should be specified");
-					target.add(SelectLinkPanel.this);
-				} else if (!linkUrl.startsWith("http://") && !linkUrl.startsWith("https://")) {
-					error("Link url should start with http:// or https://");
-					target.add(SelectLinkPanel.this);
-				} else {
-					markdownBehavior.insertUrl(target, false, linkUrl, linkName);
-					markdownBehavior.closeUrlSelector(target, SelectLinkPanel.this);
-				}
-			}
-			
-		});
-		add(new AjaxLink<Void>("cancel") {
+		add(new AjaxLink<Void>("close") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				markdownBehavior.closeUrlSelector(target, SelectLinkPanel.this);
+				markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
 			}
 			
 		});
-		add(form);
 		
 		setOutputMarkupId(true);
 	}

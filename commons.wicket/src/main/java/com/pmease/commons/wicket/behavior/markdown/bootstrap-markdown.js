@@ -1,8 +1,8 @@
 /* ===================================================
- * bootstrap-markdown.js v2.8.0
+ * bootstrap-markdown.js v2.9.0
  * http://github.com/toopay/bootstrap-markdown
  * ===================================================
- * Copyright 2013-2014 Taufan Aditya
+ * Copyright 2013-2015 Taufan Aditya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,8 @@
         .on('focus',    $.proxy(this.focus, this))
         .on('keypress', $.proxy(this.keypress, this))
         .on('keyup',    $.proxy(this.keyup, this))
-        .on('change',   $.proxy(this.change, this));
+        .on('change',   $.proxy(this.change, this))
+        .on('select',   $.proxy(this.select, this));
 
       if (this.eventSupported('keydown')) {
         this.$textarea.on('keydown', $.proxy(this.keydown, this));
@@ -218,7 +219,9 @@
     } else {
       $editor.removeClass('md-fullscreen-mode');
       $('body').removeClass('md-nooverflow');
-      this.$options.onExitFullscreen(this);
+
+      if (this.$isPreview == true) this.hidePreview().showPreview()
+      this.$options.onExitFullscreen(this);      
     }
 
     this.$isFullscreen = mode;
@@ -416,11 +419,10 @@
       }
 
       if (options.fullscreen.enable && options.fullscreen !== false) {
-        this.$editor.append('\
-          <div class="md-fullscreen-controls">\
-            <a href="#" class="exit-fullscreen" title="Exit fullscreen"><span class="'+this.__getIcon(options.fullscreen.icons.fullscreenOff)+'"></span></a>\
-          </div>');
-
+        this.$editor.append('<div class="md-fullscreen-controls">'
+                        + '<a href="#" class="exit-fullscreen" title="Exit fullscreen"><span class="' + this.__getIcon(options.fullscreen.icons.fullscreenOff) + '">'
+                        + '</span></a>'
+                        + '</div>');
         this.$editor.on('click', '.exit-fullscreen', function(e) {
           e.preventDefault();
           instance.setFullscreen(false);
@@ -445,7 +447,9 @@
       // parse with supported markdown parser
       var val = val || this.$textarea.val();
 
-      if (typeof markdown == 'object') {
+      if (this.$options.parser) {
+        content = this.$options.parser(val);
+      } else if (typeof markdown == 'object') {
         content = markdown.toHTML(val);
       } else if (typeof marked == 'function') {
         content = marked(val);
@@ -464,6 +468,12 @@
           content,
           callbackContent;
 
+      if (this.$isPreview == true) {
+        // Avoid sequenced element creation on missused scenario
+        // @see https://github.com/toopay/bootstrap-markdown/issues/170
+        return this;
+      }
+      
       // Give flag that tell the editor enter preview mode
       this.$isPreview = true;
       // Disable all buttons
@@ -796,7 +806,10 @@
       this.$options.onChange(this);
       return this;
     }
-
+  , select: function (e) {
+      this.$options.onSelect(this);
+      return this;
+    }
   , focus: function (e) {
       var options = this.$options,
           isHideable = options.hideable,
@@ -841,7 +854,7 @@
             // Build the original element
             var oldElement = $('<'+editable.type+'/>'),
                 content = this.getContent(),
-                currentContent = (typeof markdown == 'object') ? markdown.toHTML(content) : content;
+                currentContent = this.parseContent(content);
 
             $(editable.attrKeys).each(function(k,v) {
               oldElement.attr(editable.attrKeys[k],editable.attrValues[k]);
@@ -885,13 +898,14 @@
     /* Editor Properties */
     autofocus: false,
     hideable: false,
-    savable:false,
+    savable: false,
     width: 'inherit',
     height: 'inherit',
     resize: 'none',
     iconlibrary: 'glyph',
     language: 'en',
     initialstate: 'editor',
+    parser: null,
 
     /* Buttons Properties */
     buttons: [
@@ -1026,6 +1040,7 @@
         },{
           name: 'cmdImage',
           title: 'Image',
+          hotkey: 'Ctrl+G',
           icon: { glyph: 'glyphicon glyphicon-picture', fa: 'fa fa-picture-o', 'fa-3': 'icon-picture' },
           callback: function(e){
             // Give ![] surround the selection and prepend the image link
@@ -1288,7 +1303,8 @@
     onFocus: function (e) {},
     onChange: function(e) {},
     onFullscreen: function(e) {},
-    onExitFullscreen: function(e) {}
+    onExitFullscreen: function(e) {},    
+    onSelect: function (e) {}
   };
 
   $.fn.markdown.Constructor = Markdown;

@@ -1,28 +1,27 @@
 <wicket:panel>
 	<div class="modal-header">
+		<button wicket:id="close" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 		<h4 class="modal-title">Insert Link</h4>
 	</div>
 	<div class="modal-body select-url">
-		<div wicket:id="feedback" class="feedback"></div>
-		<form wicket:id="form" class="url">
+		<form wicket:id="form" class="form-inline url">
+			<div wicket:id="feedback" class="feedback"></div>
 			<div class="form-group">
-				<input wicket:id="url" class="form-control focusable"></input>
+				<input wicket:id="url" class="form-control focusable url"></input>
+				<button wicket:id="insert" type="submit" class="btn btn-primary">Insert</button>
 			</div>		
 		</form>
 		<div wicket:id="attachments"></div>
 	</div>
-	<div class="modal-footer">
-		<button wicket:id="insert" type="submit" class="btn btn-primary">Insert</button>
-		<button wicket:id="cancel" class="btn btn-default" type="button">Cancel</button>	
-	</div>
 	<wicket:fragment wicket:id="attachmentsFrag">
 		<ul class="attachments list-unstyled">
-			<li wicket:id="attachments" class="attachment">
-				<a wicket:id="link"><span wicket:id="name"></span></a>
+			<li wicket:id="attachments" class="attachment selectable">
+				<a wicket:id="link"></a>
 			</li>
 		</ul>
 		<div wicket:id="noAttachments" class="no-attachments">No uploaded files</div>
 		<form wicket:id="form">
+			<div wicket:id="feedback" class="feedback"></div>
 		    <span class="btn btn-default btn-file">
 		        Select local file... <input wicket:id="file" type="file"></input>
 		    </span>		

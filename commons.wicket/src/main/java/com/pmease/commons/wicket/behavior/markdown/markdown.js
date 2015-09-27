@@ -15,6 +15,7 @@ pmease.commons.markdown = {
        	   $modal.modal({show: true, backdrop: "static", keyboard: true});
        	   $modal.on('hidden.bs.modal', function (e) {
        		   $modal.remove();
+       		   $input.focus();
        	   });
        	   if (isImage)
        		   callback("selectImage");
@@ -145,8 +146,8 @@ pmease.commons.markdown = {
 						
 						if (file.name)
 							uploadFile(file);
+						break;
 					}
-					break;
 				}
 			});
 			
@@ -274,5 +275,5 @@ pmease.commons.markdown = {
     	if (!name)
     		$input.range($input.caret()-message.length+2, $input.caret()-message.length+defaultDescription.length+2);
     	pmease.commons.form.markDirty($input.closest("form.leave-confirm"));
-	}
+	} 
 }

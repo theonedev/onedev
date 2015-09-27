@@ -69,9 +69,7 @@ public class AttachmentResource extends AbstractResource {
 		if (!SecurityUtils.canPull(repository)) 
 			throw new UnauthorizedException();
 
-		File attachmentsDir = GitPlex.getInstance(StorageManager.class).getAttachmentsDir(request);
-		
-		final File attachmentFile = new File(attachmentsDir, attachment);
+		final File attachmentFile = new File(getAttachmentsDir(request), attachment);
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(attachmentFile.length());
@@ -96,12 +94,18 @@ public class AttachmentResource extends AbstractResource {
 		return response;
 	}
 
+	private static File getAttachmentsDir(PullRequest request) {
+		return GitPlex.getInstance(StorageManager.class).getAttachmentsDir(request);		
+	}
+	
 	public static PageParameters paramsOf(PullRequest request, String attachment) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_USER, request.getTargetRepo().getOwner().getName());
 		params.set(PARAM_REPO, request.getTargetRepo().getName());
 		params.set(PARAM_REQUEST, request.getId());
 		params.set(PARAM_ATTACHMENT, attachment);
+		final File attachmentFile = new File(getAttachmentsDir(request), attachment);
+		params.set("v", attachmentFile.lastModified());
 		
 		return params;
 	}

@@ -40,6 +40,7 @@ import com.pmease.commons.wicket.CommonPage;
 import com.pmease.commons.wicket.assets.atwho.AtWhoResourceReference;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
+import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 
 @SuppressWarnings("serial")
 public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
@@ -133,20 +134,14 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			String script = String.format("pmease.commons.markdown.onEmojisLoaded('%s', %s);", 
 					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
-		} else if (type.equals("selectImage")) {
+		} else if (type.equals("selectImage") || type.equals("selectLink")) {
 			CommonPage page = (CommonPage) getComponent().getPage();
-			SelectImagePanel imageSelector = new SelectImagePanel(page.getComponents().newChildId(), this);
-			imageSelector.setOutputMarkupId(true);
-			page.getComponents().add(imageSelector);
-			imageSelector.setMarkupId(getComponent().getMarkupId() + "-urlselector");
-			target.add(imageSelector);
-		} else if (type.equals("selectLink")) {
-			CommonPage page = (CommonPage) getComponent().getPage();
-			SelectLinkPanel linkSelector = new SelectLinkPanel(page.getComponents().newChildId(), this);
-			linkSelector.setOutputMarkupId(true);
-			page.getComponents().add(linkSelector);
-			linkSelector.setMarkupId(getComponent().getMarkupId() + "-urlselector");
-			target.add(linkSelector);
+			SelectUrlPanel urlSelector = new SelectUrlPanel(
+					page.getComponents().newChildId(), this, type.equals("selectImage"));
+			urlSelector.setOutputMarkupId(true);
+			page.getComponents().add(urlSelector);
+			urlSelector.setMarkupId(getComponent().getMarkupId() + "-urlselector");
+			target.add(urlSelector);
 		} else if (type.equals("insertUrl")) {
 			String name = params.getParameterValue("param").toString();
 			String url = getAttachmentSupport().getAttachmentUrl(name);
@@ -194,6 +189,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(AtWhoResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(HighlightResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(MarkdownBehavior.class, "markdown.js")));

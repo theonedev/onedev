@@ -15,6 +15,7 @@ import org.eclipse.jgit.lib.Constants;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
@@ -68,6 +69,9 @@ public class BlobResource extends AbstractResource {
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(blob.getSize());
 		response.setContentType(blob.getMediaType().toString());
+		
+		if (!GitUtils.isHash(revision))
+			response.disableCaching();
 		
 		response.setFileName(blob.getIdent().getName());
 		response.setWriteCallback(new WriteCallback() {

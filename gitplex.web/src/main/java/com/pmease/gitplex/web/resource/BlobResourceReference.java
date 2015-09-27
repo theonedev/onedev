@@ -5,13 +5,11 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 public class BlobResourceReference extends ResourceReference {
 
-	public static final String NAME = "rawblob";
-	
-	public BlobResourceReference() {
-		super(NAME);
-	}
-
 	private static final long serialVersionUID = 1L;
+
+	public BlobResourceReference() {
+		super("rawblob");
+	}
 
 	@Override
 	public IResource getResource() {
