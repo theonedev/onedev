@@ -1,6 +1,6 @@
 package com.pmease.commons.markdown;
 
-import static org.pegdown.Extensions.ALL;
+import static org.pegdown.Extensions.ALL_WITH_OPTIONALS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 			}
 		}
 		PegDownPlugins plugins = builder.build();
-		PegDownProcessor processor = new PegDownProcessor(ALL, plugins);
+		PegDownProcessor processor = new PegDownProcessor(ALL_WITH_OPTIONALS, plugins);
 
 		RootNode ast = processor.parseMarkdown(markdown.toCharArray());
 		
