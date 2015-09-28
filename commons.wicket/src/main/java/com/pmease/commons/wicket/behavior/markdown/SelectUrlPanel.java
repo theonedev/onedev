@@ -17,6 +17,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -202,6 +203,15 @@ class SelectUrlPanel extends Panel {
 				
 			});
 			fileForm.add(uploadField);
+			
+			if (isImage) {
+				fragment.add(new Label("hint", "you may drag and drop to insert image directly without "
+						+ "opening this dialog, or paste image from clipboard."));
+			} else {
+				fragment.add(new Label("hint", "you may drag and drop to attach file directly without "
+						+ "opening this dialog."));
+			}
+			
 			add(fragment);
 		} else {
 			urlField.add(AttributeAppender.append("placeholder", "Input url here"));
@@ -216,7 +226,7 @@ class SelectUrlPanel extends Panel {
 			}
 			
 		});
-		
+
 		setOutputMarkupId(true);
 	}
 

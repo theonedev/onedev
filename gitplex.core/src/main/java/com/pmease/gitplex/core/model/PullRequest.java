@@ -24,6 +24,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.criterion.Criterion;
@@ -139,6 +141,7 @@ public class PullRequest extends AbstractEntity {
 	@Column
 	private CloseStatus closeStatus;
 
+	@Index(name="PR_TITLE")
 	@Column(nullable=false)
 	private String title;
 	
@@ -168,9 +171,16 @@ public class PullRequest extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User assignee;
-	
+
+	// used for id search in markdown editor
+	@Index(name="PR_ID_STR")
 	@Column(nullable=false)
-	public String idStr;
+	private String idStr;
+	
+	// used for title search in markdown editor
+	@Index(name="PR_NO_SP_TITLE")
+	@Column(nullable=false)
+	private String noSpaceTitle;
 	
 	@Transient
 	private Git sandbox;
@@ -250,6 +260,7 @@ public class PullRequest extends AbstractEntity {
 
 	public void setTitle(String title) {
 		this.title = title;
+		noSpaceTitle = StringUtils.deleteWhitespace(title);
 	}
 
 	public String getDescription() {
@@ -913,4 +924,13 @@ public class PullRequest extends AbstractEntity {
 	public void prePersist() {
 		idStr = getId().toString();
 	}
+
+	public String getIdStr() {
+		return idStr;
+	}
+
+	public String getNoSpaceTitle() {
+		return noSpaceTitle;
+	}
+	
 }

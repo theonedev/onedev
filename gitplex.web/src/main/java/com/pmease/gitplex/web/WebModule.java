@@ -21,6 +21,7 @@ import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
 import com.pmease.gitplex.web.component.comment.MentionTransformer;
+import com.pmease.gitplex.web.component.comment.PullRequestTransformer;
 import com.pmease.gitplex.web.component.diff.blob.DiffRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
@@ -73,7 +74,7 @@ public class WebModule extends AbstractPluginModule {
 
 			@Override
 			public Collection<HtmlTransformer> getHtmlTransformers() {
-				return Lists.newArrayList((HtmlTransformer)new MentionTransformer());
+				return Lists.newArrayList(new MentionTransformer(), new PullRequestTransformer());
 			}
 			
 		});

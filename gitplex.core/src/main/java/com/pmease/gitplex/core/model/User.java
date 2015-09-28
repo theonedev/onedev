@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Email;
@@ -21,6 +22,7 @@ import com.google.common.base.Objects;
 import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
 import com.pmease.gitplex.core.validation.UserName;
@@ -32,11 +34,20 @@ import com.pmease.gitplex.core.validation.UserName;
 public class User extends AbstractUser implements ProtectedObject {
 
 	public static final Long ROOT_ID = 1L;
-	
+
+	@Index(name="USR_EMAIL")
 	@Column(nullable=false)
 	private String email;
 	
+	@Index(name="USR_FNAME")
 	private String fullName;
+
+	@Index(name="USR_NOSP_NAME")
+	@Column(nullable=false)
+	private String noSpaceName;
+	
+	@Index(name="USR_NOSP_FNAME")
+	private String noSpaceFullName;
 	
 	private Date avatarUploadDate;
 	
@@ -96,6 +107,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		return super.getName();
 	}
 	
+    @Override
+    public void setName(String name) {
+    	super.setName(name);
+    	noSpaceName = StringUtils.deleteWhitespace(name);
+    }
+    
 	@Editable(order=200)
 	public String getFullName() {
 		return fullName;
@@ -103,6 +120,7 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
+		noSpaceFullName = StringUtils.deleteWhitespace(fullName);
 	}
 	
 	@Editable(order=300)
@@ -253,6 +271,14 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public boolean isRoot() {
 		return ROOT_ID.equals(getId());
+	}
+
+	public String getNoSpaceName() {
+		return noSpaceName;
+	}
+
+	public String getNoSpaceFullName() {
+		return noSpaceFullName;
 	}
 	
 }

@@ -29,8 +29,6 @@ public class SearchOption implements Serializable {
 	
 	private static final String PARAM_TITLE = "title";
 	
-	private static final String PARAM_DESCRIPTION = "description";
-	
 	private static final String PARAM_BEGIN_DATE = "begin";
 	
 	private static final String PARAM_END_DATE = "end";
@@ -147,7 +145,6 @@ public class SearchOption implements Serializable {
 		
 		targetBranch = params.get(PARAM_TARGET).toString();
 		title = params.get(PARAM_TITLE).toString();
-		description = params.get(PARAM_DESCRIPTION).toString();
 		
 		value = params.get(PARAM_BEGIN_DATE).toString();
 		if (value != null)
@@ -195,8 +192,6 @@ public class SearchOption implements Serializable {
 			params.set(PARAM_TARGET, targetBranch);
 		if (title != null)
 			params.set(PARAM_TITLE, title);
-		if (description != null)
-			params.set(PARAM_DESCRIPTION, description);
 		if (beginDate != null)
 			params.set(PARAM_BEGIN_DATE, beginDate.getTime());
 		if (endDate != null)

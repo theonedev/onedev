@@ -63,10 +63,10 @@ public class CommentInput extends TextArea<String> {
 						Map<String, String> userMap = new HashMap<>();
 						userMap.put("name", user.getName());
 						userMap.put("fullName", user.getFullName());
-						if (user.getFullName() != null)
-							userMap.put("searchKey", user.getName() + "~" + user.getFullName());
+						if (user.getNoSpaceFullName() != null)
+							userMap.put("searchKey", user.getNoSpaceName() + "~" + user.getNoSpaceFullName());
 						else
-							userMap.put("searchKey", user.getName());
+							userMap.put("searchKey", user.getNoSpaceName());
 						String avatarUrl = avatarManager.getAvatarUrl(user);
 						userMap.put("avatarUrl", avatarUrl);
 						userList.add(userMap);
@@ -87,9 +87,9 @@ public class CommentInput extends TextArea<String> {
 					List<Map<String, String>> requestList = new ArrayList<>();
 					for (PullRequest request: queryRequests(requestQuery, ATWHO_LIMIT)) {
 						Map<String, String> requestMap = new HashMap<>();
-						requestMap.put("requestId", request.getId().toString());
+						requestMap.put("requestId", request.getIdStr());
 						requestMap.put("requestTitle", request.getTitle());
-						requestMap.put("searchKey", request.getId() + "~" + request.getTitle());
+						requestMap.put("searchKey", request.getIdStr() + "~" + request.getNoSpaceTitle());
 						requestList.add(requestMap);
 					}
 					
@@ -131,8 +131,8 @@ public class CommentInput extends TextArea<String> {
 		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
 		if (StringUtils.isNotBlank(query)) {
 			criteria.add(Restrictions.or(
-					Restrictions.ilike("name", query, MatchMode.ANYWHERE), 
-					Restrictions.ilike("fullName", query, MatchMode.ANYWHERE)));
+					Restrictions.ilike("noSpaceName", query, MatchMode.ANYWHERE), 
+					Restrictions.ilike("noSpaceFullName", query, MatchMode.ANYWHERE)));
 		}
 		criteria.addOrder(Order.asc("name"));
 		return GitPlex.getInstance(Dao.class).query(criteria, 0, count);
@@ -141,8 +141,9 @@ public class CommentInput extends TextArea<String> {
 	protected List<PullRequest> queryRequests(String query, int count) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		if (StringUtils.isNotBlank(query)) {
+			query = StringUtils.deleteWhitespace(query);
 			criteria.add(Restrictions.or(
-					Restrictions.ilike("title", query, MatchMode.ANYWHERE), 
+					Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
 					Restrictions.ilike("idStr", query, MatchMode.START)));
 		}
 		criteria.addOrder(Order.desc("id"));

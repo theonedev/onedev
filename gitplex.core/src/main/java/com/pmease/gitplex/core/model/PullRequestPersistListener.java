@@ -31,7 +31,7 @@ public class PullRequestPersistListener implements HibernateListener {
 					return true;
 				}
 			}
-		}
+		} 
 		return false;
 	}
 
