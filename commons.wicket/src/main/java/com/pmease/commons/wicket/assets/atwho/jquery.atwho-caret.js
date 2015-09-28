@@ -233,7 +233,11 @@ InputCaret = (function() {
     var $inputor, at_rect, end_range, format, html, mirror, start_range;
     $inputor = this.$inputor;
     format = function(value) {
-      return $('<div></div>').text(value).html().replace(/\r\n|\r|\n/g, "<br/>").replace(/\s/g, "&nbsp;");
+      value = value.replace(/<|>|`|"|&/g, '?').replace(/\r\n|\r|\n/g, "<br/>");
+      if (/firefox/i.test(navigator.userAgent)) {
+        value = value.replace(/\s/g, '&nbsp;');
+      }
+      return value;
     };
     if (pos === void 0) {
       pos = this.getPos();

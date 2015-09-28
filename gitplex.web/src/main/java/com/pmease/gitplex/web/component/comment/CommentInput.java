@@ -78,10 +78,8 @@ public class CommentInput extends TextArea<String> {
 					} catch (JsonProcessingException e) {
 						throw new RuntimeException(e);
 					}
-					String script = String.format("var $input = $('#%s');"
-							+ "$input[0].atWhoUserRenderCallback(%s);"
-							+ "$input[0].cachedUsers[$input[0].atWhoUserQuery] = %s;", 
-							getComponent().getMarkupId(), json, json);
+					String script = String.format("$('#%s').data('atWhoUserRenderCallback')(%s);",
+							getComponent().getMarkupId(), json);
 					target.appendJavaScript(script);
 				} else if (type.equals("requestQuery")) {
 					String requestQuery = params.getParameterValue("param").toOptionalString();
@@ -101,10 +99,8 @@ public class CommentInput extends TextArea<String> {
 					} catch (JsonProcessingException e) {
 						throw new RuntimeException(e);
 					}
-					String script = String.format("var $input = $('#%s');"
-							+ "$input[0].atWhoRequestRenderCallback(%s);"
-							+ "$input[0].cachedRequests[$input[0].atWhoRequestQuery] = %s;", 
-							getComponent().getMarkupId(), json, json);
+					String script = String.format("$('#%s').data('atWhoRequestRenderCallback')(%s);", 
+							getComponent().getMarkupId(), json);
 					target.appendJavaScript(script);
 				} else {
 					super.respond(target);

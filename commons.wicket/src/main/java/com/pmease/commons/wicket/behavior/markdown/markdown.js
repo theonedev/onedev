@@ -134,18 +134,8 @@ pmease.commons.markdown = {
 	    	at: ':',
 	        callbacks: {
 	        	remoteFilter: function(query, renderCallback) {
-                    var queryEmojis = $input[0].cachedEmojis[query];
-                    if(typeof queryEmojis == "object") {
-                        renderCallback(queryEmojis);
-                    } else if (typeof queryEmojis != "string") {
-                    	// indicates that emoji query is ongoing and subsequent 
-                    	// query using same query string should be waiting
-	                    $input[0].cachedEmojis[query] = "";
-	                    
-                		$input[0].atWhoEmojiRenderCallback = renderCallback;
-                		$input[0].atWhoEmojiQuery = query;
-                    	callback("emojiQuery", query);
-                    }                             
+            		$input.data("atWhoEmojiRenderCallback", renderCallback);
+                	callback("emojiQuery", query);
 	        	}
 	        },
 	        displayTpl: "<li><i class='emoji' style='background-image:url(${url})'></i> ${name} </li>",

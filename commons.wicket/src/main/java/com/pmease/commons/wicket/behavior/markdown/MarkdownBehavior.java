@@ -109,10 +109,8 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
-			String script = String.format("var $input = $('#%s');"
-					+ "$input[0].atWhoEmojiRenderCallback(%s);"
-					+ "$input[0].cachedEmojis[$input[0].atWhoEmojiQuery] = %s;", 
-					getComponent().getMarkupId(), json, json);
+			String script = String.format("$('#%s').data('atWhoEmojiRenderCallback')(%s);",
+					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
 		} else if (type.equals("loadEmojis")) {
 			List<Map<String, String>> emojis = new ArrayList<>();

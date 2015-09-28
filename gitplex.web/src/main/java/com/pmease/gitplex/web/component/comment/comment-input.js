@@ -16,18 +16,8 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
     	searchKey: "searchKey",
         callbacks: {
         	remoteFilter: function(query, renderCallback) {
-                var queryUsers = $input[0].cachedUsers[query];
-                if(typeof queryUsers == "object") {
-                    renderCallback(queryUsers);
-                } else if (typeof queryUsers != "string") {
-                	// indicates that user query is ongoing and subsequent 
-                	// query using same query string should be waiting
-                	$input[0].cachedUsers[query] = "";
-                    
-                	$input[0].atWhoUserRenderCallback = renderCallback;
-                	$input[0].atWhoUserQuery = query;
-                	callback("userQuery", query);
-                }                             
+            	$input.data("atWhoUserRenderCallback", renderCallback);
+            	callback("userQuery", query);
         	}
         },
         displayTpl: "<li><span class='avatar'><img src='${avatarUrl}'/></span> ${name} <small>${fullName}</small></li>",
@@ -40,18 +30,8 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
     	searchKey: "searchKey",
         callbacks: {
         	remoteFilter: function(query, renderCallback) {
-                var queryRequests = $input[0].cachedRequests[query];
-                if(typeof queryRequests == "object") {
-                    renderCallback(queryRequests);
-                } else if (typeof queryRequests != "string") {
-                	// indicates that request query is ongoing and subsequent 
-                	// query using same query string should be waiting
-                	$input[0].cachedRequests[query] = "";
-                    
-                	$input[0].atWhoRequestRenderCallback = renderCallback;
-                	$input[0].atWhoRequestQuery = query;
-                	callback("requestQuery", query);
-                }                             
+            	$input.data("atWhoRequestRenderCallback", renderCallback);
+            	callback("requestQuery", query);
         	}
         },
         displayTpl: "<li><span class='text-muted'>#${requestId}</span> - ${requestTitle}</li>",

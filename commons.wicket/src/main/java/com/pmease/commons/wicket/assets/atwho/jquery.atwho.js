@@ -1,28 +1,30 @@
-/*! jquery.atwho - v1.0.0 %>
+/*! jquery.atwho - v1.3.2 %>
 * Copyright (c) 2015 chord.luo <chord.luo@gmail.com>;
 * homepage: http://ichord.github.com/At.js
 * Licensed MIT
 */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module.
-    define(["jquery"], function ($) {
-      return (root.returnExportsGlobal = factory($));
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define(["jquery"], function (a0) {
+      return (factory(a0));
     });
   } else if (typeof exports === 'object') {
     // Node. Does not work with strict CommonJS, but
-    // only CommonJS-like enviroments that support module.exports,
+    // only CommonJS-like environments that support module.exports,
     // like Node.
     module.exports = factory(require("jquery"));
   } else {
     factory(jQuery);
   }
-}(this, function ($) {
+}(this, function (jquery) {
 
-var Api, App, Controller, DEFAULT_CALLBACKS, EditableController, KEY_CODE, Model, TextareaController, View,
-  __slice = [].slice,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+var $, Api, App, Controller, DEFAULT_CALLBACKS, EditableController, KEY_CODE, Model, TextareaController, View,
+  slice = [].slice,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
+
+$ = jquery;
 
 App = (function() {
   function App(inputor) {
@@ -35,13 +37,15 @@ App = (function() {
   }
 
   App.prototype.createContainer = function(doc) {
-    if ((this.$el = $("#atwho-container", doc)).length === 0) {
-      return $(doc.body).append(this.$el = $("<div id='atwho-container'></div>"));
+    var ref;
+    if ((ref = this.$el) != null) {
+      ref.remove();
     }
+    return $(doc.body).append(this.$el = $("<div class='atwho-container'></div>"));
   };
 
   App.prototype.setupRootElement = function(iframe, asRoot) {
-    var error, _ref;
+    var error;
     if (asRoot == null) {
       asRoot = false;
     }
@@ -57,27 +61,22 @@ App = (function() {
       } catch (_error) {
         error = _error;
         this.iframe = null;
-        throw new Error("iframe auto-discovery is failed.\nPlease use `serIframe` to set the target iframe manually.");
+        if ($.fn.atwho.debug) {
+          throw new Error("iframe auto-discovery is failed.\nPlease use `setIframe` to set the target iframe manually.\n" + error);
+        }
       }
     }
-    if (this.iframeAsRoot = asRoot) {
-      if ((_ref = this.$el) != null) {
-        _ref.remove();
-      }
-      return this.createContainer(this.document);
-    } else {
-      return this.createContainer(document);
-    }
+    return this.createContainer((this.iframeAsRoot = asRoot) ? this.document : document);
   };
 
   App.prototype.controller = function(at) {
-    var c, current, currentFlag, _ref;
+    var c, current, currentFlag, ref;
     if (this.aliasMaps[at]) {
       current = this.controllers[this.aliasMaps[at]];
     } else {
-      _ref = this.controllers;
-      for (currentFlag in _ref) {
-        c = _ref[currentFlag];
+      ref = this.controllers;
+      for (currentFlag in ref) {
+        c = ref[currentFlag];
         if (currentFlag === at) {
           current = c;
           break;
@@ -97,8 +96,8 @@ App = (function() {
   };
 
   App.prototype.reg = function(flag, setting) {
-    var controller, _base;
-    controller = (_base = this.controllers)[flag] || (_base[flag] = this.$inputor.is('[contentEditable]') ? new EditableController(this, flag) : new TextareaController(this, flag));
+    var base, controller;
+    controller = (base = this.controllers)[flag] || (base[flag] = this.$inputor.is('[contentEditable]') ? new EditableController(this, flag) : new TextareaController(this, flag));
     if (setting.alias) {
       this.aliasMaps[setting.alias] = flag;
     }
@@ -107,7 +106,23 @@ App = (function() {
   };
 
   App.prototype.listen = function() {
-    return this.$inputor.on('keyup.atwhoInner', (function(_this) {
+    return this.$inputor.on('compositionstart', (function(_this) {
+      return function(e) {
+        var ref;
+        if ((ref = _this.controller()) != null) {
+          ref.view.hide();
+        }
+        console.log("compositionstart");
+        _this.isComposing = true;
+        return null;
+      };
+    })(this)).on('compositionend', (function(_this) {
+      return function(e) {
+        console.log("compositionend");
+        _this.isComposing = false;
+        return null;
+      };
+    })(this)).on('keyup.atwhoInner', (function(_this) {
       return function(e) {
         return _this.onKeyup(e);
       };
@@ -115,15 +130,11 @@ App = (function() {
       return function(e) {
         return _this.onKeydown(e);
       };
-    })(this)).on('scroll.atwhoInner', (function(_this) {
-      return function(e) {
-        var _ref;
-        return (_ref = _this.controller()) != null ? _ref.view.hide(e) : void 0;
-      };
     })(this)).on('blur.atwhoInner', (function(_this) {
       return function(e) {
         var c;
         if (c = _this.controller()) {
+          c.expectedQueryCBId = null;
           return c.view.hide(e, c.getOpt("displayTimeout"));
         }
       };
@@ -131,14 +142,30 @@ App = (function() {
       return function(e) {
         return _this.dispatch(e);
       };
-    })(this));
+    })(this)).on('scroll.atwhoInner', (function(_this) {
+      return function() {
+        var lastScrollTop;
+        lastScrollTop = _this.$inputor.scrollTop();
+        return function(e) {
+          var currentScrollTop, ref;
+          currentScrollTop = e.target.scrollTop;
+          if (lastScrollTop !== currentScrollTop) {
+            if ((ref = _this.controller()) != null) {
+              ref.view.hide(e);
+            }
+          }
+          lastScrollTop = currentScrollTop;
+          return true;
+        };
+      };
+    })(this)());
   };
 
   App.prototype.shutdown = function() {
-    var c, _, _ref;
-    _ref = this.controllers;
-    for (_ in _ref) {
-      c = _ref[_];
+    var _, c, ref;
+    ref = this.controllers;
+    for (_ in ref) {
+      c = ref[_];
       c.destroy();
       delete this.controllers[_];
     }
@@ -147,39 +174,31 @@ App = (function() {
   };
 
   App.prototype.dispatch = function(e) {
-    return $.map(this.controllers, (function(_this) {
-      return function(c) {
-        var delay;
-        if (delay = c.getOpt('delay')) {
-          clearTimeout(_this.delayedCallback);
-          return _this.delayedCallback = setTimeout(function() {
-            if (c.lookUp(e)) {
-              return _this.setContextFor(c.at);
-            }
-          }, delay);
-        } else {
-          if (c.lookUp(e)) {
-            return _this.setContextFor(c.at);
-          }
-        }
-      };
-    })(this));
+    var _, c, ref, results;
+    ref = this.controllers;
+    results = [];
+    for (_ in ref) {
+      c = ref[_];
+      results.push(c.lookUp(e));
+    }
+    return results;
   };
 
   App.prototype.onKeyup = function(e) {
-    var _ref;
+    var ref;
     switch (e.keyCode) {
       case KEY_CODE.ESC:
         e.preventDefault();
-        if ((_ref = this.controller()) != null) {
-            if (_ref.view.visible())
-          	  this.$inputor.data("ignoreEsc", true);
-          _ref.view.hide();
+        if ((ref = this.controller()) != null) {
+          if (ref.view.visible())
+            this.$inputor.data("ignoreEsc", true);
+          ref.view.hide();
         }
         break;
       case KEY_CODE.DOWN:
       case KEY_CODE.UP:
       case KEY_CODE.CTRL:
+      case KEY_CODE.ENTER:
         $.noop();
         break;
       case KEY_CODE.P:
@@ -194,8 +213,8 @@ App = (function() {
   };
 
   App.prototype.onKeydown = function(e) {
-    var view, _ref;
-    view = (_ref = this.controller()) != null ? _ref.view : void 0;
+    var ref, view;
+    view = (ref = this.controller()) != null ? ref.view : void 0;
     if (!(view && view.visible())) {
       return;
     }
@@ -229,11 +248,22 @@ App = (function() {
         break;
       case KEY_CODE.TAB:
       case KEY_CODE.ENTER:
+      case KEY_CODE.SPACE:
         if (!view.visible()) {
           return;
         }
-        e.preventDefault();
-        view.choose(e);
+        if (!this.controller().getOpt('spaceSelectsMatch') && e.keyCode === KEY_CODE.SPACE) {
+          return;
+        }
+        if (!this.controller().getOpt('tabSelectsMatch') && e.keyCode === KEY_CODE.TAB) {
+          return;
+        }
+        if (view.highlighted()) {
+          e.preventDefault();
+          view.choose(e);
+        } else {
+          view.hide(e);
+        }
         break;
       default:
         $.noop();
@@ -249,11 +279,12 @@ Controller = (function() {
     return (Math.random().toString(16) + "000000000").substr(2, 8) + (new Date().getTime());
   };
 
-  function Controller(app, at) {
-    this.app = app;
-    this.at = at;
+  function Controller(app1, at1) {
+    this.app = app1;
+    this.at = at1;
     this.$inputor = this.app.$inputor;
     this.id = this.$inputor[0].id || this.uid();
+    this.expectedQueryCBId = null;
     this.setting = null;
     this.query = null;
     this.pos = 0;
@@ -280,12 +311,12 @@ Controller = (function() {
 
   Controller.prototype.callDefault = function() {
     var args, error, funcName;
-    funcName = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    funcName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
     try {
       return DEFAULT_CALLBACKS[funcName].apply(this, args);
     } catch (_error) {
       error = _error;
-      return $.error("" + error + " Or maybe At.js doesn't have function " + funcName);
+      return $.error(error + " Or maybe At.js doesn't have function " + funcName);
     }
   };
 
@@ -296,7 +327,7 @@ Controller = (function() {
     }
     data.push(this);
     alias = this.getOpt('alias');
-    eventName = alias ? "" + name + "-" + alias + ".atwho" : "" + name + ".atwho";
+    eventName = alias ? name + "-" + alias + ".atwho" : name + ".atwho";
     return this.$inputor.trigger(eventName, data);
   };
 
@@ -320,7 +351,7 @@ Controller = (function() {
     data = $.extend({}, $li.data('item-data'), {
       'atwho-at': this.at
     });
-    return this.callbacks("tplEval").call(this, tpl, data);
+    return this.callbacks("tplEval").call(this, tpl, data, "onInsert");
   };
 
   Controller.prototype.renderView = function(data) {
@@ -331,60 +362,118 @@ Controller = (function() {
   };
 
   Controller.arrayToDefaultHash = function(data) {
-    var item, _i, _len, _results;
+    var i, item, len, results;
     if (!$.isArray(data)) {
       return data;
     }
-    _results = [];
-    for (_i = 0, _len = data.length; _i < _len; _i++) {
-      item = data[_i];
+    results = [];
+    for (i = 0, len = data.length; i < len; i++) {
+      item = data[i];
       if ($.isPlainObject(item)) {
-        _results.push(item);
+        results.push(item);
       } else {
-        _results.push({
+        results.push({
           name: item
         });
       }
     }
-    return _results;
+    return results;
   };
 
   Controller.prototype.lookUp = function(e) {
-    var query, _callback;
-    if (!(query = this.catchQuery(e))) {
+    var query, wait;
+    if (this.getOpt('suspendOnComposing') && this.app.isComposing) {
       return;
     }
-    _callback = function(data) {
+    query = this.catchQuery(e);
+    if (!query) {
+      this.expectedQueryCBId = null;
+      return query;
+    }
+    this.app.setContextFor(this.at);
+    if (wait = this.getOpt('delay')) {
+      this._delayLookUp(query, wait);
+    } else {
+      this._lookUp(query);
+    }
+    return query;
+  };
+
+  Controller.prototype._delayLookUp = function(query, wait) {
+    var now, remaining;
+    now = Date.now ? Date.now() : new Date().getTime();
+    this.previousCallTime || (this.previousCallTime = now);
+    remaining = wait - (now - this.previousCallTime);
+    if ((0 < remaining && remaining < wait)) {
+      this.previousCallTime = now;
+      this._stopDelayedCall();
+      return this.delayedCallTimeout = setTimeout((function(_this) {
+        return function() {
+          _this.previousCallTime = 0;
+          _this.delayedCallTimeout = null;
+          return _this._lookUp(query);
+        };
+      })(this), wait);
+    } else {
+      this._stopDelayedCall();
+      if (this.previousCallTime !== now) {
+        this.previousCallTime = 0;
+      }
+      return this._lookUp(query);
+    }
+  };
+
+  Controller.prototype._stopDelayedCall = function() {
+    if (this.delayedCallTimeout) {
+      clearTimeout(this.delayedCallTimeout);
+      return this.delayedCallTimeout = null;
+    }
+  };
+
+  Controller.prototype._generateQueryCBId = function() {
+    return {};
+  };
+
+  Controller.prototype._lookUp = function(query) {
+    var _callback;
+    _callback = function(queryCBId, data) {
+      if (queryCBId !== this.expectedQueryCBId) {
+        return;
+      }
       if (data && data.length > 0) {
         return this.renderView(this.constructor.arrayToDefaultHash(data));
       } else {
         return this.view.hide();
       }
     };
-    this.model.query(query.text, $.proxy(_callback, this));
-    return query;
+    this.expectedQueryCBId = this._generateQueryCBId();
+    return this.model.query(query.text, $.proxy(_callback, this, this.expectedQueryCBId));
   };
 
   return Controller;
 
 })();
 
-TextareaController = (function(_super) {
-  __extends(TextareaController, _super);
+TextareaController = (function(superClass) {
+  extend(TextareaController, superClass);
 
   function TextareaController() {
     return TextareaController.__super__.constructor.apply(this, arguments);
   }
 
   TextareaController.prototype.catchQuery = function() {
-    var caretPos, content, end, query, start, subtext;
+    var caretPos, content, end, isString, query, start, subtext;
     content = this.$inputor.val();
     caretPos = this.$inputor.atwhocaret('pos', {
       iframe: this.app.iframe
     });
     subtext = content.slice(0, caretPos);
     query = this.callbacks("matcher").call(this, this.at, subtext, this.getOpt('startWithSpace'));
-    if (typeof query === "string" && query.length <= this.getOpt('maxLen', 20)) {
+    isString = typeof query === 'string';
+    if (isString && query.length < this.getOpt('minLen', 0)) {
+      return;
+    }
+    if (isString && query.length <= this.getOpt('maxLen', 20)) {
       start = caretPos - query.length;
       end = start + query.length;
       this.pos = start;
@@ -443,8 +532,8 @@ TextareaController = (function(_super) {
 
 })(Controller);
 
-EditableController = (function(_super) {
-  __extends(EditableController, _super);
+EditableController = (function(superClass) {
+  extend(EditableController, superClass);
 
   function EditableController() {
     return EditableController.__super__.constructor.apply(this, arguments);
@@ -483,13 +572,15 @@ EditableController = (function(_super) {
       range = this._getRange();
     }
     sel = this.app.window.getSelection();
-    sel.removeAllRanges();
-    return sel.addRange(range);
+    if (this.ctrl_a_pressed == null) {
+      sel.removeAllRanges();
+      return sel.addRange(range);
+    }
   };
 
   EditableController.prototype._movingEvent = function(e) {
-    var _ref;
-    return e.type === 'click' || ((_ref = e.which) === KEY_CODE.RIGHT || _ref === KEY_CODE.LEFT || _ref === KEY_CODE.UP || _ref === KEY_CODE.DOWN);
+    var ref;
+    return e.type === 'click' || ((ref = e.which) === KEY_CODE.RIGHT || ref === KEY_CODE.LEFT || ref === KEY_CODE.UP || ref === KEY_CODE.DOWN);
   };
 
   EditableController.prototype._unwrap = function(node) {
@@ -503,9 +594,19 @@ EditableController = (function(_super) {
   };
 
   EditableController.prototype.catchQuery = function(e) {
-    var $inserted, $query, index, inserted, lastNode, matched, offset, query, range, _range;
+    var $inserted, $query, _range, index, inserted, isString, lastNode, matched, offset, query, range;
     if (!(range = this._getRange())) {
       return;
+    }
+    if (e.which === KEY_CODE.CTRL) {
+      this.ctrl_pressed = true;
+    } else if (e.which === KEY_CODE.A) {
+      if (this.ctrl_pressed == null) {
+        this.ctrl_a_pressed = true;
+      }
+    } else {
+      delete this.ctrl_a_pressed;
+      delete this.ctrl_pressed;
     }
     if (e.which === KEY_CODE.ENTER) {
       ($query = $(range.startContainer).closest('.atwho-query')).contents().unwrap();
@@ -526,7 +627,7 @@ EditableController = (function(_super) {
         _range.setStart(range.startContainer, offset);
         if ($(_range.cloneContents()).contents().last().is('.atwho-inserted')) {
           inserted = $(range.startContainer).contents().get(offset);
-          this._setRange("after", $(inserted).contents().last());
+          this._setRange('after', $(inserted).contents().last());
         }
       } else if (e.which === KEY_CODE.LEFT && range.startContainer.nodeType === document.TEXT_NODE) {
         $inserted = $(range.startContainer.previousSibling);
@@ -545,9 +646,11 @@ EditableController = (function(_super) {
     _range = range.cloneRange();
     _range.setStart(range.startContainer, 0);
     matched = this.callbacks("matcher").call(this, this.at, _range.toString(), this.getOpt('startWithSpace'));
-    if ($query.length === 0 && typeof matched === 'string' && (index = range.startOffset - this.at.length - matched.length) >= 0) {
+    isString = typeof matched === 'string';
+    if ($query.length === 0 && isString && (index = range.startOffset - this.at.length - matched.length) >= 0) {
       range.setStart(range.startContainer, index);
-      range.surroundContents(($query = $("<span class='atwho-query'/>", this.app.document))[0]);
+      $query = $('<span/>', this.app.document).attr(this.getOpt("editableAtwhoQueryAttrs")).addClass('atwho-query');
+      range.surroundContents($query.get(0));
       lastNode = $query.contents().last().get(0);
       if (/firefox/i.test(navigator.userAgent)) {
         range.setStart(lastNode, lastNode.length);
@@ -557,15 +660,21 @@ EditableController = (function(_super) {
         this._setRange('after', lastNode, range);
       }
     }
-    if (typeof matched === 'string' && matched.length <= this.getOpt('maxLen', 20)) {
+    if (isString && matched.length < this.getOpt('minLen', 0)) {
+      return;
+    }
+    if (isString && matched.length <= this.getOpt('maxLen', 20)) {
       query = {
         text: matched,
         el: $query
       };
       this.trigger("matched", [this.at, query.text]);
+      return this.query = query;
     } else {
       this.view.hide();
-      query = null;
+      this.query = {
+        el: $query
+      };
       if ($query.text().indexOf(this.at) >= 0) {
         if (this._movingEvent(e) && $query.hasClass('atwho-inserted')) {
           $query.removeClass('atwho-query');
@@ -573,8 +682,8 @@ EditableController = (function(_super) {
           this._setRange("after", this._unwrap($query.text($query.text()).contents().first()));
         }
       }
+      return null;
     }
-    return this.query = query;
   };
 
   EditableController.prototype.rect = function() {
@@ -591,7 +700,7 @@ EditableController = (function(_super) {
 
   EditableController.prototype.insert = function(content, $li) {
     var range, suffix, suffixNode;
-    suffix = (suffix = this.getOpt('suffix')) ? suffix : suffix || "\u00A0";
+    suffix = (suffix = this.getOpt('suffix')) === "" ? suffix : suffix || "\u00A0";
     this.query.el.removeClass('atwho-query').addClass('atwho-inserted').html(content);
     if (range = this._getRange()) {
       range.setEndAfter(this.query.el[0]);
@@ -625,7 +734,7 @@ Model = (function() {
   };
 
   Model.prototype.query = function(query, callback) {
-    var data, searchKey, _remoteFilter;
+    var _remoteFilter, data, searchKey;
     data = this.fetch();
     searchKey = this.context.getOpt("searchKey");
     data = this.context.callbacks('filter').call(this.context, query, data, searchKey) || [];
@@ -714,6 +823,10 @@ View = (function() {
     return this.$el.is(":visible");
   };
 
+  View.prototype.highlighted = function() {
+    return this.$el.find(".cur").length > 0;
+  };
+
   View.prototype.choose = function(e) {
     var $li, content;
     if (($li = this.$el.find(".cur")).length) {
@@ -728,7 +841,7 @@ View = (function() {
   };
 
   View.prototype.reposition = function(rect) {
-    var offset, overflowOffset, _ref, _window;
+    var _window, offset, overflowOffset, ref;
     _window = this.context.app.iframeAsRoot ? this.context.app.window : window;
     if (rect.bottom + this.$el.height() - $(_window).scrollTop() > $(_window).height()) {
       rect.bottom = rect.top - this.$el.height();
@@ -740,8 +853,8 @@ View = (function() {
       left: rect.left,
       top: rect.bottom
     };
-    if ((_ref = this.context.callbacks("beforeReposition")) != null) {
-      _ref.call(this.context, offset);
+    if ((ref = this.context.callbacks("beforeReposition")) != null) {
+      ref.call(this.context, offset);
     }
     this.$el.offset(offset);
     return this.context.trigger("reposition", [offset]);
@@ -755,9 +868,7 @@ View = (function() {
       next = this.$el.find('li:first');
     }
     next.addClass('cur');
-    return this.$el.animate({
-      scrollTop: Math.max(0, cur.innerHeight() * (next.index() + 2) - this.$el.height())
-    }, 150);
+    return this.scrollTop(Math.max(0, cur.innerHeight() * (next.index() + 2) - this.$el.height()));
   };
 
   View.prototype.prev = function() {
@@ -768,9 +879,19 @@ View = (function() {
       prev = this.$el.find('li:last');
     }
     prev.addClass('cur');
-    return this.$el.animate({
-      scrollTop: Math.max(0, cur.innerHeight() * (prev.index() + 2) - this.$el.height())
-    }, 150);
+    return this.scrollTop(Math.max(0, cur.innerHeight() * (prev.index() + 2) - this.$el.height()));
+  };
+
+  View.prototype.scrollTop = function(scrollTop) {
+    var scrollDuration;
+    scrollDuration = this.context.getOpt('scrollDuration');
+    if (scrollDuration) {
+      return this.$el.animate({
+        scrollTop: scrollTop
+      }, scrollDuration);
+    } else {
+      return this.$el.scrollTop(scrollTop);
+    }
   };
 
   View.prototype.show = function() {
@@ -809,7 +930,7 @@ View = (function() {
   };
 
   View.prototype.render = function(list) {
-    var $li, $ul, item, li, tpl, _i, _len;
+    var $li, $ul, i, item, len, li, tpl;
     if (!($.isArray(list) && list.length > 0)) {
       this.hide();
       return;
@@ -817,12 +938,12 @@ View = (function() {
     this.$el.find('ul').empty();
     $ul = this.$el.find('ul');
     tpl = this.context.getOpt('displayTpl');
-    for (_i = 0, _len = list.length; _i < _len; _i++) {
-      item = list[_i];
+    for (i = 0, len = list.length; i < len; i++) {
+      item = list[i];
       item = $.extend({}, item, {
         'atwho-at': this.context.at
       });
-      li = this.context.callbacks("tplEval").call(this.context, tpl, item);
+      li = this.context.callbacks("tplEval").call(this.context, tpl, item, "onDisplay");
       $li = $(this.context.callbacks("highlighter").call(this.context, li, this.context.query.text));
       $li.data("item-data", item);
       $ul.append($li);
@@ -844,28 +965,31 @@ KEY_CODE = {
   TAB: 9,
   ENTER: 13,
   CTRL: 17,
+  A: 65,
   P: 80,
   N: 78,
   LEFT: 37,
   UP: 38,
   RIGHT: 39,
   DOWN: 40,
-  BACKSPACE: 8
+  BACKSPACE: 8,
+  SPACE: 32
 };
 
 DEFAULT_CALLBACKS = {
   beforeSave: function(data) {
     return Controller.arrayToDefaultHash(data);
   },
-  matcher: function(flag, subtext, should_startWithSpace) {
-    var match, regexp, _a, _y;
+  matcher: function(flag, subtext, should_startWithSpace, acceptSpaceBar) {
+    var _a, _y, match, regexp, space;
     flag = flag.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     if (should_startWithSpace) {
       flag = '(?:^|\\s)' + flag;
     }
     _a = decodeURI("%C3%80");
     _y = decodeURI("%C3%BF");
-    regexp = new RegExp("" + flag + "([A-Za-z" + _a + "-" + _y + "0-9_\+\-]*)$|" + flag + "([^\\x00-\\xff]*)$", 'gi');
+    space = acceptSpaceBar ? "\ " : "";
+    regexp = new RegExp(flag + "([A-Za-z" + _a + "-" + _y + "0-9_" + space + "\'\.\+\-]*)$|" + flag + "([^\\x00-\\xff]*)$", 'gi');
     match = regexp.exec(subtext);
     if (match) {
       return match[2] || match[1];
@@ -874,10 +998,10 @@ DEFAULT_CALLBACKS = {
     }
   },
   filter: function(query, data, searchKey) {
-    var item, _i, _len, _results;
+    var _results, i, item, len;
     _results = [];
-    for (_i = 0, _len = data.length; _i < _len; _i++) {
-      item = data[_i];
+    for (i = 0, len = data.length; i < len; i++) {
+      item = data[i];
       if (~new String(item[searchKey]).toLowerCase().indexOf(query.toLowerCase())) {
         _results.push(item);
       }
@@ -886,13 +1010,13 @@ DEFAULT_CALLBACKS = {
   },
   remoteFilter: null,
   sorter: function(query, items, searchKey) {
-    var item, _i, _len, _results;
+    var _results, i, item, len;
     if (!query) {
       return items;
     }
     _results = [];
-    for (_i = 0, _len = items.length; _i < _len; _i++) {
-      item = items[_i];
+    for (i = 0, len = items.length; i < len; i++) {
+      item = items[i];
       item.atwho_order = new String(item[searchKey]).toLowerCase().indexOf(query.toLowerCase());
       if (item.atwho_order > -1) {
         _results.push(item);
@@ -903,9 +1027,13 @@ DEFAULT_CALLBACKS = {
     });
   },
   tplEval: function(tpl, map) {
-    var error;
+    var error, template;
+    template = tpl;
     try {
-      return tpl.replace(/\$\{([^\}]*)\}/g, function(tag, key, pos) {
+      if (typeof tpl !== 'string') {
+        template = tpl(map);
+      }
+      return template.replace(/\$\{([^\}]*)\}/g, function(tag, key, pos) {
         return map[key];
       });
     } catch (_error) {
@@ -940,8 +1068,18 @@ Api = {
     }
   },
   isSelecting: function() {
-    var _ref;
-    return (_ref = this.controller()) != null ? _ref.view.visible() : void 0;
+    var ref;
+    return !!((ref = this.controller()) != null ? ref.view.visible() : void 0);
+  },
+  hide: function() {
+    var ref;
+    return (ref = this.controller()) != null ? ref.view.hide() : void 0;
+  },
+  reposition: function() {
+    var c;
+    if (c = this.controller()) {
+      return c.view.reposition(c.rect());
+    }
   },
   setIframe: function(iframe, asRoot) {
     this.setupRootElement(iframe, asRoot);
@@ -957,7 +1095,7 @@ Api = {
 };
 
 $.fn.atwho = function(method) {
-  var result, _args;
+  var _args, result;
   _args = arguments;
   result = null;
   this.filter('textarea, input, [contenteditable=""], [contenteditable=true]').each(function() {
@@ -970,10 +1108,14 @@ $.fn.atwho = function(method) {
     } else if (Api[method] && app) {
       return result = Api[method].apply(app, Array.prototype.slice.call(_args, 1));
     } else {
-      return $.error("Method " + method + " does not exist on jQuery.atwhocaret");
+      return $.error("Method " + method + " does not exist on jQuery.atwho");
     }
   });
-  return result || this;
+  if (result != null) {
+    return result;
+  } else {
+    return this;
+  }
 };
 
 $.fn.atwho["default"] = {
@@ -990,10 +1132,17 @@ $.fn.atwho["default"] = {
   highlightFirst: true,
   limit: 5,
   maxLen: 20,
+  minLen: 0,
   displayTimeout: 300,
-  delay: null
+  delay: null,
+  spaceSelectsMatch: false,
+  tabSelectsMatch: true,
+  editableAtwhoQueryAttrs: {},
+  scrollDuration: 150,
+  suspendOnComposing: true
 };
 
+$.fn.atwho.debug = false;
 
 
 }));
