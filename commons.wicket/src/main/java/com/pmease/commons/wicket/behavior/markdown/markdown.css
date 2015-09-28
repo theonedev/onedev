@@ -13,6 +13,10 @@
 	height: 20px; 
 	vertical-align: middle;
 }
+.atwho-view .cur .text-muted {
+	color: inherit;	
+}
+
 .md-help, .md-emojis {
 	padding: 0 8px 8px 8px; 
 	display: none;

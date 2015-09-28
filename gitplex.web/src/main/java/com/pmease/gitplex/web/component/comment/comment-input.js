@@ -3,8 +3,12 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
 
 	$input.prevAll(".md-help").html(
 			"<a href='https://help.github.com/articles/github-flavored-markdown/' target='_blank'>GitHub flavored markdown</a> " +
-			"is accepted here. You can also input <b>@<em>user_login_name</em></b> to mention an user (and email notification " +
-			"will be sent to the user), or use <b>:<em>emoji</em>:</b> to insert an emoji.");
+			"is accepted here. You can also input:" +
+			"<ul>" +
+			"<li><b>@user_login_name</b> to mention/notify an user. " +
+			"<li><b>#pull_request_id</b> to reference a pull request. " +
+			"<li><b>:emoji:</b> to insert an emoji." +
+			"</ul>");
 
 	$input[0].cachedUsers = [];
     $input.atwho({
@@ -27,6 +31,31 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
         	}
         },
         displayTpl: "<li><span class='avatar'><img src='${avatarUrl}'/></span> ${name} <small>${fullName}</small></li>",
+        limit: atWhoLimit
+    });	
+    
+    $input[0].cachedRequests = [];
+    $input.atwho({
+    	at: '#',
+    	searchKey: "searchKey",
+        callbacks: {
+        	remoteFilter: function(query, renderCallback) {
+                var queryRequests = $input[0].cachedRequests[query];
+                if(typeof queryRequests == "object") {
+                    renderCallback(queryRequests);
+                } else if (typeof queryRequests != "string") {
+                	// indicates that request query is ongoing and subsequent 
+                	// query using same query string should be waiting
+                	$input[0].cachedRequests[query] = "";
+                    
+                	$input[0].atWhoRequestRenderCallback = renderCallback;
+                	$input[0].atWhoRequestQuery = query;
+                	callback("requestQuery", query);
+                }                             
+        	}
+        },
+        displayTpl: "<li><span class='text-muted'>#${requestId}</span> - ${requestTitle}</li>",
+        insertTpl: '#${requestId}', 
         limit: atWhoLimit
     });		
 }

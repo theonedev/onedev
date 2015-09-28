@@ -17,7 +17,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.component.avatar.AvatarResourceReference;
 
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.fileinput.BootstrapFileInputField;
 
@@ -108,7 +107,6 @@ public class AvatarPicker extends FormComponentPanel<FileUpload> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(AvatarResourceReference.INSTANCE));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(AvatarPicker.class, "avatar-picker.css")));
 	}

@@ -9,6 +9,7 @@ import org.hibernate.cfg.NamingStrategy;
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.HibernateListener;
 import com.pmease.commons.hibernate.ModelProvider;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
 import com.pmease.commons.jetty.ServletConfigurator;
@@ -170,6 +171,7 @@ public class CoreModule extends AbstractPluginModule {
 			}
 			
 		});
+		contributeFromPackage(HibernateListener.class, ModelLocator.class);
 	}
 	
 	@Override

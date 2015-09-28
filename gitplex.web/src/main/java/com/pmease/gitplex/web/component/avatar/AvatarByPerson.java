@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.avatar;
 
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -75,13 +73,6 @@ public class AvatarByPerson extends WebComponent {
 		
 		tag.setName("img");
 		tag.put("src", avatarUrlModel.getObject());
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		
-		response.render(CssHeaderItem.forReference(AvatarResourceReference.INSTANCE));
 	}
 
 	@Override

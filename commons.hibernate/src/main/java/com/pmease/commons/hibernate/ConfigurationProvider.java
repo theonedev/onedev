@@ -1,5 +1,6 @@
 package com.pmease.commons.hibernate;
 
+import java.io.Serializable;
 import java.util.Properties;
 import java.util.Set;
 
@@ -8,9 +9,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.hibernate.CallbackException;
+import org.hibernate.EmptyInterceptor;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
+import org.hibernate.type.Type;
 
 import com.google.inject.Provider;
 import com.pmease.commons.bootstrap.Bootstrap;
@@ -28,12 +32,16 @@ public class ConfigurationProvider implements Provider<Configuration> {
 	
 	private final Properties hibernateProperties;
 	
+	private final Set<HibernateListener> hibernateListeners;
+	
 	@Inject
 	public ConfigurationProvider(Set<ModelProvider> modelProviders, NamingStrategy namingStrategy, 
-			@Nullable @Named("hibernate") Properties hibernateProperties) {
+			@Nullable @Named("hibernate") Properties hibernateProperties, 
+			Set<HibernateListener> hibernateListeners) {
 		this.modelProviders = modelProviders;
 		this.namingStrategy = namingStrategy;
 		this.hibernateProperties = hibernateProperties;
+		this.hibernateListeners = hibernateListeners;
 	}
 	
 	@Override
@@ -57,6 +65,54 @@ public class ConfigurationProvider implements Provider<Configuration> {
 					configuration.addAnnotatedClass(modelClass);
 			}
 			
+			configuration.setInterceptor(new EmptyInterceptor() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames,
+						Type[] types) throws CallbackException {
+					boolean changed = false;
+					for (HibernateListener listener: hibernateListeners) {
+						if (listener.onLoad(entity, id, state, propertyNames, types))
+							changed = true;
+					}
+						
+					return changed;
+				}
+
+				@Override
+				public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState,
+						Object[] previousState, String[] propertyNames, Type[] types) throws CallbackException {
+					boolean changed = false;
+					for (HibernateListener listener: hibernateListeners) {
+						if (listener.onFlushDirty(entity, id, currentState, previousState, propertyNames, types))
+							changed = true;
+					}
+						
+					return changed;
+				}
+
+				@Override
+				public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames,
+						Type[] types) throws CallbackException {
+					boolean changed = false;
+					for (HibernateListener listener: hibernateListeners) {
+						if (listener.onSave(entity, id, state, propertyNames, types))
+							changed = true;
+					}
+						
+					return changed;
+				}
+
+				@Override
+				public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames,
+						Type[] types) throws CallbackException {
+					for (HibernateListener listener: hibernateListeners)
+						listener.onDelete(entity, id, state, propertyNames, types);
+				}
+
+			});
 			configuration.setProperties(hibernateProperties);	
 		} 
 		return configuration;

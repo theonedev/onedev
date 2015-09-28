@@ -21,6 +21,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.OnDelete;
@@ -167,6 +168,9 @@ public class PullRequest extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User assignee;
+	
+	@Column(nullable=false)
+	public String idStr;
 	
 	@Transient
 	private Git sandbox;
@@ -905,4 +909,8 @@ public class PullRequest extends AbstractEntity {
 				+ "/pull_requests/" + getId() + "/overview";
 	}
 
+	@PrePersist
+	public void prePersist() {
+		idStr = getId().toString();
+	}
 }

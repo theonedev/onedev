@@ -83,6 +83,29 @@ public class CommentInput extends TextArea<String> {
 							+ "$input[0].cachedUsers[$input[0].atWhoUserQuery] = %s;", 
 							getComponent().getMarkupId(), json, json);
 					target.appendJavaScript(script);
+				} else if (type.equals("requestQuery")) {
+					String requestQuery = params.getParameterValue("param").toOptionalString();
+
+					List<Map<String, String>> requestList = new ArrayList<>();
+					for (PullRequest request: queryRequests(requestQuery, ATWHO_LIMIT)) {
+						Map<String, String> requestMap = new HashMap<>();
+						requestMap.put("requestId", request.getId().toString());
+						requestMap.put("requestTitle", request.getTitle());
+						requestMap.put("searchKey", request.getId() + "~" + request.getTitle());
+						requestList.add(requestMap);
+					}
+					
+					String json;
+					try {
+						json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(requestList);
+					} catch (JsonProcessingException e) {
+						throw new RuntimeException(e);
+					}
+					String script = String.format("var $input = $('#%s');"
+							+ "$input[0].atWhoRequestRenderCallback(%s);"
+							+ "$input[0].cachedRequests[$input[0].atWhoRequestQuery] = %s;", 
+							getComponent().getMarkupId(), json, json);
+					target.appendJavaScript(script);
 				} else {
 					super.respond(target);
 				}
@@ -119,6 +142,17 @@ public class CommentInput extends TextArea<String> {
 		return GitPlex.getInstance(Dao.class).query(criteria, 0, count);
 	}
 
+	protected List<PullRequest> queryRequests(String query, int count) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		if (StringUtils.isNotBlank(query)) {
+			criteria.add(Restrictions.or(
+					Restrictions.ilike("title", query, MatchMode.ANYWHERE), 
+					Restrictions.ilike("idStr", query, MatchMode.START)));
+		}
+		criteria.addOrder(Order.desc("id"));
+		return GitPlex.getInstance(Dao.class).query(criteria, 0, count);
+	}
+	
 	@Override
 	protected void onDetach() {
 		requestModel.detach();

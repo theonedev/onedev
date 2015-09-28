@@ -91,3 +91,9 @@ li.selectable.active a, a.selectable.active {
 	font-weight: bold; 
 	font-style: normal;
 }
+
+img.avatar {
+	border-radius: 3px;
+	height: 24px;
+	width: 24px;
+}
