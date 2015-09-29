@@ -64,7 +64,7 @@ public class CommentInput extends TextArea<String> {
 						userMap.put("name", user.getName());
 						userMap.put("fullName", user.getFullName());
 						if (user.getNoSpaceFullName() != null)
-							userMap.put("searchKey", user.getNoSpaceName() + "~" + user.getNoSpaceFullName());
+							userMap.put("searchKey", user.getNoSpaceName() + " " + user.getNoSpaceFullName());
 						else
 							userMap.put("searchKey", user.getNoSpaceName());
 						String avatarUrl = avatarManager.getAvatarUrl(user);
@@ -89,7 +89,7 @@ public class CommentInput extends TextArea<String> {
 						Map<String, String> requestMap = new HashMap<>();
 						requestMap.put("requestId", request.getIdStr());
 						requestMap.put("requestTitle", request.getTitle());
-						requestMap.put("searchKey", request.getIdStr() + "~" + request.getNoSpaceTitle());
+						requestMap.put("searchKey", request.getIdStr() + " " + request.getNoSpaceTitle());
 						requestList.add(requestMap);
 					}
 					
