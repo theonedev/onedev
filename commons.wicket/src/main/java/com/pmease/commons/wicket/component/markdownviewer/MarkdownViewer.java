@@ -17,6 +17,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.markdown.MarkdownManager;
+import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
 public class MarkdownViewer extends GenericPanel<String> {
@@ -48,10 +49,16 @@ public class MarkdownViewer extends GenericPanel<String> {
 			protected void respond(AjaxRequestTarget target) {
 				Preconditions.checkState(taskEditable);
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-				String taskStartIndex = params.getParameterValue("taskStartIndex").toString();
-				String taskEndIndex = params.getParameterValue("taskEndIndex").toString();
+				int taskStartIndex = params.getParameterValue("taskStartIndex").toInt();
 				boolean taskChecked = params.getParameterValue("taskChecked").toBoolean();
-				
+				String markdown = getModelObject();
+				String beforeTask = markdown.substring(0, taskStartIndex);
+				String beforeBracket = StringUtils.substringBeforeLast(beforeTask, "[");
+				String afterBracket = StringUtils.substringAfterLast(beforeTask, "]");
+				String taskStatus = taskChecked?"x":" ";
+				String newMarkdown = beforeBracket + "[" + taskStatus + "]" 
+						+ afterBracket + markdown.substring(taskStartIndex);
+				getModel().setObject(newMarkdown);
 			}
 
 			@Override
@@ -61,9 +68,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				response.render(JavaScriptHeaderItem.forReference(MarkdownViewerResourceReference.INSTANCE));
 				
 				CharSequence callbackFunc = getCallbackFunction(
-						explicit("taskStartIndex"), 
-						explicit("taskEndIndex"), 
-						explicit("taskChecked"));
+						explicit("taskStartIndex"), explicit("taskChecked"));
 				String script = String.format("pmease.commons.initMarkdownViewer($('#%s>.md-preview'), %s);", 
 						getMarkupId(true), taskEditable?callbackFunc:"undefined");
 				response.render(OnDomReadyHeaderItem.forScript(script));
