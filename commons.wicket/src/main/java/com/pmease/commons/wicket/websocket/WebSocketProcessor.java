@@ -58,7 +58,7 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	 */
 	public WebSocketProcessor(final ServletUpgradeRequest upgradeRequest,
 		final ServletUpgradeResponse upgradeResponse, final WebApplication application) {
-		super(new UpgradeHttpRequest(upgradeRequest), application);
+		super(upgradeRequest.getHttpServletRequest(), application);
 		
 		this.request = upgradeRequest;
 	}
