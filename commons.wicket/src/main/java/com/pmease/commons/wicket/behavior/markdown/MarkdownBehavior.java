@@ -41,6 +41,7 @@ import com.pmease.commons.wicket.assets.atwho.AtWhoResourceReference;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.HighlightResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewerResourceReference;
 
 @SuppressWarnings("serial")
 public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
@@ -63,7 +64,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 			String script = String.format(""
 					+ "var $preview=$('#%s~.md-preview');"
 					+ "$preview.html('%s');"
-					+ "pmease.commons.highlight($preview);", 
+					+ "pmease.commons.initMarkdownViewer($preview);",
 					getComponent().getMarkupId(), StringEscapeUtils.escapeEcmaScript(preview));
 			target.appendJavaScript(script);
 		} else if (type.equals("emojiQuery")){
@@ -191,7 +192,9 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(MarkdownBehavior.class, "markdown.js")));
-		response.render(CssHeaderItem.forReference(MarkdownCssResourceReference.INSTANCE));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(MarkdownBehavior.class, "markdown.css")));
+		response.render(JavaScriptHeaderItem.forReference(MarkdownViewerResourceReference.INSTANCE));
 		
 		String encodedAttachmentSupport;
 		AttachmentSupport attachmentSupport = getAttachmentSupport();

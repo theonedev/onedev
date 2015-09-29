@@ -6,7 +6,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Blob;
-import com.pmease.commons.wicket.component.markdown.MarkdownViewPanel;
+import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 
@@ -22,14 +22,15 @@ public class MarkdownFilePanel extends BlobViewPanel {
 		super.onInitialize();
 		
 		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
-		add(new MarkdownViewPanel("markdown", Model.of(blob.getText().getContent())));
+		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), false));
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(MarkdownFilePanel.class, "markdown-view.css")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(MarkdownFilePanel.class, "markdown-file.css")));
 	}
 
 }

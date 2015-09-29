@@ -11,7 +11,7 @@ import com.pmease.commons.editable.annotation.Markdown;
 import com.pmease.commons.editable.annotation.Multiline;
 import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.wicket.component.MultilineLabel;
-import com.pmease.commons.wicket.component.markdown.MarkdownViewPanel;
+import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
@@ -45,7 +45,7 @@ public class StringEditSupport implements EditSupport {
 								if (propertyDescriptor.getPropertyGetter().getAnnotation(Multiline.class) != null) {
 									return new MultilineLabel(id, model.getObject());
 								} else if (propertyDescriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
-									return new MarkdownViewPanel(id, Model.of(model.getObject()));
+									return new MarkdownViewer(id, Model.of(model.getObject()), false);
 								} else { 
 									return new Label(id, model.getObject());
 								}

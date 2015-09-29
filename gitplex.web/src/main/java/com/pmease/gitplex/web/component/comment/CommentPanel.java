@@ -33,7 +33,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
-import com.pmease.commons.wicket.component.markdown.MarkdownViewPanel;
+import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -90,9 +90,53 @@ public class CommentPanel extends GenericPanel<Comment> {
 		return getModelObject();
 	}
 	
-	private Fragment renderForView(String content) {
+	private Fragment renderCommentForView() {
 		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
-		fragment.add(new MarkdownViewPanel("comment", Model.of(content)));
+		
+		fragment.add(new MarkdownViewer("comment", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return getComment().getContent();
+			}
+
+			@Override
+			public void setObject(String object) {
+				getComment().saveContent(object);
+			}
+			
+		}, SecurityUtils.canModify(getComment())));
+		
+		fragment.setOutputMarkupId(true);
+		return fragment;
+	}
+
+	private Fragment renderReply(CommentReply reply) {
+		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
+
+		final Long replyId = reply.getId();
+		fragment.add(new MarkdownViewer("comment", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return GitPlex.getInstance(Dao.class).load(CommentReply.class, replyId).getContent();
+			}
+
+			@Override
+			public void setObject(String object) {
+				GitPlex.getInstance(Dao.class).load(CommentReply.class, replyId).saveContent(object);
+			}
+			
+		}, SecurityUtils.canModify(getComment())));
+		
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}
@@ -133,10 +177,9 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						Comment comment = getComment();
-						comment.saveContent(input.getModelObject());
+						getComment().saveContent(input.getModelObject());
 
-						Fragment fragment = renderForView(comment.getContent());
+						Fragment fragment = renderCommentForView();
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
 						target.add(head);
@@ -155,7 +198,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Fragment fragment = renderForView(getComment().getContent());
+						Fragment fragment = renderCommentForView();
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
 						target.add(head);
@@ -208,7 +251,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 		head.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
 		
-		add(renderForView(getComment().getContent()));
+		add(renderCommentForView());
 
 		add(newAddReply());
 		
@@ -401,7 +444,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 						CommentReply reply = (CommentReply) row.getDefaultModelObject();
 						reply.saveContent(input.getModelObject());
 
-						Fragment fragment = renderForView(reply.getContent());
+						Fragment fragment = renderReply(reply);
 						row.replace(fragment);
 						target.add(fragment);
 						target.add(head);
@@ -421,7 +464,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						CommentReply reply = (CommentReply) row.getDefaultModelObject();
-						Fragment fragment = renderForView(reply.getContent());
+						Fragment fragment = renderReply(reply);
 						row.replace(fragment);
 						target.add(fragment);
 						target.add(head);
@@ -469,7 +512,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		head.add(newAdditionalReplyOperations("additionalOperations", (CommentReply) row.getDefaultModelObject()));
 		head.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "reply" + reply.getId())));		
 		
-		row.add(renderForView(reply.getContent()));
+		row.add(renderReply(reply));
 		
 		Date lastVisitDate = getComment().getLastVisitDate();
 		if (lastVisitDate != null && lastVisitDate.before(reply.getDate())) {

@@ -35,7 +35,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.wicket.component.markdown.MarkdownViewPanel;
+import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
@@ -238,7 +238,7 @@ public abstract class FileListPanel extends Panel {
 			}
 			
 		}));
-		readmeContainer.add(new MarkdownViewPanel("body", new LoadableDetachableModel<String>() {
+		readmeContainer.add(new MarkdownViewer("body", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -250,7 +250,7 @@ public abstract class FileListPanel extends Panel {
 					return "This seems like a binary file!";
 			}
 			
-		}));
+		}, false));
 		add(readmeContainer);
 		
 		setOutputMarkupId(true);
