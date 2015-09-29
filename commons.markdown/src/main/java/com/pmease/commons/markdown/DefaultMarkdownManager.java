@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.pegdown.Extensions;
 import org.pegdown.LinkRenderer;
 import org.pegdown.Parser;
 import org.pegdown.PegDownProcessor;
@@ -50,7 +49,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 			}
 		}
 		PegDownPlugins plugins = builder.build();
-		PegDownProcessor processor = new PegDownProcessor(ALL_WITH_OPTIONALS|Extensions.TASKLISTITEMS, plugins);
+		PegDownProcessor processor = new PegDownProcessor(ALL_WITH_OPTIONALS, plugins);
 
 		RootNode ast = processor.parseMarkdown(markdown.toCharArray());
 		
