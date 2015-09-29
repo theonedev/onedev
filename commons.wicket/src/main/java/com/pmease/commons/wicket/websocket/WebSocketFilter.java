@@ -33,72 +33,57 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An upgrade filter that uses Jetty9's WebSocketServerFactory to decide whether to upgrade or not.
+ * An upgrade filter that uses Jetty9's WebSocketServerFactory to decide whether
+ * to upgrade or not.
  */
-public class WebSocketFilter extends AbstractUpgradeFilter
-{
-	private static final Logger LOG = LoggerFactory.getLogger(WebSocketFilter.class);
+public class WebSocketFilter extends AbstractUpgradeFilter {
+	private static final Logger logger = LoggerFactory.getLogger(WebSocketFilter.class);
 
-	private WebSocketServerFactory _webSocketFactory;
+	private WebSocketServerFactory webSocketFactory;
 
 	private final WebSocketPolicy webSocketPolicy;
-	
+
 	public WebSocketFilter(WebSocketPolicy webSocketPolicy) {
 		this.webSocketPolicy = webSocketPolicy;
 	}
-	
+
 	@Override
-	public void init(final boolean isServlet, final FilterConfig filterConfig)
-		throws ServletException
-	{
+	public void init(final boolean isServlet, final FilterConfig filterConfig) throws ServletException {
 		super.init(isServlet, filterConfig);
 
-		try
-		{
-			_webSocketFactory = new WebSocketServerFactory(webSocketPolicy);
+		try {
+			webSocketFactory = new WebSocketServerFactory(webSocketPolicy);
 
-			_webSocketFactory.setCreator(new WebSocketCreator()
-			{
+			webSocketFactory.setCreator(new WebSocketCreator() {
 				@Override
 				public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
 					return new WebSocketProcessor(req, resp, getApplication());
 				}
-				
+
 			});
 
-			_webSocketFactory.start();
-		}
-		catch (ServletException x)
-		{
+			webSocketFactory.start();
+		} catch (ServletException x) {
 			throw x;
-		}
-		catch (Exception x)
-		{
+		} catch (Exception x) {
 			throw new ServletException(x);
 		}
 	}
 
 	@Override
-	protected boolean acceptWebSocket(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-	{
-		return super.acceptWebSocket(req, resp) &&
-			_webSocketFactory.acceptWebSocket(req, resp);
+	protected boolean acceptWebSocket(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		return super.acceptWebSocket(req, resp) && webSocketFactory.acceptWebSocket(req, resp);
 	}
 
-	/* ------------------------------------------------------------ */
 	@Override
-	public void destroy()
-	{
-		try
-		{
-			if (_webSocketFactory != null)
-			{
-				_webSocketFactory.stop();
+	public void destroy() {
+		try {
+			if (webSocketFactory != null) {
+				webSocketFactory.stop();
 			}
-		}
-		catch (Exception x)
-		{
-			LOG.warn("A problem occurred while stopping the web socket factory", x);
+		} catch (Exception x) {
+			logger.warn("A problem occurred while stopping the web socket factory", x);
 		}
 
 		super.destroy();
