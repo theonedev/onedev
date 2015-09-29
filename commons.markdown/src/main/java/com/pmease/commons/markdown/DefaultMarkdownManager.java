@@ -17,7 +17,12 @@ import org.pegdown.LinkRenderer;
 import org.pegdown.Parser;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ToHtmlSerializer;
+import org.pegdown.ast.ListItemNode;
+import org.pegdown.ast.Node;
+import org.pegdown.ast.ParaNode;
 import org.pegdown.ast.RootNode;
+import org.pegdown.ast.SuperNode;
+import org.pegdown.ast.TaskListNode;
 import org.pegdown.plugins.PegDownPlugins;
 import org.pegdown.plugins.ToHtmlSerializerPlugin;
 
@@ -48,26 +53,58 @@ public class DefaultMarkdownManager implements MarkdownManager {
 					builder.withPlugin(each);
 			}
 		}
-		PegDownPlugins plugins = builder.build();
-		PegDownProcessor processor = new PegDownProcessor(ALL_WITH_OPTIONALS, plugins);
+		PegDownPlugins pegDownPlugins = builder.build();
+		PegDownProcessor processor = new PegDownProcessor(ALL_WITH_OPTIONALS, pegDownPlugins);
 
 		RootNode ast = processor.parseMarkdown(markdown.toCharArray());
 		
-		List<ToHtmlSerializerPlugin> serializers = new ArrayList<>();
+		List<ToHtmlSerializerPlugin> serializerPlugins = new ArrayList<>();
 		for (MarkdownExtension extension: extensions) {
 			if (extension.getHtmlSerializers() != null) {
 				for (ToHtmlSerializerPlugin each: extension.getHtmlSerializers())
-					serializers.add(each);
+					serializerPlugins.add(each);
 			}
 		}
 
-		return new ToHtmlSerializer(new LinkRenderer(), serializers).toHtml(ast);	
+		return new ToHtmlSerializer(new LinkRenderer(), serializerPlugins) {
+
+			@Override
+			public void visit(ListItemNode node) {
+		        if (node instanceof TaskListNode) {
+		            // vsch: #185 handle GitHub style task list items, these are a bit messy because the <input> checkbox needs to be
+		            // included inside the optional <p></p> first grand-child of the list item, first child is always RootNode
+		            // because the list item text is recursively parsed.
+		            Node firstChild = node.getChildren().get(0).getChildren().get(0);
+		            boolean firstIsPara = firstChild instanceof ParaNode;
+		            int indent = node.getChildren().size() > 1 ? 2 : 0;
+		            boolean startWasNewLine = printer.endsWithNewLine();
+
+		            printer.println().print("<li class=\"task-list-item\">").indent(indent);
+		            if (firstIsPara) {
+		                printer.println().print("<p>");
+		                printer.print("<input data-mdstart=" + node.getStartIndex() + " data-mdend=" + node.getEndIndex() + " type='checkbox' class='task-list-item-checkbox'" + (((TaskListNode) node).isDone() ? " checked='checked'" : "") + "></input>");
+		                visitChildren((SuperNode) firstChild);
+
+		                // render the other children, the p tag is taken care of here
+		                visitChildrenSkipFirst(node);
+		                printer.print("</p>");
+		            } else {
+		                printer.print("<input data-mdstart=" + node.getStartIndex() + " data-mdend=" + node.getEndIndex() + " type='checkbox' class='task-list-item-checkbox'" + (((TaskListNode) node).isDone() ? " checked='checked'" : "") + "></input>");
+		                visitChildren(node);
+		            }
+		            printer.indent(-indent).printchkln(indent != 0).print("</li>")
+		                    .printchkln(startWasNewLine);
+		        } else {
+		            printConditionallyIndentedTag(node, "li");
+		        }
+			}
+			
+		}.toHtml(ast);	
 	}
 
 	@Override
 	public String parseAndProcess(String markdown) {
-		String rawHtml = parse(markdown);
-		return process(rawHtml);
+		return process(parse(markdown));
 	}
 	
 	@Override

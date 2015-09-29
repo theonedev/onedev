@@ -20,7 +20,7 @@ public class JsoupUtils {
 		"sup", "sub", "p", "ol", "ul", "li", "table", "thead", "tbody", "tfoot",
 		"th", "tr", "td", "rt", "rp", "blockquote", "dl", "dt", "dd", "kbd", "q",
 		"hr", "strike", "caption", "cite", "col", "colgroup", "small", 
-		"span", "u"
+		"span", "u", "input"
 	};
 
 	private static final String[] SAFE_ATTRIBUTES = new String[] {
@@ -40,7 +40,8 @@ public class JsoupUtils {
 		"selected", "shape", "size", "span",
 		"start", "style", "summary", "tabindex", "target",
 		"title", "type", "usemap", "valign", "value",
-		"vspace", "width", "itemprop", "class"
+		"vspace", "width", "itemprop", "class", 
+		"data-mdstart", "data-mdend" 
 	};
 	
 	private static final String[] SAFE_ANCHOR_SCHEMES = new String[] {
