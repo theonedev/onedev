@@ -64,6 +64,10 @@
 	padding: 8px; 
 	border-bottom: none;
 }
+.md-preview {
+	font-size: 16px;
+    line-height: 1.6;
+}
 .md-preview .emoji {
 	width: 20px; 
 	height: 20px;
@@ -78,6 +82,15 @@
 }
 .md-preview table tr:nth-child(even) td {
 	background: #F5F5F5;
+}
+.md-preview h1, .md-preview h2, .md-preview h3, 
+.md-preview h4, .md-preview h5, .md-preview h6 {
+	font-weight: bold;
+}
+.md-preview h1 a, .md-preview h2 a, .md-preview h3 a, 
+.md-preview h4 a, .md-preview h5 a, .md-preview h6 a {
+	color: #333;
+	text-decoration: none;
 }
 .md-preview blockquote {
 	font-size: 15px; 
