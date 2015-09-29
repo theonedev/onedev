@@ -82,6 +82,11 @@ public abstract class RevisionDiffPanel extends Panel {
 					true, paths.toArray(new String[paths.size()]));
 			List<BlobChange> diffableChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
+	    		System.out.println(entry.getChangeType());
+	    		System.out.println(entry.getOldPath());
+	    		System.out.println(entry.getNewPath());
+	    		System.out.println(entry.getOldMode().getBits());
+	    		System.out.println(entry.getNewMode().getBits());
 	    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
 		    		diffableChanges.add(new BlobChange(oldRev, newRev, entry) {
 

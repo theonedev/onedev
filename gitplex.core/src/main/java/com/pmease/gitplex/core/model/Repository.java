@@ -565,7 +565,16 @@ public class Repository extends AbstractEntity implements UserBelonging {
 				} else if (paths.length == 1) {
 					diffFormatter.setPathFilter(PathFilter.create(paths[0]));
 				}
-		    	diffs = diffFormatter.scan(oldCommitId, newCommitId);
+				diffs = new ArrayList<>();
+		    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
+		    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
+		    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
+		    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
+		    				|| entry.getNewId()== null || !entry.getNewId().isComplete()
+		    				|| !entry.getOldId().equals(entry.getNewId())) {
+		    			diffs.add(entry);
+		    		}
+		    	}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}			
