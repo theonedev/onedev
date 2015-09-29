@@ -4,8 +4,20 @@
 		<div class="body">
 			<form wicket:id="form">
 				<div wicket:id="feedback"></div>
-				<div wicket:id="avatarPicker"></div>
+				<div class="clearfix">
+					<div class="upload pull-left">
+					    <span class="btn btn-primary btn-file">
+					        Select image file to use as avatar... <input wicket:id="file" type="file" accept=".png, .gif, .jpg, .jpeg"></input>
+					    </span>		
+					</div>
+					<div class="reset pull-left">
+						<a wicket:id="reset" class="btn btn-default">Use default</a>
+					</div>
+				</div>
 			</form>
+			<div class="help-block">
+				Supported image types are png, gif, jpg and jpeg. The image size should be less than <span wicket:id="maxSize"></span>M bytes.
+			</div>
 		</div>
 	</section>
 </wicket:extend>

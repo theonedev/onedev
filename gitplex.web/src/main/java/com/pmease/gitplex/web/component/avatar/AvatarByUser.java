@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.component.avatar;
 
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
@@ -10,6 +11,7 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
+import com.pmease.gitplex.web.page.account.setting.AvatarChanged;
 
 @SuppressWarnings("serial")
 public class AvatarByUser extends WebComponent {
@@ -46,6 +48,17 @@ public class AvatarByUser extends WebComponent {
 		this.withTooltip = withTooltip;
 	}
 	
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		
+		if (event.getPayload() instanceof AvatarChanged) {
+			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
+			if (avatarChanged.getUser().equals(getUser()))
+				avatarChanged.getTarget().add(this);
+		}
+	}
+
 	private User getUser() {
 		return (User) getDefaultModelObject();
 	}
