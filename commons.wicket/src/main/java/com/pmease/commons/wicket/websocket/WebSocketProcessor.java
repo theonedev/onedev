@@ -16,12 +16,8 @@
  */
 package com.pmease.commons.wicket.websocket;
 
-import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.util.ThreadContext;
-import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.ws.api.AbstractWebSocketProcessor;
 import org.eclipse.jetty.websocket.api.Session;
@@ -79,12 +75,8 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 		UnitOfWork unitOfWork = AppLoader.getInstance(UnitOfWork.class);
 		unitOfWork.begin();
 		try {
-			PrincipalCollection principals = (PrincipalCollection) request.getSession().getAttribute(
-					DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
-			if (principals == null)
-				principals = new SimplePrincipalCollection(0L, "");
-	    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
-	        ThreadContext.bind(new Subject.Builder(securityManager).principals(principals).buildSubject());
+			Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
+	        ThreadContext.bind(subject);
 
 	        runnable.run();
 		} finally {

@@ -105,8 +105,9 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 			
 		};
+
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

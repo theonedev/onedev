@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.protocol.ws.AbstractUpgradeFilter;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
@@ -37,6 +38,9 @@ import org.slf4j.LoggerFactory;
  * to upgrade or not.
  */
 public class WebSocketFilter extends AbstractUpgradeFilter {
+
+	public static final String SHIRO_SUBJECT = "shiro_subject"; 
+	
 	private static final Logger logger = LoggerFactory.getLogger(WebSocketFilter.class);
 
 	private WebSocketServerFactory webSocketFactory;
@@ -73,6 +77,7 @@ public class WebSocketFilter extends AbstractUpgradeFilter {
 	@Override
 	protected boolean acceptWebSocket(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		req.setAttribute(SHIRO_SUBJECT, SecurityUtils.getSubject());
 		return super.acceptWebSocket(req, resp) && webSocketFactory.acceptWebSocket(req, resp);
 	}
 
