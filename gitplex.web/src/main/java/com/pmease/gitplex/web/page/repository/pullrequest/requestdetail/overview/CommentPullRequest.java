@@ -18,7 +18,7 @@ class CommentPullRequest implements RenderableActivity {
 	
 	@Override
 	public Date getDate() {
-		return getComment().getDate();
+		return getComment().getCreateDate();
 	}
 
 	@Override

@@ -233,7 +233,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 					}
 					GitPlex.getInstance(Dao.class).persist(visit);
 				}
-				
 				super.onDetach();
 			}
 			

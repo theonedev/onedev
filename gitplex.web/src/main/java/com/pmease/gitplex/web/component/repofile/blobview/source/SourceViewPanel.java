@@ -106,7 +106,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 					@Override
 					public int compare(Comment comment1, Comment comment2) {
-						return comment1.getDate().compareTo(comment2.getDate());
+						return comment1.getCreateDate().compareTo(comment2.getCreateDate());
 					}
 					
 				});

@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.manager.impl;
 import static com.pmease.gitplex.core.model.Comment.DIFF_CONTEXT_SIZE;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -26,8 +25,8 @@ import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
@@ -216,7 +215,6 @@ public class DefaultCommentManager implements CommentManager {
 		Comment comment = new Comment();
 		request.getComments().add(comment);
 		comment.setUser(user);
-		comment.setDate(new Date());
 		comment.setContent(content);
 		comment.setRequest(request);
 		comment.setBlobIdent(blobInfo);

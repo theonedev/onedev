@@ -136,10 +136,6 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 	@Override
 	public void onOpen(Object connection) {
-		if (!(connection instanceof Session)) {
-			throw new IllegalArgumentException(WebSocketProcessor.class.getName() +
-				" can work only with " + Session.class.getName());
-		}
 		onWebSocketConnect((Session)connection);
 	}
 }

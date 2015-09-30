@@ -86,7 +86,6 @@ public class DefaultReviewManager implements ReviewManager {
 		if (comment != null) {
 			Comment requestComment = new Comment();
 			requestComment.setRequest(request);
-			requestComment.setDate(activity.getDate());
 			requestComment.setUser(reviewer);
 			requestComment.setContent(comment);
 			

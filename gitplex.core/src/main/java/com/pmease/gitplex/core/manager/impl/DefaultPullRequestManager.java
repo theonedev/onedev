@@ -181,7 +181,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		if (comment != null) {
 			Comment requestComment = new Comment();
 			requestComment.setContent(comment);
-			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
 			commentManager.save(requestComment, false);
@@ -210,7 +209,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		if (comment != null) {
 			Comment requestComment = new Comment();
 			requestComment.setContent(comment);
-			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
 			
@@ -287,7 +285,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		if (comment != null) {
 			Comment requestComment = new Comment();
 			requestComment.setContent(comment);
-			requestComment.setDate(activity.getDate());
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
 			commentManager.save(requestComment, false);

@@ -105,7 +105,7 @@ public class TextDiffPanel extends Panel {
 	
 					@Override
 					public int compare(CommentAndPos commentAndPos1, CommentAndPos commentAndPos2) {
-						return commentAndPos1.comment.getDate().compareTo(commentAndPos2.comment.getDate());
+						return commentAndPos1.comment.getCreateDate().compareTo(commentAndPos2.comment.getCreateDate());
 					}
 					
 				});

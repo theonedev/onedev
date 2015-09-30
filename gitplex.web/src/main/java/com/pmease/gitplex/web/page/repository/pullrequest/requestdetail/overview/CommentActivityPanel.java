@@ -36,7 +36,7 @@ class CommentActivityPanel extends Panel {
 						return CommentActivityPanel.this.commentModel.getObject().getRequest();
 					}
 					
-				}, CommentActivityPanel.this.commentModel.getObject().getDate(), "Changes since this comment");
+				}, CommentActivityPanel.this.commentModel.getObject().getCreateDate(), "Changes since this comment");
 			}
 
 			@Override

@@ -151,7 +151,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 		head.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
 		head.add(newActionComponent("action"));
-		head.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
+		head.add(new Label("age", DateUtils.formatAge(getComment().getCreateDate())));
 
 		head.add(new AjaxLink<Void>("edit") {
 
@@ -272,7 +272,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 					Component lastReplyRow = repliesView.get(repliesView.size()-1);
 					lastReplyDate = ((CommentReply)lastReplyRow.getDefaultModelObject()).getDate();
 				} else {
-					lastReplyDate = getComment().getDate();
+					lastReplyDate = getComment().getCreateDate();
 				}
 				for (CommentReply reply: replies) {
 					if (reply.getDate().after(lastReplyDate)) {

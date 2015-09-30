@@ -15,6 +15,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
@@ -32,6 +33,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
 @Entity
+@DynamicUpdate
 public class Comment extends AbstractEntity {
 	
 	public static final int DIFF_CONTEXT_SIZE = 3;
@@ -49,7 +51,10 @@ public class Comment extends AbstractEntity {
 	private String content;
 	
 	@Column(nullable=false)
-	private Date date = new Date();
+	private Date createDate = new Date();
+	
+	@Column(nullable=false)
+	private Date updateDate = new Date();
 	
 	@OneToMany(mappedBy="comment")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -85,12 +90,16 @@ public class Comment extends AbstractEntity {
 		this.content = content;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 
 	public void saveContent(String content) {

@@ -11,6 +11,7 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
@@ -18,6 +19,7 @@ import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.resource.AttachmentResource;
 import com.pmease.gitplex.web.resource.AttachmentResourceReference;
 
@@ -83,6 +85,8 @@ public class CommentAttachmentSupport implements AttachmentSupport {
 
 	@Override
 	public String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream) {
+		Preconditions.checkState(SecurityUtils.canPull(getRequest().getTargetRepo()));
+		
 		String attachmentName = suggestedAttachmentName;
 		File attachmentsDir = getAttachmentsDir();
 		int index = 2;
