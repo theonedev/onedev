@@ -1,8 +1,8 @@
 package com.pmease.gitplex.core.manager;
 
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 
 public interface CommentManager {
 

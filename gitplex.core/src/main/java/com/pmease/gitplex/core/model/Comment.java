@@ -20,6 +20,8 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
@@ -33,6 +35,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 
 @SuppressWarnings("serial")
 @Entity
+@OptimisticLocking(type=OptimisticLockType.DIRTY)
 @DynamicUpdate
 public class Comment extends AbstractEntity {
 	
@@ -52,9 +55,6 @@ public class Comment extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
-	
-	@Column(nullable=false)
-	private Date updateDate = new Date();
 	
 	@OneToMany(mappedBy="comment")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -92,19 +92,6 @@ public class Comment extends AbstractEntity {
 
 	public Date getCreateDate() {
 		return createDate;
-	}
-
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
-	}
-
-	public void saveContent(String content) {
-		setContent(content);
-		GitPlex.getInstance(Dao.class).persist(this);
 	}
 
 	public Repository getRepository() {

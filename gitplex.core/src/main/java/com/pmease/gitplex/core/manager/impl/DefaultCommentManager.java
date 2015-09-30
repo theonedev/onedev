@@ -223,5 +223,5 @@ public class DefaultCommentManager implements CommentManager {
 		save(comment, true);
 		return comment;
 	}
-	
+
 }

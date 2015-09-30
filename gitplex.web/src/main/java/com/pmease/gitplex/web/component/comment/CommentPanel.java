@@ -28,6 +28,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.time.Duration;
+import org.hibernate.StaleObjectStateException;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
@@ -36,6 +37,7 @@ import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
@@ -90,9 +92,9 @@ public class CommentPanel extends GenericPanel<Comment> {
 		return getModelObject();
 	}
 	
-	private Fragment renderCommentForView() {
+	private Fragment renderComment() {
 		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
-		
+
 		fragment.add(new MarkdownViewer("comment", new IModel<String>() {
 
 			@Override
@@ -106,7 +108,9 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 			@Override
 			public void setObject(String object) {
-				getComment().saveContent(object);
+				Comment comment = getComment();
+				comment.setContent(object);
+				GitPlex.getInstance(CommentManager.class).save(comment, false);				
 			}
 			
 		}, SecurityUtils.canModify(getComment())));
@@ -161,6 +165,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 				Form<?> form = new Form<Void>(FORM_ID);
 				fragment.add(form);
+				final Comment comment = getComment();
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
@@ -168,18 +173,19 @@ public class CommentPanel extends GenericPanel<Comment> {
 						return getComment().getRequest();
 					}
 					
-				}, Model.of(getComment().getContent()));
+				}, Model.of(comment.getContent()));
 				input.setRequired(true);
 				form.add(input);
 				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
-				
+
 				form.add(new AjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						getComment().saveContent(input.getModelObject());
+						comment.setContent(input.getModelObject());
+						GitPlex.getInstance(CommentManager.class).save(comment, false);
 
-						Fragment fragment = renderCommentForView();
+						Fragment fragment = renderComment();
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
 						target.add(head);
@@ -198,7 +204,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Fragment fragment = renderCommentForView();
+						Fragment fragment = renderComment();
 						CommentPanel.this.replace(fragment);
 						target.add(fragment);
 						target.add(head);
@@ -251,7 +257,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 		head.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
 		
-		add(renderCommentForView());
+		add(renderComment());
 
 		add(newAddReply());
 		
