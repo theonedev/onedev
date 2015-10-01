@@ -45,8 +45,6 @@ public class SearchOption implements Serializable {
 	
 	private String title;
 	
-	private String description;
-	
 	private Date beginDate;
 	
 	private Date endDate;
@@ -98,15 +96,6 @@ public class SearchOption implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
-	}
-
-	@Editable(order=600, name="Description Containing")
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	@Editable(order=700, name="Created After", description="Date should be specified with format <i>yyyy-MM-dd</i>.")
@@ -172,8 +161,6 @@ public class SearchOption implements Serializable {
 			criteria.add(Restrictions.eq("targetBranch", targetBranch));
 		if (title != null)
 			criteria.add(Restrictions.ilike("title", "%" + title + "%"));
-		if (description != null)
-			criteria.add(Restrictions.ilike("description", "%" + description + "%"));
 		if (beginDate != null)
 			criteria.add(Restrictions.ge("createDate", beginDate));
 		if (endDate != null)
