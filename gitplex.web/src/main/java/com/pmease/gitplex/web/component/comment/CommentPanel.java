@@ -155,7 +155,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 		head.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
 		head.add(newActionComponent("action"));
-		head.add(new Label("age", DateUtils.formatAge(getComment().getCreateDate())));
+		head.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 
 		head.add(new AjaxLink<Void>("edit") {
 
@@ -165,7 +165,6 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 				Form<?> form = new Form<Void>(FORM_ID);
 				fragment.add(form);
-				final Comment comment = getComment();
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
@@ -173,15 +172,19 @@ public class CommentPanel extends GenericPanel<Comment> {
 						return getComment().getRequest();
 					}
 					
-				}, Model.of(comment.getContent()));
+				}, Model.of(getComment().getContent()));
 				input.setRequired(true);
 				form.add(input);
 				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 
+				final long lastVersion = getComment().getVersion();
 				form.add(new AjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						Comment comment = getComment();
+						if (comment.getVersion() != lastVersion)
+							throw new StaleObjectStateException(Comment.class.getName(), comment.getId());
 						comment.setContent(input.getModelObject());
 						GitPlex.getInstance(CommentManager.class).save(comment, false);
 
@@ -278,7 +281,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 					Component lastReplyRow = repliesView.get(repliesView.size()-1);
 					lastReplyDate = ((CommentReply)lastReplyRow.getDefaultModelObject()).getDate();
 				} else {
-					lastReplyDate = getComment().getCreateDate();
+					lastReplyDate = getComment().getDate();
 				}
 				for (CommentReply reply: replies) {
 					if (reply.getDate().after(lastReplyDate)) {

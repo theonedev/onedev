@@ -14,14 +14,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.OptimisticLockType;
-import org.hibernate.annotations.OptimisticLocking;
+import org.hibernate.annotations.OptimisticLock;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
@@ -33,14 +33,21 @@ import com.pmease.gitplex.core.manager.CommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.UserManager;
 
+/*
+ * @DynamicUpdate annotation here along with various @OptimisticLock annotations
+ * on certain fields tell Hibernate not to perform version check on those fields
+ * which can be updated from background thread.
+ */
 @SuppressWarnings("serial")
 @Entity
-@OptimisticLocking(type=OptimisticLockType.DIRTY)
-@DynamicUpdate
+@DynamicUpdate 
 public class Comment extends AbstractEntity {
 	
 	public static final int DIFF_CONTEXT_SIZE = 3;
 
+	@Version
+	private long version;
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	@Fetch(FetchMode.JOIN)
@@ -54,12 +61,13 @@ public class Comment extends AbstractEntity {
 	private String content;
 	
 	@Column(nullable=false)
-	private Date createDate = new Date();
+	private Date date = new Date();
 	
 	@OneToMany(mappedBy="comment")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<CommentReply> replies = new ArrayList<>();
 	
+	@OptimisticLock(excluded=true)
 	@Embedded
 	private InlineInfo inlineInfo;
 	
@@ -82,6 +90,10 @@ public class Comment extends AbstractEntity {
 		this.user = user;
 	}
 
+	public long getVersion() {
+		return version;
+	}
+
 	public String getContent() {
 		return content;
 	}
@@ -90,8 +102,8 @@ public class Comment extends AbstractEntity {
 		this.content = content;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
+	public Date getDate() {
+		return date;
 	}
 
 	public Repository getRepository() {
@@ -111,7 +123,6 @@ public class Comment extends AbstractEntity {
 		Preconditions.checkNotNull(user);
 		CommentReply reply = new CommentReply();
 		reply.setUser(user);
-		reply.setDate(new Date());
 		reply.setContent(content);
 		reply.setComment(this);
 		GitPlex.getInstance(CommentReplyManager.class).save(reply);

@@ -8,6 +8,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -17,16 +18,23 @@ import com.pmease.gitplex.core.GitPlex;
 @Entity
 public class CommentReply extends AbstractEntity {
 
+	@Version
+	private long version;
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
+
+	public long getVersion() {
+		return version;
+	}
 
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -42,10 +50,6 @@ public class CommentReply extends AbstractEntity {
 
 	public Date getDate() {
 		return date;
-	}
-
-	public void setDate(Date date) {
-		this.date = date;
 	}
 
 	public String getContent() {

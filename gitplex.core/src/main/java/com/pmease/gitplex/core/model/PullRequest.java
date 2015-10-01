@@ -25,9 +25,11 @@ import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -50,8 +52,14 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
+/*
+ * @DynamicUpdate annotation here along with various @OptimisticLock annotations
+ * on certain fields tell Hibernate not to perform version check on those fields
+ * which can be updated from background thread.
+ */
 @SuppressWarnings("serial")
 @Entity
+@DynamicUpdate 
 public class PullRequest extends AbstractEntity {
 
 	public enum CloseStatus {INTEGRATED, DISCARDED};
@@ -138,6 +146,7 @@ public class PullRequest extends AbstractEntity {
 		
 	};
 	
+	@OptimisticLock(excluded=true)
 	@Column
 	private CloseStatus closeStatus;
 
@@ -185,15 +194,18 @@ public class PullRequest extends AbstractEntity {
 	@Transient
 	private Git sandbox;
 	
+	@OptimisticLock(excluded=true)
 	@Embedded
 	private IntegrationPreview lastIntegrationPreview;
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
 	
+	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
 	private Date lastEventDate = new Date();
 	
+	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
 	private Event lastEvent = Event.OPENED;
 	
