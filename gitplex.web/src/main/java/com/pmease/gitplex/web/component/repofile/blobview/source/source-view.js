@@ -148,7 +148,10 @@ gitplex.sourceview = {
 			$comment = $("#" + $comment);
 		$comment[0].lineWidget.changed();
 		var $wrapper = $comment.find(">div");
-		$wrapper.on("mouseup resized", function() {
+		$wrapper.on("resized", function() {
+			$comment[0].lineWidget.changed();
+		});
+		$wrapper.find("textarea").on("autosize:resized", function(){
 			$comment[0].lineWidget.changed();
 		});
 		$wrapper.on("fullscreen", function() {

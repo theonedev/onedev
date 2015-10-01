@@ -91,3 +91,6 @@
 .md-input.drag-over {
 	border: 2px solid #69B7F7;
 }
+.md-fullscreen-mode textarea {
+	max-height: inherit;
+}

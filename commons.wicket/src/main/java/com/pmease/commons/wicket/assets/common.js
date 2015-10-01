@@ -516,7 +516,16 @@ pmease.commons = {
 				return true;
 		}
 	},
-	
+	setupAutoSize: function() {
+		autosize($("textarea"));
+		$(document).on("replace", function(event, componentId) {
+			var $component = $("#" + componentId);
+			var $textarea = $component.find("textarea");
+			if ($component.is("textarea"))
+				$textarea = $textarea.add($component);
+			autosize($textarea);
+		});
+	},	
 	setupAjaxLoadingIndicator: function() {
 		$("#ajax-loading-overlay").click(function(e) {
 			e.stopPropagation();
@@ -944,6 +953,7 @@ pmease.commons = {
 };
 
 $(function() {
+	pmease.commons.setupAutoSize();
 	pmease.commons.setupDropdownAndModel();
 	pmease.commons.setupAjaxLoadingIndicator();
 	pmease.commons.form.setupDirtyCheck();

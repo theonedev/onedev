@@ -273,3 +273,7 @@ input.clearable::-ms-clear {display: none;}
     cursor: inherit;
     display: block;
 }
+
+textarea {
+	max-height: 600px;
+}
