@@ -5,10 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -26,18 +28,22 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.time.Duration;
 import org.hibernate.StaleObjectStateException;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
+import com.pmease.gitplex.core.manager.CommentReplyManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
@@ -93,8 +99,12 @@ public class CommentPanel extends GenericPanel<Comment> {
 	}
 	
 	private Fragment renderComment() {
-		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
+		final Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 
+		final FeedbackPanel feedback = new FeedbackPanel("feedback", fragment).hideAfter(Duration.seconds(5));
+		feedback.setOutputMarkupPlaceholderTag(true);
+		fragment.add(feedback);
+		final AtomicLong lastVersionRef = new AtomicLong(getComment().getVersion());
 		fragment.add(new MarkdownViewer("comment", new IModel<String>() {
 
 			@Override
@@ -108,9 +118,21 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 			@Override
 			public void setObject(String object) {
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				Preconditions.checkNotNull(target);
 				Comment comment = getComment();
-				comment.setContent(object);
-				GitPlex.getInstance(CommentManager.class).save(comment, false);				
+				try {
+					if (comment.getVersion() != lastVersionRef.get())
+						throw new StaleObjectStateException(Comment.class.getName(), comment.getId());
+					comment.setContent(object);
+					GitPlex.getInstance(CommentManager.class).save(comment, false);				
+					target.add(feedback); // clear the feedback
+				} catch (StaleObjectStateException e) {
+					fragment.warn("Some one changed the content you are editing. The content has now been "
+							+ "reloaded, please try again.");
+					target.add(fragment);
+				}
+				lastVersionRef.set(comment.getVersion());
 			}
 			
 		}, SecurityUtils.canModify(getComment())));
@@ -120,9 +142,13 @@ public class CommentPanel extends GenericPanel<Comment> {
 	}
 
 	private Fragment renderReply(CommentReply reply) {
-		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
+		final Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 
 		final Long replyId = reply.getId();
+		final FeedbackPanel feedback = new FeedbackPanel("feedback", fragment).hideAfter(Duration.seconds(5)); 
+		feedback.setOutputMarkupPlaceholderTag(true);
+		fragment.add(feedback);
+		final AtomicLong lastVersionRef = new AtomicLong(reply.getVersion());
 		fragment.add(new MarkdownViewer("comment", new IModel<String>() {
 
 			@Override
@@ -136,7 +162,21 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 			@Override
 			public void setObject(String object) {
-				GitPlex.getInstance(Dao.class).load(CommentReply.class, replyId).saveContent(object);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				Preconditions.checkNotNull(target);
+				CommentReply reply = GitPlex.getInstance(Dao.class).load(CommentReply.class, replyId);
+				try {
+					if (reply.getVersion() != lastVersionRef.get())
+						throw new StaleObjectStateException(CommentReply.class.getName(), reply.getId());
+					reply.setContent(object);
+					GitPlex.getInstance(CommentReplyManager.class).save(reply);
+					target.add(feedback); // clear the feedback
+				} catch (StaleObjectStateException e) {
+					fragment.warn("Some one changed the content you are editing. The content has now been "
+							+ "reloaded, please try again.");
+					target.add(fragment);
+				}
+				lastVersionRef.set(reply.getVersion());
 			}
 			
 		}, SecurityUtils.canModify(getComment())));
@@ -163,8 +203,12 @@ public class CommentPanel extends GenericPanel<Comment> {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(BODY_ID, "editFrag", CommentPanel.this);
 
-				Form<?> form = new Form<Void>(FORM_ID);
+				final Form<?> form = new Form<Void>(FORM_ID);
+				form.setOutputMarkupId(true);
 				fragment.add(form);
+				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5)); 
+				feedback.setOutputMarkupPlaceholderTag(true);
+				form.add(feedback);
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
@@ -175,7 +219,6 @@ public class CommentPanel extends GenericPanel<Comment> {
 				}, Model.of(getComment().getContent()));
 				input.setRequired(true);
 				form.add(input);
-				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 
 				final long lastVersion = getComment().getVersion();
 				form.add(new AjaxSubmitLink("save") {
@@ -183,27 +226,38 @@ public class CommentPanel extends GenericPanel<Comment> {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						Comment comment = getComment();
-						if (comment.getVersion() != lastVersion)
-							throw new StaleObjectStateException(Comment.class.getName(), comment.getId());
-						comment.setContent(input.getModelObject());
-						GitPlex.getInstance(CommentManager.class).save(comment, false);
-
-						Fragment fragment = renderComment();
-						CommentPanel.this.replace(fragment);
-						target.add(fragment);
-						target.add(head);
-						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
+						try {
+							if (comment.getVersion() != lastVersion)
+								throw new StaleObjectStateException(Comment.class.getName(), comment.getId());
+							comment.setContent(input.getModelObject());
+							GitPlex.getInstance(CommentManager.class).save(comment, false);
+	
+							Fragment fragment = renderComment();
+							CommentPanel.this.replace(fragment);
+							target.add(fragment);
+							target.add(head);
+							send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
+						} catch (StaleObjectStateException e) {
+							error("Some one changed the content you are editing. Reload the page and try again.");
+							target.add(feedback);
+						}
 					}
 					
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
 						super.onError(target, form);
-						target.add(form);
+						target.add(feedback);
 					}
 					
 				});
 				
 				form.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -315,8 +369,12 @@ public class CommentPanel extends GenericPanel<Comment> {
 				Fragment fragment = new Fragment(CONTENT_ID, "editFrag", CommentPanel.this);
 				row.add(fragment);
 				
-				Form<?> form = new Form<Void>(FORM_ID);
+				final Form<?> form = new Form<Void>(FORM_ID);
+				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5));
+				feedback.setOutputMarkupPlaceholderTag(true);
+				form.add(feedback);
 				fragment.add(form);
+				form.setOutputMarkupId(true);
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
 
 					@Override
@@ -328,8 +386,6 @@ public class CommentPanel extends GenericPanel<Comment> {
 				input.setRequired(true);
 				form.add(input);
 
-				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
-				
 				final int pageId = getPage().getPageId();
 				form.add(new AjaxSubmitLink("save") {
 
@@ -358,13 +414,19 @@ public class CommentPanel extends GenericPanel<Comment> {
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
 						super.onError(target, form);
-						target.add(form);
+						target.add(feedback);
 					}
 					
 				});
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+					}
+					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Component addReply = newAddReply();
@@ -431,7 +493,11 @@ public class CommentPanel extends GenericPanel<Comment> {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(BODY_ID, "editFrag", CommentPanel.this);
 
-				Form<?> form = new Form<Void>(FORM_ID);
+				final Form<?> form = new Form<Void>(FORM_ID);
+				form.setOutputMarkupId(true);
+				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5)); 
+				feedback.setOutputMarkupPlaceholderTag(true);
+				form.add(feedback);
 				fragment.add(form);
 				CommentReply reply = (CommentReply) row.getDefaultModelObject();
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
@@ -444,32 +510,46 @@ public class CommentPanel extends GenericPanel<Comment> {
 				}, Model.of(reply.getContent()));
 				input.setRequired(true);
 				form.add(input);
-				form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
 				
+				final long lastVersion = reply.getVersion();
 				form.add(new AjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						CommentReply reply = (CommentReply) row.getDefaultModelObject();
-						reply.saveContent(input.getModelObject());
-
-						Fragment fragment = renderReply(reply);
-						row.replace(fragment);
-						target.add(fragment);
-						target.add(head);
-						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
+						try {
+							CommentReply reply = (CommentReply) row.getDefaultModelObject();
+							if (lastVersion != reply.getVersion())
+								throw new StaleObjectStateException(CommentReply.class.getName(), reply.getId());
+							reply.setContent(input.getModelObject());
+							GitPlex.getInstance(CommentReplyManager.class).save(reply);
+							
+							Fragment fragment = renderReply(reply);
+							row.replace(fragment);
+							target.add(fragment);
+							target.add(head);
+							send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
+						} catch (StaleObjectStateException e) {
+							error("Some one changed the content you are editing. Reload the page and try again.");
+							target.add(feedback);
+						}
 					}
 					
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
 						super.onError(target, form);
-						target.add(form);
+						target.add(feedback);
 					}
 					
 				});
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+					}
+					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						CommentReply reply = (CommentReply) row.getDefaultModelObject();

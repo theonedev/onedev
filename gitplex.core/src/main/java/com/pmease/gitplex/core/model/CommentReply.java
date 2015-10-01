@@ -60,11 +60,6 @@ public class CommentReply extends AbstractEntity {
 		this.content = content;
 	}
 
-	public void saveContent(String content) {
-		setContent(content);
-		GitPlex.getInstance(Dao.class).persist(this);
-	}
-
 	public void delete() {
 		GitPlex.getInstance(Dao.class).remove(this);
 	}

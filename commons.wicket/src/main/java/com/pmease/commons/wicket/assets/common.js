@@ -484,7 +484,6 @@ pmease.commons = {
 				
 				$component.closest("form.ays-inited").not($component).trigger("checkform.areYouSure");
 			});
-
 			
 			if (Wicket && Wicket.Ajax) {
 				var processAjaxResponse = Wicket.Ajax.Call.prototype.processAjaxResponse;

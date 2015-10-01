@@ -23,6 +23,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -190,6 +191,9 @@ public class PullRequest extends AbstractEntity {
 	@Index(name="PR_NO_SP_TITLE")
 	@Column(nullable=false)
 	private String noSpaceTitle;
+	
+	@Version
+	private long version;
 	
 	@Transient
 	private Git sandbox;
@@ -944,5 +948,9 @@ public class PullRequest extends AbstractEntity {
 	public String getNoSpaceTitle() {
 		return noSpaceTitle;
 	}
-	
+
+	public long getVersion() {
+		return version;
+	}
+
 }

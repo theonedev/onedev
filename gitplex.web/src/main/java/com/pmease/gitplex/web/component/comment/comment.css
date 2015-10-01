@@ -4,6 +4,9 @@
 .comment>.body>form {
 	margin-bottom: 12px;
 }
+.comment .feedback .alert {
+	margin-bottom: 8px;
+}
 .reply>.activity {
 	padding: 8px;
 }

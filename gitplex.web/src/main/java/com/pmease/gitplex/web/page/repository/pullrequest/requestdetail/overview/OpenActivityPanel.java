@@ -1,7 +1,10 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -11,8 +14,14 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.time.Duration;
+import org.hibernate.StaleObjectStateException;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -38,10 +47,14 @@ class OpenActivityPanel extends Panel {
 	}
 	
 	private Fragment renderForView() {
-		Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
+		final Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 
+		final FeedbackPanel feedback = new FeedbackPanel("feedback", fragment).hideAfter(Duration.seconds(5));
+		feedback.setOutputMarkupPlaceholderTag(true);
+		fragment.add(feedback);
 		String description = requestModel.getObject().getDescription();
-		if (StringUtils.isNotBlank(description))
+		if (StringUtils.isNotBlank(description)) {
+			final AtomicLong lastVersionRef = new AtomicLong(requestModel.getObject().getVersion());
 			fragment.add(new MarkdownViewer("description", new IModel<String>() {
 
 				@Override
@@ -55,12 +68,27 @@ class OpenActivityPanel extends Panel {
 
 				@Override
 				public void setObject(String object) {
-					requestModel.getObject().setDescription(object);
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					Preconditions.checkNotNull(target);
+					PullRequest request = requestModel.getObject();
+					try {
+						if (request.getVersion() != lastVersionRef.get())
+							throw new StaleObjectStateException(PullRequest.class.getName(), request.getId());
+						request.setDescription(object);
+						GitPlex.getInstance(Dao.class).persist(request);				
+						target.add(feedback); // clear the feedback
+					} catch (StaleObjectStateException e) {
+						fragment.warn("Some one changed the content you are editing. The content has now been "
+								+ "reloaded, please try again.");
+						target.add(fragment);
+					}
+					lastVersionRef.set(request.getVersion());
 				}
 				
 			}, SecurityUtils.canModify(requestModel.getObject())));
-		else
+		} else {
 			fragment.add(new Label("description", "<i>No description</i>").setEscapeModelStrings(false));
+		}
 		fragment.setOutputMarkupId(true);
 		
 		return fragment;
@@ -83,10 +111,15 @@ class OpenActivityPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment(BODY_ID, "editFrag", OpenActivityPanel.this);
 				
-				Form<?> form = new Form<Void>(FORM_ID);
+				final Form<?> form = new Form<Void>(FORM_ID);
 				form.setOutputMarkupId(true);
 				fragment.add(form);
-
+				
+				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5));
+				feedback.setOutputMarkupPlaceholderTag(true);
+				form.add(feedback);
+				
+				final long lastVersion = requestModel.getObject().getVersion();
 				final CommentInput input = new CommentInput("input", requestModel, 
 						Model.of(requestModel.getObject().getDescription()));
 				form.add(input);
@@ -96,25 +129,38 @@ class OpenActivityPanel extends Panel {
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
 						super.onError(target, form);
-						target.add(form);
+						target.add(feedback);
 					}
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						PullRequest request = requestModel.getObject();
-						request.setDescription(input.getModelObject());
-						GitPlex.getInstance(Dao.class).persist(request);
-
-						Fragment fragment = renderForView();
-						OpenActivityPanel.this.replace(fragment);
-						target.add(fragment);
-						target.add(head);
+						try {
+							PullRequest request = requestModel.getObject();
+							if (request.getVersion() != lastVersion)
+								throw new StaleObjectStateException(PullRequest.class.getName(), request.getId());
+							request.setDescription(input.getModelObject());
+							GitPlex.getInstance(Dao.class).persist(request);
+	
+							Fragment fragment = renderForView();
+							OpenActivityPanel.this.replace(fragment);
+							target.add(fragment);
+							target.add(head);
+						} catch (StaleObjectStateException e) {
+							error("Some one changed the content you are editing. Reload the page and try again.");
+							target.add(feedback);
+						}
 					}
 					
 				});
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+					}
+					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Fragment fragment = renderForView();

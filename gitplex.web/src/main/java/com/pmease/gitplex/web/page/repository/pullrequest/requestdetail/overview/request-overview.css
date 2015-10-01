@@ -135,6 +135,9 @@
 #request-detail .activities .activity>.detail>.reopen>.icon {
 	padding-left: 7px;
 }
+#request-detail .activities .activity>.detail>.open .feedback .alert {
+	margin-bottom: 8px;
+}
 
 #request-detail .info>div>div {
 	border-bottom: 1px dotted #BBB; 
