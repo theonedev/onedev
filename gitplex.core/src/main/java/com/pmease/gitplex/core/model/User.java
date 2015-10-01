@@ -99,7 +99,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
 
-    @Editable(order=100)
+    @Editable(name="Login Name", order=100)
 	@UserName
 	@NotEmpty
 	@Override

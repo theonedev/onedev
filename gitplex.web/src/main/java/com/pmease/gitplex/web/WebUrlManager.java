@@ -23,7 +23,7 @@ public class WebUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getRepository()) + "/pull-requests/" + request.getId();
+		return urlFor(request.getTarget().getRepository()) + "/pulls/" + request.getId() + "/overview";
 	}
 
 	@Override

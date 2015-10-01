@@ -2,13 +2,11 @@ package com.pmease.gitplex.core.model;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.wicket.util.lang.Objects;
 import org.hibernate.CallbackException;
 import org.hibernate.type.Type;
 
@@ -18,14 +16,14 @@ import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 
 @Singleton
-public class PullRequestPersistListener implements HibernateListener {
+public class CommentReplyPersistListener implements HibernateListener {
 
 	private final MarkdownManager markdownManager;
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public PullRequestPersistListener(MarkdownManager markdownManager, 
+	public CommentReplyPersistListener(MarkdownManager markdownManager, 
 			Set<PullRequestListener> pullRequestListeners) {
 		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
@@ -40,23 +38,18 @@ public class PullRequestPersistListener implements HibernateListener {
 	@Override
 	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
 			String[] propertyNames, Type[] types) throws CallbackException {
-		if (entity instanceof PullRequest) {
+		if (entity instanceof CommentReply) {
 			for (int i=0; i<propertyNames.length; i++) {
-				if (propertyNames[i].equals("description")) {
-					String description = (String) currentState[i];
-					String prevDescription = (String) previousState[i];
-					if (!Objects.equal(description, prevDescription)) {
+				if (propertyNames[i].equals("content")) {
+					String content = (String) currentState[i];
+					String prevContent = (String) previousState[i];
+					if (!content.equals(prevContent)) {
 						MentionParser parser = new MentionParser();
-						Collection<User> mentions;
-						if (description != null)
-							mentions = parser.parseMentions(markdownManager.parse(description));
-						else
-							mentions = new HashSet<>();
-						if (prevDescription != null)
-							mentions.removeAll(parser.parseMentions(markdownManager.parse(prevDescription)));
+						Collection<User> mentions = parser.parseMentions(markdownManager.parse(content));
+						mentions.removeAll(parser.parseMentions(markdownManager.parse(prevContent)));
 						for (User user: mentions) {
 							for (PullRequestListener listener: pullRequestListeners)
-								listener.onMentioned((PullRequest) entity, user);
+								listener.onMentioned((CommentReply) entity, user);
 						}
 					}
 					break;
@@ -69,24 +62,21 @@ public class PullRequestPersistListener implements HibernateListener {
 	@Override
 	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
 			throws CallbackException {
-		if (entity instanceof PullRequest) {
+		if (entity instanceof CommentReply) {
 			for (int i=0; i<propertyNames.length; i++) {
-				if (propertyNames[i].equals("idStr")) {
-					state[i] = id.toString();
-				} else if (propertyNames[i].equals("description")) {
-					String description = (String) state[i];
-					if (description != null) {
-						String rawHtml = markdownManager.parse(description);
-						Collection<User> mentions = new MentionParser().parseMentions(rawHtml);
-						for (User user: mentions) {
-							for (PullRequestListener listener: pullRequestListeners)
-								listener.onMentioned((PullRequest) entity, user);
-						}
+				if (propertyNames[i].equals("content")) {
+					String content = (String) state[i];
+					String rawHtml = markdownManager.parse(content);
+					Collection<User> mentions = new MentionParser().parseMentions(rawHtml);
+					for (User user: mentions) {
+						for (PullRequestListener listener: pullRequestListeners)
+							listener.onMentioned((CommentReply) entity, user);
 					}
+					break;
 				}
 			}
 		} 
-		return true;
+		return false;
 	}
 
 	@Override

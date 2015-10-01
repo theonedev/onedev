@@ -17,6 +17,9 @@
 	background: #FCF6D6;
 }
 
+div.replies>table {
+	table-layout: fixed;
+}
 div.replies>table>tbody>tr>td {
 	border-top: 1px dashed #CCC; 
 	padding: 8px 0; 
@@ -26,7 +29,7 @@ div.replies>table>tbody>tr:first-child>td {
 	border-top: none;
 }
 div.replies>table>tbody>tr>td.avatar {
-	width: 1px; 
+	width: 32px; 
 	padding-left: 10px;
 }
 div.replies>table>tbody>tr>td.avatar img {

@@ -2,7 +2,6 @@ package com.pmease.gitplex.core.manager.impl;
 
 import static com.pmease.gitplex.core.model.Comment.DIFF_CONTEXT_SIZE;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -20,8 +19,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
-import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -38,14 +35,11 @@ public class DefaultCommentManager implements CommentManager {
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
-	private final MarkdownManager markdownManager;
-	
 	@Inject
-	public DefaultCommentManager(Dao dao, UserManager userManager, MarkdownManager markdownManager, 
+	public DefaultCommentManager(Dao dao, UserManager userManager, 
 			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.userManager = userManager;
-		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
 	}
 
@@ -189,17 +183,7 @@ public class DefaultCommentManager implements CommentManager {
 	@Transactional
 	@Override
 	public void save(Comment comment, boolean notify) {
-		boolean isNew = comment.isNew();
 		dao.persist(comment);
-		
-		if (isNew) {
-			String rawHtml = markdownManager.parse(comment.getContent());
-			Collection<User> mentions = new MentionParser().parseMentions(rawHtml);
-			for (User user: mentions) {
-				for (PullRequestListener listener: pullRequestListeners)
-					listener.onMentioned(comment, user);
-			}
-		}
 		
 		if (notify) {
 			for (PullRequestListener listener: pullRequestListeners)

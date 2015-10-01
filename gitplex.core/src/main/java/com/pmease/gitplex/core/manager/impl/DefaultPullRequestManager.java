@@ -49,7 +49,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
@@ -87,8 +86,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	
 	private final UserManager userManager;
 	
-	private final MarkdownManager markdownManager;
-	
 	private final StorageManager storageManager;
 	
 	private final UnitOfWork unitOfWork;
@@ -114,7 +111,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		this.commentManager = commentManager;
 		this.userManager = userManager;
 		this.unitOfWork = unitOfWork;
-		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
 		
 		BlockingDeque<Runnable> queue = new LinkedBlockingDeque<Runnable>() {
@@ -318,15 +314,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onOpened(request);
-		
-		if (request.getDescription() != null) {
-			String rawHtml = markdownManager.parse(request.getDescription());
-			Collection<User> mentions = new MentionParser().parseMentions(rawHtml);
-			for (User user: mentions) {
-				for (PullRequestListener listener: pullRequestListeners)
-					listener.onMentioned(request, user);
-			}
-		}
 		
 		dao.afterCommit(new Runnable() {
 
