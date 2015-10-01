@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
@@ -50,6 +51,7 @@ import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -245,10 +247,19 @@ public class TextDiffPanel extends Panel {
 				final CommentInput input;
 				newCommentForm.add(input = new CommentInput("input", requestModel, Model.of("")));
 				input.setRequired(true);
-				newCommentForm.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
+				
+				final FeedbackPanel feedback = new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)); 
+				feedback.setOutputMarkupPlaceholderTag(true);
+				newCommentForm.add(feedback);
 				
 				newCommentForm.add(new AjaxLink<Void>("cancel") {
 
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(newCommentForm));
+					}
+					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						newCommentForm.remove();
@@ -263,7 +274,7 @@ public class TextDiffPanel extends Panel {
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
 						super.onError(target, form);
-						target.add(form);
+						target.add(feedback);
 					}
 
 					@Override

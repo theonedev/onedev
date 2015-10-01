@@ -10,6 +10,9 @@
 .source-view>.outline .tree-node {
 	line-height: 1.6;
 }
+.source-view .new-comment>.feedback .alert {
+	margin-bottom: 8px;
+}
 .selection-permalink {
 	margin-left: 16px;
 	display: none;

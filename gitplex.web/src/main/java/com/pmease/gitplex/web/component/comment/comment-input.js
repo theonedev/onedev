@@ -10,7 +10,6 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
 			"<li><b>:emoji:</b> to insert an emoji." +
 			"</ul>");
 
-	$input[0].cachedUsers = [];
     $input.atwho({
     	at: '@',
     	searchKey: "searchKey",
@@ -24,7 +23,6 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
         limit: atWhoLimit
     });	
     
-    $input[0].cachedRequests = [];
     $input.atwho({
     	at: '#',
     	searchKey: "searchKey",

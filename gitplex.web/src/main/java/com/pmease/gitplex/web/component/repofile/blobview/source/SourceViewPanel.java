@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
@@ -52,6 +53,7 @@ import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.loader.InheritableThreadLocalData;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
@@ -255,10 +257,19 @@ public class SourceViewPanel extends BlobViewPanel {
 						
 					}, Model.of("")));
 					input.setRequired(true);
-					newCommentForm.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
+					
+					final FeedbackPanel feedback = new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)); 
+					feedback.setOutputMarkupPlaceholderTag(true);
+					newCommentForm.add(feedback);
 					
 					newCommentForm.add(new AjaxLink<Void>("cancel") {
 	
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(newCommentForm));
+						}
+						
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							newCommentForm.remove();
@@ -273,7 +284,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
-							target.add(form);
+							target.add(feedback);
 						}
 	
 						@Override

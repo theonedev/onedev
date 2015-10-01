@@ -168,6 +168,9 @@
 .text-diff>.comment {
 	display: none;
 }
+.text-diff .new-comment>.feedback .alert {
+	margin-bottom: 8px;
+}
 .diff-tokentooltip {
 	background-color: infobackground; 
 	border: 1px solid black;
