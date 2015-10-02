@@ -6,7 +6,7 @@
  * 
  * Revision: $Id: Multiline.java 1209 2008-07-28 00:16:18Z robin $
  */
-package com.pmease.commons.editable.annotation;
+package com.pmease.commons.wicket.editable.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Markdown {
+public @interface Multiline {
 }

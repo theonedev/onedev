@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import javax.validation.ConstraintValidatorContext;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Validatable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 
 /**
  * Git relevant settings.

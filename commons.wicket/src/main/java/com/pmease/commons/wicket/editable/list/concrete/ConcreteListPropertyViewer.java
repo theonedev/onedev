@@ -12,10 +12,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.editable.DefaultBeanDescriptor;
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptor;
+import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 
 @SuppressWarnings("serial")
 public class ConcreteListPropertyViewer extends Panel {

@@ -13,13 +13,13 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.gatekeeper.AbstractGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.AndOrGateKeeper;

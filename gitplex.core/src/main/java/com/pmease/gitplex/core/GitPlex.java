@@ -21,7 +21,6 @@ import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.git.command.GitCommand;
 import com.pmease.commons.hibernate.Sessional;
@@ -36,6 +35,7 @@ import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
 import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Validatable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.UserManager;

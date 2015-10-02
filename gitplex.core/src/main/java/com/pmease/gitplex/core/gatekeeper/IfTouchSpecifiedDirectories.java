@@ -7,9 +7,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.editable.PathChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;

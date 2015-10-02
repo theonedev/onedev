@@ -13,11 +13,11 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.editable.BeanDescriptor;
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.annotation.OmitName;
+import com.pmease.commons.wicket.editable.BeanDescriptor;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
+import com.pmease.commons.wicket.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanViewer extends Panel {

@@ -3,11 +3,11 @@ package com.pmease.gitplex.core.gatekeeper;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
+import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")

@@ -1,6 +1,6 @@
 package com.pmease.gitplex.core.gatekeeper;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;

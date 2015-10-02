@@ -24,10 +24,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.commons.editable.annotation.Vertical;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.util.ClassUtils;
@@ -35,9 +31,13 @@ import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.annotation.Horizontal;
+import com.pmease.commons.wicket.editable.annotation.Vertical;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {

@@ -10,8 +10,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")

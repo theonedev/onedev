@@ -13,11 +13,11 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
@@ -33,8 +33,9 @@ public class StringListPropertyEditor extends PropertyEditor<List<String>> {
 	public StringListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 		
-		com.pmease.commons.editable.annotation.ChoiceProvider choiceProvider = 
-				propertyDescriptor.getPropertyGetter().getAnnotation(com.pmease.commons.editable.annotation.ChoiceProvider.class);
+		com.pmease.commons.wicket.editable.annotation.ChoiceProvider choiceProvider = 
+				propertyDescriptor.getPropertyGetter().getAnnotation(
+						com.pmease.commons.wicket.editable.annotation.ChoiceProvider.class);
 		Preconditions.checkNotNull(choiceProvider);
 		for (String each: (List<String>)ReflectionUtils
 				.invokeStaticMethod(propertyDescriptor.getBeanClass(), choiceProvider.value())) {

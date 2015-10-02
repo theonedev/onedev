@@ -18,10 +18,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.editable.EditableUtils;
 import com.pmease.commons.loader.ImplementationRegistry;
 import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.commons.wicket.component.AccordionPanel;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;

@@ -6,12 +6,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
 

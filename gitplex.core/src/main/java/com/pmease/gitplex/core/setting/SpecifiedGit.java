@@ -2,8 +2,8 @@ package com.pmease.gitplex.core.setting;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 
 @Editable(name="Use Specified Git", order=200)
 @SuppressWarnings("serial")

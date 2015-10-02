@@ -11,8 +11,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 
-import com.pmease.commons.editable.BeanDescriptor;
-import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.editable.PathSegment.Property;
 

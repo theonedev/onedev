@@ -8,8 +8,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.Horizontal;
+import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.branchmatcher.AffinalBranchMatcher;
 import com.pmease.gitplex.core.branchmatcher.LocalBranchMatcher;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;

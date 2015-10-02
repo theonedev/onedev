@@ -13,15 +13,15 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.annotation.Markdown;
-import com.pmease.commons.editable.annotation.Multiline;
-import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.annotation.Markdown;
+import com.pmease.commons.wicket.editable.annotation.Multiline;
+import com.pmease.commons.wicket.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public class StringPropertyEditor extends PropertyEditor<String> {

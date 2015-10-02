@@ -11,10 +11,10 @@ import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.editable.DefaultBeanDescriptor;
-import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;

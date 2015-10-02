@@ -5,20 +5,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;

@@ -1,4 +1,4 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
@@ -13,7 +13,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.Validator;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.util.ClassUtils;
@@ -21,6 +20,7 @@ import com.pmease.commons.util.GeneralException;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.WordUtils;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 
 public class EditableUtils {
 	

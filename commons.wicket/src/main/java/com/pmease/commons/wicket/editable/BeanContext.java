@@ -6,8 +6,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.editable.BeanDescriptor;
-import com.pmease.commons.editable.DefaultBeanDescriptor;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.ClassUtils;
 

@@ -98,7 +98,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
-			<artifactId>commons.editable</artifactId>
+			<artifactId>commons.validation</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>

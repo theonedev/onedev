@@ -1,4 +1,4 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import com.pmease.commons.loader.AbstractPluginModule;
 

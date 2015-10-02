@@ -3,13 +3,13 @@ package com.pmease.gitplex.core.gatekeeper;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
+import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Horizontal;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
+import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 
 @SuppressWarnings("serial")
 @Editable(name="And Composition", icon="fa-sitemap", order=100, 

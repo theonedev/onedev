@@ -2,9 +2,9 @@ package com.pmease.gitplex.core.branchmatcher;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.OmitName;
 import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.OmitName;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")

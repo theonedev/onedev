@@ -26,16 +26,16 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.pmease.commons.editable.DefaultBeanDescriptor;
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.behavior.sortable.SortPosition;
+import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PathSegment.Property;
 import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 
 @SuppressWarnings("serial")

@@ -4,8 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.editable.PropertyDescriptor;
-
 @SuppressWarnings("serial")
 public abstract class PropertyViewer extends Panel {
 

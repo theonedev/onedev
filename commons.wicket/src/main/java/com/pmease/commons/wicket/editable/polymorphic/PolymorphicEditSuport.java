@@ -5,16 +5,16 @@ import java.io.Serializable;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.DefaultPropertyDescriptor;
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.commons.wicket.editable.NotDefinedLabel;
 import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 
 @SuppressWarnings("serial")
 public class PolymorphicEditSuport implements EditSupport {

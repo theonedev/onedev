@@ -1,6 +1,6 @@
 package com.pmease.gitplex.core.branchmatcher;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 
 @SuppressWarnings("serial")
 @Editable(name="All Branches", order=300)

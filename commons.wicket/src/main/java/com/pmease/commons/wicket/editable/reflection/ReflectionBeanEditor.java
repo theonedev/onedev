@@ -18,18 +18,18 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import com.pmease.commons.editable.BeanDescriptor;
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.commons.editable.annotation.OmitName;
-import com.pmease.commons.editable.annotation.Vertical;
+import com.pmease.commons.wicket.editable.BeanDescriptor;
 import com.pmease.commons.wicket.editable.BeanEditor;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PathSegment.Property;
 import com.pmease.commons.wicket.editable.PropertyContext;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.annotation.Horizontal;
+import com.pmease.commons.wicket.editable.annotation.OmitName;
+import com.pmease.commons.wicket.editable.annotation.Vertical;
 
 @SuppressWarnings("serial")
 public class ReflectionBeanEditor extends BeanEditor<Serializable> {

@@ -10,7 +10,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 
-import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")

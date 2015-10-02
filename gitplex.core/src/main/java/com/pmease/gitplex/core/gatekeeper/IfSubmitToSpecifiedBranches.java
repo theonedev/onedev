@@ -9,8 +9,8 @@ import javax.validation.constraints.Size;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;

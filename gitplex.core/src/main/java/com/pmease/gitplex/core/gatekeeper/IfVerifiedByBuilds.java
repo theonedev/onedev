@@ -5,15 +5,15 @@ import java.util.Collection;
 import javax.validation.constraints.Min;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.model.Verification;
 
 @Editable(icon="fa-check-circle", order=1000,
 		description="This gate keeper will be satisfied if commit is verified successfully "

@@ -7,8 +7,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.loader.AppLoader;
 
 @SuppressWarnings("serial")

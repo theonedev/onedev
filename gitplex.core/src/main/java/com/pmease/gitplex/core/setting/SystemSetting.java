@@ -9,11 +9,11 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Directory;
 import com.pmease.commons.validation.Validatable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 
 @Editable
 @ClassValidating

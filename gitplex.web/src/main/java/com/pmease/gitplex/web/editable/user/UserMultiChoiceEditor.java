@@ -5,17 +5,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.pmease.gitplex.core.GitPlex;
-
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.pmease.commons.editable.PropertyDescriptor;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.userchoice.UserMultiChoice;
 

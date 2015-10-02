@@ -4,7 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByNames;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.TargetBranchSelection;

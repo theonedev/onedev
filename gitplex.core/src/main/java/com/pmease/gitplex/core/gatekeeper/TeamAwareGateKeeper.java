@@ -2,8 +2,8 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import javax.validation.constraints.NotNull;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.editable.TeamChoice;
 import com.pmease.gitplex.core.model.Repository;

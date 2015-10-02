@@ -7,9 +7,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.DefaultPropertyDescriptor;
 import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.wicket.editable.DefaultPropertyDescriptor;
+import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.PropertyContext;
 
 public class EntityColumn<T extends AbstractEntity> implements IStyledColumn<T, String> {

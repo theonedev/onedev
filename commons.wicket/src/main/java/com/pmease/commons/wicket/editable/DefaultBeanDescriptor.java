@@ -1,11 +1,11 @@
-package com.pmease.commons.editable;
+package com.pmease.commons.wicket.editable;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.util.BeanUtils;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 
 @SuppressWarnings("serial")
 public class DefaultBeanDescriptor implements BeanDescriptor {

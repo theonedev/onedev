@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.editable.annotation.Editable;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.editable.UserChoice;
 import com.pmease.gitplex.core.model.PullRequest;

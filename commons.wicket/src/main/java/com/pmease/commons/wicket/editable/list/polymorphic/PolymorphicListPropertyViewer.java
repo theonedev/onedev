@@ -12,11 +12,11 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.editable.EditableUtils;
-import com.pmease.commons.editable.PropertyDescriptor;
-import com.pmease.commons.editable.annotation.Horizontal;
-import com.pmease.commons.editable.annotation.Vertical;
 import com.pmease.commons.wicket.editable.BeanContext;
+import com.pmease.commons.wicket.editable.EditableUtils;
+import com.pmease.commons.wicket.editable.PropertyDescriptor;
+import com.pmease.commons.wicket.editable.annotation.Horizontal;
+import com.pmease.commons.wicket.editable.annotation.Vertical;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyViewer extends Panel {

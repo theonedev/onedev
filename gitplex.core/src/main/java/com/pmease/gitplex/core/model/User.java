@@ -19,10 +19,10 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
-import com.pmease.commons.editable.annotation.Editable;
-import com.pmease.commons.editable.annotation.Password;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
 import com.pmease.gitplex.core.validation.UserName;

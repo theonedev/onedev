@@ -2,7 +2,7 @@ package com.pmease.gitplex.core.gatekeeper.helper.branchselection;
 
 import java.io.Serializable;
 
-import com.pmease.commons.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 
 @Editable
