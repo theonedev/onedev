@@ -26,8 +26,16 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit = new Git(new File(tempDir, "bare"));
         bareGit.clone(git, true, false, false, null);
         
-        repository = Mockito.mock(Repository.class);
-        Mockito.when(repository.git()).thenReturn(bareGit);
+        repository = new Repository() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Git git() {
+				return bareGit;
+			}
+        	
+        };
         
 		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(new StorageManager() {
 			

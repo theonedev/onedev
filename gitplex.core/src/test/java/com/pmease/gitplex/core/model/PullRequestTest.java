@@ -3,9 +3,9 @@ package com.pmease.gitplex.core.model;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.pmease.commons.git.AbstractGitTest;
+import com.pmease.commons.git.Git;
 
 public class PullRequestTest extends AbstractGitTest {
 
@@ -15,8 +15,16 @@ public class PullRequestTest extends AbstractGitTest {
     public void setup() {
     	super.setup();
     	
-        repository = Mockito.mock(Repository.class);
-        Mockito.when(repository.git()).thenReturn(git);
+        repository = new Repository() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Git git() {
+				return git;
+			}
+        	
+        };
     }
 
     @Test

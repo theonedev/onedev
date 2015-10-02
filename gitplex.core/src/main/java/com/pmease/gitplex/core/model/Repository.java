@@ -605,7 +605,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	public FileRepository openAsJGitRepo() {
 		try {
-			return (FileRepository) RepositoryCache.open(FileKey.exact(git().repoDir(), FS.DETECTED), true);
+			return (FileRepository) RepositoryCache.open(FileKey.lenient(git().repoDir(), FS.DETECTED), true);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
