@@ -107,15 +107,15 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		when(storageManager.getRepoDir(Mockito.any(Repository.class))).thenReturn(new File(git.repoDir(), ".git"));
 		
 		dao = mock(Dao.class);
-		when(dao.load(Repository.class, Mockito.any(Long.class))).thenReturn(repository);
+		when(dao.load(Repository.class, 1L)).thenReturn(repository);
 		
-		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
+		when(AppLoader.getInstance(StorageManager.class)).thenReturn(storageManager);
 		
 		extractors = mock(Extractors.class);
 		when(extractors.getVersion()).thenReturn("java:1");
 		when(extractors.getExtractor(anyString())).thenReturn(new JavaExtractor());
 
-		Mockito.when(AppLoader.getInstance(Extractors.class)).thenReturn(extractors);
+		when(AppLoader.getInstance(Extractors.class)).thenReturn(extractors);
 		
 		searchManager = new DefaultSearchManager(storageManager);
 		
