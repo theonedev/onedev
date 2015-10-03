@@ -14,8 +14,8 @@ import org.hibernate.type.Type;
 
 import com.pmease.commons.hibernate.HibernateListener;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.markdown.MentionParser;
 
 @Singleton
 public class PullRequestPersistListener implements HibernateListener {

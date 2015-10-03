@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -22,7 +21,6 @@ public class PullRequestActivity extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	@Lob
 	@Column(nullable=false)
 	private Action action;
 	

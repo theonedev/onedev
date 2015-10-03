@@ -12,8 +12,9 @@ import org.hibernate.type.Type;
 
 import com.pmease.commons.hibernate.HibernateListener;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.MentionParser;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.markdown.MentionParser;
+import com.pmease.gitplex.core.markdown.PullRequestParser;
 
 @Singleton
 public class CommentPersistListener implements HibernateListener {
@@ -44,12 +45,23 @@ public class CommentPersistListener implements HibernateListener {
 					String content = (String) currentState[i];
 					String prevContent = (String) previousState[i];
 					if (!content.equals(prevContent)) {
-						MentionParser parser = new MentionParser();
-						Collection<User> mentions = parser.parseMentions(markdownManager.parse(content));
-						mentions.removeAll(parser.parseMentions(markdownManager.parse(prevContent)));
+						String html = markdownManager.parse(content);
+						String prevHtml = markdownManager.parse(prevContent);
+
+						MentionParser mentionParser = new MentionParser();
+						Collection<User> mentions = mentionParser.parseMentions(html);
+						
+						mentions.removeAll(mentionParser.parseMentions(prevHtml));
 						for (User user: mentions) {
 							for (PullRequestListener listener: pullRequestListeners)
 								listener.onMentioned((Comment) entity, user);
+						}
+						
+						PullRequestParser requestParser = new PullRequestParser();
+						Collection<PullRequest> requests = requestParser.parseRequests(html);
+						
+						requests.removeAll(requestParser.parseRequests(prevHtml));
+						for (PullRequest request: requests) {
 						}
 					}
 					break;
