@@ -60,6 +60,10 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="owner")
 	private Collection<Repository> repositories = new ArrayList<>();
 
+	@OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<PullRequestReference> requestReferences = new ArrayList<>();
+	
 	@OneToMany(mappedBy="owner")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Team> teams = new ArrayList<Team>();

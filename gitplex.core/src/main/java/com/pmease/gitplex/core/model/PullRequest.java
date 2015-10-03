@@ -224,6 +224,14 @@ public class PullRequest extends AbstractEntity {
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 	
+	@OneToMany(mappedBy="referenced")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
+	
+	@OneToMany(mappedBy="referencedBy")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<PullRequestReference> referenced = new ArrayList<>();
+	
 	@OneToMany(mappedBy="request")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Verification> verifications = new ArrayList<>();
@@ -440,6 +448,22 @@ public class PullRequest extends AbstractEntity {
 
 	public void setVerifications(Collection<Verification> verifications) {
 		this.verifications = verifications;
+	}
+
+	public Collection<PullRequestReference> getReferencedBy() {
+		return referencedBy;
+	}
+
+	public void setReferencedBy(Collection<PullRequestReference> referencedBy) {
+		this.referencedBy = referencedBy;
+	}
+
+	public Collection<PullRequestReference> getReferenced() {
+		return referenced;
+	}
+
+	public void setReferenced(Collection<PullRequestReference> referenced) {
+		this.referenced = referenced;
 	}
 
 	public Collection<Comment> getComments() {

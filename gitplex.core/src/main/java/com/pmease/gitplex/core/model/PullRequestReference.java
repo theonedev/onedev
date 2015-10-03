@@ -33,9 +33,10 @@ public class PullRequestReference extends AbstractEntity {
 	private PullRequest referencedBy;
 	
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private User user;
 
 	public PullRequest getReferenced() {
