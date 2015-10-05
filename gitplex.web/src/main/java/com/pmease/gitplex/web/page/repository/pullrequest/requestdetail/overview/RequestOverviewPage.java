@@ -48,6 +48,7 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
+import com.pmease.gitplex.core.model.PullRequestReference;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.PullRequestWatch;
@@ -173,6 +174,11 @@ public class RequestOverviewPage extends RequestDetailPage {
 		
 		for (Comment comment: request.getComments()) 
 			renderableActivities.add(new CommentPullRequest(comment));
+		
+		for (PullRequestReference reference: request.getReferencedBy()) {
+			renderableActivities.add(new ReferencePullRequest(request, 
+					reference.getReferencedBy(), reference.getUser(), reference.getDate()));
+		}
 		
 		for (PullRequestActivity activity: request.getActivities()) {
 			if (activity.getAction() == PullRequestActivity.Action.INTEGRATE) {

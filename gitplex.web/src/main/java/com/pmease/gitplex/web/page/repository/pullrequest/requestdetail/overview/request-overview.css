@@ -135,6 +135,19 @@
 #request-detail .activities .activity>.detail>.reopen>.icon {
 	padding-left: 7px;
 }
+#request-detail .activities .activity>.detail>.reference>.head>.icon {
+	padding-left: 8px;
+}
+#request-detail .activities .activity>.detail>.reference>.body {
+	margin-left: 20px;
+	font-size: 15px;
+}
+#request-detail .activities .activity>.detail>.reference>.body a {
+	color: #333;
+}
+#request-detail .activities .activity>.detail>.reference>.body a .id {
+	color: #999;
+}
 #request-detail .activities .activity>.detail>.open .feedback .alert {
 	margin-bottom: 8px;
 }
