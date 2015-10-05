@@ -148,6 +148,9 @@
 #request-detail .activities .activity>.detail>.reference>.body a .id {
 	color: #999;
 }
+#request-detail .activities .activity>.detail>.reference>.body .status .help {
+	display: none;
+}
 #request-detail .activities .activity>.detail>.open .feedback .alert {
 	margin-bottom: 8px;
 }

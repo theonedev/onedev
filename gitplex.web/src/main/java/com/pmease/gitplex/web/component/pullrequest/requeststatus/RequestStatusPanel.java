@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -17,11 +16,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class RequestStatusPanel extends Panel {
 
-	private final boolean checkGatekeeper;
-	
-	public RequestStatusPanel(String id, IModel<PullRequest> requestModel, boolean checkGatekeeper) {
+	public RequestStatusPanel(String id, IModel<PullRequest> requestModel) {
 		super(id, requestModel);
-		this.checkGatekeeper = checkGatekeeper;
 	}
 
 	@Override
@@ -32,14 +28,7 @@ public class RequestStatusPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				if (getPullRequest().getCloseStatus() == CloseStatus.INTEGRATED)
-					return "Integrated";
-				else if (getPullRequest().getCloseStatus() == CloseStatus.DISCARDED)
-					return "Discarded";
-				else if (checkGatekeeper) {
-					
-				} else 
-					return "
+				return getPullRequest().getStatus().toString();
 			}
 			
 		}).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
