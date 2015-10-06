@@ -4,27 +4,70 @@
 }
 #request-detail .activities>table {
 	margin-bottom: 20px; 
-	border-bottom: 1px solid #E5E5E5;
 	table-layout: fixed;
-}
-#request-detail .activities>table>tbody>tr.discussion>td {
-	border-top: 1px solid #E5E5E5; 
-	padding: 12px 0;
+	border-bottom: 1px solid #DDD;
 }
 #request-detail .activities>table>tbody>tr.discussion>td.avatar {
 	width: 40px; 
 }
-#request-detail .activities>table>tbody>tr.discussion>td.detail {
-	padding-left: 12px;
+#request-detail .activities>table>tbody>tr.discussion>td.spacer {
+	width: 25px; 
 }
-#request-detail .activities>table>tbody>tr.activity>td.avatar {
-	border-right: 1px dashed #DDD;
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div {
+	position: relative;
+	border: 1px solid #DDD;
+	border-radius: 4px;
+	background: white;
+	margin-left: -15px;
 }
-#request-detail .activities>table>tbody>tr.activity.discussion>td.avatar {
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.head,
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.head  {
+	padding: 10px;
+	border-radius: 4px 4px 0 0;
+	background: #F5F5F5;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body,
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body {
+	padding: 0px 10px 10px 10px;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>div:before {
+	display: inline-block;
+	position: absolute;
+	top: 10px;
+	left: -8px;
+	border-top: 8px solid transparent;
+	border-bottom: 8px solid transparent;
+	border-right: 8px solid #CBCBCB;
+	content: "";
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>div:after {
+	display: inline-block;
+	position: absolute;
+	top: 11px;
+	left: -7px;
+	border-top: 7px solid transparent;
+	border-bottom: 7px solid transparent;
+	border-right: 7px solid #F5F5F5;
+	content: "";
+}
+
+#request-detail .activities>table>tbody>tr.activity>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+#request-detail .activities>table>tbody>tr.activity.discussion>td.spacer {
 	border-right: none;
 }
-#request-detail .activities>table>tbody>tr.discussion+.non-discussion>td {
-	border-top: 1px solid #E5E5E5;
+#request-detail .activities>table>tbody>tr.discussion+tr.discussion>td {
+	padding-top: 20px;
+}
+#request-detail .activities>table>tbody>tr.discussion+tr.discussion>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+#request-detail .activities>table>tbody>tr.discussion:last-child>td {
+	padding-bottom: 20px;
+}
+#request-detail .activities>table>tbody>tr.discussion:last-child>td.spacer {
+	border-right: 1px solid #E8E8E8;
 }
 #request-detail .activities>table>tbody>tr.discussion>.avatar img {
 	width: 40px; 

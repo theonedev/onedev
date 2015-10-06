@@ -16,21 +16,18 @@
 .reply.new>.avatar {
 	background: #FCF6D6;
 }
-
 div.replies>table {
 	table-layout: fixed;
 }
 div.replies>table>tbody>tr>td {
-	border-top: 1px dashed #CCC; 
 	padding: 8px 0; 
-	background: #F5F5F5;
+	border-top: 1px dashed #CCC; 
 }
-div.replies>table>tbody>tr:first-child>td {
-	border-top: none;
+div.replies>table>tbody>tr>td.spacer {
+	width: 10px; 
 }
 div.replies>table>tbody>tr>td.avatar {
-	width: 32px; 
-	padding-left: 10px;
+	width: 26px; 
 }
 div.replies>table>tbody>tr>td.avatar img {
 	width: 26px; 
@@ -39,15 +36,18 @@ div.replies>table>tbody>tr>td.avatar img {
 div.replies>table>tbody>tr>td.detail {
 	padding-left: 10px;
 }
-div.replies>.add-reply {
-	padding-top: 10px; 
-	color: #999;
-}
 div.replies>.add-reply>div>a {
-	color: #999;
+	border-top: 1px dashed #CCC; 
+	display: block;
+	color: #666;
+	padding: 5px 10px;
+	text-decoration: none;
 }
 div.replies>.add-reply:hover>div>a {
-	color: #333;
+	background: #F5F5F5;
+}
+div.replies>.add-reply>div form {
+	padding: 0 10px 10px 10px;
 }
 table.comments>tbody>tr>td.avatar {
 	width: 1px; 
