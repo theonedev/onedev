@@ -109,7 +109,7 @@
 	margin-left: -7px;
 }
 #request-detail .activities .activity>.detail>.update>.alert {
-	margin: 0 0 12px 28px;
+	margin: 0 0 8px 28px;
 }
 #request-detail .activities .activity>.detail>.update a {
 	color: #555;
@@ -119,6 +119,9 @@
 }
 #request-detail .activities>table>tbody>tr.update+tr.update>td.detail>div {
 	margin-top: -16px;
+}
+#request-detail .activities>table>tbody>tr.update+tr.update>td.detail>div>.alert {
+	margin-top: 16px;
 }
 #request-detail .activities>table>tbody>tr.discussion+tr.non-discussion>td.detail {
 	padding-top: 16px;
