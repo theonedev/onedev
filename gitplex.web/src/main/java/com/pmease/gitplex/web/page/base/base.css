@@ -66,12 +66,8 @@ li.selectable.active a, a.selectable.active {
 	border-color: #8BC8F9;
 }
 
-.activity-summary {
+.activity-summary, .activity-summary a {
 	color: #999; 
-	margin-bottom: 8px;
-}
-.activity-summary a {
-	color: #999;
 }
 .activity-summary .operations {
 	margin-left: 8px;

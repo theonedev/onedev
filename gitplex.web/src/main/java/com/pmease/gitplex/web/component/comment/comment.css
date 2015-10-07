@@ -1,6 +1,9 @@
 .comment .md-editor {
 	margin-bottom: 16px;
 }
+.comment>.head {
+	margin-bottom: 10px;
+}
 .comment>.body>form {
 	margin-bottom: 12px;
 }
@@ -21,7 +24,7 @@ div.replies>table {
 }
 div.replies>table>tbody>tr>td {
 	padding: 8px 0; 
-	border-top: 1px dashed #CCC; 
+	border-top: 1px solid #EEE; 
 }
 div.replies>table>tbody>tr>td.spacer {
 	width: 10px; 
@@ -36,14 +39,18 @@ div.replies>table>tbody>tr>td.avatar img {
 div.replies>table>tbody>tr>td.detail {
 	padding-left: 10px;
 }
+div.replies>table>tbody>tr>td.detail>.head {
+	margin-bottom: 10px;
+}
 div.replies>.add-reply>div>a {
-	border-top: 1px dashed #CCC; 
+	border-top: 1px solid #EEE; 
 	display: block;
-	color: #666;
+	color: #BBB;
 	padding: 5px 10px;
 	text-decoration: none;
 }
 div.replies>.add-reply:hover>div>a {
+	color: #666;
 	background: #F5F5F5;
 }
 div.replies>.add-reply>div form {

@@ -1,26 +1,19 @@
 <wicket:panel>
 	<div class="update">
-		<div class="head activity-summary">
-			<span class="icon fa fa-ext fa-repo-push"></span>
-			<span class="update-no">Update <span wicket:id="updateNo"></span></span> was pushed <span wicket:id="age"></span>
-			<span class="operations"><a wicket:id="changes" title="Changes of this update"></a></span>
-		</div>
-		<div class="body">
-			<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
-			<table>
-				<tr wicket:id="commits">
-					<td class="icon"><i class="fa fa-ext fa-commit"></i></td>
-					<td class="detail">
-						<span wicket:id="author"></span> 
-						<span wicket:id="message"></span> 
-					</td>
-					<td class="status">
-						<span wicket:id="verification"></span>
-						<span wicket:id="hash"></span>
-						<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
-					</td>
-				</tr>
-			</table>
-		</div>
+		<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
+		<table>
+			<tr wicket:id="commits">
+				<td class="icon"><i class="fa fa-ext fa-commit"></i></td>
+				<td class="detail">
+					<span wicket:id="author"></span> 
+					<span wicket:id="message"></span> 
+				</td>
+				<td class="status">
+					<span wicket:id="verification"></span>
+					<span wicket:id="hash"></span>
+					<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
+				</td>
+			</tr>
+		</table>
 	</div>
 </wicket:panel>

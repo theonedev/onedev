@@ -613,11 +613,11 @@ public class CommentPanel extends GenericPanel<Comment> {
 	}
 
 	protected Component newAdditionalCommentOperations(String id, IModel<Comment> comment) {
-		return new WebMarkupContainer(id);
+		return new WebMarkupContainer(id).setVisible(false);
 	}
 	
 	protected Component newAdditionalReplyOperations(String id, CommentReply reply) {
-		return new WebMarkupContainer(id);
+		return new WebMarkupContainer(id).setVisible(false);
 	}
 	
 	protected Component newActionComponent(String id) {

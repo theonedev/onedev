@@ -5,7 +5,13 @@
 #request-detail .activities>table {
 	margin-bottom: 20px; 
 	table-layout: fixed;
-	border-bottom: 1px solid #DDD;
+	border-bottom: 1px solid #CCC;
+}
+#request-detail .activities>table>tbody>tr.activity>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+#request-detail .activities>table>tbody>tr.activity.discussion>td.spacer {
+	border-right: none;
 }
 #request-detail .activities>table>tbody>tr.discussion>td.avatar {
 	width: 40px; 
@@ -15,20 +21,10 @@
 }
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div {
 	position: relative;
-	border: 1px solid #DDD;
+	border: 1px solid #CCC;
 	border-radius: 4px;
 	background: white;
 	margin-left: -15px;
-}
-#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.head,
-#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.head  {
-	padding: 10px;
-	border-radius: 4px 4px 0 0;
-	background: #F5F5F5;
-}
-#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body,
-#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body {
-	padding: 0px 10px 10px 10px;
 }
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div>div:before {
 	display: inline-block;
@@ -50,20 +46,33 @@
 	border-right: 7px solid #F5F5F5;
 	content: "";
 }
+#request-detail .activities>table>tbody>tr.discussion .replies>table>tbody>tr>td.detail>.head {
+	padding-right: 10px;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail .add-reply a:hover {
+	border-radius: 0 0 4px 4px;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.head,
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.head  {
+	padding: 10px;
+	border-radius: 4px 4px 0 0;
+	background: #F5F5F5;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body,
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body {
+	padding: 0px 10px 10px 10px;
+}
 
-#request-detail .activities>table>tbody>tr.activity>td.spacer {
-	border-right: 1px solid #E8E8E8;
-}
-#request-detail .activities>table>tbody>tr.activity.discussion>td.spacer {
-	border-right: none;
-}
 #request-detail .activities>table>tbody>tr.discussion+tr.discussion>td {
-	padding-top: 20px;
+	padding-top: 30px;
 }
 #request-detail .activities>table>tbody>tr.discussion+tr.discussion>td.spacer {
 	border-right: 1px solid #E8E8E8;
 }
 #request-detail .activities>table>tbody>tr.discussion:last-child>td {
+	padding-bottom: 20px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion:last-child>td.detail {
 	padding-bottom: 20px;
 }
 #request-detail .activities>table>tbody>tr.discussion:last-child>td.spacer {
@@ -76,9 +85,6 @@
 #request-detail .activities>table>tbody>tr.non-discussion>td.detail {
 	font-size: 13px;
 	padding: 8px 0;
-}
-#request-detail .activities>table>tbody>tr.discussion+.non-discussion>td.detail {
-	padding-top: 16px;
 }
 #request-detail .activities>table>tbody>tr.non-discussion .activity-summary {
 	margin-left: -14px;
@@ -98,56 +104,66 @@
 #request-detail .activities>table>tbody>tr.non-discussion .activity-summary .user a {
 	font-weight: normal;
 }
-#request-detail .activities .activity>.detail>.update .update-no {
-	color: #555;
-}
-#request-detail .activities .activity>.detail>.update>.body {
+#request-detail .activities .activity>.detail>.update {
 	color: #777; 
 	margin-left: -7px;
 }
-#request-detail .activities .activity>.detail>.update>.body>.alert {
+#request-detail .activities .activity>.detail>.update>.alert {
 	margin: 0 0 12px 28px;
 }
-#request-detail .activities .activity>.detail>.update>.body a {
+#request-detail .activities .activity>.detail>.update a {
 	color: #555;
 }
-#request-detail .activities .activity>.detail>.update>.body td {
+#request-detail .activities .activity>.detail>.update td {
 	padding: 4px 0;
 }
-#request-detail .activities .activity>.detail>.update>.body td.detail {
-	padding-left: 14px;
+#request-detail .activities>table>tbody>tr.update+tr.update>td.detail>div {
+	margin-top: -16px;
+}
+#request-detail .activities>table>tbody>tr.discussion+tr.non-discussion>td.detail {
+	padding-top: 16px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion+tr.discussion>td {
+	padding-top: 8px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion+tr.discussion>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+
+#request-detail .activities .activity>.detail>.update td.detail {
+	padding-left: 13px;
 	padding-right: 8px;
 }
-#request-detail .activities .activity>.detail>.update>.body td.icon {
+#request-detail .activities .activity>.detail>.update td.icon {
 	width: 1px; 
 	padding-top: 7px;
 }
-#request-detail .activities .activity>.detail>.update>.body td.status {
+#request-detail .activities .activity>.detail>.update td.status {
 	text-align: right;
 	white-space: nowrap;
 }
-#request-detail .activities .activity>.detail>.update>.body tr:hover td {
+#request-detail .activities .activity>.detail>.update tr:hover td {
 	background: #F5F5F5;
 }
-#request-detail .activities .activity>.detail>.update>.body tr.integrated td.icon .fa {
+#request-detail .activities .activity>.detail>.update tr.integrated td.icon .fa {
 	color: #35A612;
 }
-#request-detail .activities .activity>.detail>.update>.body tr.rebased td a {
+#request-detail .activities .activity>.detail>.update tr.rebased td a {
 	color: #AAA;
 }
-#request-detail .activities .activity>.detail>.update>.body tr.rebased td.icon .fa {
+#request-detail .activities .activity>.detail>.update tr.rebased td.icon .fa {
 	color: #CCC;
 }
-#request-detail .activities .activity>.detail>.update>.body tr.rebased img.avatar {
+#request-detail .activities .activity>.detail>.update tr.rebased img.avatar {
 	opacity: 0.5;
 }
-#request-detail .activities .activity>.detail>.update>.body td.status .successful {
+#request-detail .activities .activity>.detail>.update td.status .successful {
 	color: #35A612;
 }
-#request-detail .activities .activity>.detail>.update>.body td.status .failed {
+#request-detail .activities .activity>.detail>.update td.status .failed {
 	color: #F93333;
 }
-#request-detail .activities .activity>.detail>.update>.body td.status .running {
+#request-detail .activities .activity>.detail>.update td.status .running {
 	color: #AFAD1F;
 }
 #request-detail .activities .activity-summary a.file {
@@ -181,6 +197,9 @@
 #request-detail .activities .activity>.detail>.reference>.head>.icon {
 	padding-left: 8px;
 }
+#request-detail .activities .activity>.detail>.reference>.head {
+	margin-bottom: 10px;
+}
 #request-detail .activities .activity>.detail>.reference>.body {
 	margin-left: 20px;
 	font-size: 15px;
@@ -193,6 +212,9 @@
 }
 #request-detail .activities .activity>.detail>.reference>.body .status .help {
 	display: none;
+}
+#request-detail .activities .activity>.detail>.open>.head {
+	margin-bottom: 10px;
 }
 #request-detail .activities .activity>.detail>.open .feedback .alert {
 	margin-bottom: 8px;

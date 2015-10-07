@@ -141,6 +141,11 @@ public class RequestOverviewPage extends RequestDetailPage {
 		else
 			row.add(AttributeAppender.append("class", " non-discussion"));
 		
+		if (activity instanceof UpdatePullRequest)
+			row.add(AttributeAppender.append("class", " update"));
+		else
+			row.add(AttributeAppender.append("class", " non-update"));
+		
 		PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 		final Date lastVisitDate = pullRequestManager.getLastVisitDate(getPullRequest());
 		
