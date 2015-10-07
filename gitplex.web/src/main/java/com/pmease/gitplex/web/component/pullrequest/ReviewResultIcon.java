@@ -27,17 +27,17 @@ public class ReviewResultIcon extends WebComponent {
 		String tooltip;
 		if (review.getUpdate().equals(review.getUpdate().getRequest().getLatestUpdate())) { 
 			if (review.getResult() == Review.Result.APPROVE) {
-				css = " review-result approved current fa fa-thumbs-o-up";
+				css = " review-result approved current fa fa-check-circle";
 				tooltip = "Approved";
 			} else {
-				css = " review-result disapproved current fa fa-thumbs-o-down";
+				css = " review-result disapproved current fa fa-times-circle";
 				tooltip = "Disapproved";
 			}
 		} else if (review.getResult() == Review.Result.APPROVE) {
-			css = " review-result approved previous fa fa-thumbs-o-up";
+			css = " review-result approved previous fa fa-check-circle";
 			tooltip = "Approved on previous updates";
 		} else {
-			css = " review-result disapproved previous fa fa-thumbs-o-down";
+			css = " review-result disapproved previous fa fa-times-circle";
 			tooltip = "Disapproved on previous updates";
 		}
 		add(AttributeAppender.append("class", css));

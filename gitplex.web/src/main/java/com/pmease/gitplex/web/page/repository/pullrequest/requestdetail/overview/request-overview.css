@@ -134,6 +134,9 @@
 	padding-left: 13px;
 	padding-right: 8px;
 }
+#request-detail .activities .activity>.detail>.update td.detail .commit-message {
+	padding-left: 4px;
+}
 #request-detail .activities .activity>.detail>.update td.icon {
 	width: 1px; 
 	padding-top: 7px;
@@ -277,5 +280,5 @@
 }
 
 #request-detail .info .reviewers .review-result {
-	top: 12px;
+	top: -4px;
 }

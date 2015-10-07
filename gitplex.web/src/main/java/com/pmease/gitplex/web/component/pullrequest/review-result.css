@@ -1,9 +1,10 @@
 .review-result {
 	font-size: 16px; 
 	position: absolute; 
-	left: 28px; 
-	top: 12px; 
+	left: 30px; 
+	top: -11px; 
 	cursor: pointer;
+	opacity: 100;
 }
 .review-result.current.approved {
 	color: #35A612;
