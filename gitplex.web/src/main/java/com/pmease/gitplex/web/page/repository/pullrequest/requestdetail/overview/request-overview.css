@@ -75,6 +75,12 @@
 #request-detail .activities>table>tbody>tr.non-discussion:last-child>td.detail {
 	padding-bottom: 20px;
 }
+#request-detail .activities>table>tbody>tr.non-discussion>td.detail {
+	border-top: 1px solid #EEE;
+}
+#request-detail .activities>table>tbody>tr.discussion+tr.non-discussion>td.detail {
+	border-top: none;
+}
 #request-detail .activities>table>tbody>tr.discussion:last-child>td.spacer {
 	border-right: 1px solid #E8E8E8;
 }
@@ -84,7 +90,7 @@
 }
 #request-detail .activities>table>tbody>tr.non-discussion>td.detail {
 	font-size: 13px;
-	padding: 8px 0;
+	padding: 10px 0;
 }
 #request-detail .activities>table>tbody>tr.non-discussion .activity-summary {
 	margin-left: -14px;
@@ -196,6 +202,15 @@
 #request-detail .activities .activity>.detail>.undo-review>.icon {
 	padding-left: 8px;
 	padding-top: 7px;
+}
+#request-detail .activities .activity>.detail>.delete-source-branch>.icon,
+#request-detail .activities .activity>.detail>.restore-source-branch>.icon {
+	padding-top: 7px;
+	padding-left: 8px;
+}
+#request-detail .activities .activity>.detail>.delete-source-branch .branch,
+#request-detail .activities .activity>.detail>.restore-source-branch .branch {
+	color: #666;
 }
 #request-detail .activities .activity>.detail>.reopen>.icon {
 	padding-left: 7px;

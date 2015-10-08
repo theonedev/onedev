@@ -198,6 +198,10 @@ public class RequestOverviewPage extends RequestDetailPage {
 				renderableActivities.add(new UndoReviewPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
 			} else if (activity.getAction() == PullRequestActivity.Action.REOPEN) {
 				renderableActivities.add(new ReopenPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.DELETE_SOURCE_BRANCH) {
+				renderableActivities.add(new DeleteSourceBranch(activity.getRequest(), activity.getUser(), activity.getDate()));
+			} else if (activity.getAction() == PullRequestActivity.Action.RESTORE_SOURCE_BRANCH) {
+				renderableActivities.add(new RestoreSourceBranch(activity.getRequest(), activity.getUser(), activity.getDate()));
 			} else {
 				throw new IllegalStateException("Unexpected acvitity: " + activity.getAction());
 			}
@@ -378,7 +382,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				PullRequest request = getPullRequest();
 				if (request.getSourceRepo() != null) {
 					if (request.getSourceRepo().equals(request.getTargetRepo()))
-						return request.getSourceBranch() + " (removed)";
+						return request.getSourceBranch() + " (kd)";
 					else
 						return request.getSource().getFQN() + " (removed)";
 				} else {

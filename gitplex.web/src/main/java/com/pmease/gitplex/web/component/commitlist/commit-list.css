@@ -1,8 +1,14 @@
+.commit-list {
+	border: 1px solid #CCC;
+	border-radius: 4px;
+}
 .commit-list td {
-	padding-top: 8px; 
-	padding-bottom: 8px; 
+	padding: 8px; 
 	color: #999; 
-	border-top: 1px dashed #BBB;
+	border-top: 1px solid #E8E8E8;
+}
+.commit-list tr:first-child td {
+	border-top: none;
 }
 .commit-list td.avatar {
 	width: 1px;

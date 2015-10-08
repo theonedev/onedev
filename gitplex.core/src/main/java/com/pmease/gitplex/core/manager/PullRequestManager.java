@@ -71,6 +71,8 @@ public interface PullRequestManager {
     
 	List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request);
 
+	void deleteSourceBranch(PullRequest request);
+	
 	void restoreSourceBranch(PullRequest request);
 	
 	/**

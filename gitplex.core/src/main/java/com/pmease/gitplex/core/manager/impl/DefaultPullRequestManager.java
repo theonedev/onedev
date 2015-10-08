@@ -49,6 +49,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
@@ -154,9 +155,32 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			request.getSourceRepo().git().createBranch(
 					request.getSourceBranch(), latestCommitHash);
 			request.getSourceRepo().cacheObjectId(request.getSourceBranch(), ObjectId.fromString(latestCommitHash));
+			PullRequestActivity activity = new PullRequestActivity();
+			activity.setRequest(request);
+			activity.setAction(PullRequestActivity.Action.RESTORE_SOURCE_BRANCH);
+			activity.setDate(new Date());
+			activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+			dao.persist(activity);
 		}
 	}
 
+	@Transactional
+	@Override
+	public void deleteSourceBranch(PullRequest request) {
+		Preconditions.checkState(!request.isOpen() && request.getSourceRepo() != null); 
+		
+		if (request.getSource().getHead(false) != null) {
+			request.getSource().delete();
+			
+			PullRequestActivity activity = new PullRequestActivity();
+			activity.setRequest(request);
+			activity.setAction(PullRequestActivity.Action.DELETE_SOURCE_BRANCH);
+			activity.setDate(new Date());
+			activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+			dao.persist(activity);
+		}
+	}
+	
 	@Transactional
 	@Override
 	public void reopen(PullRequest request, String comment) {

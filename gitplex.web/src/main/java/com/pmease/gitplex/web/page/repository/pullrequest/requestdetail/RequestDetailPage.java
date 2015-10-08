@@ -31,7 +31,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -61,7 +60,6 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
@@ -593,18 +591,13 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		Form<?> form = new Form<Void>("form");
 		fragment.add(form);
 		final FormComponent<String> noteInput;
-		final FormComponent<Boolean> deleteSourceCheck = new CheckBox("deleteSource", Model.of(false));
 
 		RepoAndBranch source = request.getSource();
 		Preconditions.checkNotNull(source);
-		if (operation != INTEGRATE || source.isDefault() || !SecurityUtils.canModify(source.getRepository(), source.getBranch())) 
-			deleteSourceCheck.setVisible(false);
 		
-		form.add(deleteSourceCheck);
 		if (operation != INTEGRATE) {
 			form.add(noteInput = new CommentInput("note", requestModel, Model.of("")));
 			noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
-			deleteSourceCheck.setVisible(false);
 		} else {
 			IntegrationPreview preview = request.getIntegrationPreview();
 			if (preview == null || preview.getIntegrated() == null) {
@@ -635,13 +628,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				PullRequest request = getPullRequest();
 				try {
 					operation.operate(request, noteInput.getModelObject());
-					if (deleteSourceCheck.getModelObject()) {
-						PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-						if (!pullRequestManager.queryOpenTo(request.getSource(), null).isEmpty()) 
-							Session.get().warn("Source branch is not deleted as there are pull requests opening against it.");
-						else 
-							request.getSource().delete();
-					}
 					setResponsePage(getPage().getClass(), paramsOf(getPullRequest()));
 				} catch (Exception e) {
 					error("Unable to " + actionName + ": " + e.getMessage());
