@@ -124,14 +124,18 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     @Transactional
     @Override
 	public void delete(final User user) {
-    	Query query = dao.getSession().createQuery("update Branch set lastUpdater=null where lastUpdater=:lastUpdater");
-    	query.setParameter("lastUpdater", user);
+    	Query query = dao.getSession().createQuery("update PullRequest set submitter=null where submitter=:submitter");
+    	query.setParameter("submitter", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update PullRequestUpdate set user=null where user=:user");
-    	query.setParameter("user", user);
+    	query = dao.getSession().createQuery("update PullRequest set assignee=null where assignee=:assignee");
+    	query.setParameter("assignee", user);
     	query.executeUpdate();
-
+    	
+    	query = dao.getSession().createQuery("update PullRequest set closedBy=null where closedBy=:closedBy");
+    	query.setParameter("closedBy", user);
+    	query.executeUpdate();
+    	
     	for (Repository repository: user.getRepositories())
     		repositoryManager.delete(repository);
     	

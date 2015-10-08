@@ -70,7 +70,13 @@ public class User extends AbstractUser implements ProtectedObject {
 	
 	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
-
+	
+	@OneToMany(mappedBy="assignee")
+	private Collection<PullRequest> assignedRequests = new ArrayList<>();
+	
+	@OneToMany(mappedBy="closedBy")
+	private Collection<PullRequest> closedRequests = new ArrayList<>();
+	
 	@OneToMany(mappedBy="reviewer")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Review> reviews = new ArrayList<Review>();
@@ -200,7 +206,23 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.submittedRequests = submittedRequests;
 	}
 
-    public Collection<Comment> getRequestComments() {
+    public Collection<PullRequest> getAssignedRequests() {
+		return assignedRequests;
+	}
+
+	public void setAssignedRequests(Collection<PullRequest> assignedRequests) {
+		this.assignedRequests = assignedRequests;
+	}
+
+	public Collection<PullRequest> getClosedRequests() {
+		return closedRequests;
+	}
+
+	public void setClosedRequests(Collection<PullRequest> closedRequests) {
+		this.closedRequests = closedRequests;
+	}
+
+	public Collection<Comment> getRequestComments() {
 		return requestComments;
 	}
 

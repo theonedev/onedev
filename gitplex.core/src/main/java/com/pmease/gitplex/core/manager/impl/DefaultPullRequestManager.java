@@ -60,11 +60,11 @@ import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.CloseInfo;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequestActivity;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
@@ -186,13 +186,16 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	public void reopen(PullRequest request, String comment) {
 		Preconditions.checkState(!request.isOpen());
 		
-		request.setCloseStatus(null);
+		User user = userManager.getCurrent();
+		request.setCloseInfo(null);
+		request.setSubmitter(user);
+		request.setCreateDate(new Date());
+		
 		dao.persist(request);
 		
-		User user = userManager.getCurrent();
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
-		activity.setDate(new DateTime().minusSeconds(1).toDate());
+		activity.setDate(new DateTime(request.getCreateDate()).minusSeconds(1).toDate());
 		activity.setAction(PullRequestActivity.Action.REOPEN);
 		activity.setUser(user);
 		
@@ -235,7 +238,11 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			commentManager.save(requestComment, false);
 		}
 
-		request.setCloseStatus(CloseStatus.DISCARDED);
+		CloseInfo closeInfo = new CloseInfo();
+		closeInfo.setCloseDate(activity.getDate());
+		closeInfo.setClosedBy(user);
+		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
+		request.setCloseInfo(closeInfo);
 		request.setLastEventDate(activity.getDate());
 		dao.persist(request);
 		
@@ -310,8 +317,13 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			commentManager.save(requestComment, false);
 		}
 
-		request.setCloseStatus(CloseStatus.INTEGRATED);
-		request.setLastEventDate(new Date());
+		CloseInfo closeInfo = new CloseInfo();
+		closeInfo.setCloseDate(activity.getDate());
+		closeInfo.setClosedBy(user);
+		closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+		request.setCloseInfo(closeInfo);
+		
+		request.setLastEventDate(activity.getDate());
 
 		dao.persist(request);
 
@@ -396,8 +408,11 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			dao.persist(activity);
 			
 			request.setLastIntegrationPreview(null);
-			request.setCloseStatus(CloseStatus.INTEGRATED);
-			request.setLastEventDate(new Date());
+			CloseInfo closeInfo = new CloseInfo();
+			closeInfo.setCloseDate(activity.getDate());
+			closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+			request.setCloseInfo(closeInfo);
+			request.setLastEventDate(activity.getDate());
 			
 			dao.persist(request);
 			

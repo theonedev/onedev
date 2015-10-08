@@ -46,9 +46,9 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.model.CloseInfo;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.CloseStatus;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
@@ -163,8 +163,12 @@ public class NewRequestPage extends PullRequestPage {
 			if (target.getRepository().equals(source.getRepository())) {
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(
 						target.getHead(), source.getHead()));			
-				if (target.getRepository().git().isAncestor(source.getHead(), target.getHead())) 
-					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
+				if (target.getRepository().git().isAncestor(source.getHead(), target.getHead())) {
+					CloseInfo closeInfo = new CloseInfo();
+					closeInfo.setCloseDate(new Date());
+					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+					pullRequest.setCloseInfo(closeInfo);
+				}
 			} else {
 				Git sandbox = new Git(FileUtils.createTempDir());
 				pullRequest.setSandbox(sandbox);
@@ -175,8 +179,12 @@ public class NewRequestPage extends PullRequestPage {
 				
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHead(), source.getHead()));			
 
-				if (sandbox.isAncestor(source.getHead(), target.getHead()))
-					pullRequest.setCloseStatus(CloseStatus.INTEGRATED);
+				if (sandbox.isAncestor(source.getHead(), target.getHead())) {
+					CloseInfo closeInfo = new CloseInfo();
+					closeInfo.setCloseDate(new Date());
+					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
+					pullRequest.setCloseInfo(closeInfo);
+				}
 			}
 			requestModel = Model.of(pullRequest);
 		} else {

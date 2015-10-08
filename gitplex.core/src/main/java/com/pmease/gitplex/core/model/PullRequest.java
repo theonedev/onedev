@@ -63,8 +63,6 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 @DynamicUpdate 
 public class PullRequest extends AbstractEntity {
 
-	public enum CloseStatus {INTEGRATED, DISCARDED};
-	
 	public enum Status {
 		PENDING_APPROVAL("Pending Approval"), 
 		PENDING_UPDATE("Pending Update"), PENDING_INTEGRATE("Pending Integration"), 
@@ -147,9 +145,7 @@ public class PullRequest extends AbstractEntity {
 		
 	};
 	
-	@OptimisticLock(excluded=true)
-	@Column
-	private CloseStatus closeStatus;
+	private CloseInfo closeInfo;
 
 	@Index(name="PR_TITLE")
 	@Column(nullable=false)
@@ -160,7 +156,6 @@ public class PullRequest extends AbstractEntity {
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
 	private User submitter;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -299,8 +294,9 @@ public class PullRequest extends AbstractEntity {
 	 * Get the user submitting the pull request.
 	 * 
 	 * @return
-	 * 			the user submitting the pull request
+	 * 			the user submitting the pull request, or <tt>null</tt> if unknown
 	 */
+	@Nullable
 	public User getSubmitter() {
 		return submitter;
 	}
@@ -507,11 +503,12 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	public Status getStatus() {
-		if (closeStatus == CloseStatus.INTEGRATED) 
-			return Status.INTEGRATED;
-		else if (closeStatus == CloseStatus.DISCARDED) 
-			return Status.DISCARDED;
-		else if (getCheckResult() instanceof Pending || getCheckResult() instanceof Blocking) 
+		if (closeInfo != null) {
+			if (closeInfo.getCloseStatus() == CloseInfo.Status.INTEGRATED) 
+				return Status.INTEGRATED;
+			else 
+				return Status.DISCARDED;
+		} else if (getCheckResult() instanceof Pending || getCheckResult() instanceof Blocking) 
 			return Status.PENDING_APPROVAL;
 		else if (getCheckResult() instanceof Failed) 
 			return Status.PENDING_UPDATE;
@@ -519,17 +516,16 @@ public class PullRequest extends AbstractEntity {
 			return Status.PENDING_INTEGRATE;
 	}
 
-	@Nullable
-	public CloseStatus getCloseStatus() {
-		return closeStatus;
+	public CloseInfo getCloseInfo() {
+		return closeInfo;
 	}
 
-	public void setCloseStatus(@Nullable CloseStatus closeStatus) {
-		this.closeStatus = closeStatus;
+	public void setCloseInfo(CloseInfo closeInfo) {
+		this.closeInfo = closeInfo;
 	}
 
 	public boolean isOpen() {
-		return closeStatus == null;
+		return closeInfo == null;
 	}
 	
 	public PullRequestUpdate getReferentialUpdate() {
