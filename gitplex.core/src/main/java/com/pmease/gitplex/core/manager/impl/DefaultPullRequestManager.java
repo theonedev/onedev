@@ -336,12 +336,19 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	public void open(final PullRequest request, final Object listenerData) {
 		dao.persist(request);
 
+		PullRequestActivity activity = new PullRequestActivity();
+		activity.setDate(request.getCreateDate());
+		activity.setAction(PullRequestActivity.Action.OPEN);
+		activity.setRequest(request);
+		activity.setUser(request.getSubmitter());
+		dao.persist(activity);
+		
 		FileUtils.cleanDir(storageManager.getCacheDir(request));
 		
 		request.git().updateRef(request.getBaseRef(), request.getBaseCommitHash(), null, null);
 		
 		for (PullRequestUpdate update: request.getUpdates()) {
-			update.setDate(new Date(System.currentTimeMillis() + 1000));
+			update.setDate(new DateTime(activity.getDate()).plusSeconds(1).toDate());
 			pullRequestUpdateManager.save(update, false);
 		}
 		

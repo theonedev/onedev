@@ -145,6 +145,7 @@ public class PullRequest extends AbstractEntity {
 		
 	};
 	
+	@Embedded
 	private CloseInfo closeInfo;
 
 	@Index(name="PR_TITLE")
@@ -516,6 +517,7 @@ public class PullRequest extends AbstractEntity {
 			return Status.PENDING_INTEGRATE;
 	}
 
+	@Nullable
 	public CloseInfo getCloseInfo() {
 		return closeInfo;
 	}
@@ -760,11 +762,11 @@ public class PullRequest extends AbstractEntity {
 	
 	public static class CriterionHelper {
 		public static Criterion ofOpen() {
-			return Restrictions.isNull("closeStatus");
+			return Restrictions.isNull("closeInfo");
 		}
 		
 		public static Criterion ofClosed() {
-			return Restrictions.isNotNull("closeStatus");
+			return Restrictions.isNotNull("closeInfo");
 		}
 		
 		public static Criterion ofTarget(RepoAndBranch target) {

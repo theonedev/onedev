@@ -74,7 +74,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="assignee")
 	private Collection<PullRequest> assignedRequests = new ArrayList<>();
 	
-	@OneToMany(mappedBy="closedBy")
+	@OneToMany(mappedBy="closeInfo.closedBy")
 	private Collection<PullRequest> closedRequests = new ArrayList<>();
 	
 	@OneToMany(mappedBy="reviewer")

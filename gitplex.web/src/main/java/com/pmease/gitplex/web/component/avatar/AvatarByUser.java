@@ -69,8 +69,12 @@ public class AvatarByUser extends WebComponent {
 		
 		setOutputMarkupId(true);
 		
-		if (withTooltip)
-			add(new TooltipBehavior(Model.of(getUser().getDisplayName())));
+		if (withTooltip) {
+			if (getUser() != null)
+				add(new TooltipBehavior(Model.of(getUser().getDisplayName())));
+			else
+				add(new TooltipBehavior(Model.of("Unknown user")));
+		}
 	}
 
 	@Override

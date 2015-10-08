@@ -184,7 +184,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 		}
 		
 		for (PullRequestActivity activity: request.getActivities()) {
-			if (activity.getAction() == PullRequestActivity.Action.INTEGRATE) {
+			if (activity.getAction() == PullRequestActivity.Action.OPEN) {
+				renderableActivities.add(new OpenPullRequest(activity));
+			} else if (activity.getAction() == PullRequestActivity.Action.INTEGRATE) {
 				renderableActivities.add(new IntegratePullRequest(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.DISCARD) { 
 				renderableActivities.add(new DiscardPullRequest(activity));
@@ -201,7 +203,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			} else if (activity.getAction() == PullRequestActivity.Action.RESTORE_SOURCE_BRANCH) {
 				renderableActivities.add(new RestoreSourceBranch(activity));
 			} else {
-				throw new IllegalStateException("Unexpected acvitity: " + activity.getAction());
+				throw new IllegalStateException("Unexpected activity: " + activity.getAction());
 			}
 		}
 		

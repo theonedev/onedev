@@ -28,7 +28,6 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.userlink.UserLink;
-import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -98,8 +97,8 @@ class OpenActivityPanel extends AbstractActivityPanel {
 		head.setOutputMarkupId(true);
 		add(head);
 		
-		head.add(new UserLink("user", new UserModel(requestModel.getObject().getSubmitter()), AvatarMode.NAME));
-		head.add(new Label("age", DateUtils.formatAge(requestModel.getObject().getCreateDate())));
+		head.add(new UserLink("user", userModel, AvatarMode.NAME));
+		head.add(new Label("age", DateUtils.formatAge(activity.getDate())));
 		
 		head.add(new AjaxLink<Void>("edit") {
 
