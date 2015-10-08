@@ -18,6 +18,7 @@
 }
 #request-detail>.head input[type="text"] {
 	width: 600px;
+	font-weight: normal;
 }
 #request-detail>.head a i {
 	color: #999; 
