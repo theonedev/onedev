@@ -37,7 +37,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		} else {
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 			User submitter = request.getSubmitter();
-			return submitter.equals(currentUser);
+			return currentUser != null && currentUser.equals(submitter);
 		}
 	}
 	

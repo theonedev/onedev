@@ -18,7 +18,7 @@ public class IfSubmittedByRepositoryOwner extends AbstractGateKeeper {
     }
 
     private CheckResult check(User user, Repository repository) {
-		if (user.equals(repository.getOwner()))
+		if (repository.getOwner().equals(user))
 			return passed(Lists.newArrayList("Submitted by repository owner."));
 		else
 			return failed(Lists.newArrayList("Not submitted by repository owner."));

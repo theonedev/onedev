@@ -700,7 +700,8 @@ public class PullRequest extends AbstractEntity {
 		}
 		
 		// submitter is not preferred
-		secondChoices.put(getSubmitter(), new Date());
+		if (getSubmitter() != null)
+			secondChoices.put(getSubmitter(), new Date());
 		
 		/* Follow below rules to pick reviewers:
 		 * 1. If user is excluded previously, it will be considered last.

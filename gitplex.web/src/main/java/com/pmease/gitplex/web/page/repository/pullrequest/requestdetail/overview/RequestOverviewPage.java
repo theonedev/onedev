@@ -172,8 +172,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		PullRequest request = getPullRequest();
 		List<RenderableActivity> renderableActivities = new ArrayList<>();
 
-		renderableActivities.add(new OpenPullRequest(request));
-
 		for (PullRequestUpdate update: request.getUpdates())
 			renderableActivities.add(new UpdatePullRequest(update));
 		
@@ -181,27 +179,27 @@ public class RequestOverviewPage extends RequestDetailPage {
 			renderableActivities.add(new CommentPullRequest(comment));
 		
 		for (PullRequestReference reference: request.getReferencedBy()) {
-			renderableActivities.add(new ReferencePullRequest(request, 
-					reference.getReferencedBy(), reference.getUser(), reference.getDate()));
+			renderableActivities.add(new ReferencePullRequest(request, reference.getUser(), 
+					reference.getDate(), reference.getReferencedBy()));
 		}
 		
 		for (PullRequestActivity activity: request.getActivities()) {
 			if (activity.getAction() == PullRequestActivity.Action.INTEGRATE) {
-				renderableActivities.add(new IntegratePullRequest(activity.getUser(), activity.getDate()));
+				renderableActivities.add(new IntegratePullRequest(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.DISCARD) { 
-				renderableActivities.add(new DiscardPullRequest(activity.getUser(), activity.getDate()));
+				renderableActivities.add(new DiscardPullRequest(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.APPROVE) {
-				renderableActivities.add(new ApprovePullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+				renderableActivities.add(new ApprovePullRequest(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.DISAPPROVE) {
-				renderableActivities.add(new DisapprovePullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+				renderableActivities.add(new DisapprovePullRequest(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.UNDO_REVIEW) {
-				renderableActivities.add(new UndoReviewPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+				renderableActivities.add(new UndoReviewPullRequest(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.REOPEN) {
-				renderableActivities.add(new ReopenPullRequest(activity.getRequest(), activity.getUser(), activity.getDate()));
+				renderableActivities.add(new ReopenPullRequest(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.DELETE_SOURCE_BRANCH) {
-				renderableActivities.add(new DeleteSourceBranch(activity.getRequest(), activity.getUser(), activity.getDate()));
+				renderableActivities.add(new DeleteSourceBranch(activity));
 			} else if (activity.getAction() == PullRequestActivity.Action.RESTORE_SOURCE_BRANCH) {
-				renderableActivities.add(new RestoreSourceBranch(activity.getRequest(), activity.getUser(), activity.getDate()));
+				renderableActivities.add(new RestoreSourceBranch(activity));
 			} else {
 				throw new IllegalStateException("Unexpected acvitity: " + activity.getAction());
 			}
@@ -636,9 +634,10 @@ public class RequestOverviewPage extends RequestDetailPage {
 		
 		Fragment assigneeContainer;
 		User assignee = request.getAssignee();
+		User currentUser = getCurrentUser();
 		boolean canChangeAssignee = request.isOpen() 
-				&& (request.getSubmitter().equals(getCurrentUser()) 
-					|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(getRepository())));
+				&& (currentUser != null && currentUser.equals(request.getSubmitter()) 
+					|| SecurityUtils.canManage(getRepository()));
 		if (assignee != null) {
 			
 			if (canChangeAssignee) {
@@ -697,7 +696,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 					setVisible(request.isOpen() 
 							&& !request.getPotentialReviewers().isEmpty()
-							&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTarget().getRepository()))));
+							&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTarget().getRepository()))));
 				} else {
 					setVisible(true);
 				}

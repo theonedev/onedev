@@ -15,8 +15,8 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Entity
 public class PullRequestActivity extends AbstractEntity {
 
-	public enum Action {INTEGRATE, DISCARD, APPROVE, DISAPPROVE, UNDO_REVIEW, REOPEN, 
-		DELETE_SOURCE_BRANCH, RESTORE_SOURCE_BRANCH};
+	public enum Action {OPEN, INTEGRATE, DISCARD, APPROVE, DISAPPROVE, UNDO_REVIEW, 
+		REOPEN, DELETE_SOURCE_BRANCH, RESTORE_SOURCE_BRANCH};
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)

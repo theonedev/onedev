@@ -74,13 +74,15 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 			watch(request, branchWatch.getUser(), 
 					"You are set to watch this pull request as you are watching the target branch.");
 		}
-		
-		watch(request, request.getSubmitter(), "You are set to watch this pull request as you've opened it.");		
+
+		if (request.getSubmitter() != null)
+			watch(request, request.getSubmitter(), "You are set to watch this pull request as you've opened it.");		
 
 		addParticipantsToWatchList(request.getLatestUpdate());
 		
 		Collection<User> excludingUsers = new HashSet<>();
-		excludingUsers.add(request.getSubmitter());
+		if (request.getSubmitter() != null)
+			excludingUsers.add(request.getSubmitter());
 		if (request.getAssignee() != null)
 			excludingUsers.add(request.getAssignee());
 		

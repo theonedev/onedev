@@ -3,8 +3,6 @@ package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overvie
 import java.util.Date;
 
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
@@ -12,7 +10,7 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-class CommentPullRequest implements RenderableActivity {
+class CommentPullRequest extends AbstractRenderableActivity {
 
 	private final Long commentId;
 	
@@ -27,23 +25,16 @@ class CommentPullRequest implements RenderableActivity {
 	}
 
 	public CommentPullRequest(Comment comment) {
+		super(comment.getRequest(), comment.getUser(), comment.getDate());
 		this.commentId = comment.getId();
 	}
 	
 	@Override
 	public Panel render(String panelId) {
-		IModel<Comment> commentModel = new LoadableDetachableModel<Comment>(){
-			
-			@Override
-			protected Comment load() {
-				return getComment();
-			}
-			
-		}; 
 		if (getComment().getInlineInfo() != null)
-			return new InlineCommentActivityPanel(panelId, commentModel);
+			return new InlineCommentActivityPanel(panelId, this);
 		else 
-			return new CommentActivityPanel(panelId, commentModel);
+			return new CommentActivityPanel(panelId, this);
 	}
 
 	public Comment getComment() {

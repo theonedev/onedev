@@ -2,7 +2,6 @@ package com.pmease.gitplex.web.component.pullrequest.requestreviewer;
 
 import java.util.Date;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -15,7 +14,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
@@ -39,7 +38,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		setVisible(request.isOpen() 
 				&& !request.getPotentialReviewers().isEmpty()
-				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTargetRepo()))));
+				&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.canManage(request.getTargetRepo())));
 	}
                                                                                                                               
 	@Override

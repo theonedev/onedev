@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -35,7 +34,7 @@ import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
 @SuppressWarnings("serial")
-class UpdateActivityPanel extends Panel {
+class UpdateActivityPanel extends AbstractActivityPanel {
 
 	private final IModel<PullRequestUpdate> updateModel;
 	
@@ -52,10 +51,10 @@ class UpdateActivityPanel extends Panel {
 		
 	};
 
-	public UpdateActivityPanel(String id, IModel<PullRequestUpdate> model) {
-		super(id);
+	public UpdateActivityPanel(String id, RenderableActivity activity, IModel<PullRequestUpdate> updateModel) {
+		super(id, activity);
 		
-		this.updateModel = model;
+		this.updateModel = updateModel;
 	}
 	
 	@Override

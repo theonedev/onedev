@@ -24,11 +24,9 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
@@ -41,8 +39,6 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 
     private final RepositoryManager repositoryManager;
     
-    private final PullRequestManager pullRequestManager;
-    
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     		
 	private final Map<String, Set<Long>> emailToIds = new HashMap<>();
@@ -50,11 +46,9 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager, 
-    		PullRequestManager pullRequestManager) {
+    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager) {
         this.dao = dao;
         this.repositoryManager = repositoryManager;
-        this.pullRequestManager = pullRequestManager;
     }
 
     @Transactional
@@ -128,7 +122,8 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     	query.setParameter("submitter", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update PullRequest set assignee=null where assignee=:assignee");
+    	query = dao.getSession().createQuery("update PullRequest set assignee.id=:rootId where assignee=:assignee");
+    	query.setParameter("rootId", User.ROOT_ID);
     	query.setParameter("assignee", user);
     	query.executeUpdate();
     	
@@ -136,11 +131,24 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     	query.setParameter("closedBy", user);
     	query.executeUpdate();
     	
+    	query = dao.getSession().createQuery("update PullRequestActivity set user=null where user=:user");
+    	query.setParameter("user", user);
+    	query.executeUpdate();
+    	
+    	query = dao.getSession().createQuery("update PullRequestActivity set user=null where user=:user");
+    	query.setParameter("user", user);
+    	query.executeUpdate();
+    	
+    	query = dao.getSession().createQuery("update Comment set user=null where user=:user");
+    	query.setParameter("user", user);
+    	query.executeUpdate();
+    	
+    	query = dao.getSession().createQuery("update CommentReply set user=null where user=:user");
+    	query.setParameter("user", user);
+    	query.executeUpdate();
+    	
     	for (Repository repository: user.getRepositories())
     		repositoryManager.delete(repository);
-    	
-    	for (PullRequest request: user.getSubmittedRequests())
-    		pullRequestManager.delete(request);
     	
 		dao.remove(user);
 		

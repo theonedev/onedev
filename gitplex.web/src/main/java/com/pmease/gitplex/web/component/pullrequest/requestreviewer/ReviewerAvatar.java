@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
@@ -14,7 +13,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.UserModel;
@@ -44,7 +43,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		if (!request.isNew())
 			reviewEffective = request.isReviewEffective(getUser());
 		setEnabled(request.isOpen() && !reviewEffective 
-				&& (request.getSubmitter().equals(currentUser) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTargetRepo()))));
+				&& (currentUser!= null && currentUser.equals(request.getSubmitter()) || SecurityUtils.canManage(request.getTargetRepo())));
 	}
 
 	@Override

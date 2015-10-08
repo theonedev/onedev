@@ -19,9 +19,11 @@ public class IfSubmittedBySpecifiedTeam extends TeamAwareGateKeeper {
     }
 
 	private CheckResult check(User user) {
-		for (Membership membership: user.getMemberships()) {
-			if (membership.getTeam().equals(getTeam()))
-				return passed(Lists.newArrayList("Submitted by a member of team '" + getTeam().getName() + "'."));
+		if (user != null) {
+			for (Membership membership: user.getMemberships()) {
+				if (membership.getTeam().equals(getTeam()))
+					return passed(Lists.newArrayList("Submitted by a member of team '" + getTeam().getName() + "'."));
+			}
 		}
 		return failed(Lists.newArrayList("Not submitted by a member of team '" + getTeam().getName() + "'."));
 	}

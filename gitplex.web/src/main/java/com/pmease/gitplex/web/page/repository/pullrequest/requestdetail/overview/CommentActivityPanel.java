@@ -1,24 +1,29 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 
 @SuppressWarnings("serial")
-class CommentActivityPanel extends Panel {
+class CommentActivityPanel extends AbstractActivityPanel {
 
-	private final IModel<Comment> commentModel;
-	
-	public CommentActivityPanel(String id, IModel<Comment> commentModel) {
-		super(id);
+	private final IModel<Comment> commentModel = new LoadableDetachableModel<Comment>(){
+
+		@Override
+		protected Comment load() {
+			return ((CommentPullRequest)activity).getComment();
+		}
 		
-		this.commentModel = commentModel;
+	};
+	
+	public CommentActivityPanel(String id, CommentPullRequest activity) {
+		super(id, activity);
 	}
 
 	@Override

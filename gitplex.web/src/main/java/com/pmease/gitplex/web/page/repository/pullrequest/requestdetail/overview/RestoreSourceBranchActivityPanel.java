@@ -1,33 +1,17 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
-import java.util.Date;
-
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
-public class RestoreSourceBranchActivityPanel extends Panel {
+class RestoreSourceBranchActivityPanel extends AbstractActivityPanel {
 
-	private final IModel<PullRequest> requestModel;
-	
-	private final IModel<User> userModel;
-	
-	private final Date date;
-	
-	public RestoreSourceBranchActivityPanel(String id, IModel<PullRequest> requestModel, 
-			IModel<User> userModel, Date date) {
-		super(id);
-		
-		this.requestModel = requestModel;
-		this.userModel = userModel;
-		this.date = date;
+	public RestoreSourceBranchActivityPanel(String id, RenderableActivity activity) {
+		super(id, activity);
 	}
 
 	@Override
@@ -35,7 +19,7 @@ public class RestoreSourceBranchActivityPanel extends Panel {
 		super.onInitialize();
 		
 		add(new UserLink("user", userModel));
-		add(new Label("age", DateUtils.formatAge(date)));
+		add(new Label("age", DateUtils.formatAge(activity.getDate())));
 		
 		add(new Label("branch", new LoadableDetachableModel<String>() {
 
@@ -58,14 +42,6 @@ public class RestoreSourceBranchActivityPanel extends Panel {
 			}
 			
 		});
-	}
-
-	@Override
-	protected void onDetach() {
-		requestModel.detach();
-		userModel.detach();
-		
-		super.onDetach();
 	}
 
 }

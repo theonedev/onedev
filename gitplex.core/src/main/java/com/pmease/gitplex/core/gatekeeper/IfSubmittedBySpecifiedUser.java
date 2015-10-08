@@ -45,7 +45,7 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 
     private CheckResult check(User user) {
 		User expectedUser = GitPlex.getInstance(Dao.class).load(User.class, userId);
-        if (expectedUser.getId().equals(user.getId())) 
+        if (expectedUser.equals(user)) 
         	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName() + "."));
         else 
         	return failed(Lists.newArrayList("Not submitted by " + expectedUser.getDisplayName() + ".")); 

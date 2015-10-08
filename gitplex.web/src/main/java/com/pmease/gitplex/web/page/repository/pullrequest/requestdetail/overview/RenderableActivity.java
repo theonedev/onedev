@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 interface RenderableActivity extends Serializable {
@@ -15,6 +16,8 @@ interface RenderableActivity extends Serializable {
 	
 	@Nullable
 	User getUser();
+	
+	PullRequest getRequest();
 	
 	Panel render(String panelId);
 }

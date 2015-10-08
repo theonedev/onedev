@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -33,17 +32,14 @@ import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
-class OpenActivityPanel extends Panel {
+class OpenActivityPanel extends AbstractActivityPanel {
 
 	private static final String BODY_ID = "body";
 	
 	private static final String FORM_ID = "form";
 	
-	private IModel<PullRequest> requestModel;
-	
-	public OpenActivityPanel(String id, IModel<PullRequest> requestModel) {
-		super(id);
-		this.requestModel = requestModel;
+	public OpenActivityPanel(String id, RenderableActivity activity) {
+		super(id, activity);
 	}
 	
 	private Fragment renderForView() {
@@ -190,11 +186,4 @@ class OpenActivityPanel extends Panel {
 		add(renderForView());
 	}
 
-	@Override
-	protected void onDetach() {
-		requestModel.detach();
-		
-		super.onDetach();
-	}
-	
 }

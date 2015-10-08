@@ -1,57 +1,19 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
-import java.util.Date;
-
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.model.PullRequestActivity;
 
 @SuppressWarnings("serial")
-class UndoReviewPullRequest implements RenderableActivity {
+class UndoReviewPullRequest extends AbstractRenderableActivity {
 
-	private final Long requestId;
-	
-	private final Long userId;
-	
-	private final Date date;
-	
-	public UndoReviewPullRequest(PullRequest request, User user, Date date) {
-		this.requestId = request.getId();
-		this.userId = user.getId();
-		this.date = date;
+	public UndoReviewPullRequest(PullRequestActivity activity) {
+		super(activity);
 	}
 	
 	@Override
 	public Panel render(String panelId) {
-		return new UndoReviewActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
-
-			@Override
-			protected PullRequest load() {
-				return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
-			}
-			
-		}, new LoadableDetachableModel<User>() {
-
-			@Override
-			protected User load() {
-				return getUser();
-			}
-			
-		}, date);
-	}
-
-	@Override
-	public Date getDate() {
-		return date;
-	}
-
-	@Override
-	public User getUser() {
-		return GitPlex.getInstance(Dao.class).load(User.class, userId);
+		return new UndoReviewActivityPanel(panelId, this);
 	}
 
 }

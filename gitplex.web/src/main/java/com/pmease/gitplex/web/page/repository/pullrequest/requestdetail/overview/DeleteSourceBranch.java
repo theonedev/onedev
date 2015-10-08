@@ -1,57 +1,19 @@
 package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview;
 
-import java.util.Date;
-
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.model.PullRequestActivity;
 
 @SuppressWarnings("serial")
-public class DeleteSourceBranch implements RenderableActivity {
+public class DeleteSourceBranch extends AbstractRenderableActivity {
 
-	private final Long requestId;
-	
-	private final Long userId;
-	
-	private final Date date;
-	
-	public DeleteSourceBranch(PullRequest request, User user, Date date) {
-		this.requestId = request.getId();
-		this.userId = user.getId();
-		this.date = date;
+	public DeleteSourceBranch(PullRequestActivity activity) {
+		super(activity);
 	}
 	
-	@Override
-	public Date getDate() {
-		return date;
-	}
-
-	@Override
-	public User getUser() {
-		return GitPlex.getInstance(Dao.class).load(User.class, userId);
-	}
-
 	@Override
 	public Panel render(String panelId) {
-		return new DeleteSourceBranchActivityPanel(panelId, new LoadableDetachableModel<PullRequest>() {
-
-			@Override
-			protected PullRequest load() {
-				return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
-			}
-			
-		}, new LoadableDetachableModel<User>() {
-
-			@Override
-			protected User load() {
-				return getUser();
-			}
-			
-		}, date);
+		return new DeleteSourceBranchActivityPanel(panelId, this);
 	}
 
 }

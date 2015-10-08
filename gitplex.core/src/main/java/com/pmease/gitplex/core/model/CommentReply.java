@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.model;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,7 +23,6 @@ public class CommentReply extends AbstractEntity {
 	private long version;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
@@ -40,6 +40,7 @@ public class CommentReply extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Comment comment;
 	
+	@Nullable
 	public User getUser() {
 		return user;
 	}

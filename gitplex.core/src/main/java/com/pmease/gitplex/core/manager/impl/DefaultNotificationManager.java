@@ -277,16 +277,18 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void pendingUpdate(PullRequest request) {
-		Notification notification = new Notification();
-		notification.setRequest(request);
-		notification.setUser(request.getSubmitter());
-		notification.setTask(UPDATE);
-		EntityCriteria<Notification> criteria = EntityCriteria.of(Notification.class);
-		criteria.add(Restrictions.eq("request", notification.getRequest()))
-				.add(Restrictions.eq("user", notification.getUser()))
-				.add(Restrictions.eq("task", notification.getTask()));
-		if (dao.find(criteria) == null)
-			dao.persist(notification);
+		if (request.getSubmitter() != null) {
+			Notification notification = new Notification();
+			notification.setRequest(request);
+			notification.setUser(request.getSubmitter());
+			notification.setTask(UPDATE);
+			EntityCriteria<Notification> criteria = EntityCriteria.of(Notification.class);
+			criteria.add(Restrictions.eq("request", notification.getRequest()))
+					.add(Restrictions.eq("user", notification.getUser()))
+					.add(Restrictions.eq("task", notification.getTask()));
+			if (dao.find(criteria) == null)
+				dao.persist(notification);
+		}
 	}
 
 }
