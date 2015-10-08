@@ -410,6 +410,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		if (git.isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHead())) {
 			PullRequestActivity activity = new PullRequestActivity();
 			activity.setRequest(request);
+			activity.setUser(GitPlex.getInstance(UserManager.class).getRoot());
 			activity.setAction(PullRequestActivity.Action.INTEGRATE);
 			activity.setDate(new Date());
 			dao.persist(activity);
@@ -417,6 +418,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			request.setLastIntegrationPreview(null);
 			CloseInfo closeInfo = new CloseInfo();
 			closeInfo.setCloseDate(activity.getDate());
+			closeInfo.setClosedBy(activity.getUser());
 			closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
 			request.setCloseInfo(closeInfo);
 			request.setLastEventDate(activity.getDate());

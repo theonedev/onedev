@@ -14,8 +14,6 @@ import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -54,6 +52,11 @@ class SelectUrlPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		if (isImage)
+			add(new Label("title", "Insert Image"));
+		else
+			add(new Label("title", "Insert Link"));
+			
 		Form<?> urlForm = new Form<Void>("form");
 		add(urlForm);
 		urlForm.add(new FeedbackPanel("feedback", urlForm));
@@ -74,17 +77,7 @@ class SelectUrlPanel extends Panel {
 				url = object;
 			}
 			
-		}) {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				
-				String script = String.format("$('#%s').closest('.select-url').bind('keydown', 'esc', function(e) {console.log('esc');e.preventDefault(); return false;});", getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-			
-		}; 
+		}); 
 		urlField.setOutputMarkupId(true);
 		urlForm.add(urlField);
 		
@@ -111,7 +104,11 @@ class SelectUrlPanel extends Panel {
 		
 		final AttachmentSupport attachmentSupport = markdownBehavior.getAttachmentSupport();
 		if (attachmentSupport != null) {
-			urlField.add(AttributeAppender.append("placeholder", "Input url here or select below"));
+			if (isImage)
+				urlField.add(AttributeAppender.append("placeholder", "Input image url here or select below"));
+			else
+				urlField.add(AttributeAppender.append("placeholder", "Input link url here or select below"));
+				
 			final Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
 			fragment.setOutputMarkupId(true);
 			
@@ -214,7 +211,11 @@ class SelectUrlPanel extends Panel {
 			
 			add(fragment);
 		} else {
-			urlField.add(AttributeAppender.append("placeholder", "Input url here"));
+			if (isImage)
+				urlField.add(AttributeAppender.append("placeholder", "Input image url here"));
+			else
+				urlField.add(AttributeAppender.append("placeholder", "Input link url here"));
+				
 			add(new WebMarkupContainer("attachments"));
 		}
 		

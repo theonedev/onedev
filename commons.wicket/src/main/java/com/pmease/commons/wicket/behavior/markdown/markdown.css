@@ -69,7 +69,8 @@
 	margin-bottom: 20px;
 }
 .select-url input.url {
-	width: 500px;
+	width: 496px;
+	margin-right: 7px;
 }
 .select-url .attachments {
 	max-height: 300px;
