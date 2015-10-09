@@ -60,8 +60,8 @@ public class RequestListPage extends PullRequestPage {
 	private static final Map<SortOption, String> sortNames = new LinkedHashMap<>();
 	
 	static {
-		sortNames.put(new SortOption("createDate", false), "Newest");
-		sortNames.put(new SortOption("createDate", true), "Oldest");
+		sortNames.put(new SortOption("submitDate", false), "Newest");
+		sortNames.put(new SortOption("submitDate", true), "Oldest");
 		sortNames.put(new SortOption("lastEventDate", false), "Recently updated");
 		sortNames.put(new SortOption("lastEventDate", true), "Least recently updated");
 	}
@@ -225,7 +225,7 @@ public class RequestListPage extends PullRequestPage {
 				}, AvatarMode.NAME));
 				fragment.add(new BranchLink("targetBranch", request.getTarget()));
 				fragment.add(new BranchLink("source", request.getSource()));
-				fragment.add(new Label("age", DateUtils.formatAge(request.getCreateDate())));
+				fragment.add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
 				fragment.add(new UserLink("assignee", new LoadableDetachableModel<User>() {
 
 					@Override

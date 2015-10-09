@@ -30,19 +30,29 @@
 #request-detail>.head>.id {
 	color: #999;
 }
-#request-detail>.head>.label {
-	margin-top: 3px;
-}
 
 #request-detail>.summary>div {
 	border-bottom: 1px dotted #BBB; 
 	margin-bottom: 12px; 
 	padding-bottom: 8px;
+	font-size: 16px;
 }
 #request-detail>.summary>div:last-child {
 	border-bottom: none; 
 	margin-bottom: 0; 
 	padding-bottom: 0;
+}
+#request-detail>.status-and-branches {
+	font-size: 18px;
+}
+#request-detail>.status-and-branches>.status {
+	font-size: 18px;
+	margin: -2px 12px 0 0;
+}
+#request-detail>.status-and-branches .branch {
+	background: #EEE;
+	padding: 2px 4px;
+	border-radius: 2px;
 }
 #request-detail>.summary>.status-reasons ul {
 	margin-bottom: 0; 

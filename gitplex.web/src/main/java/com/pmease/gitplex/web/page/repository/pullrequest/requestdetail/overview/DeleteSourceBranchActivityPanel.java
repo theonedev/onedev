@@ -42,6 +42,7 @@ public class DeleteSourceBranchActivityPanel extends AbstractActivityPanel {
 			}
 			
 		});
+		
 	}
 
 }

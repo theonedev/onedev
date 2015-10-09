@@ -22,7 +22,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -58,7 +57,6 @@ import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
@@ -357,74 +355,12 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		});
 		
-		add(newBasicInfoContainer());
 		add(newIntegrationStrategyContainer());
 		add(newAssigneeContainer());
 		add(newReviewersContainer());
 		add(newWatchContainer());
 	}
 
-	private WebMarkupContainer newBasicInfoContainer() {
-		PullRequest request = getPullRequest();
-		WebMarkupContainer basicInfoContainer = new WebMarkupContainer("basicInfo");
-		basicInfoContainer.add(new AvatarByUser("submitter", new UserModel(request.getSubmitter()), true));
-		
-		basicInfoContainer.add(new BranchLink("target", getPullRequest().getTarget()));
-		
-		if (getPullRequest().getSourceRepo() != null && getPullRequest().getSource().getHead(false) != null) 
-			basicInfoContainer.add(new BranchLink("sourceLink", getPullRequest().getSource()));	
-		else
-			basicInfoContainer.add(new WebMarkupContainer("sourceLink").setVisible(false));
-		basicInfoContainer.add(new Label("sourceName", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				PullRequest request = getPullRequest();
-				if (request.getSourceRepo() != null) {
-					if (request.getSourceRepo().equals(request.getTargetRepo()))
-						return request.getSourceBranch() + " (kd)";
-					else
-						return request.getSource().getFQN() + " (removed)";
-				} else {
-					return "<i>unknown</i>";
-				}
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				PullRequest request = getPullRequest();
-				setVisible(request.getSourceRepo() == null || request.getSource().getHead(false) == null);
-			}
-			
-		}.setEscapeModelStrings(false));
-		
-		basicInfoContainer.add(new Link<Void>("restoreSource") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
-				PullRequest request = requestModel.getObject();
-
-				setVisible(request.getSourceRepo() != null && request.getSource().getHead(false) == null 
-						&& SecurityUtils.canModify(request) && SecurityUtils.canCreate(request.getSource()));
-			}
-
-			@Override
-			public void onClick() {
-				GitPlex.getInstance(PullRequestManager.class).restoreSourceBranch(requestModel.getObject());
-				setResponsePage(RequestOverviewPage.class, paramsOf(getPullRequest()));
-			}
-			
-		});
-		
-		return basicInfoContainer;
-	}
-	
 	private WebMarkupContainer newIntegrationStrategyContainer() {
 		WebMarkupContainer integrationStrategyContainer = new WebMarkupContainer("integrationStrategy") {
 

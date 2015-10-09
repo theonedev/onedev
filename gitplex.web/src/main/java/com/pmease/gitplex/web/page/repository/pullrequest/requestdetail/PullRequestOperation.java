@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.model;
+package com.pmease.gitplex.web.page.repository.pullrequest.requestdetail;
 
 import javax.annotation.Nullable;
 
@@ -7,6 +7,12 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.IntegrationPreview;
+import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequest.Status;
+import com.pmease.gitplex.core.model.Review;
+import com.pmease.gitplex.core.model.ReviewInvitation;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -99,6 +105,44 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			GitPlex.getInstance(PullRequestManager.class).reopen(request, comment);
+		}
+		
+	},
+	DELETE_SOURCE_BRANCH {
+
+		@Override
+		public void operate(PullRequest request, String comment) {
+			GitPlex.getInstance(PullRequestManager.class).deleteSourceBranch(request);
+		}
+
+		@Override
+		public boolean canOperate(PullRequest request) {
+			IntegrationPreview preview = request.getLastIntegrationPreview();
+			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
+			return request.getStatus() == Status.INTEGRATED 
+					&& request.getSourceRepo() != null		
+					&& request.getSource().getHead(false) != null
+					&& !request.getSource().isDefault()
+					&& preview != null
+					&& (request.getSource().getHead().equals(preview.getRequestHead()) 
+							|| request.getSource().getHead().equals(preview.getIntegrated()))
+					&& SecurityUtils.canModify(request)
+					&& SecurityUtils.canModify(request.getSource())
+					&& pullRequestManager.queryOpenTo(request.getSource(), null).isEmpty();
+		}
+		
+	}, 
+	RESTORE_SOURCE_BRANCH {
+
+		@Override
+		public void operate(PullRequest request, String comment) {
+			GitPlex.getInstance(PullRequestManager.class).restoreSourceBranch(request);
+		}
+
+		@Override
+		public boolean canOperate(PullRequest request) {
+			return request.getSourceRepo() != null && request.getSource().getHead(false) == null 
+					&& SecurityUtils.canModify(request) && SecurityUtils.canCreate(request.getSource());
 		}
 		
 	};

@@ -5,11 +5,7 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERG
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.APPROVE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.DISAPPROVE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.DISCARD;
-import static com.pmease.gitplex.core.model.PullRequestOperation.INTEGRATE;
-import static com.pmease.gitplex.core.model.PullRequestOperation.REOPEN;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,14 +60,17 @@ import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.PullRequestOperation;
+import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.BranchLink;
+import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
+import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.EntityModel;
+import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
@@ -79,6 +78,7 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.attachme
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.updates.RequestUpdatesPage;
+import com.pmease.gitplex.web.utils.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
@@ -116,48 +116,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		requestTitle.setOutputMarkupId(true);
 		add(requestTitle);
 		
-		requestTitle.add(new Label("status", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getPullRequest().getStatus().toString();
-			}
-			
-		}) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				setOutputMarkupId(true);
-				
-				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						PullRequest.Status status = getPullRequest().getStatus();
-						if (status == Status.DISCARDED)
-							return " label-danger";
-						else if (status == Status.INTEGRATED)
-							return " label-success";
-						else
-							return " label-warning";
-					}
-					
-				}));
-			}
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PullRequestChanged) {
-					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					pullRequestChanged.getTarget().add(this);
-				}
-			}
-			
-		});
 		requestTitle.add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
@@ -262,6 +220,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			
 		});
 		
+		add(newStatusAndBranchesContainer());
+
 		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary") {
 
 			@Override
@@ -277,9 +237,9 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		};
 		summaryContainer.setOutputMarkupPlaceholderTag(true);
 		add(summaryContainer);
-		
-		summaryContainer.add(newIntegratedNoteContainer());
+
 		summaryContainer.add(newDiscardedNoteContainer());
+		summaryContainer.add(newIntegratedNoteContainer());
 		summaryContainer.add(newStatusReasonsContainer());
 		summaryContainer.add(newIntegrationPreviewContainer());
 		summaryContainer.add(newOperationsContainer());
@@ -319,6 +279,86 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 
 		});
+	}
+	
+	private WebMarkupContainer newStatusAndBranchesContainer() {
+		WebMarkupContainer statusAndBranchesContainer = new WebMarkupContainer("statusAndBranches");
+		
+		PullRequest request = getPullRequest();
+		
+		statusAndBranchesContainer.add(new Label("status", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPullRequest().getStatus().toString();
+			}
+			
+		}) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				setOutputMarkupId(true);
+				
+				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						PullRequest.Status status = getPullRequest().getStatus();
+						if (status == Status.DISCARDED)
+							return " label-danger";
+						else if (status == Status.INTEGRATED)
+							return " label-success";
+						else
+							return " label-warning";
+					}
+					
+				}));
+			}
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PullRequestChanged) {
+					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
+					pullRequestChanged.getTarget().add(this);
+				}
+			}
+			
+		});
+		
+		if (request.getStatus() == Status.INTEGRATED) {
+			statusAndBranchesContainer.add(new UserLink("user", new UserModel(request.getCloseInfo().getClosedBy()), AvatarMode.NAME)); 
+			
+			int commitCount = 0;
+			for (PullRequestUpdate update: request.getUpdates())
+				commitCount += update.getCommits().size();
+			
+			statusAndBranchesContainer.add(new Label("action", "integrated " + commitCount + " commits"));
+			statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getCloseInfo().getCloseDate())));
+		} else {
+			statusAndBranchesContainer.add(new UserLink("user", new UserModel(request.getSubmitter()), AvatarMode.NAME));
+			statusAndBranchesContainer.add(new Label("action", "wants to integrate"));
+			statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
+		}
+		
+		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
+		if (request.getSourceRepo() != null) {
+			statusAndBranchesContainer.add(new BranchLink("source", request.getSource()));
+		} else {
+			statusAndBranchesContainer.add(new Label("source", "unknown") {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("span");
+				}
+				
+			});
+		}
+		return statusAndBranchesContainer;
 	}
 	
 	private WebMarkupContainer newIntegrationPreviewContainer() {
@@ -578,6 +618,37 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 
 		});
+		operationsContainer.add(new AjaxLink<Void>("deleteSourceBranch") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				operationsContainer.replace(newOperationConfirm(confirmId, DELETE_SOURCE_BRANCH, operationsContainer));
+				target.add(operationsContainer);
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(DELETE_SOURCE_BRANCH.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+			}
+
+		});
+		operationsContainer.add(new AjaxLink<Void>("restoreSourceBranch") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				operationsContainer.replace(newOperationConfirm(confirmId, RESTORE_SOURCE_BRANCH, operationsContainer));
+				target.add(operationsContainer);
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(RESTORE_SOURCE_BRANCH.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+			}
+
+		});
+		
 		operationsContainer.add(new WebMarkupContainer(confirmId).setVisible(false));
 		
 		return operationsContainer;
@@ -641,7 +712,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 			@Override
 			public String getObject() {
-				return "Confirm " + WordUtils.capitalizeFully(operation.name());
+				return "Confirm " + WordUtils.capitalizeFully(operation.name()).replace("_", " ").toLowerCase();
 			}
 			
 		})).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
@@ -731,7 +802,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 			
 		});
-		WebMarkupContainer squashedContainer = new WebMarkupContainer("squashed") {
+		integratedNoteContainer.add(new WebMarkupContainer("squashed") {
 
 			@Override
 			protected void onConfigure() {
@@ -744,15 +815,9 @@ public abstract class RequestDetailPage extends PullRequestPage {
 						&& preview.getIntegrationStrategy() == MERGE_WITH_SQUASH);
 			}
 			
-		};
-		integratedNoteContainer.add(squashedContainer);
-		squashedContainer.add(new BranchLink("target", getPullRequest().getTarget()));
-		if (getPullRequest().getSourceRepo() != null) 
-			squashedContainer.add(new BranchLink("source", getPullRequest().getSource()));
-		else 
-			squashedContainer.add(new WebMarkupContainer("source").setVisible(false));
+		});
 		
-		WebMarkupContainer sourceRebasedContainer = new WebMarkupContainer("sourceRebased") {
+		integratedNoteContainer.add(new WebMarkupContainer("sourceRebased") {
 
 			@Override
 			protected void onConfigure() {
@@ -765,15 +830,9 @@ public abstract class RequestDetailPage extends PullRequestPage {
 						&& preview.getIntegrationStrategy() == REBASE_SOURCE_ONTO_TARGET);
 			}
 			
-		};
-		integratedNoteContainer.add(sourceRebasedContainer);
-		sourceRebasedContainer.add(new BranchLink("target", getPullRequest().getTarget()));
-		if (getPullRequest().getSourceRepo() != null) 
-			sourceRebasedContainer.add(new BranchLink("source", getPullRequest().getSource()));
-		else
-			sourceRebasedContainer.add(new WebMarkupContainer("source")).setVisible(false);
+		});
 		
-		WebMarkupContainer targetRebasedContainer = new WebMarkupContainer("targetRebased") {
+		integratedNoteContainer.add(new WebMarkupContainer("targetRebased") {
 
 			@Override
 			protected void onConfigure() {
@@ -786,9 +845,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 						&& preview.getIntegrationStrategy() == REBASE_TARGET_ONTO_SOURCE);
 			}
 			
-		};
-		integratedNoteContainer.add(targetRebasedContainer);
-		targetRebasedContainer.add(new BranchLink("target", getPullRequest().getTarget()));
+		});
 		
 		return integratedNoteContainer;
 	}

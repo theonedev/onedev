@@ -199,7 +199,7 @@ public class PullRequest extends AbstractEntity {
 	private IntegrationPreview lastIntegrationPreview;
 	
 	@Column(nullable=false)
-	private Date createDate = new Date();
+	private Date submitDate = new Date();
 	
 	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
@@ -787,12 +787,12 @@ public class PullRequest extends AbstractEntity {
 		
 	}
 
-	public Date getCreateDate() {
-		return createDate;
+	public Date getSubmitDate() {
+		return submitDate;
 	}
 
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
+	public void setSubmitDate(Date submitDate) {
+		this.submitDate = submitDate;
 	}
 
 	public Date getLastEventDate() {

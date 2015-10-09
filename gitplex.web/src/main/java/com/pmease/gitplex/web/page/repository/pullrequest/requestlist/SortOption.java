@@ -27,7 +27,7 @@ public class SortOption implements Serializable {
 	}
 
 	public SortOption(PageParameters params) {
-		propertyName = params.get(PARAM_ORDER_PROPERTY).toString("createDate");
+		propertyName = params.get(PARAM_ORDER_PROPERTY).toString("submitDate");
 		ascending = params.get(PARAM_ORDER_ASCENDING).toBoolean(false); 
 	}
 	

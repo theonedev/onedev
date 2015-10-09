@@ -275,15 +275,6 @@
 	width: 20px; 
 	height: 20px;
 }
-#request-detail .info .branch {
-	font-weight: bold;
-}
-#request-detail .info .basic .submitter, #request-detail .info .basic .target {
-	margin-bottom: 4px;
-}
-#request-detail .info .basic span, #request-detail .info .basic a {
-	white-space: nowrap;
-}
 
 #request-detail .info .reviewers ul {
 	margin-bottom: 0;

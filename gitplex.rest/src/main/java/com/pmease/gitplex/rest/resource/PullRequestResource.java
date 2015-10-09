@@ -83,9 +83,9 @@ public class PullRequestResource {
 		if (assigneeId != null)
 			criteria.add(Restrictions.eq("assignee.id", assigneeId));
 		if (beginDate != null)
-			criteria.add(Restrictions.ge("createDate", beginDate));
+			criteria.add(Restrictions.ge("submitDate", beginDate));
 		if (endDate != null)
-			criteria.add(Restrictions.le("createDate", endDate));
+			criteria.add(Restrictions.le("submitDate", endDate));
 
 		List<PullRequest> requests = dao.query(criteria);
 		

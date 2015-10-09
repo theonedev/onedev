@@ -189,13 +189,13 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		User user = userManager.getCurrent();
 		request.setCloseInfo(null);
 		request.setSubmitter(user);
-		request.setCreateDate(new Date());
+		request.setSubmitDate(new Date());
 		
 		dao.persist(request);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
-		activity.setDate(new DateTime(request.getCreateDate()).minusSeconds(1).toDate());
+		activity.setDate(new DateTime(request.getSubmitDate()).minusSeconds(1).toDate());
 		activity.setAction(PullRequestActivity.Action.REOPEN);
 		activity.setUser(user);
 		
@@ -337,7 +337,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		dao.persist(request);
 
 		PullRequestActivity activity = new PullRequestActivity();
-		activity.setDate(request.getCreateDate());
+		activity.setDate(request.getSubmitDate());
 		activity.setAction(PullRequestActivity.Action.OPEN);
 		activity.setRequest(request);
 		activity.setUser(request.getSubmitter());
