@@ -23,32 +23,31 @@
 			</div>
 			<div wicket:id="integratedNote" class="integrated-note">
 				<div wicket:id="fastForwarded">
-					Per integration strategy, target branch was fast-forwarded to source branch.
+					<i class="fa fa-info-circle"></i> Target branch was fast-forwarded to source branch.
 				</div>
 				<div wicket:id="merged">
-					Per integration strategy, target branch was merged with source branch.
+					<i class="fa fa-info-circle"></i> Target branch was merged with source branch.
 				</div>
 				<div wicket:id="mergedOutside">
-					Target branch was merged with source branch by someone outside of this pull request.
+					<i class="fa fa-info-circle"></i> Target branch was merged with source branch by someone outside of this pull request.
 				</div>
 				<div wicket:id="squashed">
-					<p>Per integration strategy, commits from source branch was squashed before merging into target branch. 
-					Run below command if you want to sync local branch with the source branch:</p>
-					<p>
+					<p><i class="fa fa-info-circle"></i> Per integration strategy, pending commits in source branch was squashed 
+					before merging into target branch. Run this command if you want to sync local 
+					branch with the source branch: 
 					<kbd>git fetch origin && git rebase</kbd> 
 					</p>
 				</div>
 				<div wicket:id="sourceRebased">
-					<p>Per integration strategy, source branch was rebased on top 
-					of target branch, and then target branch was fast forwarded to the rebase result. Run below command if you want to sync local branch with the source branch:</p>
-					<p>
+					<p><i class="fa fa-info-circle"></i> Per integration strategy, pending commits in source branch was rebased 
+					before merging into target branch. Run this command if you want to sync local 
+					branch with the source branch:
 					<kbd>git fetch origin && git rebase</kbd>
 					</p>
 				</div>
 				<div wicket:id="targetRebased">
-					<p>Per integration strategy, target branch was rebased on top of this request.
-					Run below command if you want to sync local branch with the target branch:</p>
-					<p>
+					<p><i class="fa fa-info-circle"></i> Per integration strategy, target branch was rebased on top of source branch.
+					Run this command if you want to sync local branch with the target branch:
 					<kbd>git fetch origin && git rebase</kbd>
 					</p>
 				</div>

@@ -78,7 +78,8 @@
 #request-detail .activities>table>tbody>tr.non-discussion>td.detail {
 	border-top: 1px solid #EEE;
 }
-#request-detail .activities>table>tbody>tr.discussion+tr.non-discussion>td.detail {
+#request-detail .activities>table>tbody>tr.discussion+tr.non-discussion>td.detail,
+#request-detail .activities>table>tbody>tr.update+tr.update>td.detail {
 	border-top: none;
 }
 #request-detail .activities>table>tbody>tr.discussion:last-child>td.spacer {

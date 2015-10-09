@@ -59,6 +59,9 @@
 	padding-left: 16px;
 } 
 
+#request-detail>.summary kbd {
+	white-space: nowrap;
+}
 #request-detail>.summary img {
 	width: 24px; 
 	height: 24px; 
