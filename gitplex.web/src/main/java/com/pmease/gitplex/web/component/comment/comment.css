@@ -54,7 +54,7 @@ div.replies>.add-reply:hover>div>a {
 	background: #F5F5F5;
 }
 div.replies>.add-reply>div form {
-	padding: 0 10px 10px 10px;
+	padding: 0 20px 20px 20px;
 }
 table.comments>tbody>tr>td.avatar {
 	width: 1px; 
