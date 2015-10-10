@@ -6,6 +6,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.jgit.lib.FileMode;
+
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.OmitName;
 import com.pmease.gitplex.core.editable.PathChoice;
@@ -19,7 +21,7 @@ public class SpecifyTargetPathsByDirectories implements TargetPathSelection {
 	private List<String> directories = new ArrayList<>();
 	
 	@Editable(name="Directories", description="Use comma to separate multiple directories.")
-	@PathChoice
+	@PathChoice(FileMode.TYPE_TREE)
 	@NotNull
 	@Size(min=1, message="At least one directory has to be specified.")
 	@OmitName

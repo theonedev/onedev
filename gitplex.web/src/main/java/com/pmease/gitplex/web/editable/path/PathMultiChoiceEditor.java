@@ -74,7 +74,7 @@ public class PathMultiChoiceEditor extends PropertyEditor<List<String>> {
 						@Override
 						protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
 							String path = StringEscapeUtils.escapeEcmaScript(blobIdent.path);
-							String script = String.format("gitplex.selectDirectory('%s', '%s', '%s', %s);", 
+							String script = String.format("gitplex.selectPath('%s', '%s', '%s', %s);", 
 									input.getMarkupId(), getMarkupId(), path, true);
 							target.appendJavaScript(script);
 						}

@@ -98,7 +98,7 @@ public class SearchOption implements Serializable {
 		this.title = title;
 	}
 
-	@Editable(order=700, name="Created After", description="Date should be specified with format <i>yyyy-MM-dd</i>.")
+	@Editable(order=700, name="Submitted After", description="Date should be specified with format <i>yyyy-MM-dd</i>.")
 	public Date getBeginDate() {
 		return beginDate;
 	}
@@ -107,7 +107,7 @@ public class SearchOption implements Serializable {
 		this.beginDate = beginDate;
 	}
 
-	@Editable(order=800, name="Created Before", description="Date should be specified with format <i>yyyy-MM-dd</i>.")
+	@Editable(order=800, name="Submitted Before", description="Date should be specified with format <i>yyyy-MM-dd</i>.")
 	public Date getEndDate() {
 		return endDate;
 	}
@@ -169,8 +169,7 @@ public class SearchOption implements Serializable {
 	}
 	
 	public void fillPageParams(PageParameters params) {
-		if (status != Status.ALL)
-			params.set(PARAM_STATUS, status.name());
+		params.set(PARAM_STATUS, status.name());
 		if (assigneeId != null)
 			params.set(PARAM_ASSIGNEE, assigneeId);
 		if (submitterId != null)

@@ -6,6 +6,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.jgit.lib.FileMode;
+
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.pattern.WildcardUtils;
@@ -25,7 +27,7 @@ public class IfTouchSpecifiedDirectories extends AbstractGateKeeper {
 	private List<String> directories = new ArrayList<>();
 	
 	@Editable(name="Specify Directories", description="Use comma to separate multiple directories.")
-	@PathChoice
+	@PathChoice(FileMode.TYPE_TREE)
 	@NotNull
 	@Size(min=1, message="At least one directory has to be specified.")
 	public List<String> getDirectories() {

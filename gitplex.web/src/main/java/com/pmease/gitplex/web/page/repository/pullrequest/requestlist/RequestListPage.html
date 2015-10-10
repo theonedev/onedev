@@ -3,21 +3,20 @@
 		<div class="head clearfix">
 			<div class="title pull-left">Pull Requests</div>
 			<div class="actions pull-left">
-				<a wicket:id="filters" class="btn btn-default"><i class="fa fa-filter"></i> Filters <span class="caret"></span></a>
+				<a wicket:id="filters" class="btn btn-default btn-sm"><i class="fa fa-filter"></i> Filters <span class="caret"></span></a>
 				<div wicket:id="filterMenu"></div>
-				<a wicket:id="sortBy" class="btn btn-default"> <i class="fa fa-sort"></i> Sort by <span class="caret"></span></a>
+				<a wicket:id="sortBy" class="btn btn-default btn-sm"> <i class="fa fa-sort"></i> Sort by <span class="caret"></span></a>
 				<div wicket:id="sortMenu"></div>
-				<a wicket:id="newRequest" class="btn btn-default"><i class="fa fa-plus"></i> Open New</a>
+				<a wicket:id="newRequest" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> Open New</a>
 			</div>
 		</div>
 		<table class="body">
 			<tr>
 				<td class="filter">
 					<form wicket:id="form">
+						<button type="submit" class="btn btn-primary btn-block top"><i class="fa fa-search"></i> Search</button>
 						<div wicket:id="editor"></div>
-						<div class="actions">
-							<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
-						</div>
+						<button type="submit" class="btn btn-primary btn-block bottom"><i class="fa fa-search"></i> Search</button>
 					</form>
 				</td>
 				<td class="requests">
