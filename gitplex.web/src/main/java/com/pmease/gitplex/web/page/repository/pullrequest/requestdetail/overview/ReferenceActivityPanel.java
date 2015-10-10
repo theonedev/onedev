@@ -33,7 +33,7 @@ class ReferenceActivityPanel extends AbstractActivityPanel {
 		link.add(new Label("title", referencedByRequestModel.getObject().getTitle()));
 		add(link);
 		
-		add(new RequestStatusPanel("status", referencedByRequestModel));
+		add(new RequestStatusPanel("status", referencedByRequestModel, false));
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -29,6 +30,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.time.Duration;
@@ -78,6 +80,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 
 @SuppressWarnings("serial")
 public class RequestOverviewPage extends RequestDetailPage {
+	
+	private static class ActivityRendered extends MetaDataKey<RenderableActivity> {
+	};
+	
+	private static final ActivityRendered RENDERED_ACTIVITY = new ActivityRendered();		
 	
 	private static final String DETAIL_ID = "detail";
 	
@@ -163,6 +170,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		if (lastVisitDate != null && lastVisitDate.before(activity.getDate()))
 			avatarColumn.add(AttributeAppender.append("title", "New activity since your last visit"));
 		
+		RequestCycle.get().setMetaData(RENDERED_ACTIVITY, activity);
 		return row;
 	}
 	
@@ -226,25 +234,29 @@ public class RequestOverviewPage extends RequestDetailPage {
 	
 	private Component newActivitiesView() {
 		activitiesView = new RepeatingView("requestActivities") {
-			
+
 			@Override
 			protected void onDetach() {
-				/*
-				 * Put the visit save logic here instead of page wide as the page.onDetach
-				 * can be called sometimes before the page has not been rendered.   
-				 */
-				User user = getCurrentUser();
-				if (user != null) {
-					PullRequestVisit visit = getPullRequest().getVisit(user);
-					if (visit == null) {
-						visit = new PullRequestVisit();
-						visit.setRequest(getPullRequest());
-						visit.setUser(user);
-						getPullRequest().getVisits().add(visit);
-					} else {
-						visit.setDate(new Date());
+				RenderableActivity activity = RequestCycle.get().getMetaData(RENDERED_ACTIVITY);
+				
+				if (activity != null) {
+					// this logic prevents visit to be saved multiple times as 
+					// onDetach can be called multiple times at end of a request cycle
+					RequestCycle.get().setMetaData(RENDERED_ACTIVITY, null);
+					
+					User user = getCurrentUser();
+					if (user != null) {
+						PullRequestVisit visit = getPullRequest().getVisit(user);
+						if (visit == null) {
+							visit = new PullRequestVisit();
+							visit.setRequest(getPullRequest());
+							visit.setUser(user);
+							getPullRequest().getVisits().add(visit);
+						} else {
+							visit.setDate(new Date());
+						}
+						GitPlex.getInstance(Dao.class).persist(visit);
 					}
-					GitPlex.getInstance(Dao.class).persist(visit);
 				}
 				super.onDetach();
 			}
@@ -265,6 +277,11 @@ public class RequestOverviewPage extends RequestDetailPage {
 		addOrReplace(newActivitiesView());
 		
 		super.onBeforeRender();
+	}
+
+	@Override
+	public void detachModels() {
+		super.detachModels();
 	}
 
 	@Override

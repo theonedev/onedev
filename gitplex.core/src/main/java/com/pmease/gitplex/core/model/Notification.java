@@ -36,7 +36,7 @@ public class Notification extends AbstractEntity {
 		}
 	};
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	

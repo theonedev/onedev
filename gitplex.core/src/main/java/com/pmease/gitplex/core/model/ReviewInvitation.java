@@ -23,7 +23,7 @@ public class ReviewInvitation extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User reviewer;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	

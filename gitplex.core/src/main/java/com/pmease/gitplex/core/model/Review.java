@@ -28,7 +28,7 @@ public class Review extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date = new Date();
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequestUpdate update;
 	

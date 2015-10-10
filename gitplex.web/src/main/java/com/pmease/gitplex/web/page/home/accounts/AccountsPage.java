@@ -25,7 +25,6 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
-import com.pmease.commons.wicket.component.navigator.PagingNavigator;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
@@ -40,12 +39,14 @@ import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+
 @SuppressWarnings("serial")
 public class AccountsPage extends LayoutPage {
 
 	private PageableListView<User> accountsView;
 	
-	private PagingNavigator pagingNavigator;
+	private BootstrapPagingNavigator pagingNavigator;
 	
 	private WebMarkupContainer accountsContainer; 
 	
@@ -211,7 +212,7 @@ public class AccountsPage extends LayoutPage {
 			
 		});
 
-		add(pagingNavigator = new PagingNavigator("accountsPageNav", accountsView) {
+		add(pagingNavigator = new BootstrapPagingNavigator("accountsPageNav", accountsView) {
 
 			@Override
 			protected void onConfigure() {

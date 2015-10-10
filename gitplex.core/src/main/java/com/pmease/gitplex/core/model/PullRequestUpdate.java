@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -37,7 +38,7 @@ import com.pmease.gitplex.core.manager.StorageManager;
 @Entity
 public class PullRequestUpdate extends AbstractEntity {
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	

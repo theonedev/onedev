@@ -214,7 +214,7 @@ public class RequestListPage extends PullRequestPage {
 				Fragment fragment = new Fragment(componentId, "requestFrag", RequestListPage.this);
 				fragment.add(new Label("id", "#" + request.getId()));
 				fragment.add(new RequestLink("title", rowModel));
-				fragment.add(new RequestStatusPanel("status", rowModel));
+				fragment.add(new RequestStatusPanel("status", rowModel, false));
 				fragment.add(new UserLink("submitter", new LoadableDetachableModel<User>() {
 
 					@Override

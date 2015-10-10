@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.validator.routines.PercentValidator;
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
@@ -43,7 +44,6 @@ import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
-import com.pmease.commons.wicket.component.navigator.PagingNavigator;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -71,6 +71,7 @@ import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
 public class RepoBranchesPage extends RepositoryPage {
@@ -79,7 +80,7 @@ public class RepoBranchesPage extends RepositoryPage {
 	
 	private PageableListView<String> branchesView;
 	
-	private PagingNavigator pagingNavigator;
+	private Component pagingNavigator;
 	
 	private WebMarkupContainer branchesContainer; 
 	
@@ -521,7 +522,7 @@ public class RepoBranchesPage extends RepositoryPage {
 			
 		});
 
-		add(pagingNavigator = new PagingNavigator("branchesPageNav", branchesView) {
+		add(pagingNavigator = new BootstrapPagingNavigator("branchesPageNav", branchesView) {
 
 			@Override
 			protected void onConfigure() {

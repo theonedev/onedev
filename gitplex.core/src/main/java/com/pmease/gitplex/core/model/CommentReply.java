@@ -36,7 +36,7 @@ public class CommentReply extends AbstractEntity {
 		return version;
 	}
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Comment comment;
 	

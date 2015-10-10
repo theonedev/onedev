@@ -17,8 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
@@ -48,9 +46,8 @@ public class Comment extends AbstractEntity {
 	@Version
 	private long version;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	@Fetch(FetchMode.JOIN)
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

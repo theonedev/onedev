@@ -24,7 +24,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
-import com.pmease.commons.wicket.component.navigator.PagingNavigator;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -35,12 +34,14 @@ import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+
 @SuppressWarnings("serial")
 public class AccountReposPage extends AccountLayoutPage {
 
 	private PageableListView<Repository> reposView;
 	
-	private PagingNavigator pagingNavigator;
+	private BootstrapPagingNavigator pagingNavigator;
 	
 	private WebMarkupContainer reposContainer; 
 	
@@ -188,7 +189,7 @@ public class AccountReposPage extends AccountLayoutPage {
 			
 		});
 
-		add(pagingNavigator = new PagingNavigator("reposPageNav", reposView) {
+		add(pagingNavigator = new BootstrapPagingNavigator("reposPageNav", reposView) {
 
 			@Override
 			protected void onConfigure() {

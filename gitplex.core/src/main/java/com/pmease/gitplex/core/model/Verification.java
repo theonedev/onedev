@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -18,7 +19,7 @@ public class Verification extends AbstractEntity {
 	
 	public enum Status {ONGOING, PASSED, NOT_PASSED}
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
