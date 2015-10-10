@@ -23,18 +23,19 @@ pmease.commons = {
 		},
 
 		setup: function(modalId, contentUnloader, showImmediately) {
-			var modal = $("#" + modalId);
+			var $modal = $("#" + modalId);
 			
 			// This script can still be called if CollapseBehavior is added to a 
 			// a component enclosed in an invisible wicket:enclosure. So we 
 			// should check if relevant element exists.
-			if (!modal[0])
+			if ($modal.length == 0)
 				return;
 			
-			modal[0].contentUnloader = contentUnloader;
+			$modal[0].contentUnloader = contentUnloader;
 			
-			modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
-			modal.modal({backdrop: "static", keyboard: false, show: false});
+			if (!document.getElementById(modalId + "-placeholder"))
+				$modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
+			$modal.modal({backdrop: "static", keyboard: false, show: false});
 			if (showImmediately)
 				pmease.commons.modal.show(modalId, undefined);
 		},

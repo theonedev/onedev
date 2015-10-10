@@ -35,7 +35,6 @@
 	border-bottom: 1px dotted #BBB; 
 	margin-bottom: 12px; 
 	padding-bottom: 8px;
-	font-size: 16px;
 }
 #request-detail>.summary>div:last-child {
 	border-bottom: none; 

@@ -239,6 +239,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		add(summaryContainer);
 
 		summaryContainer.add(newDiscardedNoteContainer());
+		summaryContainer.add(newPendingUpdateNoteContainer());
+		summaryContainer.add(newPendingApprovalNoteContainer());
 		summaryContainer.add(newIntegratedNoteContainer());
 		summaryContainer.add(newStatusReasonsContainer());
 		summaryContainer.add(newIntegrationPreviewContainer());
@@ -754,6 +756,32 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		return discardedNoteContainer;
 	}
 	
+	private WebMarkupContainer newPendingUpdateNoteContainer() {
+		WebMarkupContainer pendingUpdateNoteContainer = new WebMarkupContainer("pendingUpdateNote") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().getStatus() == Status.PENDING_UPDATE);
+			}
+			
+		};
+		return pendingUpdateNoteContainer;
+	}
+	
+	private WebMarkupContainer newPendingApprovalNoteContainer() {
+		WebMarkupContainer pendingApprovalNoteContainer = new WebMarkupContainer("pendingApprovalNote") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().getStatus() == Status.PENDING_APPROVAL);
+			}
+			
+		};
+		return pendingApprovalNoteContainer;
+	}
+
 	private WebMarkupContainer newIntegratedNoteContainer() {
 		WebMarkupContainer integratedNoteContainer = new WebMarkupContainer("integratedNote") {
 

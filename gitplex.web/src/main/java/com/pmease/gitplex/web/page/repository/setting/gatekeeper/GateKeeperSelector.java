@@ -43,8 +43,8 @@ public abstract class GateKeeperSelector extends Panel {
 		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_FILES, new ArrayList<Class<?>>());
 		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_REVIEW, new ArrayList<Class<?>>());
 		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_SUBMITTER, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.CATEGROY_COMPOSITION, new ArrayList<Class<?>>());
 		gateKeeperClasses.put(GateKeeper.CATEGROY_OTHERS, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_COMPOSITION, new ArrayList<Class<?>>());
 		
 		List<Class<?>> implementations = new ArrayList<>();
 		for (Class<?> clazz: GitPlex.getInstance(ImplementationRegistry.class).getImplementations(GateKeeper.class)) 

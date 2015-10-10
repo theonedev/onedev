@@ -19,7 +19,15 @@
 		</div>
 		<div wicket:id="requestSummary" class="summary well">
 			<div wicket:id="discardedNote">
-				This pull request has been discarded.
+				<i class="fa fa-info-circle"></i> This pull request has been discarded.
+			</div>
+			<div wicket:id="pendingUpdateNote">
+				<i class="fa fa-exclamation-triangle"></i> This pull request does not pass gate keeper 
+				checks below, and needs to be updated with new commits.
+			</div>
+			<div wicket:id="pendingApprovalNote">
+				<i class="fa fa-exclamation-triangle"></i> This pull request needs to be approved before it can 
+				be integrated.
 			</div>
 			<div wicket:id="integratedNote" class="integrated-note">
 				<div wicket:id="fastForwarded">

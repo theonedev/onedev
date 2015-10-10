@@ -158,7 +158,7 @@ public abstract class GateKeeperPanel extends Panel {
 						andOrGateKeeper.getGateKeepers().add(gateKeeper);
 						GateKeeperPanel.this.onChange(target, andOrGateKeeper);
 					} else {
-						ModalPanel childEditor = new ModalPanel("childEditor") {
+						ModalPanel childEditor = new ModalPanel("childEditor", true) {
 
 							@Override
 							protected Component newContent(String id, ModalBehavior behavior) {
@@ -210,7 +210,7 @@ public abstract class GateKeeperPanel extends Panel {
 							notGateKeeper.setGateKeeper(gateKeeper);
 							GateKeeperPanel.this.onChange(target, notGateKeeper);
 						} else {
-							ModalPanel gateKeeperEditor = new ModalPanel("gateKeeperEditor") {
+							ModalPanel gateKeeperEditor = new ModalPanel("gateKeeperEditor", true) {
 
 								@Override
 								protected Component newContent(String id, ModalBehavior behavior) {
@@ -284,7 +284,7 @@ public abstract class GateKeeperPanel extends Panel {
 							ifThenGateKeeper.setIfGate(gateKeeper);
 							GateKeeperPanel.this.onChange(target, ifThenGateKeeper);
 						} else {
-							ModalPanel ifEditor = new ModalPanel("ifEditor") {
+							ModalPanel ifEditor = new ModalPanel("ifEditor", true) {
 
 								@Override
 								protected Component newContent(String id, ModalBehavior behavior) {
@@ -354,7 +354,7 @@ public abstract class GateKeeperPanel extends Panel {
 							ifThenGateKeeper.setThenGate(gateKeeper);
 							GateKeeperPanel.this.onChange(target, ifThenGateKeeper);
 						} else {
-							ModalPanel thenEditor = new ModalPanel("thenEditor") {
+							ModalPanel thenEditor = new ModalPanel("thenEditor", true) {
 
 								@Override
 								protected Component newContent(String id, ModalBehavior behavior) {

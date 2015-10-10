@@ -22,9 +22,9 @@ public interface GateKeeper extends Trimmable, Serializable {
 
 	String CATEGROY_CHECK_SUBMITTER = "Check Submitter";
 
-	String CATEGROY_COMPOSITION = "Gate Keeper Composition";
-	
 	String CATEGROY_OTHERS = "Other Gate Keepers";
+	
+	String CATEGROY_COMPOSITION = "Gate Keeper Composition";
 	
 	/**
 	 * Check the gate keeper against specified request. This is typically used to determine 
