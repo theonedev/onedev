@@ -60,7 +60,11 @@
 }
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body,
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body {
-	padding: 0px 10px 10px 10px;
+	padding: 0px 20px 10px 20px;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body>form,
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body>form {
+	padding-top: 10px;
 }
 
 #request-detail .activities>table>tbody>tr.discussion+tr.discussion>td {

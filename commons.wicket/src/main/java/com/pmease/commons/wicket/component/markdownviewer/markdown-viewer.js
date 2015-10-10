@@ -8,4 +8,14 @@ pmease.commons.initMarkdownViewer = function($preview, taskCallback) {
 	} else {
 		$task.attr("disabled", "disabled");
 	}
+	
+	$preview.find("h1, h2, h3, h4, h5, h6").each(function() {
+		var $this = $(this);
+		var $anchor = $this.find(">a[name]");
+		if ($anchor.length != 0) {
+			$this.addClass("anchored-h").append($anchor.html());
+			$anchor.empty();
+			$this.prepend("<a href='#" + $anchor.attr("name") + "' class='anchor'><i class='fa fa-link'></i></a>");
+		}
+	});
 }

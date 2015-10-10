@@ -46,3 +46,44 @@
 .md-preview .task-list-item input {
 	margin-right: 8px;
 }
+.md-preview .anchored-h {
+	position: relative;
+	margin-left: -20px;
+	padding-left: 20px;	
+}
+.md-preview .anchored-h a.anchor {
+	position: absolute;
+	display: none;
+}
+.md-preview .anchored-h:hover a.anchor {
+	display: inherit;
+}
+.md-preview h1.anchored-h a.anchor {
+	font-size: 16px;
+	left: 4px;
+	top: 11px;
+}
+.md-preview h2.anchored-h a.anchor {
+	font-size: 15px;
+	left: 4px;
+	top: 8px;
+}
+.md-preview h3.anchored-h a.anchor {
+	font-size: 14px;
+	top: 6px;
+	left: 4px;
+}
+.md-preview h4.anchored-h a.anchor {
+	font-size: 13px;
+	top: 3px;
+	left: 5px;
+}
+.md-preview h5.anchored-h a.anchor {
+	font-size: 12px;
+	top: 2px;
+	left: 6px;
+}
+.md-preview h6.anchored-h a.anchor {
+	font-size: 11px;
+	left: 6px;
+}

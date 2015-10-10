@@ -70,7 +70,6 @@ public class DefaultMarkdownManager implements MarkdownManager {
 
 			@Override
 			public void visit(ListItemNode node) {
-				
 		        if (node instanceof TaskListNode) {
 		            // vsch: #185 handle GitHub style task list items, these are a bit messy because the <input> checkbox needs to be
 		            // included inside the optional <p></p> first grand-child of the list item, first child is always RootNode

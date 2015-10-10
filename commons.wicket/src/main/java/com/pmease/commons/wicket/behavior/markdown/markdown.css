@@ -58,7 +58,7 @@
     z-index: 100 !important;
 }
 .md-editor .md-preview {
-	padding: 8px;
+	padding: 20px;
 }
 .md-editor>textarea.md-input {
 	padding: 8px; 
