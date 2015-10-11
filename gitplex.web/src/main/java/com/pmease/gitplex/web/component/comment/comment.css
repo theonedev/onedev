@@ -27,7 +27,7 @@ div.replies>table>tbody>tr>td {
 	border-top: 1px solid #EEE; 
 }
 div.replies>table>tbody>tr>td.spacer {
-	width: 10px; 
+	width: 20px; 
 }
 div.replies>table>tbody>tr>td.avatar {
 	width: 26px; 
