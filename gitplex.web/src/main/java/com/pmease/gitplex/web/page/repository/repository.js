@@ -1,5 +1,5 @@
 $(function() {
-	var $nav = $("#repository>.body>.sidebar>table>tbody>tr>td.nav");
+	var $nav = $("#repository>.sidebar>table>tbody>tr>td.nav");
 	
 	function enableTooltip() {
 		$nav.find("li a").each(function() {

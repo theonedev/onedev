@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -93,40 +94,6 @@ public abstract class RepositoryPage extends AccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer accountAndRepo = new WebMarkupContainer("accountAndRepo");
-		add(accountAndRepo);
-		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, paramsOf(getAccount()));
-		accountLink.add(new Label("accountName", getAccount().getName()));
-		accountAndRepo.add(accountLink);
-		
-		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, paramsOf(getRepository()));
-		repoLink.add(new Label("repoName", getRepository().getName()));
-		accountAndRepo.add(repoLink);
-		
-		DropdownPanel repoChoice = new DropdownPanel("repoChoice") {
-
-			@Override
-			protected Component newContent(String id) {
-				return new RepositorySelector(id, null, repoModel) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Repository repository) {
-						RepositoryPage.this.onSelect(target, repository);
-					}
-					
-				};
-			}
-			
-		};
-		add(repoChoice);
-		WebMarkupContainer repoChoiceTrigger = new WebMarkupContainer("repoChoiceTrigger");
-		repoChoiceTrigger.add(new DropdownBehavior(repoChoice).alignWithComponent(accountAndRepo, 0, 100, 0, 0, 6, true));
-		add(repoChoiceTrigger);
-		
-		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
-		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getRepository()));
-		add(new TextField<String>("cloneUrl", cloneUrlModel));
-		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-file-text-o", RepoFilePage.class));
 		tabs.add(new RepoTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", RepoCommitsPage.class));
@@ -182,5 +149,46 @@ public abstract class RepositoryPage extends AccountPage {
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, Repository repository);
+
+	@Override
+	protected Component newPageInfo(String componentId) {
+		Fragment fragment = new Fragment(componentId, "pageInfoFrag", this);
+		WebMarkupContainer accountAndRepo = new WebMarkupContainer("accountAndRepo");
+		fragment.add(accountAndRepo);
+		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, paramsOf(getAccount()));
+		accountLink.add(new Label("accountName", getAccount().getName()));
+		accountAndRepo.add(accountLink);
+		
+		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, paramsOf(getRepository()));
+		repoLink.add(new Label("repoName", getRepository().getName()));
+		accountAndRepo.add(repoLink);
+		
+		DropdownPanel repoChoice = new DropdownPanel("repoChoice") {
+
+			@Override
+			protected Component newContent(String id) {
+				return new RepositorySelector(id, null, repoModel) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Repository repository) {
+						RepositoryPage.this.onSelect(target, repository);
+					}
+					
+				};
+			}
+			
+		};
+		fragment.add(repoChoice);
+		WebMarkupContainer repoChoiceTrigger = new WebMarkupContainer("repoChoiceTrigger");
+		repoChoiceTrigger.add(new DropdownBehavior(repoChoice)
+				.alignWithComponent(accountAndRepo, 0, 100, 0, 0, 6, true));
+		fragment.add(repoChoiceTrigger);
+		
+		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
+		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getRepository()));
+		fragment.add(new TextField<String>("cloneUrl", cloneUrlModel));
+		
+		return fragment;
+	}
 	
 }

@@ -1,11 +1,14 @@
-package com.pmease.gitplex.web.page.home.admin;
+package com.pmease.gitplex.web.page.home;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -16,6 +19,7 @@ import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
@@ -25,7 +29,6 @@ import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
@@ -34,11 +37,12 @@ import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModalB
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
+import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
-public class AccountsPage extends AdministrationPage {
+public class AccountsPage extends LayoutPage {
 
 	private PageableListView<User> accountsView;
 	
@@ -75,7 +79,7 @@ public class AccountsPage extends AdministrationPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin()));
+				setVisible(SecurityUtils.canManageSystem());
 			}
 
 			@Override
@@ -219,6 +223,17 @@ public class AccountsPage extends AdministrationPage {
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
-	
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(AccountsPage.class, "accounts.css")));
+	}
+
+	@Override
+	protected Component newPageInfo(String componentId) {
+		return new Label(componentId, "Accounts");
+	}
 
 }

@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.page.account;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -48,6 +50,11 @@ public abstract class AccountPage extends LayoutPage {
 		PageParameters params = new PageParameters();
 		params.set(PARAM_USER, user.getName());
 		return params;
+	}
+
+	@Override
+	protected Component newPageInfo(String componentId) {
+		return new Label(componentId, "Account");
 	}
 
 }

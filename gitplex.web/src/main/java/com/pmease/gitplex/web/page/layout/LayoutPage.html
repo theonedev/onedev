@@ -4,6 +4,7 @@
 			<div class="logo pull-left">
 				<a wicket:id="home"><i class="fa fa-ext fa-gitplex-logo"></i></a>
 			</div>
+			<div wicket:id="pageInfo" class="page-info pull-left"></div>
 			<div class="account pull-right">
 			  	<wicket:enclosure child="login">
 			  		<div class="logged-out">
@@ -20,12 +21,12 @@
 				  		</a>
 				  		<div wicket:id="tooltip" id="runas-tooltip"></div>
 				  		<span wicket:id="user" class="current"></span>
-				  		<a wicket:id="userMenuTrigger"><i class="fa fa-angle-down"></i></a>
+				  		<a wicket:id="userMenuTrigger" class="menu"><i class="fa fa-angle-down"></i></a>
 				  		<div wicket:id="userMenu"></div>
 					</div>
 			  	</wicket:enclosure>
 			</div>
-			<div class="nav pull-right">
+			<div class="administration pull-right">
 				<a wicket:id="administration" title="Administration"><i class="fa fa-bars"></i></a>
 			</div>
 		</div>

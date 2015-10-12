@@ -17,9 +17,25 @@ html, body {
 	font-size: 28px;
 	color: #69B7F7; 
 }
-
+#main>.head>.page-info {
+	color: #EEE;
+	font-size: 20px;
+}
+#main>.head>.administration a {
+	font-size: 30px;
+	line-height: 20px;
+}
 #main>.head>.account {
 	margin-right: 0;
+}
+#main>.head>.account>.logged-in>.notifications {
+	color: #69B7F7;
+}
+#main>.head>.account>.logged-in>a, #main>.head>.account>.logged-in>span {
+	margin-right: 8px;
+}
+#main>.head>.account>.logged-in>.menu {
+	margin-right: 8px;
 }
 #main>.head>.account .avatar {
 	width: 32px;
@@ -29,7 +45,7 @@ html, body {
 				0px -1px 3px 0px #333, 
 				0px 1px 3px 0px #333;
 }
-#main>.head>.account a.previous .account {
+#main>.head>.account a.previous .avatar {
 	margin-right: -24px;
 }
 #main>.head>.account a.previous:hover .avatar {
@@ -37,14 +53,6 @@ html, body {
 }
 #runas-tooltip {
 	padding: 4px 8px;
-}
-
-#main>.head>.account .user-link span {
-	font-size: 16px;
-}
-#main>.head>.account a.sign-out .fa {
-	font-size: 20px;
-	vertical-align: middle;
 }
 
 #main>.body {

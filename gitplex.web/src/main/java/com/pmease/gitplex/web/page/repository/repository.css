@@ -1,34 +1,33 @@
-#repository>.head {
-	padding: 8px 10px;
-	border-bottom: 1px solid #BBB;
-	font-size: 18px;
-	color: #555;
+#repository-head {
+	padding-left: 20px;
 }
-#repository>.head>.nav .fa-repo {
-	font-size: 24px;
-	margin-right: 4px;
-	vertical-align: middle;
-}
-#repository>.head>.nav .separator {
+#repository-head>.nav .separator {
 	margin: 0 6px;
 }
-#repository>.head>.clone {
+#repository-head>.nav .open a {
+	background: inherit;
+}
+#repository-head>.clone {
+	color: #999;
+	margin: 4px 20px 0 40px;
 	font-size: 14px;
 }
-#repository>.head>.clone>label {
+#repository-head>.clone>label {
 	font-weight: normal;
 }
-#repository>.head>.clone>input {
+#repository-head>.clone>input {
+	background: #666;
 	font-size: 12px;
 	width: 200px;
-	border: 1px solid #D8D8D8;
+	border: 1px solid #666;
 	border-radius: 3px;
 	padding-left: 4px;
 	padding-right: 4px;
 	height: 22px;
+	color: #BBB;
 }
 
-#repository>.body>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
+#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
 	display: block;
 	margin-top: -20px;
 	text-align: right;
@@ -39,25 +38,25 @@
 	color: #666;
 	height: 31px;
 }
-#repository>.body>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
 	color: #333;
 }
-#repository>.body>.sidebar>table>tbody>tr>td.nav>.mini-toggle>span:before {
+#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle>span:before {
 	font-family: "FontAwesome";
 	content: "\f100";
 }
-#repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.mini-toggle>span:before {
+#repository>.sidebar>table>tbody>tr>td.mini.nav>.mini-toggle>span:before {
 	content: "\f101";
 }
-#repository>.body>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
+#repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
 	background: #EEE;
 }
-#repository>.body>.sidebar>table>tbody>tr>td.mini.nav {
+#repository>.sidebar>table>tbody>tr>td.mini.nav {
 	width: 40px;
 }
-#repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
+#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
 	width: auto;
 }
-#repository>.body>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
+#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
 	display: none;
 }
