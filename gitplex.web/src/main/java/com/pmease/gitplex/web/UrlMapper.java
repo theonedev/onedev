@@ -19,11 +19,10 @@ import com.pmease.gitplex.web.page.account.repositories.NewAccountRepoPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.home.accounts.NewAccountPage;
 import com.pmease.gitplex.web.page.home.admin.MailSettingPage;
+import com.pmease.gitplex.web.page.home.admin.NewAccountPage;
 import com.pmease.gitplex.web.page.home.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
-import com.pmease.gitplex.web.page.home.repositories.RepositoriesPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
@@ -133,8 +132,6 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addRepoPages() {
-		add(new MountedMapper("repositories", RepositoriesPage.class));
-		
 		add(new MountedMapper("${user}/${repo}", RepoFilePage.class) {
 
 			@Override

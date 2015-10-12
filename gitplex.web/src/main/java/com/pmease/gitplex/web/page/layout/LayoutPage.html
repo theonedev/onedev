@@ -1,13 +1,10 @@
 <wicket:extend>
-	<div id="main" class="container-fluid">
-		<div wicket:id="mainHead" class="head row top hideable">
-			<div class="logo col-xs-1">
+	<div id="main">
+		<div wicket:id="mainHead" class="head clearfix">
+			<div class="logo pull-left">
 				<a wicket:id="home"><i class="fa fa-ext fa-gitplex-logo"></i></a>
 			</div>
-			<div class="nav col-xs-8">
-				<ul wicket:id="tabs" class="list-unstyled clearfix"></ul>
-			</div>
-			<div class="status col-xs-3">
+			<div class="account pull-right">
 			  	<wicket:enclosure child="login">
 			  		<div class="logged-out">
 				  		<a wicket:id="login">Log in</a>
@@ -28,11 +25,14 @@
 					</div>
 			  	</wicket:enclosure>
 			</div>
+			<div class="nav pull-right">
+				<a wicket:id="administration" title="Administration"><i class="fa fa-bars"></i></a>
+			</div>
 		</div>
 		<div class="body">
 			<wicket:child></wicket:child>
 		</div>
-		<div class="foot bottom hideable clearfix">
+		<div class="foot clearfix">
 			<div class="pull-left">
 				<a href="http://www.pmease.com">PMEase GitPlex</a>, 1.0.0, 2013-03-05, Commercial License for Site 'PMEase Inc.'
 			</div>

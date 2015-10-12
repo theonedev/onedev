@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
@@ -21,8 +20,6 @@ import com.pmease.commons.wicket.behavior.menu.LinkItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
 import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
-import com.pmease.commons.wicket.component.tabbable.PageTab;
-import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
@@ -34,11 +31,7 @@ import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
-import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
-import com.pmease.gitplex.web.page.home.accounts.NewAccountPage;
-import com.pmease.gitplex.web.page.home.admin.AdministrationPage;
-import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
-import com.pmease.gitplex.web.page.home.repositories.RepositoriesPage;
+import com.pmease.gitplex.web.page.home.admin.AccountsPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
@@ -61,15 +54,8 @@ public abstract class LayoutPage extends BasePage {
 		add(mainHead);
 		
 		mainHead.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
-		
-		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new PageTab(Model.of("Accounts"), AccountsPage.class, NewAccountPage.class));
-		tabs.add(new PageTab(Model.of("Repositories"), RepositoriesPage.class));
-		
-		if (SecurityUtils.canManageSystem())
-			tabs.add(new PageTab(Model.of("Administration"), SystemSettingPage.class, AdministrationPage.class));
-			
-		mainHead.add(new Tabbable("tabs", tabs));
+		mainHead.add(new BookmarkablePageLink<Void>("administration", AccountsPage.class)
+					.setVisible(SecurityUtils.canManageSystem()));
 
 		final User user = getCurrentUser();
 		boolean signedIn = user != null;

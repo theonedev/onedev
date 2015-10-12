@@ -3,49 +3,25 @@ html, body {
 }
 #main>.head {
 	background: #303845;
-	padding: 8px 0;
+	padding: 8px 16px;
+}
+#main>.head>div {
+	margin-right: 16px;
+}
+#main>.head a {
+	text-decoration: none;
+	color: #EEE;
+	font-size: 20px;
 }
 #main>.head>.logo .fa {
 	font-size: 28px;
 	color: #69B7F7; 
-	margin-left: -6px;
 }
 
-#main>.head>.nav ul {
-	margin-bottom: 0;
+#main>.head>.account {
+	margin-right: 0;
 }
-#main>.head>.nav li {
-	float: left;
-}
-#main>.head>.nav a {
-	display: block; 
-	text-decoration: none; 
-	color: #999; 
-	margin-right: 20px;
-	font-size: 17px;
-	border-top: 2px solid #303845;
-}
-#main>.head>.nav li.active a {
-	color: #EEE;
-	border-top-color: #69B7F7;
-}
-
-#main>.head>.status {
-	text-align: right;
-}
-#main>.head>.status .logged-in {
-	font-size: 18px;
-	margin-right: -12px;
-}
-#main>.head>.status .logged-out {
-	font-size: 14px;
-	margin: 2px -12px 0 0;
-}
-#main>.head>.status a, #main>.head>.status span {
-	color: #EEE; 
-	margin-right: 8px;
-}
-#main>.head>.status .avatar {
+#main>.head>.account .avatar {
 	width: 32px;
 	height: 32px;
 	box-shadow: -1px 0px 3px 0px #333, 
@@ -53,20 +29,20 @@ html, body {
 				0px -1px 3px 0px #333, 
 				0px 1px 3px 0px #333;
 }
-#main>.head>.status a.previous .avatar {
+#main>.head>.account a.previous .account {
 	margin-right: -24px;
 }
-#main>.head>.status a.previous:hover .avatar {
+#main>.head>.account a.previous:hover .avatar {
 	margin-right: -12px;
 }
 #runas-tooltip {
 	padding: 4px 8px;
 }
 
-#main>.head>.status .user-link span {
+#main>.head>.account .user-link span {
 	font-size: 16px;
 }
-#main>.head>.status a.sign-out .fa {
+#main>.head>.account a.sign-out .fa {
 	font-size: 20px;
 	vertical-align: middle;
 }
@@ -74,7 +50,6 @@ html, body {
 #main>.body {
 	background: white;
 	border-bottom: 1px solid #BBB;
-	margin: 0 -15px;
 }
 
 .sidebar>table>tbody>tr>td.nav {

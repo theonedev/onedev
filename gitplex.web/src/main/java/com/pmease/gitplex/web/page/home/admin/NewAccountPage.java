@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.home.accounts;
+package com.pmease.gitplex.web.page.home.admin;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Session;
@@ -15,10 +15,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
-public class NewAccountPage extends LayoutPage {
+public class NewAccountPage extends AdministrationPage {
 
 	private final User account;
 	

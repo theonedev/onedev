@@ -18,7 +18,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
-import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
+import com.pmease.gitplex.web.page.home.admin.AccountsPage;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {

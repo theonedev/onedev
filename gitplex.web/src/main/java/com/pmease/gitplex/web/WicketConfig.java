@@ -18,7 +18,7 @@ import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVe
 
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitplex.web.page.error.BaseErrorPage;
-import com.pmease.gitplex.web.page.home.accounts.AccountsPage;
+import com.pmease.gitplex.web.page.home.admin.AccountsPage;
 
 @Singleton
 public class WicketConfig extends AbstractWicketConfig {
