@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 
 import javax.persistence.EntityNotFoundException;
@@ -15,6 +17,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.lib.Constants;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
@@ -79,7 +82,11 @@ public class AttachmentResource extends AbstractResource {
 			throw new RuntimeException(e);
 		}
 
-		response.setFileName(attachment);
+		try {
+			response.setFileName(URLEncoder.encode(attachment, Charsets.UTF_8.name()));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override

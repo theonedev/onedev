@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -12,6 +14,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.lib.Constants;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
@@ -73,7 +76,11 @@ public class BlobResource extends AbstractResource {
 		if (!GitUtils.isHash(revision))
 			response.disableCaching();
 		
-		response.setFileName(blob.getIdent().getName());
+		try {
+			response.setFileName(URLEncoder.encode(blob.getIdent().getName(), Charsets.UTF_8.name()));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override

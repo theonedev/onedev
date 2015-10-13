@@ -1,5 +1,5 @@
 pmease.commons.markdown = {
-	init: function(inputId, atWhoLimit, callback, uploadUrl, attachmentSupport) {
+	init: function(inputId, atWhoLimit, callback, uploadUrl, attachmentSupport, attachmentMaxSize) {
 		var $input = $("#" + inputId);
 		function onSelectUrl(isImage) {
      	   var $modal = $("" +
@@ -186,34 +186,44 @@ pmease.commons.markdown = {
 					uploadFile(files[0]);
 			}, false);
 			
-			function appendAndSelect(message) {
-				if ($input.range().length == 0) {
-					$input.caret(message);
-					$input.range($input.caret()-message.length, $input.caret());
-				} else {
-					$input.range(message);
-				}
-			}
-			
 			function uploadFile(file) {
-				var xhr = new XMLHttpRequest();
-				xhr.upload.onprogress = function(e) {
-					var percentComplete = (e.loaded / e.total) * 100;
-					appendAndSelect("Uploaded: " + percentComplete + "%");
-				};
-				xhr.onload = function() {
-					if (xhr.status == 200) 
-						callback("insertUrl", xhr.responseText);
-					else 
-						appendAndSelect("!!" + xhr.responseText + "!!");
-				};
-				xhr.onerror = function() {
-					appendAndSelect("!!Unable to connect to server!!");
-				};
-				xhr.open("POST", uploadUrl, true);
-				xhr.setRequestHeader("File-Name", file.name);
-				xhr.setRequestHeader("Attachment-Support", attachmentSupport);
-				xhr.send(file);
+				if (file.size> attachmentMaxSize) {
+					var message = "!!Upload should be less than " + Math.round(attachmentMaxSize/1024/1024) + " Mb!!";
+					pmease.commons.markdown.updateUploadMessage($input, message);
+				} else {
+					var xhr = new XMLHttpRequest();
+					var val = $input.val();
+					var i=1;
+					var message = "[Uploading file...]";
+					while (val.indexOf(message) != -1) {
+						message = "[Uploading file" + (++i) + "...]";
+					}
+
+					xhr.replaceMessage = message;
+					if ($input.range().length == 0) {
+						$input.caret(message);
+					} else {
+						$input.range(message);
+						$input.caret($input.caret()+message.length);
+					}
+					
+					xhr.onload = function() {
+						if (xhr.status == 200) { 
+							callback("insertUrl", xhr.responseText, xhr.replaceMessage);
+						} else { 
+							pmease.commons.markdown.updateUploadMessage($input, 
+									"!!" + xhr.responseText + "!!", xhr.replaceMessage);
+						}
+					};
+					xhr.onerror = function() {
+						pmease.commons.markdown.updateUploadMessage($input, 
+								"!!Unable to connect to server!!", xhr.replaceMessage);
+					};
+					xhr.open("POST", uploadUrl, true);
+					xhr.setRequestHeader("File-Name", encodeURIComponent(file.name));
+					xhr.setRequestHeader("Attachment-Support", attachmentSupport);
+					xhr.send(file);
+				}
 			}
 	    }
 	},
@@ -266,7 +276,7 @@ pmease.commons.markdown = {
  	   $input.trigger("resized");
 	},
 	
-	insertUrl: function(inputId, isImage, url, name) {
+	insertUrl: function(inputId, isImage, url, name, replaceMessage) {
 		var $input = $("#" + inputId);
 
     	var sanitizedUrl = $('<div>'+url+'</div>').text();
@@ -280,14 +290,38 @@ pmease.commons.markdown = {
     	if (isImage)
     		message = "!" + message;
     	
-    	if ($input.range().length == 0) {
-			$input.caret(message);
-		} else {
-			$input.range(message);
-	    	$input.caret($input.caret()+message.length);
-		}
+    	pmease.commons.markdown.updateUploadMessage($input, message, replaceMessage);
     	if (!name)
-    		$input.range($input.caret()-message.length+2, $input.caret()-message.length+defaultDescription.length+2);
+    		$input.range($input.caret()-message.length+1, $input.caret()-message.length+defaultDescription.length+1);
+    	
     	pmease.commons.form.markDirty($input.closest("form.leave-confirm"));
-	} 
+	}, 
+	
+	updateUploadMessage: function($input, message, replaceMessage) {
+		var isError = message.indexOf("!!") == 0;
+		var pos = $input.val().indexOf(replaceMessage);
+		if (pos != -1) {
+			var currentPos = $input.caret();
+			$input.range(pos, pos+ replaceMessage.length).range(message);
+			if (!isError) {
+				if (currentPos<pos)
+					$input.caret(currentPos);
+				else if (currentPos>pos+replaceMessage.length)
+					$input.caret(currentPos + message.length - replaceMessage.length);
+				else 
+					$input.caret($input.caret()+message.length);
+			}
+		} else {
+			if ($input.range().length != 0) {
+				$input.range(message);
+				if (!isError)
+					$input.caret($input.caret() + message.length);
+			} else {
+				$input.caret(message);
+				if (isError)
+					$input.range($input.caret()-message.length, $input.caret());
+			}
+		} 
+	}
+	
 }

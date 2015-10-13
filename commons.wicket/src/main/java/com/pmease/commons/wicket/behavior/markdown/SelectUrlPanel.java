@@ -95,7 +95,7 @@ class SelectUrlPanel extends Panel {
 					error("Url should start with http:// or https://");
 					target.add(SelectUrlPanel.this);
 				} else {
-					markdownBehavior.insertUrl(target, isImage, url, null);
+					markdownBehavior.insertUrl(target, isImage, url, null, null);
 					markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
 				}
 			}
@@ -134,7 +134,7 @@ class SelectUrlPanel extends Panel {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							markdownBehavior.insertUrl(target, isImage, attachmentUrl, attachmentName);
+							markdownBehavior.insertUrl(target, isImage, attachmentUrl, attachmentName, null);
 							markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
 						}
 
@@ -187,7 +187,7 @@ class SelectUrlPanel extends Panel {
 							throw new RuntimeException(e);
 						}
 						markdownBehavior.insertUrl(target, isImage, 
-								attachmentSupport.getAttachmentUrl(attachmentName), attachmentName);
+								attachmentSupport.getAttachmentUrl(attachmentName), attachmentName, null);
 						markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
 					}
 				}
