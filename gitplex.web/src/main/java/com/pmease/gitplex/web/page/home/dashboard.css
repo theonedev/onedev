@@ -5,13 +5,10 @@
 	font-size: 20px;
 	margin-bottom: 20px;
 }
-#dashboard .operations {
-	margin-bottom: 20px;
-}
-#dashboard .operations .search {
+#dashboard .search {
 	width: 250px;
 }
-#dashboard .operations>.pull-left {
+#dashboard .head>.pull-left {
 	margin-right: 20px;
 }
 #dashboard .pagination {
