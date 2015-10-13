@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
-import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
+import com.pmease.gitplex.web.page.home.admin.AccountListPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
@@ -54,8 +54,8 @@ public abstract class LayoutPage extends BasePage {
 		add(mainHead);
 		
 		mainHead.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
-		mainHead.add(newPageInfo("pageInfo"));
-		mainHead.add(new BookmarkablePageLink<Void>("administration", SystemSettingPage.class)
+		mainHead.add(newContextHead("context"));
+		mainHead.add(new BookmarkablePageLink<Void>("administration", AccountListPage.class)
 					.setVisible(SecurityUtils.canManageSystem()));
 
 		final User user = getCurrentUser();
@@ -159,7 +159,7 @@ public abstract class LayoutPage extends BasePage {
 		}
 	}
 
-	protected Component newPageInfo(String componentId) {
+	protected Component newContextHead(String componentId) {
 		return new WebMarkupContainer(componentId);
 	}
 	

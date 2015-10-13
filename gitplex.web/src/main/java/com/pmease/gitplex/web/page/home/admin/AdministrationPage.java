@@ -27,6 +27,7 @@ public abstract class AdministrationPage extends LayoutPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
+		tabs.add(new AdministrationTab("All Accounts", "fa fa-fw fa-users", AccountListPage.class));
 		tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-gear", SystemSettingPage.class));
 		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
 		tabs.add(new AdministrationTab("QoS Setting", "fa fa-fw fa-signal", QosSettingPage.class));
@@ -41,7 +42,7 @@ public abstract class AdministrationPage extends LayoutPage {
 	}
 
 	@Override
-	protected Component newPageInfo(String componentId) {
+	protected Component newContextHead(String componentId) {
 		return new Label(componentId, "Administration");
 	}
 

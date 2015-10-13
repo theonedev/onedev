@@ -1,0 +1,23 @@
+#dashboard {
+	padding: 20px;
+}
+#dashboard>.head {
+	font-size: 20px;
+	margin-bottom: 20px;
+}
+#dashboard .operations {
+	margin-bottom: 20px;
+}
+#dashboard .operations .search {
+	width: 250px;
+}
+#dashboard .operations>.pull-left {
+	margin-right: 20px;
+}
+#dashboard .pagination {
+	margin: 0;
+}
+#dashboard .actions .fa {
+	font-size: 18px;
+	color: #666;
+}

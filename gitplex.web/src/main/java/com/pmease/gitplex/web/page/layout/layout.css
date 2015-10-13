@@ -11,15 +11,15 @@ html, body {
 #main>.head a {
 	text-decoration: none;
 	color: #EEE;
-	font-size: 20px;
 }
 #main>.head>.logo .fa {
 	font-size: 28px;
 	color: #69B7F7; 
 }
-#main>.head>.page-info {
+#main>.head>.context {
 	color: #EEE;
 	font-size: 20px;
+	margin-left: 40px;
 }
 #main>.head>.administration a {
 	font-size: 30px;
@@ -33,9 +33,13 @@ html, body {
 }
 #main>.head>.account>.logged-in>a, #main>.head>.account>.logged-in>span {
 	margin-right: 8px;
+	font-size: 20px;
 }
 #main>.head>.account>.logged-in>.menu {
 	margin-right: 8px;
+}
+#main>.head>.account>.logged-out a {
+	font-size: 16px;
 }
 #main>.head>.account .avatar {
 	width: 32px;

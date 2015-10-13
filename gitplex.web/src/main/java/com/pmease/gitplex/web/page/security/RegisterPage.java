@@ -18,7 +18,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
-import com.pmease.gitplex.web.page.home.AccountsPage;
+import com.pmease.gitplex.web.page.home.DashboardPage;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
@@ -62,7 +62,7 @@ public class RegisterPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(AccountsPage.class);
+				setResponsePage(DashboardPage.class);
 			}
 			
 		});

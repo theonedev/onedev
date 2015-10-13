@@ -18,7 +18,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
@@ -32,17 +31,14 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
-import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
-public class AccountsPage extends LayoutPage {
+public class DashboardPage extends LayoutPage {
 
 	private PageableListView<User> accountsView;
 	
@@ -56,7 +52,7 @@ public class AccountsPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Accounts";
+		return "Dashboard";
 	}
 	
 	@Override
@@ -74,34 +70,9 @@ public class AccountsPage extends LayoutPage {
 
 		});
 		
-		add(new Link<Void>("addNew") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canManageSystem());
-			}
-
-			@Override
-			public void onClick() {
-				setResponsePage(new NewAccountPage(new User()));
-			}
-			
-		});
-		
 		accountsContainer = new WebMarkupContainer("accountsContainer");
 		accountsContainer.setOutputMarkupId(true);
 		add(accountsContainer);
-		
-		final ConfirmDeleteAccountModal confirmDeleteDlg = new ConfirmDeleteAccountModal("confirmDelete") {
-
-			@Override
-			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(getPage());
-			}
-			
-		};
-		add(confirmDeleteDlg);
 		
 		accountsContainer.add(accountsView = new PageableListView<User>("accounts", new LoadableDetachableModel<List<User>>() {
 
@@ -145,22 +116,6 @@ public class AccountsPage extends LayoutPage {
 						
 				item.add(new MultilineLabel("fullName", user.getFullName()));
 				
-				item.add(new Link<Void>("setting") {
-
-					@Override
-					public void onClick() {
-						PageParameters params = AccountPage.paramsOf(item.getModelObject());
-						setResponsePage(ProfileEditPage.class, params);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(item.getModelObject()));
-					}
-					
-				});
-				
 				item.add(new Link<Void>("runAs") {
 
 					@Override
@@ -178,33 +133,6 @@ public class AccountsPage extends LayoutPage {
 						User account = item.getModelObject();
 						User currentUser = userManager.getCurrent();
 						setVisible(!account.equals(currentUser) && SecurityUtils.canManage(account));
-					}
-					
-				});
-				
-				final Long accountId = user.getId();
-				item.add(new WebMarkupContainer("delete") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						
-						add(new ConfirmDeleteAccountModalBehavior(confirmDeleteDlg) {
-							
-							@Override
-							protected User getAccount() {
-								return GitPlex.getInstance(Dao.class).load(User.class, accountId);
-							}
-							
-						});
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						User account = item.getModelObject();
-						setVisible(!account.isRoot() && SecurityUtils.canManage(account));
 					}
 					
 				});
@@ -228,12 +156,12 @@ public class AccountsPage extends LayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AccountsPage.class, "accounts.css")));
+				new CssResourceReference(DashboardPage.class, "dashboard.css")));
 	}
 
 	@Override
-	protected Component newPageInfo(String componentId) {
-		return new Label(componentId, "Accounts");
+	protected Component newContextHead(String componentId) {
+		return new Label(componentId, "Dashboard");
 	}
 
 }

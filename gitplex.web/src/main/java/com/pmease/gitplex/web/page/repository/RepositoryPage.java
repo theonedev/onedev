@@ -151,8 +151,8 @@ public abstract class RepositoryPage extends AccountPage {
 	protected abstract void onSelect(AjaxRequestTarget target, Repository repository);
 
 	@Override
-	protected Component newPageInfo(String componentId) {
-		Fragment fragment = new Fragment(componentId, "pageInfoFrag", this);
+	protected Component newContextHead(String componentId) {
+		Fragment fragment = new Fragment(componentId, "contextHeadFrag", this);
 		WebMarkupContainer accountAndRepo = new WebMarkupContainer("accountAndRepo");
 		fragment.add(accountAndRepo);
 		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, paramsOf(getAccount()));

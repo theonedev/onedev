@@ -1,6 +1,5 @@
-package com.pmease.gitplex.web.page.home;
+package com.pmease.gitplex.web.page.home.admin;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -14,21 +13,14 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
-public class NewAccountPage extends LayoutPage {
+public class NewAccountPage extends AdministrationPage {
 
 	private final User account;
 	
 	public NewAccountPage(User account) {
 		this.account = account;
-	}
-
-	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofSystemAdmin());
 	}
 
 	@Override
@@ -51,7 +43,7 @@ public class NewAccountPage extends LayoutPage {
 				} else {
 					userManager.save(account);
 					Session.get().success("New account created");
-					setResponsePage(AccountsPage.class);
+					setResponsePage(AccountListPage.class);
 				}
 			}
 			
@@ -62,7 +54,7 @@ public class NewAccountPage extends LayoutPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(AccountsPage.class);
+				setResponsePage(AccountListPage.class);
 			}
 			
 		});
@@ -72,7 +64,7 @@ public class NewAccountPage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(AccountsPage.class, "accounts.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(AccountListPage.class, "accounts.css")));
 	}
 
 }

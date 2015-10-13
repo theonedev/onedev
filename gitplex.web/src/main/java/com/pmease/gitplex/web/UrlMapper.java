@@ -19,8 +19,9 @@ import com.pmease.gitplex.web.page.account.repositories.NewAccountRepoPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.home.NewAccountPage;
+import com.pmease.gitplex.web.page.home.admin.AccountListPage;
 import com.pmease.gitplex.web.page.home.admin.MailSettingPage;
+import com.pmease.gitplex.web.page.home.admin.NewAccountPage;
 import com.pmease.gitplex.web.page.home.admin.QosSettingPage;
 import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
@@ -91,6 +92,8 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addAdministrationPages() {
+		add(new MountedMapper("administration/accounts", AccountListPage.class));
+		add(new MountedMapper("administration/accounts/new", NewAccountPage.class));
 		add(new MountedMapper("administration/mail-setting", MailSettingPage.class));
 		add(new MountedMapper("administration/system-setting", SystemSettingPage.class));
 		add(new MountedMapper("administration/qos-setting", QosSettingPage.class));
@@ -107,8 +110,6 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addAccountPages() {
-		add(new MountedMapper("accounts/new", NewAccountPage.class));
-		
 		add(new MountedMapper("${user}", AccountReposPage.class) {
 
 			@Override
