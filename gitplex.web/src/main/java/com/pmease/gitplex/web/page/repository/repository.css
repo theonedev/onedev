@@ -11,6 +11,7 @@
 }
 #repository-head>.clone>label {
 	font-weight: normal;
+	margin-right: 4px;
 }
 #repository-head>.clone>input {
 	background: #666;

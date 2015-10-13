@@ -194,6 +194,9 @@ public class CommentPanel extends GenericPanel<Comment> {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		String anchorName = "gp-comment" + getComment().getId();
+		add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", anchorName)));
+		
 		final WebMarkupContainer head = new WebMarkupContainer(HEAD_ID); 
 		head.setOutputMarkupId(true);
 		add(head);
@@ -317,7 +320,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 			
 		}));
 		
-		head.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "comment" + getComment().getId())));
+		head.add(new WebMarkupContainer("permalink").add(AttributeAppender.append("href", "#"+anchorName)));
 		
 		add(renderComment());
 
@@ -483,6 +486,9 @@ public class CommentPanel extends GenericPanel<Comment> {
 		});
 		row.setOutputMarkupId(true);
 		
+		String anchorName = "gp-comment-reply" + reply.getId();
+		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.append("name", anchorName)));		
+		
 		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
 		avatarColumn.add(new UserLink("avatar", new UserModel(reply.getUser()), AvatarMode.AVATAR));
 		row.add(avatarColumn);
@@ -606,7 +612,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
 		
 		head.add(newAdditionalReplyOperations("additionalOperations", (CommentReply) row.getDefaultModelObject()));
-		head.add(new WebMarkupContainer("anchor").add(AttributeModifier.replace("name", "reply" + reply.getId())));		
+		head.add(new WebMarkupContainer("permalink").add(AttributeAppender.append("href", "#"+anchorName)));
 		
 		row.add(renderReply(reply));
 		

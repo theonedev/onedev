@@ -13,13 +13,13 @@ pmease.commons.initMarkdownViewer = function($preview, taskCallback) {
 		var $this = $(this);
 		var $anchor = $this.find(">a[name]");
 		if ($anchor.length != 0) {
-			$this.addClass("anchored-h").append($anchor.html());
+			$this.addClass("permalinked").append($anchor.html());
 			$anchor.empty();
-			$this.prepend("<a href='#" + $anchor.attr("name") + "' class='anchor'><i class='fa fa-link'></i></a>");
+			$this.prepend("<a href='#" + $anchor.attr("name") + "' class='permalink'><i class='fa fa-link'></i></a>");
 		} else {
 			var anchorName = encodeURIComponent($this.text());
-			$this.addClass("anchored-h").prepend("<a name='" + anchorName + "'></a>");
-			$this.prepend("<a href='#" + anchorName + "' class='anchor'><i class='fa fa-link'></i></a>");
+			$this.addClass("permalinked").prepend("<a name='" + anchorName + "'></a>");
+			$this.prepend("<a href='#" + anchorName + "' class='permalink'><i class='fa fa-link'></i></a>");
 		}
 	});
 }

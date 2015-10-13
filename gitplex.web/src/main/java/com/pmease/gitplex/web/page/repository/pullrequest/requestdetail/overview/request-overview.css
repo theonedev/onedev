@@ -57,7 +57,7 @@
 }
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body,
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body {
-	padding: 10px;
+	padding: 10px 24px;
 }
 #request-detail .activities .comment .replies {
 	padding: 0 10px 10px 10px;
