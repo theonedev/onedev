@@ -5,7 +5,7 @@
 	background: inherit;
 }
 #repository-head>.clone {
-	color: #999;
+	color: #DDD;
 	margin: 4px 20px 0 40px;
 	font-size: 14px;
 }
@@ -21,7 +21,7 @@
 	padding-left: 4px;
 	padding-right: 4px;
 	height: 22px;
-	color: #BBB;
+	color: #DDD;
 }
 
 #repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
