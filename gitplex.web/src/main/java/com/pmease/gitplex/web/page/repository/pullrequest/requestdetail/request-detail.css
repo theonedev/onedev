@@ -7,8 +7,8 @@
 #request-detail>div:last-child {
 	margin-bottom: 0;
 }
-#request-detail .md-editor {
-	margin-bottom: 12px;
+#request-detail>.summary .md-editor {
+	margin-bottom: 20px;
 }
 
 #request-detail>.head {

@@ -46,9 +46,6 @@
 	border-right: 7px solid #F5F5F5;
 	content: "";
 }
-#request-detail .activities>table>tbody>tr.discussion .replies>table>tbody>tr>td.detail>.head {
-	padding-right: 10px;
-}
 #request-detail .activities>table>tbody>tr.discussion>td.detail .add-reply a:hover {
 	border-radius: 0 0 4px 4px;
 }
@@ -60,11 +57,10 @@
 }
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body,
 #request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body {
-	padding: 0px 20px 10px 20px;
+	padding: 10px;
 }
-#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body>form,
-#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body>form {
-	padding-top: 10px;
+#request-detail .activities .comment .replies {
+	padding: 0 10px 10px 10px;
 }
 
 #request-detail .activities>table>tbody>tr.discussion+tr.discussion>td {
@@ -238,9 +234,6 @@
 }
 #request-detail .activities .activity>.detail>.reference>.body .status .help {
 	display: none;
-}
-#request-detail .activities .activity>.detail>.open>.head {
-	margin-bottom: 10px;
 }
 #request-detail .activities .activity>.detail>.open .feedback .alert {
 	margin-bottom: 8px;

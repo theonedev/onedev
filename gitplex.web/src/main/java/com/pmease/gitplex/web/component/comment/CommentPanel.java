@@ -70,6 +70,10 @@ public class CommentPanel extends GenericPanel<Comment> {
 	
 	private static final String FORM_ID = "form";
 	
+	private final boolean canReply;
+	
+	private WebMarkupContainer repliesContainer;
+	
 	private RepeatingView repliesView;
 	
 	private final IModel<List<CommentReply>> repliesModel = new LoadableDetachableModel<List<CommentReply>>() {
@@ -90,8 +94,9 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 	};
 	
-	public CommentPanel(String id, IModel<Comment> commentModel) {
+	public CommentPanel(String id, IModel<Comment> commentModel, boolean canReply) {
 		super(id, commentModel);
+		this.canReply = canReply;
 	}
 
 	private Comment getComment() {
@@ -316,7 +321,9 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 		add(renderComment());
 
-		add(newAddReply());
+		add(repliesContainer = new WebMarkupContainer("replies"));
+		repliesContainer.setVisible(canReply);
+		repliesContainer.add(newAddReply());
 		
 		setOutputMarkupId(true);
 	}
@@ -392,7 +399,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						Component addReply = newAddReply();
-						CommentPanel.this.replace(addReply);
+						repliesContainer.replace(addReply);
 						target.add(addReply);
 						
 						CommentReply reply; 
@@ -430,14 +437,14 @@ public class CommentPanel extends GenericPanel<Comment> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Component addReply = newAddReply();
-						CommentPanel.this.replace(addReply);
+						repliesContainer.replace(addReply);
 						target.add(addReply);
 						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 				});
 
-				CommentPanel.this.replace(row);
+				repliesContainer.replace(row);
 				target.add(row);
 				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
@@ -459,7 +466,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 	@Override
 	protected void onBeforeRender() {
-		addOrReplace(repliesView = newRepliesView());
+		repliesContainer.addOrReplace(repliesView = newRepliesView());
 		
 		super.onBeforeRender();
 	}

@@ -54,7 +54,7 @@ public class InlineCommentPanel extends GenericPanel<Comment> {
 		add(alert);
 		
 		add(new UserLink("avatar", new UserModel(getModelObject().getUser()), AvatarMode.AVATAR));
-		add(new CommentPanel("detail", getModel()));
+		add(new CommentPanel("detail", getModel(), true));
 		
 	}
 	

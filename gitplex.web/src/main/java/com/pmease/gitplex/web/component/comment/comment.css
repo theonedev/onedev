@@ -1,20 +1,8 @@
-.comment .md-editor {
-	margin-bottom: 16px;
-}
-.comment>.head {
-	margin-bottom: 10px;
-}
-.comment>.body>form {
-	margin-bottom: 12px;
+.comment>.body {
+	padding: 0 0 10px 0;
 }
 .comment .feedback .alert {
 	margin-bottom: 8px;
-}
-.reply>.activity {
-	padding: 8px;
-}
-.reply>.activity>div.summary {
-	font-size: 13px;
 }
 .reply.new>.avatar {
 	background: #FCF6D6;
@@ -23,11 +11,8 @@ div.replies>table {
 	table-layout: fixed;
 }
 div.replies>table>tbody>tr>td {
-	padding: 8px 0; 
 	border-top: 1px solid #EEE; 
-}
-div.replies>table>tbody>tr>td.spacer {
-	width: 20px; 
+	padding-top: 10px;
 }
 div.replies>table>tbody>tr>td.avatar {
 	width: 26px; 
@@ -37,7 +22,7 @@ div.replies>table>tbody>tr>td.avatar img {
 	height: 26px;
 }
 div.replies>table>tbody>tr>td.detail {
-	padding-left: 10px;
+	padding: 10px 0 10px 10px;
 }
 div.replies>table>tbody>tr>td.detail>.head {
 	margin-bottom: 10px;
@@ -52,22 +37,4 @@ div.replies>.add-reply>div>a {
 div.replies>.add-reply:hover>div>a {
 	color: #666;
 	background: #F5F5F5;
-}
-div.replies>.add-reply>div form {
-	padding: 0 20px 20px 20px;
-}
-table.comments>tbody>tr>td.avatar {
-	width: 1px; 
-	padding-right: 16px;
-}
-table.comments>tbody>tr>td.avatar img {
-	width: 36px; 
-	height: 36px;
-}
-table.comments>tbody>tr>td {
-	border-top: 1px solid #E5E5E5; 
-	padding: 12px 0;
-}
-table.comments>tbody>tr:first-child>td {
-	border-top: none;
 }

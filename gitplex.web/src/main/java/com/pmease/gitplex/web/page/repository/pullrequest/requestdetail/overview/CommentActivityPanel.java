@@ -30,7 +30,7 @@ class CommentActivityPanel extends AbstractActivityPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CommentPanel("content", commentModel) {
+		add(new CommentPanel("content", commentModel, false) {
 
 			@Override
 			protected Component newAdditionalCommentOperations(String id, final IModel<Comment> commentModel) {
