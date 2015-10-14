@@ -2,10 +2,22 @@
 	<p>hello</p>
 	<p>world</p>
 	<p>just</p>
+	<p>do</p>
 	
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <ellipse cx="200" cy="70" rx="85" ry="55" fill="url(#grad1)" />
+</svg>
 	<script type="text/javascript">
-	d3.selectAll("p")
-    .data([4, 8, 15, 16, 23, 42])
+	var p = d3.selectAll("p")
+    .data([16, 42, 16, 16, 28])
     .style("font-size", function(d) { return d + "px"; });		
+	p.enter().append("p").text("gogogo");
+	p.exit().remove();
 	</script>
 </wicket:extend>
