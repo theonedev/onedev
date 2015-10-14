@@ -1,11 +1,11 @@
 <wicket:extend>
-	<p>hello</p>
-	<p>world</p>
-	<p>just</p>
-	
 	<script type="text/javascript">
-	d3.selectAll("p")
-    .data([4, 8, 15, 16, 23, 42])
-    .style("font-size", function(d) { return d + "px"; });		
+		var s = Snap(800, 600);
+		var bigCircle = s.circle(150, 150, 100);
+		bigCircle.attr({
+		    fill: "#bada55",
+		    stroke: "#000",
+		    strokeWidth: 5
+		});		
 	</script>
 </wicket:extend>
