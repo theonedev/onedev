@@ -39,7 +39,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.util.time.Duration;
 
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
@@ -52,7 +51,6 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
@@ -72,6 +70,7 @@ import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 
 @SuppressWarnings("serial")
@@ -248,7 +247,7 @@ public class TextDiffPanel extends Panel {
 				newCommentForm.add(input = new CommentInput("input", requestModel, Model.of("")));
 				input.setRequired(true);
 				
-				final FeedbackPanel feedback = new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)); 
+				final NotificationPanel feedback = new NotificationPanel("feedback", input); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				newCommentForm.add(feedback);
 				

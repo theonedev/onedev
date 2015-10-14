@@ -30,7 +30,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.util.time.Duration;
 import org.hibernate.StaleObjectStateException;
 
 import com.google.common.base.Preconditions;
@@ -38,7 +37,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
@@ -57,6 +55,8 @@ import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.utils.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+
 @SuppressWarnings("serial")
 public class CommentPanel extends GenericPanel<Comment> {
 
@@ -69,10 +69,6 @@ public class CommentPanel extends GenericPanel<Comment> {
 	private static final String ADD_REPLY_ID = "addReply";
 	
 	private static final String FORM_ID = "form";
-	
-	private final boolean canReply;
-	
-	private WebMarkupContainer repliesContainer;
 	
 	private RepeatingView repliesView;
 	
@@ -94,9 +90,8 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 	};
 	
-	public CommentPanel(String id, IModel<Comment> commentModel, boolean canReply) {
+	public CommentPanel(String id, IModel<Comment> commentModel) {
 		super(id, commentModel);
-		this.canReply = canReply;
 	}
 
 	private Comment getComment() {
@@ -106,7 +101,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 	private Fragment renderComment() {
 		final Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 
-		final FeedbackPanel feedback = new FeedbackPanel("feedback", fragment).hideAfter(Duration.seconds(5));
+		final NotificationPanel feedback = new NotificationPanel("feedback", fragment);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		fragment.add(feedback);
 		final AtomicLong lastVersionRef = new AtomicLong(getComment().getVersion());
@@ -150,7 +145,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		final Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 
 		final Long replyId = reply.getId();
-		final FeedbackPanel feedback = new FeedbackPanel("feedback", fragment).hideAfter(Duration.seconds(5)); 
+		final NotificationPanel feedback = new NotificationPanel("feedback", fragment); 
 		feedback.setOutputMarkupPlaceholderTag(true);
 		fragment.add(feedback);
 		final AtomicLong lastVersionRef = new AtomicLong(reply.getVersion());
@@ -214,7 +209,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				final Form<?> form = new Form<Void>(FORM_ID);
 				form.setOutputMarkupId(true);
 				fragment.add(form);
-				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5)); 
+				final NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				final CommentInput input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
@@ -324,9 +319,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		
 		add(renderComment());
 
-		add(repliesContainer = new WebMarkupContainer("replies"));
-		repliesContainer.setVisible(canReply);
-		repliesContainer.add(newAddReply());
+		add(newAddReply());
 		
 		setOutputMarkupId(true);
 	}
@@ -380,7 +373,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				row.add(fragment);
 				
 				final Form<?> form = new Form<Void>(FORM_ID);
-				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5));
+				final NotificationPanel feedback = new NotificationPanel("feedback", form);
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				fragment.add(form);
@@ -402,7 +395,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						Component addReply = newAddReply();
-						repliesContainer.replace(addReply);
+						CommentPanel.this.replace(addReply);
 						target.add(addReply);
 						
 						CommentReply reply; 
@@ -440,14 +433,14 @@ public class CommentPanel extends GenericPanel<Comment> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Component addReply = newAddReply();
-						repliesContainer.replace(addReply);
+						CommentPanel.this.replace(addReply);
 						target.add(addReply);
 						send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 					}
 					
 				});
 
-				repliesContainer.replace(row);
+				CommentPanel.this.replace(row);
 				target.add(row);
 				send(CommentPanel.this, Broadcast.BUBBLE, new CommentResized(target, getComment()));
 			}
@@ -469,7 +462,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 	@Override
 	protected void onBeforeRender() {
-		repliesContainer.addOrReplace(repliesView = newRepliesView());
+		addOrReplace(repliesView = newRepliesView());
 		
 		super.onBeforeRender();
 	}
@@ -508,7 +501,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 
 				final Form<?> form = new Form<Void>(FORM_ID);
 				form.setOutputMarkupId(true);
-				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5)); 
+				final NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				fragment.add(form);

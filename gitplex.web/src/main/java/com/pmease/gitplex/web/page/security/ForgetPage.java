@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.wicket.behavior.testform.TestFormBehavior;
 import com.pmease.commons.wicket.behavior.testform.TestResult;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
@@ -25,6 +24,8 @@ import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.page.base.BasePage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class ForgetPage extends BasePage {
@@ -37,7 +38,7 @@ public class ForgetPage extends BasePage {
 		
 		final HelperBean bean = new HelperBean();
 		Form<?> form = new Form<Void>("form");
-		form.add(new FeedbackPanel("feedback", form));		
+		form.add(new NotificationPanel("feedback", form));		
 		form.add(BeanContext.editBean("editor", bean));
 		
 		form.add(new AjaxSubmitLink("reset") {

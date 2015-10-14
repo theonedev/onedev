@@ -14,13 +14,11 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.util.time.Duration;
 import org.hibernate.StaleObjectStateException;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -29,6 +27,8 @@ import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.utils.DateUtils;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 class OpenActivityPanel extends AbstractActivityPanel {
@@ -44,7 +44,7 @@ class OpenActivityPanel extends AbstractActivityPanel {
 	private Fragment renderForView() {
 		final Fragment fragment = new Fragment(BODY_ID, "viewFrag", this);
 
-		final FeedbackPanel feedback = new FeedbackPanel("feedback", fragment).hideAfter(Duration.seconds(5));
+		final NotificationPanel feedback = new NotificationPanel("feedback", fragment);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		fragment.add(feedback);
 		String description = requestModel.getObject().getDescription();
@@ -110,7 +110,7 @@ class OpenActivityPanel extends AbstractActivityPanel {
 				form.setOutputMarkupId(true);
 				fragment.add(form);
 				
-				final FeedbackPanel feedback = new FeedbackPanel("feedback", form).hideAfter(Duration.seconds(5));
+				final NotificationPanel feedback = new NotificationPanel("feedback", form);
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				

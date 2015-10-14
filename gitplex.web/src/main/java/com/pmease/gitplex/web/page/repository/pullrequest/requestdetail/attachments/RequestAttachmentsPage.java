@@ -29,13 +29,14 @@ import org.apache.wicket.util.upload.FileUploadException;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.CommentAttachmentSupport;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.resource.AttachmentResource;
 import com.pmease.gitplex.web.resource.AttachmentResourceReference;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class RequestAttachmentsPage extends RequestDetailPage {
@@ -106,7 +107,7 @@ public class RequestAttachmentsPage extends RequestDetailPage {
 		});
 		
 		form.add(uploadField);
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback", form));
 		form.setOutputMarkupId(true);
 		add(form);
 		

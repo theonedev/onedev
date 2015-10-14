@@ -13,11 +13,12 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.page.base.BasePage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class LoginPage extends BasePage {
@@ -37,7 +38,7 @@ public class LoginPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new FeedbackPanel("feedback"));
+		add(new NotificationPanel("feedback"));
 		
 		Form<?> form = new Form<Void>("form") {
 

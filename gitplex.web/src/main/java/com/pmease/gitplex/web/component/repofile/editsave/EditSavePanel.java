@@ -23,7 +23,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
@@ -41,7 +40,6 @@ import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Comment;
@@ -52,6 +50,7 @@ import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import jersey.repackaged.com.google.common.base.Objects;
 
 @SuppressWarnings("serial")
@@ -148,7 +147,7 @@ public abstract class EditSavePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final FeedbackPanel feedback = new FeedbackPanel("feedback", this).hideAfter(Duration.seconds(5));
+		final NotificationPanel feedback = new NotificationPanel("feedback", this);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 				

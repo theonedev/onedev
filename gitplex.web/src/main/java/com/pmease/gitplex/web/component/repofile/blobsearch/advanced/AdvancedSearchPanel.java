@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -54,6 +53,8 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public abstract class AdvancedSearchPanel extends Panel {
@@ -248,7 +249,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 					
 				});
 				termContainer.add(termInput);
-				termContainer.add(new FeedbackPanel("feedback", termInput));
+				termContainer.add(new NotificationPanel("feedback", termInput));
 				termContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
@@ -326,7 +327,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 				});
 				
 				termContainer.add(termInput);
-				termContainer.add(new FeedbackPanel("feedback", termInput));
+				termContainer.add(new NotificationPanel("feedback", termInput));
 				termContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
@@ -405,7 +406,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 				});
 				
 				termContainer.add(termInput);
-				termContainer.add(new FeedbackPanel("feedback", termInput));
+				termContainer.add(new NotificationPanel("feedback", termInput));
 				termContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override

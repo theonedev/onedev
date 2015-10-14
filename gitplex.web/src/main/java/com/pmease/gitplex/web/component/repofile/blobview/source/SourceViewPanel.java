@@ -35,7 +35,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.lib.FileMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,6 @@ import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
@@ -73,10 +71,12 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
-import com.pmease.gitplex.web.page.repository.file.Mark;
 import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.Mark;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.utils.DateUtils;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {
@@ -258,7 +258,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					}, Model.of("")));
 					input.setRequired(true);
 					
-					final FeedbackPanel feedback = new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)); 
+					final NotificationPanel feedback = new NotificationPanel("feedback", input); 
 					feedback.setOutputMarkupPlaceholderTag(true);
 					newCommentForm.add(feedback);
 					

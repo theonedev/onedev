@@ -33,13 +33,11 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.util.time.Duration;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
@@ -75,6 +73,7 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestD
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
@@ -332,7 +331,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		input.setRequired(true);
 		form.add(input);
 		
-		form.add(new FeedbackPanel("feedback", input).hideAfter(Duration.seconds(5)));
+		form.add(new NotificationPanel("feedback", input));
 		
 		form.add(new AjaxSubmitLink("comment") {
 

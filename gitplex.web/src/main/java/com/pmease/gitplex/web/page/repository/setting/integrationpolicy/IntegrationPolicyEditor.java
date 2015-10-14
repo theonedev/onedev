@@ -6,9 +6,10 @@ import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 abstract class IntegrationPolicyEditor extends Panel {
@@ -28,7 +29,7 @@ abstract class IntegrationPolicyEditor extends Panel {
 		setOutputMarkupId(true);
 		
 		Form<?> form = new Form<Void>("form");
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback", form));
 		form.add(BeanContext.editBean("editor", policy));
 		form.add(new AjaxSubmitLink("save") {
 

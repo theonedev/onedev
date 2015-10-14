@@ -39,7 +39,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -74,6 +73,8 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestD
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class NewRequestPage extends PullRequestPage {
@@ -536,7 +537,7 @@ public class NewRequestPage extends PullRequestPage {
 		titleInput.setRequired(true);
 		titleContainer.add(titleInput);
 		
-		titleContainer.add(new FeedbackPanel("feedback", titleInput));
+		titleContainer.add(new NotificationPanel("feedback", titleInput));
 		
 		titleContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
@@ -572,7 +573,7 @@ public class NewRequestPage extends PullRequestPage {
 		assigneeChoice.setRequired(true);
 		assigneeContainer.add(assigneeChoice);
 		
-		assigneeContainer.add(new FeedbackPanel("feedback", assigneeChoice));
+		assigneeContainer.add(new NotificationPanel("feedback", assigneeChoice));
 		
 		assigneeContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 

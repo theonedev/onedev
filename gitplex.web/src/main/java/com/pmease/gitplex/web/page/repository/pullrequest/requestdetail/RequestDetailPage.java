@@ -5,7 +5,13 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERG
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
-import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.*;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.APPROVE;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.DELETE_SOURCE_BRANCH;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.DISAPPROVE;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.DISCARD;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.INTEGRATE;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.REOPEN;
+import static com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.PullRequestOperation.RESTORE_SOURCE_BRANCH;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +55,6 @@ import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -81,6 +86,8 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.updates.
 import com.pmease.gitplex.web.utils.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public abstract class RequestDetailPage extends PullRequestPage {
@@ -688,7 +695,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				noteInput.add(AttributeModifier.replace("placeholder", "Commit message"));
 			}
 		}
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback", form));
 		form.add(new AjaxButton("submit") {
 
 			@Override

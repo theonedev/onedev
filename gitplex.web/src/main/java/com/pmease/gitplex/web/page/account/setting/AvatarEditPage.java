@@ -19,9 +19,10 @@ import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
 import org.apache.wicket.util.upload.FileUploadException;
 
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.web.avatar.AvatarManager;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class AvatarEditPage extends AccountSettingPage {
@@ -46,7 +47,7 @@ public class AvatarEditPage extends AccountSettingPage {
 			
 		};
 		add(form);
-		form.add(new FeedbackPanel("feedback", form));
+		form.add(new NotificationPanel("feedback", form));
 		form.setOutputMarkupId(true);
 
 		form.setMaxSize(Bytes.megabytes(MAX_IMAGE_SIZE));

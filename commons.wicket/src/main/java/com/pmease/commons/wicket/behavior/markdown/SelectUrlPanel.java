@@ -31,7 +31,7 @@ import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
 import org.apache.wicket.util.upload.FileUploadException;
 
-import com.pmease.commons.wicket.component.feedback.FeedbackPanel;
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 class SelectUrlPanel extends Panel {
@@ -59,7 +59,7 @@ class SelectUrlPanel extends Panel {
 			
 		Form<?> urlForm = new Form<Void>("form");
 		add(urlForm);
-		urlForm.add(new FeedbackPanel("feedback", urlForm));
+		urlForm.add(new NotificationPanel("feedback", urlForm));
 		
 		final TextField<String> urlField = new TextField<String>("url", new IModel<String>() {
 
@@ -168,7 +168,7 @@ class SelectUrlPanel extends Panel {
 				}
 				
 			};
-			fileForm.add(new FeedbackPanel("feedback", fileForm));
+			fileForm.add(new NotificationPanel("feedback", fileForm));
 			fileForm.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
 			fileForm.setMultiPart(true);
 			fragment.add(fileForm);
