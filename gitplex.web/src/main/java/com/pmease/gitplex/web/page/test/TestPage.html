@@ -1,3 +1,11 @@
 <wicket:extend>
-	<a wicket:id="test">test</a>
+	<p>hello</p>
+	<p>world</p>
+	<p>just</p>
+	
+	<script type="text/javascript">
+	d3.selectAll("p")
+    .data([4, 8, 15, 16, 23, 42])
+    .style("font-size", function(d) { return d + "px"; });		
+	</script>
 </wicket:extend>
