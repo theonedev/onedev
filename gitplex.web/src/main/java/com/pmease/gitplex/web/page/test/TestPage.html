@@ -1,11 +1,6 @@
 <wicket:extend>
-	<script type="text/javascript">
-		var s = Snap(800, 600);
-		var bigCircle = s.circle(150, 150, 100);
-		bigCircle.attr({
-		    fill: "#bada55",
-		    stroke: "#000",
-		    strokeWidth: 5
-		});		
-	</script>
+<svg width="500" height="500">
+  <path d="M100 100 a10,10 0 0,1 10 10 v200" stroke="red" stroke-width="2" fill="none"/>
+  <path d="M100 100 a20,20 0 0,1 20 20 v400" stroke="green" stroke-width="2" fill="none"/>
+</svg>
 </wicket:extend>
