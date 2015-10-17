@@ -24,7 +24,6 @@ public class CommitLane implements Serializable {
 		}
 		
 		for (int rowIndex=0; rowIndex<commits.size(); rowIndex++) {
-			Commit commit = commits.get(rowIndex);
 			Map<Column, Integer> row = new HashMap<>();
 			if (rowIndex == 0) {
 				row.put(new Column(0, 0), 0);
@@ -40,7 +39,8 @@ public class CommitLane implements Serializable {
 					
 				});
 				int columnIndex = 0;
-				for (Column columnOfLastRow: columnsOfLastRow) {
+				for (int columnIndexOfLastRow = 0; columnIndexOfLastRow<columnsOfLastRow.size(); columnIndexOfLastRow++) {
+					Column columnOfLastRow = columnsOfLastRow.get(columnIndexOfLastRow);
 					if (columnOfLastRow.commitRowIndex != columnOfLastRow.parentRowIndex) {
 						if (columnOfLastRow.parentRowIndex == rowIndex) { 
 							Column column = new Column(rowIndex, rowIndex);
@@ -50,19 +50,55 @@ public class CommitLane implements Serializable {
 							row.put(new Column(columnOfLastRow), columnIndex++);
 						}
 					} else {
-						List<Column> columns = new ArrayList<>();
-						for (String parentHash: commit.getParentHashes()) {
+						Commit lastCommit = commits.get(rowIndex-1);
+						final Map<Column, Integer> columnScores = new HashMap<>();
+						for (String parentHash: lastCommit.getParentHashes()) {
 							Integer parentRowIndex = commitRowIndexes.get(parentHash);
 							if (parentRowIndex != null) {
+								Column column;
 								if (parentRowIndex.intValue() == rowIndex) {
-									Column column = new Column(rowIndex, rowIndex);
-									if (!row.containsKey(column))
-										columns.add(column);
+									column = new Column(rowIndex, rowIndex);
+									if (row.containsKey(column))
+										column = null;
 								} else {
-									columns.add(new Column(rowIndex-1, parentRowIndex));
+									column = new Column(rowIndex-1, parentRowIndex);
+								}
+								if (column != null) {
+									int score = 0;
+									for (int i=0; i<columnIndexOfLastRow; i++) {
+										if (columnsOfLastRow.get(i).parentRowIndex == column.parentRowIndex)
+											score--;
+									}
+									for (int i=columnIndexOfLastRow+1; i<columnsOfLastRow.size(); i++) {
+										if (columnsOfLastRow.get(i).parentRowIndex == column.parentRowIndex)
+											score++;
+									}
+									if (score > 0)
+										score = 1;
+									else if (score < 0)
+										score = -1;
+									columnScores.put(column, score);
 								}
 							}
 						}
+						List<Column> columns = new ArrayList<>(columnScores.keySet());
+						Collections.sort(columns, new Comparator<Column>() {
+
+							@Override
+							public int compare(Column column1, Column column2) {
+								int score1 = columnScores.get(column1);
+								int score2 = columnScores.get(column2);
+								if (score1 != score2)
+									return score1 - score2;
+								else if (score1>0)
+									return column2.parentRowIndex - column1.parentRowIndex;
+								else
+									return column1.parentRowIndex - column2.parentRowIndex;
+							}
+							
+						});
+						for (Column column: columns)
+							row.put(column, columnIndex++);
 					}
 				}
 			}
