@@ -28,6 +28,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private Date untilDate;
     
+    private boolean allBranchesAndTags;
+    
     private String path;
     
     private int maxCount;
@@ -50,7 +52,11 @@ public class LogCommand extends GitCommand<List<Commit>> {
         return this;
     }
     
-    public LogCommand sinceDate(Date sinceDate) {
+	public void allBranchesAndTags(boolean allBranchesAndTags) {
+		this.allBranchesAndTags = allBranchesAndTags;
+	}
+
+	public LogCommand sinceDate(Date sinceDate) {
     	this.sinceDate = sinceDate;
     	return this;
     }
@@ -97,6 +103,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         } else if (toRev != null) {
         	cmd.addArgs(toRev);
         }
+        
+        if (allBranchesAndTags)
+        	cmd.addArgs("--branches", "--tags");
         
         if (sinceDate != null) 
         	cmd.addArgs("--since").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(sinceDate));

@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @SuppressWarnings("serial")
 public class CommitLane implements Serializable {
 	
-	List<Map<Column, Integer>> rows = new ArrayList<>();
+	private final List<Map<Column, Integer>> rows = new ArrayList<>();
 
 	public CommitLane(List<Commit> commits) {
 		Map<String, Integer> commitRowIndexes = new HashMap<>();
@@ -28,6 +28,7 @@ public class CommitLane implements Serializable {
 			if (rowIndex == 0) {
 				row.put(new Column(0, 0), 0);
 			} else {
+				Column commitColumn = new Column(rowIndex, rowIndex);
 				final Map<Column, Integer> lastRow = rows.get(rowIndex-1);
 				List<Column> columnsOfLastRow = new ArrayList<>(lastRow.keySet());
 				Collections.sort(columnsOfLastRow, new Comparator<Column>() {
@@ -43,11 +44,10 @@ public class CommitLane implements Serializable {
 					Column columnOfLastRow = columnsOfLastRow.get(columnIndexOfLastRow);
 					if (columnOfLastRow.commitRowIndex != columnOfLastRow.parentRowIndex) {
 						if (columnOfLastRow.parentRowIndex == rowIndex) { 
-							Column column = new Column(rowIndex, rowIndex);
-							if (!row.containsKey(column))
-								row.put(column, columnIndex++);
+							if (!row.containsKey(commitColumn))
+								row.put(commitColumn, columnIndex++);
 						} else { 
-							row.put(new Column(columnOfLastRow), columnIndex++);
+							row.put(columnOfLastRow, columnIndex++);
 						}
 					} else {
 						Commit lastCommit = commits.get(rowIndex-1);
@@ -57,8 +57,9 @@ public class CommitLane implements Serializable {
 							if (parentRowIndex != null) {
 								Column column;
 								if (parentRowIndex.intValue() == rowIndex) {
-									column = new Column(rowIndex, rowIndex);
-									if (row.containsKey(column))
+									if (!row.containsKey(commitColumn))
+										column = commitColumn;
+									else
 										column = null;
 								} else {
 									column = new Column(rowIndex-1, parentRowIndex);
@@ -101,25 +102,36 @@ public class CommitLane implements Serializable {
 							row.put(column, columnIndex++);
 					}
 				}
+				if (!row.containsKey(commitColumn))
+					row.put(commitColumn, columnIndex++);
 			}
 			rows.add(row);
 		}
+		
 	}
 	
-	static class Column implements Serializable {
-		int commitRowIndex;
+	public List<Map<Column, Integer>> getRows() {
+		return rows;
+	}
+
+	public static class Column implements Serializable {
+		private final int commitRowIndex;
 		
-		int parentRowIndex;
+		private final int parentRowIndex;
 		
-		Column(int commitRowIndex, int parentRowIndex) {
+		public Column(int commitRowIndex, int parentRowIndex) {
 			this.commitRowIndex = commitRowIndex;
 			this.parentRowIndex = parentRowIndex;
 		}
 		
-		Column(Column column) {
-			this(column.commitRowIndex, column.parentRowIndex);
+		public int getCommitRowIndex() {
+			return commitRowIndex;
 		}
-		
+
+		public int getParentRowIndex() {
+			return parentRowIndex;
+		}
+
 		@Override
 		public boolean equals(Object other) {
 			if (!(other instanceof Column))
