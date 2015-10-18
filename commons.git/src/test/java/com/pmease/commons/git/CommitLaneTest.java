@@ -1,6 +1,6 @@
 package com.pmease.commons.git;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -19,9 +19,9 @@ public class CommitLaneTest extends AbstractGitTest {
 		CommitLane lane = new CommitLane(logCommand.call());
 		
 		assertEquals(3, lane.getRows().size());
-		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Column(0, 0)));
-		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Column(1, 1)));
-		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Column(2, 2)));
+		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Line(0, 0)));
+		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Line(1, 1)));
+		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Line(2, 2)));
 	}
 
 	@Test
@@ -36,10 +36,10 @@ public class CommitLaneTest extends AbstractGitTest {
 		CommitLane lane = new CommitLane(logCommand.call());
 		
 		assertEquals(3, lane.getRows().size());
-		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Column(0, 0)));
-		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Column(1, 1)));
-		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Column(0, 2)));
-		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Column(2, 2)));
+		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Line(0, 0)));
+		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Line(1, 1)));
+		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Line(0, 2)));
+		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Line(2, 2)));
 	}
 	
 	@Test
@@ -54,12 +54,12 @@ public class CommitLaneTest extends AbstractGitTest {
 		CommitLane lane = new CommitLane(logCommand.call());
 		
 		assertEquals(4, lane.getRows().size());
-		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Column(0, 0)));
-		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Column(1, 1)));
-		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Column(0, 2)));
-		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Column(1, 3)));
-		assertEquals((Integer)1, lane.getRows().get(2).get(new CommitLane.Column(2, 2)));
-		assertEquals((Integer)0, lane.getRows().get(3).get(new CommitLane.Column(3, 3)));
+		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Line(0, 0)));
+		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Line(1, 1)));
+		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Line(0, 2)));
+		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Line(1, 3)));
+		assertEquals((Integer)1, lane.getRows().get(2).get(new CommitLane.Line(2, 2)));
+		assertEquals((Integer)0, lane.getRows().get(3).get(new CommitLane.Line(3, 3)));
 	}
 	
 	
@@ -76,11 +76,11 @@ public class CommitLaneTest extends AbstractGitTest {
 		CommitLane lane = new CommitLane(logCommand.call());
 		
 		assertEquals(4, lane.getRows().size());
-		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Column(0, 0)));
-		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Column(0, 2)));
-		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Column(1, 1)));
-		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Column(2, 2)));
-		assertEquals((Integer)0, lane.getRows().get(3).get(new CommitLane.Column(3, 3)));
+		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Line(0, 0)));
+		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Line(0, 2)));
+		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Line(1, 1)));
+		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Line(2, 2)));
+		assertEquals((Integer)0, lane.getRows().get(3).get(new CommitLane.Line(3, 3)));
 	}
 	
 }
