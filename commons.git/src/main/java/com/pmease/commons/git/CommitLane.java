@@ -3,13 +3,15 @@ package com.pmease.commons.git;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public class CommitLane implements Serializable {
@@ -26,120 +28,124 @@ public class CommitLane implements Serializable {
 	 */
 	private final List<Map<Line, Integer>> rows = new ArrayList<>();
 	
-	private final Map<Line, String> colorAssignments = new HashMap<>();
-
-	public CommitLane(List<Commit> commits, List<String> colors) {
-		Map<String, Integer> commitRowIndexes = new HashMap<>();
+	public CommitLane(List<Commit> commits, int maxColumns) {
+		Preconditions.checkArgument(!commits.isEmpty() && maxColumns>=1);
+		
+		Map<String, Integer> mapOfHashToRow = new HashMap<>();
+		Map<Integer, List<Integer>> mapOfParentToChildren = new HashMap<>(); 
 		for (int i=0; i<commits.size(); i++) {
 			Commit commit = commits.get(i);
-			commitRowIndexes.put(commit.getHash(), i);
+			mapOfHashToRow.put(commit.getHash(), i);
+		}
+		for (int i=0; i<commits.size(); i++) {
+			Commit commit = commits.get(i);
+			for (String parentHash: commit.getParentHashes()) {
+				Integer parent = mapOfHashToRow.get(parentHash);
+				if (parent != null) {
+					List<Integer> children = mapOfParentToChildren.get(parent);
+					if (children == null) {
+						children = new ArrayList<>();
+						mapOfParentToChildren.put(parent, children);
+					}
+					children.add(i);
+				}
+			}
 		}
 		
 		for (int rowIndex=0; rowIndex<commits.size(); rowIndex++) {
-			Map<Line, Integer> row = new HashMap<>();
+			Map<Line, Integer> row = new LinkedHashMap<>();
 			if (rowIndex == 0) {
 				row.put(new Line(0, 0), 0);
 			} else {
 				// special line represents the commit at rowIndex itself
 				Line commitLine = new Line(rowIndex, rowIndex);
 				final Map<Line, Integer> lastRow = rows.get(rowIndex-1);
-				List<Line> linesOfLastRow = new ArrayList<>(lastRow.keySet());
-
-				// examine lines of last row from left to right, so we sort them
-				Collections.sort(linesOfLastRow, new Comparator<Line>() {
-
-					@Override
-					public int compare(Line line1, Line line2) {
-						return lastRow.get(line1) - lastRow.get(line2);
-					}
-					
-				});
 				int column = 0;
-				for (int columnOfLastRow = 0; columnOfLastRow<linesOfLastRow.size(); columnOfLastRow++) {
-					Line lineOfLastRow = linesOfLastRow.get(columnOfLastRow);
-					
-					if (lineOfLastRow.childRowIndex != lineOfLastRow.parentRowIndex) {
+				List<Line> linesOfLastRow = new ArrayList<>(lastRow.keySet());
+				for (Line lineOfLastRow: linesOfLastRow) {
+					if (lineOfLastRow.parent < 0) // line is stopped due to max columns limitation
+						continue;
+					if (lineOfLastRow.child != lineOfLastRow.parent) {
 						// line not started from last row, in this case, the line 
 						// only occupies a column when it goes through current row 
-						if (lineOfLastRow.parentRowIndex == rowIndex) { 
+						if (lineOfLastRow.parent == rowIndex) { 
 							if (!row.containsKey(commitLine))
 								row.put(commitLine, column++);
 						} else { 
 							row.put(lineOfLastRow, column++);
 						}
 					} else {
-						// determine columns for lines starting from last row is a bit complicated, 
-						// if commit of last row has N parents, we have to assign N columns at 
-						// current row, the order of these columns matters: to minimize line 
-						// crossovers (at least for these parents), we calculate score of each line 
-						// and use the score to order the line
-						Commit lastCommit = commits.get(rowIndex-1);
-						final Map<Line, Integer> lineScores = new HashMap<>();
-						for (String parentHash: lastCommit.getParentHashes()) {
-							Integer parentRowIndex = commitRowIndexes.get(parentHash);
-							if (parentRowIndex != null) {
-								Line line;
-								if (parentRowIndex.intValue() == rowIndex) {
+						for (String parentHash: commits.get(rowIndex-1).getParentHashes()) {
+							Integer parent = mapOfHashToRow.get(parentHash);
+							if (parent != null) {
+								if (parent.intValue() == rowIndex) {
 									if (!row.containsKey(commitLine))
-										line = commitLine;
-									else
-										line = null;
+										row.put(commitLine, column++);
 								} else {
-									line = new Line(rowIndex-1, parentRowIndex);
-								}
-								if (line != null) {
-									int score = 0;
-									for (int i=0; i<columnOfLastRow; i++) {
-										// minus score by one if there is a line pulling current line 
-										// from left
-										if (linesOfLastRow.get(i).parentRowIndex == line.parentRowIndex)
-											score--;
-									}
-									for (int i=columnOfLastRow+1; i<linesOfLastRow.size(); i++) {
-										// plus score by one if there is a line pulling current line 
-										// from right
-										if (linesOfLastRow.get(i).parentRowIndex == line.parentRowIndex)
-											score++;
-									}
-									// normalize the score so we can use score subtraction to arrange the 
-									// order later
-									if (score > 0)
-										score = 1;
-									else if (score < 0)
-										score = -1;
-									lineScores.put(line, score);
+									row.put(new Line(rowIndex-1, parent), column++);
 								}
 							}
 						}
-						List<Line> lines = new ArrayList<>(lineScores.keySet());
-						Collections.sort(lines, new Comparator<Line>() {
-
-							@Override
-							public int compare(Line line1, Line line2) {
-								int score1 = lineScores.get(line1);
-								int score2 = lineScores.get(line2);
-								if (score1 != score2) 
-									// put the line at the side where there is a pull from that side
-									return score1 - score2; 
-								else if (score1>0)
-									// if both lines are pulled from right side, we put longer line at left side, 
-									// otherwise there will exist a line crossover
-									return line2.parentRowIndex - line1.parentRowIndex;
-								else
-									// if both lines are pulled from left side, we put shorter line at left side, 
-									// otherwise there will exist a line crossover. Additionally, if both lines
-									// have score of 0, we put shorter line at left side in order to make commit
-									// points at left side as possible as we can
-									return line1.parentRowIndex - line2.parentRowIndex;
-							}
-							
-						});
-						for (Line line: lines)
-							row.put(line, column++);
 					}
 				}
 				if (!row.containsKey(commitLine))
 					row.put(commitLine, column++);
+				if (column > maxColumns) {
+					List<Line> lines = new ArrayList<>(row.keySet());
+					Collections.reverse(lines);
+					for (Line line: lines) {
+						if (line.child == rowIndex-1) {
+							row.remove(line);
+							row.put(new Line(line.child, line.parent*-1), );
+							line.toggle();
+							column--;
+							if (column == maxColumns)
+								break;
+						}
+					}
+					Preconditions.checkState(column == maxColumns);
+				}
+				
+				List<Line> disappearedLines = new ArrayList<>();
+				List<Integer> children = mapOfParentToChildren.get(rowIndex);
+				if (children != null) {
+					for (int child: children) {
+						if (child != rowIndex-1) {
+							Line line = new Line(child, rowIndex);
+							if (!lastRow.containsKey(line)) {
+								line.toggle();
+								
+								if (lastRow.containsKey(line)) {
+									
+								} else {
+									disappearedLines.add(line);
+								}
+							}
+						}
+					}
+				}
+				if (!disappearedLines.isEmpty()) {
+					// for every disappeared line, we need to make them appear again in last row
+					// so that end part of the line can be drawn from last row to this row. 
+					// Below code find column in last row to insert these appeared lines, and 
+					// we want to make sure that this column can result in minimum line crossovers. 
+					int commitColumn = row.get(commitLine);
+					for (int i=linesOfLastRow.size()-1; i>=0; i--) {
+						Line lineOfLastRow = linesOfLastRow.get(i);
+						Integer lineColumn = row.get(lineOfLastRow);
+						if (i == 0 || lineColumn!=null && lineColumn.intValue()<commitColumn) {
+							for (int j=i+1; j<linesOfLastRow.size(); j++) 
+								lastRow.remove(linesOfLastRow.get(j));
+							for (Line line: disappearedLines) {
+								line.appear();
+								lastRow.put(line, lastRow.size());
+							}
+							for (int j=i+1; j<linesOfLastRow.size(); j++) 
+								lastRow.put(linesOfLastRow.get(j), lastRow.size());
+							break;
+						}
+					}
+				}
 			}
 			rows.add(row);
 		}
@@ -161,47 +167,47 @@ public class CommitLane implements Serializable {
 	 */
 	public static class Line implements Serializable {
 		
-		private final int childRowIndex;
+		private final int child;
 		
-		private final int parentRowIndex;
+		private final int parent;
 		
-		public Line(int commitRowIndex, int parentRowIndex) {
-			this.childRowIndex = commitRowIndex;
-			this.parentRowIndex = parentRowIndex;
+		public Line(int child, int parent) {
+			this.child = child;
+			this.parent = parent;
 		}
 		
-		public int getChildRowIndex() {
-			return childRowIndex;
-		}
-
-		public int getParentRowIndex() {
-			return parentRowIndex;
+		public int getChild() {
+			return child;
 		}
 
+		public int getParent() {
+			return parent;
+		}
+		
 		@Override
 		public boolean equals(Object other) {
 			if (!(other instanceof Line))
 				return false;
 			if (this == other)
 				return true;
-			Line otherCell = (Line) other;
+			Line otherLine = (Line) other;
 			return new EqualsBuilder()
-					.append(childRowIndex, otherCell.childRowIndex)
-					.append(parentRowIndex, otherCell.parentRowIndex)
+					.append(child, otherLine.child)
+					.append(parent, otherLine.parent)
 					.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-					.append(childRowIndex)
-					.append(parentRowIndex)
+					.append(child)
+					.append(parent)
 					.toHashCode();
 		}
 
 		@Override
 		public String toString() {
-			return childRowIndex+","+parentRowIndex;
+			return child+","+parent;
 		}
 		
 	}

@@ -20,6 +20,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
 	
+	public enum Order {DATE, AUTHOR_DATE, TOPO};
+	
     private String fromRev;
     
     private Date sinceDate;
@@ -37,6 +39,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     private int skip;
     
     private boolean firstParent;
+    
+    private Order order;
 
     public LogCommand(File repoDir) {
         super(repoDir);
@@ -85,6 +89,11 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		this.firstParent = firstParent;
 		return this;
 	}
+	
+	public LogCommand order(Order order) {
+		this.order = order;
+		return this;
+	}
 
 	@Override
     public List<Commit> call() {
@@ -120,6 +129,13 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         if (firstParent)
         	cmd.addArgs("--first-parent");
+        
+        if (order == Order.DATE)
+        	cmd.addArgs("--date-order");
+        else if (order == Order.AUTHOR_DATE)
+        	cmd.addArgs("--author-date-order");
+        else if (order == Order.TOPO)
+        	cmd.addArgs("topo-order");
         
         cmd.addArgs("--");
         if (path != null)
