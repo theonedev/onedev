@@ -64,7 +64,8 @@ public class CommitLaneTest extends AbstractGitTest {
 		addFileAndCommit("file2", "", "file2");
 		git.checkout("master~1", "dev");
 		addFileAndCommit("file3", "", "file3");
-		git.merge("master", null, null, null, null);
+		git.checkout("master", null);
+		git.merge("dev", null, null, null, null);
 		
 		LogCommand logCommand = new LogCommand(git.repoDir()).order(Order.DATE);
 		CommitLane lane = new CommitLane(logCommand.call(), Integer.MAX_VALUE);
@@ -73,6 +74,16 @@ public class CommitLaneTest extends AbstractGitTest {
 		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Line(0, 0)));
 		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Line(1, 1)));
 		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Line(0, 2)));
+		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Line(1, 3)));
+		assertEquals((Integer)1, lane.getRows().get(2).get(new CommitLane.Line(2, 2)));
+		assertEquals((Integer)0, lane.getRows().get(3).get(new CommitLane.Line(3, 3)));
+		
+		lane = new CommitLane(logCommand.call(), 1);
+		
+		assertEquals(4, lane.getRows().size());
+		assertEquals((Integer)0, lane.getRows().get(0).get(new CommitLane.Line(0, 0)));
+		assertEquals((Integer)0, lane.getRows().get(1).get(new CommitLane.Line(0, -2)));
+		assertEquals((Integer)1, lane.getRows().get(1).get(new CommitLane.Line(1, 1)));
 		assertEquals((Integer)0, lane.getRows().get(2).get(new CommitLane.Line(1, 3)));
 		assertEquals((Integer)1, lane.getRows().get(2).get(new CommitLane.Line(2, 2)));
 		assertEquals((Integer)0, lane.getRows().get(3).get(new CommitLane.Line(3, 3)));

@@ -128,12 +128,11 @@ public class CommitLane implements Serializable {
 						Line lineOfLastRow = linesOfLastRow.get(i);
 						Integer lineColumn = row.get(lineOfLastRow);
 						if (i == 0 || lineColumn!=null && lineColumn.intValue()<commitColumn) {
+							column = i+1;
+							for (Line cuttedLine: cuttedLines) 
+								lastRow.put(cuttedLine, column++);
 							for (int j=i+1; j<linesOfLastRow.size(); j++) 
-								lastRow.remove(linesOfLastRow.get(j));
-							for (Line cuttedLine: cuttedLines)
-								lastRow.put(cuttedLine, lastRow.size());
-							for (int j=i+1; j<linesOfLastRow.size(); j++) 
-								lastRow.put(linesOfLastRow.get(j), lastRow.size());
+								lastRow.put(linesOfLastRow.get(j), column++);
 							break;
 						}
 					}
