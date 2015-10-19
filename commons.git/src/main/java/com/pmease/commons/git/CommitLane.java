@@ -3,8 +3,8 @@ package com.pmease.commons.git;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public class CommitLane implements Serializable {
 		}
 		
 		for (int rowIndex=0; rowIndex<commits.size(); rowIndex++) {
-			Map<Line, Integer> row = new LinkedHashMap<>();
+			Map<Line, Integer> row = new HashMap<>();
 			if (rowIndex == 0) {
 				row.put(new Line(0, 0), 0);
 			} else {
@@ -61,9 +61,9 @@ public class CommitLane implements Serializable {
 				Line commitLine = new Line(rowIndex, rowIndex);
 				final Map<Line, Integer> lastRow = rows.get(rowIndex-1);
 				int column = 0;
-				List<Line> linesOfLastRow = new ArrayList<>(lastRow.keySet());
+				List<Line> linesOfLastRow = getSortedLines(lastRow, false);
 				for (Line lineOfLastRow: linesOfLastRow) {
-					if (lineOfLastRow.parent < 0) // line is stopped due to max columns limitation
+					if (lineOfLastRow.isCutted()) // line is cutted due to max columns limitation
 						continue;
 					if (lineOfLastRow.child != lineOfLastRow.parent) {
 						// line not started from last row, in this case, the line 
@@ -91,13 +91,9 @@ public class CommitLane implements Serializable {
 				if (!row.containsKey(commitLine))
 					row.put(commitLine, column++);
 				if (column > maxColumns) {
-					List<Line> lines = new ArrayList<>(row.keySet());
-					Collections.reverse(lines);
-					for (Line line: lines) {
+					for (Line line: getSortedLines(row, true)) {
 						if (line.child == rowIndex-1) {
-							row.remove(line);
-							row.put(new Line(line.child, line.parent*-1), );
-							line.toggle();
+							row.put(line.toggle(), row.remove(line));
 							column--;
 							if (column == maxColumns)
 								break;
@@ -106,25 +102,23 @@ public class CommitLane implements Serializable {
 					Preconditions.checkState(column == maxColumns);
 				}
 				
-				List<Line> disappearedLines = new ArrayList<>();
+				List<Line> cuttedLines = new ArrayList<>();
 				List<Integer> children = mapOfParentToChildren.get(rowIndex);
 				if (children != null) {
 					for (int child: children) {
 						if (child != rowIndex-1) {
 							Line line = new Line(child, rowIndex);
+							Line cuttedLine = line.toggle();
 							if (!lastRow.containsKey(line)) {
-								line.toggle();
-								
-								if (lastRow.containsKey(line)) {
-									
-								} else {
-									disappearedLines.add(line);
-								}
+								if (lastRow.containsKey(cuttedLine))
+									lastRow.put(line, lastRow.remove(cuttedLine));
+								else 
+									cuttedLines.add(cuttedLine);
 							}
 						}
 					}
 				}
-				if (!disappearedLines.isEmpty()) {
+				if (!cuttedLines.isEmpty()) {
 					// for every disappeared line, we need to make them appear again in last row
 					// so that end part of the line can be drawn from last row to this row. 
 					// Below code find column in last row to insert these appeared lines, and 
@@ -136,10 +130,8 @@ public class CommitLane implements Serializable {
 						if (i == 0 || lineColumn!=null && lineColumn.intValue()<commitColumn) {
 							for (int j=i+1; j<linesOfLastRow.size(); j++) 
 								lastRow.remove(linesOfLastRow.get(j));
-							for (Line line: disappearedLines) {
-								line.appear();
-								lastRow.put(line, lastRow.size());
-							}
+							for (Line cuttedLine: cuttedLines)
+								lastRow.put(cuttedLine, lastRow.size());
 							for (int j=i+1; j<linesOfLastRow.size(); j++) 
 								lastRow.put(linesOfLastRow.get(j), lastRow.size());
 							break;
@@ -150,6 +142,21 @@ public class CommitLane implements Serializable {
 			rows.add(row);
 		}
 		
+	}
+	
+	private List<Line> getSortedLines(final Map<Line, Integer> row, boolean reverse) {
+		List<Line> lines = new ArrayList<>(row.keySet());
+		Collections.sort(lines, new Comparator<Line>() {
+
+			@Override
+			public int compare(Line line1, Line line2) {
+				return row.get(line1) - row.get(line2);
+			}
+			
+		});
+		if (reverse)
+			Collections.reverse(lines);
+		return lines;
 	}
 	
 	public List<Map<Line, Integer>> getRows() {
@@ -182,6 +189,14 @@ public class CommitLane implements Serializable {
 
 		public int getParent() {
 			return parent;
+		}
+
+		public boolean isCutted() {
+			return parent < 0;
+		}
+		
+		public Line toggle() {
+			return new Line(child, parent*-1);
 		}
 		
 		@Override
