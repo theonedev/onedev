@@ -65,7 +65,7 @@ public class CommitLane implements Serializable {
 				for (Line lineOfLastRow: linesOfLastRow) {
 					if (lineOfLastRow.isCutted()) // line is cutted due to max columns limitation
 						continue;
-					if (lineOfLastRow.child != lineOfLastRow.parent) {
+					if (!lineOfLastRow.isCommit()) {
 						// line not started from last row, in this case, the line 
 						// only occupies a column when it goes through current row 
 						if (lineOfLastRow.parent == rowIndex) { 
@@ -124,18 +124,39 @@ public class CommitLane implements Serializable {
 					// Below code find column in last row to insert these appeared lines, and 
 					// we want to make sure that this column can result in minimum line crossovers. 
 					int commitColumn = row.get(commitLine);
+					int insertColumn = 0;
 					for (int i=linesOfLastRow.size()-1; i>=0; i--) {
 						Line lineOfLastRow = linesOfLastRow.get(i);
-						Integer lineColumn = row.get(lineOfLastRow);
-						if (i == 0 || lineColumn!=null && lineColumn.intValue()<commitColumn) {
-							column = i+1;
-							for (Line cuttedLine: cuttedLines) 
-								lastRow.put(cuttedLine, column++);
-							for (int j=i+1; j<linesOfLastRow.size(); j++) 
-								lastRow.put(linesOfLastRow.get(j), column++);
-							break;
+						if (lineOfLastRow.isCommit()) {
+							boolean found = false;
+							for (String parentHash: commits.get(rowIndex-1).getParentHashes()) {
+								Integer parent = mapOfHashToRow.get(parentHash);
+								if (parent != null) {
+									Line line = new Line(rowIndex-1, parent);
+									Integer lineColumn = row.get(line);
+									if (lineColumn!=null && lineColumn.intValue()<commitColumn) {
+										found = true;
+										break;
+									}
+								}
+							}
+							if (found) {
+								insertColumn = i;
+								break;
+							}
+						} else {
+							Integer lineColumn = row.get(lineOfLastRow);
+							if (lineColumn!=null && lineColumn.intValue()<commitColumn) {
+								insertColumn = i;
+								break;
+							}
 						}
 					}
+					column = insertColumn+1;
+					for (Line cuttedLine: cuttedLines) 
+						lastRow.put(cuttedLine, column++);
+					for (int i=insertColumn+1; i<linesOfLastRow.size(); i++) 
+						lastRow.put(linesOfLastRow.get(i), column++);
 				}
 			}
 			rows.add(row);
@@ -192,6 +213,10 @@ public class CommitLane implements Serializable {
 
 		public boolean isCutted() {
 			return parent < 0;
+		}
+		
+		public boolean isCommit() {
+			return child == parent;
 		}
 		
 		public Line toggle() {
