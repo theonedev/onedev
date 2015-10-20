@@ -1,3 +1,3 @@
-gitplex.commitlane = function() {
-	
+gitplex.commitlane = function(commits) {
+	return [{a:1}, {b:2}];
 }
