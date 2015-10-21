@@ -1,7 +1,12 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -79,7 +84,53 @@ public class RepoCommitsPage extends RepositoryPage {
 			log.path(path);
 		
 		List<Commit> commits = log.call();
+		
+		long time = System.currentTimeMillis();
 		hasMore = commits.size() > step*COUNT;
+		final Map<String, Long> hash2index = new HashMap<>();
+		Map<String, Commit> hash2commit = new HashMap<>();
+		for (int i=0; i<commits.size(); i++) {
+			Commit commit = commits.get(i);
+			hash2index.put(commit.getHash(), 1L*i*commits.size());
+			hash2commit.put(commit.getHash(), commit);
+		}
+
+		Stack<Commit> stack = new Stack<>();
+		
+		for (int i=commits.size()-1; i>=0; i--)
+			stack.push(commits.get(i));
+
+		while (!stack.isEmpty()) {
+			Commit commit = stack.pop();
+			long commitIndex = hash2index.get(commit.getHash());
+			int count = 1;
+			for (String parentHash: commit.getParentHashes()) {
+				Long parentIndex = hash2index.get(parentHash);
+				if (parentIndex != null && parentIndex.longValue()<commitIndex) {
+					stack.push(hash2commit.get(parentHash));
+					hash2index.put(parentHash, commitIndex+(count++));
+				}
+			}
+		}
+		
+		Collections.sort(commits, new Comparator<Commit>() {
+
+			@Override
+			public int compare(Commit o1, Commit o2) {
+				long value = hash2index.get(o1.getHash()) - hash2index.get(o2.getHash());
+				if (value < 0)
+					return -1;
+				else if (value > 0)
+					return 1;
+				else
+					return 0;
+			}
+			
+		});
+		if (hasMore)
+			commits = commits.subList(0, commits.size()-1);
+		
+		System.out.println(System.currentTimeMillis()-time);
 		
 		return commits;
 	}
