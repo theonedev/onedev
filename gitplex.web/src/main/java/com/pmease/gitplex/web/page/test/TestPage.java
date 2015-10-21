@@ -14,7 +14,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.CommitLane;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.LogCommand.Order;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;

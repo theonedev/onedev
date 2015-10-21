@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.GitUtils;
@@ -12,8 +11,6 @@ import com.pmease.gitplex.web.page.repository.RepositoryPage;
 public class RepoCommitPage extends RepositoryPage {
 
 	private static final String PARAM_REVISION = "revision";
-	
-	protected IModel<Repository> repoModel;
 	
 	protected String revision;
 	

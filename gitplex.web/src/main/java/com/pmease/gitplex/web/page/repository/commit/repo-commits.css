@@ -1,0 +1,50 @@
+#repo-commits {
+	padding: 20px;
+}
+#repo-commits li {
+	padding: 4px 0;
+}
+#repo-commits .avatar {
+	width: 40px;
+}
+#repo-commits .info {
+	text-align: right;
+	white-space: nowrap;
+}
+#repo-commits .avatar img {
+	width: 37px; 
+	height: 37px;
+}
+#repo-commits a {
+	color: #666;
+}
+#repo-commits a.summary {
+	font-weight: bold;
+}
+#repo-commits .detail {
+	padding-left: 8px; 
+	padding-right: 8px;
+}
+#repo-commits .detail .name {
+	color: #666;
+}
+#repo-commits .commit-hash {
+	font-family: monospace;
+}
+#repo-commits li:hover {
+	background: #F7ECB9;
+}
+#repo-commits li.more {
+	text-align: center;
+}
+#repo-commits li.more:hover, #repo-commits li.no-more:hover {
+	background: inherit;
+}
+#repo-commits .commit-message>.full {
+	margin-bottom: 4px;
+}
+#repo-commits li.no-more {
+	font-style: italic;
+	font-size: 16px;
+	text-align: center;
+}

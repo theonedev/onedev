@@ -49,7 +49,7 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -305,7 +305,7 @@ public abstract class RevisionSelector extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						HistoryState state = new HistoryState();
+						RepoFileState state = new RepoFileState();
 						state.blobIdent.revision = item.getModelObject();
 						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
 						tag.put("href", urlFor(RepoFilePage.class, params));

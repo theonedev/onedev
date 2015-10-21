@@ -43,7 +43,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -245,7 +245,7 @@ public abstract class RepositorySelector extends Panel {
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
 								
-								HistoryState state = new HistoryState();
+								RepoFileState state = new RepoFileState();
 								PageParameters params = RepoFilePage.paramsOf(repoItem.getModelObject(), state);
 								tag.put("href", urlFor(RepoFilePage.class, params));
 							}

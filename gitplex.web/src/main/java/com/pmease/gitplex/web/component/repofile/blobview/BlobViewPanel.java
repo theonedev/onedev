@@ -28,7 +28,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
@@ -117,7 +117,7 @@ public abstract class BlobViewPanel extends Panel {
 					
 				}));
 				
-				HistoryState state = new HistoryState();
+				RepoFileState state = new RepoFileState();
 				state.blobIdent = context.getBlobIdent();
 				state.mode = context.getMode()==null?Mode.BLAME:null;
 				state.mark = context.getMark();
@@ -166,7 +166,7 @@ public abstract class BlobViewPanel extends Panel {
 		
 		WebMarkupContainer editLink;
 		if (context.isAtSourceBranchHead()) {
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 			state.blobIdent.path = context.getBlobIdent().path;
 			state.mode = Mode.EDIT;
@@ -190,7 +190,7 @@ public abstract class BlobViewPanel extends Panel {
 			editLink.add(new Label("label", "Edit"));
 			
 			PageParameters params;
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.blobIdent = context.getBlobIdent();
 			state.mode = Mode.EDIT;
 			state.mark = context.getMark();
@@ -207,7 +207,7 @@ public abstract class BlobViewPanel extends Panel {
 		
 		WebMarkupContainer deleteLink;
 		if (context.isAtSourceBranchHead()) {
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 			state.blobIdent.path = context.getBlobIdent().path;
 			state.mode = Mode.DELETE;
@@ -231,7 +231,7 @@ public abstract class BlobViewPanel extends Panel {
 					if (context.isOnBranch()) {
 						context.onDelete(target);
 					} else {
-						HistoryState state = new HistoryState();
+						RepoFileState state = new RepoFileState();
 						state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 						state.blobIdent.path = context.getBlobIdent().path;
 						state.mode = Mode.DELETE;
@@ -243,7 +243,7 @@ public abstract class BlobViewPanel extends Panel {
 			};
 			deleteLink.add(new Label("label", "Delete"));
 			
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.blobIdent = context.getBlobIdent();
 			state.mode = Mode.EDIT;
 			PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);

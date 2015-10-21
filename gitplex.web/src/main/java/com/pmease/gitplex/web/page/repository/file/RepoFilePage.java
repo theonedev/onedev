@@ -546,7 +546,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		    		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
 		    			listener.onRefUpdate(repository, refName, newCommitId.name());
 
-	    			HistoryState state = getState();
+	    			RepoFileState state = getState();
 	    			state.blobIdent = committed;
 	    			state.mode = null;
 	    			applyState(target, state);
@@ -604,7 +604,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 						for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
 			    			listener.onRefUpdate(repository, refName, newCommitId.name());
 						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-						HistoryState state = getState();
+						RepoFileState state = getState();
 						state.blobIdent = parentBlobIdent;
 						state.mode = null;
 						applyState(target, state);
@@ -642,8 +642,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		pushState(target, url.toString(), getState());
 	}
 	
-	private HistoryState getState() {
-		HistoryState state = new HistoryState();
+	private RepoFileState getState() {
+		RepoFileState state = new RepoFileState();
 		state.blobIdent = new BlobIdent(blobIdent);
 		state.commentId = commentId;
 		state.mark = mark;
@@ -652,7 +652,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		return state;
 	}
 	
-	private void setState(HistoryState state) {
+	private void setState(RepoFileState state) {
 		blobIdent = new BlobIdent(state.blobIdent);
 		commentId = state.commentId;
 		mark = state.mark;
@@ -665,7 +665,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				HistoryState state = getState();
+				RepoFileState state = getState();
 				state.blobIdent.revision = revision;
 				state.requestId = null;
 				state.commentId = null;
@@ -702,7 +702,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		}
 	}
 
-	private void applyState(AjaxRequestTarget target, HistoryState state) {
+	private void applyState(AjaxRequestTarget target, RepoFileState state) {
 		if (!state.blobIdent.revision.equals(blobIdent.revision))
 			newSearchResult(target, null);
 		
@@ -735,7 +735,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				new CssResourceReference(RepoFilePage.class, "repo-file.css")));
 	}
 
-	public static PageParameters paramsOf(Repository repository, HistoryState state) {
+	public static PageParameters paramsOf(Repository repository, RepoFileState state) {
 		PageParameters params = paramsOf(repository);
 		if (state.blobIdent.revision != null)
 			params.set(PARAM_REVISION, state.blobIdent.revision);
@@ -792,7 +792,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		
-		applyState(target, (HistoryState) data);
+		applyState(target, (RepoFileState) data);
 		resizeWindow(target);
 	}
 	

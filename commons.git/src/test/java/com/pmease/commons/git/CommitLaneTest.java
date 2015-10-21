@@ -39,6 +39,7 @@ public class CommitLaneTest extends AbstractGitTest {
 	public void testNonFastForwardMerge() {
 		addFileAndCommit("file1", "", "file1");
 		git.checkout("master", "dev");
+		sleep();
 		addFileAndCommit("file2", "", "file2");
 		git.checkout("master", null);
 		git.merge("dev", FastForwardMode.NO_FF, null, null, null);

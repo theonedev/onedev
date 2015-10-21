@@ -71,7 +71,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.Mark;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -152,7 +152,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	protected WebMarkupContainer newLeftActions(String id) {
 		Fragment fragment = new Fragment(id, "leftActionsFrag", this);
 		
-		HistoryState state = new HistoryState();
+		RepoFileState state = new RepoFileState();
 		state.blobIdent = context.getBlobIdent();
 		state.requestId = PullRequest.idOf(context.getPullRequest());
 		PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);

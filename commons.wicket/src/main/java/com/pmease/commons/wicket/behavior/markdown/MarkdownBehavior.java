@@ -225,7 +225,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 				getCallbackFunction(explicit("type"), explicit("param"), explicit("param2")), 
 				uploadUrl, 
 				encodedAttachmentSupport, 
-				attachmentSupport.getAttachmentMaxSize());
+				attachmentSupport!=null?attachmentSupport.getAttachmentMaxSize():0);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

@@ -53,7 +53,7 @@ import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -158,7 +158,7 @@ public abstract class InstantSearchPanel extends Panel {
 						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
 
-						HistoryState state = new HistoryState();
+						RepoFileState state = new RepoFileState();
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
 						state.mark = Mark.of(hit.getTokenPos());
@@ -284,7 +284,7 @@ public abstract class InstantSearchPanel extends Panel {
 						if (item.getIndex() + symbolHits.size() == activeHitIndex)
 							item.add(AttributeModifier.append("class", " active"));
 						
-						HistoryState state = new HistoryState();
+						RepoFileState state = new RepoFileState();
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
 						state.mark = Mark.of(hit.getTokenPos());

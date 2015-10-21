@@ -39,7 +39,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -410,7 +410,7 @@ public abstract class SearchResultPanel extends Panel {
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
 						
-						HistoryState state = new HistoryState();
+						RepoFileState state = new RepoFileState();
 						state.blobIdent.revision = context.getBlobIdent().revision;
 						state.blobIdent.path = blobPath;
 						state.requestId = PullRequest.idOf(context.getPullRequest());
@@ -469,7 +469,7 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
-								HistoryState state = new HistoryState();
+								RepoFileState state = new RepoFileState();
 								state.requestId = PullRequest.idOf(context.getPullRequest());
 								state.mark = Mark.of(hit.getTokenPos());
 								state.blobIdent.revision = context.getBlobIdent().revision;

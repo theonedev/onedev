@@ -22,7 +22,7 @@ import com.pmease.commons.git.Blob;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -67,7 +67,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			};
 			link.setEnabled(false);
 		} else {
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.blobIdent.revision = context.getBlobIdent().revision;
 			state.blobIdent.path = targetPath;
 			state.requestId = PullRequest.idOf(context.getPullRequest());

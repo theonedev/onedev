@@ -38,7 +38,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 @SuppressWarnings("serial")
@@ -156,7 +156,7 @@ public abstract class FileListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				HistoryState state = new HistoryState();
+				RepoFileState state = new RepoFileState();
 				state.blobIdent = parentIdent;
 				state.requestId = PullRequest.idOf(requestModel.getObject());
 				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state); 
@@ -192,7 +192,7 @@ public abstract class FileListPanel extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						HistoryState state = new HistoryState();
+						RepoFileState state = new RepoFileState();
 						state.blobIdent = blobIdent;
 						state.requestId = PullRequest.idOf(requestModel.getObject());
 						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state); 

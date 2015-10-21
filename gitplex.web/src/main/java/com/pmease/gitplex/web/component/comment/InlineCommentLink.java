@@ -6,7 +6,7 @@ import com.pmease.commons.wicket.component.LabelLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.compare.RequestComparePage;
 
@@ -22,7 +22,7 @@ public class InlineCommentLink extends LabelLink<Comment> {
 		Comment comment = getModelObject();
 		GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
 		if (comment.getBlobIdent().equals(comment.getCompareWith())) {
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.commentId = comment.getId();
 			setResponsePage(RepoFilePage.class, RepoFilePage.paramsOf(comment.getRepository(), state));
 		} else { 

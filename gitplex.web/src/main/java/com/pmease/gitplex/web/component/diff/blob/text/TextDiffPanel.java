@@ -67,7 +67,7 @@ import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -159,12 +159,12 @@ public class TextDiffPanel extends Panel {
 
 		PullRequest request = requestModel.getObject();
 		if (request != null) {
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.requestId = request.getId();
 			state.blobIdent = change.getBlobIdent();
 			PageParameters params = RepoFilePage.paramsOf(request.getTargetRepo(), state);
 			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
-			state = new HistoryState();
+			state = new RepoFileState();
 			state.blobIdent.revision = request.getSourceBranch();
 			state.blobIdent.path = change.getPath();
 			state.mode = Mode.EDIT;
@@ -183,7 +183,7 @@ public class TextDiffPanel extends Panel {
 			editFileLink.add(AttributeAppender.append("target", "_blank"));
 			add(editFileLink);
 		} else {
-			HistoryState state = new HistoryState();
+			RepoFileState state = new RepoFileState();
 			state.blobIdent = change.getBlobIdent();
 			PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
 			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));

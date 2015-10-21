@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 
-public class HistoryState implements Serializable {
+public class RepoFileState implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

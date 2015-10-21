@@ -28,7 +28,7 @@ import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -174,7 +174,7 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 				}
 				
 				PullRequest request = updateModel.getObject().getRequest();
-				HistoryState state = new HistoryState();
+				RepoFileState state = new RepoFileState();
 				state.requestId = request.getId();
 				state.blobIdent.revision = commit.getHash();
 				PageParameters params = RepoFilePage.paramsOf(request.getTargetRepo(), state);

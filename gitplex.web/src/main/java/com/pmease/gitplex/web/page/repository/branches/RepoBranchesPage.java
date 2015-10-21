@@ -64,7 +64,7 @@ import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.compare.BranchComparePage;
-import com.pmease.gitplex.web.page.repository.file.HistoryState;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -285,7 +285,7 @@ public class RepoBranchesPage extends RepositoryPage {
 			protected void populateItem(final ListItem<String> item) {
 				final String branch = item.getModelObject();
 				
-				HistoryState state = new HistoryState();
+				RepoFileState state = new RepoFileState();
 				state.blobIdent.revision = branch;
 				AbstractLink link = new BookmarkablePageLink<Void>("branchLink", 
 						RepoFilePage.class, RepoFilePage.paramsOf(getRepository(), state));
