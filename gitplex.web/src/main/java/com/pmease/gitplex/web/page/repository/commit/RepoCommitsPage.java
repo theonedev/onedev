@@ -194,7 +194,7 @@ public class RepoCommitsPage extends RepositoryPage {
 					Component item = newCommitItem(commitsView.newChildId(), i);
 					commitsView.add(item);
 					target.add(item);
-					builder.append(String.format("$('#repo-commits>ul>li.footer').before(\"<li id='%s'></li>\");", 
+					builder.append(String.format("$('#repo-commits>ul').append(\"<li id='%s'></li>\");", 
 							item.getMarkupId()));
 				}
 				target.prependJavaScript(builder);
@@ -208,15 +208,6 @@ public class RepoCommitsPage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(hasMore && state.step < MAX_STEPS);
-			}
-			
-		});
-		footer.add(new WebMarkupContainer("noMore") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!hasMore);
 			}
 			
 		});

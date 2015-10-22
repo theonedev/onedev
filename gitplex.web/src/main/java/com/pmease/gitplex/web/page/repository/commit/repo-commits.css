@@ -34,20 +34,19 @@
 #repo-commits li:hover {
 	background: #F7ECB9;
 }
-#repo-commits li.footer {
-	text-align: center;
-}
-#repo-commits li.footer:hover {
-	background: inherit;
-}
 #repo-commits .commit-message>.full {
 	margin-bottom: 4px;
 }
-#repo-commits li.no-more {
-	font-style: italic;
-	font-size: 16px;
-	text-align: center;
-}
 #repo-commits .commit-message .detail {
 	margin-bottom: 8px;
+}
+#repo-commits>ul {
+	margin-bottom: 0;
+}
+#repo-commits>.footer {
+	text-align: center;
+}
+#repo-commits>.footer>.alert, #repo-commits>.footer>.btn {
+	margin-top: 8px;
+	margin-bottom: 0;
 }
