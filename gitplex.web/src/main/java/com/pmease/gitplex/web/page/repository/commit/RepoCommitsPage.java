@@ -45,6 +45,8 @@ public class RepoCommitsPage extends RepositoryPage {
 
 	private static final int COUNT = 100;
 	
+	private static final int MAX_STEPS = 25;
+	
 	private static final String PARAM_REVISION = "revision";
 	
 	private static final String PARAM_PATH = "path";
@@ -107,10 +109,12 @@ public class RepoCommitsPage extends RepositoryPage {
 		Integer step = params.get(PARAM_STEP).toOptionalInteger();
 		if (step != null)
 			state.step = step.intValue();
-		initInternalState();
+		initWithState();
 	}
 	
-	private void initInternalState() {
+	private void initWithState() {
+		if (state.step > MAX_STEPS)
+			throw new RuntimeException("Step should be no more than " + MAX_STEPS);
 		if (state.revision != null)
 			revisionHash = getRepository().getObjectId(state.revision).name();
 	}
@@ -203,7 +207,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(hasMore);
+				setVisible(hasMore && state.step < MAX_STEPS);
 			}
 			
 		});
@@ -213,6 +217,15 @@ public class RepoCommitsPage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!hasMore);
+			}
+			
+		});
+		footer.add(new WebMarkupContainer("tooMany") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(state.step==MAX_STEPS);
 			}
 			
 		});
@@ -284,7 +297,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		super.onPopState(target, data);
 		
 		state = (HistoryState) data;
-		initInternalState();
+		initWithState();
 		
 		replace(commitsView = newCommitsView());
 		target.add(commitsView);
