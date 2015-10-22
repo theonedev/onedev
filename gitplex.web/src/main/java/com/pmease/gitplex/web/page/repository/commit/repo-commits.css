@@ -34,10 +34,10 @@
 #repo-commits li:hover {
 	background: #F7ECB9;
 }
-#repo-commits li.more {
+#repo-commits li.footer {
 	text-align: center;
 }
-#repo-commits li.more:hover, #repo-commits li.no-more:hover {
+#repo-commits li.footer:hover {
 	background: inherit;
 }
 #repo-commits .commit-message>.full {
@@ -47,4 +47,7 @@
 	font-style: italic;
 	font-size: 16px;
 	text-align: center;
+}
+#repo-commits .commit-message .detail {
+	margin-bottom: 8px;
 }

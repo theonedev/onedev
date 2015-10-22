@@ -22,6 +22,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -48,13 +49,11 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	private static final String PARAM_PATH = "path";
 	
-	protected String revision;
+	private static final String PARAM_STEP = "step";
 	
-	protected String revisionHash;
+	private HistoryState state = new HistoryState();
 	
-	protected String path;
-	
-	private int step;
+	private String revisionHash;
 	
 	private boolean hasMore;
 	
@@ -68,19 +67,19 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected LastAndCurrentCommits load() {
 			LastAndCurrentCommits lastAndCurrentCommits = new LastAndCurrentCommits();
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
-			log.maxCount(step*COUNT);
+			log.maxCount(state.step*COUNT);
 			if (revisionHash != null)
 				log.toRev(revisionHash);
 			else
 				log.allBranchesAndTags(true);
-			if (path != null)
-				log.path(path);
+			if (state.path != null)
+				log.path(state.path);
 			
 			List<Commit> commits = log.call();
 			
-			hasMore = commits.size() == step*COUNT;
+			hasMore = commits.size() == state.step*COUNT;
 			
-			int lastMaxCount = (step-1)*COUNT;
+			int lastMaxCount = (state.step-1)*COUNT;
 
 			lastAndCurrentCommits.last = new ArrayList<>();
 			
@@ -103,17 +102,19 @@ public class RepoCommitsPage extends RepositoryPage {
 	public RepoCommitsPage(PageParameters params) {
 		super(params);
 		
-		revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
-		path = GitUtils.normalizePath(params.get(PARENT_PATH).toString());
-		initState();
+		state.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+		state.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
+		Integer step = params.get(PARAM_STEP).toOptionalInteger();
+		if (step != null)
+			state.step = step.intValue();
+		initInternalState();
 	}
 	
-	private void initState() {
-		if (revision != null)
-			revisionHash = getRepository().getObjectId(revision).name();
-		step = 1;
+	private void initInternalState() {
+		if (state.revision != null)
+			revisionHash = getRepository().getObjectId(state.revision).name();
 	}
-
+	
 	private void sort(List<Commit> commits, int after) {
 		final Map<String, Long> hash2index = new HashMap<>();
 		Map<String, Commit> hash2commit = new HashMap<>();
@@ -170,7 +171,7 @@ public class RepoCommitsPage extends RepositoryPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				step++;
+				state.step++;
 				
 				LastAndCurrentCommits commits = lastAndCurrentCommitsModel.getObject();
 				for (int i=0; i<commits.last.size(); i++) {
@@ -195,6 +196,8 @@ public class RepoCommitsPage extends RepositoryPage {
 				target.prependJavaScript(builder);
 				
 				target.add(footer);
+				
+				pushState(target);
 			}
 
 			@Override
@@ -214,6 +217,12 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 		});
 		add(footer);
+	}
+	
+	private void pushState(AjaxRequestTarget target) {
+		PageParameters params = paramsOf(getRepository(), state);
+		CharSequence url = RequestCycle.get().urlFor(RepoCommitsPage.class, params);
+		pushState(target, url.toString(), state);
 	}
 	
 	private RepeatingView newCommitsView() {
@@ -254,10 +263,14 @@ public class RepoCommitsPage extends RepositoryPage {
 		return item;
 	}
 	
-	public static PageParameters paramsOf(Repository repository, String revision, String path) {
+	public static PageParameters paramsOf(Repository repository, HistoryState state) {
 		PageParameters params = paramsOf(repository);
-		params.set(PARAM_REVISION, revision);
-		params.set(PARAM_PATH, path);
+		if (state.revision != null)
+			params.set(PARAM_REVISION, state.revision);
+		if (state.path != null)
+			params.set(PARAM_PATH, state.path);
+		if (state.step != 1)
+			params.set(PARAM_STEP, state.step);
 		return params;
 	}
 	
@@ -270,11 +283,8 @@ public class RepoCommitsPage extends RepositoryPage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		
-		RepoCommitsState state = (RepoCommitsState) data;
-		revision = state.revision;
-		path = state.path;
-		
-		initState();
+		state = (HistoryState) data;
+		initInternalState();
 		
 		replace(commitsView = newCommitsView());
 		target.add(commitsView);
@@ -303,4 +313,16 @@ public class RepoCommitsPage extends RepositoryPage {
 		
 		List<Commit> current;
 	}
+	
+	public static class HistoryState implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		String revision;
+		
+		String path;
+		
+		int step = 1;
+	}
+	
 }
