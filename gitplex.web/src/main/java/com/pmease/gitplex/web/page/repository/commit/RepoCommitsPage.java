@@ -43,7 +43,7 @@ import com.pmease.gitplex.web.utils.DateUtils;
 @SuppressWarnings("serial")
 public class RepoCommitsPage extends RepositoryPage {
 
-	private static final int COUNT = 2;
+	private static final int COUNT = 100;
 	
 	private static final int MAX_STEPS = 25;
 	
