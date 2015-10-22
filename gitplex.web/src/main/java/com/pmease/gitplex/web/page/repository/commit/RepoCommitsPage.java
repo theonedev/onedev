@@ -43,7 +43,7 @@ import com.pmease.gitplex.web.utils.DateUtils;
 @SuppressWarnings("serial")
 public class RepoCommitsPage extends RepositoryPage {
 
-	private static final int COUNT = 100;
+	private static final int COUNT = 2;
 	
 	private static final int MAX_STEPS = 25;
 	
@@ -119,7 +119,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			revisionHash = getRepository().getObjectId(state.revision).name();
 	}
 	
-	private void sort(List<Commit> commits, int after) {
+	private void sort(List<Commit> commits, int from) {
 		final Map<String, Long> hash2index = new HashMap<>();
 		Map<String, Commit> hash2commit = new HashMap<>();
 		for (int i=0; i<commits.size(); i++) {
@@ -130,7 +130,7 @@ public class RepoCommitsPage extends RepositoryPage {
 
 		Stack<Commit> stack = new Stack<>();
 		
-		for (int i=commits.size()-1; i>after; i--)
+		for (int i=commits.size()-1; i>=from; i--)
 			stack.push(commits.get(i));
 
 		while (!stack.isEmpty()) {
