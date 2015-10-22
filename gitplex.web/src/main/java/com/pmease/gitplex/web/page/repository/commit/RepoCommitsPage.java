@@ -43,9 +43,9 @@ import com.pmease.gitplex.web.utils.DateUtils;
 @SuppressWarnings("serial")
 public class RepoCommitsPage extends RepositoryPage {
 
-	private static final int COUNT = 100;
+	private static final int COUNT = 50;
 	
-	private static final int MAX_STEPS = 25;
+	private static final int MAX_STEPS = 50;
 	
 	private static final String PARAM_REVISION = "revision";
 	
@@ -133,6 +133,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		for (int i=commits.size()-1; i>=from; i--)
 			stack.push(commits.get(i));
 
+		// commits are nearly ordered, so this should be fast
 		while (!stack.isEmpty()) {
 			Commit commit = stack.pop();
 			long commitIndex = hash2index.get(commit.getHash());
@@ -312,6 +313,20 @@ public class RepoCommitsPage extends RepositoryPage {
 				new CssResourceReference(RepoCommitsPage.class, "repo-commits.css")));
 	}
 	
+	/*
+	 * We do not use "--date-order", "--topo-order" or "--author-order" option of git log to 
+	 * retrieve commits as they can be slow. However use the default log ordering has the 
+	 * possibility of returning parent before child which can corrupt the commit lane. To 
+	 * solve this issue, we sort the commits in memory so that parent always comes after 
+	 * child. When more commits are loaded via "more" button, it is possible that some 
+	 * commits displayed previously can be parent of commits loaded lately and should be 
+	 * moved. To work around this issue, we calculate exact order of commits being displayed 
+	 * as "last", and calculate commits will be displayed as "current". Then we compare them 
+	 * to see which commit item in the page should be replaced, and which should be added. 
+	 *  
+	 * @author robin
+	 *
+	 */
 	private static class LastAndCurrentCommits {
 		List<Commit> last;
 		
