@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -16,9 +18,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -57,7 +58,47 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	private boolean hasMore;
 	
-	private WebMarkupContainer commitsContainer;
+	private RepeatingView commitsView;
+	
+	private WebMarkupContainer footer;
+	
+	private IModel<LastAndCurrentCommits> lastAndCurrentCommitsModel = new LoadableDetachableModel<LastAndCurrentCommits>() {
+
+		@Override
+		protected LastAndCurrentCommits load() {
+			LastAndCurrentCommits lastAndCurrentCommits = new LastAndCurrentCommits();
+			LogCommand log = new LogCommand(getRepository().git().repoDir());
+			log.maxCount(step*COUNT);
+			if (revisionHash != null)
+				log.toRev(revisionHash);
+			else
+				log.allBranchesAndTags(true);
+			if (path != null)
+				log.path(path);
+			
+			List<Commit> commits = log.call();
+			
+			hasMore = commits.size() == step*COUNT;
+			
+			int lastMaxCount = (step-1)*COUNT;
+
+			lastAndCurrentCommits.last = new ArrayList<>();
+			
+			for (int i=0; i<lastMaxCount; i++) 
+				lastAndCurrentCommits.last.add(commits.get(i));
+			
+			sort(lastAndCurrentCommits.last, 0);
+
+			lastAndCurrentCommits.current = new ArrayList<>(lastAndCurrentCommits.last);
+			for (int i=lastMaxCount; i<commits.size(); i++)
+				lastAndCurrentCommits.current.add(commits.get(i));
+			
+			sort(lastAndCurrentCommits.current, lastMaxCount);
+
+			return lastAndCurrentCommits;
+		}
+		
+	};
 	
 	public RepoCommitsPage(PageParameters params) {
 		super(params);
@@ -73,20 +114,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		step = 1;
 	}
 
-	private List<Commit> loadCommits() {
-		LogCommand log = new LogCommand(getRepository().git().repoDir());
-		log.maxCount(step*COUNT+1);
-		if (revisionHash != null)
-			log.toRev(revisionHash);
-		else
-			log.allBranchesAndTags(true);
-		if (path != null)
-			log.path(path);
-		
-		List<Commit> commits = log.call();
-		
-		long time = System.currentTimeMillis();
-		hasMore = commits.size() > step*COUNT;
+	private void sort(List<Commit> commits, int after) {
 		final Map<String, Long> hash2index = new HashMap<>();
 		Map<String, Commit> hash2commit = new HashMap<>();
 		for (int i=0; i<commits.size(); i++) {
@@ -97,7 +125,7 @@ public class RepoCommitsPage extends RepositoryPage {
 
 		Stack<Commit> stack = new Stack<>();
 		
-		for (int i=commits.size()-1; i>=0; i--)
+		for (int i=commits.size()-1; i>after; i--)
 			stack.push(commits.get(i));
 
 		while (!stack.isEmpty()) {
@@ -127,65 +155,46 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		});
-		if (hasMore)
-			commits = commits.subList(0, commits.size()-1);
-		
-		System.out.println(System.currentTimeMillis()-time);
-		
-		return commits;
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		add(commitsView = newCommitsView());
 		
-		commitsContainer = new WebMarkupContainer("commitsContainer");
-		commitsContainer.setOutputMarkupId(true);
-		add(commitsContainer);
+		footer = new WebMarkupContainer("footer");
+		footer.setOutputMarkupId(true);
 		
-		commitsContainer.add(new ListView<Commit>("commits", new LoadableDetachableModel<List<Commit>>() {
-
-			@Override
-			protected List<Commit> load() {
-				return loadCommits();
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(final ListItem<Commit> item) {
-				Commit commit = item.getModelObject();
-				
-				item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
-
-				item.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
-
-					@Override
-					public Commit getObject() {
-						return item.getModelObject();
-					}
-					
-				}));
-
-				item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
-				item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
-				
-				item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
-				
-				RepoFileState state = new RepoFileState();
-				state.blobIdent.revision = commit.getHash();
-				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-						RepoFilePage.paramsOf(repoModel.getObject(), state)));
-			}
-			
-		});
-		
-		commitsContainer.add(new AjaxLink<Void>("more") {
+		footer.add(new AjaxLink<Void>("more") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				step++;
-				target.add(commitsContainer);
+				
+				LastAndCurrentCommits commits = lastAndCurrentCommitsModel.getObject();
+				for (int i=0; i<commits.last.size(); i++) {
+					Commit lastCommit = commits.last.get(i);
+					Commit currentCommit = commits.current.get(i);
+					if (!lastCommit.getHash().equals(currentCommit.getHash())) {
+						Component item = commitsView.get(i);
+						Component newItem = newCommitItem(item.getId(), i);
+						item.replaceWith(newItem);
+						target.add(newItem);
+					}
+				}
+
+				StringBuilder builder = new StringBuilder();
+				for (int i=commits.last.size(); i<commits.current.size(); i++) {
+					Component item = newCommitItem(commitsView.newChildId(), i);
+					commitsView.add(item);
+					target.add(item);
+					builder.append(String.format("$('#repo-commits>ul>li.footer').before(\"<li id='%s'></li>\");", 
+							item.getMarkupId()));
+				}
+				target.prependJavaScript(builder);
+				
+				target.add(footer);
 			}
 
 			@Override
@@ -195,7 +204,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		});
-		commitsContainer.add(new WebMarkupContainer("noMore") {
+		footer.add(new WebMarkupContainer("noMore") {
 
 			@Override
 			protected void onConfigure() {
@@ -204,6 +213,45 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		});
+		add(footer);
+	}
+	
+	private RepeatingView newCommitsView() {
+		RepeatingView commitsView = new RepeatingView("commits");
+		
+		for (int i=0; i<lastAndCurrentCommitsModel.getObject().current.size(); i++) 
+			commitsView.add(newCommitItem(commitsView.newChildId(), i));
+		
+		return commitsView;
+	}
+	
+	private Component newCommitItem(String itemId, final int index) {
+		WebMarkupContainer item = new WebMarkupContainer(itemId);
+		Commit commit = lastAndCurrentCommitsModel.getObject().current.get(index);
+		item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
+
+		item.add(new CommitMessagePanel("message", repoModel, new LoadableDetachableModel<Commit>() {
+
+			@Override
+			protected Commit load() {
+				return lastAndCurrentCommitsModel.getObject().current.get(index);
+			}
+			
+		}));
+
+		item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
+		item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
+		
+		item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+		
+		RepoFileState state = new RepoFileState();
+		state.blobIdent.revision = commit.getHash();
+		item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
+				RepoFilePage.paramsOf(repoModel.getObject(), state)));
+		
+		item.setOutputMarkupId(true);
+		
+		return item;
 	}
 	
 	public static PageParameters paramsOf(Repository repository, String revision, String path) {
@@ -228,7 +276,16 @@ public class RepoCommitsPage extends RepositoryPage {
 		
 		initState();
 		
-		target.add(commitsContainer);
+		replace(commitsView = newCommitsView());
+		target.add(commitsView);
+		target.add(footer);
+	}
+
+	@Override
+	protected void onDetach() {
+		lastAndCurrentCommitsModel.detach();
+		
+		super.onDetach();
 	}
 
 	@Override
@@ -241,4 +298,9 @@ public class RepoCommitsPage extends RepositoryPage {
 				new CssResourceReference(RepoCommitsPage.class, "repo-commits.css")));
 	}
 	
+	private static class LastAndCurrentCommits {
+		List<Commit> last;
+		
+		List<Commit> current;
+	}
 }

@@ -1,6 +1,6 @@
 <wicket:extend>
 	<div id="repo-commits">
-		<ul wicket:id="commitsContainer" class="list list-unstyled">
+		<ul class="list list-unstyled">
 			<li wicket:id="commits" class="commit clearfix">
 				<div class="avatar pull-left">
 					<span wicket:id="avatar"></span>
@@ -16,12 +16,10 @@
 					<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
 				</div>
 			</li>
-			<wicket:enclosure child="more">
-			<li class="more"><a wicket:id="more" class="btn btn-default">More commits</a></li>
-			</wicket:enclosure>
-			<wicket:enclosure child="noMore">
-			<li class="no-more">No more commits</li>
-			</wicket:enclosure>
+			<li wicket:id="footer" class="footer">
+				<a wicket:id="more" class="btn btn-default">More commits</a>
+				<span wicket:id="noMore">No more commits</span>
+			</li>
 		</ul>
 	</div>
 </wicket:extend>
