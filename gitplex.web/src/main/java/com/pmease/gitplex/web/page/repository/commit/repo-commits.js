@@ -6,10 +6,13 @@ gitplex.repocommits = {
 	 */
 	drawCommitLane: function(commits) {
 
-		function getSortedLines(row, boolean reverse) {
+		var maxColumns = 20;
+		var colors = [];
+			
+		function getSortedLines(row, reverse) {
 			var lines = [];
-			for (var line in row.keys())
-				lines.add(line);
+			for (var line in Object.keys(row))
+				lines.push(line);
 
 			lines.sort(function(x, y) {
 				if (reverse)
@@ -21,7 +24,7 @@ gitplex.repocommits = {
 		}
 		
 		function fromKey(lineKey) {
-			return line.split(',').map(function(item) {
+			return lineKey.split(',').map(function(item) {
 				return parseInt(item, 10);
 			});
 		}
@@ -50,22 +53,23 @@ gitplex.repocommits = {
 					children = [];
 					parent2children[parent] = children;
 				}
-				children.add(i);
+				children.push(i);
 			}
 		}
 		
-		for (int rowIndex=0; rowIndex<commits.length; rowIndex++) {
+		for (var rowIndex=0; rowIndex<commits.length; rowIndex++) {
 			var row = {};
 			if (rowIndex == 0) {
 				row["0,0"] = 0;
 			} else {
+				var commit = commits[rowIndex-1];
 				// special line represents the commit at rowIndex itself
-				var commitLineKey = toKeyrowIndex + "," + rowIndex;
+				var commitLineKey = toKey([rowIndex, rowIndex]);
 				var lastRow = rows[rowIndex-1];
 				var column = 0;
 				var linesOfLastRow = getSortedLines(lastRow, false);
 				for (var i=0; i<linesOfLastRow.length; i++) {
-					var lineOfLastRow = fromKey(linesOfLastRows[i]);
+					var lineOfLastRow = fromKey(linesOfLastRow[i]);
 					if (lineOfLastRow[1] < 0) // line is cutted due to max columns limitation
 						continue;
 					if (lineOfLastRow[1] != lineOfLastRow[0]) { // not a commit point
@@ -78,7 +82,6 @@ gitplex.repocommits = {
 							row[toKey(lineOfLastRow)] = column++;
 						}
 					} else {
-						var commit = commits[rowIndex-1];
 						for (var j=0; j<commit.length; j++) {
 							var parent = commit[j];
 							if (parent == rowIndex) {
@@ -91,58 +94,69 @@ gitplex.repocommits = {
 					}
 				}
 				
-				=================================================
-					
-				if (!row.containsKey(commitLine))
-					row.put(commitLine, column++);
+				if (!row[commitLineKey])
+					row[commitLineKey] = column++;
 				if (column > maxColumns) {
-					for (Line line: getSortedLines(row, true)) {
+					var reverseLines = getSortedLines(row, true);
+					for (var i=0; i<reversedLines.length; i++) {
+						var line = reversedLines[i];
 						if (line[0] == rowIndex-1) {
-							row.put(line.toggle(), row.remove(line));
+							var cuttedLine = [line[0], line[1]*-1];
+							var lineKey = toKey(line);
+							var lineColumn = row.get(lineKey);
+							delete row[lineKey];
+							row.put(toKey(cuttedLine), lineColumn);
 							column--;
 							if (column == maxColumns)
 								break;
 						}
 					}
-					Preconditions.checkState(column == maxColumns);
+					if (column != maxColumns)
+						throw "Illegal state";
 				}
 				
-				List<Line> cuttedLines = new ArrayList<>();
-				List<Integer> children = mapOfParentToChildren.get(rowIndex);
-				if (children != null) {
-					for (int child: children) {
+				var cuttedLines = [];
+				var children = parent2children[rowIndex];
+				if (children) {
+					for (var i=0; i<children.length; i++) {
+						var child = children[i];
 						if (child != rowIndex-1) {
-							Line line = new Line(child, rowIndex);
-							Line cuttedLine = line.toggle();
-							if (!lastRow.containsKey(line)) {
-								if (lastRow.containsKey(cuttedLine))
-									lastRow.put(line, lastRow.remove(cuttedLine));
-								else 
-									cuttedLines.add(cuttedLine);
+							var line = [child, rowIndex];
+							var cuttedLine = [child, rowIndex*-1];
+							var lineKey = toKey(line);
+							var cuttedLineKey = toKey(cuttedLine);
+							if (!lastRow[lineKey]) {
+								if (lastRow[cuttedLineKey]) {
+									var cuttedLineColumn = lastRow[cuttedLineKey];
+									delete lastRow[cuttedLineKey];
+									lastRow[lineKey] = cuttedLineColumn;
+								} else { 
+									cuttedLines.push(cuttedLine);
+								}
 							}
 						}
 					}
 				}
-				if (!cuttedLines.isEmpty()) {
+				if (cuttedLines.length != 0) {
 					// for every disappeared line, we need to make them appear again in last row
 					// so that end part of the line can be drawn from last row to this row. 
 					// Below code find column in last row to insert these appeared lines, and 
 					// we want to make sure that this column can result in minimum line crossovers. 
-					int commitColumn = row.get(commitLine);
-					int insertColumn = 0;
-					for (int i=linesOfLastRow.size()-1; i>=0; i--) {
-						Line lineOfLastRow = linesOfLastRow.get(i);
-						if (lineOfLastRow.isCommit()) {
-							boolean found = false;
-							for (String parentHash: commits.get(rowIndex-1).getParentHashes()) {
-								Integer parent = mapOfHashToRow.get(parentHash);
-								if (parent != null) {
-									Line line = new Line(rowIndex-1, parent);
-									Integer lineColumn = row.get(line);
-									if (lineColumn!=null && lineColumn.intValue()<commitColumn) {
-										found = true;
-										break;
-									}
+					var commitColumn = row[commitLineKey];
+					var insertColumn = 0;
+					for (var i=linesOfLastRow.length-1; i>=0; i--) {
+						var lineOfLastRowKey = linesOfLastRow[i];
+						var lineOfLastRow = fromKey(lineOfLastRowKey);
+						if (lineOfLastRow[0] == lineOfLastRow[1]) {
+							var found = false;
+							for (var j=0; j<commit.lenght; j++) {
+								var parent = commit[j];
+								var line = [rowIndex-1, parent];
+								var lineKey = toKey(line);
+								var lineColumn = row[lineKey];
+								if (lineColumn && lineColumn<commitColumn) {
+									found = true;
+									break;
 								}
 							}
 							if (found) {
@@ -150,21 +164,21 @@ gitplex.repocommits = {
 								break;
 							}
 						} else {
-							Integer lineColumn = row.get(lineOfLastRow);
-							if (lineColumn!=null && lineColumn.intValue()<commitColumn) {
+							var lineColumn = row[lineOfLastRowKey];
+							if (lineColumn && lineColumn<commitColumn) {
 								insertColumn = i;
 								break;
 							}
 						}
 					}
 					column = insertColumn+1;
-					for (Line cuttedLine: cuttedLines) 
-						lastRow.put(cuttedLine, column++);
-					for (int i=insertColumn+1; i<linesOfLastRow.size(); i++) 
-						lastRow.put(linesOfLastRow.get(i), column++);
+					for (var i=0; i<cuttedLines.length; i++) 
+						lastRow[toKey(cuttedLines[i])] = column++;
+					for (var i=insertColumn+1; i<linesOfLastRow.size(); i++) 
+						lastRow[linesOfLastRow[i]] = column++;
 				}
 			}
-			rows.add(row);
+			rows.push(row);
 		}
 	}
 	
