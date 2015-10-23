@@ -15,6 +15,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -27,9 +28,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.command.LogCommand;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
@@ -199,8 +203,8 @@ public class RepoCommitsPage extends RepositoryPage {
 							item.getMarkupId()));
 				}
 				target.prependJavaScript(builder);
-				
 				target.add(footer);
+				target.appendJavaScript(getCommitLaneScript());
 				
 				pushState(target);
 			}
@@ -303,6 +307,29 @@ public class RepoCommitsPage extends RepositoryPage {
 		super.onDetach();
 	}
 
+	private String getCommitLaneScript() {
+		List<Commit> commits = lastAndCurrentCommitsModel.getObject().current;
+		Map<String, Integer> hash2index = new HashMap<>();
+		for (int i=0; i<commits.size(); i++) 
+			hash2index.put(commits.get(i).getHash(), i);
+		List<List<Integer>> commitIndexes = new ArrayList<>();
+		for (Commit commit: commits) {
+			List<Integer> parentIndexes = new ArrayList<>();
+			for (String parentHash: commit.getParentHashes()) {
+				Integer parentIndex = hash2index.get(parentHash);
+				if (parentIndex != null)
+					parentIndexes.add(parentIndex);
+			}
+			commitIndexes.add(parentIndexes);
+		}
+		try {
+			String json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commitIndexes);
+			return String.format("gitplex.repocommits.drawCommitLane(%s);", json);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -311,6 +338,8 @@ public class RepoCommitsPage extends RepositoryPage {
 				new JavaScriptResourceReference(RepoCommitsPage.class, "repo-commits.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RepoCommitsPage.class, "repo-commits.css")));
+		
+		response.render(OnDomReadyHeaderItem.forScript(getCommitLaneScript()));
 	}
 	
 	/*
