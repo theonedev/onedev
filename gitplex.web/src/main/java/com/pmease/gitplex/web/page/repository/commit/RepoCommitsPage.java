@@ -74,7 +74,6 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected LastAndCurrentCommits load() {
 			LastAndCurrentCommits lastAndCurrentCommits = new LastAndCurrentCommits();
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
-			log.skip((state.step-1)*COUNT);
 			log.maxCount(state.step*COUNT);
 			if (revisionHash != null)
 				log.toRev(revisionHash);
