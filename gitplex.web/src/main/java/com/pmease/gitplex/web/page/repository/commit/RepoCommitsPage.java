@@ -74,6 +74,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected LastAndCurrentCommits load() {
 			LastAndCurrentCommits lastAndCurrentCommits = new LastAndCurrentCommits();
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
+			log.skip((state.step-1)*COUNT);
 			log.maxCount(state.step*COUNT);
 			if (revisionHash != null)
 				log.toRev(revisionHash);
@@ -88,13 +89,15 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 			int lastMaxCount = (state.step-1)*COUNT;
 
+			/*
 			lastAndCurrentCommits.last = new ArrayList<>();
 			
 			for (int i=0; i<lastMaxCount; i++) 
 				lastAndCurrentCommits.last.add(commits.get(i));
 			
 			sort(lastAndCurrentCommits.last, 0);
-
+			*/
+			
 			lastAndCurrentCommits.current = new ArrayList<>(lastAndCurrentCommits.last);
 			for (int i=lastMaxCount; i<commits.size(); i++)
 				lastAndCurrentCommits.current.add(commits.get(i));
