@@ -1,21 +1,28 @@
-gitplex.repocommits = {
-		
+gitplex.repocommits = {		
 	/*
 	 * commits is an array of ordered commit object, and the commit object is itself a 
 	 * list of parent indexes
 	 */
-	drawCommitLane: function(commits) {
-		
+	renderCommitLane: function(commits) {
 		var columnsLimit = 20;
-		var columnWidth = 20;
+		
 		var colors = ["#0000ff", "#00ff00", "#ff0000",
 		              "#ffff00", "#ff00ff", "#00ffff",
 		              "#000080", "#008000", "#800000", 
 		              "#808000", "#800080", "#008080"];
 
-		var colorStack = [];
+		/*
+		 * rows store the map of line to row. A line represents a child->parent relationship. 
+		 * For instance line(1,5) represents the line from commit at row 1 (the child ) to 
+		 * commit at row 5 (the parent). In case child row index equals parent row index, 
+		 * the line represents a commit. 
+		 * 
+		 */
+		var rows = [];
+		var parent2children = {};
 		var colorAssignments = {};
-
+		
+		var colorStack = [];
 		function getSortedLines(row, reverse) {
 			var lines = [];
 			var keys = Object.keys(row);
@@ -41,21 +48,24 @@ gitplex.repocommits = {
 			return line[0] + "," + line[1];
 		}
 		
-		/*
-		 * rows store the map of line to row. A line represents a child->parent relationship. 
-		 * For instance line(1,5) represents the line from commit at row 1 (the child ) to 
-		 * commit at row 5 (the parent). In case child row index equals parent row index, 
-		 * the line represents a commit. 
-		 * 
-		 */
-		var rows = [];
-		
-		var parent2children = {}; 
+		function assignColor(lineKey) {
+			var color = colorAssignments[lineKey];
+			if (color == undefined) {
+				if (colorStack.length == 0) {
+					for (var i=colors.length-1; i>=0; i--)
+						colorStack.push(colors[i]);
+				}
+				color = colorStack.pop();
+				colorAssignments[lineKey] = color;
+			}
+			return color;
+		}
 		
 		for (var i=0; i<commits.length; i++) {
-			var commit = commits[i][1];
-			for (var j=0; j<commit.length; j++) {
-				var parent = commit[j];
+			commits[i] = commits[i][1];
+			var parents = commits[i];
+			for (var j=0; j<parents.length; j++) {
+				var parent = parents[j];
 				var children = parent2children[parent];
 				if (children == undefined) {
 					children = [];
@@ -71,7 +81,7 @@ gitplex.repocommits = {
 			if (rowIndex == 0) {
 				row["0,0"] = 0;
 			} else {
-				var commit = commits[rowIndex-1][1];
+				var commit = commits[rowIndex-1];
 				// special line represents the commit at rowIndex itself
 				var commitLineKey = toKey([rowIndex, rowIndex]);
 				var lastRow = rows[rowIndex-1];
@@ -186,15 +196,82 @@ gitplex.repocommits = {
 					for (var i=insertColumn+1; i<linesOfLastRow.length; i++) 
 						lastRow[linesOfLastRow[i]] = column++;
 				}
+				for (var lineKey in row) {
+					var line = fromKey(lineKey);
+					if (line.child == line.parent) {
+						var children = parent2children[line.parent];
+						if (children) {
+							for (var i=0; i<children.length; i++) {
+								var child = children[i];
+								var lineToMe = [child, line.parent];
+								colorStack.push(assignColor(toKey(lineToMe)));
+							}
+						}
+					} else {
+						if (line.parent < 0) 
+							assignColor(toKey([line.child, line.parent*-1]));
+						else
+							assignColor(toKey(line));
+					}
+				}
 			}
 			rows.push(row);
 			var keysLen = Object.keys(row).length;
 			if (keysLen > maxColumns) 
 				maxColumns = keysLen; 
 		}
+		gitplex.repocommits.rows = rows;
+		gitplex.repocommits.commits = commits; 
+		gitplex.repocommits.colorAssignments = colorAssignments;
+		gitplex.repocommits.maxColumns = maxColumns;
 		
-		$("#repo-commits>ul").css("margin-left", maxColumns*columnWidth);
+		gitplex.repocommits.drawCommitLane();
+	},
+	drawCommitLane: function() {
+		var columnWidth = 20;
+		var topOffset = 12;
+		var rightOffset = 8;
+		var commitSize = 3;
+		var commitColor = "#0000ff";
+
+		var rows = gitplex.repocommits.rows;
+		var commits = gitplex.repocommits.commits; 
+		var colorAssignments = gitplex.repocommits.colorAssignments;
+		var maxColumns = gitplex.repocommits.maxColumns;
 		
+		function fromKey(lineKey) {
+			return lineKey.split(',').map(function(item) {
+				return parseInt(item, 10);
+			});
+		}
+		
+		function toKey(line) {
+			return line[0] + "," + line[1];
+		}
+		
+		var $list = $("#repo-commits>.body>.list"); 
+		$list.css("margin-left", maxColumns*columnWidth+8);
+		
+		var $lane = $("#repo-commits>.body>.lane"); 
+		$lane.empty();
+		$lane.height($list.outerHeight());
+		$lane.width(maxColumns*columnWidth);
+		var paper = Snap($lane[0]);
+		
+		var bodyTop = $("#repo-commits>.body").offset().top - rightOffset;
+		var commitGroup = paper.g();
+		for (var i=0; i<rows.length; i++) {
+			var row = rows[i];
+			var column = row[toKey([i, i])];
+			var top = $("#commitindex-"+i).offset().top - bodyTop;
+			var left = column*columnWidth + columnWidth/2;
+			commitGroup.add(paper.circle(left, top, commitSize));
+			
+			if (i < rows.length-1) {
+				
+			}
+		}
+		commitGroup.attr({fill: commitColor, stroke: commitColor});
 	}
 	
 }

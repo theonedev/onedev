@@ -1,52 +1,56 @@
 #repo-commits {
 	padding: 20px;
+	position: relative;
 }
-#repo-commits li {
+#repo-commits>.body li {
 	padding: 4px 0;
 }
-#repo-commits .avatar {
+#repo-commits>.body .avatar {
 	width: 40px;
 }
-#repo-commits .info {
-	text-align: right;
-	white-space: nowrap;
-}
-#repo-commits .avatar img {
+#repo-commits>.body .avatar img {
 	width: 37px; 
 	height: 37px;
 }
-#repo-commits a {
+#repo-commits>.body .info {
+	text-align: right;
+	white-space: nowrap;
+}
+#repo-commits>.body a {
 	color: #666;
 }
-#repo-commits a.summary {
+#repo-commits>.body a.summary {
 	font-weight: bold;
 }
-#repo-commits .detail {
+#repo-commits>.body .detail {
 	padding-left: 8px; 
 	padding-right: 8px;
 }
-#repo-commits .detail .name {
+#repo-commits>.body .detail .name {
 	color: #666;
 }
-#repo-commits .commit-hash {
+#repo-commits>.body .commit-hash {
 	font-family: monospace;
 }
-#repo-commits li:hover {
+#repo-commits>.body li:hover {
 	background: #F7ECB9;
 }
-#repo-commits .commit-message>.full {
+#repo-commits>.body .commit-message>.full {
 	margin-bottom: 4px;
 }
-#repo-commits .commit-message .detail {
+#repo-commits>.body .commit-message .detail {
 	margin-bottom: 8px;
 }
-#repo-commits>ul {
+#repo-commits>.body>.list {
 	margin-bottom: 0;
 }
-#repo-commits>.footer {
+#repo-commits>.body>.lane {
+	position: absolute;
+}
+#repo-commits>.foot {
 	text-align: center;
 }
-#repo-commits>.footer>.alert, #repo-commits>.footer>.btn {
+#repo-commits>.foot>.alert, #repo-commits>.footer>.btn {
 	margin-top: 8px;
 	margin-bottom: 0;
 }

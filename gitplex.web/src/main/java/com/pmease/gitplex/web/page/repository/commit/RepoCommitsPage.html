@@ -1,23 +1,27 @@
 <wicket:extend>
 	<div id="repo-commits">
-		<ul class="list list-unstyled">
-			<li wicket:id="commits" class="commit clearfix">
-				<div class="avatar pull-left">
-					<span wicket:id="avatar"></span>
-				</div>
-				<div class="detail pull-left">
-					<div wicket:id="message"></div> 
-					<div class="author">
-						<span wicket:id="name"></span> authored <span wicket:id="age"></span>
+		<div class="head"></div>
+		<div class="body">
+			<svg class="lane"></svg>
+			<ul class="list list-unstyled">
+				<li wicket:id="commits" class="commit clearfix">
+					<div class="avatar pull-left">
+						<span wicket:id="avatar"></span>
 					</div>
-				</div>
-				<div class="info pull-right">
-					<span wicket:id="hash"></span>
-					<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
-				</div>
-			</li>
-		</ul>
-		<div wicket:id="footer" class="footer">
+					<div class="detail pull-left">
+						<div wicket:id="message"></div> 
+						<div class="author">
+							<span wicket:id="name"></span> authored <span wicket:id="age"></span>
+						</div>
+					</div>
+					<div class="info pull-right">
+						<span wicket:id="hash"></span>
+						<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div wicket:id="foot" class="foot">
 			<a wicket:id="more" class="btn btn-default">More commits</a>
 			<div wicket:id="tooMany" class="alert alert-warning">Too many commits to load</div>
 		</div>

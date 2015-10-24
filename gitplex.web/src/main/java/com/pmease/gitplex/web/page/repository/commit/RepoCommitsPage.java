@@ -66,7 +66,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	private RepeatingView commitsView;
 	
-	private WebMarkupContainer footer;
+	private WebMarkupContainer foot;
 	
 	private IModel<LastAndCurrentCommits> lastAndCurrentCommitsModel = new LoadableDetachableModel<LastAndCurrentCommits>() {
 
@@ -174,10 +174,10 @@ public class RepoCommitsPage extends RepositoryPage {
 
 		add(commitsView = newCommitsView());
 		
-		footer = new WebMarkupContainer("footer");
-		footer.setOutputMarkupId(true);
+		foot = new WebMarkupContainer("foot");
+		foot.setOutputMarkupId(true);
 		
-		footer.add(new AjaxLink<Void>("more") {
+		foot.add(new AjaxLink<Void>("more") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -200,11 +200,11 @@ public class RepoCommitsPage extends RepositoryPage {
 					Component item = newCommitItem(commitsView.newChildId(), i);
 					commitsView.add(item);
 					target.add(item);
-					builder.append(String.format("$('#repo-commits>ul').append(\"<li id='%s'></li>\");", 
+					builder.append(String.format("$('#repo-commits>.body>.list').append(\"<li id='%s'></li>\");", 
 							item.getMarkupId()));
 				}
 				target.prependJavaScript(builder);
-				target.add(footer);
+				target.add(foot);
 				target.appendJavaScript(getCommitLaneScript());
 				
 				pushState(target);
@@ -217,7 +217,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		});
-		footer.add(new WebMarkupContainer("tooMany") {
+		foot.add(new WebMarkupContainer("tooMany") {
 			
 			@Override
 			protected void onConfigure() {
@@ -226,7 +226,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		});
-		add(footer);
+		add(foot);
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
@@ -299,7 +299,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		
 		replace(commitsView = newCommitsView());
 		target.add(commitsView);
-		target.add(footer);
+		target.add(foot);
 	}
 
 	@Override
@@ -326,7 +326,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		}
 		try {
 			String json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commitIndexes);
-			return String.format("gitplex.repocommits.drawCommitLane(%s);", json);
+			return String.format("gitplex.repocommits.renderCommitLane(%s);", json);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}

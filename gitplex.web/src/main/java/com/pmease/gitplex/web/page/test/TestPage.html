@@ -1,3 +1,9 @@
 <wicket:extend>
-	<a wicket:id="test">test</a>
+	<svg id="snap"></svg>
+	<script type="text/javascript">
+		$(function() {
+			var snap = Snap("#snap");
+			snap.circle(20, 20, 10);
+		});
+	</script>
 </wicket:extend>
