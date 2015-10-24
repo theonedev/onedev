@@ -88,14 +88,12 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 			int lastMaxCount = (state.step-1)*COUNT;
 
-			/*
 			lastAndCurrentCommits.last = new ArrayList<>();
 			
 			for (int i=0; i<lastMaxCount; i++) 
 				lastAndCurrentCommits.last.add(commits.get(i));
 			
 			sort(lastAndCurrentCommits.last, 0);
-			*/
 			
 			lastAndCurrentCommits.current = new ArrayList<>(lastAndCurrentCommits.last);
 			for (int i=lastMaxCount; i<commits.size(); i++)

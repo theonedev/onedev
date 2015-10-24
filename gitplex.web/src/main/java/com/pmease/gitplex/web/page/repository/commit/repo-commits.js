@@ -57,7 +57,7 @@ gitplex.repocommits = {
 			for (var j=0; j<commit.length; j++) {
 				var parent = commit[j];
 				var children = parent2children[parent];
-				if (!children) {
+				if (children == undefined) {
 					children = [];
 					parent2children[parent] = children;
 				}
@@ -85,7 +85,7 @@ gitplex.repocommits = {
 						// line not started from last row, in this case, the line 
 						// only occupies a column when it goes through current row 
 						if (lineOfLastRow[1] == rowIndex) { 
-							if (!row[commitLineKey])
+							if (row[commitLineKey] == undefined)
 								row[commitLineKey] = column++;
 						} else { 
 							row[toKey(lineOfLastRow)] = column++;
@@ -94,7 +94,7 @@ gitplex.repocommits = {
 						for (var j=0; j<commit.length; j++) {
 							var parent = commit[j];
 							if (parent == rowIndex) {
-								if (!row[commitLineKey])
+								if (row[commitLineKey] == undefined)
 									row[commitLineKey] = column++;
 							} else {
 								row[toKey([rowIndex-1, parent])] = column++;
@@ -103,18 +103,18 @@ gitplex.repocommits = {
 					}
 				}
 				
-				if (!row[commitLineKey])
+				if (row[commitLineKey] == undefined)
 					row[commitLineKey] = column++;
 				if (column > columnsLimit) {
 					var reversedLines = getSortedLines(row, true);
 					for (var i=0; i<reversedLines.length; i++) {
-						var line = reversedLines[i];
+						var line = fromKey(reversedLines[i]);
 						if (line[0] == rowIndex-1) {
 							var cuttedLine = [line[0], line[1]*-1];
 							var lineKey = toKey(line);
-							var lineColumn = row.get(lineKey);
+							var lineColumn = row[lineKey];
 							delete row[lineKey];
-							row.put(toKey(cuttedLine), lineColumn);
+							row[toKey(cuttedLine)] = lineColumn;
 							column--;
 							if (column == columnsLimit)
 								break;
@@ -134,7 +134,7 @@ gitplex.repocommits = {
 							var cuttedLine = [child, rowIndex*-1];
 							var lineKey = toKey(line);
 							var cuttedLineKey = toKey(cuttedLine);
-							if (!lastRow[lineKey]) {
+							if (lastRow[lineKey] == undefined) {
 								if (lastRow[cuttedLineKey]) {
 									var cuttedLineColumn = lastRow[cuttedLineKey];
 									delete lastRow[cuttedLineKey];
