@@ -5,14 +5,22 @@ gitplex.repocommits = {
 	 * list of parent indexes
 	 */
 	drawCommitLane: function(commits) {
+		
+		var columnsLimit = 20;
+		var columnWidth = 20;
+		var colors = ["#0000ff", "#00ff00", "#ff0000",
+		              "#ffff00", "#ff00ff", "#00ffff",
+		              "#000080", "#008000", "#800000", 
+		              "#808000", "#800080", "#008080"];
 
-		var maxColumns = 20;
-		var colors = [];
-			
+		var colorStack = [];
+		var colorAssignments = {};
+
 		function getSortedLines(row, reverse) {
 			var lines = [];
-			for (var line in Object.keys(row))
-				lines.push(line);
+			var keys = Object.keys(row);
+			for (var i=0; i<keys.length; i++)
+				lines.push(keys[i]);
 
 			lines.sort(function(x, y) {
 				if (reverse)
@@ -45,7 +53,7 @@ gitplex.repocommits = {
 		var parent2children = {}; 
 		
 		for (var i=0; i<commits.length; i++) {
-			var commit = commits[i];
+			var commit = commits[i][1];
 			for (var j=0; j<commit.length; j++) {
 				var parent = commit[j];
 				var children = parent2children[parent];
@@ -57,12 +65,13 @@ gitplex.repocommits = {
 			}
 		}
 		
+		var maxColumns = 1;
 		for (var rowIndex=0; rowIndex<commits.length; rowIndex++) {
 			var row = {};
 			if (rowIndex == 0) {
 				row["0,0"] = 0;
 			} else {
-				var commit = commits[rowIndex-1];
+				var commit = commits[rowIndex-1][1];
 				// special line represents the commit at rowIndex itself
 				var commitLineKey = toKey([rowIndex, rowIndex]);
 				var lastRow = rows[rowIndex-1];
@@ -96,8 +105,8 @@ gitplex.repocommits = {
 				
 				if (!row[commitLineKey])
 					row[commitLineKey] = column++;
-				if (column > maxColumns) {
-					var reverseLines = getSortedLines(row, true);
+				if (column > columnsLimit) {
+					var reversedLines = getSortedLines(row, true);
 					for (var i=0; i<reversedLines.length; i++) {
 						var line = reversedLines[i];
 						if (line[0] == rowIndex-1) {
@@ -107,12 +116,12 @@ gitplex.repocommits = {
 							delete row[lineKey];
 							row.put(toKey(cuttedLine), lineColumn);
 							column--;
-							if (column == maxColumns)
+							if (column == columnsLimit)
 								break;
 						}
 					}
-					if (column != maxColumns)
-						throw "Illegal state";
+					if (column != columnsLimit)
+						throw "Error calculating commit lane at row " + rowIndex;
 				}
 				
 				var cuttedLines = [];
@@ -174,12 +183,18 @@ gitplex.repocommits = {
 					column = insertColumn+1;
 					for (var i=0; i<cuttedLines.length; i++) 
 						lastRow[toKey(cuttedLines[i])] = column++;
-					for (var i=insertColumn+1; i<linesOfLastRow.size(); i++) 
+					for (var i=insertColumn+1; i<linesOfLastRow.length; i++) 
 						lastRow[linesOfLastRow[i]] = column++;
 				}
 			}
 			rows.push(row);
+			var keysLen = Object.keys(row).length;
+			if (keysLen > maxColumns) 
+				maxColumns = keysLen; 
 		}
+		
+		$("#repo-commits>ul").css("margin-left", maxColumns*columnWidth);
+		
 	}
 	
 }

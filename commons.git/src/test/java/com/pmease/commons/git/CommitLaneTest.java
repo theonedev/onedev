@@ -2,6 +2,14 @@ package com.pmease.commons.git;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 import org.junit.Test;
 
 import com.pmease.commons.git.command.LogCommand;
@@ -115,6 +123,59 @@ public class CommitLaneTest extends AbstractGitTest {
 		assertLine(lane, 1, 1, 1, 1);
 		assertLine(lane, 2, 2, 2, 0);
 		assertLine(lane, 3, 3, 3, 0);
+	}
+	
+	@Test
+	public void test() {
+		LogCommand log = new LogCommand(new File("w:\\temp\\gitplex_storage\\repositories\\1"));
+		log.maxCount(550);
+		log.allBranchesAndTags(true);
+		
+		List<Commit> commits = log.call();
+		final Map<String, Long> hash2index = new HashMap<>();
+		Map<String, Commit> hash2commit = new HashMap<>();
+		
+		for (int i=0; i<commits.size(); i++) {
+			Commit commit = commits.get(i);
+			hash2index.put(commit.getHash(), 1L*i*commits.size());
+			hash2commit.put(commit.getHash(), commit);
+		}
+
+		Stack<Commit> stack = new Stack<>();
+		
+		for (int i=commits.size()-1; i>=0; i--)
+			stack.push(commits.get(i));
+
+		// commits are nearly ordered, so this should be fast
+		while (!stack.isEmpty()) {
+			Commit commit = stack.pop();
+			long commitIndex = hash2index.get(commit.getHash());
+			int count = 1;
+			for (String parentHash: commit.getParentHashes()) {
+				Long parentIndex = hash2index.get(parentHash);
+				if (parentIndex != null && parentIndex.longValue()<commitIndex) {
+					stack.push(hash2commit.get(parentHash));
+					hash2index.put(parentHash, commitIndex+(count++));
+				}
+			}
+		}
+		
+		Collections.sort(commits, new Comparator<Commit>() {
+
+			@Override
+			public int compare(Commit o1, Commit o2) {
+				long value = hash2index.get(o1.getHash()) - hash2index.get(o2.getHash());
+				if (value < 0)
+					return -1;
+				else if (value > 0)
+					return 1;
+				else
+					return 0;
+			}
+			
+		});
+		
+		new CommitLane(commits, 20);
 	}
 	
 	@Test

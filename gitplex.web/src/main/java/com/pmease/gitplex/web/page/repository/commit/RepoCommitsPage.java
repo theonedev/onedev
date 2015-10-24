@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.command.LogCommand;
+import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
@@ -267,6 +268,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
 				RepoFilePage.paramsOf(repoModel.getObject(), state)));
 		
+		item.setMarkupId("commitindex-" + index);
 		item.setOutputMarkupId(true);
 		
 		return item;
@@ -334,6 +336,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		response.render(JavaScriptHeaderItem.forReference(SnapSvgResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(RepoCommitsPage.class, "repo-commits.js")));
 		response.render(CssHeaderItem.forReference(
