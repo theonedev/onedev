@@ -6,10 +6,7 @@ gitplex.repocommits = {
 	renderCommitLane: function(commits) {
 		var columnsLimit = 20;
 		
-		var colors = ["#0000ff", "#00ff00", "#ff0000",
-		              "#ffff00", "#ff00ff", "#00ffff",
-		              "#000080", "#008000", "#800000", 
-		              "#808000", "#800080", "#008080"];
+		var colorsLimit = 12;
 
 		/*
 		 * rows store the map of line to row. A line represents a child->parent relationship. 
@@ -20,7 +17,7 @@ gitplex.repocommits = {
 		 */
 		var rows = [];
 		var parent2children = {};
-		var colorAssignments = {};
+		var colors = {};
 		
 		var colorStack = [];
 		function getSortedLines(row, reverse) {
@@ -49,14 +46,14 @@ gitplex.repocommits = {
 		}
 		
 		function assignColor(lineKey) {
-			var color = colorAssignments[lineKey];
+			var color = colors[lineKey];
 			if (color == undefined) {
 				if (colorStack.length == 0) {
-					for (var i=colors.length-1; i>=0; i--)
-						colorStack.push(colors[i]);
+					for (var i=colorLimit; i>=1; i--)
+						colorStack.push(i);
 				}
 				color = colorStack.pop();
-				colorAssignments[lineKey] = color;
+				colors[lineKey] = color;
 			}
 			return color;
 		}
@@ -222,7 +219,7 @@ gitplex.repocommits = {
 		}
 		gitplex.repocommits.rows = rows;
 		gitplex.repocommits.commits = commits; 
-		gitplex.repocommits.colorAssignments = colorAssignments;
+		gitplex.repocommits.colors = colors;
 		gitplex.repocommits.maxColumns = maxColumns;
 		
 		gitplex.repocommits.drawCommitLane();
@@ -232,11 +229,13 @@ gitplex.repocommits = {
 		var topOffset = 12;
 		var rightOffset = 8;
 		var commitSize = 3;
-		var commitColor = "#0000ff";
+		
+		var commitCss = "commit-lane-dot";
+		var lineCss = "commit-lane-line";
 
 		var rows = gitplex.repocommits.rows;
 		var commits = gitplex.repocommits.commits; 
-		var colorAssignments = gitplex.repocommits.colorAssignments;
+		var colors = gitplex.repocommits.colors;
 		var maxColumns = gitplex.repocommits.maxColumns;
 		
 		function fromKey(lineKey) {
@@ -259,19 +258,17 @@ gitplex.repocommits = {
 		var paper = Snap($lane[0]);
 		
 		var bodyTop = $("#repo-commits>.body").offset().top - rightOffset;
-		var commitGroup = paper.g();
-		for (var i=0; i<rows.length; i++) {
-			var row = rows[i];
-			var column = row[toKey([i, i])];
-			var top = $("#commitindex-"+i).offset().top - bodyTop;
-			var left = column*columnWidth + columnWidth/2;
-			commitGroup.add(paper.circle(left, top, commitSize));
-			
-			if (i < rows.length-1) {
-				
+		var drawedCommits = {};
+		for (var i=0; i<commits.length; i++) {
+			if (!drawedCommits[i]) {
+				var row = rows[i];
+				var column = row[toKey([i, i])];
+				var top = $("#commitindex-"+i).offset().top - bodyTop;
+				var left = column*columnWidth + columnWidth/2;
+				var parents = commits[i];
+				paper.circle(left, top, commitSize);
 			}
 		}
-		commitGroup.attr({fill: commitColor, stroke: commitColor});
 	}
 	
 }
