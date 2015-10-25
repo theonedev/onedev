@@ -49,7 +49,7 @@ gitplex.repocommits = {
 			var color = colors[lineKey];
 			if (color == undefined) {
 				if (colorStack.length == 0) {
-					for (var i=colorLimit; i>=1; i--)
+					for (var i=colorsLimit; i>=1; i--)
 						colorStack.push(i);
 				}
 				color = colorStack.pop();
@@ -193,24 +193,27 @@ gitplex.repocommits = {
 					for (var i=insertColumn+1; i<linesOfLastRow.length; i++) 
 						lastRow[linesOfLastRow[i]] = column++;
 				}
+				var recycledColors = [];
 				for (var lineKey in row) {
 					var line = fromKey(lineKey);
-					if (line.child == line.parent) {
-						var children = parent2children[line.parent];
+					if (line[0] == line[1]) {
+						var children = parent2children[line[1]];
 						if (children) {
 							for (var i=0; i<children.length; i++) {
 								var child = children[i];
-								var lineToMe = [child, line.parent];
-								colorStack.push(assignColor(toKey(lineToMe)));
+								var lineToMe = [child, line[1]];
+								recycledColors.push(assignColor(toKey(lineToMe)));
 							}
 						}
 					} else {
-						if (line.parent < 0) 
-							assignColor(toKey([line.child, line.parent*-1]));
+						if (line[1] < 0) 
+							assignColor(toKey([line[0], line[1]*-1]));
 						else
 							assignColor(toKey(line));
 					}
 				}
+				for (var i=recycledColors.length-1; i>=0; i--)
+					colorStack.push(recycledColors[i]);
 			}
 			rows.push(row);
 			var keysLen = Object.keys(row).length;
@@ -219,6 +222,7 @@ gitplex.repocommits = {
 		}
 		gitplex.repocommits.rows = rows;
 		gitplex.repocommits.commits = commits; 
+		gitplex.repocommits.parent2children = parent2children;
 		gitplex.repocommits.colors = colors;
 		gitplex.repocommits.maxColumns = maxColumns;
 		
@@ -226,15 +230,16 @@ gitplex.repocommits = {
 	},
 	drawCommitLane: function() {
 		var columnWidth = 20;
-		var topOffset = 12;
+		var topOffset = 22;
 		var rightOffset = 8;
-		var commitSize = 3;
+		var commitSize = 4;
 		
-		var commitCss = "commit-lane-dot";
-		var lineCss = "commit-lane-line";
+		var commitClass = "commit-lane-dot";
+		var lineClass = "commit-lane-line";
 
 		var rows = gitplex.repocommits.rows;
 		var commits = gitplex.repocommits.commits; 
+		var parent2children = gitplex.repocommits.parent2children;
 		var colors = gitplex.repocommits.colors;
 		var maxColumns = gitplex.repocommits.maxColumns;
 		
@@ -248,8 +253,18 @@ gitplex.repocommits = {
 			return line[0] + "," + line[1];
 		}
 		
+		var bodyTop = $("#repo-commits>.body").offset().top - topOffset;
+		
+		function getTop(row) {
+			return $("#commitindex-"+row).offset().top - bodyTop;
+		}
+		
+		function getLeft(column) {
+			return column*columnWidth + columnWidth/2;
+		}
+		
 		var $list = $("#repo-commits>.body>.list"); 
-		$list.css("margin-left", maxColumns*columnWidth+8);
+		$list.css("margin-left", maxColumns*columnWidth+rightOffset);
 		
 		var $lane = $("#repo-commits>.body>.lane"); 
 		$lane.empty();
@@ -257,16 +272,83 @@ gitplex.repocommits = {
 		$lane.width(maxColumns*columnWidth);
 		var paper = Snap($lane[0]);
 		
-		var bodyTop = $("#repo-commits>.body").offset().top - rightOffset;
-		var drawedCommits = {};
 		for (var i=0; i<commits.length; i++) {
-			if (!drawedCommits[i]) {
-				var row = rows[i];
-				var column = row[toKey([i, i])];
-				var top = $("#commitindex-"+i).offset().top - bodyTop;
-				var left = column*columnWidth + columnWidth/2;
-				var parents = commits[i];
-				paper.circle(left, top, commitSize);
+			var parents = commits[i];
+			var row = rows[i];
+			var column = row[toKey([i, i])];
+			var left = getLeft(column);
+			var top = getTop(i);
+			var circle = paper.circle(left, top, commitSize);
+			circle.addClass(commitClass);
+			if (parents.length != 0) {
+				circle.addClass(commitClass + colors[toKey([i, parents[0]])]);
+			} else {
+				var children = parent2children[i];
+				if (children && children.length != 0)
+					circle.addClass(commitClass + colors[toKey([children[0], i])]);
+			}
+			if (i != commits.length-1) {
+				var nextRow = rows[i+1];
+				var nextTop = getTop(i+1);
+				for (var lineKey in row) {
+					var line = fromKey(lineKey);
+					column = row[lineKey];
+
+					function drawLine(nextColumn, color, upArrow, downArrow) {
+						if (nextColumn != undefined) {
+							var arrowOffset = 10;
+							var arrowWidth = 4;
+							var arrowHeight = 8;
+							var left = getLeft(column);
+							var nextLeft = getLeft(nextColumn);
+							var line = paper.line(left, top, nextLeft, nextTop);
+							line.addClass(lineClass);
+							line.addClass(lineClass + color);
+							var arrow;
+							if (upArrow) {
+								arrow = paper.path("M" + left + " " + top + "l0 -" + arrowOffset 
+										+ "l-" + arrowWidth + " " + arrowHeight + "m" + arrowWidth*2 
+										+ " 0");
+							} else if (downArrow) {
+								arrow = paper.path("M" + nextLeft + " " + nextTop + "l0 " + arrowOffset 
+										+ "l-" + arrowWidth + " -" + arrowHeight + "m" + arrowWidth*2 
+										+ " 0l-" + arrowWidth + " " + arrowHeight);
+							}
+							if (arrow) {
+								arrow.addClass(lineClass);
+								arrow.addClass(lineClass + color);
+							}
+						}
+					}
+					
+					if (line[0] == line[1]) {
+						for (var j=0; j<parents.length; j++) {
+							var parent = parents[j];
+							if (parent == i+1) {
+								drawLine(nextRow[toKey([i+1, i+1])], colors[toKey([i, i+1])]);
+							} else {
+								var nextLineKey = toKey([i, parent]);
+								var nextColumn = nextRow[nextLineKey];
+								if (nextColumn != undefined) { 
+									drawLine(nextColumn, colors[nextLineKey], false, false);
+								} else {
+									var nextCuttedLineKey = toKey([i, -1*parent]);
+									drawLine(nextRow[nextCuttedLineKey], colors[nextLineKey], false, true);
+								}
+							}
+						}
+					} else {
+						if (line[1] < 0) {
+							var nextColumn = nextRow[toKey([i+1, i+1])];
+							drawLine(nextColumn, colors[toKey([line[0], i+1])], true, false);
+						} else if (line[1] == i+1){
+							var nextColumn = nextRow[toKey([i+1, i+1])];
+							drawLine(nextColumn, colors[lineKey], true, false);
+						} else {
+							drawLine(nextRow[lineKey], colors[lineKey], false, false);
+						}
+					}
+				}
 			}
 		}
 	}

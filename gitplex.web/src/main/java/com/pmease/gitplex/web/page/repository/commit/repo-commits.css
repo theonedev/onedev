@@ -54,3 +54,95 @@
 	margin-top: 8px;
 	margin-bottom: 0;
 }
+
+.commit-lane-dot {
+	fill: #000080;
+}
+.commit-lane-line {
+	stroke-width: 2px;
+	stroke: #000080;
+}
+
+.commit-lane-dot1 {
+	fill: #000080;
+}
+.commit-lane-line1 {
+	stroke: #000080;
+}
+
+.commit-lane-dot2 {
+	fill: #008000;
+}
+.commit-lane-line2 {
+	stroke: #008000;
+}
+
+.commit-lane-dot3 {
+	fill: #800000;
+}
+.commit-lane-line3 {
+	stroke: #800000;
+}
+
+.commit-lane-dot4 {
+	fill: #0000ff;
+}
+.commit-lane-line4 {
+	stroke: #0000ff;
+}
+
+.commit-lane-dot5 {
+	fill: #00ff00;
+}
+.commit-lane-line5 {
+	stroke: #00ff00;
+}
+
+.commit-lane-dot6 {
+	fill: #ff0000;
+}
+.commit-lane-line6 {
+	stroke: #ff0000;
+}
+
+.commit-lane-dot7 {
+	fill: #808000;
+}
+.commit-lane-line7 {
+	stroke: #808000;
+}
+
+.commit-lane-dot8 {
+	fill: #800080;
+}
+.commit-lane-line8 {
+	stroke: #800080;
+}
+
+.commit-lane-dot9 {
+	fill: #008080;
+}
+.commit-lane-line9 {
+	stroke: #008080;
+}
+
+.commit-lane-dot10 {
+	fill: #ffff00;
+}
+.commit-lane-line10 {
+	stroke: #ffff00;
+}
+
+.commit-lane-dot11 {
+	fill: #ff00ff;
+}
+.commit-lane-line11 {
+	stroke: #ff00ff;
+}
+
+.commit-lane-dot12 {
+	fill: #00ffff;
+}
+.commit-lane-line12 {
+	stroke: #00ffff;
+}
