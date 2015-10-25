@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.command.LogCommand;
-import com.pmease.commons.git.command.LogCommand.Order;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
@@ -75,13 +74,12 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected LastAndCurrentCommits load() {
 			LastAndCurrentCommits lastAndCurrentCommits = new LastAndCurrentCommits();
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
-			log.toRev("cfa9a9");
 			log.maxCount(state.step*COUNT);
-/*			if (revisionHash != null)
+			if (revisionHash != null)
 				log.toRev(revisionHash);
 			else
 				log.allBranchesAndTags(true);
-*/			if (state.path != null)
+			if (state.path != null)
 				log.path(state.path);
 			
 			List<Commit> commits = log.call();

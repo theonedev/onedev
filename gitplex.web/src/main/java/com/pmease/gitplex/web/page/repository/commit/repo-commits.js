@@ -4,7 +4,7 @@ gitplex.repocommits = {
 	 * list of parent indexes
 	 */
 	renderCommitLane: function(commits) {
-		var columnsLimit = 1;
+		var columnsLimit = 20;
 		
 		var colorsLimit = 12;
 
@@ -23,7 +23,7 @@ gitplex.repocommits = {
 		function getSortedLines(row, reverse) {
 			var lines = [];
 			var keys = Object.keys(row);
-			for (var i=0; i<keys.length; i++)
+			for (var i in keys)
 				lines.push(keys[i]);
 
 			lines.sort(function(x, y) {
@@ -58,10 +58,10 @@ gitplex.repocommits = {
 			return color;
 		}
 		
-		for (var i=0; i<commits.length; i++) {
+		for (var i in commits) {
 			commits[i] = commits[i][1];
 			var parents = commits[i];
-			for (var j=0; j<parents.length; j++) {
+			for (var j in parents) {
 				var parent = parents[j];
 				var children = parent2children[parent];
 				if (children == undefined) {
@@ -72,19 +72,18 @@ gitplex.repocommits = {
 			}
 		}
 		
-		var maxColumns = 1;
-		for (var rowIndex=0; rowIndex<commits.length; rowIndex++) {
+		for (var rowIndex in commits) {
 			var row = {};
 			if (rowIndex == 0) {
 				row["0,0"] = 0;
 			} else {
-				var commit = commits[rowIndex-1];
+				var parents = commits[rowIndex-1];
 				// special line represents the commit at rowIndex itself
 				var commitLineKey = toKey([rowIndex, rowIndex]);
 				var lastRow = rows[rowIndex-1];
 				var column = 0;
 				var linesOfLastRow = getSortedLines(lastRow, false);
-				for (var i=0; i<linesOfLastRow.length; i++) {
+				for (var i in linesOfLastRow) {
 					var lineOfLastRow = fromKey(linesOfLastRow[i]);
 					if (lineOfLastRow[1] < 0) // line is cutted due to max columns limitation
 						continue;
@@ -98,8 +97,8 @@ gitplex.repocommits = {
 							row[toKey(lineOfLastRow)] = column++;
 						}
 					} else {
-						for (var j=0; j<commit.length; j++) {
-							var parent = commit[j];
+						for (var j in parents) {
+							var parent = parents[j];
 							if (parent == rowIndex) {
 								if (row[commitLineKey] == undefined)
 									row[commitLineKey] = column++;
@@ -114,7 +113,7 @@ gitplex.repocommits = {
 					row[commitLineKey] = column++;
 				if (column > columnsLimit) {
 					var reversedLines = getSortedLines(row, true);
-					for (var i=0; i<reversedLines.length; i++) {
+					for (var i in reversedLines) {
 						var line = fromKey(reversedLines[i]);
 						if (line[0] == rowIndex-1) {
 							var cuttedLine = [line[0], line[1]*-1];
@@ -134,7 +133,7 @@ gitplex.repocommits = {
 				var cuttedLines = [];
 				var children = parent2children[rowIndex];
 				if (children) {
-					for (var i=0; i<children.length; i++) {
+					for (var i in children) {
 						var child = children[i];
 						if (child != rowIndex-1) {
 							var line = [child, rowIndex];
@@ -165,14 +164,22 @@ gitplex.repocommits = {
 						var lineOfLastRow = fromKey(lineOfLastRowKey);
 						if (lineOfLastRow[0] == lineOfLastRow[1]) {
 							var found = false;
-							for (var j=0; j<commit.lenght; j++) {
-								var parent = commit[j];
-								var line = [rowIndex-1, parent];
-								var lineKey = toKey(line);
+							for (var j in parents) {
+								var parent = parents[j];
+								var lineKey = toKey([rowIndex-1, parent]);
 								var lineColumn = row[lineKey];
-								if (lineColumn!=undefined && lineColumn<commitColumn) {
-									found = true;
-									break;
+								if (lineColumn != undefined) {
+									if (lineColumn<commitColumn) {
+										found = true;
+										break;
+									}
+								} else {
+									lineKey = toKey([rowIndex-1, parent*-1]);
+									lineColumn = row[lineKey];
+									if (lineColumn != undefined && lineColumn<commitColumn) {
+										found = true;
+										break;
+									}
 								}
 							}
 							if (found) {
@@ -188,50 +195,57 @@ gitplex.repocommits = {
 						}
 					}
 					column = insertColumn+1;
-					for (var i=0; i<cuttedLines.length; i++) 
+					for (var i in cuttedLines) 
 						lastRow[toKey(cuttedLines[i])] = column++;
 					for (var i=insertColumn+1; i<linesOfLastRow.length; i++) 
 						lastRow[linesOfLastRow[i]] = column++;
 				}
-				var recycledColors = [];
-				for (var lineKey in row) {
-					var line = fromKey(lineKey);
-					if (line[0] == line[1]) {
-						var children = parent2children[line[1]];
-						if (children) {
-							for (var i=0; i<children.length; i++) {
-								var child = children[i];
-								var lineToMe = [child, line[1]];
-								recycledColors.push(assignColor(toKey(lineToMe)));
-							}
-						}
-					} else {
-						if (line[1] < 0) 
-							assignColor(toKey([line[0], line[1]*-1]));
-						else
-							assignColor(toKey(line));
-					}
-				}
-				for (var i=recycledColors.length-1; i>=0; i--)
-					colorStack.push(recycledColors[i]);
 			}
 			rows.push(row);
-			var keysLen = Object.keys(row).length;
-			if (keysLen > maxColumns) 
-				maxColumns = keysLen; 
+		}
+		for (var i=1; i<rows.length; i++) {
+			var row = rows[i];
+			var lastRow = rows[i-1];
+			var lines = getSortedLines(row, false);
+			var lastLines = getSortedLines(lastRow, true);
+			
+			var recycledColors = [];
+			
+			for (var j in lines) {
+				var line = fromKey(lines[j]);
+				if (line[0] == line[1]) {
+					for (var k in lastLines) {
+						var lastLine = fromKey(lastLines[k]);
+						if (lastLine[0] == lastLine[1]) {
+							if (commits[i-1].indexOf(i) != -1) 
+								recycledColors.push(assignColor(toKey([i-1, i])));
+						} else if (lastLine[1] == i) {
+							recycledColors.push(assignColor(toKey(lastLine)));
+						} else if (lastLine[1]*-1 == i) {
+							recycledColors.push(assignColor(toKey([lastLine[0], i])));
+						}
+					}
+				} else {
+					if (line[1] < 0) 
+						assignColor(toKey([line[0], line[1]*-1]));
+					else
+						assignColor(toKey(line));
+				}
+			}
+			for (var j in recycledColors)
+				colorStack.push(recycledColors[j]);
 		}
 		gitplex.repocommits.rows = rows;
 		gitplex.repocommits.commits = commits; 
 		gitplex.repocommits.parent2children = parent2children;
 		gitplex.repocommits.colors = colors;
-		gitplex.repocommits.maxColumns = maxColumns;
 		
 		gitplex.repocommits.drawCommitLane();
 	},
 	drawCommitLane: function() {
-		var columnWidth = 20;
+		var columnWidth = 12;
 		var topOffset = 22;
-		var rightOffset = 8;
+		var rightOffset = 16;
 		var commitSize = 4;
 		
 		var commitClass = "commit-lane-dot";
@@ -241,7 +255,13 @@ gitplex.repocommits = {
 		var commits = gitplex.repocommits.commits; 
 		var parent2children = gitplex.repocommits.parent2children;
 		var colors = gitplex.repocommits.colors;
-		var maxColumns = gitplex.repocommits.maxColumns;
+
+		var maxColumns = 0;
+		for (var i in rows) {
+			var columns = Object.keys(rows[i]).length;
+			if (columns > maxColumns) 
+				maxColumns = columns; 
+		}
 		
 		function fromKey(lineKey) {
 			return lineKey.split(',').map(function(item) {
@@ -264,7 +284,6 @@ gitplex.repocommits = {
 		}
 		
 		var $list = $("#repo-commits>.body>.list"); 
-		$list.css("margin-left", maxColumns*columnWidth+rightOffset);
 		
 		var $lane = $("#repo-commits>.body>.lane"); 
 		$lane.empty();
@@ -275,6 +294,9 @@ gitplex.repocommits = {
 		for (var i=0; i<commits.length; i++) {
 			var parents = commits[i];
 			var row = rows[i];
+			var columns = Object.keys(rows[i]).length;
+			$("#commitindex-"+i).css("margin-left", columns*columnWidth+rightOffset);
+			
 			var column = row[toKey([i, i])];
 			var left = getLeft(column);
 			var top = getTop(i);
@@ -322,7 +344,7 @@ gitplex.repocommits = {
 					}
 					
 					if (line[0] == line[1]) {
-						for (var j=0; j<parents.length; j++) {
+						for (var j in parents) {
 							var parent = parents[j];
 							if (parent == i+1) {
 								drawLine(nextRow[toKey([i+1, i+1])], colors[toKey([i, i+1])]);
@@ -339,8 +361,10 @@ gitplex.repocommits = {
 						}
 					} else {
 						if (line[1] < 0) {
-							var nextColumn = nextRow[toKey([i+1, i+1])];
-							drawLine(nextColumn, colors[toKey([line[0], i+1])], true, false);
+							if (line[1]*-1 == i+1) {
+								var nextColumn = nextRow[toKey([i+1, i+1])];
+								drawLine(nextColumn, colors[toKey([line[0], i+1])], true, false);
+							}
 						} else if (line[1] == i+1){
 							var nextColumn = nextRow[toKey([i+1, i+1])];
 							drawLine(nextColumn, colors[lineKey], false, false);
