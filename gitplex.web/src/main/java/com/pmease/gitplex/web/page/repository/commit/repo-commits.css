@@ -59,8 +59,9 @@
 	fill: #000080;
 }
 .commit-lane-line {
-	stroke-width: 2px;
+	stroke-width: 1px;
 	stroke: #000080;
+	fill: none;
 }
 
 .commit-lane-dot1 {

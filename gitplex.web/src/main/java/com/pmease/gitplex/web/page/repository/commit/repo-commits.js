@@ -4,7 +4,7 @@ gitplex.repocommits = {
 	 * list of parent indexes
 	 */
 	renderCommitLane: function(commits) {
-		var columnsLimit = 20;
+		var columnsLimit = 1;
 		
 		var colorsLimit = 12;
 
@@ -142,7 +142,7 @@ gitplex.repocommits = {
 							var lineKey = toKey(line);
 							var cuttedLineKey = toKey(cuttedLine);
 							if (lastRow[lineKey] == undefined) {
-								if (lastRow[cuttedLineKey]) {
+								if (lastRow[cuttedLineKey] != undefined) {
 									var cuttedLineColumn = lastRow[cuttedLineKey];
 									delete lastRow[cuttedLineKey];
 									lastRow[lineKey] = cuttedLineColumn;
@@ -170,7 +170,7 @@ gitplex.repocommits = {
 								var line = [rowIndex-1, parent];
 								var lineKey = toKey(line);
 								var lineColumn = row[lineKey];
-								if (lineColumn && lineColumn<commitColumn) {
+								if (lineColumn!=undefined && lineColumn<commitColumn) {
 									found = true;
 									break;
 								}
@@ -181,7 +181,7 @@ gitplex.repocommits = {
 							}
 						} else {
 							var lineColumn = row[lineOfLastRowKey];
-							if (lineColumn && lineColumn<commitColumn) {
+							if (lineColumn!=undefined && lineColumn<commitColumn) {
 								insertColumn = i;
 								break;
 							}
@@ -308,7 +308,7 @@ gitplex.repocommits = {
 							if (upArrow) {
 								arrow = paper.path("M" + left + " " + top + "l0 -" + arrowOffset 
 										+ "l-" + arrowWidth + " " + arrowHeight + "m" + arrowWidth*2 
-										+ " 0");
+										+ " 0l-" + arrowWidth + " -" + arrowHeight);
 							} else if (downArrow) {
 								arrow = paper.path("M" + nextLeft + " " + nextTop + "l0 " + arrowOffset 
 										+ "l-" + arrowWidth + " -" + arrowHeight + "m" + arrowWidth*2 
@@ -343,7 +343,7 @@ gitplex.repocommits = {
 							drawLine(nextColumn, colors[toKey([line[0], i+1])], true, false);
 						} else if (line[1] == i+1){
 							var nextColumn = nextRow[toKey([i+1, i+1])];
-							drawLine(nextColumn, colors[lineKey], true, false);
+							drawLine(nextColumn, colors[lineKey], false, false);
 						} else {
 							drawLine(nextRow[lineKey], colors[lineKey], false, false);
 						}

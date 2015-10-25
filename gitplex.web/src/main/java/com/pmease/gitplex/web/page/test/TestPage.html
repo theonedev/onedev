@@ -3,7 +3,8 @@
 	<script type="text/javascript">
 		$(function() {
 			var snap = Snap("#snap");
-			snap.circle(20, 20, 10);
+			var path = snap.path("M100 100l0 -10l-4 8");
+			path.attr({stroke: "red", fill: "none"});
 		});
 	</script>
 </wicket:extend>
