@@ -1,4 +1,12 @@
-gitplex.repocommits = {		
+gitplex.repocommits = {
+	init: function(commits) {
+		$(window).resize(function(e) {
+			e.stopPropagation();
+			gitplex.repocommits.drawCommitLane();
+		});		
+		gitplex.repocommits.renderCommitLane(commits);
+	},
+
 	/*
 	 * commits is an array of ordered commit object, and the commit object is itself a 
 	 * list of parent indexes

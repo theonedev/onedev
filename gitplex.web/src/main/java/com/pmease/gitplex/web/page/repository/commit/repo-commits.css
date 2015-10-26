@@ -56,94 +56,94 @@
 }
 
 .commit-lane-dot {
-	fill: #000080;
+	fill: #53a8fd;
 }
 .commit-lane-line {
 	stroke-width: 2px;
-	stroke: #000080;
+	stroke: #53a8fd;
 	fill: none;
 }
 
 .commit-lane-dot1 {
-	fill: #000080;
+	fill: #53a8fd;
 }
 .commit-lane-line1 {
-	stroke: #000080;
+	stroke: #53a8fd;
 }
 
 .commit-lane-dot2 {
-	fill: #008000;
+	fill: #09c112;
 }
 .commit-lane-line2 {
-	stroke: #008000;
+	stroke: #09c112;
 }
 
 .commit-lane-dot3 {
-	fill: #800000;
+	fill: #ff4242;
 }
 .commit-lane-line3 {
-	stroke: #800000;
+	stroke: #ff4242;
 }
 
 .commit-lane-dot4 {
-	fill: #0000ff;
+	fill: #0252a2;
 }
 .commit-lane-line4 {
-	stroke: #0000ff;
+	stroke: #0252a2;
 }
 
 .commit-lane-dot5 {
-	fill: #00ff00;
+	fill: #056d0b;
 }
 .commit-lane-line5 {
-	stroke: #00ff00;
+	stroke: #056d0b;
 }
 
 .commit-lane-dot6 {
-	fill: #ff0000;
+	fill: #b00000;
 }
 .commit-lane-line6 {
-	stroke: #ff0000;
+	stroke: #b00000;
 }
 
 .commit-lane-dot7 {
-	fill: #808000;
+	fill: #af29f8;
 }
 .commit-lane-line7 {
-	stroke: #808000;
+	stroke: #af29f8;
 }
 
 .commit-lane-dot8 {
-	fill: #800080;
+	fill: #ee6c1e;
 }
 .commit-lane-line8 {
-	stroke: #800080;
+	stroke: #ee6c1e;
 }
 
 .commit-lane-dot9 {
-	fill: #008080;
+	fill: #ef56cd;
 }
 .commit-lane-line9 {
-	stroke: #008080;
+	stroke: #ef56cd;
 }
 
 .commit-lane-dot10 {
-	fill: #ffff00;
+	fill: #630596;
 }
 .commit-lane-line10 {
-	stroke: #ffff00;
+	stroke: #630596;
 }
 
 .commit-lane-dot11 {
-	fill: #ff00ff;
+	fill: #8e4509;
 }
 .commit-lane-line11 {
-	stroke: #ff00ff;
+	stroke: #8e4509;
 }
 
 .commit-lane-dot12 {
-	fill: #00ffff;
+	fill: #9b0f7b;
 }
 .commit-lane-line12 {
-	stroke: #00ffff;
+	stroke: #9b0f7b;
 }

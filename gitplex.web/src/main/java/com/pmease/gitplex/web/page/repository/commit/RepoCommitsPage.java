@@ -19,6 +19,7 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -27,6 +28,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,6 +61,8 @@ public class RepoCommitsPage extends RepositoryPage {
 	private static final String PARAM_PATH = "path";
 	
 	private static final String PARAM_STEP = "step";
+	
+	private static DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
 	
 	private HistoryState state = new HistoryState();
 	
@@ -101,6 +107,9 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 			sort(lastAndCurrentCommits.current, lastMaxCount);
 
+			lastAndCurrentCommits.last = separateByDate(lastAndCurrentCommits.last);
+			lastAndCurrentCommits.current = separateByDate(lastAndCurrentCommits.current);
+			
 			return lastAndCurrentCommits;
 		}
 		
@@ -168,6 +177,14 @@ public class RepoCommitsPage extends RepositoryPage {
 		});
 	}
 
+	private Component replaceItem(AjaxRequestTarget target, int index) {
+		Component item = commitsView.get(index);
+		Component newItem = newCommitItem(item.getId(), index);
+		item.replaceWith(newItem);
+		target.add(newItem);
+		return newItem;
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -184,15 +201,30 @@ public class RepoCommitsPage extends RepositoryPage {
 				state.step++;
 				
 				LastAndCurrentCommits commits = lastAndCurrentCommitsModel.getObject();
+				int commitIndex = 0;
 				for (int i=0; i<commits.last.size(); i++) {
 					Commit lastCommit = commits.last.get(i);
 					Commit currentCommit = commits.current.get(i);
+					if (lastCommit == null) {
+						if (currentCommit == null) {
+							if (!commits.last.get(i+1).getHash().equals(commits.current.get(i+1).getHash())) 
+								replaceItem(target, i);
+						} else {
+							
+						}
+					} else {
+						if (currentCommit == null) {
+						} else {
+						}						
+					}
 					if (!lastCommit.getHash().equals(currentCommit.getHash())) {
 						Component item = commitsView.get(i);
 						Component newItem = newCommitItem(item.getId(), i);
 						item.replaceWith(newItem);
 						target.add(newItem);
 					}
+					if (currentCommit != null)
+						commitIndex++;
 				}
 
 				StringBuilder builder = new StringBuilder();
@@ -205,7 +237,8 @@ public class RepoCommitsPage extends RepositoryPage {
 				}
 				target.prependJavaScript(builder);
 				target.add(foot);
-				target.appendJavaScript(getCommitLaneScript());
+				String script = String.format("gitplex.repocommits.renderCommitLane(%s);", getCommitsJson());
+				target.appendJavaScript(script);
 				
 				pushState(target);
 			}
@@ -238,37 +271,50 @@ public class RepoCommitsPage extends RepositoryPage {
 	private RepeatingView newCommitsView() {
 		RepeatingView commitsView = new RepeatingView("commits");
 		
-		for (int i=0; i<lastAndCurrentCommitsModel.getObject().current.size(); i++) 
-			commitsView.add(newCommitItem(commitsView.newChildId(), i));
+		int commitIndex = 0;
+		List<Commit> commits = lastAndCurrentCommitsModel.getObject().current;
+		for (int i=0; i<commits.size(); i++) {
+			Component item = newCommitItem(commitsView.newChildId(), i);
+			if (commits.get(i) != null)
+				item.setMarkupId("commitindex-" + commitIndex++);
+			commitsView.add(item);
+		}
 		
 		return commitsView;
 	}
 	
 	private Component newCommitItem(String itemId, final int index) {
-		WebMarkupContainer item = new WebMarkupContainer(itemId);
-		Commit commit = lastAndCurrentCommitsModel.getObject().current.get(index);
-		item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
+		List<Commit> current = lastAndCurrentCommitsModel.getObject().current;
+		Commit commit = current.get(index);
+		
+		Fragment item;
+		if (commit != null) {
+			item = new Fragment(itemId, "commitFrag", this);
+			item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
 
-		item.add(new CommitMessagePanel("message", repoModel, new LoadableDetachableModel<Commit>() {
+			item.add(new CommitMessagePanel("message", repoModel, new LoadableDetachableModel<Commit>() {
 
-			@Override
-			protected Commit load() {
-				return lastAndCurrentCommitsModel.getObject().current.get(index);
-			}
+				@Override
+				protected Commit load() {
+					return lastAndCurrentCommitsModel.getObject().current.get(index);
+				}
+				
+			}));
+
+			item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
+			item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 			
-		}));
-
-		item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
-		item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
-		
-		item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
-		
-		RepoFileState state = new RepoFileState();
-		state.blobIdent.revision = commit.getHash();
-		item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-				RepoFilePage.paramsOf(repoModel.getObject(), state)));
-		
-		item.setMarkupId("commitindex-" + index);
+			item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+			
+			RepoFileState state = new RepoFileState();
+			state.blobIdent.revision = commit.getHash();
+			item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
+					RepoFilePage.paramsOf(repoModel.getObject(), state)));
+		} else {
+			item = new Fragment(itemId, "dateFrag", this);
+			DateTime dateTime = new DateTime(current.get(index+1).getCommitter().getWhen());
+			item.add(new Label("date", dateFormatter.print(dateTime)));
+		}
 		item.setOutputMarkupId(true);
 		
 		return item;
@@ -309,27 +355,47 @@ public class RepoCommitsPage extends RepositoryPage {
 		super.onDetach();
 	}
 
-	private String getCommitLaneScript() {
+	private String getCommitsJson() {
 		List<Commit> commits = lastAndCurrentCommitsModel.getObject().current;
 		Map<String, Integer> hash2index = new HashMap<>();
-		for (int i=0; i<commits.size(); i++) 
-			hash2index.put(commits.get(i).getHash(), i);
+		int commitIndex = 0;
+		for (int i=0; i<commits.size(); i++) { 
+			Commit commit = commits.get(i);
+			if (commit != null)
+				hash2index.put(commit.getHash(), commitIndex++);
+		}
 		List<List<Integer>> commitIndexes = new ArrayList<>();
 		for (Commit commit: commits) {
-			List<Integer> parentIndexes = new ArrayList<>();
-			for (String parentHash: commit.getParentHashes()) {
-				Integer parentIndex = hash2index.get(parentHash);
-				if (parentIndex != null)
-					parentIndexes.add(parentIndex);
+			if (commit != null) {
+				List<Integer> parentIndexes = new ArrayList<>();
+				for (String parentHash: commit.getParentHashes()) {
+					Integer parentIndex = hash2index.get(parentHash);
+					if (parentIndex != null)
+						parentIndexes.add(parentIndex);
+				}
+				commitIndexes.add(parentIndexes);
 			}
-			commitIndexes.add(parentIndexes);
 		}
 		try {
-			String json = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commitIndexes);
-			return String.format("gitplex.repocommits.renderCommitLane(%s);", json);
+			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commitIndexes);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	private List<Commit> separateByDate(List<Commit> commits) {
+		List<Commit> separated = new ArrayList<>();
+		DateTime groupTime = null;
+		for (Commit commit: commits) {
+			DateTime commitTime = new DateTime(commit.getCommitter().getWhen());
+			if (groupTime == null || commitTime.getYear() != groupTime.getYear() 
+					|| commitTime.getDayOfYear() != groupTime.getDayOfYear()) {
+				groupTime = commitTime;
+				separated.add(null);
+			} 
+			separated.add(commit);
+		}
+		return separated;
 	}
 	
 	@Override
@@ -342,7 +408,8 @@ public class RepoCommitsPage extends RepositoryPage {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RepoCommitsPage.class, "repo-commits.css")));
 		
-		response.render(OnDomReadyHeaderItem.forScript(getCommitLaneScript()));
+		String script = String.format("gitplex.repocommits.init(%s);", getCommitsJson());
+		//response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 	/*

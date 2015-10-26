@@ -4,21 +4,7 @@
 		<div class="body">
 			<svg class="lane"></svg>
 			<ul class="list list-unstyled">
-				<li wicket:id="commits" class="commit clearfix">
-					<div class="avatar pull-left">
-						<span wicket:id="avatar"></span>
-					</div>
-					<div class="detail pull-left">
-						<div wicket:id="message"></div> 
-						<div class="author">
-							<span wicket:id="name"></span> authored <span wicket:id="age"></span>
-						</div>
-					</div>
-					<div class="info pull-right">
-						<span wicket:id="hash"></span>
-						<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
-					</div>
-				</li>
+				<li wicket:id="commits" class="commit clearfix"></li>
 			</ul>
 		</div>
 		<div wicket:id="foot" class="foot">
@@ -26,4 +12,22 @@
 			<div wicket:id="tooMany" class="alert alert-warning">Too many commits to load</div>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="commitFrag">
+		<div class="avatar pull-left">
+			<span wicket:id="avatar"></span>
+		</div>
+		<div class="detail pull-left">
+			<div wicket:id="message"></div> 
+			<div class="author">
+				<span wicket:id="name"></span> authored <span wicket:id="age"></span>
+			</div>
+		</div>
+		<div class="info pull-right">
+			<span wicket:id="hash"></span>
+			<a wicket:id="codeLink" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="dateFrag">
+		<div wicket:id="date"></div>
+	</wicket:fragment>
 </wicket:extend>
