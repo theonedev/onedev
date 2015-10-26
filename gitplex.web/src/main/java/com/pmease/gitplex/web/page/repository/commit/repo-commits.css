@@ -32,7 +32,7 @@
 #repo-commits>.body .commit-hash {
 	font-family: monospace;
 }
-#repo-commits>.body li:hover {
+#repo-commits>.body li.commit:hover {
 	background: #F7ECB9;
 }
 #repo-commits>.body .commit-message>.full {
@@ -50,9 +50,14 @@
 #repo-commits>.foot {
 	text-align: center;
 }
-#repo-commits>.foot>.alert, #repo-commits>.footer>.btn {
+#repo-commits>.foot>.alert, #repo-commits>.foot>.btn {
 	margin-top: 8px;
 	margin-bottom: 0;
+}
+#repo-commits li.date {
+	font-size: 18px;
+	margin-top: 12px;
+	text-align: left;
 }
 
 .commit-lane-dot {

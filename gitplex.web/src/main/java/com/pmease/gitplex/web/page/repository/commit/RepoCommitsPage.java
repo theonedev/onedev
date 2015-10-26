@@ -12,6 +12,7 @@ import java.util.Stack;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -202,6 +203,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				
 				LastAndCurrentCommits commits = lastAndCurrentCommitsModel.getObject();
 				int commitIndex = 0;
+				int lastCommitIndex = 0;
 				for (int i=0; i<commits.last.size(); i++) {
 					Commit lastCommit = commits.last.get(i);
 					Commit currentCommit = commits.current.get(i);
@@ -210,19 +212,18 @@ public class RepoCommitsPage extends RepositoryPage {
 							if (!commits.last.get(i+1).getHash().equals(commits.current.get(i+1).getHash())) 
 								replaceItem(target, i);
 						} else {
-							
+							addCommitClass(replaceItem(target, i), commitIndex);
 						}
 					} else {
 						if (currentCommit == null) {
-						} else {
+							replaceItem(target, i);
+						} else if (commitIndex != lastCommitIndex 
+								|| !lastCommit.getHash().equals(currentCommit.getHash())){
+							addCommitClass(replaceItem(target, i), commitIndex);
 						}						
 					}
-					if (!lastCommit.getHash().equals(currentCommit.getHash())) {
-						Component item = commitsView.get(i);
-						Component newItem = newCommitItem(item.getId(), i);
-						item.replaceWith(newItem);
-						target.add(newItem);
-					}
+					if (lastCommit != null)
+						lastCommitIndex++;
 					if (currentCommit != null)
 						commitIndex++;
 				}
@@ -230,6 +231,8 @@ public class RepoCommitsPage extends RepositoryPage {
 				StringBuilder builder = new StringBuilder();
 				for (int i=commits.last.size(); i<commits.current.size(); i++) {
 					Component item = newCommitItem(commitsView.newChildId(), i);
+					if (commits.current.get(i) != null)
+						addCommitClass(item, commitIndex++);
 					commitsView.add(item);
 					target.add(item);
 					builder.append(String.format("$('#repo-commits>.body>.list').append(\"<li id='%s'></li>\");", 
@@ -239,7 +242,6 @@ public class RepoCommitsPage extends RepositoryPage {
 				target.add(foot);
 				String script = String.format("gitplex.repocommits.renderCommitLane(%s);", getCommitsJson());
 				target.appendJavaScript(script);
-				
 				pushState(target);
 			}
 
@@ -276,11 +278,15 @@ public class RepoCommitsPage extends RepositoryPage {
 		for (int i=0; i<commits.size(); i++) {
 			Component item = newCommitItem(commitsView.newChildId(), i);
 			if (commits.get(i) != null)
-				item.setMarkupId("commitindex-" + commitIndex++);
+				addCommitClass(item, commitIndex++);
 			commitsView.add(item);
 		}
 		
 		return commitsView;
+	}
+	
+	private void addCommitClass(Component item, int commitIndex) {
+		item.add(AttributeAppender.append("class", " commitindex-" + commitIndex));
 	}
 	
 	private Component newCommitItem(String itemId, final int index) {
@@ -310,10 +316,12 @@ public class RepoCommitsPage extends RepositoryPage {
 			state.blobIdent.revision = commit.getHash();
 			item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
 					RepoFilePage.paramsOf(repoModel.getObject(), state)));
+			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
 			DateTime dateTime = new DateTime(current.get(index+1).getCommitter().getWhen());
 			item.add(new Label("date", dateFormatter.print(dateTime)));
+			item.add(AttributeAppender.append("class", "date"));
 		}
 		item.setOutputMarkupId(true);
 		
@@ -409,7 +417,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				new CssResourceReference(RepoCommitsPage.class, "repo-commits.css")));
 		
 		String script = String.format("gitplex.repocommits.init(%s);", getCommitsJson());
-		//response.render(OnDomReadyHeaderItem.forScript(script));
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 	/*

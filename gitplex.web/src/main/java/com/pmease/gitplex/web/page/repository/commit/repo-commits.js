@@ -12,7 +12,7 @@ gitplex.repocommits = {
 	 * list of parent indexes
 	 */
 	renderCommitLane: function(commits) {
-		var columnsLimit = 20;
+		var columnsLimit = 12;
 		
 		var colorsLimit = 12;
 
@@ -253,7 +253,7 @@ gitplex.repocommits = {
 	drawCommitLane: function() {
 		var columnWidth = 12;
 		var topOffset = 22;
-		var rightOffset = 16;
+		var rightOffset = 4;
 		var commitSize = 4;
 		
 		var commitClass = "commit-lane-dot";
@@ -284,7 +284,7 @@ gitplex.repocommits = {
 		var bodyTop = $("#repo-commits>.body").offset().top - topOffset;
 		
 		function getTop(row) {
-			return $("#commitindex-"+row).offset().top - bodyTop;
+			return $(".commitindex-"+row).offset().top - bodyTop;
 		}
 		
 		function getLeft(column) {
@@ -292,6 +292,7 @@ gitplex.repocommits = {
 		}
 		
 		var $list = $("#repo-commits>.body>.list"); 
+		$list.css("margin-left", maxColumns*columnWidth+rightOffset);
 		
 		var $lane = $("#repo-commits>.body>.lane"); 
 		$lane.empty();
@@ -302,8 +303,6 @@ gitplex.repocommits = {
 		for (var i=0; i<commits.length; i++) {
 			var parents = commits[i];
 			var row = rows[i];
-			var columns = Object.keys(rows[i]).length;
-			$("#commitindex-"+i).css("margin-left", columns*columnWidth+rightOffset);
 			
 			var column = row[toKey([i, i])];
 			var left = getLeft(column);
