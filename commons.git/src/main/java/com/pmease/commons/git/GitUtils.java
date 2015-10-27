@@ -161,7 +161,6 @@ public class GitUtils {
 		return joinPath(splitPath(path));
 	}
 
-	
 	/**
      * Convert a git reference name to branch name.
      * 
@@ -182,6 +181,26 @@ public class GitUtils {
     	return Git.REFS_HEADS + branch; 
     }    
 
+	/**
+     * Convert a git reference name to tag name.
+     * 
+     * @param refName
+     *			name of the git reference 	
+     * @return
+     * 			name of the tag, or <tt>null</tt> if specified ref
+     * 			does not represent a tag
+     */ 
+    public static @Nullable String ref2tag(String refName) {
+		if (refName.startsWith(Git.REFS_TAGS)) 
+			return refName.substring(Git.REFS_TAGS.length());
+		else
+			return null;
+    }
+    
+    public static String tag2ref(String tag) {
+    	return Git.REFS_HEADS + tag; 
+    }    
+    
     public static BlobIdent getOldBlobIdent(DiffEntry diffEntry, String oldRev) {
     	BlobIdent blobIdent;
 		if (diffEntry.getChangeType() != ChangeType.ADD) {

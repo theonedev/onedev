@@ -12,6 +12,12 @@
 	width: 37px; 
 	height: 37px;
 }
+#repo-commits>.body .labels {
+	margin-left: 8px;
+}
+#repo-commits>.body .label {
+	margin-left: 4px;
+}
 #repo-commits>.body .info {
 	text-align: right;
 	white-space: nowrap;

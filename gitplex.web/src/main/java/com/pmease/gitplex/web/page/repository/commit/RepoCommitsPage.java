@@ -29,6 +29,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.lib.Ref;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -36,6 +37,7 @@ import org.joda.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
@@ -75,11 +77,11 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	private WebMarkupContainer foot;
 	
-	private IModel<LastAndCurrentCommits> lastAndCurrentCommitsModel = new LoadableDetachableModel<LastAndCurrentCommits>() {
+	private IModel<Commits> commitsModel = new LoadableDetachableModel<Commits>() {
 
 		@Override
-		protected LastAndCurrentCommits load() {
-			LastAndCurrentCommits lastAndCurrentCommits = new LastAndCurrentCommits();
+		protected Commits load() {
+			Commits commits = new Commits();
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
 			log.maxCount(state.step*COUNT);
 			if (revisionHash != null)
@@ -89,29 +91,51 @@ public class RepoCommitsPage extends RepositoryPage {
 			if (state.path != null)
 				log.path(state.path);
 			
-			List<Commit> commits = log.call();
+			List<Commit> logCommits = log.call();
 			
-			hasMore = commits.size() == state.step*COUNT;
+			hasMore = logCommits.size() == state.step*COUNT;
 			
 			int lastMaxCount = (state.step-1)*COUNT;
 
-			lastAndCurrentCommits.last = new ArrayList<>();
+			commits.last = new ArrayList<>();
 			
 			for (int i=0; i<lastMaxCount; i++) 
-				lastAndCurrentCommits.last.add(commits.get(i));
+				commits.last.add(logCommits.get(i));
 			
-			sort(lastAndCurrentCommits.last, 0);
+			sort(commits.last, 0);
 			
-			lastAndCurrentCommits.current = new ArrayList<>(lastAndCurrentCommits.last);
-			for (int i=lastMaxCount; i<commits.size(); i++)
-				lastAndCurrentCommits.current.add(commits.get(i));
+			commits.current = new ArrayList<>(commits.last);
+			for (int i=lastMaxCount; i<logCommits.size(); i++)
+				commits.current.add(logCommits.get(i));
 			
-			sort(lastAndCurrentCommits.current, lastMaxCount);
+			sort(commits.current, lastMaxCount);
 
-			lastAndCurrentCommits.last = separateByDate(lastAndCurrentCommits.last);
-			lastAndCurrentCommits.current = separateByDate(lastAndCurrentCommits.current);
+			commits.last = separateByDate(commits.last);
+			commits.current = separateByDate(commits.current);
 			
-			return lastAndCurrentCommits;
+			return commits;
+		}
+		
+	};
+	
+	private IModel<Map<String, List<String>>> labelsModel = new LoadableDetachableModel<Map<String, List<String>>>() {
+
+		@Override
+		protected Map<String, List<String>> load() {
+			Map<String, List<String>> labels = new HashMap<>();
+			Map<String, Ref> refs = new HashMap<>();
+			refs.putAll(getRepository().getRefs(Git.REFS_HEADS));
+			refs.putAll(getRepository().getRefs(Git.REFS_TAGS));
+			for (Map.Entry<String, Ref> entry: refs.entrySet()) {
+				String commitHash = entry.getValue().getObjectId().name();
+				List<String> commitLabels = labels.get(commitHash);
+				if (commitLabels == null) {
+					commitLabels = new ArrayList<>();
+					labels.put(commitHash, commitLabels);
+				}
+				commitLabels.add(entry.getKey());
+			}
+			return labels;
 		}
 		
 	};
@@ -201,7 +225,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			public void onClick(AjaxRequestTarget target) {
 				state.step++;
 				
-				LastAndCurrentCommits commits = lastAndCurrentCommitsModel.getObject();
+				Commits commits = commitsModel.getObject();
 				int commitIndex = 0;
 				int lastCommitIndex = 0;
 				for (int i=0; i<commits.last.size(); i++) {
@@ -274,7 +298,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		RepeatingView commitsView = new RepeatingView("commits");
 		
 		int commitIndex = 0;
-		List<Commit> commits = lastAndCurrentCommitsModel.getObject().current;
+		List<Commit> commits = commitsModel.getObject().current;
 		for (int i=0; i<commits.size(); i++) {
 			Component item = newCommitItem(commitsView.newChildId(), i);
 			if (commits.get(i) != null)
@@ -290,7 +314,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	}
 	
 	private Component newCommitItem(String itemId, final int index) {
-		List<Commit> current = lastAndCurrentCommitsModel.getObject().current;
+		List<Commit> current = commitsModel.getObject().current;
 		Commit commit = current.get(index);
 		
 		Fragment item;
@@ -302,11 +326,20 @@ public class RepoCommitsPage extends RepositoryPage {
 
 				@Override
 				protected Commit load() {
-					return lastAndCurrentCommitsModel.getObject().current.get(index);
+					return commitsModel.getObject().current.get(index);
 				}
 				
 			}));
 
+			RepeatingView labelsView = new RepeatingView("labels");
+
+			List<String> commitLabels = labelsModel.getObject().get(commit.getHash());
+			if (commitLabels == null)
+				commitLabels = new ArrayList<>();
+			for (String label: commitLabels) 
+				labelsView.add(new Label(labelsView.newChildId(), label));
+			item.add(labelsView);
+			
 			item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
 			item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 			
@@ -316,6 +349,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			state.blobIdent.revision = commit.getHash();
 			item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
 					RepoFilePage.paramsOf(repoModel.getObject(), state)));
+
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
@@ -358,13 +392,14 @@ public class RepoCommitsPage extends RepositoryPage {
 
 	@Override
 	protected void onDetach() {
-		lastAndCurrentCommitsModel.detach();
+		commitsModel.detach();
+		labelsModel.detach();
 		
 		super.onDetach();
 	}
 
 	private String getCommitsJson() {
-		List<Commit> commits = lastAndCurrentCommitsModel.getObject().current;
+		List<Commit> commits = commitsModel.getObject().current;
 		Map<String, Integer> hash2index = new HashMap<>();
 		int commitIndex = 0;
 		for (int i=0; i<commits.size(); i++) { 
@@ -434,7 +469,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	 * @author robin
 	 *
 	 */
-	private static class LastAndCurrentCommits {
+	private static class Commits {
 		List<Commit> last;
 		
 		List<Commit> current;
