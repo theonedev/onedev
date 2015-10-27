@@ -17,14 +17,12 @@
 			<span wicket:id="avatar"></span>
 		</div>
 		<div class="detail pull-left">
-			<div wicket:id="message" class="message"></div>
-			<div class="author-and-labels clearfix">
-				<div class="author pull-left">
-					<span wicket:id="name"></span> authored <span wicket:id="age"></span>
-				</div>
-				<div class="labels pull-left">
-					<span wicket:id="labels" class="label label-default"></span>
-				</div>
+			<div class="message-and-labels clearfix">
+				<div wicket:id="message" class="message pull-left"></div>
+				<span wicket:id="labels" class="label label-default pull-left"></span>
+			</div>
+			<div class="author">
+				<span wicket:id="name"></span> authored <span wicket:id="age"></span>
 			</div>
 		</div>
 		<div class="info pull-right">

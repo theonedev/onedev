@@ -13,6 +13,7 @@
 	padding: 0px 6px;
 	border-radius: 2px; 
 	color: #777;
+	line-height: 16px;
 }
 .commit-message>.toggle:hover {
 	background: #888;

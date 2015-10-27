@@ -9,17 +9,15 @@
 	width: 40px;
 }
 #repo-commits>.body .avatar img {
-	width: 37px; 
-	height: 37px;
-}
-#repo-commits>.body .labels {
-	margin-left: 8px;
+	width: 40px; 
+	height: 40px;
 }
 #repo-commits>.body .label {
-	margin-left: 4px;
+	margin: 2px 0 0 4px;
 }
 #repo-commits>.body .info {
 	text-align: right;
+	margin-top: 10px;
 	white-space: nowrap;
 }
 #repo-commits>.body a {
@@ -64,6 +62,7 @@
 	font-size: 18px;
 	margin-top: 12px;
 	text-align: left;
+	border-bottom: 1px solid #EEE;
 }
 
 .commit-lane-dot {
