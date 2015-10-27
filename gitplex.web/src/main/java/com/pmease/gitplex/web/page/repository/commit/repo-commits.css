@@ -36,9 +36,10 @@
 #repo-commits>.body .commit-hash {
 	font-family: monospace;
 }
-#repo-commits>.body li.commit:hover {
+#repo-commits>.body li.commit:hover, #repo-commits>.body li.commit.hover {
 	background: #F7ECB9;
 }
+
 #repo-commits>.body .commit-message>.full {
 	margin-bottom: 4px;
 }
@@ -65,95 +66,108 @@
 	border-bottom: 1px solid #EEE;
 }
 
-.commit-lane-dot {
+.commit-dot {
 	fill: #53a8fd;
+	stroke: #53a8fd;
 }
-.commit-lane-line {
+.commit-line {
 	stroke-width: 2px;
 	stroke: #53a8fd;
 	fill: none;
 }
 
-.commit-lane-dot1 {
+.commit-dot-color1 {
 	fill: #53a8fd;
+	stroke: #53a8fd;
 }
-.commit-lane-line1 {
+.commit-line-color1 {
 	stroke: #53a8fd;
 }
 
-.commit-lane-dot2 {
+.commit-dot-color2 {
 	fill: #09c112;
+	stroke: #09c112;
 }
-.commit-lane-line2 {
+.commit-line-color2 {
 	stroke: #09c112;
 }
 
-.commit-lane-dot3 {
+.commit-dot-color3 {
 	fill: #ff4242;
+	stroke: #ff4242;
 }
-.commit-lane-line3 {
+.commit-line-color3 {
 	stroke: #ff4242;
 }
 
-.commit-lane-dot4 {
+.commit-dot-color4 {
 	fill: #0252a2;
+	stroke: #0252a2;
 }
-.commit-lane-line4 {
+.commit-line-color4 {
 	stroke: #0252a2;
 }
 
-.commit-lane-dot5 {
+.commit-dot-color5 {
 	fill: #056d0b;
+	stroke: #056d0b;
 }
-.commit-lane-line5 {
+.commit-line-color5 {
 	stroke: #056d0b;
 }
 
-.commit-lane-dot6 {
+.commit-dot-color6 {
 	fill: #b00000;
+	stroke: #b00000;
 }
-.commit-lane-line6 {
+.commit-line-color6 {
 	stroke: #b00000;
 }
 
-.commit-lane-dot7 {
+.commit-dot-color7 {
 	fill: #af29f8;
+	stroke: #af29f8;
 }
-.commit-lane-line7 {
+.commit-line-color7 {
 	stroke: #af29f8;
 }
 
-.commit-lane-dot8 {
+.commit-dot-color8 {
 	fill: #ee6c1e;
+	stroke: #ee6c1e;
 }
-.commit-lane-line8 {
+.commit-line-color8 {
 	stroke: #ee6c1e;
 }
 
-.commit-lane-dot9 {
+.commit-dot-color9 {
 	fill: #ef56cd;
+	stroke: #ef56cd;
 }
-.commit-lane-line9 {
+.commit-line-color9 {
 	stroke: #ef56cd;
 }
 
-.commit-lane-dot10 {
+.commit-dot-color10 {
 	fill: #630596;
+	stroke: #630596;
 }
-.commit-lane-line10 {
+.commit-line-color10 {
 	stroke: #630596;
 }
 
-.commit-lane-dot11 {
+.commit-dot-color11 {
 	fill: #8e4509;
+	stroke: #8e4509;
 }
-.commit-lane-line11 {
+.commit-line-color11 {
 	stroke: #8e4509;
 }
 
-.commit-lane-dot12 {
+.commit-dot-color12 {
 	fill: #9b0f7b;
+	stroke: #9b0f7b;
 }
-.commit-lane-line12 {
+.commit-line-color12 {
 	stroke: #9b0f7b;
 }

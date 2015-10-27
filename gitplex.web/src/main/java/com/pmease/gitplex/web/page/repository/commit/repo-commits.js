@@ -4,14 +4,14 @@ gitplex.repocommits = {
 			e.stopPropagation();
 			gitplex.repocommits.drawCommitLane();
 		});		
-		gitplex.repocommits.renderCommitLane(commits);
+		gitplex.repocommits.onCommitsLoaded(commits);
 	},
 
 	/*
 	 * commits is an array of ordered commit object, and the commit object is itself a 
 	 * list of parent indexes
 	 */
-	renderCommitLane: function(commits) {
+	onCommitsLoaded: function(commits) {
 		var columnsLimit = 12;
 		
 		var colorsLimit = 12;
@@ -249,15 +249,35 @@ gitplex.repocommits = {
 		gitplex.repocommits.colors = colors;
 		
 		gitplex.repocommits.drawCommitLane();
+		
+		var paper = Snap("#repo-commits>.body>.lane");
+		function getCommitDot(e) {
+			var $target = $(e.target);
+			if (!$target.hasClass("commit") || !$target.is("li"))
+				$target = $target.closest("li.commit");
+			var index = $target.attr("class").split(" ").pop().split("-").pop();
+			return paper.select("#commit-dot-" + index);
+		}
+		function onMouseEnter(e) {
+			getCommitDot(e).attr("strokeWidth", 4);
+		}
+		function onMouseLeave(e) {
+			getCommitDot(e).attr("strokeWidth", 0);
+		}
+		var $commits = $("#repo-commits li.commit");
+		$commits.off("mouseenter");
+		$commits.off("mouseleave");
+		$commits.mouseenter(onMouseEnter);
+		$commits.mouseleave(onMouseLeave);
 	},
 	drawCommitLane: function() {
 		var columnWidth = 12;
 		var topOffset = 22;
 		var rightOffset = 4;
-		var commitSize = 4;
+		var dotSize = 4;
 		
-		var commitClass = "commit-lane-dot";
-		var lineClass = "commit-lane-line";
+		var dotColorClass = "commit-dot-color";
+		var lineColorClass = "commit-line-color";
 
 		var rows = gitplex.repocommits.rows;
 		var commits = gitplex.repocommits.commits; 
@@ -284,7 +304,7 @@ gitplex.repocommits = {
 		var bodyTop = $("#repo-commits>.body").offset().top - topOffset;
 		
 		function getTop(row) {
-			return $(".commitindex-"+row).offset().top - bodyTop;
+			return $(".commit-item-"+row).offset().top - bodyTop;
 		}
 		
 		function getLeft(column) {
@@ -307,15 +327,7 @@ gitplex.repocommits = {
 			var column = row[toKey([i, i])];
 			var left = getLeft(column);
 			var top = getTop(i);
-			var circle = paper.circle(left, top, commitSize);
-			circle.addClass(commitClass);
-			if (parents.length != 0) {
-				circle.addClass(commitClass + colors[toKey([i, parents[0]])]);
-			} else {
-				var children = parent2children[i];
-				if (children && children.length != 0)
-					circle.addClass(commitClass + colors[toKey([children[0], i])]);
-			}
+			
 			if (i != commits.length-1) {
 				var nextRow = rows[i+1];
 				var nextTop = getTop(i+1);
@@ -331,8 +343,8 @@ gitplex.repocommits = {
 							var left = getLeft(column);
 							var nextLeft = getLeft(nextColumn);
 							var line = paper.line(left, top, nextLeft, nextTop);
-							line.addClass(lineClass);
-							line.addClass(lineClass + color);
+							line.addClass("commit-line");
+							line.addClass(lineColorClass + color);
 							var arrow;
 							if (upArrow) {
 								arrow = paper.path("M" + left + " " + top + "l0 -" + arrowOffset 
@@ -344,8 +356,8 @@ gitplex.repocommits = {
 										+ " 0l-" + arrowWidth + " " + arrowHeight);
 							}
 							if (arrow) {
-								arrow.addClass(lineClass);
-								arrow.addClass(lineClass + color);
+								arrow.addClass(lineColorClass);
+								arrow.addClass(lineColorClass + color);
 							}
 						}
 					}
@@ -382,6 +394,36 @@ gitplex.repocommits = {
 				}
 			}
 		}
+		
+		for (var i in commits) {
+			var parents = commits[i];
+			var row = rows[i];
+			
+			var column = row[toKey([i, i])];
+			var left = getLeft(column);
+			var top = getTop(i);
+			var circle = paper.circle(left, top, dotSize);
+			circle.addClass("commit-dot");
+			if (parents.length != 0) {
+				circle.addClass(dotColorClass + colors[toKey([i, parents[0]])]);
+			} else {
+				var children = parent2children[i];
+				if (children && children.length != 0)
+					circle.addClass(dotColorClass + colors[toKey([children[0], i])]);
+			}
+			circle.attr("id", "commit-dot-" + i);
+			circle.mouseover(function() {
+				this.attr("strokeWidth", 4);
+				var index = this.attr("id").split("-").pop();
+				$(".commit-item-" + index).addClass("hover");
+			});
+			circle.mouseout(function() {
+				this.attr("strokeWidth", 0);
+				var index = this.attr("id").split("-").pop();
+				$(".commit-item-" + index).removeClass("hover");
+			});
+		}
+		
 	}
 	
 }

@@ -263,7 +263,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				}
 				target.prependJavaScript(builder);
 				target.add(foot);
-				String script = String.format("gitplex.repocommits.renderCommitLane(%s);", getCommitsJson());
+				String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
 				target.appendJavaScript(script);
 				pushState(target);
 			}
@@ -309,7 +309,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	}
 	
 	private void addCommitClass(Component item, int commitIndex) {
-		item.add(AttributeAppender.append("class", " commitindex-" + commitIndex));
+		item.add(AttributeAppender.append("class", " commit-item-" + commitIndex));
 	}
 	
 	private Component newCommitItem(String itemId, final int index) {
