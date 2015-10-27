@@ -87,7 +87,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			if (revisionHash != null)
 				log.toRev(revisionHash);
 			else
-				log.allBranchesAndTags(true);
+				log.allBranches(true);
 			if (state.path != null)
 				log.path(state.path);
 			
@@ -125,7 +125,6 @@ public class RepoCommitsPage extends RepositoryPage {
 			Map<String, List<String>> labels = new HashMap<>();
 			Map<String, Ref> refs = new HashMap<>();
 			refs.putAll(getRepository().getRefs(Git.REFS_HEADS));
-			refs.putAll(getRepository().getRefs(Git.REFS_TAGS));
 			for (Map.Entry<String, Ref> entry: refs.entrySet()) {
 				String commitHash = entry.getValue().getObjectId().name();
 				List<String> commitLabels = labels.get(commitHash);

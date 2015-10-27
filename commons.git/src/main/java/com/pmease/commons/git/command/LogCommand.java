@@ -30,7 +30,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private Date untilDate;
     
-    private boolean allBranchesAndTags;
+    private boolean allBranches;
     
     private String path;
     
@@ -56,8 +56,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
         return this;
     }
     
-	public void allBranchesAndTags(boolean allBranchesAndTags) {
-		this.allBranchesAndTags = allBranchesAndTags;
+	public void allBranches(boolean allBranches) {
+		this.allBranches = allBranches;
 	}
 
 	public LogCommand sinceDate(Date sinceDate) {
@@ -113,7 +113,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
         	cmd.addArgs(toRev);
         }
         
-        if (allBranchesAndTags)
+        if (allBranches)
         	cmd.addArgs("--branches", "--tags");
         
         if (sinceDate != null) 
