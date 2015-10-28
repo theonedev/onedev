@@ -356,7 +356,7 @@ gitplex.repocommits = {
 										+ " 0l-" + arrowWidth + " " + arrowHeight);
 							}
 							if (arrow) {
-								arrow.addClass(lineColorClass);
+								arrow.addClass("commit-line");
 								arrow.addClass(lineColorClass + color);
 							}
 						}

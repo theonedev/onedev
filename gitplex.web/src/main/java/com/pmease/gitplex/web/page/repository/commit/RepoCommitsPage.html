@@ -1,6 +1,13 @@
 <wicket:extend>
 	<div id="repo-commits">
-		<div class="head"></div>
+		<div class="head">
+			<div class="row1 clearfix">
+				<div wicket:id="revision" class="revision pull-left"></div>
+				<div wicket:id="path" class="path pull-left"></div>
+			</div>
+			<div class="row2 clearfix">
+			</div>
+		</div>
 		<div class="body">
 			<svg class="lane"></svg>
 			<ul class="list list-unstyled">
