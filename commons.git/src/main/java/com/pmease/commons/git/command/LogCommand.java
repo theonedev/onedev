@@ -41,6 +41,10 @@ public class LogCommand extends GitCommand<List<Commit>> {
     private boolean firstParent;
     
     private Order order;
+    
+    private List<String> messages = new ArrayList<>();
+    
+    private String revisionRange;
 
     public LogCommand(File repoDir) {
         super(repoDir);
@@ -94,6 +98,15 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		this.order = order;
 		return this;
 	}
+	
+	public List<String> messages() {
+		return messages;
+	}
+	
+	public LogCommand revisionRange(String revisionRange) {
+		this.revisionRange = revisionRange;
+		return this;
+	}
 
 	@Override
     public List<Commit> call() {
@@ -112,6 +125,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         } else if (toRev != null) {
         	cmd.addArgs(toRev);
         }
+        
+        if (revisionRange != null)
+        	cmd.addArgs(revisionRange);
         
         if (allBranches)
         	cmd.addArgs("--branches", "--tags");
@@ -136,6 +152,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         	cmd.addArgs("--author-date-order");
         else if (order == Order.TOPO)
         	cmd.addArgs("topo-order");
+
+        for (String message: messages)
+        	cmd.addArgs("--grep=" + message);
         
         cmd.addArgs("--");
         if (path != null)
