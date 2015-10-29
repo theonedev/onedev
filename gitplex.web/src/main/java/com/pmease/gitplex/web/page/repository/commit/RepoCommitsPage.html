@@ -1,14 +1,19 @@
 <wicket:extend>
 	<div wicket:id="container" id="repo-commits">
-		<div class="head clearfix">
-			<div wicket:id="filters" class="filter pull-left clearfix">
-				<a wicket:id="remove" class="btn btn-default remove pull-left" title="Remove filter"><i class="fa fa-times"></i></a>
-				<div wicket:id="editor" class="editor pull-left"></div>
-			</div>
-			<div wicket:id="addFilter" class="pull-left add-filter">
-				<a wicket:id="trigger" class="pull-left btn btn-default" title="Add filter"><i class="fa fa-plus"></i></a>
-				<div wicket:id="menu"></div>
-			</div>
+		<div class="head">
+			<form wicket:id="form" class="filters clearfix">
+				<div wicket:id="filters" class="filter pull-left clearfix">
+					<a wicket:id="remove" class="btn btn-default remove pull-left" title="Remove filter"><i class="fa fa-times"></i></a>
+					<div wicket:id="editor" class="editor pull-left"></div>
+				</div>
+				<div wicket:id="addFilter" class="pull-left add-filter">
+					<div class="btn-group">
+						<a wicket:id="trigger" class="btn btn-default" title="Add filter"><i class="fa fa-plus"></i></a>
+						<button wicket:id="query" type="submit" title="Filter" class="btn btn-default"><i class="fa fa-search"></i></button>
+					</div>
+					<div wicket:id="menu"></div>
+				</div>
+			</form>
 		</div>
 		<div class="body">
 			<svg class="lane"></svg>

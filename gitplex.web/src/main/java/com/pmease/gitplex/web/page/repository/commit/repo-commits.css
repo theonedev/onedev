@@ -5,16 +5,18 @@
 #repo-commits>.head {
 	margin-bottom: 20px;
 }
-#repo-commits>.head>.filter {
+
+#repo-commits>.head>form>.filter {
 	margin-right: 12px;
 }
-#repo-commits>.head>.filter>.remove {
+#repo-commits>.head>form>.filter>.remove {
 	border-radius: 4px 0 0 4px;
 	border-right: none;
 }
-#repo-commits>.head>.filter .form-control {
+#repo-commits>.head>form>.filter .form-control {
 	border-radius: 0 4px 4px 0;
 }
+
 #repo-commits>.body li {
 	padding: 4px 0;
 }

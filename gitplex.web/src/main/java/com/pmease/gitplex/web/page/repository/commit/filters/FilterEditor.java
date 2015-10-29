@@ -1,18 +1,38 @@
 package com.pmease.gitplex.web.page.repository.commit.filters;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
+import java.util.List;
+
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 @SuppressWarnings("serial")
-public abstract class FilterEditor<T> extends FormComponentPanel<T> {
+public abstract class FilterEditor extends FormComponentPanel<List<String>> {
 
-	protected final CommitFilter filter; 
+	private final boolean focus;
 	
-	public FilterEditor(String id, CommitFilter filter) {
-		super(id);
+	public FilterEditor(String id, final CommitFilter filter, boolean focus) {
+		super(id, new IModel<List<String>>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public List<String> getObject() {
+				return filter.getValues();
+			}
+
+			@Override
+			public void setObject(List<String> object) {
+				filter.setValues(object);
+			}
+			
+		});
 		
-		this.filter = filter;
+		this.focus = focus;
 	}
 
 	@Override
@@ -24,7 +44,16 @@ public abstract class FilterEditor<T> extends FormComponentPanel<T> {
 		}
 	}
 	
-	protected abstract T convertInputToValue() throws ConversionException;
+	protected abstract List<String> convertInputToValue() throws ConversionException;
+
+	protected abstract String getFocusScript();
 	
-	public abstract void onEdit(AjaxRequestTarget target);
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		if (focus) 
+			response.render(OnDomReadyHeaderItem.forScript(getFocusScript()));
+	}
+	
 }

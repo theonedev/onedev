@@ -12,8 +12,8 @@ public class MessageFilter extends CommitFilter {
 	}
 
 	@Override
-	public FilterEditor<?> newEditor(String id, FilterCallback callback) {
-		return new MessageEditor(id, this);
+	public FilterEditor newEditor(String id, boolean focus) {
+		return new MessageEditor(id, this, focus);
 	}
 
 	@Override

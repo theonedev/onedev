@@ -7,7 +7,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.pmease.commons.git.command.LogCommand;
-import com.pmease.commons.util.StringUtils;
 
 public abstract class CommitFilter implements Serializable {
 	
@@ -18,7 +17,7 @@ public abstract class CommitFilter implements Serializable {
 	public abstract String getName();
 
 	@Nullable
-	public abstract FilterEditor<?> newEditor(String id, FilterCallback callback);
+	public abstract FilterEditor newEditor(String id, boolean focus);
 	
 	public abstract void applyTo(LogCommand logCommand);
 	
@@ -28,14 +27,6 @@ public abstract class CommitFilter implements Serializable {
 	
 	public void setValues(List<String> values) {
 		this.values = values;
-	}
-	
-	@Nullable 
-	public String getValue() {
-		if (!values.isEmpty())
-			return StringUtils.join(values, ",");
-		else
-			return null;
 	}
 	
 }

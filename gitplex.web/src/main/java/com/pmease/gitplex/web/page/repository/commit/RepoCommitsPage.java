@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -22,6 +24,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -37,6 +40,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,15 +61,16 @@ import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.commit.filters.CommitFilter;
-import com.pmease.gitplex.web.page.repository.commit.filters.FilterCallback;
 import com.pmease.gitplex.web.page.repository.commit.filters.FilterEditor;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
-public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
+public class RepoCommitsPage extends RepositoryPage {
 
+	private static final Logger logger = LoggerFactory.getLogger(RepoCommitsPage.class);
+	
 	private static final int COUNT = 50;
 	
 	private static final int MAX_STEPS = 50;
@@ -78,6 +84,8 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 	private boolean hasMore;
 	
 	private WebMarkupContainer container;
+	
+	private Form<?> filterForm;
 	
 	private RepeatingView filtersView;
 	
@@ -93,8 +101,14 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 			
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
 			state.applyTo(log);
-			
-			List<Commit> logCommits = log.call();
+
+			List<Commit> logCommits;
+			try {
+				logCommits = log.call();
+			} catch (Exception e) {
+				logger.error("Error running git log command.", e);
+				logCommits = new ArrayList<>();
+			}
 			
 			hasMore = logCommits.size() == state.step*COUNT;
 			
@@ -208,8 +222,12 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 		container.setOutputMarkupId(true);
 		add(container);
 		
-		container.add(filtersView = newFiltersView());
-		container.add(newAddFilter());
+		filterForm = new Form<Void>("form");
+		container.add(filterForm);
+		
+		filterForm.add(filtersView = newFiltersView());
+		filterForm.add(newAddFilter());
+		
 		container.add(commitsView = newCommitsView());
 		
 		foot = new WebMarkupContainer("foot");
@@ -296,14 +314,16 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 				for (CommitFilter filter: state.filters)
 					usedFilters.add(filter.getName());
 				List<MenuItem> menuItems = new ArrayList<>();
-				for (final CommitFilter filter: GitPlex.getExtensions(CommitFilter.class)) {
-					if (!usedFilters.contains(filter.getName())) {
-						menuItems.add(new AjaxLinkItem("Filter by " + filter.getName()) {
+				for (final CommitFilter extension: GitPlex.getExtensions(CommitFilter.class)) {
+					if (!usedFilters.contains(extension.getName())) {
+						menuItems.add(new AjaxLinkItem("Filter by " + extension.getName()) {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								state.filters.add(filter);
-								Component item = newFilterItem(filtersView.newChildId(), filter, target);
+								// extension is a singleton, so we need to make a clone
+								CommitFilter clone = SerializationUtils.clone(extension);
+								state.filters.add(clone);
+								Component item = newFilterItem(filtersView.newChildId(), clone, true);
 								filtersView.add(item);
 								
 								String script = String.format(
@@ -314,7 +334,7 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 								hide(target);
 
 								WebMarkupContainer addFilter = newAddFilter();
-								container.replace(addFilter);
+								filterForm.replace(addFilter);
 								target.add(addFilter);
 							}
 							
@@ -338,7 +358,36 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 		addFilterTrigger.add(new MenuBehavior(addFilterMenu));
 		addFilter.add(addFilterTrigger);
 				
+		addFilter.add(new AjaxSubmitLink("query") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+
+				updateCommits(target);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!state.filters.isEmpty());
+			}
+			
+		});
+		
 		return addFilter;
+	}
+	
+	private void updateCommits(AjaxRequestTarget target) {
+		state.step = 1;
+
+		container.replace(commitsView = newCommitsView());
+		target.add(container);
+
+		String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
+		target.appendJavaScript(script);
+		
+		pushState(target);
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
@@ -350,11 +399,11 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 	private RepeatingView newFiltersView() {
 		RepeatingView filtersView = new RepeatingView("filters");
 		for (CommitFilter filter: state.filters) 
-			filtersView.add(newFilterItem(filtersView.newChildId(), filter, null));
+			filtersView.add(newFilterItem(filtersView.newChildId(), filter, false));
 		return filtersView;
 	}
 	
-	private Component newFilterItem(String itemId, final CommitFilter itemFilter, AjaxRequestTarget target) {
+	private Component newFilterItem(String itemId, final CommitFilter itemFilter, boolean focus) {
 		final WebMarkupContainer item = new WebMarkupContainer(itemId);
 		item.add(new AjaxLink<Void>("remove") {
 
@@ -368,14 +417,15 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 				}
 				target.appendJavaScript(String.format("$('#%s').remove();", item.getMarkupId()));
 				WebMarkupContainer addFilter = newAddFilter();
-				container.replace(addFilter);
+				filterForm.replace(addFilter);
 				target.add(addFilter);
+				
+				if (!itemFilter.getValues().isEmpty())
+					updateCommits(target);
 			}
 			
 		});
-		FilterEditor<?> editor = itemFilter.newEditor("editor", this);
-		if (target != null)
-			editor.onEdit(target);
+		FilterEditor editor = itemFilter.newEditor("editor", focus);
 		item.add(editor);
 		item.setOutputMarkupId(true);
 		return item;
@@ -472,8 +522,8 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 		
 		state = (HistoryState) data;
 
-		replace(commitsView = newCommitsView());
-		replace(filtersView = newFiltersView());
+		container.replace(commitsView = newCommitsView());
+		filterForm.replace(filtersView = newFiltersView());
 		target.add(container);
 
 		String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
@@ -587,8 +637,10 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 					List<String> values = new ArrayList<>();
 					for (StringValue each: params.getValues(filter.getName())) 
 						values.add(each.toString());
-					filter.setValues(values);
-					filters.add(filter);
+					// extension is a singleton, so we need to make a clone
+					CommitFilter clone = SerializationUtils.clone(filter);
+					clone.setValues(values);
+					filters.add(clone);
 				}
 			}
 			
@@ -622,11 +674,7 @@ public class RepoCommitsPage extends RepositoryPage implements FilterCallback {
 			for (CommitFilter filter: filters)
 				filter.applyTo(logCommand);
 		}
-	}
-
-	@Override
-	public void filter(AjaxRequestTarget target) {
 		
 	}
-	
+
 }

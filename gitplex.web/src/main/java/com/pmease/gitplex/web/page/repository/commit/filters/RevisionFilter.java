@@ -12,8 +12,8 @@ public class RevisionFilter extends CommitFilter {
 	}
 
 	@Override
-	public FilterEditor<?> newEditor(String id, FilterCallback callback) {
-		return new RevisionEditor(id, this);
+	public FilterEditor newEditor(String id, boolean focus) {
+		return new RevisionEditor(id, this, focus);
 	}
 
 	@Override
