@@ -4,21 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.util.convert.ConversionException;
+import org.eclipse.jgit.lib.FileMode;
 
-import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
-import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.component.pathchoice.PathSingleChoice;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class PathEditor extends FilterEditor {
 
-	private BranchSingleChoice input;
+	private PathSingleChoice input;
 	
 	public PathEditor(String id, CommitFilter filter, boolean focus) {
 		super(id, filter, focus);
@@ -28,37 +24,25 @@ public class PathEditor extends FilterEditor {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		String branch;
+		String path;
 		
 		List<String> values = getModelObject();
 		if (!values.isEmpty())
-			branch = values.get(0);
+			path = values.get(0);
 		else
-			branch = null;
-		
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Repository>() {
-
-			@Override
-			protected Repository load() {
-				RepositoryPage page = (RepositoryPage) getPage();
-				return page.getRepository();
-			}
-    		
-    	});
-
-    	add(input = new BranchSingleChoice("input", Model.of(branch), branchProvider, true, "Filter by branch"));
-    	input.add(new AjaxFormSubmitBehavior("change") {
-    		
-    	});
+			path = null;
+    	add(input = new PathSingleChoice("input", Model.of(path), 
+    			new int[]{FileMode.TYPE_FILE, FileMode.TYPE_TREE}, "Filter by path"));
+    	input.add(new AjaxFormSubmitBehavior("select") {});
 	}
 
 	@Override
-	protected List<String> convertInputToValue() throws ConversionException {
+	protected void convertInput() {
 		String value = input.getConvertedInput();
 		if (value != null) 
-			return Lists.newArrayList(value);
+			setConvertedInput(Lists.newArrayList(value));
 		else
-			return new ArrayList<>();
+			setConvertedInput(new ArrayList<String>());
 	}
 
 	@Override

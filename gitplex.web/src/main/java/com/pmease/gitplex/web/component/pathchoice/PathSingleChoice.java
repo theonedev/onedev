@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.component.pathchoice;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -28,17 +29,28 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 	
 	private final int[] pathTypes;
 	
-	public PathSingleChoice(String id, IModel<String> model, int[] pathTypes) {
+	private final String placeholder;
+	
+	public PathSingleChoice(String id, IModel<String> model, int[] pathTypes, String placeholder) {
 		super(id, model);
 		
 		this.pathTypes = pathTypes;
+		this.placeholder = placeholder;
 	}
+	
+	public PathSingleChoice(String id, IModel<String> model, int[] pathTypes) {
+		this(id, model, pathTypes, null);
+	}	
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
 		add(input = new TextField<String>("input", Model.of(getModelObject())));
+		if (placeholder != null)
+			input.add(AttributeAppender.append("placeholder", placeholder));
+		else
+			input.add(AttributeAppender.append("placeholder", "Input path"));
 		input.setOutputMarkupId(true);
 		
 		DropdownPanel chooser = new DropdownPanel("chooser") {

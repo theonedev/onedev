@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -33,12 +34,19 @@ public class PathMultiChoice extends FormComponentPanel<List<String>> {
 	
 	private final int[] pathTypes;
 	
-	public PathMultiChoice(String id, IModel<List<String>> model, int[] pathTypes) {
+	private final String placeholder;
+	
+	public PathMultiChoice(String id, IModel<List<String>> model, int[] pathTypes, String placeholder) {
 		super(id, model);
 		
 		this.pathTypes = pathTypes;
+		this.placeholder = placeholder;
 	}
 
+	public PathMultiChoice(String id, IModel<List<String>> model, int[] pathTypes) {
+		this(id, model, pathTypes, null);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -50,6 +58,11 @@ public class PathMultiChoice extends FormComponentPanel<List<String>> {
 			directories = null;
 
 		add(input = new TextField<String>("input", Model.of(directories)));
+		if (placeholder != null)
+			input.add(AttributeAppender.append("placeholder", placeholder));
+		else
+			input.add(AttributeAppender.append("placeholder", "Input paths"));
+			
 		input.setOutputMarkupId(true);
 		
 		DropdownPanel chooser = new DropdownPanel("chooser") {

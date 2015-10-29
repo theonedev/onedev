@@ -1,11 +1,9 @@
 package com.pmease.gitplex.web.page.repository.commit.filters;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.util.convert.ConversionException;
 
 import com.pmease.commons.util.StringUtils;
 
@@ -28,12 +26,12 @@ public class MessageEditor extends FilterEditor {
 	}
 
 	@Override
-	protected List<String> convertInputToValue() throws ConversionException {
+	protected void convertInput() {
 		String value = input.getConvertedInput();
 		if (value != null) 
-			return StringUtils.splitAndTrim(value);
+			setConvertedInput(StringUtils.splitAndTrim(value));
 		else
-			return new ArrayList<>();
+			setConvertedInput(new ArrayList<String>());
 	}
 
 	@Override

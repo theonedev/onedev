@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.util.convert.ConversionException;
 
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
@@ -47,20 +46,18 @@ public class BranchEditor extends FilterEditor {
     	});
 
     	add(input = new BranchSingleChoice("input", Model.of(branch), branchProvider, true, "Filter by branch"));
-    	input.add(new AjaxFormSubmitBehavior("change") {
-    		
-    	});
+    	input.add(new AjaxFormSubmitBehavior("change") {});
 	}
 
 	@Override
-	protected List<String> convertInputToValue() throws ConversionException {
+	protected void convertInput() {
 		String value = input.getConvertedInput();
 		if (value != null) 
-			return Lists.newArrayList(value);
+			setConvertedInput(Lists.newArrayList(value));
 		else
-			return new ArrayList<>();
+			setConvertedInput(new ArrayList<String>());
 	}
-
+	
 	@Override
 	protected String getFocusScript() {
 		return String.format("$('#%s').focus();", input.getMarkupId());

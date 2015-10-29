@@ -14,10 +14,14 @@
 	border-right: none;
 }
 #repo-commits>.head>form>.filter .form-control {
-	border-radius: 0 4px 4px 0;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
 }
 #repo-commits>.head>form>.filter .select2-choice {
 	border-radius: 0 4px 4px 0;
+}
+#repo-commits>.head>form>.filter .input-group {
+	width: 250px;
 }
 
 #repo-commits>.body .no-commits {

@@ -395,6 +395,12 @@ public class RepoCommitsPage extends RepositoryPage {
 		addFilter.add(addFilterTrigger);
 				
 		addFilter.add(new AjaxSubmitLink("query") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!state.filters.isEmpty());
+			}
 			
 		});
 		
