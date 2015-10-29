@@ -2,6 +2,7 @@ package com.pmease.commons.git;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.AddNoteCommand;
 import com.pmease.commons.git.command.AddSubModuleCommand;
@@ -112,7 +114,7 @@ public class Git implements Serializable {
 	}
 
 	public Commit showRevision(String revision) {
-		List<Commit> commits = new LogCommand(repoDir).toRev(revision).maxCount(1).call();
+		List<Commit> commits = new LogCommand(repoDir).revisions(Lists.newArrayList(".." + revision)).count(1).call();
 		Preconditions.checkState(commits.size() == 1);
 		return commits.get(0);
 	}
@@ -355,14 +357,28 @@ public class Git implements Serializable {
 	
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
 			@Nullable String path, int maxCount, int skip) {
-		return new LogCommand(repoDir).fromRev(fromRev).toRev(toRev)
-				.path(path).maxCount(maxCount).skip(skip).call();
+		List<String> paths = new ArrayList<>();
+		if (path != null)
+			paths.add(path);
+		
+		List<String> revisions = new ArrayList<>();
+		if (fromRev != null && toRev != null)
+			revisions.add(fromRev + ".." + toRev);
+		else if (fromRev != null && toRev == null)
+			revisions.add(fromRev + "..");
+		else if (fromRev == null && toRev != null)
+			revisions.add(toRev);
+		return new LogCommand(repoDir).revisions(revisions)
+				.paths(paths).count(maxCount).skip(skip).call();
 	}
 	
-	public List<Commit> log(@Nullable Date sinceDate, @Nullable Date untilDate, 
+	public List<Commit> log(@Nullable Date after, @Nullable Date before, 
 			@Nullable String path, int maxCount, int skip) {
-		return new LogCommand(repoDir).sinceDate(sinceDate).untilDate(untilDate)
-				.path(path).maxCount(maxCount).skip(skip).call();
+		List<String> paths = new ArrayList<>();
+		if (path != null)
+			paths.add(path);
+		return new LogCommand(repoDir).after(after).before(before)
+				.paths(paths).count(maxCount).skip(skip).call();
 	}
 	
 	public Commit retrieveLastCommmit(String revision, @Nullable String path) {

@@ -8,12 +8,7 @@ public class MessageFilter extends CommitFilter {
 
 	@Override
 	public String getName() {
-		return "message";
-	}
-
-	@Override
-	public boolean isMultiple() {
-		return true;
+		return "commit message";
 	}
 
 	@Override
@@ -23,9 +18,7 @@ public class MessageFilter extends CommitFilter {
 
 	@Override
 	public void applyTo(LogCommand logCommand) {
-		String value = getValue();
-		if (value != null)
-			logCommand.messages().add(value);
+		logCommand.messages(getValues());
 	}
 
 }

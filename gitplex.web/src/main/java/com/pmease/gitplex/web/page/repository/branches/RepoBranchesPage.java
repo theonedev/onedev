@@ -544,7 +544,7 @@ public class RepoBranchesPage extends RepositoryPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoBranchesPage.class, "repo-branch.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(RepoBranchesPage.class, "repo-branches.css")));
 	}
 
 	@Override

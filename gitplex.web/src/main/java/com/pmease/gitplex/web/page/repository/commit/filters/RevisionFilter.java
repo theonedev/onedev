@@ -2,7 +2,7 @@ package com.pmease.gitplex.web.page.repository.commit.filters;
 
 import com.pmease.commons.git.command.LogCommand;
 
-public class RevisionRangeFilter extends CommitFilter {
+public class RevisionFilter extends CommitFilter {
 
 	private static final long serialVersionUID = 1L;
 
@@ -12,20 +12,13 @@ public class RevisionRangeFilter extends CommitFilter {
 	}
 
 	@Override
-	public boolean isMultiple() {
-		return false;
-	}
-
-	@Override
 	public FilterEditor<?> newEditor(String id, FilterCallback callback) {
-		return new RevisionRangeEditor(id, this);
+		return new RevisionEditor(id, this);
 	}
 
 	@Override
 	public void applyTo(LogCommand logCommand) {
-		String value = getValue();
-		if (value != null)
-			logCommand.revisionRange(value);
+		logCommand.revisions(getValues());
 	}
 
 }

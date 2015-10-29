@@ -17,8 +17,6 @@ public abstract class CommitFilter implements Serializable {
 	
 	public abstract String getName();
 
-	public abstract boolean isMultiple();
-	
 	@Nullable
 	public abstract FilterEditor<?> newEditor(String id, FilterCallback callback);
 	

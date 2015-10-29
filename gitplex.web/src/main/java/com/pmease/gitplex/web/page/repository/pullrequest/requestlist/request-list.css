@@ -2,12 +2,8 @@
 	padding: 12px 20px;
 	border-bottom: 1px solid #BBB;
 }
-#request-list>.head>.title {
-	margin-top: 3px;
-	font-size: 18px;
-}
-#request-list>.head>div {
-	margin-right: 20px;
+#request-list>.head>a {
+	margin-right: 16px;
 }
 
 #request-list td.filter {

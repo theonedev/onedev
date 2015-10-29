@@ -1,7 +1,14 @@
 <wicket:extend>
-	<div id="repo-commits">
+	<div wicket:id="container" id="repo-commits">
 		<div class="head clearfix">
-			<div wicket:id="filters" class="filter pull-left"></div>
+			<div wicket:id="filters" class="filter pull-left clearfix">
+				<a wicket:id="remove" class="btn btn-default remove pull-left" title="Remove filter"><i class="fa fa-times"></i></a>
+				<div wicket:id="editor" class="editor pull-left"></div>
+			</div>
+			<div wicket:id="addFilter" class="pull-left add-filter">
+				<a wicket:id="trigger" class="pull-left btn btn-default" title="Add filter"><i class="fa fa-plus"></i></a>
+				<div wicket:id="menu"></div>
+			</div>
 		</div>
 		<div class="body">
 			<svg class="lane"></svg>

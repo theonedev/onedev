@@ -20,94 +20,109 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
 	
-	public enum Order {DATE, AUTHOR_DATE, TOPO};
-	
-    private String fromRev;
+    private List<String> revisions = new ArrayList<>();
     
-    private Date sinceDate;
+    private List<String> paths = new ArrayList<>();
     
-    private String toRev;
+    private Date after;
     
-    private Date untilDate;
+    private Date before;
     
-    private boolean allBranches;
-    
-    private String path;
-    
-    private int maxCount;
+    private int count;
     
     private int skip;
     
-    private boolean firstParent;
-    
-    private Order order;
-    
     private List<String> messages = new ArrayList<>();
     
-    private String revisionRange;
-
+    private List<String> authors = new ArrayList<>();
+    
+    private List<String> committers = new ArrayList<>();
+    
     public LogCommand(File repoDir) {
         super(repoDir);
     }
 
-    public LogCommand fromRev(String fromRev) {
-        this.fromRev = fromRev;
-        return this;
-    }
-
-    public LogCommand toRev(String toRev) {
-        this.toRev = toRev;
-        return this;
-    }
-    
-	public void allBranches(boolean allBranches) {
-		this.allBranches = allBranches;
+	public List<String> revisions() {
+		return revisions;
 	}
 
-	public LogCommand sinceDate(Date sinceDate) {
-    	this.sinceDate = sinceDate;
-    	return this;
-    }
-    
-    public LogCommand untilDate(Date untilDate) {
-    	this.untilDate = untilDate;
-    	return this;
-    }
-    
-    public LogCommand path(String path) {
-    	this.path = path;
-    	return this;
-    }
-    
-    public LogCommand maxCount(int maxCount) {
-    	this.maxCount = maxCount;
-    	return this;
-    }
-
-    public LogCommand skip(int skip) {
-    	this.skip = skip;
-    	return this;
-    }
-    
-	public LogCommand firstParent(boolean firstParent) {
-		this.firstParent = firstParent;
+	public LogCommand revisions(List<String> revisions) {
+		this.revisions = revisions;
 		return this;
 	}
-	
-	public LogCommand order(Order order) {
-		this.order = order;
+
+	public List<String> paths() {
+		return paths;
+	}
+
+	public LogCommand paths(List<String> paths) {
+		this.paths = paths;
 		return this;
 	}
-	
+
+	public Date after() {
+		return after;
+	}
+
+	public LogCommand after(Date after) {
+		this.after = after;
+		return this;
+	}
+
+	public Date before() {
+		return before;
+	}
+
+	public LogCommand before(Date before) {
+		this.before = before;
+		return this;
+	}
+
+	public int count() {
+		return count;
+	}
+
+	public LogCommand count(int count) {
+		this.count = count;
+		return this;
+	}
+
+	public int skip() {
+		return skip;
+	}
+
+	public LogCommand skip(int skip) {
+		this.skip = skip;
+		return this;
+	}
+
 	public List<String> messages() {
 		return messages;
 	}
-	
-	public LogCommand revisionRange(String revisionRange) {
-		this.revisionRange = revisionRange;
+
+	public LogCommand messages(List<String> messages) {
+		this.messages = messages;
 		return this;
 	}
 
+	public List<String> authors() {
+		return authors;
+	}
+	
+	public LogCommand authors(List<String> authors) {
+		this.authors = authors;
+		return this;
+	}
+	
+	public List<String> committers() {
+		return committers;
+	}
+	
+	public LogCommand commmitters(List<String> committers) {
+		this.committers = committers;
+		return this;
+	}
+	
 	@Override
     public List<Commit> call() {
         Commandline cmd = cmd();
@@ -117,47 +132,31 @@ public class LogCommand extends GitCommand<List<Commit>> {
                         + "committerEmail:%cE%ncommitter:%cN%nparents:%P%ncommitterDate:%cd %n"
                         + "authorDate:%ad %n",
                         "--date=raw");
-        if (fromRev != null) {
-        	if (toRev != null)
-        		cmd.addArgs(fromRev + ".." + toRev);
-        	else
-        		cmd.addArgs(fromRev + "..");
-        } else if (toRev != null) {
-        	cmd.addArgs(toRev);
+        
+        if (!revisions.isEmpty()) {
+        	for (String revision: revisions)
+        		cmd.addArgs(revision);
+        } else {
+        	cmd.addArgs("--branches");
         }
         
-        if (revisionRange != null)
-        	cmd.addArgs(revisionRange);
+        if (before != null) 
+        	cmd.addArgs("--before").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(before));
         
-        if (allBranches)
-        	cmd.addArgs("--branches", "--tags");
+        if (after != null)
+        	cmd.addArgs("--after").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(after));
         
-        if (sinceDate != null) 
-        	cmd.addArgs("--since").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(sinceDate));
-        
-        if (untilDate != null)
-        	cmd.addArgs("--until").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(untilDate));
-        
-        if (maxCount != 0)
-        	cmd.addArgs("-" + maxCount);
+        if (count != 0)
+        	cmd.addArgs("-" + count);
         if (skip != 0)
         	cmd.addArgs("--skip=" + skip);
-        
-        if (firstParent)
-        	cmd.addArgs("--first-parent");
-        
-        if (order == Order.DATE)
-        	cmd.addArgs("--date-order");
-        else if (order == Order.AUTHOR_DATE)
-        	cmd.addArgs("--author-date-order");
-        else if (order == Order.TOPO)
-        	cmd.addArgs("topo-order");
 
         for (String message: messages)
         	cmd.addArgs("--grep=" + message);
         
         cmd.addArgs("--");
-        if (path != null)
+        
+        for (String path: paths)
         	cmd.addArgs(path);
 
         final List<Commit> commits = new ArrayList<>();

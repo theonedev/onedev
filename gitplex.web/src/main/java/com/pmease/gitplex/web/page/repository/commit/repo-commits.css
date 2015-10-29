@@ -1,6 +1,19 @@
 #repo-commits {
-	padding: 20px;
 	position: relative;
+	padding: 20px;
+}
+#repo-commits>.head {
+	margin-bottom: 20px;
+}
+#repo-commits>.head>.filter {
+	margin-right: 12px;
+}
+#repo-commits>.head>.filter>.remove {
+	border-radius: 4px 0 0 4px;
+	border-right: none;
+}
+#repo-commits>.head>.filter .form-control {
+	border-radius: 0 4px 4px 0;
 }
 #repo-commits>.body li {
 	padding: 4px 0;

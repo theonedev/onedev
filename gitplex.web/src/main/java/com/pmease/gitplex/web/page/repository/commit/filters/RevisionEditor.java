@@ -5,11 +5,11 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.util.convert.ConversionException;
 
 @SuppressWarnings("serial")
-public class RevisionRangeEditor extends FilterEditor<String> {
+public class RevisionEditor extends FilterEditor<String> {
 
 	private TextField<String> input;
 	
-	public RevisionRangeEditor(String id, CommitFilter filter) {
+	public RevisionEditor(String id, CommitFilter filter) {
 		super(id, filter);
 	}
 
@@ -17,7 +17,7 @@ public class RevisionRangeEditor extends FilterEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(input = new TextField<String>("revision range"));
+		add(input = new TextField<String>("revisions"));
 	}
 
 	@Override

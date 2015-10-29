@@ -17,12 +17,12 @@ public class MessageEditor extends FilterEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(input = new TextField<String>("message"));
+		add(input = new TextField<String>("messages"));
 	}
 
 	@Override
 	public void onEdit(AjaxRequestTarget target) {
-		
+		target.focusComponent(input);
 	}
 
 	@Override

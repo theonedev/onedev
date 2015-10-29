@@ -273,7 +273,7 @@ gitplex.repocommits = {
 	drawCommitLane: function() {
 		var columnWidth = 12;
 		var topOffset = 22;
-		var rightOffset = 4;
+		var rightOffset = 12;
 		var dotSize = 4;
 		
 		var dotColorClass = "commit-dot-color";
