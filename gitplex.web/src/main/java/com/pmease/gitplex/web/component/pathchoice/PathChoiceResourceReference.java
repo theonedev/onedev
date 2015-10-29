@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.path;
+package com.pmease.gitplex.web.component.pathchoice;
 
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 

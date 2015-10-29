@@ -1,12 +1,3 @@
 <wicket:panel>
-	<div class="input-group directory-choice">
-		<input wicket:id="input" type="text" class="form-control pull-left"></input> 
-		<div class="input-group-btn">
-			<button wicket:id="chooserTrigger" class="btn btn-default" title="Choose directory"><i class="fa fa-ext fa-folder-o"></i></button>
-			<div wicket:id="chooser"></div>
-		</div>
-	</div>
-	<wicket:fragment wicket:id="noDefaultBranchFrag">
-		<div class="alert alert-warning" style="margin: 0px;">No content in repository yet.</div>
-	</wicket:fragment>
+	<div wicket:id="input"></div>
 </wicket:panel>

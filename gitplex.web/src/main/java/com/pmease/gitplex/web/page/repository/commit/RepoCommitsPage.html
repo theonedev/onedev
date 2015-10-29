@@ -15,11 +15,13 @@
 				</div>
 			</form>
 		</div>
+		<div wicket:id="feedback"></div>
 		<div class="body">
 			<svg class="lane"></svg>
 			<ul class="list list-unstyled">
 				<li wicket:id="commits"></li>
 			</ul>
+			<div wicket:id="noCommits" class="no-commits"><i class="fa fa-exclamation-triangle"></i> No comimts found</div>
 		</div>
 		<div wicket:id="foot" class="foot">
 			<a wicket:id="more" class="btn btn-default">More commits</a>

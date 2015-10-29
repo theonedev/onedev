@@ -16,7 +16,14 @@
 #repo-commits>.head>form>.filter .form-control {
 	border-radius: 0 4px 4px 0;
 }
+#repo-commits>.head>form>.filter .select2-choice {
+	border-radius: 0 4px 4px 0;
+}
 
+#repo-commits>.body .no-commits {
+	font-style: italic;
+	font-size: 16px;
+}
 #repo-commits>.body li {
 	padding: 4px 0;
 }

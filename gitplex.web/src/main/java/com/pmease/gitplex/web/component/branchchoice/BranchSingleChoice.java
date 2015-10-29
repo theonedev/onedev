@@ -12,17 +12,31 @@ public class BranchSingleChoice extends Select2Choice<String> {
 
 	private final boolean allowEmpty;
 	
-	public BranchSingleChoice(String id, IModel<String> model, ChoiceProvider<String> branchesProvider, boolean allowEmpty) {
+	private final String placeholder;
+	
+	public BranchSingleChoice(String id, IModel<String> model, ChoiceProvider<String> branchesProvider, 
+			boolean allowEmpty, String placeholder) {
 		super(id, model, branchesProvider);
 		
 		this.allowEmpty = allowEmpty;
+		this.placeholder = placeholder;
 	}
 
+	public BranchSingleChoice(String id, IModel<String> model, ChoiceProvider<String> branchesProvider, 
+			boolean allowEmpty) {
+		this(id, model, branchesProvider, allowEmpty, null);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		getSettings().setAllowClear(allowEmpty);
-		getSettings().setPlaceholder("Choose a branch ...");
+		
+		if (placeholder != null) 
+			getSettings().setPlaceholder(placeholder);
+		else
+			getSettings().setPlaceholder("Choose a branch ...");
+		
 		getSettings().setFormatResult("gitplex.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.branchChoiceFormatter.escapeMarkup");

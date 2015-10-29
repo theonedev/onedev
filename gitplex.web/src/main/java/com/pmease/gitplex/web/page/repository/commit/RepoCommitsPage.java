@@ -40,11 +40,10 @@ import org.eclipse.jgit.lib.Ref;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
@@ -66,11 +65,11 @@ import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+
 @SuppressWarnings("serial")
 public class RepoCommitsPage extends RepositoryPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(RepoCommitsPage.class);
-	
 	private static final int COUNT = 50;
 	
 	private static final int MAX_STEPS = 50;
@@ -91,6 +90,8 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	private RepeatingView commitsView;
 	
+	private NotificationPanel feedback;
+	
 	private WebMarkupContainer foot;
 	
 	private IModel<Commits> commitsModel = new LoadableDetachableModel<Commits>() {
@@ -106,8 +107,15 @@ public class RepoCommitsPage extends RepositoryPage {
 			try {
 				logCommits = log.call();
 			} catch (Exception e) {
-				logger.error("Error running git log command.", e);
-				logCommits = new ArrayList<>();
+				int index = -1;
+				if (e.getMessage() != null)
+					index = e.getMessage().indexOf("bad revision");
+				if (index != -1) {
+					filterForm.error(e.getMessage().substring(index));
+					logCommits = new ArrayList<>();
+				} else {
+					throw Throwables.propagate(e);
+				}
 			}
 			
 			hasMore = logCommits.size() == state.step*COUNT;
@@ -222,14 +230,42 @@ public class RepoCommitsPage extends RepositoryPage {
 		container.setOutputMarkupId(true);
 		add(container);
 		
-		filterForm = new Form<Void>("form");
+		filterForm = new Form<Void>("form") {
+
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				
+				updateCommits(RequestCycle.get().find(AjaxRequestTarget.class));
+			}
+
+			@Override
+			protected void onError() {
+				super.onError();
+				
+				RequestCycle.get().find(AjaxRequestTarget.class).add(feedback);
+			}
+			
+		};
 		container.add(filterForm);
 		
 		filterForm.add(filtersView = newFiltersView());
 		filterForm.add(newAddFilter());
 		
-		container.add(commitsView = newCommitsView());
+		container.add(feedback = new NotificationPanel("feedback", filterForm));
+		feedback.setOutputMarkupPlaceholderTag(true);
 		
+		container.add(commitsView = newCommitsView());
+		container.add(new WebMarkupContainer("noCommits") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!filterForm.hasErrorMessage() && commitsModel.getObject().current.isEmpty());
+			}
+			
+		});
+
 		foot = new WebMarkupContainer("foot");
 		foot.setOutputMarkupId(true);
 		
@@ -359,19 +395,6 @@ public class RepoCommitsPage extends RepositoryPage {
 		addFilter.add(addFilterTrigger);
 				
 		addFilter.add(new AjaxSubmitLink("query") {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-
-				updateCommits(target);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!state.filters.isEmpty());
-			}
 			
 		});
 		

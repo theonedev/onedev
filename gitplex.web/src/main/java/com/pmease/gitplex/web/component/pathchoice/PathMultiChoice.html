@@ -1,0 +1,10 @@
+<wicket:panel>
+	<div class="path-choice input-group">
+		<input wicket:id="input" type="text" class="form-control"></input> 
+		<a wicket:id="chooserTrigger" title="Choose path" class="input-group-addon"><i class="fa fa-ext fa-folder-o"></i></a>
+		<div wicket:id="chooser"></div>
+	</div>
+	<wicket:fragment wicket:id="noDefaultBranchFrag">
+		<div class="alert alert-warning" style="margin: 0px;">No content in repository yet.</div>
+	</wicket:fragment>
+</wicket:panel>
