@@ -10,7 +10,7 @@ import org.apache.wicket.model.IModel;
 @SuppressWarnings("serial")
 public abstract class FilterEditor extends FormComponentPanel<List<String>> {
 
-	private final boolean focus;
+	private boolean focus;
 	
 	public FilterEditor(String id, final CommitFilter filter, boolean focus) {
 		super(id, new IModel<List<String>>() {
@@ -40,8 +40,10 @@ public abstract class FilterEditor extends FormComponentPanel<List<String>> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		if (focus) 
+		if (focus) {
 			response.render(OnDomReadyHeaderItem.forScript(getFocusScript()));
+			focus = false;
+		}
 	}
 	
 }

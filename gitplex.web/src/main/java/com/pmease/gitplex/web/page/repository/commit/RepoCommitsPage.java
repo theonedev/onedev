@@ -38,8 +38,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.string.StringValue;
 import org.eclipse.jgit.lib.Ref;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +52,7 @@ import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
@@ -75,8 +74,6 @@ public class RepoCommitsPage extends RepositoryPage {
 	private static final int MAX_STEPS = 50;
 	
 	private static final String PARAM_STEP = "step";
-	
-	private static DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
 	
 	private HistoryState state = new HistoryState();
 	
@@ -521,7 +518,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
 			DateTime dateTime = new DateTime(current.get(index+1).getCommitter().getWhen());
-			item.add(new Label("date", dateFormatter.print(dateTime)));
+			item.add(new Label("date", Constants.DATE_FORMATTER.print(dateTime)));
 			item.add(AttributeAppender.append("class", "date"));
 		}
 		item.setOutputMarkupId(true);
