@@ -65,8 +65,8 @@
 			<version>4.2.0</version>
 			<exclusions>
 				<exclusion>
-		            <groupId>org.webjars</groupId>
-		            <artifactId>bootstrap</artifactId>
+					<groupId>org.webjars</groupId>
+					<artifactId>bootstrap</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

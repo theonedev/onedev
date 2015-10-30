@@ -4,18 +4,18 @@ import java.util.Date;
 
 import com.pmease.commons.git.command.LogCommand;
 
-public class BeforeFilter extends DateFilter {
+public class AfterFilter extends DateFilter {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected void applyTo(LogCommand logCommand, Date date) {
-		logCommand.before(date);
+		logCommand.after(date);
 	}
 
 	@Override
 	public String getName() {
-		return "commit before";
+		return "commit after";
 	}
 
 }

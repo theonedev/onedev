@@ -1,5 +1,5 @@
 <wicket:extend>
-	<div wicket:id="container" id="repo-commits">
+	<div id="repo-commits">
 		<div class="head">
 			<form wicket:id="form" class="filters clearfix">
 				<div wicket:id="filters" class="filter pull-left clearfix">
@@ -16,7 +16,7 @@
 			</form>
 		</div>
 		<div wicket:id="feedback"></div>
-		<div class="body">
+		<div wicket:id="body" class="body">
 			<svg class="lane"></svg>
 			<ul class="list list-unstyled">
 				<li wicket:id="commits"></li>

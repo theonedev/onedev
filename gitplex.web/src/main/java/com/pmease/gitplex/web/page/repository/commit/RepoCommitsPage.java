@@ -15,6 +15,7 @@ import java.util.Stack;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -45,6 +46,7 @@ import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
+import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.commons.wicket.behavior.menu.AjaxLinkItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
@@ -79,11 +81,11 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	private boolean hasMore;
 	
-	private WebMarkupContainer container;
-	
 	private Form<?> filterForm;
 	
 	private RepeatingView filtersView;
+	
+	private WebMarkupContainer body;
 	
 	private RepeatingView commitsView;
 	
@@ -223,10 +225,6 @@ public class RepoCommitsPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		container = new WebMarkupContainer("container");
-		container.setOutputMarkupId(true);
-		add(container);
-		
 		filterForm = new Form<Void>("form") {
 
 			@Override
@@ -244,16 +242,19 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		};
-		container.add(filterForm);
+		add(filterForm);
 		
 		filterForm.add(filtersView = newFiltersView());
 		filterForm.add(newAddFilter());
 		
-		container.add(feedback = new NotificationPanel("feedback", filterForm));
+		add(feedback = new NotificationPanel("feedback", filterForm));
 		feedback.setOutputMarkupPlaceholderTag(true);
 		
-		container.add(commitsView = newCommitsView());
-		container.add(new WebMarkupContainer("noCommits") {
+		body = new WebMarkupContainer("body");
+		body.setOutputMarkupId(true);
+		add(body);
+		body.add(commitsView = newCommitsView());
+		body.add(new WebMarkupContainer("noCommits") {
 
 			@Override
 			protected void onConfigure() {
@@ -267,6 +268,12 @@ public class RepoCommitsPage extends RepositoryPage {
 		foot.setOutputMarkupId(true);
 		
 		foot.add(new AjaxLink<Void>("more") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -310,6 +317,7 @@ public class RepoCommitsPage extends RepositoryPage {
 							item.getMarkupId()));
 				}
 				target.prependJavaScript(builder);
+				target.add(feedback);
 				target.add(foot);
 				String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
 				target.appendJavaScript(script);
@@ -332,7 +340,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		});
-		container.add(foot);
+		add(foot);
 	}
 	
 	private WebMarkupContainer newAddFilter() {
@@ -349,7 +357,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				List<MenuItem> menuItems = new ArrayList<>();
 				for (final CommitFilter extension: GitPlex.getExtensions(CommitFilter.class)) {
 					if (!usedFilters.contains(extension.getName())) {
-						menuItems.add(new AjaxLinkItem("Filter by " + extension.getName()) {
+						menuItems.add(new AjaxLinkItem(extension.getName()) {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
@@ -394,6 +402,12 @@ public class RepoCommitsPage extends RepositoryPage {
 		addFilter.add(new AjaxSubmitLink("query") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+			}
+			
+			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!state.filters.isEmpty());
@@ -407,9 +421,12 @@ public class RepoCommitsPage extends RepositoryPage {
 	private void updateCommits(AjaxRequestTarget target) {
 		state.step = 1;
 
-		container.replace(commitsView = newCommitsView());
-		target.add(container);
+		target.add(feedback);
+		body.replace(commitsView = newCommitsView());
+		target.add(body);
 
+		target.add(foot);
+		
 		String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
 		target.appendJavaScript(script);
 		
@@ -548,9 +565,13 @@ public class RepoCommitsPage extends RepositoryPage {
 		
 		state = (HistoryState) data;
 
-		container.replace(commitsView = newCommitsView());
 		filterForm.replace(filtersView = newFiltersView());
-		target.add(container);
+		target.add(filterForm);
+		
+		body.replace(commitsView = newCommitsView());
+		target.add(body);
+		
+		target.add(foot);
 
 		String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
 		target.appendJavaScript(script);
