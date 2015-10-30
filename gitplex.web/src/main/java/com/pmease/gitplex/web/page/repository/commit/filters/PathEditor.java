@@ -3,10 +3,12 @@ package com.pmease.gitplex.web.page.repository.commit.filters;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.FileMode;
 
+import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.web.component.pathchoice.PathSingleChoice;
 
 import jersey.repackaged.com.google.common.collect.Lists;
@@ -33,7 +35,15 @@ public class PathEditor extends FilterEditor {
 			path = null;
     	add(input = new PathSingleChoice("input", Model.of(path), 
     			new int[]{FileMode.TYPE_FILE, FileMode.TYPE_TREE}, "Filter by path"));
-    	input.add(new AjaxFormSubmitBehavior("select") {});
+    	input.add(new AjaxFormSubmitBehavior("select") {
+
+    		@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+			}
+    		
+    	});
 	}
 
 	@Override

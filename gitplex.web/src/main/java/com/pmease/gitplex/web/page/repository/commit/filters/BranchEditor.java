@@ -3,10 +3,12 @@ package com.pmease.gitplex.web.page.repository.commit.filters;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
@@ -46,7 +48,15 @@ public class BranchEditor extends FilterEditor {
     	});
 
     	add(input = new BranchSingleChoice("input", Model.of(branch), branchProvider, true, "Filter by branch"));
-    	input.add(new AjaxFormSubmitBehavior("change") {});
+    	input.add(new AjaxFormSubmitBehavior("change") {
+    		
+    		@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+			}
+    		
+    	});
 	}
 
 	@Override

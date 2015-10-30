@@ -100,6 +100,8 @@ public class RepoCommitsPage extends RepositoryPage {
 			Commits commits = new Commits();
 			
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
+			log.parentRewriting(true);
+			
 			state.applyTo(log);
 
 			List<Commit> logCommits;

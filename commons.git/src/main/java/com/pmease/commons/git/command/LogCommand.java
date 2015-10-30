@@ -32,6 +32,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private int skip;
     
+    private boolean parentRewriting;
+    
     private List<String> messages = new ArrayList<>();
     
     private List<String> authors = new ArrayList<>();
@@ -123,6 +125,15 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		return this;
 	}
 	
+	public boolean parentRewriting() {
+		return parentRewriting;
+	}
+	
+	public LogCommand parentRewriting(boolean parentRewriting) {
+		this.parentRewriting = parentRewriting;
+		return this;
+	}
+	
 	@Override
     public List<Commit> call() {
         Commandline cmd = cmd();
@@ -153,6 +164,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
 
         for (String message: messages)
         	cmd.addArgs("--grep=" + message);
+        
+        if (parentRewriting)
+        	cmd.addArgs("--parents");
         
         cmd.addArgs("--");
         
