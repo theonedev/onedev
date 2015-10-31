@@ -45,7 +45,7 @@
 			<artifactId>gitplex.rest</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-        
+
 		<!-- JERSEY CLIENT -->
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
@@ -64,11 +64,15 @@
 		</dependency>
 
 		<dependency>
-		   <groupId>org.ocpsoft.prettytime</groupId>
-		   <artifactId>prettytime</artifactId>
-		   <version>3.2.4.Final</version>
+			<groupId>org.ocpsoft.prettytime</groupId>
+			<artifactId>prettytime</artifactId>
+			<version>3.2.4.Final</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.190</version>
+		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>gitplex.search</artifactId>
@@ -106,7 +110,7 @@
 			<url>file://${project.basedir}/repo</url>
 		</repository>
 	</repositories>
-	
+
 	<properties>
 		<moduleClass>com.pmease.gitplex.web.WebModule</moduleClass>
 		<owsi-core.version>0.8.6-SNAPSHOT</owsi-core.version>
