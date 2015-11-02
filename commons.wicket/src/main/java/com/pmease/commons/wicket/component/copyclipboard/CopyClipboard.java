@@ -32,7 +32,7 @@ public class CopyClipboard extends WebMarkupContainer {
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(CopyClipboard.class, "copy-clipboard.js")));
 
-		String script = String.format("gitplex.copyClipboard('%s');", getMarkupId(true));
+		String script = String.format("pmease.commons.copyClipboard('%s');", getMarkupId(true));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

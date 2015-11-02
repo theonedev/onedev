@@ -11,9 +11,6 @@ public class Assets {
 	public static final JavaScriptResourceReference STICKY_JS = 
 			new JavaScriptResourceReference(Assets.class, "jquery.sticky-kit.js");
 
-	public static final JavaScriptResourceReference ALIGN_JS = 
-			new JavaScriptResourceReference(Assets.class, "jquery.align.js");
-
 	public static final JavaScriptResourceReference COMMON_JS = 
 			new JavaScriptResourceReference(Assets.class, "common.js");
 	

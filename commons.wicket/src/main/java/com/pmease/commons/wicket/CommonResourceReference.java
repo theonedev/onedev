@@ -84,7 +84,6 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 				new WebjarsCssResourceReference("font-awesome/current/css/font-awesome.min.css")));
 
 		dependencies.add(JavaScriptHeaderItem.forReference(AutoSizeResourceReference.INSTANCE));
-		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ALIGN_JS));
 
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.STICKY_JS));
 

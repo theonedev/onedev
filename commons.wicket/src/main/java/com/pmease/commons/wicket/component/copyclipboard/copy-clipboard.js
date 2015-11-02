@@ -1,4 +1,4 @@
-gitplex.copyClipboard = function(bridgeId) {
+pmease.commons.copyClipboard = function(bridgeId) {
 	var $bridge = $('#' + bridgeId);
 	var client = new ZeroClipboard($bridge);
 	client.on('ready', function(e) {
