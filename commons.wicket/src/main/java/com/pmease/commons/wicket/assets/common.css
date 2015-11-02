@@ -97,23 +97,25 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 .dropdown-panel>.content {margin: 0; padding: 0;}
 .dropdown-panel>.loading, .dropdown-panel>.loading.content {margin: 8px; padding: 0 0 0 20px;
 	background: url("ajax-indicator.gif") left center no-repeat;}
-.dropdown-panel>.indicator {display: inline-block; position: absolute;}
-.dropdown-panel>.indicator.bottom:last-child {border-bottom: 6px solid #FFF; border-right: 6px solid transparent;
+	
+.align-triangle {display: inline-block; position: absolute;}
+.align-triangle.bottom:last-child {border-bottom: 6px solid #FFF; border-right: 6px solid transparent;
     border-left: 6px solid transparent; top: -6px;}
-.dropdown-panel>.indicator.top:last-child {border-top: 6px solid #FFF; border-right: 6px solid transparent;
+.align-triangle.top:last-child {border-top: 6px solid #FFF; border-right: 6px solid transparent;
     border-left: 6px solid transparent; top: 100%;}
-.dropdown-panel>.indicator.left:last-child {border-bottom: 6px solid transparent; border-top: 6px solid transparent;
+.align-triangle.left:last-child {border-bottom: 6px solid transparent; border-top: 6px solid transparent;
     border-left: 6px solid #FFF; left: 100%;}
-.dropdown-panel>.indicator.right:last-child {border-bottom: 6px solid transparent; border-top: 6px solid transparent;
+.align-triangle.right:last-child {border-bottom: 6px solid transparent; border-top: 6px solid transparent;
     border-right: 6px solid #FFF; left: -6px;}
-.dropdown-panel>.indicator.bottom:first-child {border-bottom: 7px solid rgba(0, 0, 0, 0.2);
+.align-triangle.bottom:first-child {border-bottom: 7px solid rgba(0, 0, 0, 0.2);
 	border-right: 7px solid transparent; border-left: 7px solid transparent; top: -7px;}
-.dropdown-panel>.indicator.top:first-child {border-top: 7px solid rgba(0, 0, 0, 0.2);
+.align-triangle.top:first-child {border-top: 7px solid rgba(0, 0, 0, 0.2);
     border-right: 7px solid transparent; border-left: 7px solid transparent; top: 100%;}
-.dropdown-panel>.indicator.left:first-child {border-bottom: 7px solid transparent;
+.align-triangle.left:first-child {border-bottom: 7px solid transparent;
     border-top: 7px solid transparent; border-left: 7px solid rgba(0, 0, 0, 0.2); left: 100%;}
-.dropdown-panel>.indicator.right:first-child {border-bottom: 7px solid transparent; border-top: 7px solid transparent;
+.align-triangle.right:first-child {border-bottom: 7px solid transparent; border-top: 7px solid transparent;
     border-right: 7px solid rgba(0, 0, 0, 0.2); left: -7px;}
+    
 .nav-tabs .dropdown-trigger.dropdown-hover:hover, .nav-pills .dropdown-trigger.dropdown-hover:hover {
     background-color: #999; border-color: #999; color: #FFF;}
 .nav li.dropdown .dropdown-hover:hover .caret {border-bottom-color: #FFF; border-top-color: #FFF; opacity: 1;}

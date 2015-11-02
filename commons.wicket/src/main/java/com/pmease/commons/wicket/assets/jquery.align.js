@@ -2,7 +2,7 @@
  * 2014, Robin Shen
  */
 jQuery.fn.align = function(alignment) {
-	if (this[0] == undefined)
+	if (this.length == 0)
 		return this;
 	
 	// make sure position is absolute as otherwise width/height calculation
@@ -10,9 +10,7 @@ jQuery.fn.align = function(alignment) {
 	this.css("position", "absolute");
 	
 	if (alignment == undefined) 
-		alignment = this[0].alignment;
-	
-	var indicator = this.find(">.indicator");
+		alignment = this.data("alignment");
 	
 	var borderTop = jQuery(window).scrollTop();
 	var borderBottom = borderTop + jQuery(window).height();
@@ -21,8 +19,6 @@ jQuery.fn.align = function(alignment) {
 
 	var width = this.outerWidth();
 	var height = this.outerHeight();
-	
-	var indicatorSize = 6;
 	
 	var left, top;
 	var targetLeft, targetTop;
@@ -80,76 +76,20 @@ jQuery.fn.align = function(alignment) {
 			top = borderTop;
 	}
 
-	if (indicator[0] && indicator[1]) {
-		indicator.removeClass("left right top bottom");
-		if (left >= targetLeft + targetWidth) {
-			if (left + width + alignment.offset <= borderRight) {
-				indicator.addClass("right");
-				left += alignment.offset;
-				var targetCenter = targetTop + targetHeight/2.0;
-				var indicatorTop = targetCenter - top - indicatorSize;
-				if (indicatorTop < indicatorSize)
-					indicatorTop = indicatorSize;
-				if (indicatorTop > height - 3 * indicatorSize)
-					indicatorTop = height - 3 * indicatorSize;
-				$(indicator[0]).css({top: (indicatorTop - 1) + "px"});
-				$(indicator[1]).css({top: indicatorTop + "px"});
-			}
-		} else if (left + width <= targetLeft) {
-			if (left - alignment.offset >= borderLeft) {
-				indicator.addClass("left");
-				left -= alignment.offset;
-				var targetCenter = targetTop + targetHeight/2.0;
-				var indicatorTop = targetCenter - top - indicatorSize;
-				if (indicatorTop < indicatorSize)
-					indicatorTop = indicatorSize;
-				if (indicatorTop > height - 3 * indicatorSize)
-					indicatorTop = height - 3 * indicatorSize;
-				$(indicator[0]).css({top: (indicatorTop - 1) + "px"});
-				$(indicator[1]).css({top: indicatorTop + "px"});
-			}
-		} else if (top >= targetTop + targetHeight) {
-			if (top + height + alignment.offset <= borderBottom) {
-				indicator.addClass("bottom");
-				top += alignment.offset;
-				var targetCenter = targetLeft + targetWidth/2.0;
-				var indicatorLeft = targetCenter - left - indicatorSize;
-				if (indicatorLeft < indicatorSize)
-					indicatorLeft = indicatorSize;
-				if (indicatorLeft > width - 3 * indicatorSize)
-					indicatorLeft = width - 3 * indicatorSize;
-				$(indicator[0]).css({left: (indicatorLeft - 1) + "px"});
-				$(indicator[1]).css({left: indicatorLeft + "px"});
-			}
-		} else if (top + height <= targetTop) {
-			if (top - alignment.offset >= borderTop) {
-				indicator.addClass("top");
-				top -= alignment.offset;
-				var targetCenter = targetLeft + targetWidth/2.0;
-				var indicatorLeft = targetCenter - left - indicatorSize;
-				if (indicatorLeft < indicatorSize)
-					indicatorLeft = indicatorSize;
-				if (indicatorLeft > width - 3 * indicatorSize)
-					indicatorLeft = width - 3 * indicatorSize;
-				$(indicator[0]).css({left: (indicatorLeft - 1) + "px"});
-				$(indicator[1]).css({left: indicatorLeft + "px"});
-			}
-		}
-	} else {
-		if (left >= targetLeft + targetWidth) {
-			if (left + width + alignment.offset <= borderRight)
-				left += alignment.offset;
-		} else if (left + width <= targetLeft) {
-			if (left - alignment.offset >= borderLeft)
-				left -= alignment.offset;
-		} else if (top >= targetTop + targetHeight) {
-			if (top + height + alignment.offset <= borderBottom) 
-				top += alignment.offset;
-		} else if (top + height <= targetTop) {
-			if (top - alignment.offset >= borderTop) 
-				top -= alignment.offset;
-		}
+	if (left >= targetLeft + targetWidth) {
+		if (left + width + alignment.offset <= borderRight)
+			left += alignment.offset;
+	} else if (left + width <= targetLeft) {
+		if (left - alignment.offset >= borderLeft)
+			left -= alignment.offset;
+	} else if (top >= targetTop + targetHeight) {
+		if (top + height + alignment.offset <= borderBottom) 
+			top += alignment.offset;
+	} else if (top + height <= targetTop) {
+		if (top - alignment.offset >= borderTop) 
+			top -= alignment.offset;
 	}
+
 	this.css({left:left, top:top});		
 	return this;
 };
