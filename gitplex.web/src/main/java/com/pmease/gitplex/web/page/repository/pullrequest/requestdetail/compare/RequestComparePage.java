@@ -40,7 +40,10 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.IntegrationPreview;
@@ -338,7 +341,13 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}));
 		
-		MenuPanel commonComparisons = new MenuPanel("comparisonChoices") {
+		compareHead.add(new MenuLink<Void>("comparisonSelector", new Alignment(50, 100, 50, 0)) {
+
+			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", " common-comparisons"));
+			}
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
@@ -348,7 +357,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target) {
-						hide(target);
+						close(target);
 						
 						state.commentId = null;
 						state.oldRev = REV_BASE;
@@ -367,7 +376,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target) {
-								hide(target);
+								close(target);
 								
 								state.commentId = null;
 								state.oldRev = REV_TARGET_BRANCH;
@@ -393,7 +402,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target) {
-							hide(target);
+							close(target);
 
 							state.commentId = null;
 							state.oldRev = REV_UPDATE_PREFIX + (updateNo-1);
@@ -408,12 +417,7 @@ public class RequestComparePage extends RequestDetailPage {
 				return items;
 			}
 			
-		};
-		commonComparisons.add(AttributeAppender.append("class", " common-comparisons"));
-		compareHead.add(commonComparisons);
-		compareHead.add(new WebMarkupContainer("comparisonSelector")
-				.add(new MenuBehavior(commonComparisons)
-				.alignWithTrigger(50, 100, 50, 0)));
+		});
 		
 		compareHead.add(diffOption = new DiffOptionPanel("diffOption", repoModel, newCommitHash) {
 

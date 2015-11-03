@@ -17,8 +17,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.model.Verification.Status;
@@ -50,7 +49,7 @@ public abstract class VerificationStatusPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DropdownPanel dropdown = new DropdownPanel("detail", true) {
+		DropdownLink<Void> link =  new DropdownLink<Void>("link") {
 
 			@Override
 			protected Component newContent(String id) {
@@ -86,9 +85,9 @@ public abstract class VerificationStatusPanel extends Panel {
 			}
 			
 		};
-		add(dropdown);
+		add(link);
 		
-		Component statusComponent = newStatusComponent("overall", new LoadableDetachableModel<Verification.Status>() {
+		link.add(newStatusComponent("overall", new LoadableDetachableModel<Verification.Status>() {
 
 			@Override
 			protected Status load() {
@@ -106,9 +105,7 @@ public abstract class VerificationStatusPanel extends Panel {
 				return overallStatus;
 			}
 			
-		});
-		statusComponent.add(new DropdownBehavior(dropdown));
-		add(statusComponent);
+		}));
 	}
 	
 	protected abstract Component newStatusComponent(String id, IModel<Verification.Status> statusModel);

@@ -16,7 +16,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationTo
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -31,11 +30,10 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.commons.wicket.component.menu.CheckItem;
 import com.pmease.commons.wicket.component.menu.LinkItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -81,7 +79,7 @@ public class RequestListPage extends PullRequestPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		MenuPanel filterMenu = new MenuPanel("filterMenu") {
+		add(new MenuLink<Void>("filters") {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
@@ -140,11 +138,9 @@ public class RequestListPage extends PullRequestPage {
 				return menuItems;
 			}
 			
-		};
-		add(filterMenu);
-		add(new WebMarkupContainer("filters").add(new MenuBehavior(filterMenu)));
+		});
 		
-		MenuPanel sortMenu = new MenuPanel("sortMenu") {
+		add(new MenuLink<Void>("sortBy") {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
@@ -176,10 +172,7 @@ public class RequestListPage extends PullRequestPage {
 				return menuItems;
 			}
 			
-		};
-		add(sortMenu);
-		
-		add(new WebMarkupContainer("sortBy").add(new MenuBehavior(sortMenu)));
+		});
 		
 		add(new Link<Void>("newRequest") {
 

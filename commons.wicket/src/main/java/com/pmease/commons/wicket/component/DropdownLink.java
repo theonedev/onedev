@@ -4,19 +4,25 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
+import com.pmease.commons.wicket.dropdown.AlignWith;
+import com.pmease.commons.wicket.dropdown.AlignWithComponent;
+import com.pmease.commons.wicket.dropdown.AlignWithMe;
+import com.pmease.commons.wicket.dropdown.AlignWithMouse;
 
 @SuppressWarnings("serial")
 public abstract class DropdownLink<T> extends AjaxLink<T> {
 
-	private final Component alignWith;
+	private final AlignWith alignWith;
 	
 	private final Alignment alignment;
 	
@@ -27,19 +33,19 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	}
 	
 	public DropdownLink(String id, Alignment alignment) {
-		this(id, null, null, alignment);
+		this(id, null, new AlignWithMe(), alignment);
 	}
 
 	public DropdownLink(String id, @Nullable IModel<T> model, Alignment alignment) {
-		this(id, model, null, alignment);
+		this(id, model, new AlignWithMe(), alignment);
 	}
 	
-	public DropdownLink(String id, @Nullable Component alignWith, Alignment alignment) {
+	public DropdownLink(String id, AlignWith alignWith, Alignment alignment) {
 		this(id, null, alignWith, alignment);
 	}
 	
 	public DropdownLink(String id, @Nullable IModel<T> model, 
-			@Nullable Component alignWith, Alignment alignment) {
+			AlignWith alignWith, Alignment alignment) {
 		super(id, model);
 		
 		this.alignWith = alignWith;
@@ -57,9 +63,33 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	}
 	
 	@Override
+	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+		super.updateAjaxAttributes(attributes);
+
+		String script = String.format(""
+				+ "return {mouseX: $('#%s').data('mouseX'), mouseY: $('#%s').data('mouseY')};", 
+				getMarkupId(), getMarkupId());
+		attributes.getDynamicExtraParameters().add(script);
+	}
+
+	@Override
 	public void onClick(AjaxRequestTarget target) {
-		if (dropdown == null) {
-			dropdown = new FloatingPanel(target, alignWith!=null?alignWith:this, alignment) {
+		if (dropdown == null) { 
+			com.pmease.commons.wicket.component.floating.AlignWith alignFloatingWith;
+			if (alignWith instanceof AlignWithComponent) {
+				Component component = ((AlignWithComponent)alignWith).getComponent();
+				alignFloatingWith =  new com.pmease.commons.wicket.component.floating.AlignWithComponent(component);
+			} else if (alignWith instanceof AlignWithMe) { 
+				alignFloatingWith =  new com.pmease.commons.wicket.component.floating.AlignWithComponent(this);
+			} else {
+				int mouseX = RequestCycle.get().getRequest().getRequestParameters()
+						.getParameterValue("mouseX").toInt();
+				int mouseY = RequestCycle.get().getRequest().getRequestParameters()
+						.getParameterValue("mouseY").toInt();
+				alignFloatingWith = ((AlignWithMouse)alignWith).asCoords(mouseX, mouseY);
+			}
+			
+			dropdown = new FloatingPanel(target, alignFloatingWith, alignment) {
 	
 				@Override
 				protected void onInitialize() {
@@ -109,6 +139,8 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 		String script = String.format(""
 				+ "$('#%s').on('mouseup touchstart', function() {"
 				+ "  return false;"
+				+ "}).on('click', function(e){"
+				+ "  $(this).data('mouseX', e.pageX).data('mouseY', e.pageY);"
 				+ "});", getMarkupId(true));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

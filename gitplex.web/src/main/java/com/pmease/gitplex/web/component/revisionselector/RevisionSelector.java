@@ -43,14 +43,13 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
@@ -63,7 +62,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private int activeRefIndex;
 	
-	private DropdownPanel dropdown;
+	private DropdownLink<Void> dropdownLink;
 	
 	private String revInput;
 	
@@ -82,39 +81,7 @@ public abstract class RevisionSelector extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer button = new WebMarkupContainer("button");
-		add(button);
-		
-		button.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
-					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + revision) != null)
-						return "fa fa-ext fa-branch";
-					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + revision) != null)
-						return "fa fa-tag";
-					else
-						return "fa fa-ext fa-commit";
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		})));
-		button.add(new Label("label", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				if (GitUtils.isHash(revision))
-					return GitUtils.abbreviateSHA(revision);
-				else
-					return revision;
-			}
-			
-		}));
-		
-		dropdown = new DropdownPanel("dropdown", true) {
+		dropdownLink = new DropdownLink<Void>("button") {
 
 			private Fragment fragment;
 			
@@ -144,7 +111,7 @@ public abstract class RevisionSelector extends Panel {
 				filteredRefs.addAll(refs);
 				revField.setModel(Model.of(""));
 				activeRefIndex = 0;
-				Component revisionList = newRefList(this, filteredRefs);
+				Component revisionList = newRefList(filteredRefs);
 				fragment.replace(revisionList);
 				target.add(revisionList);
 				target.add(revField);
@@ -153,7 +120,7 @@ public abstract class RevisionSelector extends Panel {
 				target.appendJavaScript(script);
 				target.focusComponent(revField);
 			}
-			
+
 			@Override
 			protected Component newContent(String id) {
 				fragment = new Fragment(id, "dropdownContentFrag", RevisionSelector.this);
@@ -269,20 +236,47 @@ public abstract class RevisionSelector extends Panel {
 				});
 				
 				fragment.add(new Tabbable("tabs", tabs));
-				fragment.add(newRefList(this, filteredRefs));
+				fragment.add(newRefList(filteredRefs));
 				
 				return fragment;
 			}
 			
 		};
-		add(dropdown);
+		add(dropdownLink);
 		
-		button.add(new DropdownBehavior(dropdown).alignWithTrigger(0, 100, 0, 0, 6, true));
+		dropdownLink.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
+					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + revision) != null)
+						return "fa fa-ext fa-branch";
+					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + revision) != null)
+						return "fa fa-tag";
+					else
+						return "fa fa-ext fa-commit";
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		})));
+		dropdownLink.add(new Label("label", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (GitUtils.isHash(revision))
+					return GitUtils.abbreviateSHA(revision);
+				else
+					return revision;
+			}
+			
+		}));
 		
 		setOutputMarkupId(true);
 	}
 	
-	private Component newRefList(final DropdownPanel dropdown, List<String> refs) {
+	private Component newRefList(List<String> refs) {
 		WebMarkupContainer refsContainer = new WebMarkupContainer("refs");
 		refsContainer.add(new ListView<String>("refs", refs) {
 
@@ -329,7 +323,7 @@ public abstract class RevisionSelector extends Panel {
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
 			if (repoModel.getObject().getObjectId(revision, false) != null) {
-				dropdown.hide(target);
+				dropdownLink.close(target);
 				onSelect(target, revision);
 			} else {
 				feedbackMessage = "Can not find revision " + revision + "";

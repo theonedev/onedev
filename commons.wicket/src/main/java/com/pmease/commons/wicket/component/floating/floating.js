@@ -1,5 +1,5 @@
 pmease.commons.floating = {
-	init: function(floatingId, targetId, alignment, closeCallback) {
+	init: function(floatingId, alignWith, alignment, closeCallback) {
 		var $floating = $("#" + floatingId);
 		$floating.data("closeCallback", closeCallback);
 		
@@ -27,8 +27,12 @@ pmease.commons.floating = {
 		
 		Wicket.Event.subscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));
 
-		alignment.target = $("#" + targetId);
-		alignment.target.addClass("floating-aligned");
+		if (typeof alignWith === "string") {
+			alignment.target = $("#" + alignWith);
+			alignment.target.addClass("floating-aligned");
+		} else {
+			alignment.target = alignWith;
+		}
 		
 		alignment.resizable = ">.content";
 		$floating.data("alignment", alignment);

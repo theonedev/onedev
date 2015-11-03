@@ -52,8 +52,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
@@ -397,26 +396,20 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				DropdownPanel resolveInstructions = new DropdownPanel("resolveInstructions", true) {
-
-					@Override
-					protected Component newContent(String id) {
-						return new ResolveConflictInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
-					}
-					
-				};
-				add(resolveInstructions);
-				WebMarkupContainer resolveInstructionsTrigger = new WebMarkupContainer("resolveInstructionsTrigger") {
+				add(new DropdownLink<Void>("resolveInstructionsTrigger") {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(getPullRequest().getSource() != null);
 					}
+
+					@Override
+					protected Component newContent(String id) {
+						return new ResolveConflictInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
+					}
 					
-				};
-				resolveInstructionsTrigger.add(new DropdownBehavior(resolveInstructions));
-				add(resolveInstructionsTrigger);
+				});
 			}
 
 			@Override

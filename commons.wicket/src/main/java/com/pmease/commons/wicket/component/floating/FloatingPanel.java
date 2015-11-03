@@ -22,15 +22,16 @@ import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 @SuppressWarnings("serial")
 public abstract class FloatingPanel extends Panel {
 
-	private final Component alignWith;
+	private final AlignWith alignWith;
 	
 	private final Alignment alignment;
 	
-	public FloatingPanel(AjaxRequestTarget target, Component alignWith, Alignment alignment) {
+	public FloatingPanel(AjaxRequestTarget target, AlignWith alignWith, Alignment alignment) {
 		this(target, null, alignWith, alignment);
 	}
 
-	public FloatingPanel(AjaxRequestTarget target, IModel<?> model, Component alignWith, Alignment alignment) {
+	public FloatingPanel(AjaxRequestTarget target, IModel<?> model, 
+			AlignWith alignWith, Alignment alignment) {
 		super(((CommonPage)target.getPage()).getStandalones().newChildId(), model);
 		
 		CommonPage page = (CommonPage) target.getPage(); 
@@ -74,8 +75,9 @@ public abstract class FloatingPanel extends Panel {
 					throw new RuntimeException(e);
 				}
 				
-				String script = String.format("pmease.commons.floating.init('%s', '%s', %s, %s);", 
-						getMarkupId(true), alignWith.getMarkupId(true), alignmentJson, getCallbackFunction());
+				String script = String.format("pmease.commons.floating.init('%s', %s, %s, %s);", 
+						getMarkupId(true), alignWith.toJSON(), 
+						alignmentJson, getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 
