@@ -1,19 +1,19 @@
-.dropdown-panel.menu .content {
+.floating.menu .content {
 	padding: 4px 0; 
 	min-width: 120px;
 }
-.dropdown-panel.menu ul {
+.floating.menu ul {
 	list-style: none outside none; 
 	margin:0; 
 	padding: 0;
 }
-.dropdown-panel.menu li.submenu>a {
+.floating.menu li.submenu>a {
 	margin-right: 2px; 
 	margin-left: 2px; 
 	padding-left: 18px; 
 	padding-right: 18px;
 }
-.dropdown-panel.menu li.submenu>a:after {
+.floating.menu li.submenu>a:after {
 	border-color: transparent transparent transparent #CCCCCC; 
 	border-style: solid;
     border-width: 5px 0 5px 5px; 
@@ -25,30 +25,30 @@
     margin-top: 5px; 
     width: 0;
 }
-.dropdown-panel.menu li.submenu:hover > a:after {
+.floating.menu li.submenu:hover > a:after {
 	border-left-color: #FFFFFF;
 }
-.dropdown-panel.menu li:hover {
+.floating.menu li:hover {
 	background-color: #f5f5f5;
 }
-.dropdown-panel.menu li input[type=checkbox] {
+.floating.menu li input[type=checkbox] {
 	margin-right: 8px; vertical-align: text-bottom;
 }
-.dropdown-panel.menu .divider {
+.floating.menu .divider {
 	background-color: #E5E5E5; 
 	border-bottom: 1px solid #FFFFFF; 
 	height: 1px;
     margin: 8px 1px; 
     overflow: hidden;
 }
-.dropdown-panel.menu li.divider:hover {
+.floating.menu li.divider:hover {
 	background-color: #E5E5E5;
 }
-.dropdown-panel.menu ul>li>div {
+.floating.menu ul>li>div {
 	padding: 6px 20px; 
 	white-space: nowrap;
 }
-.dropdown-panel.menu ul>li>a {
+.floating.menu ul>li>a {
 	color: #333333; 
 	display: block; 
 	font-weight: normal; 
@@ -57,10 +57,10 @@
 	padding: 6px 20px; 
 	white-space: nowrap;
 }
-.dropdown-panel.menu ul>li>.check {
+.floating.menu ul>li>.check {
 	float: left;
 	margin: 9px 0 0 5px;
 }
-.dropdown-panel.menu ul>li>.check+a {
+.floating.menu ul>li>.check+a {
 	padding-left: 24px;
 }

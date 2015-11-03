@@ -1,18 +1,19 @@
-package com.pmease.commons.wicket.behavior.menu;
+package com.pmease.commons.wicket.component.menu;
 
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.wicket.behavior.dropdown.AlignmentTarget;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownAlignment;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownHover;
+import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
 abstract class ContentPanel extends Panel {
@@ -45,19 +46,27 @@ abstract class ContentPanel extends Panel {
 					if (menuItem instanceof Menu) {
 						final Menu menu = (Menu) menuItem;
 						item.add(new AttributeModifier("class", "submenu"));
-						MenuPanel menuPanel = new MenuPanel("itemMenu") {
+						item.add(new DropdownHover(menuItemComponent, new Alignment(100, 0, 0, 0)) {
 
 							@Override
-							protected List<MenuItem> getMenuItems() {
-								return menu.getItems();
+							protected void onInitialize(FloatingPanel dropdown) {
+								super.onInitialize(dropdown);
+								dropdown.add(AttributeAppender.append("class", " submenu"));
+							}
+
+							@Override
+							protected Component newContent(String id) {
+								return new ContentPanel(id) {
+
+									@Override
+									protected List<MenuItem> getMenuItems() {
+										return menu.getItems();
+									}
+									
+								};
 							}
 							
-						};
-						menuPanel.add(AttributeModifier.append("class", "submenu"));
-						item.add(menuPanel);
-						AlignmentTarget target = new AlignmentTarget(menuItemComponent, 100, 0);
-						DropdownAlignment alignment = new DropdownAlignment(target, 0, 0, -1, false);
-						item.add(new MenuBehavior(menuPanel).mode(new DropdownMode.Hover(0)).alignment(alignment));
+						});
 					} else {
 						item.add(new WebMarkupContainer("itemMenu").setVisible(false));
 					}

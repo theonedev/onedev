@@ -21,7 +21,8 @@ pmease.commons.floating = {
 		
 		$floating.data("ajaxCallComplete", function() {
 			var $floating = $("body>.floating");
-			$floating.align($floating.data("alignment"));
+			if ($floating.data("alignment"))
+				$floating.align($floating.data("alignment"));
 		});
 		
 		Wicket.Event.subscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));

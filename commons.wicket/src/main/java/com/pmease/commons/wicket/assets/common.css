@@ -90,34 +90,6 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 .modal>.modal-dialog>.loading {margin:8px; min-height:64px;
 	background: url("ajax-indicator.gif") center center no-repeat white;}
 
-/* DROPDOWN PANEL*/
-.dropdown-panel {background-clip: padding-box; background-color: #FFF; border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 4px 4px 4px 4px; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); position: absolute;
-	z-index: 2000; display: none;}
-.dropdown-panel>.content {margin: 0; padding: 0;}
-.dropdown-panel>.loading, .dropdown-panel>.loading.content {margin: 8px; padding: 0 0 0 20px;
-	background: url("ajax-indicator.gif") left center no-repeat;}
-	
-.nav-tabs .dropdown-trigger.dropdown-hover:hover, .nav-pills .dropdown-trigger.dropdown-hover:hover {
-    background-color: #999; border-color: #999; color: #FFF;}
-.nav li.dropdown .dropdown-hover:hover .caret {border-bottom-color: #FFF; border-top-color: #FFF; opacity: 1;}
-
-.dropdown-trigger {cursor: pointer;}
-
-.dropdown-trigger.pill {border-radius: 4px; margin: 2px 2px 2px 0; padding: 4px 6px; line-height: 12px;}
-.dropdown-trigger.pill .caret {border-bottom-color: #0088CC; border-top-color: #0088CC; margin-top: 8px;}
-.dropdown-trigger.pill:hover {background-color: #EEE; text-decoration: none;}
-.dropdown-trigger.pill:hover .caret {border-bottom-color: #005580; border-top-color: #005580;}
-.dropdown-trigger.pill.open, .dropdown-trigger.dropdown-hover.pill:hover {background-color: #999; border-color: #999; color: #FFF;}
-.dropdown-trigger.pill.open .caret, .dropdown-trigger.pill.dropdown-hover:hover .caret {border-bottom-color: #FFF; border-top-color: #FFF; opacity: 1;}
-
-.piped>a.dropdown-trigger {border-radius: 4px; margin: 2px 2px 2px -5px; padding: 3px 6px; line-height: 11px;}
-.piped .dropdown-trigger .caret {border-bottom-color: #0088CC; border-top-color: #0088CC; margin-top: 9px;}
-.piped .dropdown-trigger {background-color: #EEE; text-decoration: none;}
-.piped .dropdown-trigger .caret {border-bottom-color: #005580; border-top-color: #005580;}
-.piped .dropdown-trigger.open, .piped .dropdown-trigger.dropdown-hover:hover {background-color: #999; border-color: #999; color: #FFF;}
-.piped .dropdown-trigger.open .caret, .piped .dropdown-trigger.dropdown-hover:hover .caret {border-bottom-color: #FFF; border-top-color: #FFF; opacity: 1;}
-
 /* Tabs */
 .tabbable>.tab-content {padding-top: 16px;}
 

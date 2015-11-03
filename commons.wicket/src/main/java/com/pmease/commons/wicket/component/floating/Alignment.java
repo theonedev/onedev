@@ -14,6 +14,14 @@ public class Alignment implements Serializable {
 	
 	private final boolean triangle;
 	
+	public Alignment(int targetX, int targetY, int x, int y) {
+		this(targetX, targetY, x, y, 0);
+	}
+
+	public Alignment(int targetX, int targetY, int x, int y, int offset) {
+		this(targetX, targetY, x, y, offset, false);
+	}
+	
 	public Alignment(int targetX, int targetY, int x, int y, int offset, boolean triangle) {
 		this.targetX = targetX;
 		this.targetY = targetY;

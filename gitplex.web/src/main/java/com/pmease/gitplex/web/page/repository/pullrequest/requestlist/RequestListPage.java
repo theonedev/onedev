@@ -31,11 +31,11 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.wicket.behavior.menu.CheckItem;
-import com.pmease.commons.wicket.behavior.menu.LinkItem;
 import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuItem;
 import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.component.menu.CheckItem;
+import com.pmease.commons.wicket.component.menu.LinkItem;
+import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;

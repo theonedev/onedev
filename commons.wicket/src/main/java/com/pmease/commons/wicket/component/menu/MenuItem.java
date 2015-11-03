@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.behavior.menu;
+package com.pmease.commons.wicket.component.menu;
 
 import java.io.Serializable;
 

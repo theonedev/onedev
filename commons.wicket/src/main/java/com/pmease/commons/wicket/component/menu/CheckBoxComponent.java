@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.behavior.menu;
+package com.pmease.commons.wicket.component.menu;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
 class CheckBoxComponent extends Panel {
@@ -27,7 +27,7 @@ class CheckBoxComponent extends Panel {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				findParent(DropdownPanel.class).hide(target);
+				findParent(FloatingPanel.class).close(target);
 				target.add(findParent(ContentPanel.class));
 				checkBoxItem.onUpdate(target);
 			}

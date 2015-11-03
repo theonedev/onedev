@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.behavior.menu;
+package com.pmease.commons.wicket.component.menu;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;

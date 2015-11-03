@@ -151,20 +151,23 @@ pmease.commons = {
 		target[0].trigger = trigger[0];
 
 		target.on("shown.bs.collapse hidden.bs.collapse", function() {
-			var dropdown = target.closest(".dropdown-panel");
-			if (dropdown.length != 0) {
+			var $floating = target.closest(".floating");
+			if ($floating.length != 0) {
 				var borderTop = $(window).scrollTop();
 				var borderBottom = borderTop + $(window).height();
 				var borderLeft = $(window).scrollLeft();
 				var borderRight = borderLeft + $(window).width();
 
-				var left = dropdown.position().left;
-				var top = dropdown.position().top;
-				var width = dropdown.outerWidth();
-				var height = dropdown.outerHeight();
+				var left = $floating.position().left;
+				var top = $floating.position().top;
+				var width = $floating.outerWidth();
+				var height = $floating.outerHeight();
 				
-				if (left < borderLeft || left + width > borderRight || top < borderTop || top + height > borderBottom)
-					dropdown.align();
+				if (left < borderLeft || left + width > borderRight 
+						|| top < borderTop || top + height > borderBottom) {
+					if ($floating.data("alignment"))
+						$floating.align($floating.data("alignment"));
+				}
 			}
 			
 		});
@@ -212,191 +215,6 @@ pmease.commons = {
 				$(collapsible[0].trigger).addClass("collapsed");
 			}
 			collapsible[0].collapsibleIds = collapsibleIds;
-		}
-	},
-	
-	dropdown: {
-		setup: function(triggerId, dropdownId, mode, alignment, dropdownLoader) {
-			if (alignment.target) {
-				var target = $("#" + alignment.target.id);
-				if (!target[0])
-					return;
-				alignment.target.element = target[0];
-				$(alignment.target.element).addClass("dropdown-alignment");
-			}
-			
-			var trigger = $("#" + triggerId);
-			
-			// This script can still be called if CollapseBehavior is added to a 
-			// a component enclosed in an invisible wicket:enclosure. So we 
-			// should check if relevant element exists.
-			if (!trigger[0])
-				return;
-			
-			trigger.addClass("dropdown-trigger");
-			if (typeof mode === "number")
-				trigger.addClass("dropdown-hover");
-			
-			var dropdown = $("#" + dropdownId);
-
-			if (!dropdown[0])
-				return;
-					
-			dropdown[0].showMe = function() {
-				pmease.commons.dropdown.show(trigger, dropdown, alignment, dropdownLoader);
-			};
-			dropdown[0].hideMe = function() {
-				pmease.commons.dropdown.hide(dropdownId);
-			};
-			
-			// Dropdown can associate with multiple triggers, and we should initialize it only once.
-			if (!$("#" + dropdownId + "-placeholder")[0]) 
-				dropdown.before("<div id='" + dropdownId + "-placeholder' class='hide'></div>");
-
-			if (typeof mode === "number") {
-				function hide() {
-					var topmostDropdown = $("body>.dropdown-panel:visible:last");
-					if (topmostDropdown[0] == dropdown[0]) 
-						pmease.commons.dropdown.hide(dropdownId);
-					trigger.hideTimer = null;
-				}
-				function prepareToHide() {
-					if (trigger.hideTimer != null) 
-						clearTimeout(trigger.hideTimer);
-					trigger.hideTimer = setTimeout(function(){
-						if (trigger.hasClass("open"))
-							hide();
-					}, mode);
-				}
-				function cancelHide() {
-					if (trigger.hideTimer != null) {
-						clearTimeout(trigger.hideTimer);
-						trigger.hideTimer = null;				
-					} 
-				}
-				function cancelShow() {
-					if (trigger.showTimer != null) {
-						clearTimeout(trigger.showTimer);
-						trigger.showTimer = null;
-					}
-				}
-				trigger.mouseover(function(mouse){
-					if (!trigger.showTimer) {
-						trigger.showTimer = setTimeout(function() {
-							if (!trigger.hasClass("open")) {
-								if (alignment.target == undefined || alignment.target.id == undefined)
-									alignment.target = mouse;
-								pmease.commons.dropdown.show(trigger, dropdown, alignment, dropdownLoader);
-								cancelHide();
-							}
-							trigger.showTimer = null;
-						}, mode);
-					}
-				});
-				dropdown.mouseover(function() {
-					cancelHide();
-				});
-				trigger.mouseout(function() {
-					prepareToHide();
-					cancelShow();
-				});
-				trigger.mousemove(function() {
-					cancelHide();
-				});
-				dropdown.mouseout(function(event) {
-					if (event.pageX<dropdown.offset().left+5 || event.pageX>dropdown.offset().left+dropdown.width()-5 
-							|| event.pageY<dropdown.offset().top+5 || event.pageY>dropdown.offset().top+dropdown.height()-5) {
-						prepareToHide();
-					}
-				});
-			} else if (mode != undefined) {
-				trigger.click(function(mouse) {
-					if (!trigger.hasClass("open")) {
-						if (alignment.target == undefined || alignment.target.id == undefined)
-							alignment.target = mouse;
-						pmease.commons.dropdown.show(trigger, dropdown, alignment, dropdownLoader);
-					} else {
-						pmease.commons.dropdown.hide(dropdownId);
-					} 
-					return false;
-				});
-			}
-			
-			return this;
-		},
-
-		// hide all dropdowns except the dropdown attached to specified trigger
-		hideExcept: function(trigger) {
-			var start;
-			var dropdown = trigger.closest(".dropdown-panel");
-			if (dropdown[0]) {
-				start = dropdown;
-			} else {
-				var topmostModal = $("body>.modal:visible:last");
-				if (topmostModal[0]) 
-					start = topmostModal;
-				else 
-					start = $("body").children(":first");
-			}		
-			var childDropdownEl = start.nextAll(".dropdown-panel:visible")[0];
-			if (childDropdownEl)
-				pmease.commons.dropdown.hide(childDropdownEl.id);
-		},
-
-		show: function(trigger, dropdown, alignment, dropdownLoader) {
-			pmease.commons.dropdown.hideExcept(trigger);
-			
-			dropdown[0].trigger = trigger[0];
-			dropdown[0].alignment = alignment;
-			
-			trigger.addClass("open");
-			trigger.parent().addClass("open");
-
-			if (alignment.target.element)
-				$(alignment.target.element).addClass("open");
-
-			if (alignment.showIndicator) {
-				dropdown.prepend("<div class='indicator'></div>");
-				dropdown.append("<div class='indicator'></div>");
-			}
-			
-			var topmostPopup = $("body>.popup:visible:last");
-			if (topmostPopup[0])
-				dropdown.css("z-index", parseInt(topmostPopup.css("z-index")) + 10);
-
-			$("body").append(dropdown);
-			dropdown.align(alignment).show();
-
-			if (!dropdown.find(">.content")[0]) {
-				dropdown.find(">div").addClass("content");
-				dropdownLoader();
-			}
-			dropdown.trigger("show");
-		},
-		
-		loaded: function(dropdownId) {
-		},
-		
-		hide: function(dropdownId) {
-			var dropdown = $("#" + dropdownId);
-			dropdown.trigger("hide");
-			
-			var childDropdown = dropdown.nextAll(".dropdown-panel:visible");
-
-			if (childDropdown[0])
-				hideDropdown(childDropdown[0].id);
-			
-			var trigger = $(dropdown[0].trigger);
-			trigger.removeClass("open");
-			trigger.parent().removeClass("open");
-			
-			if ($(dropdown[0].alignment.target.element))
-				$(dropdown[0].alignment.target.element).removeClass("open");
-			dropdown.find(">.indicator").remove();
-			
-			dropdown.hide();
-			
-			$("#" + dropdownId + "-placeholder").after(dropdown);
 		}
 	},
 	
@@ -552,34 +370,24 @@ pmease.commons = {
 		});
 	}, 
 		
-	setupDropdownAndModel: function() {
-		$(document).bind("mousedown touchstart", function(event) {
-			var source = $(event.target);
-			if (!source.closest(".dropdown-trigger")[0])
-				pmease.commons.dropdown.hideExcept(source);
-		});
-		
+	setupModel: function() {
 		// use keydown as keypress does not work in chrome/safari
 		$(document).keydown(function(e) {
 			if (e.keyCode == 27) { // esc
 				if ($(".select2-drop:visible").length == 0) {
-					var topmostPopup = $("body>.popup:visible:last");
-					if (topmostPopup[0]) {
-						if (topmostPopup.hasClass("modal")) {
-							if (!topmostPopup[0].confirm)
-								pmease.commons.modal.hide(topmostPopup[0].id);
-							else
-								topmostPopup.modal("hide").remove();
-						}
-						if (topmostPopup.hasClass("dropdown-panel"))
-							pmease.commons.dropdown.hide(topmostPopup[0].id);
+					var $modal = $("body>.modal:visible");
+					if ($modal.length != 0) {
+						if (!$modal[0].confirm)
+							pmease.commons.modal.hide($modal[0].id);
+						else
+							$modal.modal("hide").remove();
 					}
 				}
 			} else if (e.keyCode == 13) {
-				var topmostPopup = $("body>.popup:visible:last");
-				if (topmostPopup[0] && topmostPopup[0].confirm) {
-					topmostPopup[0].confirm.callback();
-					topmostPopup.modal("hide").remove();
+				var $modal = $("body>.modal:visible");
+				if ($modal[0] && $modal[0].confirm) {
+					$modal[0].confirm.callback();
+					$modal.modal("hide").remove();
 				}
 			}
 		});
@@ -948,7 +756,7 @@ pmease.commons = {
 
 $(function() {
 	pmease.commons.setupAutoSize();
-	pmease.commons.setupDropdownAndModel();
+	pmease.commons.setupModel();
 	pmease.commons.setupAjaxLoadingIndicator();
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();

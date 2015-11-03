@@ -53,11 +53,21 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 		add(AttributeAppender.append("class", "dropdown-link"));
 	}
 
+	protected void onInitialize(FloatingPanel dropdown) {
+		
+	}
+	
 	@Override
 	public void onClick(AjaxRequestTarget target) {
 		if (dropdown == null || dropdown.findParent(Page.class) == null) {
 			dropdown = new FloatingPanel(target, alignWith!=null?alignWith:this, alignment) {
 	
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+					DropdownLink.this.onInitialize(this);
+				}
+
 				@Override
 				protected Component newContent(String id) {
 					return DropdownLink.this.newContent(id);

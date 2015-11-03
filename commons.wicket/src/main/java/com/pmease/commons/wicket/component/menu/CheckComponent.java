@@ -1,4 +1,4 @@
-package com.pmease.commons.wicket.behavior.menu;
+package com.pmease.commons.wicket.component.menu;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
 class CheckComponent extends Panel {
@@ -48,7 +48,7 @@ class CheckComponent extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				findParent(DropdownPanel.class).hide(target);
+				findParent(FloatingPanel.class).close(target);
 				target.add(findParent(ContentPanel.class));
 				checkItem.onClick(target);
 			}
