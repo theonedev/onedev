@@ -28,7 +28,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		inputField.setOutputMarkupId(true);
 		
 		CommonPage page = (CommonPage) inputField.getPage();
-		dropdown = new DropdownPanel(page.getComponents().newChildId()) {
+		dropdown = new DropdownPanel(page.getStandalones().newChildId()) {
 
 			@Override
 			protected Component newContent(String id) {
@@ -36,7 +36,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 			}
 			
 		};
-		page.getComponents().add(dropdown);
+		page.getStandalones().add(dropdown);
 		
 		inputField.add(new DropdownBehavior(dropdown)
 				.mode(null)

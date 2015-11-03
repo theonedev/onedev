@@ -139,9 +139,9 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 		} else if (type.equals("selectImage") || type.equals("selectLink")) {
 			CommonPage page = (CommonPage) getComponent().getPage();
 			SelectUrlPanel urlSelector = new SelectUrlPanel(
-					page.getComponents().newChildId(), this, type.equals("selectImage"));
+					page.getStandalones().newChildId(), this, type.equals("selectImage"));
 			urlSelector.setOutputMarkupId(true);
-			page.getComponents().add(urlSelector);
+			page.getStandalones().add(urlSelector);
 			urlSelector.setMarkupId(getComponent().getMarkupId() + "-urlselector");
 			target.add(urlSelector);
 		} else if (type.equals("insertUrl")) {
@@ -170,7 +170,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 	
 	public void closeUrlSelector(AjaxRequestTarget target, Component urlSelector) {
 		CommonPage page = (CommonPage) urlSelector.getPage();
-		page.getComponents().remove(urlSelector);
+		page.getStandalones().remove(urlSelector);
 		String script = String.format("$('#%s-urlselector').closest('.modal').modal('hide');", 
 				getComponent().getMarkupId());
 		target.appendJavaScript(script);

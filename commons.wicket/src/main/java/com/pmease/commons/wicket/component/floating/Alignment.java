@@ -12,12 +12,15 @@ public class Alignment implements Serializable {
 	
 	private final int offset;
 	
-	public Alignment(int targetX, int targetY, int x, int y, int offset) {
+	private final boolean triangle;
+	
+	public Alignment(int targetX, int targetY, int x, int y, int offset, boolean triangle) {
 		this.targetX = targetX;
 		this.targetY = targetY;
 		this.x = x;
 		this.y = y;
 		this.offset = offset;
+		this.triangle = triangle;
 	}
 
 	public int getTargetX() {
@@ -38,6 +41,10 @@ public class Alignment implements Serializable {
 
 	public int getOffset() {
 		return offset;
+	}
+
+	public boolean isTriangle() {
+		return triangle;
 	}
 
 }

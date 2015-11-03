@@ -1,20 +1,7 @@
 <wicket:extend>
-	<a wicket:id="test" class="target" 
-		style="border: 1px solid red; position: absolute; left: 1000px; top: 100px">test</a>
-	<div class="float" style="border: 1px solid rgba(0, 0, 0, 0.2); box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);padding: 20px;">
-	<div class="content" style="border: 1px solid green;">
-	<div style="width: 600px; height: 600px;"></div>
-	</div>
-	</div>
-	<script type="text/javascript">
-		$(".float").align({
-			target: $(".target"),
-			targetX: 0,
-			x: 0,
-			targetY: 100,
-			y: 0,
-			offset: 10,
-			resizable: ".content"
-		});
-	</script>
+	<a wicket:id="test" style="position: absolute; left: 400px; top: 200px;">test</a>
+	<wicket:fragment wicket:id="contentFrag">
+		<a wicket:id="more">more</a>
+		<div wicket:id="lines"></div>
+	</wicket:fragment>
 </wicket:extend>

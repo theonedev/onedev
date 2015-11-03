@@ -3,33 +3,42 @@ package com.pmease.commons.wicket.component.floating;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.wicket.CommonPage;
+import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class FloatingPanel extends Panel {
 
-	private final Component target;
+	private final Component alignWith;
 	
 	private final Alignment alignment;
 	
-	public FloatingPanel(String id, Component target, Alignment alignment) {
-		super(id);
-		
-		this.target = target;
-		this.alignment = alignment;
+	public FloatingPanel(AjaxRequestTarget target, Component alignWith, Alignment alignment) {
+		this(target, null, alignWith, alignment);
 	}
 
-	public FloatingPanel(String id, IModel<?> model, Component target, Alignment alignment) {
-		super(id, model);
+	public FloatingPanel(AjaxRequestTarget target, IModel<?> model, Component alignWith, Alignment alignment) {
+		super(((CommonPage)target.getPage()).getStandalones().newChildId(), model);
 		
-		this.target = target;
+		CommonPage page = (CommonPage) target.getPage(); 
+		page.getStandalones().add(this);
+		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId(true)));
+		target.add(this);
+
+		this.alignWith = alignWith;
 		this.alignment = alignment;
 	}
 
@@ -44,12 +53,19 @@ public abstract class FloatingPanel extends Panel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				FloatingPanel.this.remove();
+				onClosed(target);
 			}
 			
 			@Override
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 
+				response.render(JavaScriptHeaderItem.forReference(
+						new JavaScriptResourceReference(FloatingPanel.class, "floating.js")));
+				response.render(CssHeaderItem.forReference(
+						new CssResourceReference(FloatingPanel.class, "floating.css")));
+				response.render(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
+				
 				ObjectMapper mapper = AppLoader.getInstance(ObjectMapper.class);
 				String alignmentJson;
 				try {
@@ -59,13 +75,28 @@ public abstract class FloatingPanel extends Panel {
 				}
 				
 				String script = String.format("pmease.commons.floating.init('%s', '%s', %s, %s);", 
-						getMarkupId(true), target.getMarkupId(true), alignmentJson, getCallbackFunction());
+						getMarkupId(true), alignWith.getMarkupId(true), alignmentJson, getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 
 		});
+		
+		add(AttributeAppender.append("class", "floating"));
+		setOutputMarkupId(true);
 	}
 	
 	protected abstract Component newContent(String id);
 
+	public final void close(AjaxRequestTarget target) {
+		String script = String.format("pmease.commons.floating.close($('#%s'), false);", getMarkupId(true));
+		target.appendJavaScript(script);
+		
+		remove();
+		
+		onClosed(target);
+	}
+	
+	protected void onClosed(AjaxRequestTarget target) {
+		
+	}
 }

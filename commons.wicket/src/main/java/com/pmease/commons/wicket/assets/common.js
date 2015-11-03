@@ -585,13 +585,6 @@ pmease.commons = {
 		});
 
 		Wicket.Event.subscribe('/ajax/call/complete', function() {
-			$("body>.dropdown-panel:visible").each(function() {
-				if (!$("#" + this.id + "-placeholder")[0])
-					$(this).remove();
-			});
-			
-			$("body>.dropdown-panel:visible:last").align();
-
 			$("body>.modal:visible").each(function() {
 				if (!this.confirm) {
 					if (!$("#" + this.id + "-placeholder")[0]) {

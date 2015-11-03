@@ -35,7 +35,7 @@ public abstract class CommonPage extends WebPage {
 
 	private FeedbackPanel sessionFeedback;
 	
-	private RepeatingView components;
+	private RepeatingView standalones;
 	
 	public CommonPage() {
 	}
@@ -89,7 +89,7 @@ public abstract class CommonPage extends WebPage {
 		add(new WebMarkupContainer("keepSessionAlive").add(
 				new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
 		
-		add(components = new RepeatingView("components"));
+		add(standalones = new RepeatingView("components"));
 	}
 	
 	public FeedbackPanel getSessionFeedback() {
@@ -123,7 +123,8 @@ public abstract class CommonPage extends WebPage {
 		
 	}
 	
-	public RepeatingView getComponents() {
-		return components;
+	public RepeatingView getStandalones() {
+		return standalones;
 	}
+
 }
