@@ -12,7 +12,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -26,12 +25,10 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.menu.CheckItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
@@ -68,7 +65,7 @@ public abstract class DiffOptionPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		MenuPanel lineProcessorMenu = new MenuPanel("lineProcessorMenu") {
+		add(new MenuLink<Void>("lineProcessor") {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
@@ -105,11 +102,9 @@ public abstract class DiffOptionPanel extends Panel {
 				}
 
 				return menuItems;
-			}	
+			}
 			
-		};
-		add(lineProcessorMenu);
-		add(new WebMarkupContainer("lineProcessor").add(new MenuBehavior(lineProcessorMenu)));
+		});
 		
 		for (final DiffMode each: DiffMode.values()) {
 			add(new AjaxLink<Void>(each.name().toLowerCase()) {
@@ -145,7 +140,7 @@ public abstract class DiffOptionPanel extends Panel {
 			})));
 		}
 		
-		DropdownPanel filterDropdown = new DropdownPanel("filterDropdown", true) {
+		add(new DropdownLink<Void>("filter") {
 
 			@Override
 			protected Component newContent(String id) {
@@ -154,7 +149,7 @@ public abstract class DiffOptionPanel extends Panel {
 					
 					@Override
 					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-						hide(target);
+						close(target);
 						target.add(DiffOptionPanel.this);
 						onSelectPath(target, blobIdent.path);
 					}
@@ -169,9 +164,7 @@ public abstract class DiffOptionPanel extends Panel {
 				};
 			}
 			
-		};
-		add(filterDropdown);
-		add(new WebMarkupContainer("filter").add(new DropdownBehavior(filterDropdown)));
+		});
 		
 		setOutputMarkupId(true);
 	}

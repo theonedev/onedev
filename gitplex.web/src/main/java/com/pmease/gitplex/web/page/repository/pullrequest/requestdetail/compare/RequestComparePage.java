@@ -39,10 +39,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Comment;
@@ -251,7 +248,7 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		add(compareHead);
 
-		WebMarkupContainer oldSelector = new WebMarkupContainer("oldSelector") {
+		DropdownLink<Void> oldSelector = new DropdownLink<Void>("oldSelector") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
@@ -262,6 +259,23 @@ public class RequestComparePage extends RequestDetailPage {
 					tag.put("title", description.getSubject());
 				else 
 					tag.put("title", getRepository().getCommit(oldCommitHash).getSubject());
+			}
+
+			@Override
+			protected Component newContent(String id) {
+				return new CommitChoicePanel(id) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String commitHash) {
+						oldCommitHash = commitHash;
+						state.commentId = null;
+						state.oldRev = getRevision(oldCommitHash);
+						state.newRev = getRevision(newCommitHash);
+						close(target);
+						onStateChange(target);
+					}
+					
+				};
 			}
 			
 		};
@@ -279,30 +293,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}));
 		
-		DropdownPanel oldChoicesDropdown = new DropdownPanel("oldChoices", false) {
-
-			@Override
-			protected Component newContent(String id) {
-				return new CommitChoicePanel(id) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, String commitHash) {
-						oldCommitHash = commitHash;
-						state.commentId = null;
-						state.oldRev = getRevision(oldCommitHash);
-						state.newRev = getRevision(newCommitHash);
-						hide(target);
-						onStateChange(target);
-					}
-					
-				};
-			}
-			
-		}; 
-		compareHead.add(oldChoicesDropdown);
-		oldSelector.add(new DropdownBehavior(oldChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
-		
-		WebMarkupContainer newSelector = new WebMarkupContainer("newSelector") {
+		DropdownLink<Void> newSelector = new DropdownLink<Void>("newSelector") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
@@ -313,6 +304,23 @@ public class RequestComparePage extends RequestDetailPage {
 					tag.put("title", description.getSubject());
 				else
 					tag.put("title", getRepository().getCommit(newCommitHash).getSubject());
+			}
+
+			@Override
+			protected Component newContent(String id) {
+				return new CommitChoicePanel(id) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String commitHash) {
+						newCommitHash = commitHash;
+						state.commentId = null;
+						state.oldRev = getRevision(oldCommitHash);
+						state.newRev = getRevision(newCommitHash);
+						close(target);
+						onStateChange(target);
+					}
+					
+				};
 			}
 			
 		};
@@ -330,29 +338,6 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}));
 		
-		DropdownPanel newChoicesDropdown = new DropdownPanel("newChoices", false) {
-
-			@Override
-			protected Component newContent(String id) {
-				return new CommitChoicePanel(id) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, String commitHash) {
-						newCommitHash = commitHash;
-						state.commentId = null;
-						state.oldRev = getRevision(oldCommitHash);
-						state.newRev = getRevision(newCommitHash);
-						hide(target);
-						onStateChange(target);
-					}
-					
-				};
-			}
-			
-		}; 
-		compareHead.add(newChoicesDropdown);
-		newSelector.add(new DropdownBehavior(newChoicesDropdown).alignWithTrigger(0, 100, 0, 0));
-
 		MenuPanel commonComparisons = new MenuPanel("comparisonChoices") {
 
 			@Override

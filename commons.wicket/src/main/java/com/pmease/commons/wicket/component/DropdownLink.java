@@ -3,7 +3,6 @@ package com.pmease.commons.wicket.component;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -59,7 +58,7 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		if (dropdown == null || dropdown.findParent(Page.class) == null) {
+		if (dropdown == null) {
 			dropdown = new FloatingPanel(target, alignWith!=null?alignWith:this, alignment) {
 	
 				@Override
@@ -80,6 +79,8 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 					String script = String.format("$('#%s').removeClass('dropdown-open');", 
 							DropdownLink.this.getMarkupId(true));
 					target.appendJavaScript(script);
+					
+					dropdown = null;
 				}
 	
 			};
@@ -90,6 +91,11 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 		}
 	}
 
+	public void close(AjaxRequestTarget target) {
+		if (dropdown != null)
+			dropdown.close(target);
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

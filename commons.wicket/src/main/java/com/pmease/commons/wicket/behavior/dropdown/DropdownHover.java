@@ -24,6 +24,8 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 	
 	private final int hoverDelay;
 	
+	private FloatingPanel dropdown;
+	
 	public DropdownHover() {
 		this(new Alignment(0, 100, 0, 0, 8, true));
 	}
@@ -52,34 +54,43 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 	
 	@Override
 	protected void respond(AjaxRequestTarget target) {
-		FloatingPanel dropdown = new FloatingPanel(target, alignWith!=null?alignWith:getComponent(), alignment) {
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				DropdownHover.this.onInitialize(this);
-			}
-
-			@Override
-			protected Component newContent(String id) {
-				return DropdownHover.this.newContent(id);
-			}
-
-			@Override
-			protected void onClosed(AjaxRequestTarget target) {
-				super.onClosed(target);
-
-				String script = String.format("pmease.commons.dropdownhover.closed('%s', '%s');", 
-						getComponent().getMarkupId(true), getMarkupId(true));
-				target.appendJavaScript(script);
-			}
-
-		};
-		String script = String.format("pmease.commons.dropdownhover.opened('%s', '%s');", 
-				getComponent().getMarkupId(true), dropdown.getMarkupId(true));
-		target.appendJavaScript(script);
+		if (dropdown == null) {
+			dropdown = new FloatingPanel(target, alignWith!=null?alignWith:getComponent(), alignment) {
+				
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+					DropdownHover.this.onInitialize(this);
+				}
+	
+				@Override
+				protected Component newContent(String id) {
+					return DropdownHover.this.newContent(id);
+				}
+	
+				@Override
+				protected void onClosed(AjaxRequestTarget target) {
+					super.onClosed(target);
+	
+					String script = String.format("pmease.commons.dropdownhover.closed('%s', '%s');", 
+							getComponent().getMarkupId(true), getMarkupId(true));
+					target.appendJavaScript(script);
+					
+					dropdown = null;
+				}
+	
+			};
+			String script = String.format("pmease.commons.dropdownhover.opened('%s', '%s');", 
+					getComponent().getMarkupId(true), dropdown.getMarkupId(true));
+			target.appendJavaScript(script);
+		}
 	}
 
+	public void close(AjaxRequestTarget target) {
+		if (dropdown != null) 
+			dropdown.close(target);
+	}
+	
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
