@@ -3,14 +3,11 @@ package com.pmease.gitplex.web.page.test;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import com.pmease.commons.wicket.assets.align.AlignResourceReference;
-import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.dropdownhover.DropdownHover;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.gitplex.web.page.base.BasePage;
 
@@ -23,7 +20,7 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new DropdownLink<Void>("test", new Alignment(0, 50, 100, 50, 8, true)) {
+		add(new DropdownHover("test", new Alignment(0, 50, 100, 50, 8, true)) {
 
 			@Override
 			protected Component newContent(String id) {
@@ -51,12 +48,5 @@ public class TestPage extends BasePage {
 
 		});
 	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-
-		response.render(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
-	}		
 
 }

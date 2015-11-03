@@ -6,9 +6,11 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -70,8 +72,8 @@ public abstract class DropdownHover extends WebMarkupContainer {
 					protected void onClosed(AjaxRequestTarget target) {
 						super.onClosed(target);
 
-						String script = String.format("$('#%s').removeClass('dropdown-on');", 
-								DropdownHover.this.getMarkupId(true));
+						String script = String.format("pmease.commons.dropdownhover.closed('%s', '%s');", 
+								DropdownHover.this.getMarkupId(true), getMarkupId(true));
 						target.appendJavaScript(script);
 					}
 		
@@ -85,6 +87,8 @@ public abstract class DropdownHover extends WebMarkupContainer {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
+				response.render(JavaScriptHeaderItem.forReference(
+						new JavaScriptResourceReference(DropdownHover.class, "dropdown-hover.js")));
 				String script = String.format("pmease.commons.dropdownhover.init('%s', %s, %s);", 
 						getMarkupId(true), hoverDelay, getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));

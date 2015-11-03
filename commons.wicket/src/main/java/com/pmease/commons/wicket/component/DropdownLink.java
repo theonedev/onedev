@@ -67,13 +67,13 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 				protected void onClosed(AjaxRequestTarget target) {
 					super.onClosed(target);
 
-					String script = String.format("$('#%s').removeClass('dropdown-on');", 
+					String script = String.format("$('#%s').removeClass('dropdown-open');", 
 							DropdownLink.this.getMarkupId(true));
 					target.appendJavaScript(script);
 				}
 	
 			};
-			String script = String.format("$('#%s').addClass('dropdown-on');", getMarkupId(true));
+			String script = String.format("$('#%s').addClass('dropdown-open');", getMarkupId(true));
 			target.appendJavaScript(script);
 		} else {
 			dropdown.close(target);
