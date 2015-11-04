@@ -1,7 +1,14 @@
 <wicket:extend>
-	<a wicket:id="test" style="position: absolute; left: 400px; top: 200px;">test</a>
+	<a wicket:id="test">test</a>
 	<wicket:fragment wicket:id="contentFrag">
-		<a wicket:id="more">more</a>
-		<div wicket:id="lines"></div>
+		<div class="modal-header">
+			<h4>Title</h4>
+		</div>
+		<div class="modal-body">
+			hello world
+		</div>
+		<div class="modal-footer">
+			<a wicket:id="close" class="btn btn-default">Close</a>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

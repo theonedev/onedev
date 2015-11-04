@@ -6,85 +6,10 @@
 var pmease = {};
 
 pmease.commons = {
-	modal: {
-		setupTrigger: function(triggerId, modalId, contentLoader) {
-			var trigger = $("#" + triggerId);
-			var modal = $("#" + modalId);
-
-			// This script can still be called if CollapseBehavior is added to a 
-			// a component enclosed in an invisible wicket:enclosure. So we 
-			// should check if relevant element exists.
-			if (!trigger[0] || !modal[0])
-				return;
-			
-			$("#" + triggerId).click(function() {
-				pmease.commons.modal.show(modalId, contentLoader);
-			});
-		},
-
-		setup: function(modalId, contentUnloader, showImmediately) {
-			var $modal = $("#" + modalId);
-			
-			// This script can still be called if CollapseBehavior is added to a 
-			// a component enclosed in an invisible wicket:enclosure. So we 
-			// should check if relevant element exists.
-			if ($modal.length == 0)
-				return;
-			
-			$modal[0].contentUnloader = contentUnloader;
-			
-			if (!document.getElementById(modalId + "-placeholder"))
-				$modal.before("<div id='" + modalId + "-placeholder' class='hide'></div>");
-			$modal.modal({backdrop: "static", keyboard: false, show: false});
-			if (showImmediately)
-				pmease.commons.modal.show(modalId, undefined);
-		},
-
-		show: function(modalId, contentLoader) {
-			var modal = $("#" + modalId);
-			$("body").append(modal);
-			
-			modal.modal("show");
-
-			pmease.commons.modal.afterShow(modal);
-			
-			if (contentLoader && !modal.find(">.modal-dialog>.content")[0])
-				contentLoader();
-			else
-				modal.find("input[type=text], input[type=textarea]").filter(":visible:first").focus();
-		},
-		
-		afterShow: function(modal) {
-			var backdrop = $(".modal-backdrop:last");
-			var prevPopup = modal.prevAll(".popup:visible");
-			
-			if (prevPopup[0]) {
-				var prevPopupZIndex = parseInt(prevPopup.css("z-index"));
-				var backdropZIndex = prevPopupZIndex + 10;
-				backdrop.css("z-index", backdropZIndex);
-				modal.css("z-index", backdropZIndex + 10);
-			}
-		},
-
-		loaded: function(modalId) {
-			$("#" + modalId).find("input[type=text], input[type=textarea]").filter(":visible:first").focus();
-		},
-
-		hide: function(modalId, callFromServerSide) {
-			var $modal = $("#" + modalId);
-			$modal.modal("hide");
-			$("#" + modalId + "-placeholder").after($modal);
-			
-			if (callFromServerSide !== true && $modal[0].contentUnloader)
-				$modal[0].contentUnloader();
-		}
-		
-	},
-	
 	confirm: {
 		show: function(trigger, message, callback) {
 			var html = 
-				"<div class='modal popup'><div class='modal-dialog'><div class='modal-content'>" + 
+				"<div class='modal'><div class='modal-dialog'><div class='modal-content'>" + 
 				"	<div class='modal-body'>" +
 				"		<p>" + message + "</p>" +
 				"	</div>" +
@@ -97,6 +22,7 @@ pmease.commons = {
 			var modal = $(html);
 
 			$("body").append(modal);
+
 			modal[0].confirm = {};
 			modal[0].confirm.trigger= trigger[0];
 			modal[0].confirm.callback = callback;
@@ -109,8 +35,6 @@ pmease.commons = {
 			trigger.blur();
 			
 			modal.modal({keyboard: false, backdrop: "static"});
-			
-			pmease.commons.modal.afterShow(modal);
 		},
 		
 		setup: function(triggerId, message) {
