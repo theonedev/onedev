@@ -114,7 +114,7 @@ public class Git implements Serializable {
 	}
 
 	public Commit showRevision(String revision) {
-		List<Commit> commits = new LogCommand(repoDir).revisions(Lists.newArrayList(".." + revision)).count(1).call();
+		List<Commit> commits = new LogCommand(repoDir).revisions(Lists.newArrayList(revision)).count(1).call();
 		Preconditions.checkState(commits.size() == 1);
 		return commits.get(0);
 	}

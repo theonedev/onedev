@@ -1,5 +1,5 @@
 gitplex.blobInstantSearch = {
-	init: function(inputId, dropdownId, callback) {
+	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
 		
 		$input.on("blur", function() {
@@ -58,14 +58,14 @@ gitplex.blobInstantSearch = {
 			var $hint = $input.data("hint");
 			if ($hint != null) {
 				e.preventDefault();
-				var $active = $dropdown.find("li.hit.active");
+				var $active = $hint.find("li.hit.active");
 				var $next = $active.next("li.hit");
 				if ($next.length != 0) {
 					$active.removeClass("active");
 					$next.addClass("active");
 					callback("down");
 				} else if ($active.closest(".symbols.section").length != 0) {
-					var $firstTextHit = $dropdown.find(".texts.section li.hit:first-child");
+					var $firstTextHit = $hint.find(".texts.section li.hit:first-child");
 					if ($firstTextHit.length != 0) {
 						$active.removeClass("active");
 						$firstTextHit.addClass("active");

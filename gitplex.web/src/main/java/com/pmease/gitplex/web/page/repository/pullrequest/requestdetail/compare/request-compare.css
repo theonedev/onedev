@@ -18,9 +18,7 @@
 	color: #8a6d3b;
 }
 .content>.commit-choice {
-	max-height: 400px; 
 	padding: 8px 0; 
-	overflow-y: scroll;
 }
 .content>.commit-choice a {
 	text-decoration: none; 
@@ -41,7 +39,3 @@
 	font-size: 12px; 
 	color: #999;
 } 
-.common-comparisons.menu>.content {
-	max-height: 400px; 
-	overflow-y: scroll;
-}
