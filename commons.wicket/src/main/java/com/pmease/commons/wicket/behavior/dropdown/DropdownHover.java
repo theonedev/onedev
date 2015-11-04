@@ -10,6 +10,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import com.pmease.commons.wicket.component.floating.AlignFloatingWithComponent;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
@@ -55,7 +56,7 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		if (dropdown == null) {
-			dropdown = new FloatingPanel(target, alignWith!=null?alignWith:getComponent(), alignment) {
+			dropdown = new FloatingPanel(target, new AlignFloatingWithComponent(alignWith!=null?alignWith:getComponent()), alignment) {
 				
 				@Override
 				protected void onInitialize() {

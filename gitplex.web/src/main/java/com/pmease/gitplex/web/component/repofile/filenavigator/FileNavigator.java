@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -45,14 +46,14 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public abstract class FileNavigator extends Panel {
@@ -148,9 +149,13 @@ public abstract class FileNavigator extends Panel {
 				
 				item.add(link);
 				
-				WebMarkupContainer subtreeDropdownTrigger = new WebMarkupContainer("subtreeDropdownTrigger");
-				
-				DropdownPanel subtreeDropdown = new DropdownPanel("subtreeDropdown", true) {
+				item.add(new DropdownLink<Void>("subtreeDropdownTrigger") {
+
+					@Override
+					protected void onInitialize(FloatingPanel dropdown) {
+						super.onInitialize(dropdown);
+						dropdown.add(AttributeAppender.append("class", " subtree-dropdown"));
+					}
 
 					@Override
 					protected Component newContent(String id) {
@@ -235,7 +240,7 @@ public abstract class FileNavigator extends Panel {
 									@Override
 									public void onClick(AjaxRequestTarget target) {
 										onSelect(target, model.getObject());
-										hide(target);
+										close(target);
 									}
 
 									@Override
@@ -262,10 +267,7 @@ public abstract class FileNavigator extends Panel {
 						};		
 					}
 					
-				};
-				item.add(subtreeDropdown);
-				subtreeDropdownTrigger.add(new DropdownBehavior(subtreeDropdown));
-				item.add(subtreeDropdownTrigger);
+				});
 			}
 			
 		});

@@ -4,8 +4,14 @@ pmease.commons.floating = {
 		$floating.data("closeCallback", closeCallback);
 		
 		$floating.data("mouseUpOrTouchStart", function(e) {
-		    if (!$floating.is(e.target) // if the target of the click isn't the container...
-		            && $floating.has(e.target).length === 0) { // ... nor a descendant of the container
+			/*
+			 * Close the floating panel if mouse clicks outside of the floating. Also we 
+			 * do not close the panel if mouse clicks on the element triggering this 
+			 * floating panel, as normally the triggering element already has the logic 
+			 * closing the floating when it is clicked (to achieve the toggle effect) 
+			 */
+		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0 
+		            && (!$floating.data("trigger") || !$floating.data("trigger").is(e.target))) { 
 		    	pmease.commons.floating.close($floating, true);
 		    }
 		});
@@ -19,14 +25,6 @@ pmease.commons.floating = {
 		// use keydown as keypress does not work in chrome/safari
 		$(document).on("keydown", $floating.data("keydown"));
 		
-		$floating.data("ajaxCallComplete", function() {
-			var $floating = $("body>.floating");
-			if ($floating.data("alignment"))
-				$floating.align($floating.data("alignment"));
-		});
-		
-		Wicket.Event.subscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));
-
 		if (typeof alignWith === "string") {
 			alignment.target = $("#" + alignWith);
 			alignment.target.addClass("floating-aligned");
@@ -34,21 +32,28 @@ pmease.commons.floating = {
 			alignment.target = alignWith;
 		}
 		
-		alignment.resizable = ">.content";
 		$floating.data("alignment", alignment);
-
-		$floating.align(alignment);
+		
+		$floating.data("ajaxCallComplete", function() {
+			$floating.show().align(alignment).trigger("open");
+		});
+		Wicket.Event.subscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));
 	}, 
 	
 	close: function($floating, callCloseCallback) {
-		if (callCloseCallback) 
+		if (callCloseCallback)
 			$floating.data("closeCallback")();
 		
-		$floating.data("alignment").target.removeClass("floating-aligned");
+		var alignment = $floating.data("alignment");
+		
+		if (alignment.target instanceof jQuery || alignment.target instanceof HTMLElement)
+			alignment.target.removeClass("floating-aligned");
 		
 		$(document).off("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 		$(document).off("keydown", $floating.data("keydown"));
 		Wicket.Event.unsubscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));
+		
+		$floating.trigger("close");
 		
 		$floating.remove();
 	}

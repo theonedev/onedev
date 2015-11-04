@@ -9,10 +9,9 @@
 	border-color: #ADADAD; 
 	cursor: pointer;
 }
-.gate-keeper-selector {
+.gate-keeper-selector.floating {
 	width: 600px; 
-	max-height: 600px; 
-	overflow: auto;
+	border-radius: 0;
 }
 .gate-keeper-selector .panel {
 	border: none; 

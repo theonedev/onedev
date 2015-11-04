@@ -1,11 +1,8 @@
 gitplex.revisionSelector = {
 	init: function(containerId, callback) {
 		var $container = $("#" + containerId);
-		$container.closest(".dropdown-panel").on("show", function() {
-			$container.find("input").focus();
-		});
-		$container.find("input").focus();
-		$container.closest(".dropdown-panel").on("click", function() {
+		var $floating = $container.closest(".floating");
+		$floating.on("open click", function() {
 			$container.find("input").focus();
 		});
 		gitplex.revisionSelector.bindInputKeys(containerId, callback);

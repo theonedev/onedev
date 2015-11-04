@@ -17,7 +17,6 @@ import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.behavior.ConfirmBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
-import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.gatekeeper.AbstractGateKeeper;
@@ -149,7 +148,7 @@ public abstract class GateKeeperPanel extends Panel {
 				}
 				
 			});
-			GateKeeperDropdown dropdown = new GateKeeperDropdown("childTypeSelector") {
+			fragment.add(new GateKeeperLink("childTypeSelectorTrigger") {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
@@ -186,21 +185,8 @@ public abstract class GateKeeperPanel extends Panel {
 					}
 				}
 				
-			};
-			fragment.add(dropdown);
-			DropdownBehavior behavior = new DropdownBehavior(dropdown);
-			behavior.alignWithCursor(10, 10);	
-			DropdownLink<Void> childTypeSelectorTrigger = new DropdownLink<Void>("childTypeSelectorTrigger") {
-
-				@Override
-				protected Component newContent(String id) {
-					return null;
-				}
-				
-			};
+			});
 			
-			childTypeSelectorTrigger.add(behavior);
-			fragment.add(childTypeSelectorTrigger);
 			fragment.add(new WebMarkupContainer("childEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 			container.add(fragment);
 		} else if (clazz == NotGateKeeper.class) {
@@ -208,7 +194,7 @@ public abstract class GateKeeperPanel extends Panel {
 			final Fragment fragment = new Fragment("content", "notFrag", GateKeeperPanel.this);
 
 			if (notGateKeeper.getGateKeeper() instanceof DefaultGateKeeper) {
-				GateKeeperDropdown dropdown = new GateKeeperDropdown("gateKeeperTypeSelector") {
+				fragment.add(new GateKeeperLink("gateKeeperTypeSelectorTrigger") {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
@@ -245,14 +231,7 @@ public abstract class GateKeeperPanel extends Panel {
 						}
 					}
 					
-				};
-				fragment.add(dropdown);
-				DropdownBehavior behavior = new DropdownBehavior(dropdown);
-				behavior.alignWithCursor(10, 10);	
-				WebMarkupContainer gateKeeperTypeSelectorTrigger = new WebMarkupContainer("gateKeeperTypeSelectorTrigger");
-				
-				gateKeeperTypeSelectorTrigger.add(behavior);
-				fragment.add(gateKeeperTypeSelectorTrigger);				
+				});
 				
 				fragment.add(new WebMarkupContainer("gateKeeper").setVisible(false));
 				fragment.add(new WebMarkupContainer("gateKeeperEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
@@ -282,7 +261,7 @@ public abstract class GateKeeperPanel extends Panel {
 			final Fragment fragment = new Fragment("content", "ifThenFrag", GateKeeperPanel.this);
 
 			if (ifThenGateKeeper.getIfGate() instanceof DefaultGateKeeper) {
-				GateKeeperDropdown dropdown = new GateKeeperDropdown("ifTypeSelector") {
+				fragment.add(new GateKeeperLink("ifTypeSelectorTrigger") {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
@@ -319,15 +298,7 @@ public abstract class GateKeeperPanel extends Panel {
 						}
 					}
 					
-				};
-				fragment.add(dropdown);
-				DropdownBehavior behavior = new DropdownBehavior(dropdown);
-				behavior.alignWithCursor(10, 10);	
-				WebMarkupContainer ifTypeSelectorTrigger = new WebMarkupContainer("ifTypeSelectorTrigger");
-				
-				ifTypeSelectorTrigger.add(behavior);
-				fragment.add(ifTypeSelectorTrigger);				
-				
+				});
 				fragment.add(new WebMarkupContainer("if").setVisible(false));
 				fragment.add(new WebMarkupContainer("ifEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));
 			} else {
@@ -352,7 +323,7 @@ public abstract class GateKeeperPanel extends Panel {
 			}
 			
 			if (ifThenGateKeeper.getThenGate() instanceof DefaultGateKeeper) {
-				GateKeeperDropdown dropdown = new GateKeeperDropdown("thenTypeSelector") {
+				fragment.add(new GateKeeperLink("thenTypeSelectorTrigger") {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
@@ -389,14 +360,7 @@ public abstract class GateKeeperPanel extends Panel {
 						}
 					}
 					
-				};
-				fragment.add(dropdown);
-				DropdownBehavior behavior = new DropdownBehavior(dropdown);
-				behavior.alignWithCursor(10, 10);	
-				WebMarkupContainer thenTypeSelectorTrigger = new WebMarkupContainer("thenTypeSelectorTrigger");
-				
-				thenTypeSelectorTrigger.add(behavior);
-				fragment.add(thenTypeSelectorTrigger);				
+				});
 				
 				fragment.add(new WebMarkupContainer("then").setVisible(false));
 				fragment.add(new WebMarkupContainer("thenEditor").setOutputMarkupPlaceholderTag(true).setVisible(false));

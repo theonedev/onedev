@@ -30,10 +30,12 @@ import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.commons.wicket.dropdown.AlignDropdownWithComponent;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -163,7 +165,13 @@ public abstract class RepositoryPage extends AccountPage {
 		repoLink.add(new Label("repoName", getRepository().getName()));
 		accountAndRepo.add(repoLink);
 		
-		DropdownPanel repoChoice = new DropdownPanel("repoChoice") {
+		fragment.add(new DropdownLink<Void>("repoChoiceTrigger", new AlignDropdownWithComponent(accountAndRepo), new Alignment(0, 100, 0, 0, 6, true)) {
+
+			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", " repo-choice"));
+			}
 
 			@Override
 			protected Component newContent(String id) {
@@ -177,13 +185,8 @@ public abstract class RepositoryPage extends AccountPage {
 				};
 			}
 			
-		};
-		fragment.add(repoChoice);
-		WebMarkupContainer repoChoiceTrigger = new WebMarkupContainer("repoChoiceTrigger");
-		repoChoiceTrigger.add(new DropdownBehavior(repoChoice)
-				.alignWithComponent(accountAndRepo, 0, 100, 0, 0, 6, true));
-		fragment.add(repoChoiceTrigger);
-		
+		});
+
 		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getRepository()));
 		fragment.add(new TextField<String>("cloneUrl", cloneUrlModel));

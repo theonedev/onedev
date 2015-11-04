@@ -22,21 +22,23 @@ import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 @SuppressWarnings("serial")
 public abstract class FloatingPanel extends Panel {
 
-	private final AlignWith alignWith;
+	private static final String CONTENT_ID = "content";
+	
+	private final AlignFloatingWith alignWith;
 	
 	private final Alignment alignment;
 	
-	public FloatingPanel(AjaxRequestTarget target, AlignWith alignWith, Alignment alignment) {
+	public FloatingPanel(AjaxRequestTarget target, AlignFloatingWith alignWith, Alignment alignment) {
 		this(target, null, alignWith, alignment);
 	}
 
 	public FloatingPanel(AjaxRequestTarget target, IModel<?> model, 
-			AlignWith alignWith, Alignment alignment) {
+			AlignFloatingWith alignWith, Alignment alignment) {
 		super(((CommonPage)target.getPage()).getStandalones().newChildId(), model);
 		
 		CommonPage page = (CommonPage) target.getPage(); 
 		page.getStandalones().add(this);
-		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId(true)));
+		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		target.add(this);
 
 		this.alignWith = alignWith;
@@ -47,7 +49,7 @@ public abstract class FloatingPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newContent("content"));
+		add(newContent(CONTENT_ID));
 		
 		add(new AbstractDefaultAjaxBehavior() {
 			
@@ -89,6 +91,10 @@ public abstract class FloatingPanel extends Panel {
 	
 	protected abstract Component newContent(String id);
 
+	public Component getContent() {
+		return get(CONTENT_ID); 
+	}
+	
 	public final void close(AjaxRequestTarget target) {
 		String script = String.format("pmease.commons.floating.close($('#%s'), false);", getMarkupId(true));
 		target.appendJavaScript(script);

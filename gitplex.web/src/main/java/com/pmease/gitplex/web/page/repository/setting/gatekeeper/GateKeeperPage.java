@@ -11,7 +11,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.util.ReflectionUtils;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
 import com.pmease.commons.wicket.behavior.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.EditableUtils;
@@ -55,7 +54,7 @@ public class GateKeeperPage extends RepoSettingPage {
 			}
 			
 		});
-		GateKeeperDropdown gateKeeperDropdown = new GateKeeperDropdown("gateKeeperDropdown") {
+		content.add(new GateKeeperLink("gateKeeperDropdownTrigger") {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
@@ -91,11 +90,7 @@ public class GateKeeperPage extends RepoSettingPage {
 				}
 			}
 			
-		};
-		content.add(gateKeeperDropdown);
-		DropdownBehavior behavior = new DropdownBehavior(gateKeeperDropdown);
-		behavior.alignWithCursor(10, 10);
-		content.add(new WebMarkupContainer("gateKeeperDropdownTrigger").add(behavior));
+		});
 		content.add(new WebMarkupContainer("gateKeeperPanel").setVisible(false));
 		content.add(new WebMarkupContainer("gateKeeperModal").setOutputMarkupPlaceholderTag(true).setVisible(false));
 		return content;

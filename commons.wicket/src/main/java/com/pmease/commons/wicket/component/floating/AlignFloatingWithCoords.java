@@ -1,10 +1,12 @@
 package com.pmease.commons.wicket.component.floating;
 
-public class AlignWithCoords implements AlignWith {
+public class AlignFloatingWithCoords implements AlignFloatingWith {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final int left, top, width, height;
 	
-	public AlignWithCoords(int left, int top, int width, int height) {
+	public AlignFloatingWithCoords(int left, int top, int width, int height) {
 		this.left = left;
 		this.top = top;
 		this.width = width;

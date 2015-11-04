@@ -48,10 +48,9 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
 import com.pmease.commons.wicket.component.menu.AjaxLinkItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
@@ -349,7 +348,13 @@ public class RepoCommitsPage extends RepositoryPage {
 		WebMarkupContainer addFilter = new WebMarkupContainer("addFilter");
 		addFilter.setOutputMarkupId(true);
 		
-		MenuPanel addFilterMenu = new MenuPanel("menu") {
+		addFilter.add(new MenuLink<Void>("trigger") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(GitPlex.getExtensions(CommitFilter.class).size() != state.filters.size());
+			}
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
@@ -374,7 +379,7 @@ public class RepoCommitsPage extends RepositoryPage {
 										item.getMarkupId());
 								target.prependJavaScript(script);
 								target.add(item);
-								hide(target);
+								close(target);
 
 								WebMarkupContainer addFilter = newAddFilter();
 								filterForm.replace(addFilter);
@@ -387,19 +392,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				return menuItems;
 			}
 			
-		};
-		addFilter.add(addFilterMenu);
-		WebMarkupContainer addFilterTrigger = new WebMarkupContainer("trigger") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(GitPlex.getExtensions(CommitFilter.class).size() != state.filters.size());
-			}
-			
-		};
-		addFilterTrigger.add(new MenuBehavior(addFilterMenu));
-		addFilter.add(addFilterTrigger);
+		});
 				
 		addFilter.add(new AjaxSubmitLink("query") {
 

@@ -3,7 +3,6 @@
 		<input wicket:id="input" placeholder="Find symbols, files, or text" class="form-control input-sm"/> 
 		<a title="Instant search" onclick="if (!$(this).prev().is(':visible')) $(this).prev().show().focus();"><i class="fa fa-search"></i></a>
 	</span>		
-	<div wicket:id="resultDropdown"></div>
 	<wicket:fragment wicket:id="resultFrag">
 		<div class="instant-search-result">
 			<wicket:enclosure child="symbolHits">

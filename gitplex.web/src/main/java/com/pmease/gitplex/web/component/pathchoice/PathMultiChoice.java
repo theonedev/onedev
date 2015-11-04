@@ -9,7 +9,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -21,8 +20,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -65,7 +63,7 @@ public class PathMultiChoice extends FormComponentPanel<List<String>> {
 			
 		input.setOutputMarkupId(true);
 		
-		DropdownPanel chooser = new DropdownPanel("chooser") {
+		add(new DropdownLink<Void>("chooserTrigger") {
 
 			@Override
 			protected Component newContent(String id) {
@@ -95,9 +93,8 @@ public class PathMultiChoice extends FormComponentPanel<List<String>> {
 					return new Fragment(id, "noDefaultBranchFrag", PathMultiChoice.this);
 				}					
 			}
-		};
-		add(chooser);
-		add(new WebMarkupContainer("chooserTrigger").add(new DropdownBehavior(chooser)));
+			
+		});
 	}
 
 	@Override

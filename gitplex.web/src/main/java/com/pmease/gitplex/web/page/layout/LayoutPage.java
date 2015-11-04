@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -13,13 +14,12 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownMode;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
-import com.pmease.commons.wicket.behavior.menu.MenuBehavior;
-import com.pmease.commons.wicket.behavior.menu.MenuPanel;
+import com.pmease.commons.wicket.behavior.dropdown.DropdownHover;
+import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.LinkItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
@@ -98,7 +98,14 @@ public abstract class LayoutPage extends BasePage {
 
 				// Use dropdown panel to mimic tooltip as the bootstrap tooltip has the issue 
 				// of disappearing when we adjust margin property when hover over the link
-				DropdownPanel tooltip = new DropdownPanel("tooltip", false) {
+				
+				prevLink.add(new DropdownHover(prevLink, new Alignment(0, 50, 100, 50, 7, true), 100) {
+
+					@Override
+					protected void onInitialize(FloatingPanel dropdown) {
+						super.onInitialize(dropdown);
+						dropdown.add(AttributeAppender.replace("id", "runas-tooltip"));
+					}
 
 					@Override
 					protected Component newContent(String id) {
@@ -106,11 +113,7 @@ public abstract class LayoutPage extends BasePage {
 								+ user.getDisplayName() + ", click to exit the run-as mode");
 					}
 					
-				};
-				mainHead.add(tooltip);
-				prevLink.add(new DropdownBehavior(tooltip)
-						.mode(new DropdownMode.Hover(100))
-						.alignWithComponent(prevLink, 0, 50, 100, 50, 7, true));
+				});
 			} else {
 				WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
 				prevLink.add(new WebMarkupContainer("avatar"));
@@ -119,8 +122,7 @@ public abstract class LayoutPage extends BasePage {
 				mainHead.add(new WebMarkupContainer("tooltip").setVisible(false));
 			}
 			mainHead.add(new UserLink("user", new UserModel(user), AvatarMode.AVATAR));
-			WebMarkupContainer userMenuTrigger = new WebMarkupContainer("userMenuTrigger");
-			MenuPanel userMenu = new MenuPanel("userMenu") {
+			mainHead.add(new MenuLink<Void>("userMenuTrigger", new Alignment(50, 100, 50, 0, 8, true)) {
 
 				@Override
 				protected List<MenuItem> getMenuItems() {
@@ -144,10 +146,7 @@ public abstract class LayoutPage extends BasePage {
 					return menuItems;
 				}
 				
-			};
-			mainHead.add(userMenu);
-			userMenuTrigger.add(new MenuBehavior(userMenu).alignWithTrigger(50, 100, 50, 0, 8, true));
-			mainHead.add(userMenuTrigger);
+			});
 		} else {  
 			WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
 			prevLink.add(new WebMarkupContainer("avatar"));

@@ -6,7 +6,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -16,8 +15,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -53,7 +51,7 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 			input.add(AttributeAppender.append("placeholder", "Input path"));
 		input.setOutputMarkupId(true);
 		
-		DropdownPanel chooser = new DropdownPanel("chooser") {
+		add(new DropdownLink<Void>("chooserTrigger") {
 
 			@Override
 			protected Component newContent(String id) {
@@ -76,7 +74,7 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 							String script = String.format("gitplex.selectPath('%s', '%s', '%s', %s);", 
 									input.getMarkupId(), getMarkupId(), path, false);
 							target.appendJavaScript(script);
-							hide(target);
+							close(target);
 						}
 						
 					};
@@ -84,9 +82,8 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 					return new Fragment(id, "noDefaultBranchFrag", PathSingleChoice.this);
 				}					
 			}
-		};
-		add(chooser);
-		add(new WebMarkupContainer("chooserTrigger").add(new DropdownBehavior(chooser)));
+			
+		});
 	}
 
 	@Override

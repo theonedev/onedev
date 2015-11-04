@@ -3,12 +3,14 @@
  */
 (function ( $ ) {
  
-	var pageMargin = 9;
+	var pageMargin = 8;
 	var triangleSize = 6;
 	
     $.fn.align = function( alignment ) {
-    	jQuery("body").append(this);
-    	this.css("position", "absolute");
+    	if (!this.parent().is("body")) 
+    		jQuery("body").append(this);
+    	if(this.css("position") != "absolute")
+    		this.css("position", "absolute");
     	
     	var borderTop = jQuery(window).scrollTop() + pageMargin;
     	var borderBottom = borderTop + jQuery(window).height() - 2*pageMargin;
@@ -188,14 +190,8 @@
     	}
     	
     	this.css({left:left, top:top});	
-    	if (alignment.resizable) {
-    		var $resizable = this.find(alignment.resizable);
-    		$resizable.outerWidth(width - this.outerWidth() + $resizable.outerWidth());
-    		$resizable.outerHeight(height - this.outerHeight() + $resizable.outerHeight());
-    		$resizable.css({overflow: "auto"});
-    	} else {
-    		this.outerWidth(width).outerHeight(height).css({overflow: "auto"});
-    	}
+    	if (width < this.outerWidth() || height < this.outerHeight())
+        	this.outerWidth(width).outerHeight(height).css({overflow: "auto", "border-radius": "0"});
     	
     	return this;
     };

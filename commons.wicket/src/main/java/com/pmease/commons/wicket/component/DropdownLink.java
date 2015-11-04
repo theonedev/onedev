@@ -12,17 +12,19 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import com.pmease.commons.wicket.component.floating.AlignFloatingWith;
+import com.pmease.commons.wicket.component.floating.AlignFloatingWithComponent;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
-import com.pmease.commons.wicket.dropdown.AlignWith;
-import com.pmease.commons.wicket.dropdown.AlignWithComponent;
-import com.pmease.commons.wicket.dropdown.AlignWithMe;
-import com.pmease.commons.wicket.dropdown.AlignWithMouse;
+import com.pmease.commons.wicket.dropdown.AlignDropdownWith;
+import com.pmease.commons.wicket.dropdown.AlignDropdownWithComponent;
+import com.pmease.commons.wicket.dropdown.AlignDropdownWithMe;
+import com.pmease.commons.wicket.dropdown.AlignDropdownWithMouse;
 
 @SuppressWarnings("serial")
 public abstract class DropdownLink<T> extends AjaxLink<T> {
 
-	private final AlignWith alignWith;
+	private final AlignDropdownWith alignWith;
 	
 	private final Alignment alignment;
 	
@@ -33,19 +35,19 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	}
 	
 	public DropdownLink(String id, Alignment alignment) {
-		this(id, null, new AlignWithMe(), alignment);
+		this(id, null, new AlignDropdownWithMe(), alignment);
 	}
 
 	public DropdownLink(String id, @Nullable IModel<T> model, Alignment alignment) {
-		this(id, model, new AlignWithMe(), alignment);
+		this(id, model, new AlignDropdownWithMe(), alignment);
 	}
 	
-	public DropdownLink(String id, AlignWith alignWith, Alignment alignment) {
+	public DropdownLink(String id, AlignDropdownWith alignWith, Alignment alignment) {
 		this(id, null, alignWith, alignment);
 	}
 	
 	public DropdownLink(String id, @Nullable IModel<T> model, 
-			AlignWith alignWith, Alignment alignment) {
+			AlignDropdownWith alignWith, Alignment alignment) {
 		super(id, model);
 		
 		this.alignWith = alignWith;
@@ -56,6 +58,8 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	protected void onInitialize() {
 		super.onInitialize();
 		add(AttributeAppender.append("class", "dropdown-link"));
+		
+		setOutputMarkupId(true);
 	}
 
 	protected void onInitialize(FloatingPanel dropdown) {
@@ -75,18 +79,18 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	@Override
 	public void onClick(AjaxRequestTarget target) {
 		if (dropdown == null) { 
-			com.pmease.commons.wicket.component.floating.AlignWith alignFloatingWith;
-			if (alignWith instanceof AlignWithComponent) {
-				Component component = ((AlignWithComponent)alignWith).getComponent();
-				alignFloatingWith =  new com.pmease.commons.wicket.component.floating.AlignWithComponent(component);
-			} else if (alignWith instanceof AlignWithMe) { 
-				alignFloatingWith =  new com.pmease.commons.wicket.component.floating.AlignWithComponent(this);
+			AlignFloatingWith alignFloatingWith;
+			if (alignWith instanceof AlignDropdownWithComponent) {
+				Component component = ((AlignDropdownWithComponent)alignWith).getComponent();
+				alignFloatingWith =  new AlignFloatingWithComponent(component);
+			} else if (alignWith instanceof AlignDropdownWithMe) { 
+				alignFloatingWith =  new AlignFloatingWithComponent(this);
 			} else {
 				int mouseX = RequestCycle.get().getRequest().getRequestParameters()
 						.getParameterValue("mouseX").toInt();
 				int mouseY = RequestCycle.get().getRequest().getRequestParameters()
 						.getParameterValue("mouseY").toInt();
-				alignFloatingWith = ((AlignWithMouse)alignWith).asCoords(mouseX, mouseY);
+				alignFloatingWith = ((AlignDropdownWithMouse)alignWith).asCoords(mouseX, mouseY);
 			}
 			
 			dropdown = new FloatingPanel(target, alignFloatingWith, alignment) {
@@ -114,7 +118,10 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 				}
 	
 			};
-			String script = String.format("$('#%s').addClass('dropdown-open');", getMarkupId(true));
+			String script = String.format(""
+					+ "$('#%s').addClass('dropdown-open');"
+					+ "$('#%s').data('trigger', $('#%s'));", 
+					getMarkupId(), dropdown.getMarkupId(), getMarkupId());
 			target.appendJavaScript(script);
 		} else {
 			dropdown.close(target);
@@ -130,18 +137,10 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		/*
-		 * We want to toggle open/close of the dropdown if we click on the link, 
-		 * below code is added in order not to close the dropdown from browser side,
-		 * otherwise, the dropdown will be closed at browser side and opened again 
-		 * from server side
-		 */
 		String script = String.format(""
-				+ "$('#%s').on('mouseup touchstart', function() {"
-				+ "  return false;"
-				+ "}).on('click', function(e){"
+				+ "$('#%s').on('click', function(e){"
 				+ "  $(this).data('mouseX', e.pageX).data('mouseY', e.pageY);"
-				+ "});", getMarkupId(true));
+				+ "});", getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

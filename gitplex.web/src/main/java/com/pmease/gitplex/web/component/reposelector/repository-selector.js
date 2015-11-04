@@ -2,10 +2,9 @@ gitplex.repositorySelector = {
 	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
 
-		$input.closest(".dropdown-panel").on("show", function() {
+		$input.closest(".floating").on("open", function() {
 			$input.focus();
 		});
-		$input.focus();
 		
 		var $container = $input.closest(".repository-selector");
 		

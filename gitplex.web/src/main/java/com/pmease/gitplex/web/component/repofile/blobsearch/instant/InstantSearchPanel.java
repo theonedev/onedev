@@ -39,8 +39,9 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownBehavior;
-import com.pmease.commons.wicket.behavior.dropdown.DropdownPanel;
+import com.pmease.commons.wicket.component.floating.AlignFloatingWithComponent;
+import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -71,9 +72,7 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	private String searchInput;
 	
-	private DropdownPanel searchDropdown;
-	
-	private WebMarkupContainer searchResult;
+	private FloatingPanel searchHint;
 	
 	private List<QueryHit> symbolHits;
 	
@@ -98,11 +97,121 @@ public abstract class InstantSearchPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		searchDropdown = new DropdownPanel("resultDropdown") {
+		searchField = new TextField<>("input", Model.of(""));
+		searchField.add(new AjaxFormComponentUpdatingBehavior("inputchange focus click") {
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setChannel(new AjaxChannel("blob-instant-search-input", AjaxChannel.Type.DROP));
+			}
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				if (searchHint != null)
+					target.add(searchHint.getContent());
+				
+				searchInput = searchField.getInput();
+
+				if (StringUtils.isNotBlank(searchInput)) {
+					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+
+					try {
+						BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
+								null, null, MAX_QUERY_ENTRIES);
+						symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+						
+						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
+							query = new FileQuery(searchInput+"*", false, null, 
+									MAX_QUERY_ENTRIES-symbolHits.size());
+							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+						}
+						
+						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
+							query = new SymbolQuery(searchInput+"*", false, false, 
+									null, null, MAX_QUERY_ENTRIES-symbolHits.size());
+							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+						}
+					} catch (TooGeneralQueryException e) {
+						symbolHits = new ArrayList<>();
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+					
+					try {
+						BlobQuery query = new TextQuery(searchInput, false, false, false, 
+								null, null, MAX_QUERY_ENTRIES);
+						textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+					} catch (TooGeneralQueryException e) {
+						textHits = new ArrayList<>();
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+					
+					if (searchHint == null)
+						newSearchHint(target);
+				} else {
+					symbolHits = new ArrayList<>();
+					textHits = new ArrayList<>();
+					
+					if (searchHint != null)
+						searchHint.close(target);
+				}
+				activeHitIndex = 0;
+			}			
+			
+		});
+		searchField.add(new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				String key = params.getParameterValue("key").toString();
+				
+				if (key.equals("return")) {
+					QueryHit activeHit = getActiveHit();
+					if (activeHit != null) {
+						if (activeHit instanceof MoreSymbolHit) 
+							moreSymbolHitsBehavior.requestRun(target);
+						else if (activeHit instanceof MoreTextHit) 
+							moreTextHitsBehavior.requestRun(target);
+						else 
+							selectHit(target, activeHit);
+					}
+				} else if (key.equals("up")) {
+					activeHitIndex--;
+				} else if (key.equals("down")) {
+					activeHitIndex++;
+				} else {
+					throw new IllegalStateException("Unrecognized key: " + key);
+				}
+			}
+
+			@Override
+			public void renderHead(Component component, IHeaderResponse response) {
+				super.renderHead(component, response);
+				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
+
+				response.render(JavaScriptHeaderItem.forReference(
+						new JavaScriptResourceReference(InstantSearchPanel.class, "instant-search.js")));
+				
+				String script = String.format(
+						"gitplex.blobInstantSearch.init('%s', %s);", 
+						searchField.getMarkupId(true), getCallbackFunction(CallbackParameter.explicit("key")));
+				
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		});
+		add(searchField);
+	}
+	
+	private void newSearchHint(AjaxRequestTarget target) {
+		searchHint = new FloatingPanel(target, new AlignFloatingWithComponent(searchField), new Alignment(100, 100, 100, 0, 6, true)) {
 
 			@Override
 			protected Component newContent(String id) {
-				searchResult = new Fragment(id, "resultFrag", InstantSearchPanel.this);
+				WebMarkupContainer searchResult = new Fragment(id, "resultFrag", InstantSearchPanel.this);
 				searchResult.setOutputMarkupId(true);
 				
 				searchResult.add(new WebMarkupContainer("symbolsTitle") {
@@ -209,7 +318,7 @@ public abstract class InstantSearchPanel extends Panel {
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
-								searchDropdown.hide(target);
+								close(target);
 							}
 							
 						});
@@ -316,7 +425,7 @@ public abstract class InstantSearchPanel extends Panel {
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
-								searchDropdown.hide(target);
+								close(target);
 							}
 							
 						});
@@ -347,123 +456,18 @@ public abstract class InstantSearchPanel extends Panel {
 				
 				return searchResult;
 			}
+
+			@Override
+			protected void onClosed(AjaxRequestTarget target) {
+				super.onClosed(target);
+				searchHint = null;
+			}
 			
-		};
-		add(searchDropdown);
+		};	
 		
-		searchField = new TextField<>("input", Model.of(""));
-		searchField.add(new AjaxFormComponentUpdatingBehavior("inputchange focus click") {
-			
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.setChannel(new AjaxChannel("blob-instant-search-input", AjaxChannel.Type.DROP));
-			}
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				if (searchResult != null) {
-					target.add(searchResult);
-					String script = String.format("gitplex.blobInstantSearch.adjustDropdownHeight('%s', '%s');", 
-							searchField.getMarkupId(), searchDropdown.getMarkupId());
-					target.appendJavaScript(script);
-				}
-				
-				searchInput = searchField.getInput();
-
-				if (StringUtils.isNotBlank(searchInput)) {
-					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-
-					try {
-						BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
-								null, null, MAX_QUERY_ENTRIES);
-						symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-						
-						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-							query = new FileQuery(searchInput+"*", false, null, 
-									MAX_QUERY_ENTRIES-symbolHits.size());
-							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
-						}
-						
-						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-							query = new SymbolQuery(searchInput+"*", false, false, 
-									null, null, MAX_QUERY_ENTRIES-symbolHits.size());
-							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
-						}
-					} catch (TooGeneralQueryException e) {
-						symbolHits = new ArrayList<>();
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-					
-					try {
-						BlobQuery query = new TextQuery(searchInput, false, false, false, 
-								null, null, MAX_QUERY_ENTRIES);
-						textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-					} catch (TooGeneralQueryException e) {
-						textHits = new ArrayList<>();
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-					
-					searchDropdown.show(target);
-				} else {
-					symbolHits = new ArrayList<>();
-					textHits = new ArrayList<>();
-					
-					searchDropdown.hide(target);
-				}
-				activeHitIndex = 0;
-			}			
-			
-		});
-		searchField.add(new DropdownBehavior(searchDropdown)
-				.mode(null)
-				.alignWithTrigger(100, 100, 100, 0, 6, true));
-		searchField.add(new AbstractDefaultAjaxBehavior() {
-			
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-				String key = params.getParameterValue("key").toString();
-				
-				if (key.equals("return")) {
-					QueryHit activeHit = getActiveHit();
-					if (activeHit != null) {
-						if (activeHit instanceof MoreSymbolHit) 
-							moreSymbolHitsBehavior.requestRun(target);
-						else if (activeHit instanceof MoreTextHit) 
-							moreTextHitsBehavior.requestRun(target);
-						else 
-							selectHit(target, activeHit);
-					}
-				} else if (key.equals("up")) {
-					activeHitIndex--;
-				} else if (key.equals("down")) {
-					activeHitIndex++;
-				} else {
-					throw new IllegalStateException("Unrecognized key: " + key);
-				}
-			}
-
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-
-				response.render(JavaScriptHeaderItem.forReference(
-						new JavaScriptResourceReference(InstantSearchPanel.class, "instant-search.js")));
-				
-				String script = String.format(
-						"gitplex.blobInstantSearch.init('%s', '%s', %s);", 
-						searchField.getMarkupId(true), searchDropdown.getMarkupId(true),
-						getCallbackFunction(CallbackParameter.explicit("key")));
-				
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-			
-		});
-		add(searchField);
+		String script = String.format("gitplex.blobInstantSearch.hintOpened('%s', '%s');", 
+				searchField.getMarkupId(true), searchHint.getMarkupId(true));
+		target.appendJavaScript(script);
 	}
 	
 	private QueryHit getActiveHit() {
@@ -502,7 +506,7 @@ public abstract class InstantSearchPanel extends Panel {
 
 	private void selectHit(AjaxRequestTarget target, QueryHit hit) {
 		target.appendJavaScript(String.format("$('#%s').hide();", searchField.getMarkupId(true)));
-		searchDropdown.hide(target);
+		searchHint.close(target);
 		onSelect(target, hit);
 	}
 	
