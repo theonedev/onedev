@@ -47,6 +47,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -149,7 +150,7 @@ public abstract class FileNavigator extends Panel {
 				
 				item.add(link);
 				
-				item.add(new DropdownLink<Void>("subtreeDropdownTrigger") {
+				item.add(new DropdownLink("subtreeDropdownTrigger", Alignment.bottom(6)) {
 
 					@Override
 					protected void onInitialize(FloatingPanel dropdown) {

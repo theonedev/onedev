@@ -7,14 +7,13 @@ import org.apache.wicket.behavior.AttributeAppender;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
-import com.pmease.commons.wicket.dropdown.AlignDropdownWithMouse;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
-public abstract class GateKeeperLink extends DropdownLink<Void> {
+public abstract class GateKeeperLink extends DropdownLink {
 
 	public GateKeeperLink(String id) {
-		super(id, new AlignDropdownWithMouse(), new Alignment(50, 50, 50, 50));
+		super(id, true, new Alignment(50, 50, 50, 50));
 	}
 
 	@Override

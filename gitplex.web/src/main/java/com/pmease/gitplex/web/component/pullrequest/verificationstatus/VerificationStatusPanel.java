@@ -49,7 +49,7 @@ public abstract class VerificationStatusPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DropdownLink<Void> link =  new DropdownLink<Void>("link") {
+		DropdownLink link =  new DropdownLink("link") {
 
 			@Override
 			protected Component newContent(String id) {

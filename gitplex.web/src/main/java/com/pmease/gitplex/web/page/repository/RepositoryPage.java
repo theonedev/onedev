@@ -31,11 +31,9 @@ import org.eclipse.jgit.lib.Constants;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.commons.wicket.dropdown.AlignDropdownWithComponent;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -165,7 +163,7 @@ public abstract class RepositoryPage extends AccountPage {
 		repoLink.add(new Label("repoName", getRepository().getName()));
 		accountAndRepo.add(repoLink);
 		
-		fragment.add(new DropdownLink<Void>("repoChoiceTrigger", new AlignDropdownWithComponent(accountAndRepo), new Alignment(0, 100, 0, 0, 6, true)) {
+		fragment.add(new DropdownLink("repoChoiceTrigger") {
 
 			@Override
 			protected void onInitialize(FloatingPanel dropdown) {

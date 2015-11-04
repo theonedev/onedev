@@ -4,7 +4,6 @@
 (function ( $ ) {
  
 	var pageMargin = 8;
-	var triangleSize = 6;
 	
     $.fn.align = function( alignment ) {
     	if (!this.parent().is("body")) 
@@ -131,58 +130,6 @@
     		}
     	}
 
-    	if (alignment.triangle) {
-    		var $triangles = this.find(">.align-triangle"); 
-    		if ($triangles.length == 0) {
-				this.prepend("<div class='align-triangle'></div>");
-				this.append("<div class='align-triangle'></div>");
-				$triangles = this.find(">.align-triangle");				
-    		}
-
-        	$triangles.removeClass("left right top bottom");
-    		if (left >= targetLeft + targetWidth) {
-				$triangles.addClass("right");
-				var targetCenter = targetTop + targetHeight/2.0;
-				var triangleTop = targetCenter - top - triangleSize;
-				if (triangleTop < triangleSize)
-					triangleTop = triangleSize;
-				if (triangleTop > height - 3 * triangleSize)
-					triangleTop = height - 3 * triangleSize;
-				$($triangles[0]).css({top: (triangleTop - 1) + "px"});
-				$($triangles[1]).css({top: triangleTop + "px"});
-    		} else if (left + width <= targetLeft) {
-				$triangles.addClass("left");
-				var targetCenter = targetTop + targetHeight/2.0;
-				var triangleTop = targetCenter - top - triangleSize;
-				if (triangleTop < triangleSize)
-					triangleTop = triangleSize;
-				if (triangleTop > height - 3 * triangleSize)
-					triangleTop = height - 3 * triangleSize;
-				$($triangles[0]).css({top: (triangleTop - 1) + "px"});
-				$($triangles[1]).css({top: triangleTop + "px"});
-    		} else if (top >= targetTop + targetHeight) {
-				$triangles.addClass("bottom");
-				var targetCenter = targetLeft + targetWidth/2.0;
-				var triangleLeft = targetCenter - left - triangleSize;
-				if (triangleLeft < triangleSize)
-					triangleLeft = triangleSize;
-				if (triangleLeft > width - 3 * triangleSize)
-					triangleLeft = width - 3 * triangleSize;
-				$($triangles[0]).css({left: (triangleLeft - 1) + "px"});
-				$($triangles[1]).css({left: triangleLeft + "px"});
-    		} else if (top + height <= targetTop) {
-				$triangles.addClass("top");
-				var targetCenter = targetLeft + targetWidth/2.0;
-				var triangleLeft = targetCenter - left - triangleSize;
-				if (triangleLeft < triangleSize)
-					triangleLeft = triangleSize;
-				if (triangleLeft > width - 3 * triangleSize)
-					triangleLeft = width - 3 * triangleSize;
-				$($triangles[0]).css({left: (triangleLeft - 1) + "px"});
-				$($triangles[1]).css({left: triangleLeft + "px"});
-    		}
-    	}
-    	
     	this.css({left:left, top:top});	
     	var overflow = false;
     	

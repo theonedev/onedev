@@ -10,9 +10,10 @@ pmease.commons.floating = {
 			 * floating panel, as normally the triggering element already has the logic 
 			 * closing the floating when it is clicked (to achieve the toggle effect) 
 			 */
-		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0 
-		            && (!$floating.data("trigger") || !$floating.data("trigger").is(e.target))) { 
-		    	pmease.commons.floating.close($floating, true);
+		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0) {
+		    	var $trigger = $floating.data("trigger");
+			    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) 
+			    	pmease.commons.floating.close($floating, true);
 		    }
 		});
 		$(document).on("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
@@ -57,4 +58,5 @@ pmease.commons.floating = {
 		
 		$floating.remove();
 	}
+	
 }

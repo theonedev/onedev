@@ -62,7 +62,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private int activeRefIndex;
 	
-	private DropdownLink<Void> dropdownLink;
+	private DropdownLink dropdownLink;
 	
 	private String revInput;
 	
@@ -81,7 +81,7 @@ public abstract class RevisionSelector extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		dropdownLink = new DropdownLink<Void>("button") {
+		dropdownLink = new DropdownLink("button") {
 
 			private Fragment fragment;
 			

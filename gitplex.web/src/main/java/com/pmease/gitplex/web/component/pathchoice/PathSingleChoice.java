@@ -51,7 +51,7 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 			input.add(AttributeAppender.append("placeholder", "Input path"));
 		input.setOutputMarkupId(true);
 		
-		add(new DropdownLink<Void>("chooserTrigger") {
+		add(new DropdownLink("chooserTrigger") {
 
 			@Override
 			protected Component newContent(String id) {

@@ -24,16 +24,16 @@ public abstract class FloatingPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
-	private final AlignFloatingWith alignWith;
+	private final AlignWith alignWith;
 	
 	private final Alignment alignment;
 	
-	public FloatingPanel(AjaxRequestTarget target, AlignFloatingWith alignWith, Alignment alignment) {
+	public FloatingPanel(AjaxRequestTarget target, AlignWith alignWith, Alignment alignment) {
 		this(target, null, alignWith, alignment);
 	}
 
 	public FloatingPanel(AjaxRequestTarget target, IModel<?> model, 
-			AlignFloatingWith alignWith, Alignment alignment) {
+			AlignWith alignWith, Alignment alignment) {
 		super(((CommonPage)target.getPage()).getStandalones().newChildId(), model);
 		
 		CommonPage page = (CommonPage) target.getPage(); 

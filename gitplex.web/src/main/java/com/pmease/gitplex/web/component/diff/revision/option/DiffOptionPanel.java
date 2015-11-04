@@ -65,7 +65,7 @@ public abstract class DiffOptionPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new MenuLink<Void>("lineProcessor") {
+		add(new MenuLink("lineProcessor") {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
@@ -140,7 +140,7 @@ public abstract class DiffOptionPanel extends Panel {
 			})));
 		}
 		
-		add(new DropdownLink<Void>("filter") {
+		add(new DropdownLink("filter") {
 
 			@Override
 			protected Component newContent(String id) {

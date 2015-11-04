@@ -63,7 +63,7 @@ public class PathMultiChoice extends FormComponentPanel<List<String>> {
 			
 		input.setOutputMarkupId(true);
 		
-		add(new DropdownLink<Void>("chooserTrigger") {
+		add(new DropdownLink("chooserTrigger") {
 
 			@Override
 			protected Component newContent(String id) {

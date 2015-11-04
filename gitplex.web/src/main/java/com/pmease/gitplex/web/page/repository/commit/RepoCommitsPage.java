@@ -348,7 +348,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		WebMarkupContainer addFilter = new WebMarkupContainer("addFilter");
 		addFilter.setOutputMarkupId(true);
 		
-		addFilter.add(new MenuLink<Void>("trigger") {
+		addFilter.add(new MenuLink("trigger") {
 
 			@Override
 			protected void onConfigure() {

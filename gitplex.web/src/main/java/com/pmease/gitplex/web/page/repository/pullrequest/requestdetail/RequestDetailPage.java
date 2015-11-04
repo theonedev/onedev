@@ -396,7 +396,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new DropdownLink<Void>("resolveInstructionsTrigger") {
+				add(new DropdownLink("resolveInstructionsTrigger") {
 
 					@Override
 					protected void onConfigure() {

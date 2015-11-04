@@ -12,23 +12,16 @@ public class Alignment implements Serializable {
 	
 	private final int offset;
 	
-	private final boolean triangle;
-	
 	public Alignment(int targetX, int targetY, int x, int y) {
 		this(targetX, targetY, x, y, 0);
 	}
 
 	public Alignment(int targetX, int targetY, int x, int y, int offset) {
-		this(targetX, targetY, x, y, offset, false);
-	}
-	
-	public Alignment(int targetX, int targetY, int x, int y, int offset, boolean triangle) {
 		this.targetX = targetX;
 		this.targetY = targetY;
 		this.x = x;
 		this.y = y;
 		this.offset = offset;
-		this.triangle = triangle;
 	}
 
 	public int getTargetX() {
@@ -51,8 +44,20 @@ public class Alignment implements Serializable {
 		return offset;
 	}
 
-	public boolean isTriangle() {
-		return triangle;
+	public static Alignment bottom(int offset) {
+		return new Alignment(0, 100, 0, 0, offset);
 	}
-
+	
+	public static Alignment top(int offset) {
+		return new Alignment(0, 0, 0, 100, offset);
+	}
+	
+	public static Alignment left(int offset) {
+		return new Alignment(0, 50, 100, 50, offset);
+	}
+	
+	public static Alignment right(int offset) {
+		return new Alignment(100, 50, 0, 50, offset);
+	}
+	
 }

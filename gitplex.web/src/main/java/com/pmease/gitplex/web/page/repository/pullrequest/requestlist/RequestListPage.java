@@ -79,7 +79,7 @@ public class RequestListPage extends PullRequestPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new MenuLink<Void>("filters") {
+		add(new MenuLink("filters") {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {
@@ -140,7 +140,7 @@ public class RequestListPage extends PullRequestPage {
 			
 		});
 		
-		add(new MenuLink<Void>("sortBy") {
+		add(new MenuLink("sortBy") {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {

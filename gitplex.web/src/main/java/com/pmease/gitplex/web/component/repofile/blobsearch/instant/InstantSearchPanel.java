@@ -39,7 +39,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
-import com.pmease.commons.wicket.component.floating.AlignFloatingWithComponent;
+import com.pmease.commons.wicket.component.floating.AlignWithComponent;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.GitPlex;
@@ -207,7 +207,7 @@ public abstract class InstantSearchPanel extends Panel {
 	}
 	
 	private void newSearchHint(AjaxRequestTarget target) {
-		searchHint = new FloatingPanel(target, new AlignFloatingWithComponent(searchField), new Alignment(100, 100, 100, 0, 6, true)) {
+		searchHint = new FloatingPanel(target, new AlignWithComponent(searchField), new Alignment(100, 100, 100, 0, 0)) {
 
 			@Override
 			protected Component newContent(String id) {

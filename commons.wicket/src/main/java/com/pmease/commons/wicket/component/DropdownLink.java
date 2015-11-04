@@ -1,7 +1,5 @@
 package com.pmease.commons.wicket.component;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -9,48 +7,39 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.pmease.commons.wicket.component.floating.AlignFloatingWith;
-import com.pmease.commons.wicket.component.floating.AlignFloatingWithComponent;
+import com.pmease.commons.wicket.component.floating.AlignWith;
+import com.pmease.commons.wicket.component.floating.AlignWithComponent;
+import com.pmease.commons.wicket.component.floating.AlignWithCoords;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
-import com.pmease.commons.wicket.dropdown.AlignDropdownWith;
-import com.pmease.commons.wicket.dropdown.AlignDropdownWithComponent;
-import com.pmease.commons.wicket.dropdown.AlignDropdownWithMe;
-import com.pmease.commons.wicket.dropdown.AlignDropdownWithMouse;
 
 @SuppressWarnings("serial")
-public abstract class DropdownLink<T> extends AjaxLink<T> {
+public abstract class DropdownLink extends AjaxLink<Void> {
 
-	private final AlignDropdownWith alignWith;
+	private final boolean alignWithMouse;
 	
 	private final Alignment alignment;
 	
 	private FloatingPanel dropdown;
 
 	public DropdownLink(String id) {
-		this(id, new Alignment(0, 100, 0, 0, 8, true));
+		this(id, Alignment.bottom(0));
 	}
 	
 	public DropdownLink(String id, Alignment alignment) {
-		this(id, null, new AlignDropdownWithMe(), alignment);
+		this(id, false, alignment);
 	}
 
-	public DropdownLink(String id, @Nullable IModel<T> model, Alignment alignment) {
-		this(id, model, new AlignDropdownWithMe(), alignment);
+	public DropdownLink(String id, boolean alignWithMouse) {
+		this(id, alignWithMouse, Alignment.bottom(0));
 	}
 	
-	public DropdownLink(String id, AlignDropdownWith alignWith, Alignment alignment) {
-		this(id, null, alignWith, alignment);
-	}
-	
-	public DropdownLink(String id, @Nullable IModel<T> model, 
-			AlignDropdownWith alignWith, Alignment alignment) {
-		super(id, model);
+	public DropdownLink(String id, boolean alignWithMouse, Alignment alignment) {
+		super(id);
 		
-		this.alignWith = alignWith;
+		this.alignWithMouse = alignWithMouse;
 		this.alignment = alignment;
 	}
 	
@@ -79,19 +68,16 @@ public abstract class DropdownLink<T> extends AjaxLink<T> {
 	@Override
 	public void onClick(AjaxRequestTarget target) {
 		if (dropdown == null) { 
-			AlignFloatingWith alignFloatingWith;
-			if (alignWith instanceof AlignDropdownWithComponent) {
-				Component component = ((AlignDropdownWithComponent)alignWith).getComponent();
-				alignFloatingWith =  new AlignFloatingWithComponent(component);
-			} else if (alignWith instanceof AlignDropdownWithMe) { 
-				alignFloatingWith =  new AlignFloatingWithComponent(this);
-			} else {
+			AlignWith alignFloatingWith;
+			if (alignWithMouse) {
 				int mouseX = RequestCycle.get().getRequest().getRequestParameters()
 						.getParameterValue("mouseX").toInt();
 				int mouseY = RequestCycle.get().getRequest().getRequestParameters()
 						.getParameterValue("mouseY").toInt();
-				alignFloatingWith = ((AlignDropdownWithMouse)alignWith).asCoords(mouseX, mouseY);
-			}
+				alignFloatingWith = AlignWithCoords.ofMouse(mouseX, mouseY);
+			} else { 
+				alignFloatingWith =  new AlignWithComponent(this);
+			} 
 			
 			dropdown = new FloatingPanel(target, alignFloatingWith, alignment) {
 	

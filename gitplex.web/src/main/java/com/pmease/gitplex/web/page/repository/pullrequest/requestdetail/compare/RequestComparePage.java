@@ -251,7 +251,7 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		add(compareHead);
 
-		DropdownLink<Void> oldSelector = new DropdownLink<Void>("oldSelector") {
+		DropdownLink oldSelector = new DropdownLink("oldSelector") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
@@ -296,7 +296,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}));
 		
-		DropdownLink<Void> newSelector = new DropdownLink<Void>("newSelector") {
+		DropdownLink newSelector = new DropdownLink("newSelector") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
@@ -341,7 +341,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}));
 		
-		compareHead.add(new MenuLink<Void>("comparisonSelector", new Alignment(50, 100, 50, 0)) {
+		compareHead.add(new MenuLink("comparisonSelector", new Alignment(50, 100, 50, 0)) {
 
 			@Override
 			protected void onInitialize(FloatingPanel dropdown) {
