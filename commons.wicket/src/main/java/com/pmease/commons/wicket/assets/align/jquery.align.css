@@ -1,6 +1,9 @@
 .align-triangle {
-	display: inline-block; 
+	display: none; 
 	position: absolute;
+}
+.align-triangle.left, .align-triangle.right, .align-triangle.bottom, .align-triangle.top {
+	display: inline-block;
 }
 .align-triangle.bottom:last-child {
 	border-bottom: 6px solid #FFF; 

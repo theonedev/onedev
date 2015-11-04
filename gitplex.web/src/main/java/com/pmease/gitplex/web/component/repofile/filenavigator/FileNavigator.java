@@ -154,7 +154,7 @@ public abstract class FileNavigator extends Panel {
 					@Override
 					protected void onInitialize(FloatingPanel dropdown) {
 						super.onInitialize(dropdown);
-						dropdown.add(AttributeAppender.append("class", " subtree-dropdown"));
+						dropdown.add(AttributeAppender.append("class", "subtree-dropdown"));
 					}
 
 					@Override
