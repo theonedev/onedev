@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -29,7 +30,6 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarByUser;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
@@ -87,16 +87,6 @@ public class AccountListPage extends AdministrationPage {
 		accountsContainer = new WebMarkupContainer("accountsContainer");
 		accountsContainer.setOutputMarkupId(true);
 		add(accountsContainer);
-		
-		final ConfirmDeleteAccountModal confirmDeleteDlg = new ConfirmDeleteAccountModal("confirmDelete") {
-
-			@Override
-			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(getPage());
-			}
-			
-		};
-		add(confirmDeleteDlg);
 		
 		accountsContainer.add(accountsView = new PageableListView<User>("accounts", new LoadableDetachableModel<List<User>>() {
 
@@ -172,20 +162,22 @@ public class AccountListPage extends AdministrationPage {
 				});
 				
 				final Long accountId = user.getId();
-				item.add(new WebMarkupContainer("delete") {
+				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						
-						add(new ConfirmDeleteAccountModalBehavior(confirmDeleteDlg) {
+					public void onClick(AjaxRequestTarget target) {
+						new ConfirmDeleteAccountModal(target) {
+							
+							@Override
+							protected void onDeleted(AjaxRequestTarget target) {
+								setResponsePage(getPage());
+							}
 							
 							@Override
 							protected User getAccount() {
 								return GitPlex.getInstance(Dao.class).load(User.class, accountId);
 							}
-							
-						});
+						};
 					}
 
 				});

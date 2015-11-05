@@ -1,11 +1,8 @@
 package com.pmease.gitplex.web.page.test;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.link.Link;
 
-import com.pmease.commons.wicket.component.modal.ModalPanel;
+import com.pmease.commons.wicket.ConfirmOnClick;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -15,30 +12,20 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AjaxLink<Void>("test") {
+		add(new Link<Void>("test") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				new ModalPanel(target, ModalPanel.Size.SMALL) {
+			protected CharSequence getOnClickScript(CharSequence url) {
+				// TODO Auto-generated method stub
+				return super.getOnClickScript(url);
+			}
 
-					@Override
-					protected Component newContent(String id) {
-						Fragment fragment = new Fragment(id, "contentFrag", TestPage.this);
-						fragment.add(new AjaxLink<Void>("close") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								close(target);
-							}
-							
-						});
-						return fragment;
-					}
-					
-				};
+			@Override
+			public void onClick() {
+				System.out.println("clicked");
 			}
 			
-		});
+		}.add(new ConfirmOnClick("'lalala'")));
 	}
 
 }

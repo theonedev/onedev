@@ -3,26 +3,23 @@ package com.pmease.gitplex.web.component.confirmdelete;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalPanel;
+import com.pmease.commons.wicket.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 public abstract class ConfirmDeleteModal extends ModalPanel {
 
-	public ConfirmDeleteModal(String id) {
-		super(id);
+	public ConfirmDeleteModal(AjaxRequestTarget target) {
+		super(target);
 	}
 
 	@Override
-	protected Component newContent(String id, ModalBehavior behavior) {
-		final ConfirmDeleteModalBehavior confirmDeleteBehavior = (ConfirmDeleteModalBehavior) behavior;
-		
+	protected Component newContent(String id) {
 		return new ConfirmDeletePanel(id) {
 			
 			@Override
 			protected void onDelete(AjaxRequestTarget target) {
 				close(target);
-				doDelete(target, confirmDeleteBehavior);
+				doDelete(target);
 			}
 			
 			@Override
@@ -32,16 +29,20 @@ public abstract class ConfirmDeleteModal extends ModalPanel {
 
 			@Override
 			protected String getWarningMessage() {
-				return confirmDeleteBehavior.getWarningMessage();
+				return ConfirmDeleteModal.this.getWarningMessage();
 			}
 
 			@Override
 			protected String getConfirmInput() {
-				return confirmDeleteBehavior.getConfirmInput();
+				return ConfirmDeleteModal.this.getConfirmInput();
 			}
 			
 		};
 	}
 
-	protected abstract void doDelete(AjaxRequestTarget target, ConfirmDeleteModalBehavior behavior);
+	protected abstract void doDelete(AjaxRequestTarget target);
+	
+	protected abstract String getConfirmInput();
+	
+	protected abstract String getWarningMessage();
 }

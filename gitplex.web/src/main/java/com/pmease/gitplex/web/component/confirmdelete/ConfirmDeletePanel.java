@@ -55,8 +55,10 @@ abstract class ConfirmDeletePanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(ConfirmDeletePanel.class, "confirm-delete.css")));
-		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(ConfirmDeletePanel.class, "confirm-delete.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(ConfirmDeletePanel.class, "confirm-delete.css")));
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(ConfirmDeletePanel.class, "confirm-delete.js")));
 		
 		String script = String.format("gitplex.confirmDelete('%s', '%s');", getMarkupId(), getConfirmInput());
 		response.render(OnDomReadyHeaderItem.forScript(script));

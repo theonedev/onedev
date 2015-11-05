@@ -6,62 +6,6 @@
 var pmease = {};
 
 pmease.commons = {
-	confirm: {
-		show: function(trigger, message, callback) {
-			var html = 
-				"<div class='modal'><div class='modal-dialog'><div class='modal-content'>" + 
-				"	<div class='modal-body'>" +
-				"		<p>" + message + "</p>" +
-				"	</div>" +
-				"	<div class='modal-footer'>" +
-				"		<button class='btn btn-primary'>Ok</button>" +
-				"		<button class='btn btn-default' onclick='$(this).closest(\".modal\").modal(\"hide\").remove();'>Cancel</button>" +
-				"	</div>" +
-				"</div></div></div>";
-			
-			var modal = $(html);
-
-			$("body").append(modal);
-
-			modal[0].confirm = {};
-			modal[0].confirm.trigger= trigger[0];
-			modal[0].confirm.callback = callback;
-
-			modal.find(".btn-primary").on("click", function() {
-				modal.modal("hide").remove();
-				callback();
-			});
-			
-			trigger.blur();
-			
-			modal.modal({keyboard: false, backdrop: "static"});
-		},
-		
-		setup: function(triggerId, message) {
-			$(function() {
-				var trigger = $("#" + triggerId);
-				
-				var previousClick;
-
-				var handlers = $._data(trigger[0], 'events').click;
-
-				$.each(handlers, function(i,f) {
-					previousClick = f.handler; 
-					return false; 
-				});
-				
-				trigger.unbind('click');
-
-				trigger.click(function(event){
-					pmease.commons.confirm.show(trigger, message, function() {
-						previousClick(event);
-					});
-				});
-			});
-		}
-		
-	},
-	
 	setupCollapse: function(triggerId, targetId) {
 		var trigger = $("#" + triggerId);
 		var target = $("#" + targetId);
@@ -294,43 +238,6 @@ pmease.commons = {
 		});
 	}, 
 		
-	setupModel: function() {
-		// use keydown as keypress does not work in chrome/safari
-		$(document).keydown(function(e) {
-			if (e.keyCode == 27) { // esc
-				if ($(".select2-drop:visible").length == 0) {
-					var $modal = $("body>.modal:visible");
-					if ($modal.length != 0) {
-						if (!$modal[0].confirm)
-							pmease.commons.modal.hide($modal[0].id);
-						else
-							$modal.modal("hide").remove();
-					}
-				}
-			} else if (e.keyCode == 13) {
-				var $modal = $("body>.modal:visible");
-				if ($modal[0] && $modal[0].confirm) {
-					$modal[0].confirm.callback();
-					$modal.modal("hide").remove();
-				}
-			}
-		});
-
-		Wicket.Event.subscribe('/ajax/call/complete', function() {
-			$("body>.modal:visible").each(function() {
-				if (!this.confirm) {
-					if (!$("#" + this.id + "-placeholder")[0]) {
-						$(this).modal("hide");
-						$(this).remove();
-					}
-				} else {
-					if (!$("#" + this.confirm.trigger.id)[0])
-						$(this).modal("hide").remove();
-				}
-			});
-		});
-	},
-	
 	stick: function(sticky, parent) {
 		var $sticky = $(sticky);
 		var offset = 0;
@@ -680,7 +587,6 @@ pmease.commons = {
 
 $(function() {
 	pmease.commons.setupAutoSize();
-	pmease.commons.setupModel();
 	pmease.commons.setupAjaxLoadingIndicator();
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();

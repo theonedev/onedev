@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.model.IModel;
@@ -17,7 +17,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModalBehavior;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
 
@@ -81,23 +80,25 @@ public class GeneralSettingPage extends RepoSettingPage {
 		form.add(editor);
 		form.add(new SubmitLink("save"));
 
-		ConfirmDeleteRepoModal confirmDeleteDlg = new ConfirmDeleteRepoModal("confirmDeleteDlg") {
+		form.add(new AjaxLink<Void>("delete") {
 
 			@Override
-			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(AccountReposPage.class, paramsOf(getAccount()));
+			public void onClick(AjaxRequestTarget target) {
+				new ConfirmDeleteRepoModal(target) {
+					
+					@Override
+					protected void onDeleted(AjaxRequestTarget target) {
+						setResponsePage(AccountReposPage.class, paramsOf(getAccount()));						
+					}
+					
+					@Override
+					protected Repository getRepository() {
+						return GeneralSettingPage.this.getRepository();
+					}
+				};
 			}
 			
-		};
-		form.add(confirmDeleteDlg);
-		form.add(new WebMarkupContainer("delete").add(new ConfirmDeleteRepoModalBehavior(confirmDeleteDlg) {
-
-			@Override
-			protected Repository getRepository() {
-				return GeneralSettingPage.this.getRepository();
-			}
-			
-		}));
+		});
 		
 		add(form);
 	}

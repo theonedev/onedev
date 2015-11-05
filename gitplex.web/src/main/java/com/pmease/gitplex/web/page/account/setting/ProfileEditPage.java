@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.model.IModel;
@@ -20,7 +20,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
 @SuppressWarnings("serial")
@@ -81,16 +80,7 @@ public class ProfileEditPage extends AccountSettingPage {
 		form.add(editor);
 		form.add(new SubmitLink("save"));
 
-		ConfirmDeleteAccountModal confirmDeleteDlg = new ConfirmDeleteAccountModal("confirmDeleteDlg") {
-
-			@Override
-			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(getApplication().getHomePage());
-			}
-			
-		};
-		form.add(confirmDeleteDlg);
-		form.add(new WebMarkupContainer("delete") {
+		form.add(new AjaxLink<Void>("delete") {
 
 			@Override
 			protected void onConfigure() {
@@ -98,15 +88,25 @@ public class ProfileEditPage extends AccountSettingPage {
 				
 				setVisible(!getAccount().isRoot());
 			}
-			
-		}.add(new ConfirmDeleteAccountModalBehavior(confirmDeleteDlg) {
 
 			@Override
-			protected User getAccount() {
-				return ProfileEditPage.this.getAccount();
+			public void onClick(AjaxRequestTarget target) {
+				new ConfirmDeleteAccountModal(target) {
+
+					@Override
+					protected void onDeleted(AjaxRequestTarget target) {
+						setResponsePage(getApplication().getHomePage());
+					}
+
+					@Override
+					protected User getAccount() {
+						return ProfileEditPage.this.getAccount();
+					}
+					
+				};
 			}
 			
-		}));
+		});
 		
 		add(form);
 	}

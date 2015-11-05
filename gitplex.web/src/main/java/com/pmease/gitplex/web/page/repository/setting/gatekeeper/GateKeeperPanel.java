@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.repository.setting.gatekeeper;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -14,9 +15,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.util.ReflectionUtils;
-import com.pmease.commons.wicket.behavior.ConfirmBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalPanel;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
+import com.pmease.commons.wicket.component.modal.ModalLink;
+import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.gatekeeper.AbstractGateKeeper;
@@ -49,7 +50,7 @@ public abstract class GateKeeperPanel extends Panel {
 		
 		final Class<? extends GateKeeper> clazz = gateKeeper.getClass();
 		container.add(new Label("title", EditableUtils.getName(clazz)));
-		container.add(new AjaxLink<Void>("edit") {
+		container.add(new ModalLink("edit") {
 
 			@Override
 			protected void onConfigure() {
@@ -59,30 +60,21 @@ public abstract class GateKeeperPanel extends Panel {
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				ModalPanel modalPanel = new ModalPanel("editor", true) {
+			protected Component newContent(String id) {
+				return new GateKeeperEditor(id, gateKeeper) {
 
 					@Override
-					protected Component newContent(String id, ModalBehavior behavior) {
-						return new GateKeeperEditor(id, gateKeeper) {
+					protected void onCancel(AjaxRequestTarget target) {
+						close(target);
+					}
 
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								close(target);
-							}
-
-							@Override
-							protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
-								close(target);
-								GateKeeperPanel.this.onChange(target, gateKeeper);
-							}
-							
-						};
+					@Override
+					protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
+						close(target);
+						GateKeeperPanel.this.onChange(target, gateKeeper);
 					}
 					
 				};
-				container.replace(modalPanel);
-				target.add(modalPanel);
 			}
 			
 		});
@@ -90,11 +82,17 @@ public abstract class GateKeeperPanel extends Panel {
 		container.add(new AjaxLink<Void>("delete") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this gate keeper?"));
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onDelete(target);
 			}
 			
-		}.add(new ConfirmBehavior("Do you really want to delete this gate keeper?")));
+		});
 		
 		container.add(new AjaxLink<Void>("enable") {
 
@@ -157,10 +155,10 @@ public abstract class GateKeeperPanel extends Panel {
 						andOrGateKeeper.getGateKeepers().add(gateKeeper);
 						GateKeeperPanel.this.onChange(target, andOrGateKeeper);
 					} else {
-						ModalPanel childEditor = new ModalPanel("childEditor", true) {
+						new ModalPanel(target) {
 
 							@Override
-							protected Component newContent(String id, ModalBehavior behavior) {
+							protected Component newContent(String id) {
 								return new GateKeeperEditor(id, gateKeeper) {
 
 									@Override
@@ -180,8 +178,6 @@ public abstract class GateKeeperPanel extends Panel {
 							}
 							
 						};
-						fragment.replace(childEditor);
-						target.add(childEditor);
 					}
 				}
 				
@@ -203,10 +199,10 @@ public abstract class GateKeeperPanel extends Panel {
 							notGateKeeper.setGateKeeper(gateKeeper);
 							GateKeeperPanel.this.onChange(target, notGateKeeper);
 						} else {
-							ModalPanel gateKeeperEditor = new ModalPanel("gateKeeperEditor", true) {
+							new ModalPanel(target) {
 
 								@Override
-								protected Component newContent(String id, ModalBehavior behavior) {
+								protected Component newContent(String id) {
 									return new GateKeeperEditor(id, gateKeeper) {
 
 										@Override
@@ -226,8 +222,6 @@ public abstract class GateKeeperPanel extends Panel {
 								}
 								
 							};
-							fragment.replace(gateKeeperEditor);
-							target.add(gateKeeperEditor);
 						}
 					}
 					
@@ -270,10 +264,10 @@ public abstract class GateKeeperPanel extends Panel {
 							ifThenGateKeeper.setIfGate(gateKeeper);
 							GateKeeperPanel.this.onChange(target, ifThenGateKeeper);
 						} else {
-							ModalPanel ifEditor = new ModalPanel("ifEditor", true) {
+							new ModalPanel(target) {
 
 								@Override
-								protected Component newContent(String id, ModalBehavior behavior) {
+								protected Component newContent(String id) {
 									return new GateKeeperEditor(id, gateKeeper) {
 
 										@Override
@@ -293,8 +287,6 @@ public abstract class GateKeeperPanel extends Panel {
 								}
 								
 							};
-							fragment.replace(ifEditor);
-							target.add(ifEditor);
 						}
 					}
 					
@@ -332,10 +324,10 @@ public abstract class GateKeeperPanel extends Panel {
 							ifThenGateKeeper.setThenGate(gateKeeper);
 							GateKeeperPanel.this.onChange(target, ifThenGateKeeper);
 						} else {
-							ModalPanel thenEditor = new ModalPanel("thenEditor", true) {
+							new ModalPanel(target) {
 
 								@Override
-								protected Component newContent(String id, ModalBehavior behavior) {
+								protected Component newContent(String id) {
 									return new GateKeeperEditor(id, gateKeeper) {
 
 										@Override
@@ -355,8 +347,6 @@ public abstract class GateKeeperPanel extends Panel {
 								}
 								
 							};
-							fragment.replace(thenEditor);
-							target.add(thenEditor);
 						}
 					}
 					

@@ -52,8 +52,7 @@ import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalPanel;
+import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
@@ -281,10 +280,10 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 		});
 		
-		ModalPanel advancedSearchModal = new ModalPanel("advancedSearchModal") {
+		add(new ModalLink("advancedSearch") {
 
 			@Override
-			protected Component newContent(String id, ModalBehavior behavior) {
+			protected Component newContent(String id) {
 				return new AdvancedSearchPanel(id, repoModel, new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -314,9 +313,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				};
 			}
 			
-		};
-		add(advancedSearchModal);
-		add(new WebMarkupContainer("advancedSearch").add(new ModalBehavior(advancedSearchModal)));
+		});
 		
 		newRevisionSelector(null);
 		

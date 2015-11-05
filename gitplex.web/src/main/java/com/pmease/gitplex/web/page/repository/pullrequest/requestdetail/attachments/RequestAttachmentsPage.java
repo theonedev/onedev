@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -27,7 +28,7 @@ import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
 import org.apache.wicket.util.upload.FileUploadException;
 
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.comment.CommentAttachmentSupport;
@@ -134,12 +135,18 @@ public class RequestAttachmentsPage extends RequestDetailPage {
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete attachment " + attachment + "?"));
+					}
+
+					@Override
 					public void onClick(AjaxRequestTarget target) {
 						attachmentSupport.deleteAttachemnt(attachment);
 						target.add(available);
 					}
 					
-				}.add(new ConfirmBehavior("Do you really want to delete attachment " + attachment + "?")));
+				});
 			}
 			
 		});

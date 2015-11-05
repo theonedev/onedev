@@ -11,8 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.util.ReflectionUtils;
-import com.pmease.commons.wicket.behavior.modal.ModalBehavior;
-import com.pmease.commons.wicket.behavior.modal.ModalPanel;
+import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
@@ -63,10 +62,10 @@ public class GateKeeperPage extends RepoSettingPage {
 					getRepository().getGateKeepers().add(gateKeeper);
 					onGateKeeperChanged(target);
 				} else {
-					ModalPanel modalPanel = new ModalPanel("gateKeeperModal", true) {
+					new ModalPanel(target) {
 
 						@Override
-						protected Component newContent(String id, ModalBehavior behavior) {
+						protected Component newContent(String id) {
 							return new GateKeeperEditor(id, gateKeeper) {
 
 								@Override
@@ -85,8 +84,6 @@ public class GateKeeperPage extends RepoSettingPage {
 						}
 						
 					};
-					((WebMarkupContainer)GateKeeperPage.this.get(CONTAINER_ID)).replace(modalPanel);
-					target.add(modalPanel);
 				}
 			}
 			

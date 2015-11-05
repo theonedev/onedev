@@ -36,7 +36,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
@@ -298,13 +298,19 @@ public class CommentPanel extends GenericPanel<Comment> {
 			}
 			
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmListener("Deleting this comment will also delete all its replies. Do you really want to continue?"));
+			}
+
+			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
 				setVisible(SecurityUtils.canModify(getComment()));
 			}
 
-		}.add(new ConfirmBehavior("Deleting this comment will also delete all its replies. Do you really want to continue?")));
+		});
 		
 		head.add(newAdditionalCommentOperations("additionalOperations", new AbstractReadOnlyModel<Comment>() {
 
@@ -587,6 +593,12 @@ public class CommentPanel extends GenericPanel<Comment> {
 		head.add(new AjaxLink<Void>("delete") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this reply?"));
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				CommentReply reply = (CommentReply) row.getDefaultModelObject();
 				reply.delete();
@@ -602,7 +614,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				setVisible(SecurityUtils.canModify(getComment()));
 			}
 
-		}.add(new ConfirmBehavior("Do you really want to delete this reply?")));
+		});
 		
 		head.add(newAdditionalReplyOperations("additionalOperations", (CommentReply) row.getDefaultModelObject()));
 		head.add(new WebMarkupContainer("permalink").add(AttributeAppender.append("href", "#"+anchorName)));

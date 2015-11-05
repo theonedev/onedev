@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -29,7 +30,6 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModalBehavior;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.setting.general.GeneralSettingPage;
@@ -94,16 +94,6 @@ public class AccountReposPage extends AccountLayoutPage {
 		reposContainer.setOutputMarkupId(true);
 		add(reposContainer);
 		
-		final ConfirmDeleteRepoModal confirmDeleteDlg = new ConfirmDeleteRepoModal("confirmDelete") {
-
-			@Override
-			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(getPage());
-			}
-			
-		};
-		add(confirmDeleteDlg);
-		
 		reposContainer.add(reposView = new PageableListView<Repository>("repositories", new LoadableDetachableModel<List<Repository>>() {
 
 			@Override
@@ -161,27 +151,30 @@ public class AccountReposPage extends AccountLayoutPage {
 				});
 				
 				final Long repositoryId = repository.getId();
-				item.add(new WebMarkupContainer("deleteRepo") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						
-						add(new ConfirmDeleteRepoModalBehavior(confirmDeleteDlg) {
-							
-							@Override
-							protected Repository getRepository() {
-								return GitPlex.getInstance(Dao.class).load(Repository.class, repositoryId);
-							}
-							
-						});
-					}
+				item.add(new AjaxLink<Void>("deleteRepo") {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 
 						setVisible(SecurityUtils.canManage(item.getModelObject()));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						new ConfirmDeleteRepoModal(target) {
+
+							@Override
+							protected void onDeleted(AjaxRequestTarget target) {
+								setResponsePage(getPage());
+							}
+
+							@Override
+							protected Repository getRepository() {
+								return GitPlex.getInstance(Dao.class).load(Repository.class, repositoryId);
+							}
+							
+						};
 					}
 					
 				});

@@ -11,16 +11,15 @@ import com.pmease.gitplex.web.WebSession;
 @SuppressWarnings("serial")
 public abstract class ConfirmDeleteAccountModal extends ConfirmDeleteModal {
 
-	public ConfirmDeleteAccountModal(String id) {
-		super(id);
+	public ConfirmDeleteAccountModal(AjaxRequestTarget target) {
+		super(target);
 	}
 
 	@Override
-	protected void doDelete(AjaxRequestTarget target, ConfirmDeleteModalBehavior behavior) {
+	protected void doDelete(AjaxRequestTarget target) {
 		UserManager userManager = GitPlex.getInstance(UserManager.class);
 		
-		ConfirmDeleteAccountModalBehavior confirmDeleteAccountBehavior = (ConfirmDeleteAccountModalBehavior) behavior;
-		User account = confirmDeleteAccountBehavior.getAccount();
+		User account = getAccount();
 		if (account.equals(userManager.getCurrent())) {
 			if (userManager.getPrevious() != null)
 				SecurityUtils.getSubject().releaseRunAs();
@@ -36,6 +35,17 @@ public abstract class ConfirmDeleteAccountModal extends ConfirmDeleteModal {
 		onDeleted(target);
 	}
 
+	@Override
+	protected String getConfirmInput() {
+		return getAccount().getName();
+	}
+
+	@Override
+	protected String getWarningMessage() {
+		return "All repositories belonging to this account will also be deleted, please input account name below to confirm deletion.";
+	}
+
 	protected abstract void onDeleted(AjaxRequestTarget target);
 	
+	protected abstract User getAccount();
 }

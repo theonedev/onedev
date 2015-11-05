@@ -9,14 +9,13 @@ import com.pmease.gitplex.core.model.Repository;
 @SuppressWarnings("serial")
 public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
 
-	public ConfirmDeleteRepoModal(String id) {
-		super(id);
+	public ConfirmDeleteRepoModal(AjaxRequestTarget target) {
+		super(target);
 	}
 
 	@Override
-	protected void doDelete(AjaxRequestTarget target, ConfirmDeleteModalBehavior behavior) {
-		ConfirmDeleteRepoModalBehavior confirmDeleteRepoBehavior = (ConfirmDeleteRepoModalBehavior) behavior;
-		Repository repository = confirmDeleteRepoBehavior.getRepository();
+	protected void doDelete(AjaxRequestTarget target) {
+		Repository repository = getRepository();
 		
 		GitPlex.getInstance(RepositoryManager.class).delete(repository);
 		getSession().success("Repository has been deleted");
@@ -25,5 +24,18 @@ public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
 	}
 
 	protected abstract void onDeleted(AjaxRequestTarget target);
+	
+	@Override
+	protected String getWarningMessage() {
+		return "Everything inside this repository will be deleted and can not be recovered, "
+				+ "please input repository name below to confirm deletion.";
+	}
+
+	@Override
+	protected String getConfirmInput() {
+		return getRepository().getName();
+	}
+
+	protected abstract Repository getRepository();
 	
 }

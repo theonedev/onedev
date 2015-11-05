@@ -40,7 +40,7 @@ import com.pmease.commons.git.AheadBehind;
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.ConfirmOnClick;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
@@ -64,8 +64,8 @@ import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.compare.BranchComparePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
@@ -510,7 +510,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					}
 					
 				});
-				deleteLink.add(new ConfirmBehavior("Do you really want to delete this branch?"));				
+				deleteLink.add(new ConfirmOnClick("Do you really want to delete this branch?"));				
 				PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
 				PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
 				if (aheadOpen != null || behindOpen != null) {

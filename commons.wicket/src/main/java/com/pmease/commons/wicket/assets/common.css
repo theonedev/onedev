@@ -86,10 +86,6 @@ a.wicket_orderDown:AFTER { content: "\f063"; }
 .tree-theme-windows .tree-node span.tree-content a {color: #444444;}
 .tree-content {white-space: nowrap;}
 
-/* MODAL DIALOG */
-.modal>.modal-dialog>.loading {margin:8px; min-height:64px;
-	background: url("ajax-indicator.gif") center center no-repeat white;}
-
 /* Tabs */
 .tabbable>.tab-content {padding-top: 16px;}
 

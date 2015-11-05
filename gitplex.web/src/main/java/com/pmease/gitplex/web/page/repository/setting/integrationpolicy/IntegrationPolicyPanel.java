@@ -2,10 +2,11 @@ package com.pmease.gitplex.web.page.repository.setting.integrationpolicy;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.wicket.behavior.ConfirmBehavior;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 
@@ -25,6 +26,12 @@ abstract class IntegrationPolicyPanel extends Panel {
 		super.onInitialize();
 		
 		add(new AjaxLink<Void>("edit") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this policy?"));
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -59,7 +66,7 @@ abstract class IntegrationPolicyPanel extends Panel {
 				onDelete(target);
 			}
 			
-		}.add(new ConfirmBehavior("Do you really want to delete this policy?")));
+		});
 		
 		add(BeanContext.viewBean("policy", policy).setOutputMarkupId(true));
 	}
