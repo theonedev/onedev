@@ -11,7 +11,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.pmease.commons.wicket.component.floating.AlignWith;
 import com.pmease.commons.wicket.component.floating.AlignWithComponent;
-import com.pmease.commons.wicket.component.floating.AlignWithCoords;
+import com.pmease.commons.wicket.component.floating.AlignWithRect;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
@@ -74,7 +74,7 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 						.getParameterValue("mouseX").toInt();
 				int mouseY = RequestCycle.get().getRequest().getRequestParameters()
 						.getParameterValue("mouseY").toInt();
-				alignFloatingWith = AlignWithCoords.ofMouse(mouseX, mouseY);
+				alignFloatingWith = AlignWithRect.ofMouse(mouseX, mouseY);
 			} else { 
 				alignFloatingWith =  new AlignWithComponent(this);
 			} 

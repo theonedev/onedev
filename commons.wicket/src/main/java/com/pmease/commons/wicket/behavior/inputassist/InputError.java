@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.test;
+package com.pmease.commons.wicket.behavior.inputassist;
 
 import java.io.Serializable;
 

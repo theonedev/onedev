@@ -43,7 +43,7 @@ public abstract class FloatingPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newContent(CONTENT_ID));
+		add(newContent(CONTENT_ID).setOutputMarkupId(true));
 		
 		add(new AbstractDefaultAjaxBehavior() {
 			

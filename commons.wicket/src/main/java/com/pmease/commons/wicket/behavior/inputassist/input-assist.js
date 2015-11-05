@@ -1,4 +1,4 @@
-gitplex.inputassist = {
+pmease.commons.inputassist = {
 	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
 		$input.data("callback", callback);
@@ -7,18 +7,15 @@ gitplex.inputassist = {
 		});
 	},
 
-	change: function(inputId, value, cursor) {
+	update: function(inputId, value, cursor) {
 		var $input = $("#" + inputId);
 		$input.val(value);
 		$input.cursor(cursor);
 		$input.data("callback")(value, cursor);
 	},
 	
-	fitWindow: function(inputId, dropdownId) {
+	markErrors: function(inputId, inputErrors) {
 		var $input = $("#" + inputId);
-		var $dropdown = $("#" + dropdownId);
-		var dropdownSpace = $(window).height() - $input.offset().top - $input.height() - 45;
-		$dropdown.find(".-assist").css("max-height", dropdownSpace);
 	}
 	
 }
