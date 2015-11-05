@@ -28,12 +28,6 @@ abstract class IntegrationPolicyPanel extends Panel {
 		add(new AjaxLink<Void>("edit") {
 
 			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this policy?"));
-			}
-
-			@Override
 			public void onClick(AjaxRequestTarget target) {
 				IntegrationPolicyEditor editor = new IntegrationPolicyEditor("policy", policy) {
 
@@ -60,6 +54,12 @@ abstract class IntegrationPolicyPanel extends Panel {
 		});
 		
 		add(new AjaxLink<Void>("delete") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this policy?"));
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {

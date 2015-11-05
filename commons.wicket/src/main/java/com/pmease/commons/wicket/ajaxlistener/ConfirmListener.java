@@ -14,12 +14,12 @@ public class ConfirmListener implements IAjaxCallListener {
 	
 	@Override
 	public CharSequence getBeforeHandler(Component component) {
-		return String.format("return confirm('%s');", StringEscapeUtils.escapeEcmaScript(message));
+		return null;
 	}
 
 	@Override
 	public CharSequence getPrecondition(Component component) {
-		return null;
+		return String.format("return confirm('%s');", StringEscapeUtils.escapeEcmaScript(message));
 	}
 
 	@Override
