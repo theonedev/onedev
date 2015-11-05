@@ -2,15 +2,15 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import java.util.List;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
 @SuppressWarnings("serial")
-abstract class AssistPanel extends Panel {
+class AssistPanel extends Panel {
 
 	private final List<AssistItem> assistItems;
 	
@@ -31,15 +31,10 @@ abstract class AssistPanel extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<AssistItem> item) {
-				final AssistItem assistItem = item.getModelObject();
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						onSelect(target, assistItem);
-					}
-					
-				};
+				AssistItem assistItem = item.getModelObject();
+				WebMarkupContainer link = new WebMarkupContainer("link");
+				link.add(AttributeAppender.append("data-input", assistItem.getInput()));
+				link.add(AttributeAppender.append("data-cursor", assistItem.getCursor()));
 				link.add(new Label("label", assistItem.getInput()));
 				item.add(link);
 			}
@@ -56,16 +51,10 @@ abstract class AssistPanel extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
-				final String recentInput = item.getModelObject();
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						onSelect(target, recentInput);
-					}
-					
-				};
+				String recentInput = item.getModelObject();
+				WebMarkupContainer link = new WebMarkupContainer("link");
 				link.add(new Label("label", recentInput));
+				link.add(AttributeAppender.append("data-input", recentInput));
 				item.add(link);
 			}
 
@@ -80,8 +69,4 @@ abstract class AssistPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, AssistItem assistItem);
-	
-	protected abstract void onSelect(AjaxRequestTarget target, String recentInput);
-	
 }

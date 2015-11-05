@@ -95,11 +95,9 @@ gitplex.blobInstantSearch = {
 				// the advanced button moving to lost the click
 				setTimeout(function(){$input.hide();}, 250);
 			}
-		});
-		
-		$hint.on("close", function() {
 			$input.data("hint", null);
 		});
+		
 		$input.data("hint", $hint);
 	}
 	

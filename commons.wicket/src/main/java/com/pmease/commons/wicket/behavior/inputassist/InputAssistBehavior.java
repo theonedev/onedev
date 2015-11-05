@@ -36,8 +36,6 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		inputField.setOutputMarkupId(true);
 	}
 
-	protected abstract InputAssist assist(String input, int cursor);
-
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
@@ -55,7 +53,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				getComponent().getMarkupId(), errorsJSON);
 		target.appendJavaScript(script);
 
-		final List<String> recentInputs = getRecentInputs();
+		final List<String> recentInputs = getRecentInputs(input, cursor);
 		
 		if (!assist.getAssistItems().isEmpty() || !recentInputs.isEmpty()) {
 			if (dropdown == null) {
@@ -63,19 +61,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 					@Override
 					protected Component newContent(String id) {
-						return new AssistPanel(id, assist.getAssistItems(), recentInputs) {
-
-							@Override
-							protected void onSelect(AjaxRequestTarget target, AssistItem assistItem) {
-								InputAssistBehavior.this.onSelect(target, assistItem);
-							}
-
-							@Override
-							protected void onSelect(AjaxRequestTarget target, String recentInput) {
-								InputAssistBehavior.this.onSelect(target, recentInput);
-							}
-							
-						};
+						return new AssistPanel(id, assist.getAssistItems(), recentInputs);
 					}
 
 					@Override
@@ -85,37 +71,24 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 					}
 					
 				};
+				script = String.format("pmease.commons.inputassist.assistOpened('%s', '%s');", 
+						getComponent().getMarkupId(), dropdown.getMarkupId());
+				target.appendJavaScript(script);
 			} else {
 				Component content = dropdown.getContent();
-				Component newContent = new AssistPanel(content.getId(), assist.getAssistItems(), recentInputs) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, AssistItem assistItem) {
-						InputAssistBehavior.this.onSelect(target, assistItem);
-					}
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, String recentInput) {
-						InputAssistBehavior.this.onSelect(target, recentInput);
-					}
-					
-				};
+				Component newContent = new AssistPanel(content.getId(), assist.getAssistItems(), recentInputs);
 				content.replaceWith(newContent);
 				target.add(newContent);
+
+				script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
+						getComponent().getMarkupId(), dropdown.getMarkupId());
+				target.appendJavaScript(script);
 			}
 		} else if (dropdown != null) {
 			dropdown.close(target);
 		}
 	}
 
-	protected void onSelect(AjaxRequestTarget target, AssistItem assistItem) {
-		
-	}
-	
-	protected void onSelect(AjaxRequestTarget target, String recentInput) {
-		
-	}
-	
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
@@ -131,6 +104,8 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract List<String> getRecentInputs();
+	protected abstract InputAssist assist(String input, int cursor);
+
+	protected abstract List<String> getRecentInputs(String input, int cursor);
 	
 }
