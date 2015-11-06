@@ -207,7 +207,7 @@ public abstract class InstantSearchPanel extends Panel {
 	}
 	
 	private void newSearchHint(AjaxRequestTarget target) {
-		searchHint = new FloatingPanel(target, new AlignWithComponent(searchField), new Alignment(100, 100, 100, 0, 0)) {
+		searchHint = new FloatingPanel(target, new AlignWithComponent(searchField), Alignment.bottom(0)) {
 
 			@Override
 			protected Component newContent(String id) {

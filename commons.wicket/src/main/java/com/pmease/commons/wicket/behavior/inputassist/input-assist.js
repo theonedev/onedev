@@ -7,15 +7,16 @@ pmease.commons.inputassist = {
 		});
 		
 		$input.data("update", function($item) {
-			$input.val($item.data("input"));
+			var value = $item.data("input");
+			$input.val(value);
 			var cursor = $item.data("cursor");
 			if (cursor != undefined)
-				$input.cursor(cursor);
+				$input.caret(cursor);
 			$input.focus();
-			$input.data("callback")(value, $input.cursor());
+			$input.data("callback")(value, $input.caret());
 		});
 		
-		$input.on("keydown", "up", function() {
+		$input.bind("keydown", "up", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
 				var $active = $dropdown.find("li.active");
@@ -29,15 +30,7 @@ pmease.commons.inputassist = {
 			}
 		});
 		
-		$input.on("keydown", "down", function() {
-			var $dropdown = $input.data("dropdown");
-			if ($dropdown) {
-				$input.data("update")($dropdown.find("li.active"));
-				return false;
-			}
-		});
-		
-		$input.on("keydown", "return", function() {
+		$input.bind("keydown", "down", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
 				var $active = $dropdown.find("li.active");
@@ -47,6 +40,14 @@ pmease.commons.inputassist = {
 					$next.addClass("active");
 				else
 					$dropdown.find("li.selectable").first().addClass("active");
+				return false;
+			}
+		});
+		
+		$input.bind("keydown", "return", function() {
+			var $dropdown = $input.data("dropdown");
+			if ($dropdown) {
+				$input.data("update")($dropdown.find("li.active"));
 				return false;
 			}
 		});
@@ -75,7 +76,7 @@ pmease.commons.inputassist = {
 		});
 		var $item = $dropdown.find("li.selectable");
 		$item.first().addClass("active");
-		$item.click(function(){
+		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);
 		});

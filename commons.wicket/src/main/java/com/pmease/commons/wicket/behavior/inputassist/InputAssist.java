@@ -3,7 +3,7 @@ package com.pmease.commons.wicket.behavior.inputassist;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class InputAssist implements Serializable {
+public class InputAssist implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

@@ -4,6 +4,7 @@
 (function ( $ ) {
  
 	var pageMargin = 8;
+	var scrollbarWidth = 20;
 	
     $.fn.align = function( alignment ) {
     	if (!this.parent().is("body")) 
@@ -142,7 +143,7 @@
         	overflow = true;
     	}
     	if (overflow)
-        	this.css({overflow: "auto", "border-radius": "0"});
+        	this.css({"overflow": "auto", "border-radius": "0"});
     	
     	return this;
     };

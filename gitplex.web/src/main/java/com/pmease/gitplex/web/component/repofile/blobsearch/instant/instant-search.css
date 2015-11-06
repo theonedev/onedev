@@ -12,8 +12,6 @@
 }
 .instant-search-result {
 	padding: 8px; 
-	width: 600px; 
-	overflow: auto;
 }
 .instant-search-result .section>.title {
 	font-weight: bold; 

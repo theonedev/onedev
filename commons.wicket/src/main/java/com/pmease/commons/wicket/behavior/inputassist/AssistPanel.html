@@ -1,16 +1,18 @@
 <wicket:panel>
-	<wicket:enclosure child="assistItem">
-	<ul class="assist-items">
-		<li wicket:id="assistItems" class="selectable">
-			<a wicket:id="link"><span wicket:id="label"></span></a>
-		</li>
-	</ul>
-	</wicket:enclosure>
-	<wicket:enclosure child="recentInputs">
-	<ul class="recent-inputs">
-		<li wicket:id="recentInputs" class="selectable">
-			<a wicket:id="link"><span wicket:id="label"></span></a>
-		</li>
-	</ul>
-	</wicket:enclosure>
+	<div class="input-assist">
+		<wicket:enclosure child="assistItems">
+		<ul class="assist-items list-unstyled">
+			<li wicket:id="assistItems" class="selectable">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+			</li>
+		</ul>
+		</wicket:enclosure>
+		<wicket:enclosure child="recentInputs">
+		<ul class="recent-inputs list-unstyled">
+			<li wicket:id="recentInputs" class="selectable">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+			</li>
+		</ul>
+		</wicket:enclosure>
+	</div>
 </wicket:panel>

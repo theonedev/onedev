@@ -6,18 +6,20 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
-import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.component.floating.AlignWithComponent;
 import com.pmease.commons.wicket.component.floating.Alignment;
@@ -28,6 +30,13 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 	private FloatingPanel dropdown;
 	
+	@Override
+	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+		super.updateAjaxAttributes(attributes);
+		
+		attributes.setChannel(new AjaxChannel(AjaxChannel.DEFAULT_NAME, AjaxChannel.Type.DROP));
+	}
+
 	@Override
 	protected void onBind() {
 		super.onBind();
@@ -95,9 +104,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(InputAssistBehavior.class, "input-assist.js")));
 		
-		String script = String.format("pmease.commons.inputassist.init('#%s');", 
+		String script = String.format("pmease.commons.inputassist.init('%s', %s);", 
 				getComponent().getMarkupId(true), 
 				getCallbackFunction(explicit("input"), explicit("cursor")));
 		

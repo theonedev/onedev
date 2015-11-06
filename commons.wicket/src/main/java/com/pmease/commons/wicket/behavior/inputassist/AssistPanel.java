@@ -3,11 +3,14 @@ package com.pmease.commons.wicket.behavior.inputassist;
 import java.util.List;
 
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {
@@ -33,10 +36,10 @@ class AssistPanel extends Panel {
 			protected void populateItem(ListItem<AssistItem> item) {
 				AssistItem assistItem = item.getModelObject();
 				WebMarkupContainer link = new WebMarkupContainer("link");
-				link.add(AttributeAppender.append("data-input", assistItem.getInput()));
-				link.add(AttributeAppender.append("data-cursor", assistItem.getCursor()));
 				link.add(new Label("label", assistItem.getInput()));
 				item.add(link);
+				item.add(AttributeAppender.append("data-input", assistItem.getInput()));
+				item.add(AttributeAppender.append("data-cursor", assistItem.getCursor()));
 			}
 
 			@Override
@@ -54,19 +57,26 @@ class AssistPanel extends Panel {
 				String recentInput = item.getModelObject();
 				WebMarkupContainer link = new WebMarkupContainer("link");
 				link.add(new Label("label", recentInput));
-				link.add(AttributeAppender.append("data-input", recentInput));
 				item.add(link);
+				item.add(AttributeAppender.append("data-input", recentInput));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!assistItems.isEmpty());
+				setVisible(!recentInputs.isEmpty());
 			}
 			
 		});
 		
 		setOutputMarkupId(true);
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(AssistPanel.class, "input-assist.css")));
 	}
 
 }

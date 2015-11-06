@@ -2,9 +2,7 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import java.io.Serializable;
 
-import org.apache.wicket.Component;
-
-public abstract class AssistItem implements Serializable {
+public class AssistItem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -25,6 +23,4 @@ public abstract class AssistItem implements Serializable {
 		return cursor;
 	}
 
-	protected abstract Component render(String id);
-	
 }
