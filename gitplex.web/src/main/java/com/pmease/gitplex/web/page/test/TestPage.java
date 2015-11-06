@@ -48,7 +48,7 @@ public class TestPage extends BasePage {
 			@Override
 			protected InputAssist assist(String input, int cursor) {
 				List<AssistItem> assistItems = new ArrayList<>();
-				for (int i=0; i<2; i++) {
+				for (int i=0; i<20; i++) {
 					String newInput = input + " hello " + i*10;
 					assistItems.add(new AssistItem(newInput, newInput.length()));
 					newInput = input + " world " + i*10;

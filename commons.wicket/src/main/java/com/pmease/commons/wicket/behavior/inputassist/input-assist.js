@@ -23,9 +23,10 @@ pmease.commons.inputassist = {
 				$active.removeClass("active");
 				var $prev = $active.prev();
 				if ($prev.length != 0)
-					$prev.addClass("active");
+					$prev.addClass("active").focus();
 				else
-					$dropdown.find("li.selectable").last().addClass("active");
+					$dropdown.find("li.selectable").last().addClass("active").focus();
+				$input.focus();
 				return false;
 			}
 		});
@@ -37,9 +38,10 @@ pmease.commons.inputassist = {
 				$active.removeClass("active");
 				var $next = $active.next();
 				if ($next.length != 0)
-					$next.addClass("active");
+					$next.addClass("active").focus();
 				else
-					$dropdown.find("li.selectable").first().addClass("active");
+					$dropdown.find("li.selectable").first().addClass("active").focus();
+				$input.focus();
 				return false;
 			}
 		});
