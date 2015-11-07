@@ -2,6 +2,9 @@ gitplex.blobInstantSearch = {
 	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
 		
+		$input.doneEvents("inputchange focus click", function() {
+			callback("input", $(this).val());
+		}, 100);
 		$input.on("blur", function() {
 			if ($input.data("hint") == null && $input.is(":visible")) {
 				// in case user clicks advanced button while the 

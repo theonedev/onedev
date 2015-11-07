@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.repofile.blobsearch.instant;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +11,6 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -27,7 +27,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -37,6 +36,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.component.floating.AlignWithComponent;
@@ -54,8 +54,8 @@ import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public abstract class InstantSearchPanel extends Panel {
@@ -97,8 +97,8 @@ public abstract class InstantSearchPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		searchField = new TextField<>("input", Model.of(""));
-		searchField.add(new AjaxFormComponentUpdatingBehavior("inputchange focus click") {
+		searchField = new TextField<>("input");
+		searchField.add(new AbstractDefaultAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -107,68 +107,60 @@ public abstract class InstantSearchPanel extends Panel {
 			}
 
 			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				if (searchHint != null)
-					target.add(searchHint.getContent());
-				
-				searchInput = searchField.getInput();
-
-				if (StringUtils.isNotBlank(searchInput)) {
-					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-
-					try {
-						BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
-								null, null, MAX_QUERY_ENTRIES);
-						symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-						
-						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-							query = new FileQuery(searchInput+"*", false, null, 
-									MAX_QUERY_ENTRIES-symbolHits.size());
-							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
-						}
-						
-						if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-							query = new SymbolQuery(searchInput+"*", false, false, 
-									null, null, MAX_QUERY_ENTRIES-symbolHits.size());
-							symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
-						}
-					} catch (TooGeneralQueryException e) {
-						symbolHits = new ArrayList<>();
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-					
-					try {
-						BlobQuery query = new TextQuery(searchInput, false, false, false, 
-								null, null, MAX_QUERY_ENTRIES);
-						textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
-					} catch (TooGeneralQueryException e) {
-						textHits = new ArrayList<>();
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-					
-					if (searchHint == null)
-						newSearchHint(target);
-				} else {
-					symbolHits = new ArrayList<>();
-					textHits = new ArrayList<>();
-					
-					if (searchHint != null)
-						searchHint.close(target);
-				}
-				activeHitIndex = 0;
-			}			
-			
-		});
-		searchField.add(new AbstractDefaultAjaxBehavior() {
-			
-			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				String key = params.getParameterValue("key").toString();
-				
-				if (key.equals("return")) {
+
+				if (key.equals("input")) {
+					searchInput = params.getParameterValue("input").toString();
+					if (StringUtils.isNotBlank(searchInput)) {
+						SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+
+						try {
+							BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
+									null, null, MAX_QUERY_ENTRIES);
+							symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+							
+							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
+								query = new FileQuery(searchInput+"*", false, null, 
+										MAX_QUERY_ENTRIES-symbolHits.size());
+								symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+							}
+							
+							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
+								query = new SymbolQuery(searchInput+"*", false, false, 
+										null, null, MAX_QUERY_ENTRIES-symbolHits.size());
+								symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+							}
+						} catch (TooGeneralQueryException e) {
+							symbolHits = new ArrayList<>();
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						}
+						
+						try {
+							BlobQuery query = new TextQuery(searchInput, false, false, false, 
+									null, null, MAX_QUERY_ENTRIES);
+							textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+						} catch (TooGeneralQueryException e) {
+							textHits = new ArrayList<>();
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						}
+						
+						if (searchHint == null)
+							newSearchHint(target);
+						else
+							target.add(searchHint.getContent());
+					} else {
+						symbolHits = new ArrayList<>();
+						textHits = new ArrayList<>();
+						
+						if (searchHint != null)
+							searchHint.close(target);
+					}
+					activeHitIndex = 0;
+				} else if (key.equals("return")) {
 					QueryHit activeHit = getActiveHit();
 					if (activeHit != null) {
 						if (activeHit instanceof MoreSymbolHit) 
@@ -190,6 +182,7 @@ public abstract class InstantSearchPanel extends Panel {
 			@Override
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
+				response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));
 				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 
 				response.render(JavaScriptHeaderItem.forReference(
@@ -197,12 +190,14 @@ public abstract class InstantSearchPanel extends Panel {
 				
 				String script = String.format(
 						"gitplex.blobInstantSearch.init('%s', %s);", 
-						searchField.getMarkupId(true), getCallbackFunction(CallbackParameter.explicit("key")));
+						searchField.getMarkupId(), 
+						getCallbackFunction(explicit("key"), explicit("input")));
 				
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});
+		searchField.setOutputMarkupId(true);
 		add(searchField);
 	}
 	

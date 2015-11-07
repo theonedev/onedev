@@ -485,17 +485,6 @@ pmease.commons = {
 		});
 	},
 
-	setupDoneTyping: function(inputId, timeout) {
-		var $input = $("#" + inputId);
-		$input.on("input", function() {
-			if ($input[0].typingTimer) 
-				clearTimeout($input[0].typingTimer);
-			$input[0].typingTimer = setTimeout(function() {
-				$input.trigger("donetyping");
-			}, timeout);
-		});
-	},
-	
 	history: {
 		init: function(callback) {
 			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:"");

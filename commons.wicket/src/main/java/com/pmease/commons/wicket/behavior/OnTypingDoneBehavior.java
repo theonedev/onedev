@@ -5,8 +5,11 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponent;
+
+import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBehavior{
@@ -24,7 +27,11 @@ public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBeha
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
-		String script = String.format("pmease.commons.setupDoneTyping('%s', %d);",
+		response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));
+		String script = String.format(""
+				+ "$('#%s').doneEvents('input', function() {"
+				+ "  $(this).trigger('donetyping');"
+				+ "}, %s);",
 				component.getMarkupId(true), timeout);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

@@ -2,7 +2,8 @@ pmease.commons.inputassist = {
 	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
 		$input.data("callback", callback);
-		$input.on("input focus", function() {
+		
+		$input.doneevents("input focus mouseup keyup", function() {
 			callback($input.val(), $input.caret());
 		});
 		
@@ -63,6 +64,7 @@ pmease.commons.inputassist = {
 	assistOpened: function(inputId, dropdownId) {
 		var $input = $("#" + inputId);
 		var $dropdown = $("#" + dropdownId);
+		$dropdown.data("trigger", $input);
 		$input.data("dropdown", $dropdown);
 		$dropdown.on("close", function() {
 			$input.data("dropdown", null);

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
+import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.component.floating.AlignWithComponent;
 import com.pmease.commons.wicket.component.floating.Alignment;
@@ -48,6 +49,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 		String input = params.getParameterValue("input").toString();
 		int cursor = params.getParameterValue("cursor").toInt();
+		System.out.println(input + ":" + cursor);
 		final InputAssist assist = assist(input, cursor);
 		
 		String errorsJSON;
@@ -100,6 +102,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(InputAssistBehavior.class, "input-assist.js")));
 		
