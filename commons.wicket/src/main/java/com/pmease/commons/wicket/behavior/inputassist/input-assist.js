@@ -2,7 +2,7 @@ pmease.commons.inputassist = {
 	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
 		$input.data("callback", callback);
-		$input.on("input", function() {
+		$input.on("input focus", function() {
 			callback($input.val(), $input.caret());
 		});
 		
