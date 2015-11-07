@@ -57,11 +57,6 @@ public class TestPage extends BasePage {
 				return new InputAssist(new ArrayList<InputError>(), assistItems);
 			}
 
-			@Override
-			protected List<String> getRecentInputs(String input, int cursor) {
-				return new ArrayList<>();
-			}
-			
 		}));
 		
 		form.add(new AjaxButton("submit") {

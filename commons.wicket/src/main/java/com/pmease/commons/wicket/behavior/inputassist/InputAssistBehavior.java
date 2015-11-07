@@ -2,8 +2,6 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-import java.util.List;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -62,15 +60,13 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				getComponent().getMarkupId(), errorsJSON);
 		target.appendJavaScript(script);
 
-		final List<String> recentInputs = getRecentInputs(input, cursor);
-		
-		if (!assist.getAssistItems().isEmpty() || !recentInputs.isEmpty()) {
+		if (!assist.getAssistItems().isEmpty()) {
 			if (dropdown == null) {
 				dropdown = new FloatingPanel(target, new AlignWithComponent(getComponent()), Alignment.bottom(0)) {
 
 					@Override
 					protected Component newContent(String id) {
-						return new AssistPanel(id, assist.getAssistItems(), recentInputs);
+						return new AssistPanel(id, assist.getAssistItems());
 					}
 
 					@Override
@@ -85,7 +81,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				target.appendJavaScript(script);
 			} else {
 				Component content = dropdown.getContent();
-				Component newContent = new AssistPanel(content.getId(), assist.getAssistItems(), recentInputs);
+				Component newContent = new AssistPanel(content.getId(), assist.getAssistItems());
 				content.replaceWith(newContent);
 				target.add(newContent);
 
@@ -115,7 +111,5 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	}
 
 	protected abstract InputAssist assist(String input, int cursor);
-
-	protected abstract List<String> getRecentInputs(String input, int cursor);
 	
 }

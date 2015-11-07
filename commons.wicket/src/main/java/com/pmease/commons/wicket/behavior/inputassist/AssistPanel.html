@@ -1,18 +1,7 @@
 <wicket:panel>
-	<div class="input-assist">
-		<wicket:enclosure child="assistItems">
-		<ul class="assist-items list-unstyled">
-			<li wicket:id="assistItems" class="selectable" tabindex="-1">
-				<a wicket:id="link"><span wicket:id="label"></span></a>
-			</li>
-		</ul>
-		</wicket:enclosure>
-		<wicket:enclosure child="recentInputs">
-		<ul class="recent-inputs list-unstyled">
-			<li wicket:id="recentInputs" class="selectable" tabindex="-1">
-				<a wicket:id="link"><span wicket:id="label"></span></a>
-			</li>
-		</ul>
-		</wicket:enclosure>
-	</div>
+	<ul class="input-assist list-unstyled">
+		<li wicket:id="assistItems" class="selectable" tabindex="-1">
+			<a wicket:id="link"><span wicket:id="label"></span></a>
+		</li>
+	</ul>
 </wicket:panel>

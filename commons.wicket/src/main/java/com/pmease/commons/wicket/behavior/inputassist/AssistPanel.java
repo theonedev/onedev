@@ -17,13 +17,10 @@ class AssistPanel extends Panel {
 
 	private final List<AssistItem> assistItems;
 	
-	private final List<String> recentInputs;
-	
-	public AssistPanel(String id, List<AssistItem> assistItems, List<String> recentInputs) {
+	public AssistPanel(String id, List<AssistItem> assistItems) {
 		super(id);
 		
 		this.assistItems = assistItems;
-		this.recentInputs = recentInputs;
 	}
 
 	@Override
@@ -42,31 +39,6 @@ class AssistPanel extends Panel {
 				item.add(AttributeAppender.append("data-cursor", assistItem.getCursor()));
 			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!assistItems.isEmpty());
-			}
-			
-		});
-		
-		add(new ListView<String>("recentInputs", recentInputs) {
-
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				String recentInput = item.getModelObject();
-				WebMarkupContainer link = new WebMarkupContainer("link");
-				link.add(new Label("label", recentInput));
-				item.add(link);
-				item.add(AttributeAppender.append("data-input", recentInput));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!recentInputs.isEmpty());
-			}
-			
 		});
 		
 		setOutputMarkupId(true);

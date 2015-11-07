@@ -157,7 +157,7 @@
             overflow = true;
     	}
     	if (overflow)
-        	this.css({"overflow": "auto", "border-radius": "0"});
+        	this.css({"overflow": "auto"});
     	
     	return this;
     };

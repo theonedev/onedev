@@ -99,6 +99,7 @@ public abstract class CommonPage extends WebPage {
 	@Override
 	protected void onBeforeRender() {
 		WebSocketRenderBehavior.onPageRender(getPageId());
+		standalones.removeAll();
 		super.onBeforeRender();
 	}
 
