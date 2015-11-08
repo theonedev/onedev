@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -50,6 +54,10 @@ import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.commit.query.CommitQueryBaseVisitor;
+import com.pmease.gitplex.web.page.repository.commit.query.CommitQueryLexer;
+import com.pmease.gitplex.web.page.repository.commit.query.CommitQueryParser;
+import com.pmease.gitplex.web.page.repository.commit.query.QueryCriteria;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -90,17 +98,13 @@ public class RepoCommitsPage extends RepositoryPage {
 			LogCommand log = new LogCommand(getRepository().git().repoDir());
 			log.parentRewriting(true);
 			
-			state.applyTo(log);
-
 			List<Commit> logCommits;
 			try {
+				state.applyTo(log);
 				logCommits = log.call();
 			} catch (Exception e) {
-				int index = -1;
-				if (e.getMessage() != null)
-					index = e.getMessage().indexOf("bad revision");
-				if (index != -1) {
-					queryForm.error(e.getMessage().substring(index));
+				if (e.getMessage() != null) {
+					queryForm.error(e.getMessage());
 					logCommits = new ArrayList<>();
 				} else {
 					throw Throwables.propagate(e);
@@ -573,11 +577,21 @@ public class RepoCommitsPage extends RepositoryPage {
 			this.step = step;
 		}
 		
-		public void applyTo(LogCommand logCommand) {
+		public void applyTo(final LogCommand logCommand) {
 			if (step > MAX_STEPS)
 				throw new RuntimeException("Step should be no more than " + MAX_STEPS);
 			
 			logCommand.count(step*COUNT);
+			
+			if (StringUtils.isNotBlank(query)) {
+				ANTLRInputStream is = new ANTLRInputStream(query);
+				CommitQueryLexer lexer = new CommitQueryLexer(is);
+				CommonTokenStream tokens = new CommonTokenStream(lexer);
+				CommitQueryParser parser = new CommitQueryParser(tokens);
+				ParseTree tree = parser.query();
+				for (QueryCriteria criteria: new CommitQueryBaseVisitor<List<QueryCriteria>>().visit(tree))
+					criteria.applyTo(logCommand);
+			}
 		}
 		
 	}

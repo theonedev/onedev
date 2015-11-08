@@ -24,9 +24,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private List<String> paths = new ArrayList<>();
     
-    private Date after;
+    private String after;
     
-    private Date before;
+    private String before;
     
     private int count;
     
@@ -62,21 +62,31 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		return this;
 	}
 
-	public Date after() {
+	public String after() {
 		return after;
 	}
 
-	public LogCommand after(Date after) {
+	public LogCommand after(String after) {
 		this.after = after;
 		return this;
 	}
+	
+	public LogCommand after(Date after) {
+		this.after = DateFormatUtils.ISO_DATE_FORMAT.format(after);
+		return this;
+	}
 
-	public Date before() {
+	public String before() {
 		return before;
 	}
 
-	public LogCommand before(Date before) {
+	public LogCommand before(String before) {
 		this.before = before;
+		return this;
+	}
+	
+	public LogCommand before(Date before) {
+		this.before = DateFormatUtils.ISO_DATE_FORMAT.format(before);		
 		return this;
 	}
 
@@ -152,10 +162,10 @@ public class LogCommand extends GitCommand<List<Commit>> {
         }
         
         if (before != null) 
-        	cmd.addArgs("--before").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(before));
+        	cmd.addArgs("--before", before);
         
         if (after != null)
-        	cmd.addArgs("--after").addArgs(DateFormatUtils.ISO_DATE_FORMAT.format(after));
+        	cmd.addArgs("--after", after);
         
         if (count != 0)
         	cmd.addArgs("-" + count);
