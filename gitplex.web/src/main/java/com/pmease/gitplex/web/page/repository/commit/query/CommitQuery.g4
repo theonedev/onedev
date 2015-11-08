@@ -2,31 +2,37 @@ grammar CommitQuery;
 
 query: criteria+ EOF;
 
-criteria: revisionRange | date | committer | author | path | message;
+criteria: revisionCriteria | before | after | committer | author | path | message;
 
-revisionRange: revision | EXCLUDE revision | revision RANGE revision;
+revisionCriteria
+	: revision						# SingleRevision
+	| EXCLUDE revision 				# RevisionExclusion
+	| revision RANGE revision		# RevisionRange
+	;
 
 revision: branch | tag | id;
 
-branch: BRANCH VALUE;
+branch: BRANCH Value;
 
-tag: TAG VALUE;
+tag: TAG Value;
 
-id: ID VALUE;
+id: ID Value;
 
-date: before | after;
+before: BEFORE Value;
 
-before: BEFORE VALUE;
+after: AFTER Value;
 
-after: AFTER VALUE;
+committer: COMMITTER Value;
 
-committer: COMMITTER VALUE;
+author: AUTHOR Value;
 
-author: AUTHOR VALUE;
+path: PATH Value;
 
-path: PATH VALUE;
+message: MESSAGE Value;
 
-message: MESSAGE VALUE;
+Range: '..' | '...';
+
+Value: LPAREN (ESCAPE|~[()\\])+? RPAREN;
 
 BRANCH: 'branch';
 
@@ -51,10 +57,6 @@ EXCLUDE: '^';
 LPAREN: '(';
 
 RPAREN: ')';
-
-RANGE: '..'| '...';
-
-VALUE: LPAREN (ESCAPE|~[()\\])+? RPAREN;
 
 fragment
 ESCAPE: '\\'[()\\];

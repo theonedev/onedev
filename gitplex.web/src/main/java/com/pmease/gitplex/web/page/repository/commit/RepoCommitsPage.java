@@ -9,14 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -25,6 +22,7 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -54,10 +52,7 @@ import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.commit.query.CommitQueryBaseVisitor;
-import com.pmease.gitplex.web.page.repository.commit.query.CommitQueryLexer;
-import com.pmease.gitplex.web.page.repository.commit.query.CommitQueryParser;
-import com.pmease.gitplex.web.page.repository.commit.query.QueryCriteria;
+import com.pmease.gitplex.web.page.repository.commit.query.CommitQuery;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -224,8 +219,15 @@ public class RepoCommitsPage extends RepositoryPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				
-				updateCommits(RequestCycle.get().find(AjaxRequestTarget.class));
+
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				try {
+					CommitQuery.of(state.query);
+					updateCommits(target);
+				} catch (Exception e) {
+					error(e.getMessage());
+					target.add(feedback);
+				}
 			}
 
 			@Override
@@ -236,6 +238,24 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		};
+		queryForm.add(new TextField<String>("input", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return state.query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				state.query = object;
+			}
+			
+		}));
+		queryForm.add(new AjaxButton("submit") {});
 		add(queryForm);
 		
 		add(feedback = new NotificationPanel("feedback", queryForm));
@@ -545,7 +565,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		private String query;
 		
 		private int step = 1;
-
+		
 		public HistoryState() {
 		}
 		
@@ -577,21 +597,12 @@ public class RepoCommitsPage extends RepositoryPage {
 			this.step = step;
 		}
 		
-		public void applyTo(final LogCommand logCommand) {
+		public void applyTo(LogCommand logCommand) {
 			if (step > MAX_STEPS)
 				throw new RuntimeException("Step should be no more than " + MAX_STEPS);
 			
 			logCommand.count(step*COUNT);
-			
-			if (StringUtils.isNotBlank(query)) {
-				ANTLRInputStream is = new ANTLRInputStream(query);
-				CommitQueryLexer lexer = new CommitQueryLexer(is);
-				CommonTokenStream tokens = new CommonTokenStream(lexer);
-				CommitQueryParser parser = new CommitQueryParser(tokens);
-				ParseTree tree = parser.query();
-				for (QueryCriteria criteria: new CommitQueryBaseVisitor<List<QueryCriteria>>().visit(tree))
-					criteria.applyTo(logCommand);
-			}
+			CommitQuery.of(query).applyTo(logCommand);
 		}
 		
 	}

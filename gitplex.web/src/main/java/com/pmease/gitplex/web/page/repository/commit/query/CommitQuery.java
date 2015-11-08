@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -22,7 +24,7 @@ public class CommitQuery implements Serializable {
 			criteria.applyTo(logCommand);
 	}
 	
-	public static CommitQuery of(String query) {
+	public static CommitQuery of(@Nullable String query) {
 		if (StringUtils.isNotBlank(query)) {
 			ANTLRInputStream is = new ANTLRInputStream(query);
 			CommitQueryLexer lexer = new CommitQueryLexer(is);
