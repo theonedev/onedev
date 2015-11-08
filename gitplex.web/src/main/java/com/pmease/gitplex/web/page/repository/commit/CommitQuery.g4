@@ -7,7 +7,7 @@ criteria: revisionCriteria | before | after | committer | author | path | messag
 revisionCriteria
 	: revision						# SingleRevision
 	| EXCLUDE revision 				# RevisionExclusion
-	| revision RANGE revision		# RevisionRange
+	| revision Range revision		# RevisionRange
 	;
 
 revision: branch | tag | id;

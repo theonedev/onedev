@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -35,6 +36,8 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Ref;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +45,7 @@ import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
@@ -52,7 +56,6 @@ import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.commit.query.CommitQuery;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -62,6 +65,10 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 public class RepoCommitsPage extends RepositoryPage {
 
+	private static final Logger logger = LoggerFactory.getLogger(RepoCommitsPage.class);
+	
+	private static final String GIT_ERROR_START = "Command error output: ";
+	
 	private static final int COUNT = 50;
 	
 	private static final int MAX_STEPS = 50;
@@ -90,16 +97,17 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected Commits load() {
 			Commits commits = new Commits();
 			
-			LogCommand log = new LogCommand(getRepository().git().repoDir());
-			log.parentRewriting(true);
+			LogCommand logCommand = new LogCommand(getRepository().git().repoDir());
+			logCommand.parentRewriting(true);
 			
 			List<Commit> logCommits;
 			try {
-				state.applyTo(log);
-				logCommits = log.call();
+				state.applyTo(logCommand);
+				logCommits = logCommand.call();
 			} catch (Exception e) {
-				if (e.getMessage() != null) {
-					queryForm.error(e.getMessage());
+				
+				if (e.getMessage() != null && e.getMessage().contains(GIT_ERROR_START)) {
+					queryForm.error(StringUtils.substringAfter(e.getMessage(), GIT_ERROR_START));
 					logCommits = new ArrayList<>();
 				} else {
 					throw Throwables.propagate(e);
@@ -214,7 +222,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		queryForm = new Form<Void>("form") {
+		queryForm = new Form<Void>("query") {
 
 			@Override
 			protected void onSubmit() {
@@ -222,10 +230,12 @@ public class RepoCommitsPage extends RepositoryPage {
 
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				try {
-					CommitQuery.of(state.query);
+					if (state.query != null)
+						new CommitQuery(state.query).parse(); // validate query
 					updateCommits(target);
 				} catch (Exception e) {
-					error(e.getMessage());
+					logger.error("Error parsing commit query string: " + state.query, e);
+					error("Syntax error in query string");
 					target.add(feedback);
 				}
 			}
@@ -256,6 +266,17 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 		}));
 		queryForm.add(new AjaxButton("submit") {});
+		queryForm.add(new AjaxLink<Void>("clear") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				state.query = null;
+				target.add(queryForm);
+				updateCommits(target);
+			}
+			
+		});
+		queryForm.setOutputMarkupId(true);
 		add(queryForm);
 		
 		add(feedback = new NotificationPanel("feedback", queryForm));
@@ -464,6 +485,8 @@ public class RepoCommitsPage extends RepositoryPage {
 		
 		state = (HistoryState) data;
 
+		target.add(queryForm);
+		
 		body.replace(commitsView = newCommitsView());
 		target.add(body);
 		
@@ -602,7 +625,9 @@ public class RepoCommitsPage extends RepositoryPage {
 				throw new RuntimeException("Step should be no more than " + MAX_STEPS);
 			
 			logCommand.count(step*COUNT);
-			CommitQuery.of(query).applyTo(logCommand);
+
+			if (query != null)
+				new ParseTreeWalker().walk(new LogCommandDecorator(logCommand), new CommitQuery(query).parse());
 		}
 		
 	}

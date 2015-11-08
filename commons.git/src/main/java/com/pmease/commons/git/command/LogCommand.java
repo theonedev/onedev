@@ -172,6 +172,12 @@ public class LogCommand extends GitCommand<List<Commit>> {
         if (skip != 0)
         	cmd.addArgs("--skip=" + skip);
 
+        for (String author: authors)
+        	cmd.addArgs("--author=" + author);
+        
+        for (String committer: committers)
+        	cmd.addArgs("--committer=" + committer);
+        
         for (String message: messages)
         	cmd.addArgs("--grep=" + message);
         
