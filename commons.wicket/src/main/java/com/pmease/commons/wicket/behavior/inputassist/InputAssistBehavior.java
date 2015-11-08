@@ -49,7 +49,6 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 		String input = params.getParameterValue("input").toString();
 		int cursor = params.getParameterValue("cursor").toInt();
-		System.out.println(input + ":" + cursor);
 		final InputAssist assist = assist(input, cursor);
 		
 		String errorsJSON;

@@ -22,10 +22,6 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.antlr</groupId>
-				<artifactId>antlr4-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>com.pmease</groupId>
 				<artifactId>plugin.maven</artifactId>
 				<executions>

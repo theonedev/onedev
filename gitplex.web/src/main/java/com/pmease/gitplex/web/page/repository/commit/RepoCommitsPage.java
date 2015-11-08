@@ -5,19 +5,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -36,7 +31,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.util.string.StringValue;
 import org.eclipse.jgit.lib.Ref;
 import org.joda.time.DateTime;
 
@@ -48,9 +42,6 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
-import com.pmease.commons.wicket.component.menu.AjaxLinkItem;
-import com.pmease.commons.wicket.component.menu.MenuItem;
-import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
@@ -59,8 +50,6 @@ import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.commit.filters.CommitFilter;
-import com.pmease.gitplex.web.page.repository.commit.filters.FilterEditor;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -74,17 +63,17 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	private static final int MAX_STEPS = 50;
 	
+	private static final String PARAM_QUERY = "query";
+	
 	private static final String PARAM_STEP = "step";
 	
 	private HistoryState state = new HistoryState();
 	
 	private boolean hasMore;
 	
-	private Form<?> filterForm;
-	
-	private RepeatingView filtersView;
-	
 	private WebMarkupContainer body;
+	
+	private Form<?> queryForm;
 	
 	private RepeatingView commitsView;
 	
@@ -111,7 +100,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				if (e.getMessage() != null)
 					index = e.getMessage().indexOf("bad revision");
 				if (index != -1) {
-					filterForm.error(e.getMessage().substring(index));
+					queryForm.error(e.getMessage().substring(index));
 					logCommits = new ArrayList<>();
 				} else {
 					throw Throwables.propagate(e);
@@ -226,7 +215,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		filterForm = new Form<Void>("form") {
+		queryForm = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
@@ -243,12 +232,9 @@ public class RepoCommitsPage extends RepositoryPage {
 			}
 			
 		};
-		add(filterForm);
+		add(queryForm);
 		
-		filterForm.add(filtersView = newFiltersView());
-		filterForm.add(newAddFilter());
-		
-		add(feedback = new NotificationPanel("feedback", filterForm));
+		add(feedback = new NotificationPanel("feedback", queryForm));
 		feedback.setOutputMarkupPlaceholderTag(true);
 		
 		body = new WebMarkupContainer("body");
@@ -260,7 +246,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!filterForm.hasErrorMessage() && commitsModel.getObject().current.isEmpty());
+				setVisible(!queryForm.hasErrorMessage() && commitsModel.getObject().current.isEmpty());
 			}
 			
 		});
@@ -344,75 +330,6 @@ public class RepoCommitsPage extends RepositoryPage {
 		add(foot);
 	}
 	
-	private WebMarkupContainer newAddFilter() {
-		WebMarkupContainer addFilter = new WebMarkupContainer("addFilter");
-		addFilter.setOutputMarkupId(true);
-		
-		addFilter.add(new MenuLink("trigger") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(GitPlex.getExtensions(CommitFilter.class).size() != state.filters.size());
-			}
-
-			@Override
-			protected List<MenuItem> getMenuItems() {
-				Set<String> usedFilters = new HashSet<>();
-				for (CommitFilter filter: state.filters)
-					usedFilters.add(filter.getName());
-				List<MenuItem> menuItems = new ArrayList<>();
-				for (final CommitFilter extension: GitPlex.getExtensions(CommitFilter.class)) {
-					if (!usedFilters.contains(extension.getName())) {
-						menuItems.add(new AjaxLinkItem(extension.getName()) {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								// extension is a singleton, so we need to make a clone
-								CommitFilter clone = SerializationUtils.clone(extension);
-								state.filters.add(clone);
-								Component item = newFilterItem(filtersView.newChildId(), clone, true);
-								filtersView.add(item);
-								
-								String script = String.format(
-										"$('#repo-commits .add-filter').before('<div id=\"%s\"></div>');", 
-										item.getMarkupId());
-								target.prependJavaScript(script);
-								target.add(item);
-								close(target);
-
-								WebMarkupContainer addFilter = newAddFilter();
-								filterForm.replace(addFilter);
-								target.add(addFilter);
-							}
-							
-						});
-					}
-				}
-				return menuItems;
-			}
-			
-		});
-				
-		addFilter.add(new AjaxSubmitLink("query") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!state.filters.isEmpty());
-			}
-			
-		});
-		
-		return addFilter;
-	}
-	
 	private void updateCommits(AjaxRequestTarget target) {
 		state.step = 1;
 
@@ -432,41 +349,6 @@ public class RepoCommitsPage extends RepositoryPage {
 		PageParameters params = paramsOf(getRepository(), state);
 		CharSequence url = RequestCycle.get().urlFor(RepoCommitsPage.class, params);
 		pushState(target, url.toString(), state);
-	}
-	
-	private RepeatingView newFiltersView() {
-		RepeatingView filtersView = new RepeatingView("filters");
-		for (CommitFilter filter: state.filters) 
-			filtersView.add(newFilterItem(filtersView.newChildId(), filter, false));
-		return filtersView;
-	}
-	
-	private Component newFilterItem(String itemId, final CommitFilter itemFilter, boolean focus) {
-		final WebMarkupContainer item = new WebMarkupContainer(itemId);
-		item.add(new AjaxLink<Void>("remove") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				filtersView.remove(item);
-				for (Iterator<CommitFilter> it = state.filters.iterator(); it.hasNext();) {
-					CommitFilter filter = it.next();
-					if (filter.getName().equals(itemFilter.getName()))
-						it.remove();
-				}
-				target.appendJavaScript(String.format("$('#%s').remove();", item.getMarkupId()));
-				WebMarkupContainer addFilter = newAddFilter();
-				filterForm.replace(addFilter);
-				target.add(addFilter);
-				
-				if (!itemFilter.getValues().isEmpty())
-					updateCommits(target);
-			}
-			
-		});
-		FilterEditor editor = itemFilter.newEditor("editor", focus);
-		item.add(editor);
-		item.setOutputMarkupId(true);
-		return item;
 	}
 	
 	private RepeatingView newCommitsView() {
@@ -540,10 +422,8 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	public static PageParameters paramsOf(Repository repository, HistoryState state) {
 		PageParameters params = paramsOf(repository);
-		for (CommitFilter filter: state.filters) {
-			for (String value: filter.getValues())
-				params.add(filter.getName(), value);
-		}
+		if (state.query != null)
+			params.set(PARAM_QUERY, state.query);
 		if (state.step != 1)
 			params.set(PARAM_STEP, state.step);
 		return params;
@@ -560,9 +440,6 @@ public class RepoCommitsPage extends RepositoryPage {
 		
 		state = (HistoryState) data;
 
-		filterForm.replace(filtersView = newFiltersView());
-		target.add(filterForm);
-		
 		body.replace(commitsView = newCommitsView());
 		target.add(body);
 		
@@ -661,42 +538,31 @@ public class RepoCommitsPage extends RepositoryPage {
 
 		private static final long serialVersionUID = 1L;
 
-		private List<CommitFilter> filters = new ArrayList<>();
+		private String query;
 		
 		private int step = 1;
 
 		public HistoryState() {
 		}
 		
-		public HistoryState(List<CommitFilter> filters) {
-			this.filters = filters;
+		public HistoryState(String query) {
+			this.query = query;
 		}
 		
 		public HistoryState(PageParameters params) {
-			Set<String> names = params.getNamedKeys();
-			for (CommitFilter filter: GitPlex.getExtensions(CommitFilter.class)) {
-				if (names.contains(filter.getName())) {
-					List<String> values = new ArrayList<>();
-					for (StringValue each: params.getValues(filter.getName())) 
-						values.add(each.toString());
-					// extension is a singleton, so we need to make a clone
-					CommitFilter clone = SerializationUtils.clone(filter);
-					clone.setValues(values);
-					filters.add(clone);
-				}
-			}
+			query = params.get(PARAM_QUERY).toString();
 			
 			Integer step = params.get(PARAM_STEP).toOptionalInteger();
 			if (step != null)
 				this.step = step.intValue();		
 		}
 
-		public List<CommitFilter> getFilters() {
-			return filters;
+		public String getQuery() {
+			return query;
 		}
 
-		public void setFilters(List<CommitFilter> filters) {
-			this.filters = filters;
+		public void setQuery(String query) {
+			this.query = query;
 		}
 
 		public int getStep() {
@@ -712,9 +578,6 @@ public class RepoCommitsPage extends RepositoryPage {
 				throw new RuntimeException("Step should be no more than " + MAX_STEPS);
 			
 			logCommand.count(step*COUNT);
-
-			for (CommitFilter filter: filters)
-				filter.applyTo(logCommand);
 		}
 		
 	}

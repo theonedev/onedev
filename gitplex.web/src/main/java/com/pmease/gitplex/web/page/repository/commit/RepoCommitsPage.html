@@ -1,17 +1,9 @@
 <wicket:extend>
 	<div id="repo-commits">
 		<div class="head">
-			<form wicket:id="form" class="filters clearfix">
-				<div wicket:id="filters" class="filter pull-left clearfix">
-					<a wicket:id="remove" class="btn btn-default remove pull-left" title="Remove filter"><i class="fa fa-times"></i></a>
-					<div wicket:id="editor" class="editor pull-left"></div>
-				</div>
-				<div wicket:id="addFilter" class="pull-left add-filter">
-					<div class="btn-group">
-						<a wicket:id="trigger" class="btn btn-default" title="Add filter"><i class="fa fa-plus"></i></a>
-						<button wicket:id="query" type="submit" title="Filter" class="btn btn-default"><i class="fa fa-search"></i></button>
-					</div>
-				</div>
+			<form wicket:id="query" class="query form-inline">
+				<input wicket:id="input" class="form-control"></input>
+				<input wicket:id="submit" type="submit" class="btn btn-default">query</input>
 			</form>
 		</div>
 		<div wicket:id="feedback"></div>
@@ -20,7 +12,7 @@
 			<ul class="list list-unstyled">
 				<li wicket:id="commits"></li>
 			</ul>
-			<div wicket:id="noCommits" class="no-commits"><i class="fa fa-exclamation-triangle"></i> No comimts found</div>
+			<div wicket:id="noCommits" class="no-commits"><i class="fa fa-exclamation-triangle"></i> No commits found</div>
 		</div>
 		<div wicket:id="foot" class="foot">
 			<a wicket:id="more" class="btn btn-default">More commits</a>

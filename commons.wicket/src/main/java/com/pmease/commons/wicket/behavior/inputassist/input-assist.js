@@ -3,8 +3,9 @@ pmease.commons.inputassist = {
 		var $input = $("#" + inputId);
 		$input.data("callback", callback);
 		
-		$input.doneevents("input focus mouseup keyup", function() {
-			callback($input.val(), $input.caret());
+		$input.doneEvents("input mouseup keyup", function(e) {
+			if (e.keyCode != 27 && e.keyCode != 38 && e.keyCode != 40) // ignore esc, up and down key 
+				callback($input.val(), $input.caret());
 		});
 		
 		$input.data("update", function($item) {
@@ -21,12 +22,16 @@ pmease.commons.inputassist = {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
 				var $active = $dropdown.find("li.active");
-				$active.removeClass("active");
-				var $prev = $active.prev();
-				if ($prev.length != 0)
-					$prev.addClass("active").focus();
-				else
+				if ($active.length != 0) {
+					$active.removeClass("active");
+					var $prev = $active.prev();
+					if ($prev.length != 0)
+						$prev.addClass("active").focus();
+					else
+						$dropdown.find("li.selectable").last().addClass("active").focus();
+				} else {
 					$dropdown.find("li.selectable").last().addClass("active").focus();
+				}
 				$input.focus();
 				return false;
 			}
@@ -36,12 +41,16 @@ pmease.commons.inputassist = {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
 				var $active = $dropdown.find("li.active");
-				$active.removeClass("active");
-				var $next = $active.next();
-				if ($next.length != 0)
-					$next.addClass("active").focus();
-				else
+				if ($active.length != 0) {
+					$active.removeClass("active");
+					var $next = $active.next();
+					if ($next.length != 0)
+						$next.addClass("active")[0].focus();
+					else
+						$dropdown.find("li.selectable").first().addClass("active").focus();
+				} else {
 					$dropdown.find("li.selectable").first().addClass("active").focus();
+				}
 				$input.focus();
 				return false;
 			}
@@ -50,8 +59,11 @@ pmease.commons.inputassist = {
 		$input.bind("keydown", "return", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				$input.data("update")($dropdown.find("li.active"));
-				return false;
+				var $active = $dropdown.find("li.active");
+				if ($active.length != 0) {
+					$input.data("update")($active);
+					return false;
+				}
 			}
 		});
 		
@@ -59,6 +71,7 @@ pmease.commons.inputassist = {
 
 	markErrors: function(inputId, inputErrors) {
 		var $input = $("#" + inputId);
+		$input.data("errors", inputErrors);
 	},
 	
 	assistOpened: function(inputId, dropdownId) {
@@ -79,7 +92,8 @@ pmease.commons.inputassist = {
 			$input.focus();
 		});
 		var $item = $dropdown.find("li.selectable");
-		$item.first().addClass("active");
+		if (!$.isEmptyObject($input.data("errors")))
+			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);

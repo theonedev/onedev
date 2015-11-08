@@ -54,7 +54,9 @@ public class TestPage extends BasePage {
 					newInput = input + " world " + i*10;
 					assistItems.add(new AssistItem(newInput, newInput.length()));
 				}
-				return new InputAssist(new ArrayList<InputError>(), assistItems);
+				List<InputError> inputErrors = new ArrayList<>();
+				inputErrors.add(new InputError(0, 1, "hello world"));
+				return new InputAssist(inputErrors, assistItems);
 			}
 
 		}));

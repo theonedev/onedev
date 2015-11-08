@@ -25,7 +25,6 @@ import com.pmease.gitplex.web.component.comment.PullRequestTransformer;
 import com.pmease.gitplex.web.component.diff.blob.DiffRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
-import com.pmease.gitplex.web.page.repository.commit.filters.CommitFilter;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
 
@@ -55,7 +54,6 @@ public class WebModule extends AbstractPluginModule {
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
 		contributeFromPackage(BlobRenderer.class, BlobRenderer.class);
-		contributeFromPackage(CommitFilter.class, CommitFilter.class);
 		
 		contribute(MarkdownExtension.class, new MarkdownExtension() {
 			

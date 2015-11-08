@@ -189,9 +189,19 @@ span.delete.icon {padding: 12px; background: url("delete.png") no-repeat 50% 50%
 span.move.icon {padding: 12px; background: url("move.png") no-repeat 50% 50%;}
 
 /* CLEARABLE TEXT FIELD */
-input.clearable::-ms-clear {display: none;}
-.input-clear {background: url("clear.png") no-repeat; margin-left: -20px; z-index: 1000; position: relative; 
-	cursor: pointer; top: 8px; color: #333; display: none;}	
+input.clearable::-ms-clear {
+	display: none;
+}
+.input-clear {
+	background: url("clear.png") no-repeat; 
+	margin-left: -20px; 
+	z-index: 1000; 
+	position: relative; 
+	cursor: pointer; 
+	top: 8px; 
+	color: #333; 
+	display: none;
+}	
 @-moz-document url-prefix() {
     .input-clear {top: 7px;}
 }
