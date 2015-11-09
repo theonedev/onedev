@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
@@ -90,7 +91,46 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 
 	@Override
 	protected List<InputAssist> getAssists(String input, int caret) {
-		return new ArrayList<>();
+		final List<InputAssist> assists = new ArrayList<>();
+		
+		String inputBeforeCaret;
+		if (caret > input.length())
+			inputBeforeCaret = input;
+		else
+			inputBeforeCaret = input.substring(0, caret);
+
+		ANTLRInputStream is = new ANTLRInputStream(inputBeforeCaret); 
+		CommitQueryLexer lexer = new CommitQueryLexer(is);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		CommitQueryParser parser = new CommitQueryParser(tokens);
+		lexer.removeErrorListeners();
+		parser.removeErrorListeners();
+
+		System.out.println("********************************");
+		lexer.addErrorListener(new BaseErrorListener() {
+
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				System.out.println("lexer :: symbol: " + offendingSymbol + ", msg: " + msg + ", exception: " + e);
+			}
+			
+		});
+		parser.addErrorListener(new BaseErrorListener() {
+
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				Parser parser = (Parser) recognizer;
+				System.out.println("expected tokens: " + parser.getExpectedTokens());
+				System.out.println("parser :: symbol: " + offendingSymbol + ", msg: " + msg + ", exception: " + e);
+			}
+			
+		});
+		
+		parser.query();
+
+		return assists;
 	}
 	
 }
