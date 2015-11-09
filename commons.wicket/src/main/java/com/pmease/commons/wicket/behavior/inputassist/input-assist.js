@@ -67,24 +67,30 @@ pmease.commons.inputassist = {
 			}
 		});
 		
+		callback($input.val());
 	},
 
 	markErrors: function(inputId, errors) {
 		var $input = $("#" + inputId);
 		$input.data("errors", errors);
-		$("body>." + inputId + ".input-error-underline").remove();
+		var $parent = $input.closest("form");
+		$parent.css("position", "relative");
+		$parent.find(">.input-error-mark").remove();
 		if ($input.val().length != 0) {
 			for (var i in errors) {
-				var errorMark = errors[i];
-				var fromCoord = getCaretCoordinates($input[0], errorMark.from);
-				var toCoord = getCaretCoordinates($input[0], errorMark.to);
-				var $error = $("<div class='" + inputId + " input-error-underline'><div>");
-				$error.appendTo($("body"));
+				var error = errors[i];
+				var fromCoord = getCaretCoordinates($input[0], error.from);
+				var toCoord = getCaretCoordinates($input[0], error.to);
+				var $error = $("<div class='input-error-mark'></div>");
+				$error.appendTo($parent);
 				var inputCoord = $input.offset();
+				var parentCoord = $parent.offset();
 				var errorHeight = 5;
 				var errorOffset = 9;
 				var minWidth = 5;
-				$error.css({left: fromCoord.left + inputCoord.left, top: inputCoord.top + $input.outerHeight() - errorOffset});
+				var left = fromCoord.left + inputCoord.left - parentCoord.left;
+				var top = inputCoord.top + $input.outerHeight() - parentCoord.top - errorOffset;
+				$error.css({left: left, top: top});
 				$error.outerWidth(Math.max(toCoord.left-fromCoord.left, minWidth));
 				$error.outerHeight(errorHeight);
 			}
