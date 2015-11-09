@@ -1,3 +1,8 @@
 .input-assist {
 	padding: 8px;
 }
+.input-assist-error {
+	position: absolute;
+    background: url(wave-line.gif) bottom repeat-x;
+    z-index: 100000;
+}

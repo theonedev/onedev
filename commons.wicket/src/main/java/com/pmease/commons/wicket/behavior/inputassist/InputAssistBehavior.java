@@ -7,11 +7,13 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,6 +22,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.assets.textareacaretposition.TextareaCaretPositionResourceReference;
 import com.pmease.commons.wicket.component.floating.AlignWithComponent;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -53,7 +56,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		
 		String errorsJSON;
 		try {
-			errorsJSON = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(assist.getInputErrors());
+			errorsJSON = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(assist.getErrorMarks());
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -102,6 +105,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(TextareaCaretPositionResourceReference.INSTANCE));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(AssistPanel.class, "input-assist.css")));
+		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(InputAssistBehavior.class, "input-assist.js")));
 		

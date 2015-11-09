@@ -230,8 +230,8 @@ public class RepoCommitsPage extends RepositoryPage {
 
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				try {
-					if (state.query != null)
-						new CommitQuery(state.query).parse(); // validate query
+					if (state.query != null) // validate query
+						LogCommandDecorator.parse(state.query);
 					updateCommits(target);
 				} catch (Exception e) {
 					logger.error("Error parsing commit query string: " + state.query, e);
@@ -264,7 +264,8 @@ public class RepoCommitsPage extends RepositoryPage {
 				state.query = object;
 			}
 			
-		}));
+		}).add(new QueryAssistBehavior()));
+		
 		queryForm.add(new AjaxButton("submit") {});
 		queryForm.add(new AjaxLink<Void>("clear") {
 
@@ -626,8 +627,8 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 			logCommand.count(step*COUNT);
 
-			if (query != null)
-				new ParseTreeWalker().walk(new LogCommandDecorator(logCommand), new CommitQuery(query).parse());
+			if (query != null) 
+				new ParseTreeWalker().walk(new LogCommandDecorator(logCommand), LogCommandDecorator.parse(query));
 		}
 		
 	}

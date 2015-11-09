@@ -1,6 +1,6 @@
 grammar CommitQuery;
 
-query: criteria+ EOF;
+query: criteria+;
 
 criteria: revisionCriteria | before | after | committer | author | path | message;
 

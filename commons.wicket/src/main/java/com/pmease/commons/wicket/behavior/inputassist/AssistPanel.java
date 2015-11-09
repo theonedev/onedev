@@ -3,14 +3,11 @@ package com.pmease.commons.wicket.behavior.inputassist;
 import java.util.List;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {
@@ -42,13 +39,6 @@ class AssistPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AssistPanel.class, "input-assist.css")));
 	}
 
 }

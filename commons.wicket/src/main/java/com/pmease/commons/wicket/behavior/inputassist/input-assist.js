@@ -69,9 +69,24 @@ pmease.commons.inputassist = {
 		
 	},
 
-	markErrors: function(inputId, inputErrors) {
+	markErrors: function(inputId, errorMarks) {
 		var $input = $("#" + inputId);
-		$input.data("errors", inputErrors);
+		$input.data("errorMarks", errorMarks);
+		$("body>." + inputId + ".input-assist-error").remove();
+		for (var i in errorMarks) {
+			var errorMark = errorMarks[i];
+			console.log(errorMark);
+			var fromCoord = getCaretCoordinates($input[0], errorMark.from);
+			var toCoord = getCaretCoordinates($input[0], errorMark.to);
+			var $error = $("<div class='" + inputId + " input-assist-error'><div>");
+			$error.appendTo($("body"));
+			var inputCoord = $input.offset();
+			var errorHeight = 5;
+			var errorOffset = 8;
+			$error.css({left: fromCoord.left + inputCoord.left, top: inputCoord.top + $input.outerHeight() - errorOffset});
+			$error.outerWidth(toCoord.left-fromCoord.left);
+			$error.outerHeight(errorHeight);
+		}
 	},
 	
 	assistOpened: function(inputId, dropdownId) {
@@ -92,7 +107,7 @@ pmease.commons.inputassist = {
 			$input.focus();
 		});
 		var $item = $dropdown.find("li.selectable");
-		if (!$.isEmptyObject($input.data("errors")))
+		if (!$input.data("errorMarks").length != 0)
 			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);

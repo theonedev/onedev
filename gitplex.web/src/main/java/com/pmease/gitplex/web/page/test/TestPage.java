@@ -10,9 +10,9 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.behavior.inputassist.AssistItem;
+import com.pmease.commons.wicket.behavior.inputassist.ErrorMark;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
-import com.pmease.commons.wicket.behavior.inputassist.InputError;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -54,8 +54,8 @@ public class TestPage extends BasePage {
 					newInput = input + " world " + i*10;
 					assistItems.add(new AssistItem(newInput, newInput.length()));
 				}
-				List<InputError> inputErrors = new ArrayList<>();
-				inputErrors.add(new InputError(0, 1, "hello world"));
+				List<ErrorMark> inputErrors = new ArrayList<>();
+				inputErrors.add(new ErrorMark(0, 1));
 				return new InputAssist(inputErrors, assistItems);
 			}
 

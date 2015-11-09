@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -12,6 +15,7 @@ import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.Committer
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.IdContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.MessageContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.PathContext;
+import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionExclusionContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionRangeContext;
@@ -20,7 +24,7 @@ import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.TagContex
 
 public class LogCommandDecorator extends CommitQueryBaseListener {
 
-	private LogCommand logCommand;
+	private final LogCommand logCommand;
 	
 	private ParseTreeProperty<String> value = new ParseTreeProperty<>();
 
@@ -101,6 +105,15 @@ public class LogCommandDecorator extends CommitQueryBaseListener {
 	@Override
 	public void exitMessage(MessageContext ctx) {
 		logCommand.messages().add(getValue(ctx.Value()));
+	}
+	
+	public static QueryContext parse(String query) {
+		ANTLRInputStream is = new ANTLRInputStream(query); 
+		CommitQueryLexer lexer = new CommitQueryLexer(is);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		CommitQueryParser parser = new CommitQueryParser(tokens);
+		parser.setErrorHandler(new BailErrorStrategy());
+		return parser.query();
 	}
 	
 }
