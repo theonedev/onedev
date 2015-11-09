@@ -4,9 +4,9 @@ pmease.commons.inputassist = {
 		$input.data("callback", callback);
 		
 		$input.doneEvents("input mouseup keyup", function(e) {
-			if (e.keyCode != 27 && e.keyCode != 38 && e.keyCode != 40) // ignore esc, up and down key 
+			if (e.keyCode != 27 && e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13) // ignore esc, enter, up and down key 
 				callback($input.val(), $input.caret());
-		});
+		}, 100);
 		
 		$input.data("update", function($item) {
 			var value = $item.data("input");
