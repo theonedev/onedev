@@ -1,7 +1,7 @@
-.input-assist {
+.input-assists {
 	padding: 8px;
 }
-.input-assist-error {
+.input-error-underline {
 	position: absolute;
     background: url(wave-line.gif) bottom repeat-x;
     z-index: 100000;

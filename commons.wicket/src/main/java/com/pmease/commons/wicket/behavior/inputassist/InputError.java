@@ -2,7 +2,7 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import java.io.Serializable;
 
-public class ErrorMark implements Serializable {
+public class InputError implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -10,7 +10,7 @@ public class ErrorMark implements Serializable {
 	
 	private final int to;
 	
-	public ErrorMark(int from, int to) {
+	public InputError(int from, int to) {
 		this.from = from;
 		this.to = to;
 	}

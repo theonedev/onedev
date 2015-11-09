@@ -12,28 +12,28 @@ import org.apache.wicket.markup.html.panel.Panel;
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {
 
-	private final List<AssistItem> assistItems;
+	private final List<InputAssist> assists;
 	
-	public AssistPanel(String id, List<AssistItem> assistItems) {
+	public AssistPanel(String id, List<InputAssist> assists) {
 		super(id);
 		
-		this.assistItems = assistItems;
+		this.assists = assists;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<AssistItem>("assistItems", assistItems) {
+		add(new ListView<InputAssist>("assists", assists) {
 
 			@Override
-			protected void populateItem(ListItem<AssistItem> item) {
-				AssistItem assistItem = item.getModelObject();
+			protected void populateItem(ListItem<InputAssist> item) {
+				InputAssist assist = item.getModelObject();
 				WebMarkupContainer link = new WebMarkupContainer("link");
-				link.add(new Label("label", assistItem.getInput()));
+				link.add(new Label("label", assist.getInput()));
 				item.add(link);
-				item.add(AttributeAppender.append("data-input", assistItem.getInput()));
-				item.add(AttributeAppender.append("data-cursor", assistItem.getCursor()));
+				item.add(AttributeAppender.append("data-input", assist.getInput()));
+				item.add(AttributeAppender.append("data-caret", assist.getCaret()));
 			}
 
 		});

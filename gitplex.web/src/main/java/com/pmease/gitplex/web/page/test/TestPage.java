@@ -9,8 +9,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.wicket.behavior.inputassist.AssistItem;
-import com.pmease.commons.wicket.behavior.inputassist.ErrorMark;
+import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
+import com.pmease.commons.wicket.behavior.inputassist.InputError;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.gitplex.web.page.base.BasePage;
@@ -47,15 +47,15 @@ public class TestPage extends BasePage {
 
 			@Override
 			protected InputAssist assist(String input, int cursor) {
-				List<AssistItem> assistItems = new ArrayList<>();
+				List<InputAssist> assistItems = new ArrayList<>();
 				for (int i=0; i<20; i++) {
 					String newInput = input + " hello " + i*10;
-					assistItems.add(new AssistItem(newInput, newInput.length()));
+					assistItems.add(new InputAssist(newInput, newInput.length()));
 					newInput = input + " world " + i*10;
-					assistItems.add(new AssistItem(newInput, newInput.length()));
+					assistItems.add(new InputAssist(newInput, newInput.length()));
 				}
-				List<ErrorMark> inputErrors = new ArrayList<>();
-				inputErrors.add(new ErrorMark(0, 1));
+				List<InputError> inputErrors = new ArrayList<>();
+				inputErrors.add(new InputError(0, 1));
 				return new InputAssist(inputErrors, assistItems);
 			}
 

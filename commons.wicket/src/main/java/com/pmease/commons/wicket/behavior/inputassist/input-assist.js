@@ -11,9 +11,9 @@ pmease.commons.inputassist = {
 		$input.data("update", function($item) {
 			var value = $item.data("input");
 			$input.val(value);
-			var cursor = $item.data("cursor");
-			if (cursor != undefined)
-				$input.caret(cursor);
+			var caret = $item.data("caret");
+			if (caret != undefined)
+				$input.caret(caret);
 			$input.focus();
 			$input.data("callback")(value, $input.caret());
 		});
@@ -69,23 +69,25 @@ pmease.commons.inputassist = {
 		
 	},
 
-	markErrors: function(inputId, errorMarks) {
+	markErrors: function(inputId, errors) {
 		var $input = $("#" + inputId);
-		$input.data("errorMarks", errorMarks);
-		$("body>." + inputId + ".input-assist-error").remove();
-		for (var i in errorMarks) {
-			var errorMark = errorMarks[i];
-			console.log(errorMark);
-			var fromCoord = getCaretCoordinates($input[0], errorMark.from);
-			var toCoord = getCaretCoordinates($input[0], errorMark.to);
-			var $error = $("<div class='" + inputId + " input-assist-error'><div>");
-			$error.appendTo($("body"));
-			var inputCoord = $input.offset();
-			var errorHeight = 5;
-			var errorOffset = 8;
-			$error.css({left: fromCoord.left + inputCoord.left, top: inputCoord.top + $input.outerHeight() - errorOffset});
-			$error.outerWidth(toCoord.left-fromCoord.left);
-			$error.outerHeight(errorHeight);
+		$input.data("errors", errors);
+		$("body>." + inputId + ".input-error-underline").remove();
+		if ($input.val().length != 0) {
+			for (var i in errors) {
+				var errorMark = errors[i];
+				var fromCoord = getCaretCoordinates($input[0], errorMark.from);
+				var toCoord = getCaretCoordinates($input[0], errorMark.to);
+				var $error = $("<div class='" + inputId + " input-error-underline'><div>");
+				$error.appendTo($("body"));
+				var inputCoord = $input.offset();
+				var errorHeight = 5;
+				var errorOffset = 9;
+				var minWidth = 5;
+				$error.css({left: fromCoord.left + inputCoord.left, top: inputCoord.top + $input.outerHeight() - errorOffset});
+				$error.outerWidth(Math.max(toCoord.left-fromCoord.left, minWidth));
+				$error.outerHeight(errorHeight);
+			}
 		}
 	},
 	
@@ -107,7 +109,7 @@ pmease.commons.inputassist = {
 			$input.focus();
 		});
 		var $item = $dropdown.find("li.selectable");
-		if (!$input.data("errorMarks").length != 0)
+		if (!$input.data("errors").length != 0)
 			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);

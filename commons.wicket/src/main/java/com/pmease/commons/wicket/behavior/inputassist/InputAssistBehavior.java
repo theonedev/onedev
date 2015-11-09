@@ -2,6 +2,9 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -51,26 +54,33 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 		String input = params.getParameterValue("input").toString();
-		int cursor = params.getParameterValue("cursor").toInt();
-		final InputAssist assist = assist(input, cursor);
+		Integer caret = params.getParameterValue("caret").toOptionalInteger();
 		
+		List<InputError> errors = getErrors(input);
 		String errorsJSON;
 		try {
-			errorsJSON = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(assist.getErrorMarks());
+			errorsJSON = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(errors);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
 		String script = String.format("pmease.commons.inputassist.markErrors('%s', %s);", 
 				getComponent().getMarkupId(), errorsJSON);
 		target.appendJavaScript(script);
+		
+		final List<InputAssist> assists;
+		
+		if (caret != null)
+			assists = getAssists(input, caret);
+		else
+			assists = new ArrayList<>();
 
-		if (!assist.getAssistItems().isEmpty()) {
+		if (!assists.isEmpty()) {
 			if (dropdown == null) {
 				dropdown = new FloatingPanel(target, new AlignWithComponent(getComponent()), Alignment.bottom(0)) {
 
 					@Override
 					protected Component newContent(String id) {
-						return new AssistPanel(id, assist.getAssistItems());
+						return new AssistPanel(id, assists);
 					}
 
 					@Override
@@ -85,7 +95,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				target.appendJavaScript(script);
 			} else {
 				Component content = dropdown.getContent();
-				Component newContent = new AssistPanel(content.getId(), assist.getAssistItems());
+				Component newContent = new AssistPanel(content.getId(), assists);
 				content.replaceWith(newContent);
 				target.add(newContent);
 
@@ -114,11 +124,12 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		
 		String script = String.format("pmease.commons.inputassist.init('%s', %s);", 
 				getComponent().getMarkupId(true), 
-				getCallbackFunction(explicit("input"), explicit("cursor")));
+				getCallbackFunction(explicit("input"), explicit("caret")));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract InputAssist assist(String input, int cursor);
+	protected abstract List<InputAssist> getAssists(String input, int caret);
 	
+	protected abstract List<InputError> getErrors(String input);
 }

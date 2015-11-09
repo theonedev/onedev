@@ -9,24 +9,21 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 
-import com.pmease.commons.wicket.behavior.inputassist.AssistItem;
+import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
-import com.pmease.commons.wicket.behavior.inputassist.ErrorMark;
+import com.pmease.commons.wicket.behavior.inputassist.InputError;
 
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends InputAssistBehavior {
 
-	private List<ErrorMark> inputErrors = new ArrayList<>();
-	
 	@Override
-	protected InputAssist assist(String input, int cursor) {
-		inputErrors.clear();
-		
+	protected List<InputError> getErrors(String input) {
 		ANTLRInputStream is = new ANTLRInputStream(input); 
 		CommitQueryLexer lexer = new CommitQueryLexer(is);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -37,8 +34,8 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 		lexer.addErrorListener(new LexerErrorListener());
 		parser.addErrorListener(new ParserErrorListener());
 		parser.query();
+
 		
-		return new InputAssist(inputErrors, new ArrayList<AssistItem>());
 	}
 
 	@Nullable
@@ -54,20 +51,24 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 	
 	private class LexerErrorListener extends BaseErrorListener {
 
+		private List<InputError> errors = new ArrayList<>();
+		
 		@Override
 		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
 				String msg, RecognitionException e) {
 			String unrecognizedText = getUnrecognizedText(msg);
 			if (unrecognizedText != null) 
-				inputErrors.add(new ErrorMark(charPositionInLine, charPositionInLine + unrecognizedText.length()));
+				inputErrors.add(new InputError(charPositionInLine, charPositionInLine + unrecognizedText.length()));
 			else 
-				inputErrors.add(new ErrorMark(charPositionInLine, charPositionInLine+1));
+				inputErrors.add(new InputError(charPositionInLine, charPositionInLine+1));
 		}
 		
 	}
 	
 	private class ParserErrorListener extends BaseErrorListener {
 
+		private List<InputError> errors = new ArrayList<>();
+		
 		@Override
 		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
 				String msg, RecognitionException e) {
@@ -77,7 +78,7 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 				end = charPositionInLine + token.getText().length();
 			else
 				end = charPositionInLine + 1;
-			inputErrors.add(new ErrorMark(charPositionInLine, end));
+			inputErrors.add(new InputError(charPositionInLine, end));
 		}
 		
 	}
