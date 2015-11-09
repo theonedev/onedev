@@ -9,12 +9,10 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 
-import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.commons.wicket.behavior.inputassist.InputError;
@@ -31,11 +29,18 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 		lexer.removeErrorListeners();
 		parser.removeErrorListeners();
 
-		lexer.addErrorListener(new LexerErrorListener());
-		parser.addErrorListener(new ParserErrorListener());
+		LexerErrorListener lexerErrorListener = new LexerErrorListener();
+		lexer.addErrorListener(lexerErrorListener);
+		
+		ParserErrorListener parserErrorListener = new ParserErrorListener();
+		parser.addErrorListener(parserErrorListener);
 		parser.query();
 
+		List<InputError> errors = new ArrayList<>();
+		errors.addAll(lexerErrorListener.errors);
+		errors.addAll(parserErrorListener.errors);
 		
+		return errors;
 	}
 
 	@Nullable
@@ -58,9 +63,9 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 				String msg, RecognitionException e) {
 			String unrecognizedText = getUnrecognizedText(msg);
 			if (unrecognizedText != null) 
-				inputErrors.add(new InputError(charPositionInLine, charPositionInLine + unrecognizedText.length()));
+				errors.add(new InputError(charPositionInLine, charPositionInLine + unrecognizedText.length()));
 			else 
-				inputErrors.add(new InputError(charPositionInLine, charPositionInLine+1));
+				errors.add(new InputError(charPositionInLine, charPositionInLine+1));
 		}
 		
 	}
@@ -78,9 +83,14 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 				end = charPositionInLine + token.getText().length();
 			else
 				end = charPositionInLine + 1;
-			inputErrors.add(new InputError(charPositionInLine, end));
+			errors.add(new InputError(charPositionInLine, end));
 		}
 		
+	}
+
+	@Override
+	protected List<InputAssist> getAssists(String input, int caret) {
+		return new ArrayList<>();
 	}
 	
 }
