@@ -13,7 +13,7 @@ public class Test {
 
 	@org.junit.Test
 	public void test() throws IOException {
-		CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream("123 branch 345 tag  (hello world)"));
+		CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream("branch tag"));
 		lexer.removeErrorListeners();
 		List<Token> allTokens = new ArrayList<>();
 		Token token = lexer.nextToken();

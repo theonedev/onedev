@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,6 +17,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 
+import com.google.common.primitives.Chars;
 import com.pmease.commons.lang.extractors.ExtractToken;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
@@ -115,53 +117,78 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 		
 		private int caret;
 		
-		private String inputBeforeCaret;
-		
-		private Token caretToken;
-		
-		private List<Token> tokens;
-		
 		private List<Token> tokensBeforeCaret;
 		
-		InputInfo(String input, int caret) {
+		private String textToMatch;
+		
+		private int replaceStart;
+		
+		private int replaceEnd;
+		
+		InputInfo(@Nullable String input, int caret) {
+			if (input == null)
+				input = "";
+			if (caret > input.length())
+				caret = input.length();
 			this.input = input;
 			this.caret = caret;
-			
-			if (caret > input.length())
-				inputBeforeCaret = input;
-			else
-				inputBeforeCaret = input.substring(0, caret);
-			
+
+			Token tokenAtCaret = null;
+			Token tokenAfterCaret = null;
 			CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream(input));
-			tokens = new ArrayList<>();
 			Token token = lexer.nextToken();
 			while (token.getType() != Token.EOF) {
-				tokens.add(token);
+				if (caret>=token.getStartIndex() && caret<=token.getStopIndex()) {
+					tokenAtCaret = token;
+				} else if (caret > token.getStopIndex()) {
+					tokensBeforeCaret.add(token);
+				} else if (caret < token.getStartIndex()) {
+					tokenAfterCaret = token;
+					break;
+				}
 				token = lexer.nextToken();
 			}
 			
-			for (Token each: tokens) {
-				if (caret>=each.getStartIndex() && caret<=each.getStopIndex()) {
-					caretToken = each;
-					break;
+			Collections.reverse(tokensBeforeCaret);
+			
+			if (tokenAtCaret != null) {
+				textToMatch = tokenAtCaret.getText().substring(0, caret-token.getStartIndex());
+				replaceStart = tokenAtCaret.getStartIndex();
+				replaceEnd = tokenAtCaret.getStopIndex()+1;
+			} else {
+				int start;
+				if (!tokensBeforeCaret.isEmpty())
+					start = tokensBeforeCaret.get(0).getStopIndex() + 1;
+				else
+					start = 0;
+				while (start < input.length() && Character.isWhitespace(input.charAt(start)))
+					start++;
+				
+				int end;
+				if (tokenAfterCaret != null) {
+					end = tokenAfterCaret.getStartIndex();
+					while (end>=0 && Character.isWhitespace(input.charAt(end)))
+						end--;
+				} else {
+					end = input.length();
 				}
+				
+				if (start>caret) {
+					textToMatch = "";
+					replaceStart = caret;
+				} else {
+					textToMatch = input.substring(start, caret);
+					replaceStart = start;
+				}
+				
+				replaceEnd = Math.max(end, caret);
 			}
 			
 		}
 
-		Token getTokenBeforeCaret(int index) {
-			int count = 0;
-			for (int i=tokens.size()-1; i>=0; i--) {
-				Token token = tokens.get(i);
-				if (caret>token.getStopIndex() && count == index)
-					return token;
-				count++;
-			}
-			return null;
-		}
-		
-		void insertToken(String tokenText) {
+		InputInfo replaceToken(String tokenText, int caretOffset) {
 			
 		}
+		
 	}
 }
