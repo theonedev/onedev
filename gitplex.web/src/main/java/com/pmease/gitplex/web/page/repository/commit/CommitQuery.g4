@@ -10,13 +10,7 @@ revisionCriteria
 	| revision Range revision		# RevisionRange
 	;
 
-revision: branch | tag | id;
-
-branch: BRANCH Value;
-
-tag: TAG Value;
-
-id: ID Value;
+revision: (BRANCH|TAG|ID) Value;
 
 before: BEFORE Value;
 
@@ -30,33 +24,19 @@ path: PATH Value;
 
 message: MESSAGE Value;
 
-Range: '..' | '...';
-
-Value: LPAREN (ESCAPE|~[()\\])+? RPAREN;
-
 BRANCH: 'branch';
-
 TAG: 'tag';
-
 ID: 'id';
-
 BEFORE: 'before';
-
 AFTER: 'after';
-
 MESSAGE: 'message';
-
 COMMITTER: 'committer';
-
 AUTHOR: 'author';
-
 PATH: 'path';
-
 EXCLUDE: '^';
 
-LPAREN: '(';
-
-RPAREN: ')';
+Range: '..' | '...';
+Value: '(' (ESCAPE|~[()\\])+? ')';
 
 fragment
 ESCAPE: '\\'[()\\];

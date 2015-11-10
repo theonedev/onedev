@@ -10,9 +10,7 @@ import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.AfterContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.AuthorContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.BeforeContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.BranchContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CommitterContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.IdContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.MessageContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.PathContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
@@ -20,7 +18,6 @@ import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionC
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionExclusionContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionRangeContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.SingleRevisionContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.TagContext;
 
 public class LogCommandDecorator extends CommitQueryBaseListener {
 
@@ -49,32 +46,12 @@ public class LogCommandDecorator extends CommitQueryBaseListener {
 
 	@Override
 	public void exitRevision(RevisionContext ctx) {
-		if (ctx.branch() != null)
-			value.put(ctx, value.get(ctx.branch()));
-		else if (ctx.tag() != null)
-			value.put(ctx, value.get(ctx.tag()));
-		else
-			value.put(ctx, value.get(ctx.id()));
+		value.put(ctx, getValue(ctx.Value()));
 	}
 	
 	private String getValue(TerminalNode terminal) {
 		String value = terminal.getText().substring(1);
 		return value.substring(0, value.length()-1);
-	}
-
-	@Override
-	public void enterBranch(BranchContext ctx) {
-		value.put(ctx, getValue(ctx.Value()));
-	}
-
-	@Override
-	public void exitTag(TagContext ctx) {
-		value.put(ctx, getValue(ctx.Value()));
-	}
-
-	@Override
-	public void exitId(IdContext ctx) {
-		value.put(ctx, getValue(ctx.Value()));
 	}
 
 	@Override

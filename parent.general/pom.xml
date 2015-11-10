@@ -231,7 +231,7 @@
 				<plugin>
 					<groupId>org.antlr</groupId>
 					<artifactId>antlr4-maven-plugin</artifactId>
-					<version>4.3</version>
+					<version>${antlrVersion}</version>
 					<executions>
 						<execution>
 							<goals>
@@ -463,6 +463,11 @@
 				<artifactId>reflections</artifactId>
 				<version>0.9.9</version>
 			</dependency>
+			<dependency>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-runtime</artifactId>
+				<version>${antlrVersion}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -558,5 +563,6 @@
 		<jacksonVersion>2.4.3</jacksonVersion>
 		<powermockVersion>1.5.1</powermockVersion>
 		<servletVersion>3.1.0</servletVersion>
+		<antlrVersion>4.5.1-1</antlrVersion>
 	</properties>
 </project>
