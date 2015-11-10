@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 
+import com.pmease.commons.lang.extractors.ExtractToken;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssist;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.commons.wicket.behavior.inputassist.InputError;
@@ -55,12 +56,32 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 		CommitQueryParser parser = buildParser(inputBeforeCaret, lexerErrorListener, null);
 		parser.query();
 		
-		Token token = getLastToken(parser, 1);
+		CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream(input));
+		List<Token> allTokens = new ArrayList<>();
+		Token token = lexer.nextToken();
+		while (token.getType() != Token.EOF) {
+			allTokens.add(token);
+			token = lexer.nextToken();
+		}
 		
+		token = getLastToken(parser, 1);
+		if (token != null) {
+			
+		} else {
+			
+		}
 		
 		List<InputAssist> assists = new ArrayList<>();
 		
 		return assists;
+	}
+	
+	private Token getCaretToken(List<Token> tokens, int caret) {
+		for (Token token: tokens) {
+			if (caret>=token.getStartIndex() && caret<=token.getStopIndex())
+				return token;
+		}
+		return null;
 	}
 	
 	private Token getLastToken(CommitQueryParser parser, int index) {
@@ -69,6 +90,14 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 			return null;
 		else
 			return stream.get(stream.size() - index - 1);
+	}
+
+	private List<InputAssist> getCriteriaAssists(String input, @Nullable String term) {
+		List<InputAssist> assists = new ArrayList<>();
+		if (term == null)
+			term = "";
+		
+		return assists;
 	}
 
 	@Override
@@ -80,4 +109,59 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 		return errors;
 	}
 	
+	private static class InputInfo {
+		
+		private String input;
+		
+		private int caret;
+		
+		private String inputBeforeCaret;
+		
+		private Token caretToken;
+		
+		private List<Token> tokens;
+		
+		private List<Token> tokensBeforeCaret;
+		
+		InputInfo(String input, int caret) {
+			this.input = input;
+			this.caret = caret;
+			
+			if (caret > input.length())
+				inputBeforeCaret = input;
+			else
+				inputBeforeCaret = input.substring(0, caret);
+			
+			CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream(input));
+			tokens = new ArrayList<>();
+			Token token = lexer.nextToken();
+			while (token.getType() != Token.EOF) {
+				tokens.add(token);
+				token = lexer.nextToken();
+			}
+			
+			for (Token each: tokens) {
+				if (caret>=each.getStartIndex() && caret<=each.getStopIndex()) {
+					caretToken = each;
+					break;
+				}
+			}
+			
+		}
+
+		Token getTokenBeforeCaret(int index) {
+			int count = 0;
+			for (int i=tokens.size()-1; i>=0; i--) {
+				Token token = tokens.get(i);
+				if (caret>token.getStopIndex() && count == index)
+					return token;
+				count++;
+			}
+			return null;
+		}
+		
+		void insertToken(String tokenText) {
+			
+		}
+	}
 }
