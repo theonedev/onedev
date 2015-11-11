@@ -113,17 +113,17 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 	
 	private static class InputInfo {
 		
-		private String input;
+		private final String input;
 		
-		private int caret;
+		private final int caret;
 		
-		private List<Token> tokensBeforeCaret;
+		private final List<Token> tokensBeforeCaret = new ArrayList<>();
 		
-		private String textToMatch;
+		private final String textToMatch;
 		
-		private int replaceStart;
+		private final int replaceStart;
 		
-		private int replaceEnd;
+		private final int replaceEnd;
 		
 		InputInfo(@Nullable String input, int caret) {
 			if (input == null)
@@ -186,8 +186,11 @@ public class QueryAssistBehavior extends InputAssistBehavior {
 			
 		}
 
-		InputInfo replaceToken(String tokenText, int caretOffset) {
-			
+		InputInfo insertToken(String tokenText, int caretOffset) {
+			String inputBeforeStart = input.substring(0, replaceStart);
+			String inputAfterEnd = input.substring(replaceEnd);
+			String newInput = inputBeforeStart + tokenText + inputAfterEnd;
+			return new InputInfo(newInput, replaceStart + caretOffset);
 		}
 		
 	}
