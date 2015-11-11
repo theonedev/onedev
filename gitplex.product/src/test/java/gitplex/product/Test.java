@@ -1,28 +1,38 @@
 package gitplex.product;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryLexer;
+import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser;
 
 public class Test {
 
 	@org.junit.Test
 	public void test() throws IOException {
-		CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream("branch tag"));
+		CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream("branch(val)"));
+		final CommonTokenStream tokens = new CommonTokenStream(lexer);
+		CommitQueryParser parser = new CommitQueryParser(tokens);
 		lexer.removeErrorListeners();
-		List<Token> allTokens = new ArrayList<>();
-		Token token = lexer.nextToken();
-		while (token.getType() != Token.EOF) {
-			System.out.println(token);
-			allTokens.add(token);
-			token = lexer.nextToken();
-		}
-		
+		parser.removeErrorListeners();
+		parser.addErrorListener(new BaseErrorListener() {
+
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				Parser parser = (Parser) recognizer;
+				System.out.println(parser.getRuleContext());
+			}
+			
+		});
+		System.out.println(parser.query().getChild(0));
+		System.out.println(parser.getRuleContext());
 	}
 	
 }
