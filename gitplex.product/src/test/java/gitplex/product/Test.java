@@ -6,8 +6,13 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryLexer;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser;
@@ -16,7 +21,7 @@ public class Test {
 
 	@org.junit.Test
 	public void test() throws IOException {
-		CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream("branch(val)"));
+		CommitQueryLexer lexer = new CommitQueryLexer(new ANTLRInputStream("rule1"));
 		final CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CommitQueryParser parser = new CommitQueryParser(tokens);
 		lexer.removeErrorListeners();
@@ -31,8 +36,7 @@ public class Test {
 			}
 			
 		});
-		System.out.println(parser.query().getChild(0));
-		System.out.println(parser.getRuleContext());
+		parser.test();
 	}
 	
 }

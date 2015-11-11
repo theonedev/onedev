@@ -2,7 +2,6 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,12 +15,12 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 
 @SuppressWarnings("serial")
-public abstract class ANTLRInputAssistBehavior extends InputAssistBehavior {
+public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
 	@Override
 	protected List<InputAssist> getAssists(String input, final int caret) {
 		final AtomicInteger replaceStart = new AtomicInteger(caret);
-		final AtomicReference<ParserRuleContext> expectingRule = new AtomicReference<>(null);
+		final AtomicReference<ParserRuleContext> expectedRule = new AtomicReference<>(null);
 		final List<Token> tokensBeforeCaret = new ArrayList<>();
 		ParserRuleContext parseResult = parse(input.substring(0, caret), new BaseErrorListener() {
 
@@ -35,13 +34,12 @@ public abstract class ANTLRInputAssistBehavior extends InputAssistBehavior {
 			}
 			
 		}, new BaseErrorListener() {
-
-			private int maxTokenIndex = -1;
 			
-			private int maxDepth = -1;
-
-			private void record(Parser parser) {
-				expectingRule.set(parser.getRuleContext());
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				Parser parser = (Parser) recognizer;
+				expectedRule.set(parser.getRuleContext());
 				tokensBeforeCaret.clear();
 				for (int i=parser.getTokenStream().size()-1; i>=0; i--) {
 					Token token = parser.getTokenStream().get(i);
@@ -50,45 +48,37 @@ public abstract class ANTLRInputAssistBehavior extends InputAssistBehavior {
 				}
 			}
 			
-			@Override
-			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-					int charPositionInLine, String msg, RecognitionException e) {
-				Parser parser = (Parser) recognizer;
-				int tokenIndex = parser.getRuleContext().getStart().getTokenIndex();
-				if (tokenIndex > maxTokenIndex) {
-					maxTokenIndex = tokenIndex;
-					record(parser);
-				} else if (tokenIndex == maxTokenIndex && parser.getRuleContext().depth() > maxDepth) {
-					maxDepth = parser.getRuleContext().depth();
-					record(parser);
-				}
-			}
-			
 		});
 		int replaceEnd = caret;
-		if (expectingRule != null) { 
-			for (int i=caret+1; i<input.length(); i++) {
-				final AtomicBoolean endOfExpectingRule = new AtomicBoolean(false);
+		if (expectedRule.get() != null) { 
+			for (int i=caret+1; i<=input.length(); i++) {
+				final AtomicReference<ParserRuleContext> expectedRuleNow = new AtomicReference<>(null);
 				parse(input.substring(0, i), new BaseErrorListener(), new BaseErrorListener() {
 
 					@Override
 					public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 							int charPositionInLine, String msg, RecognitionException e) {
-						Parser parser = (Parser) recognizer;
-						if (parser.getRuleContext().getStart().getTokenIndex() != expectingRule.get().getStart().getTokenIndex()
-								|| parser.getRuleContext().depth() != expectingRule.get().depth()) { 
-							endOfExpectingRule.set(true);
-						}
+						expectedRuleNow.set(((Parser) recognizer).getRuleContext());
 					}
 					
 				});
-				
+				if (expectedRuleNow.get() == null || expectedRuleNow.get().depth() < expectedRule.get().depth()
+						|| expectedRuleNow.get().depth() == expectedRule.get().depth() 
+							&& expectedRuleNow.get().getStart().getTokenIndex() > expectedRule.get().getStart().getTokenIndex()) {
+					replaceEnd = i;
+					break;
+				}
 			}
 		}
 		
-		return new ArrayList<>();
+		return getAssists(input, caret, expectedRule.get()!=null?expectedRule.get():parseResult, 
+				tokensBeforeCaret, replaceStart.get(), replaceEnd);
 	}
 
+	protected abstract List<InputAssist> getAssists(String input, int caret, 
+			ParserRuleContext ruleBeforeCaret, List<Token> tokensBeforeCaret, 
+			int replaceStart, int replaceEnd);
+	
 	@Override
 	protected List<InputError> getErrors(String input) {
 		final List<InputError> errors = new ArrayList<>();
@@ -120,4 +110,5 @@ public abstract class ANTLRInputAssistBehavior extends InputAssistBehavior {
 
 	protected abstract ParserRuleContext parse(String input, 
 			ANTLRErrorListener lexerErrorListener, ANTLRErrorListener parserErrorListener);
+	
 }
