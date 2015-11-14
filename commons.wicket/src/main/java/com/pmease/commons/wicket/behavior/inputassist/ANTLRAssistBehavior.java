@@ -70,14 +70,24 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 				}
 			}
 		}
+
+		List<InputAssist> assists = new ArrayList<>();
+		List<InputAssist> insertions = getInsertions(expectedRule.get()!=null?expectedRule.get():parseResult, 
+				tokensBeforeCaret, input.substring(replaceStart.get(), caret).toLowerCase());
 		
-		return getAssists(input, caret, expectedRule.get()!=null?expectedRule.get():parseResult, 
-				tokensBeforeCaret, replaceStart.get(), replaceEnd);
+		for (InputAssist insertion: insertions) {
+			String before = input.substring(replaceStart.get());
+			String after = input.substring(replaceEnd);
+			String newInput = before + insertion.getInput() + after;
+			int newCaret = caret - replaceStart.get() + insertion.getCaret();
+			assists.add(new InputAssist(newInput, newCaret));
+		}
+		
+		return assists;
 	}
 
-	protected abstract List<InputAssist> getAssists(String input, int caret, 
-			ParserRuleContext ruleBeforeCaret, List<Token> tokensBeforeCaret, 
-			int replaceStart, int replaceEnd);
+	protected abstract List<InputAssist> getInsertions(ParserRuleContext ruleBeforeCaret, 
+			List<Token> tokensBeforeCaret, String textToMatch);
 	
 	@Override
 	protected List<InputError> getErrors(String input) {

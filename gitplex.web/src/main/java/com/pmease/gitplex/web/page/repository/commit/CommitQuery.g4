@@ -24,14 +24,6 @@ path: PATH Value;
 
 message: MESSAGE Value;
 
-test: rule1 rule2 rule3;
-
-rule1: 'rule1';
-
-rule2: 'rule2';
-
-rule3: 'rule3';
-
 BRANCH: 'branch';
 TAG: 'tag';
 ID: 'id';
@@ -42,9 +34,11 @@ COMMITTER: 'committer';
 AUTHOR: 'author';
 PATH: 'path';
 EXCLUDE: '^';
+LPAREN: '(';
+RPAREN: ')';
 
 Range: '..' | '...';
-Value: '(' (ESCAPE|~[()\\])+? ')';
+Value: LPAREN (ESCAPE|~[()\\])+? RPAREN;
 
 fragment
 ESCAPE: '\\'[()\\];

@@ -28,10 +28,38 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputAssist> getAssists(String input, int caret, ParserRuleContext ruleBeforeCaret,
-			List<Token> tokensBeforeCaret, int replaceStart, int replaceEnd) {
-		System.out.println(replaceEnd);
-		return new ArrayList<>();
+	protected List<InputAssist> getInsertions(ParserRuleContext ruleBeforeCaret,
+			List<Token> tokensBeforeCaret, String textToMatch) {
+		List<InputAssist> insertions = new ArrayList<>();
+		
+		if (ruleBeforeCaret.getRuleIndex() == CommitQueryParser.RULE_query && ruleBeforeCaret.getStop() != null) { 
+			// previous input is a valid query
+			suggestCriterias(insertions, textToMatch);
+		}
+		
+		return insertions;
+	}
+	
+	private void suggestCriteria(List<InputAssist> insertions, String criteriaName, String textToMatch) {
+		if (criteriaName.startsWith(textToMatch))
+			insertions.add(new InputAssist(criteriaName + "()", criteriaName.length()+1));
+	}
+
+	private void suggestRevisionCriterias(List<InputAssist> insertions, String textToMatch) {
+		suggestCriteria(insertions, "branch", textToMatch);
+		suggestCriteria(insertions, "tag", textToMatch);
+		suggestCriteria(insertions, "id", textToMatch);
+	}
+	
+	private void suggestCriterias(List<InputAssist> insertions, String textToMatch) {
+		suggestRevisionCriterias(insertions, textToMatch);
+		suggestCriteria(insertions, "path", textToMatch);
+		suggestCriteria(insertions, "before", textToMatch);
+		suggestCriteria(insertions, "after", textToMatch);
+		suggestCriteria(insertions, "author", textToMatch);
+		suggestCriteria(insertions, "committer", textToMatch);
+		suggestCriteria(insertions, "message", textToMatch);
+		
 	}
 	
 }

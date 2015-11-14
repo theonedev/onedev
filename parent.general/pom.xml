@@ -241,6 +241,7 @@
 					</executions>
 					<configuration>
 						<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+						<libDirectory>${basedir}/src/main/java</libDirectory>
 					</configuration>
 				</plugin>
 				<plugin>
