@@ -25,11 +25,9 @@
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
 				<configuration>
-					<grammars>ANTLRv4Parser.g4</grammars>
-					<includes>
-						<include>ANTLRv4Lexer.g4</include>
-						<include>ANTLRv4Parser.g4</include>
-					</includes>		
+					<excludes>
+						<exclude>**/Lex*.g4</exclude>
+					</excludes>
 					<libDirectory>${basedir}/src/main/java/com/pmease/commons/antlr</libDirectory>
 				</configuration>
 			</plugin>
