@@ -21,14 +21,6 @@
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.antlr</groupId>
-				<artifactId>antlr4-maven-plugin</artifactId>
-				<configuration>
-					<libDirectory></libDirectory>
-					<visitor>true</visitor>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -130,8 +122,9 @@
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr4-runtime</artifactId>
+			<groupId>com.pmease</groupId>
+			<artifactId>commons.antlr</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 	<properties>

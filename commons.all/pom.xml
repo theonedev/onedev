@@ -33,6 +33,7 @@
         <module>../commons.markdown</module>
         
         <module>../gitplex.search</module>
+        <module>../commons.antlr</module>
     </modules>  
     <repositories> 
         <repository> 

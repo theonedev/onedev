@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>commons.lang</artifactId>
+	<artifactId>commons.antlr</artifactId>
 	<version>1.0.0</version>
 	<parent>
 		<groupId>com.pmease</groupId>
@@ -15,9 +15,6 @@
 				<groupId>com.pmease</groupId>
 				<artifactId>plugin.maven</artifactId>
 			</plugin>
-			<!-- Uncomment below if you'd like to publish an archetype based on your 
-				plugin -->
-			<!--plugin> <artifactId>maven-archetype-plugin</artifactId> </plugin -->
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
@@ -27,6 +24,14 @@
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
+				<configuration>
+					<grammars>ANTLRv4Parser.g4</grammars>
+					<includes>
+						<include>ANTLRv4Lexer.g4</include>
+						<include>ANTLRv4Parser.g4</include>
+					</includes>		
+					<libDirectory>${basedir}/src/main/java/com/pmease/commons/antlr</libDirectory>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -38,9 +43,8 @@
 			<version>1.0.31</version>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>codemirror</artifactId>
-			<version>5.1</version>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>
@@ -48,21 +52,6 @@
 			<version>1.0.31</version>
 			<type>test-jar</type>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.util</artifactId>
-			<version>1.0.31</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.wicket</artifactId>
-			<version>1.0.29</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pmease</groupId>
-			<artifactId>commons.antlr</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 
@@ -85,7 +74,7 @@
 	</repositories>
 
 	<properties>
-		<moduleClass>com.pmease.commons.lang.LangModule</moduleClass>
+		<moduleClass>com.pmease.commons.antlr.PluginModule</moduleClass>
 	</properties>
 
 </project>
