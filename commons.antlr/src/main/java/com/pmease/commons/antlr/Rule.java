@@ -7,17 +7,17 @@ public class Rule implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String name;
+	private final int id;
 	
 	private final List<Altenative> altenatives;
 
-	public Rule(String name, List<Altenative> altenatives) {
-		this.name = name;
+	public Rule(int id, List<Altenative> altenatives) {
+		this.id = id;
 		this.altenatives = altenatives;
 	}
 	
-	public String getName() {
-		return name;
+	public int getId() {
+		return id;
 	}
 
 	public List<Altenative> getAltenatives() {
