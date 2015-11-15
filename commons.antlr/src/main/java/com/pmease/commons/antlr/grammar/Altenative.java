@@ -1,9 +1,8 @@
-package com.pmease.commons.antlr;
+package com.pmease.commons.antlr.grammar;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class Altenative implements Serializable {
+public class Altenative extends GrammarAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -11,7 +10,8 @@ public class Altenative implements Serializable {
 	
 	private final List<Element> elements;
 	
-	public Altenative(String label, List<Element> elements) {
+	public Altenative(Grammar grammar, String label, List<Element> elements) {
+		super(grammar);
 		this.label = label;
 		this.elements = elements;
 	}

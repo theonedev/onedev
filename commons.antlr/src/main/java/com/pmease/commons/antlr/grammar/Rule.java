@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr;
+package com.pmease.commons.antlr.grammar;
 
 import java.io.Serializable;
 import java.util.List;
