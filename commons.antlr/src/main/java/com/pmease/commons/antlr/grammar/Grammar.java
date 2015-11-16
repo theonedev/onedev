@@ -11,15 +11,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.ANTLRv4Parser;
+import com.pmease.commons.antlr.ANTLRv4Parser.AlternativeContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.AtomContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.BlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.EbnfContext;
@@ -27,28 +29,33 @@ import com.pmease.commons.antlr.ANTLRv4Parser.EbnfSuffixContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.ElementContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LabeledAltContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LabeledElementContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.LabeledLexerElementContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.LexerAltContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.LexerAtomContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.LexerBlockContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.LexerElementContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.LexerRuleBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LexerRuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.NotSetContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.ParserRuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.SetElementContext;
-import com.pmease.commons.antlr.ANTLRv4Parser.TerminalContext;
 import com.pmease.commons.antlr.grammar.Element.Multiplicity;
 
 public class Grammar implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String PARSER_SUFFIX = "parser";
+	private static final String PARSER_SUFFIX = "Parser";
 
 	private final Map<String, Rule> rules = new HashMap<>();
 	
-	private final Map<String, Integer> tokenTypesByValue = new HashMap<>();
+	private final Map<String, Integer> tokenTypesByLiteral = new HashMap<>();
 
-	private final Map<String, Integer> tokenTypesByName = new HashMap<>();
+	private final Map<String, Integer> tokenTypesByRule = new HashMap<>();
 	
-	public Grammar(Class<? extends Parser> parserClass, String entryRule) {
+	public Grammar(Class<? extends Parser> parserClass) {
 		String parserName = parserClass.getSimpleName();
 		Preconditions.checkArgument(parserName.endsWith(PARSER_SUFFIX));
 		String grammarName = parserName.substring(0, parserName.length() - PARSER_SUFFIX.length());
@@ -59,9 +66,9 @@ public class Grammar implements Serializable {
 				String key = (String) entry.getKey();
 				Integer value = Integer.valueOf((String) entry.getValue());
 				if (key.startsWith("'"))
-					tokenTypesByValue.put(key.substring(1, key.length()-1), value);
+					tokenTypesByLiteral.put(key.substring(1, key.length()-1), value);
 				else
-					tokenTypesByName.put(key, value);
+					tokenTypesByRule.put(key, value);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -88,31 +95,72 @@ public class Grammar implements Serializable {
 		ParserRuleSpecContext parserRuleSpecContext = ruleSpecContext.parserRuleSpec();
 		if (parserRuleSpecContext != null) {
 			name = parserRuleSpecContext.RULE_REF().getText();
-			RuleBlockContext ruleBlock = parserRuleSpecContext.ruleBlock();
-			for (LabeledAltContext labeledAlt: ruleBlock.ruleAltList().labeledAlt())
-				altenatives.add(newAltenative(labeledAlt));
+			RuleBlockContext ruleBlockContext = parserRuleSpecContext.ruleBlock();
+			for (LabeledAltContext labeledAltContext: ruleBlockContext.ruleAltList().labeledAlt())
+				altenatives.add(newAltenative(labeledAltContext));
 		} else {
 			LexerRuleSpecContext lexerRuleSpecContext = ruleSpecContext.lexerRuleSpec();
 			name = lexerRuleSpecContext.TOKEN_REF().getText();
-			
+			LexerRuleBlockContext lexerRuleBlockContext = lexerRuleSpecContext.lexerRuleBlock();
+			for (LexerAltContext lexerAltContext: lexerRuleBlockContext.lexerAltList().lexerAlt())
+				altenatives.add(newAltenative(lexerAltContext));
 		}
 		return new Rule(this, name, altenatives);
 	}
 	
+	private Altenative newAltenative(LexerAltContext lexerAltContext) {
+		List<Element> elements = new ArrayList<>();
+		if (lexerAltContext.lexerElements() != null) {
+			for (LexerElementContext lexerElementContext: lexerAltContext.lexerElements().lexerElement()) {
+				Element element = newElement(lexerElementContext);
+				if (element != null)
+					elements.add(element);
+			}
+		}
+		
+		return new Altenative(this, null, elements);
+	}
+	
 	private Altenative newAltenative(LabeledAltContext labeledAltContext) {
 		String label;
-		List<Element> elements = new ArrayList<>();
 		if (labeledAltContext.id() != null)
 			label = labeledAltContext.id().getText();
 		else
 			label = null;
 		
-		for (ElementContext elementContext: labeledAltContext.alternative().element())
-			elements.add(newElement(elementContext));
+		return newAltenative(label, labeledAltContext.alternative());
+	}
+	
+	private Element newElement(LexerElementContext lexerElementContext) {
+		LabeledLexerElementContext labeledLexerElementContext = lexerElementContext.labeledLexerElement();
+		if (labeledLexerElementContext != null) {
+			String label = labeledLexerElementContext.id().getText();
+			LexerAtomContext lexerAtomContext = labeledLexerElementContext.lexerAtom();
+			if (lexerAtomContext != null)
+				return newElement(label, lexerAtomContext, lexerElementContext.ebnfSuffix());
+			else 
+				return newElement(label, labeledLexerElementContext.block(), lexerElementContext.ebnfSuffix());
+		} else if (lexerElementContext.lexerAtom() != null) {
+			return newElement(null, lexerElementContext.lexerAtom(), lexerElementContext.ebnfSuffix());
+		} else if (lexerElementContext.lexerBlock() != null) {
+			return newElement(null, lexerElementContext.lexerBlock(), lexerElementContext.ebnfSuffix());
+		} else {
+			return null;
+		}
+	}
+	
+	private Altenative newAltenative(@Nullable String label, AlternativeContext alternativeContext) {
+		List<Element> elements = new ArrayList<>();
+		for (ElementContext elementContext: alternativeContext.element()) {
+			Element element = newElement(elementContext);
+			if (element != null)
+				elements.add(element);
+		}
 		
 		return new Altenative(this, label, elements);
 	}
 	
+	@Nullable
 	private Element newElement(ElementContext elementContext) {
 		LabeledElementContext labeledElementContext = elementContext.labeledElement();
 		if (labeledElementContext != null) {
@@ -126,29 +174,59 @@ public class Grammar implements Serializable {
 			return newElement(null, elementContext.atom(), elementContext.ebnfSuffix());
 		} else if (elementContext.ebnf() != null) {
 			return newElement(elementContext.ebnf());
+		} else {
+			return null;
 		}
-	}
-	
-	private int getTokenType(TerminalContext terminalContext) {
-		if (terminalContext.STRING_LITERAL() != null)
-			return tokenTypesByValue.get(terminalContext.STRING_LITERAL().getText());
-		else
-			return tokenTypesByName.get(terminalContext.TOKEN_REF().getText());
 	}
 	
 	private Element newElement(String label, AtomContext atomContext, EbnfSuffixContext ebnfSuffixContext) {
 		Multiplicity multiplicity = newMultiplicity(ebnfSuffixContext);
 		if (atomContext.terminal() != null) {
-			String tokenName;
-			if (atomContext.terminal().TOKEN_REF() != null)
-				tokenName = atomContext.terminal().TOKEN_REF().getText();
-			else
-				tokenName = null;
-			return new TokenElement(this, label, multiplicity, getTokenType(atomContext.terminal()), tokenName);
+			if (atomContext.terminal().TOKEN_REF() != null) {
+				String ruleName = atomContext.terminal().TOKEN_REF().getText();
+				int tokenType = tokenTypesByRule.get(ruleName);
+				return new LexerRuleElement(this, label, multiplicity, tokenType, ruleName);
+			} else {
+				String literal = atomContext.terminal().STRING_LITERAL().getText();
+				int tokenType = tokenTypesByLiteral.get(literal);
+				return new LiteralElement(this, label, multiplicity, tokenType, literal);
+			}
 		} else if (atomContext.ruleref() != null) {
 			return new RuleElement(this, label, multiplicity, atomContext.ruleref().RULE_REF().getText());
 		} else if (atomContext.notSet() != null) {
 			return new NegativeTokensElement(this, label, multiplicity, getNegativeTokenTypes(atomContext.notSet()));
+		} else if (atomContext.DOT() != null) {
+			return new AnyTokenElement(this, label, multiplicity);
+		} else {
+			throw new IllegalStateException();
+		}
+	}
+	
+	private Element newElement(String label, LexerAtomContext lexerAtomContext, EbnfSuffixContext ebnfSuffixContext) {
+		Multiplicity multiplicity = newMultiplicity(ebnfSuffixContext);
+		if (lexerAtomContext.terminal() != null) {
+			if (lexerAtomContext.terminal().TOKEN_REF() != null) {
+				String ruleName = lexerAtomContext.terminal().TOKEN_REF().getText();
+				Integer tokenType = tokenTypesByRule.get(ruleName);
+				if (tokenType == null)
+					tokenType = 0;
+				return new LexerRuleElement(this, label, multiplicity, tokenType, ruleName);
+			} else {
+				String literal = lexerAtomContext.terminal().STRING_LITERAL().getText();
+				Integer tokenType = tokenTypesByLiteral.get(literal);
+				if (tokenType == null)
+					tokenType = 0;
+				return new LiteralElement(this, label, multiplicity, tokenType, literal);
+			}
+		} else if (lexerAtomContext.RULE_REF() != null) {
+			return new RuleElement(this, label, multiplicity, lexerAtomContext.RULE_REF().getText());
+		} else if (lexerAtomContext.notSet() != null 
+				|| lexerAtomContext.DOT() != null 
+				|| lexerAtomContext.LEXER_CHAR_SET()!=null 
+				|| lexerAtomContext.range() != null) {
+			return new AnyTokenElement(this, label, multiplicity);
+		} else {
+			throw new IllegalStateException();
 		}
 	}
 	
@@ -164,10 +242,20 @@ public class Grammar implements Serializable {
 	}
 	
 	private int getTokenType(SetElementContext setElementContext) {
-		
+		Integer tokenType;
+		if (setElementContext.STRING_LITERAL() != null) 
+			tokenType = tokenTypesByLiteral.get(setElementContext.STRING_LITERAL().getText());
+		else if (setElementContext.TOKEN_REF() != null)
+			tokenType = tokenTypesByRule.get(setElementContext.TOKEN_REF().getText());
+		else 
+			tokenType = null;
+		if (tokenType != null)
+			return tokenType;
+		else
+			throw new IllegalStateException();
 	}
 	
-	private Multiplicity newMultiplicity(EbnfSuffixContext ebnfSuffixContext) {
+	private Multiplicity newMultiplicity(@Nullable EbnfSuffixContext ebnfSuffixContext) {
 		if (ebnfSuffixContext != null) {
 			if (ebnfSuffixContext.STAR() != null)
 				return Multiplicity.ZERO_OR_MORE;
@@ -180,16 +268,29 @@ public class Grammar implements Serializable {
 		}
 	}
 	
-	private Element newElement(String label, BlockContext blockContext, EbnfSuffixContext ebnfSuffixContext) {
-		
+	private Element newElement(@Nullable String label, BlockContext blockContext, @Nullable EbnfSuffixContext ebnfSuffixContext) {
+		List<Altenative> altenatives = new ArrayList<>();
+		for (AlternativeContext alternativeContext: blockContext.altList().alternative())
+			altenatives.add(newAltenative(null, alternativeContext));
+		return new BlockElement(this, label, newMultiplicity(ebnfSuffixContext), altenatives);
+	}
+	
+	private Element newElement(@Nullable String label, LexerBlockContext lexerBlockContext, @Nullable EbnfSuffixContext ebnfSuffixContext) {
+		List<Altenative> altenatives = new ArrayList<>();
+		for (LexerAltContext lexerAltContext: lexerBlockContext.lexerAltList().lexerAlt())
+			altenatives.add(newAltenative(lexerAltContext));
+		return new BlockElement(this, label, newMultiplicity(ebnfSuffixContext), altenatives);
 	}
 	
 	private Element newElement(EbnfContext ebnfContext) {
-		
+		if (ebnfContext.blockSuffix() != null)
+			return newElement(null, ebnfContext.block(), ebnfContext.blockSuffix().ebnfSuffix());
+		else
+			return newElement(null, ebnfContext.block(), null);
 	}
 	
 	public Map<String, Rule> getRules() {
 		return rules;
 	}
-
+	
 }

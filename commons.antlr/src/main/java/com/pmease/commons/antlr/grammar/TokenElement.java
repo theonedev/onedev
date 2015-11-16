@@ -6,21 +6,14 @@ public class TokenElement extends Element {
 
 	private final int tokenType;
 
-	private final String tokenName;
-	
-	public TokenElement(Grammar grammar, String label, Multiplicity multiplicity, int tokenType, String tokenName) {
+	public TokenElement(Grammar grammar, String label, Multiplicity multiplicity, int tokenType) {
 		super(grammar, label, multiplicity);
 		
 		this.tokenType = tokenType;
-		this.tokenName = tokenName;
 	}
 
 	public int getTokenType() {
 		return tokenType;
-	}
-
-	public String getTokenName() {
-		return tokenName;
 	}
 
 }
