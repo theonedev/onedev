@@ -1,12 +1,12 @@
-package com.pmease.commons.antlr.grammarabstraction;
+package com.pmease.commons.antlr.grammarspec;
 
-public class LiteralElement extends TokenElement {
+public class LiteralElementSpec extends TokenElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String literal;
 	
-	public LiteralElement(Grammar grammar, String label, Multiplicity multiplicity, int tokenType, String literal) {
+	public LiteralElementSpec(Grammar grammar, String label, Multiplicity multiplicity, int tokenType, String literal) {
 		super(grammar, label, multiplicity, tokenType);
 		
 		this.literal = literal;

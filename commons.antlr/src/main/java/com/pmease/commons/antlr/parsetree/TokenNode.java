@@ -1,8 +1,6 @@
 package com.pmease.commons.antlr.parsetree;
 
-import java.util.ArrayList;
-
-import com.pmease.commons.antlr.grammarabstraction.TokenElement;
+import com.pmease.commons.antlr.grammarspec.TokenElementSpec;
 
 public class TokenNode extends Node {
 
@@ -10,8 +8,8 @@ public class TokenNode extends Node {
 
 	private final String value;
 	
-	public TokenNode(TokenElement tokenElement, Node parent, String value) {
-		super(tokenElement, parent, new ArrayList<Node>());
+	public TokenNode(TokenElementSpec tokenElement, Node parent, String value) {
+		super(tokenElement, parent);
 		
 		this.value = value;
 	}

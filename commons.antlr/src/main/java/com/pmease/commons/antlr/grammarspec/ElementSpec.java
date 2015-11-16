@@ -1,6 +1,6 @@
-package com.pmease.commons.antlr.grammarabstraction;
+package com.pmease.commons.antlr.grammarspec;
 
-public class Element extends GrammarMember {
+public class ElementSpec extends Spec {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -10,7 +10,7 @@ public class Element extends GrammarMember {
 	
 	private final Multiplicity multiplicity;
 	
-	public Element(Grammar grammar, String label, Multiplicity multiplicity) {
+	public ElementSpec(Grammar grammar, String label, Multiplicity multiplicity) {
 		super(grammar);
 		
 		this.label = label;

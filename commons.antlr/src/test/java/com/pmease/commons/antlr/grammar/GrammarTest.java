@@ -3,15 +3,15 @@ package com.pmease.commons.antlr.grammar;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import com.pmease.commons.antlr.grammarabstraction.Alternative;
-import com.pmease.commons.antlr.grammarabstraction.AnyTokenElement;
-import com.pmease.commons.antlr.grammarabstraction.BlockElement;
-import com.pmease.commons.antlr.grammarabstraction.Grammar;
-import com.pmease.commons.antlr.grammarabstraction.LexerRuleElement;
-import com.pmease.commons.antlr.grammarabstraction.LiteralElement;
-import com.pmease.commons.antlr.grammarabstraction.Rule;
-import com.pmease.commons.antlr.grammarabstraction.RuleElement;
-import com.pmease.commons.antlr.grammarabstraction.Element.Multiplicity;
+import com.pmease.commons.antlr.grammarspec.AlternativeSpec;
+import com.pmease.commons.antlr.grammarspec.AnyTokenElementSpec;
+import com.pmease.commons.antlr.grammarspec.BlockElementSpec;
+import com.pmease.commons.antlr.grammarspec.Grammar;
+import com.pmease.commons.antlr.grammarspec.LexerRuleRefElementSpec;
+import com.pmease.commons.antlr.grammarspec.LiteralElementSpec;
+import com.pmease.commons.antlr.grammarspec.RuleRefElementSpec;
+import com.pmease.commons.antlr.grammarspec.RuleSpec;
+import com.pmease.commons.antlr.grammarspec.ElementSpec.Multiplicity;
 
 public class GrammarTest {
 
@@ -25,70 +25,70 @@ public class GrammarTest {
 	
 	@Test
 	public void testGrammarSpec() {
-		Rule rule = grammar.getRules().get("grammarSpec");
+		RuleSpec rule = grammar.getRules().get("grammarSpec");
 		assertEquals(1, rule.getAlternatives().size());
-		Alternative alternative = rule.getAlternatives().get(0);
+		AlternativeSpec alternative = rule.getAlternatives().get(0);
 		assertEquals(8, alternative.getElements().size());
-		LexerRuleElement lexerRuleElement = (LexerRuleElement) alternative.getElements().get(0);
-		assertEquals("DOC_COMMENT", lexerRuleElement.getName());
+		LexerRuleRefElementSpec lexerRuleElement = (LexerRuleRefElementSpec) alternative.getElements().get(0);
+		assertEquals("DOC_COMMENT", lexerRuleElement.getRuleName());
 		assertEquals(4, lexerRuleElement.getType());
 		assertEquals(Multiplicity.ZERO_OR_ONE, lexerRuleElement.getMultiplicity());
 		
-		RuleElement ruleElement = (RuleElement) alternative.getElements().get(1);
-		assertEquals("grammarType", ruleElement.getName());
+		RuleRefElementSpec ruleElement = (RuleRefElementSpec) alternative.getElements().get(1);
+		assertEquals("grammarType", ruleElement.getRuleName());
 		assertEquals(Multiplicity.ONE, ruleElement.getMultiplicity());
 		
-		ruleElement = (RuleElement) alternative.getElements().get(6);
-		assertEquals("modeSpec", ruleElement.getName());
+		ruleElement = (RuleRefElementSpec) alternative.getElements().get(6);
+		assertEquals("modeSpec", ruleElement.getRuleName());
 		assertEquals(Multiplicity.ZERO_OR_MORE, ruleElement.getMultiplicity());
 	}
 
 	@Test
 	public void testDocComment() {
-		Rule rule = grammar.getRules().get("DocComment");
+		RuleSpec rule = grammar.getRules().get("DocComment");
 		assertEquals(1, rule.getAlternatives().size());
-		Alternative alternative = rule.getAlternatives().get(0);
+		AlternativeSpec alternative = rule.getAlternatives().get(0);
 		assertEquals(3, alternative.getElements().size());
-		LiteralElement literalElement = (LiteralElement) alternative.getElements().get(0);
+		LiteralElementSpec literalElement = (LiteralElementSpec) alternative.getElements().get(0);
 		assertEquals(0, literalElement.getType());
 		assertEquals("/**", literalElement.getLiteral());
 		assertEquals(Multiplicity.ONE, literalElement.getMultiplicity());
 		
-		AnyTokenElement anyTokenElement = (AnyTokenElement) alternative.getElements().get(1);
+		AnyTokenElementSpec anyTokenElement = (AnyTokenElementSpec) alternative.getElements().get(1);
 		assertEquals(Multiplicity.ZERO_OR_MORE, anyTokenElement.getMultiplicity());
 		
-		BlockElement blockElement = (BlockElement) alternative.getElements().get(2);
+		BlockElementSpec blockElement = (BlockElementSpec) alternative.getElements().get(2);
 		assertEquals(2, blockElement.getAltenatives().size());
 		assertEquals(1, blockElement.getAltenatives().get(0).getElements().size());
-		literalElement = (LiteralElement) blockElement.getAltenatives().get(0).getElements().get(0);
+		literalElement = (LiteralElementSpec) blockElement.getAltenatives().get(0).getElements().get(0);
 		assertEquals(0, literalElement.getType());
 		assertEquals("*/", literalElement.getLiteral());
 		assertEquals(1, blockElement.getAltenatives().get(1).getElements().size());
-		LexerRuleElement lexerRuleElement = (LexerRuleElement) blockElement.getAltenatives().get(1).getElements().get(0);
+		LexerRuleRefElementSpec lexerRuleElement = (LexerRuleRefElementSpec) blockElement.getAltenatives().get(1).getElements().get(0);
 		assertEquals(-1, lexerRuleElement.getType());
-		assertEquals("EOF", lexerRuleElement.getName());
+		assertEquals("EOF", lexerRuleElement.getRuleName());
 	}
 	
 	@Test
 	public void testWs() {
-		Rule rule = grammar.getRules().get("Ws");
+		RuleSpec rule = grammar.getRules().get("Ws");
 		assertEquals(2, rule.getAlternatives().size());
 		assertEquals(1, rule.getAlternatives().get(0).getElements().size());
-		LexerRuleElement lexerRuleElement = (LexerRuleElement) rule.getAlternatives().get(0).getElements().get(0);
-		assertEquals("Hws", lexerRuleElement.getName());
+		LexerRuleRefElementSpec lexerRuleElement = (LexerRuleRefElementSpec) rule.getAlternatives().get(0).getElements().get(0);
+		assertEquals("Hws", lexerRuleElement.getRuleName());
 	}
 
 	@Test
 	public void testVws() {
-		Rule rule = grammar.getRules().get("Vws");
+		RuleSpec rule = grammar.getRules().get("Vws");
 		assertEquals(1, rule.getAlternatives().size());
 		assertEquals(1, rule.getAlternatives().get(0).getElements().size());
-		assertTrue(rule.getAlternatives().get(0).getElements().get(0) instanceof AnyTokenElement);
+		assertTrue(rule.getAlternatives().get(0).getElements().get(0) instanceof AnyTokenElementSpec);
 	}
 
 	@Test
 	public void testNameStartChar() {
-		Rule rule = grammar.getRules().get("NameStartChar");
-		assertTrue(rule.getAlternatives().get(0).getElements().get(0) instanceof AnyTokenElement);
+		RuleSpec rule = grammar.getRules().get("NameStartChar");
+		assertTrue(rule.getAlternatives().get(0).getElements().get(0) instanceof AnyTokenElementSpec);
 	}
 }

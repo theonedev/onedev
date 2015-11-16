@@ -1,14 +1,14 @@
-package com.pmease.commons.antlr.grammarabstraction;
+package com.pmease.commons.antlr.grammarspec;
 
 import java.util.Set;
 
-public class NegativeTokensElement extends Element {
+public class NegativeTokensElementSpec extends ElementSpec {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final Set<Integer> negativeTokenTypes;
 	
-	public NegativeTokensElement(Grammar grammar, String label, Multiplicity multiplicity, 
+	public NegativeTokensElementSpec(Grammar grammar, String label, Multiplicity multiplicity, 
 			Set<Integer> negativeTokenTypes) {
 		super(grammar, label, multiplicity);
 		
