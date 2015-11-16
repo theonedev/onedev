@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.grammar;
+package com.pmease.commons.antlr.grammarabstraction;
 
 public class Element extends GrammarMember {
 	

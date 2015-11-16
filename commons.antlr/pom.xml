@@ -25,11 +25,12 @@
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
 				<configuration>
-					<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 					<excludes>
 						<exclude>**/Lex*.g4</exclude>
 					</excludes>
 					<libDirectory>${basedir}/src/main/java/com/pmease/commons/antlr</libDirectory>
+					<listener>false</listener>
+					<visitor>false</visitor>
 				</configuration>
 			</plugin>
 		</plugins>

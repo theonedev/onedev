@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.grammar;
+package com.pmease.commons.antlr.grammarabstraction;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +40,7 @@ import com.pmease.commons.antlr.ANTLRv4Parser.ParserRuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.SetElementContext;
-import com.pmease.commons.antlr.grammar.Element.Multiplicity;
+import com.pmease.commons.antlr.grammarabstraction.Element.Multiplicity;
 
 public class Grammar implements Serializable {
 
