@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.grammar;
 
 import java.util.List;
 
-public class Altenative extends GrammarAware {
+public class Altenative extends GrammarMember {
 
 	private static final long serialVersionUID = 1L;
 

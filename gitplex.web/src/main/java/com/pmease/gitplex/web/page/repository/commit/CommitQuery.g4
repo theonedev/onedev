@@ -38,7 +38,7 @@ LPAREN: '(';
 RPAREN: ')';
 
 Range: '..' | '...';
-Value: LPAREN (ESCAPE|~[()\\])+? RPAREN;
+Value: LPAREN ([a-z])+? RPAREN;
 
 fragment
 ESCAPE: '\\'[()\\];

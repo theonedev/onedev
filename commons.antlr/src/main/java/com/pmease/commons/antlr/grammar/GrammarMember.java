@@ -2,13 +2,13 @@ package com.pmease.commons.antlr.grammar;
 
 import java.io.Serializable;
 
-public class GrammarAware implements Serializable {
+public class GrammarMember implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Grammar grammar;
 	
-	public GrammarAware(Grammar grammar) {
+	public GrammarMember(Grammar grammar) {
 		this.grammar = grammar;
 	}
 

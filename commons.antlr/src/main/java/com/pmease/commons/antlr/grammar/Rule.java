@@ -1,23 +1,24 @@
 package com.pmease.commons.antlr.grammar;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class Rule implements Serializable {
+public class Rule extends GrammarMember {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int id;
+	private final String name;
 	
 	private final List<Altenative> altenatives;
 
-	public Rule(int id, List<Altenative> altenatives) {
-		this.id = id;
+	public Rule(Grammar grammar, String name, List<Altenative> altenatives) {
+		super(grammar);
+		
+		this.name = name;
 		this.altenatives = altenatives;
 	}
 	
-	public int getId() {
-		return id;
+	public String getName() {
+		return name;
 	}
 
 	public List<Altenative> getAltenatives() {

@@ -1,6 +1,6 @@
 package com.pmease.commons.antlr.grammar;
 
-public class Element extends GrammarAware {
+public class Element extends GrammarMember {
 	
 	private static final long serialVersionUID = 1L;
 
