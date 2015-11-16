@@ -4,7 +4,7 @@ public class Element extends GrammarMember {
 	
 	private static final long serialVersionUID = 1L;
 
-	public enum Multiplicity{ONE, ONE_OR_ZERO, ZERO_OR_MORE, ONE_OR_MORE};
+	public enum Multiplicity{ONE, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE};
 	
 	private final String label;
 	

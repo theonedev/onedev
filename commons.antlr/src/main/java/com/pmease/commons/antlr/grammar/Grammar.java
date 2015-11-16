@@ -16,9 +16,8 @@ import javax.annotation.Nullable;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.ANTLRv4Parser;
 import com.pmease.commons.antlr.ANTLRv4Parser.AlternativeContext;
@@ -47,19 +46,24 @@ public class Grammar implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String PARSER_SUFFIX = "Parser";
-
 	private final Map<String, Rule> rules = new HashMap<>();
 	
 	private final Map<String, Integer> tokenTypesByLiteral = new HashMap<>();
 
 	private final Map<String, Integer> tokenTypesByRule = new HashMap<>();
 	
-	public Grammar(Class<? extends Parser> parserClass) {
-		String parserName = parserClass.getSimpleName();
-		Preconditions.checkArgument(parserName.endsWith(PARSER_SUFFIX));
-		String grammarName = parserName.substring(0, parserName.length() - PARSER_SUFFIX.length());
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream(grammarName + ".tokens")) {
+	/**
+	 * Construct object representation of ANTLR grammar file.
+	 * 
+	 * @param grammarFiles
+	 * 			grammar files in class path, relative to class path root
+	 * @param tokenFile
+	 * 			generated tokens file in class path, relative to class path root
+	 */
+	public Grammar(String grammarFiles[], String tokenFile) {
+		tokenTypesByRule.put("EOF", -1);
+		
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream(tokenFile)) {
 			Properties props = new Properties();
 			props.load(is);
 			for (Map.Entry<Object, Object> entry: props.entrySet()) {
@@ -73,42 +77,44 @@ public class Grammar implements Serializable {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		try (InputStream is = parserClass.getResourceAsStream(grammarName + ".g4")) {
-			ANTLRv4Lexer lexer = new ANTLRv4Lexer(new ANTLRInputStream(is));
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			ANTLRv4Parser parser = new ANTLRv4Parser(tokens);
-			parser.removeErrorListeners();
-			parser.setErrorHandler(new BailErrorStrategy());
-			for (RuleSpecContext ruleSpecContext: parser.rules().ruleSpec()) {
-				Rule rule = newRule(ruleSpecContext);
-				rules.put(rule.getName(), rule);
+	
+		for (String grammarFile: grammarFiles) {
+			try (InputStream is = getClass().getClassLoader().getResourceAsStream(grammarFile)) {
+				ANTLRv4Lexer lexer = new ANTLRv4Lexer(new ANTLRInputStream(is));
+				CommonTokenStream tokens = new CommonTokenStream(lexer);
+				ANTLRv4Parser parser = new ANTLRv4Parser(tokens);
+				parser.removeErrorListeners();
+				parser.setErrorHandler(new BailErrorStrategy());
+				for (RuleSpecContext ruleSpecContext: parser.grammarSpec().rules().ruleSpec()) {
+					Rule rule = newRule(ruleSpecContext);
+					rules.put(rule.getName(), rule);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 	
 	private Rule newRule(RuleSpecContext ruleSpecContext) {
 		String name;
-		List<Altenative> altenatives = new ArrayList<>();
+		List<Alternative> alternatives = new ArrayList<>();
 		ParserRuleSpecContext parserRuleSpecContext = ruleSpecContext.parserRuleSpec();
 		if (parserRuleSpecContext != null) {
 			name = parserRuleSpecContext.RULE_REF().getText();
 			RuleBlockContext ruleBlockContext = parserRuleSpecContext.ruleBlock();
 			for (LabeledAltContext labeledAltContext: ruleBlockContext.ruleAltList().labeledAlt())
-				altenatives.add(newAltenative(labeledAltContext));
+				alternatives.add(newAltenative(labeledAltContext));
 		} else {
 			LexerRuleSpecContext lexerRuleSpecContext = ruleSpecContext.lexerRuleSpec();
 			name = lexerRuleSpecContext.TOKEN_REF().getText();
 			LexerRuleBlockContext lexerRuleBlockContext = lexerRuleSpecContext.lexerRuleBlock();
 			for (LexerAltContext lexerAltContext: lexerRuleBlockContext.lexerAltList().lexerAlt())
-				altenatives.add(newAltenative(lexerAltContext));
+				alternatives.add(newAltenative(lexerAltContext));
 		}
-		return new Rule(this, name, altenatives);
+		return new Rule(this, name, alternatives);
 	}
 	
-	private Altenative newAltenative(LexerAltContext lexerAltContext) {
+	private Alternative newAltenative(LexerAltContext lexerAltContext) {
 		List<Element> elements = new ArrayList<>();
 		if (lexerAltContext.lexerElements() != null) {
 			for (LexerElementContext lexerElementContext: lexerAltContext.lexerElements().lexerElement()) {
@@ -118,10 +124,10 @@ public class Grammar implements Serializable {
 			}
 		}
 		
-		return new Altenative(this, null, elements);
+		return new Alternative(this, null, elements);
 	}
 	
-	private Altenative newAltenative(LabeledAltContext labeledAltContext) {
+	private Alternative newAltenative(LabeledAltContext labeledAltContext) {
 		String label;
 		if (labeledAltContext.id() != null)
 			label = labeledAltContext.id().getText();
@@ -149,7 +155,7 @@ public class Grammar implements Serializable {
 		}
 	}
 	
-	private Altenative newAltenative(@Nullable String label, AlternativeContext alternativeContext) {
+	private Alternative newAltenative(@Nullable String label, AlternativeContext alternativeContext) {
 		List<Element> elements = new ArrayList<>();
 		for (ElementContext elementContext: alternativeContext.element()) {
 			Element element = newElement(elementContext);
@@ -157,7 +163,7 @@ public class Grammar implements Serializable {
 				elements.add(element);
 		}
 		
-		return new Altenative(this, label, elements);
+		return new Alternative(this, label, elements);
 	}
 	
 	@Nullable
@@ -187,7 +193,7 @@ public class Grammar implements Serializable {
 				int tokenType = tokenTypesByRule.get(ruleName);
 				return new LexerRuleElement(this, label, multiplicity, tokenType, ruleName);
 			} else {
-				String literal = atomContext.terminal().STRING_LITERAL().getText();
+				String literal = getLiteral(atomContext.terminal().STRING_LITERAL());
 				int tokenType = tokenTypesByLiteral.get(literal);
 				return new LiteralElement(this, label, multiplicity, tokenType, literal);
 			}
@@ -201,6 +207,11 @@ public class Grammar implements Serializable {
 			throw new IllegalStateException();
 		}
 	}
+
+	private String getLiteral(TerminalNode terminal) {
+		String literal = terminal.getText();
+		return literal.substring(1, literal.length()-1);
+	}
 	
 	private Element newElement(String label, LexerAtomContext lexerAtomContext, EbnfSuffixContext ebnfSuffixContext) {
 		Multiplicity multiplicity = newMultiplicity(ebnfSuffixContext);
@@ -212,7 +223,7 @@ public class Grammar implements Serializable {
 					tokenType = 0;
 				return new LexerRuleElement(this, label, multiplicity, tokenType, ruleName);
 			} else {
-				String literal = lexerAtomContext.terminal().STRING_LITERAL().getText();
+				String literal = getLiteral(lexerAtomContext.terminal().STRING_LITERAL());
 				Integer tokenType = tokenTypesByLiteral.get(literal);
 				if (tokenType == null)
 					tokenType = 0;
@@ -244,7 +255,7 @@ public class Grammar implements Serializable {
 	private int getTokenType(SetElementContext setElementContext) {
 		Integer tokenType;
 		if (setElementContext.STRING_LITERAL() != null) 
-			tokenType = tokenTypesByLiteral.get(setElementContext.STRING_LITERAL().getText());
+			tokenType = tokenTypesByLiteral.get(getLiteral(setElementContext.STRING_LITERAL()));
 		else if (setElementContext.TOKEN_REF() != null)
 			tokenType = tokenTypesByRule.get(setElementContext.TOKEN_REF().getText());
 		else 
@@ -262,24 +273,24 @@ public class Grammar implements Serializable {
 			else if (ebnfSuffixContext.PLUS() != null)
 				return Multiplicity.ONE_OR_MORE;
 			else
-				return Multiplicity.ONE_OR_ZERO;
+				return Multiplicity.ZERO_OR_ONE;
 		} else {
 			return Multiplicity.ONE;
 		}
 	}
 	
 	private Element newElement(@Nullable String label, BlockContext blockContext, @Nullable EbnfSuffixContext ebnfSuffixContext) {
-		List<Altenative> altenatives = new ArrayList<>();
+		List<Alternative> alternatives = new ArrayList<>();
 		for (AlternativeContext alternativeContext: blockContext.altList().alternative())
-			altenatives.add(newAltenative(null, alternativeContext));
-		return new BlockElement(this, label, newMultiplicity(ebnfSuffixContext), altenatives);
+			alternatives.add(newAltenative(null, alternativeContext));
+		return new BlockElement(this, label, newMultiplicity(ebnfSuffixContext), alternatives);
 	}
 	
 	private Element newElement(@Nullable String label, LexerBlockContext lexerBlockContext, @Nullable EbnfSuffixContext ebnfSuffixContext) {
-		List<Altenative> altenatives = new ArrayList<>();
+		List<Alternative> alternatives = new ArrayList<>();
 		for (LexerAltContext lexerAltContext: lexerBlockContext.lexerAltList().lexerAlt())
-			altenatives.add(newAltenative(lexerAltContext));
-		return new BlockElement(this, label, newMultiplicity(ebnfSuffixContext), altenatives);
+			alternatives.add(newAltenative(lexerAltContext));
+		return new BlockElement(this, label, newMultiplicity(ebnfSuffixContext), alternatives);
 	}
 	
 	private Element newElement(EbnfContext ebnfContext) {

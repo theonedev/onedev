@@ -6,15 +6,15 @@ public class BlockElement extends Element {
 
 	private static final long serialVersionUID = 1L;
 
-	private final List<Altenative> altenatives;
+	private final List<Alternative> altenatives;
 
-	public BlockElement(Grammar grammar, String label, Multiplicity multiplicity, List<Altenative> altenatives) {
+	public BlockElement(Grammar grammar, String label, Multiplicity multiplicity, List<Alternative> altenatives) {
 		super(grammar, label, multiplicity);
 		
 		this.altenatives = altenatives;
 	}
 	
-	public List<Altenative> getAltenatives() {
+	public List<Alternative> getAltenatives() {
 		return altenatives;
 	}
 

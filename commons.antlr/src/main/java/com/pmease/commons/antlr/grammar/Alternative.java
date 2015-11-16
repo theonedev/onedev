@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.grammar;
 
 import java.util.List;
 
-public class Altenative extends GrammarMember {
+public class Alternative extends GrammarMember {
 
 	private static final long serialVersionUID = 1L;
 
@@ -10,7 +10,7 @@ public class Altenative extends GrammarMember {
 	
 	private final List<Element> elements;
 	
-	public Altenative(Grammar grammar, String label, List<Element> elements) {
+	public Alternative(Grammar grammar, String label, List<Element> elements) {
 		super(grammar);
 		this.label = label;
 		this.elements = elements;

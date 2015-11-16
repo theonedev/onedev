@@ -8,9 +8,9 @@ public class Rule extends GrammarMember {
 
 	private final String name;
 	
-	private final List<Altenative> altenatives;
+	private final List<Alternative> altenatives;
 
-	public Rule(Grammar grammar, String name, List<Altenative> altenatives) {
+	public Rule(Grammar grammar, String name, List<Alternative> altenatives) {
 		super(grammar);
 		
 		this.name = name;
@@ -21,7 +21,7 @@ public class Rule extends GrammarMember {
 		return name;
 	}
 
-	public List<Altenative> getAltenatives() {
+	public List<Alternative> getAlternatives() {
 		return altenatives;
 	}
 
