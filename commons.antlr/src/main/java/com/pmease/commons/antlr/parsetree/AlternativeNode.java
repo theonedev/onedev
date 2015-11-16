@@ -5,7 +5,8 @@ import java.util.List;
 
 import com.pmease.commons.antlr.grammarspec.AlternativeSpec;
 import com.pmease.commons.antlr.grammarspec.ElementSpec;
-import com.pmease.commons.antlr.grammarspec.RuleSpec;
+import com.pmease.commons.antlr.grammarspec.LexerRuleRefElementSpec;
+import com.pmease.commons.antlr.grammarspec.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammarspec.Spec;
 
 public class AlternativeNode extends Node {
@@ -34,27 +35,27 @@ public class AlternativeNode extends Node {
 		return nodes;
 	}
 	
-	public List<RuleNode> getElementsByRule(String ruleName) {
-		List<RuleNode> nodes = new ArrayList<>();
+	public List<RuleRefElementNode> getElementsByRule(String ruleName) {
+		List<RuleRefElementNode> nodes = new ArrayList<>();
 		for (ElementNode node: elements) {
 			Spec spec = node.getSpec();
-			if (spec instanceof RuleSpec) {
-				RuleSpec ruleSpec = (RuleSpec) spec;
-				if (ruleSpec.getName().equals(ruleName))
-					nodes.add((RuleNode)node);
+			if (spec instanceof RuleRefElementSpec) {
+				RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) spec;
+				if (ruleRefElementSpec.getRuleName().equals(ruleName))
+					nodes.add((RuleRefElementNode)node);
 			}
 		}
 		return nodes;
 	}
 	
-	public List<RuleNode> getElementsByLexerRule(String ruleName) {
-		List<RuleNode> nodes = new ArrayList<>();
+	public List<LexerRuleRefElementNode> getElementsByLexerRule(String ruleName) {
+		List<LexerRuleRefElementNode> nodes = new ArrayList<>();
 		for (ElementNode node: elements) {
 			Spec spec = node.getSpec();
-			if (spec instanceof RuleSpec) {
-				RuleSpec ruleSpec = (RuleSpec) spec;
-				if (ruleSpec.getName().equals(ruleName))
-					nodes.add((RuleNode)node);
+			if (spec instanceof LexerRuleRefElementSpec) {
+				LexerRuleRefElementSpec lexerRuleRefElementSpec = (LexerRuleRefElementSpec) spec;
+				if (lexerRuleRefElementSpec.getRuleName().equals(ruleName))
+					nodes.add((LexerRuleRefElementNode)node);
 			}
 		}
 		return nodes;

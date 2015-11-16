@@ -200,7 +200,7 @@ public class Grammar implements Serializable {
 		} else if (atomContext.ruleref() != null) {
 			return new RuleRefElementSpec(this, label, multiplicity, atomContext.ruleref().RULE_REF().getText());
 		} else if (atomContext.notSet() != null) {
-			return new NegativeTokensElementSpec(this, label, multiplicity, getNegativeTokenTypes(atomContext.notSet()));
+			return new NotTokenElementSpec(this, label, multiplicity, getNegativeTokenTypes(atomContext.notSet()));
 		} else if (atomContext.DOT() != null) {
 			return new AnyTokenElementSpec(this, label, multiplicity);
 		} else {

@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import com.pmease.commons.antlr.grammarspec.AlternativeSpec;
 import com.pmease.commons.antlr.grammarspec.RuleSpec;
 
-public class RuleNode extends ElementNode {
+public class RuleNode extends Node {
 
 	private static final long serialVersionUID = 1L;
 	
