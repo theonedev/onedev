@@ -4,13 +4,10 @@ import java.util.Set;
 
 public class NotTokenElementSpec extends ElementSpec {
 
-	private static final long serialVersionUID = 1L;
-	
 	private final Set<Integer> notTokenTypes;
 	
-	public NotTokenElementSpec(Grammar grammar, String label, Multiplicity multiplicity, 
-			Set<Integer> notTokenTypes) {
-		super(grammar, label, multiplicity);
+	public NotTokenElementSpec(String label, Multiplicity multiplicity, Set<Integer> notTokenTypes) {
+		super(label, multiplicity);
 		
 		this.notTokenTypes = notTokenTypes;
 	}

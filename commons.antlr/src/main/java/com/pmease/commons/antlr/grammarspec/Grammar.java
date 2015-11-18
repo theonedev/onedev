@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -111,7 +112,7 @@ public class Grammar implements Serializable {
 			for (LexerAltContext lexerAltContext: lexerRuleBlockContext.lexerAltList().lexerAlt())
 				alternatives.add(newAltenative(lexerAltContext));
 		}
-		return new RuleSpec(this, name, alternatives);
+		return new RuleSpec(name, alternatives);
 	}
 	
 	private AlternativeSpec newAltenative(LexerAltContext lexerAltContext) {
@@ -124,7 +125,7 @@ public class Grammar implements Serializable {
 			}
 		}
 		
-		return new AlternativeSpec(this, null, elements);
+		return new AlternativeSpec(null, elements);
 	}
 	
 	private AlternativeSpec newAltenative(LabeledAltContext labeledAltContext) {
@@ -163,7 +164,7 @@ public class Grammar implements Serializable {
 				elements.add(element);
 		}
 		
-		return new AlternativeSpec(this, label, elements);
+		return new AlternativeSpec(label, elements);
 	}
 	
 	@Nullable
@@ -191,18 +192,18 @@ public class Grammar implements Serializable {
 			if (atomContext.terminal().TOKEN_REF() != null) {
 				String ruleName = atomContext.terminal().TOKEN_REF().getText();
 				int tokenType = tokenTypesByRule.get(ruleName);
-				return new LexerRuleRefElementSpec(this, label, multiplicity, tokenType, ruleName);
+				return new LexerRuleRefElementSpec(label, multiplicity, tokenType, ruleName);
 			} else {
 				String literal = getLiteral(atomContext.terminal().STRING_LITERAL());
 				int tokenType = tokenTypesByLiteral.get(literal);
-				return new LiteralElementSpec(this, label, multiplicity, tokenType, literal);
+				return new LiteralElementSpec(label, multiplicity, tokenType, literal);
 			}
 		} else if (atomContext.ruleref() != null) {
-			return new RuleRefElementSpec(this, label, multiplicity, atomContext.ruleref().RULE_REF().getText());
+			return new RuleRefElementSpec(label, multiplicity, atomContext.ruleref().RULE_REF().getText());
 		} else if (atomContext.notSet() != null) {
-			return new NotTokenElementSpec(this, label, multiplicity, getNegativeTokenTypes(atomContext.notSet()));
+			return new NotTokenElementSpec(label, multiplicity, getNegativeTokenTypes(atomContext.notSet()));
 		} else if (atomContext.DOT() != null) {
-			return new AnyTokenElementSpec(this, label, multiplicity);
+			return new AnyTokenElementSpec(label, multiplicity);
 		} else {
 			throw new IllegalStateException();
 		}
@@ -221,21 +222,21 @@ public class Grammar implements Serializable {
 				Integer tokenType = tokenTypesByRule.get(ruleName);
 				if (tokenType == null)
 					tokenType = 0;
-				return new LexerRuleRefElementSpec(this, label, multiplicity, tokenType, ruleName);
+				return new LexerRuleRefElementSpec(label, multiplicity, tokenType, ruleName);
 			} else {
 				String literal = getLiteral(lexerAtomContext.terminal().STRING_LITERAL());
 				Integer tokenType = tokenTypesByLiteral.get(literal);
 				if (tokenType == null)
 					tokenType = 0;
-				return new LiteralElementSpec(this, label, multiplicity, tokenType, literal);
+				return new LiteralElementSpec(label, multiplicity, tokenType, literal);
 			}
 		} else if (lexerAtomContext.RULE_REF() != null) {
-			return new RuleRefElementSpec(this, label, multiplicity, lexerAtomContext.RULE_REF().getText());
+			return new RuleRefElementSpec(label, multiplicity, lexerAtomContext.RULE_REF().getText());
 		} else if (lexerAtomContext.notSet() != null 
 				|| lexerAtomContext.DOT() != null 
 				|| lexerAtomContext.LEXER_CHAR_SET()!=null 
 				|| lexerAtomContext.range() != null) {
-			return new AnyTokenElementSpec(this, label, multiplicity);
+			return new AnyTokenElementSpec(label, multiplicity);
 		} else {
 			throw new IllegalStateException();
 		}
@@ -283,14 +284,20 @@ public class Grammar implements Serializable {
 		List<AlternativeSpec> alternatives = new ArrayList<>();
 		for (AlternativeContext alternativeContext: blockContext.altList().alternative())
 			alternatives.add(newAltenative(null, alternativeContext));
-		return new BlockElementSpec(this, label, newMultiplicity(ebnfSuffixContext), alternatives);
+		String ruleName = UUID.randomUUID().toString();
+		RuleSpec rule = new RuleSpec(ruleName, alternatives);
+		rules.put(ruleName, rule);
+		return new RuleRefElementSpec(label, newMultiplicity(ebnfSuffixContext), ruleName);
 	}
 	
 	private ElementSpec newElement(@Nullable String label, LexerBlockContext lexerBlockContext, @Nullable EbnfSuffixContext ebnfSuffixContext) {
 		List<AlternativeSpec> alternatives = new ArrayList<>();
 		for (LexerAltContext lexerAltContext: lexerBlockContext.lexerAltList().lexerAlt())
 			alternatives.add(newAltenative(lexerAltContext));
-		return new BlockElementSpec(this, label, newMultiplicity(ebnfSuffixContext), alternatives);
+		String ruleName = UUID.randomUUID().toString();
+		RuleSpec rule = new RuleSpec(ruleName, alternatives);
+		rules.put(ruleName, rule);
+		return new RuleRefElementSpec(label, newMultiplicity(ebnfSuffixContext), ruleName);
 	}
 	
 	private ElementSpec newElement(EbnfContext ebnfContext) {

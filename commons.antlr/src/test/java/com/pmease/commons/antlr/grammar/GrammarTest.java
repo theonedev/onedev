@@ -1,17 +1,18 @@
 package com.pmease.commons.antlr.grammar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import com.pmease.commons.antlr.grammarspec.AlternativeSpec;
 import com.pmease.commons.antlr.grammarspec.AnyTokenElementSpec;
-import com.pmease.commons.antlr.grammarspec.BlockElementSpec;
+import com.pmease.commons.antlr.grammarspec.ElementSpec.Multiplicity;
 import com.pmease.commons.antlr.grammarspec.Grammar;
 import com.pmease.commons.antlr.grammarspec.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.grammarspec.LiteralElementSpec;
 import com.pmease.commons.antlr.grammarspec.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammarspec.RuleSpec;
-import com.pmease.commons.antlr.grammarspec.ElementSpec.Multiplicity;
 
 public class GrammarTest {
 
@@ -57,14 +58,15 @@ public class GrammarTest {
 		AnyTokenElementSpec anyTokenElement = (AnyTokenElementSpec) alternative.getElements().get(1);
 		assertEquals(Multiplicity.ZERO_OR_MORE, anyTokenElement.getMultiplicity());
 		
-		BlockElementSpec blockElement = (BlockElementSpec) alternative.getElements().get(2);
-		assertEquals(2, blockElement.getAltenatives().size());
-		assertEquals(1, blockElement.getAltenatives().get(0).getElements().size());
-		literalElement = (LiteralElementSpec) blockElement.getAltenatives().get(0).getElements().get(0);
+		RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) alternative.getElements().get(2);
+		RuleSpec blockRule = grammar.getRules().get(ruleRefElement.getRuleName());
+		assertEquals(2, blockRule.getAlternatives().size());
+		assertEquals(1, blockRule.getAlternatives().get(0).getElements().size());
+		literalElement = (LiteralElementSpec) blockRule.getAlternatives().get(0).getElements().get(0);
 		assertEquals(0, literalElement.getType());
 		assertEquals("*/", literalElement.getLiteral());
-		assertEquals(1, blockElement.getAltenatives().get(1).getElements().size());
-		LexerRuleRefElementSpec lexerRuleElement = (LexerRuleRefElementSpec) blockElement.getAltenatives().get(1).getElements().get(0);
+		assertEquals(1, blockRule.getAlternatives().get(1).getElements().size());
+		LexerRuleRefElementSpec lexerRuleElement = (LexerRuleRefElementSpec) blockRule.getAlternatives().get(1).getElements().get(0);
 		assertEquals(-1, lexerRuleElement.getType());
 		assertEquals("EOF", lexerRuleElement.getRuleName());
 	}

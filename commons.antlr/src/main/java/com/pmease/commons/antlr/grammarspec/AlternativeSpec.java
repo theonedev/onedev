@@ -2,16 +2,13 @@ package com.pmease.commons.antlr.grammarspec;
 
 import java.util.List;
 
-public class AlternativeSpec extends Spec {
-
-	private static final long serialVersionUID = 1L;
+public class AlternativeSpec implements Spec {
 
 	private final String label;
 	
 	private final List<ElementSpec> elements;
 	
-	public AlternativeSpec(Grammar grammar, String label, List<ElementSpec> elements) {
-		super(grammar);
+	public AlternativeSpec(String label, List<ElementSpec> elements) {
 		this.label = label;
 		this.elements = elements;
 	}

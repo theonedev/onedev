@@ -4,8 +4,6 @@ import com.pmease.commons.antlr.grammarspec.ElementSpec;
 
 public class AltTokenElementNode extends ElementNode {
 
-	private static final long serialVersionUID = 1L;
-
 	private final int tokenType;
 	
 	private final String tokenValue;
