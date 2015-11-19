@@ -339,7 +339,7 @@ public abstract class CodeAssist {
 		return Preconditions.checkNotNull(rules.get(ruleName));
 	}
 	
-	public List<Token> lex(String input) {
+	public TokenStream lex(String input) {
 		try {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(input));
@@ -349,7 +349,7 @@ public abstract class CodeAssist {
 					tokens.add(token);
 				token = lexer.nextToken();
 			}
-			return tokens;
+			return new TokenStream(tokens);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			throw new RuntimeException(e);
@@ -363,25 +363,27 @@ public abstract class CodeAssist {
 		List<CaretAwareText> texts = new ArrayList<>();
 		RuleSpec rule = getRule(ruleName);
 		String contentBeforeCaret = input.getContentBeforeCaret();
-		List<Token> tokens = lex(contentBeforeCaret);
+		TokenStream stream = lex(contentBeforeCaret);
 		
-		if (!tokens.isEmpty()) {
-			Token lastToken = tokens.get(tokens.size()-1);
+		if (!stream.isEmpty()) {
+			Token lastToken = stream.getLastToken();
 			String matchWith;
 			int beyondLastToken = input.getCaret() - lastToken.getStopIndex() -1; 
 			if (beyondLastToken > 0) {
 				matchWith = contentBeforeCaret.substring(input.getCaret()-beyondLastToken, input.getCaret());
 				matchWith = StringUtils.stripStart(matchWith, " \t\n\r");
-				mergeSuggestions(suggest(rule, tokens, input, matchWith), texts);
+				mergeSuggestions(suggest(rule, stream, input, matchWith), texts);
 			} else {
-				mergeSuggestions(suggest(rule, tokens, input, ""), texts);
+				mergeSuggestions(suggest(rule, stream, input, ""), texts);
 
-				matchWith = tokens.get(tokens.size()-1).getText();
+				matchWith = stream.getLastToken().getText();
+				List<Token> tokens = stream.getTokens();
 				tokens.remove(tokens.size()-1);
-				mergeSuggestions(suggest(rule, tokens, input, matchWith), texts);
+				stream = new TokenStream(tokens);
+				mergeSuggestions(suggest(rule, stream, input, matchWith), texts);
 			}
 		} else {
-			mergeSuggestions(suggest(rule, tokens, input, ""), texts);
+			mergeSuggestions(suggest(rule, stream, input, ""), texts);
 		}
 		return texts;
 	}
@@ -398,32 +400,32 @@ public abstract class CodeAssist {
 		}
 	}
 	
-	private List<CaretAwareText> suggest(RuleSpec spec, List<Token> tokens, 
+	private List<CaretAwareText> suggest(RuleSpec spec, TokenStream stream, 
 			CaretAwareText input, String matchWith) {
 		List<CaretAwareText> texts = new ArrayList<>();
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		
 		int replaceStart = input.getCaret() - matchWith.length();
 		for (ElementSuggestion suggestion: suggestions) {
-			int replaceEnd = getEndOfMatch(suggestion.getSpec(), suggestion.getParent(), 
+			int replaceEnd = getEndOfMatch(suggestion.getElementNode(), 
 					input.getContent().substring(replaceStart));
 			replaceEnd += replaceStart;
 			String before = input.getContent().substring(0, replaceStart);
 			String after = input.getContent().substring(replaceEnd);
 			List<String> mandatoryFollowings;
 			if (replaceStart != replaceEnd)
-				mandatoryFollowings = getMandatoryFollowing(suggestion.getSpec(), suggestion.getParent());
+				mandatoryFollowings = getMandatoryFollowing(suggestion.getElementNode());
 			else
 				mandatoryFollowings = new ArrayList<>();
 
 			for (CaretAwareText text: suggestion.getTexts()) {
 				String newContent;
-				if (!tokens.isEmpty()) { 
+				if (!stream.isEmpty()) { 
 					newContent = before + text.getContent();
-					List<Token> newTokens = lex(newContent);
-					if (newTokens.size() >= tokens.size()) {
-						Token lastToken = tokens.get(tokens.size()-1);
-						Token newLastToken = newTokens.get(tokens.size()-1);
+					TokenStream newStream = lex(newContent);
+					if (newStream.size() >= stream.size()) {
+						Token lastToken = stream.getLastToken();
+						Token newLastToken = newStream.getLastToken();
 						if (lastToken.getStartIndex() != newLastToken.getStartIndex()
 								|| lastToken.getStopIndex() != newLastToken.getStopIndex()) {
 							newContent = before + " " + text.getContent();
@@ -443,9 +445,9 @@ public abstract class CodeAssist {
 				for (String following: mandatoryFollowings) {
 					String prevNewContent = newContent;
 					newContent += following;
-					List<Token> newTokens = lex(newContent);
-					if (!newTokens.isEmpty()) {
-						Token lastToken = newTokens.get(newTokens.size()-1);
+					TokenStream newStream = lex(newContent);
+					if (!newStream.isEmpty()) {
+						Token lastToken = newStream.getLastToken();
 						if (lastToken.getStartIndex() != newContent.length() - following.length()
 								|| lastToken.getStopIndex() != newContent.length()-1) {
 							newContent = prevNewContent + " " + following;
@@ -458,9 +460,9 @@ public abstract class CodeAssist {
 				newContent += after;
 				
 				if (text.getCaret() == text.getContent().length()) {
-					List<Token> newTokens = lex(newContent.substring(caret));
-					if (!newTokens.isEmpty())
-						caret += getNextEditCaret(suggestion.getSpec(), suggestion.getParent(), newTokens);
+					TokenStream newStream = lex(newContent.substring(caret));
+					if (!newStream.isEmpty())
+						caret += moveCaretToEditAfter(suggestion.getElementNode(), newStream, 0);
 				}
 				
 				texts.add(new CaretAwareText(newContent, caret));
@@ -469,7 +471,7 @@ public abstract class CodeAssist {
 		return texts;
 	}
 	
-	private int getEndOfMatch(ElementSpec spec, Node parent, String content) {
+	private int getEndOfMatch(Node elementNode, String content) {
 		List<Token> tokens = lex(content);
 		if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {
 			
@@ -478,12 +480,39 @@ public abstract class CodeAssist {
 		}
 	}
 	
-	private List<String> getMandatoryFollowing(ElementSpec spec, Node parent) {
+	private List<String> getMandatoryFollowing(Node elementNode) {
 		
 	}
 	
-	private int getNextEditCaret(ElementSpec spec, Node parent, List<Token> tokens) {
-		
+	private int moveCaretToEditAfter(Node elementNode, TokenStream stream, int caret) {
+		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
+		if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE 
+				|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
+			return caret;
+		} else {
+			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
+			int index = alternativeSpec.getElements().indexOf(elementSpec);
+			if (index == alternativeSpec.getElements().size()-1) {
+				Node upElementNode = elementNode.getParent().getParent().getParent();
+				if (upElementNode == null)
+					return caret;
+				else 
+					return moveCaretToEditAfter(upElementNode, stream, caret);
+			} else {
+				elementSpec = alternativeSpec.getElements().get(index+1);
+				if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE 
+						|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
+					return caret;
+				} else {
+					CaretMove caretMove = elementSpec.moveCaretToEdit(stream);
+					caret += caretMove.getOffset();
+					if (!caretMove.isStop())
+						return moveCaretToEditAfter(new Node(elementSpec, elementNode.getParent()), stream, ++caret);
+					else
+						return caret;
+				}
+			}
+		}
 	}
 	
 }

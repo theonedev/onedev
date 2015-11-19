@@ -19,4 +19,9 @@ public class AnyTokenElementSpec extends ElementSpec {
 		return new ArrayList<ElementSuggestion>();
 	}
 
+	@Override
+	public CaretMove moveCaretToEdit(TokenStream stream) {
+		return new CaretMove(0, true);
+	}
+
 }

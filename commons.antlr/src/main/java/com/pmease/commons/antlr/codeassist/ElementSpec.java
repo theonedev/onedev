@@ -42,4 +42,6 @@ public abstract class ElementSpec extends Spec {
 	}
 	
 	protected abstract boolean matchEmptyInElement();
+	
+	public abstract CaretMove moveCaretToEdit(TokenStream stream);
 }

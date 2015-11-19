@@ -29,4 +29,9 @@ public class NotTokenElementSpec extends ElementSpec {
 		return new ArrayList<>();
 	}
 
+	@Override
+	public CaretMove moveCaretToEdit(TokenStream stream) {
+		return new CaretMove(0, true);
+	}
+
 }

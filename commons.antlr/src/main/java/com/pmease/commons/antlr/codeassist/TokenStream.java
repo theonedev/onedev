@@ -16,6 +16,10 @@ public class TokenStream {
 		this.tokens = tokens;
 	}
 
+	public List<Token> getTokens() {
+		return tokens;
+	}
+
 	public int getIndex() {
 		return index;
 	}
@@ -23,17 +27,38 @@ public class TokenStream {
 	public void setIndex(int index) {
 		this.index = index;
 	}
+	
+	public int indexOf(Token token) {
+		return tokens.indexOf(token);
+	}
 
-	@Nullable
-	public Token nextToken() {
-		if (index < tokens.size())
-			return tokens.get(index);
-		else
-			return null;
+	public Token getToken(int index) {
+		return tokens.get(index);
 	}
 	
-	public int getSize() {
+	@Nullable
+	public Token nextToken() {
+		if (index < tokens.size()) {
+			return tokens.get(index++);
+		} else {
+			return null;
+		}
+	}
+	
+	public int size() {
 		return tokens.size();
+	}
+	
+	public boolean isEmpty() {
+		return tokens.isEmpty();
+	}
+	
+	public Token getFirstToken() {
+		return tokens.get(0);
+	}
+	
+	public Token getLastToken() {
+		return tokens.get(tokens.size()-1);
 	}
 	
 }
