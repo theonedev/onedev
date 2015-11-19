@@ -1,6 +1,12 @@
 package com.pmease.commons.antlr.grammarspec;
 
-public class ElementSpec implements Spec {
+import java.util.List;
+
+import org.antlr.v4.runtime.Token;
+
+import com.pmease.commons.antlr.parsetree.TokenNode;
+
+public abstract class ElementSpec extends Spec {
 	
 	public enum Multiplicity{ONE, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE};
 	
@@ -8,7 +14,9 @@ public class ElementSpec implements Spec {
 	
 	private final Multiplicity multiplicity;
 	
-	public ElementSpec(String label, Multiplicity multiplicity) {
+	public ElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity) {
+		super(codeAssist);
+		
 		this.label = label;
 		this.multiplicity = multiplicity;
 	}
@@ -20,5 +28,20 @@ public class ElementSpec implements Spec {
 	public Multiplicity getMultiplicity() {
 		return multiplicity;
 	}
+
+	@Override
+	public List<TokenNode> match(List<Token> tokens, int from) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean matchEmpty() {
+		if (multiplicity == Multiplicity.ZERO_OR_MORE || multiplicity == Multiplicity.ZERO_OR_ONE)
+			return true;
+		else
+			return matchEmptyInElement();
+	}
 	
+	protected abstract boolean matchEmptyInElement();
 }

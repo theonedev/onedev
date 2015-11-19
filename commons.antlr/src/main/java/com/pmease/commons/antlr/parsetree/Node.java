@@ -2,11 +2,11 @@ package com.pmease.commons.antlr.parsetree;
 
 import com.pmease.commons.antlr.grammarspec.Spec;
 
-public abstract class Node {
+public class Node {
 	
-	private final Spec spec;
+	protected final Spec spec;
 	
-	private final Node parent;
+	protected final Node parent;
 	
 	public Node(Spec spec, Node parent) {
 		this.spec = spec;
