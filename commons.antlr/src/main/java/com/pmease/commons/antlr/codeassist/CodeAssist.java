@@ -401,18 +401,59 @@ public abstract class CodeAssist {
 	private List<CaretAwareText> suggest(RuleSpec spec, List<Token> tokens, 
 			CaretAwareText input, String matchWith) {
 		List<CaretAwareText> texts = new ArrayList<>();
+		List<ElementSuggestion> suggestions = new ArrayList<>();
+		
 		int replaceStart = input.getCaret() - matchWith.length();
 		for (ElementSuggestion suggestion: suggestions) {
+			int replaceEnd = getEndOfMatch(suggestion.getSpec(), suggestion.getParent(), 
+					input.getContent().substring(replaceStart));
+			replaceEnd += replaceStart;
+			String before = input.getContent().substring(0, replaceStart);
+			String after = input.getContent().substring(replaceEnd);
+			MandatoryFollowing mandatoryFollowing = 
+					getMandatoryFollowing(suggestion.getSpec(), suggestion.getParent());
 			
+			for (CaretAwareText text: suggestion.getTexts()) {
+				String newContent;
+				if (!tokens.isEmpty()) { 
+					newContent = before + text.getContent();
+					List<Token> newTokens = lex(newContent);
+					if (newTokens.size() >= tokens.size()) {
+						Token lastToken = tokens.get(tokens.size()-1);
+						Token newLastToken = newTokens.get(tokens.size()-1);
+						if (lastToken.getStartIndex() != newLastToken.getStartIndex()
+								|| lastToken.getStopIndex() != newLastToken.getStopIndex()) {
+							newContent = before + " " + text.getContent();
+						}
+					} else {
+						newContent = before + " " + text.getContent();
+					}
+				} else {
+					newContent = before + text.getContent();
+				}
+				
+				for (String literal: mandatoryFollowing.getLiterals()) {
+					newContent += literal;
+					List<Token> newTokens = lex(newContent);
+					if (!newTokens.isEmpty()) {
+						Token lastToken = newTokens.get(newTokens.size()-1);
+						if (lastToken.getStartIndex() != newContent) {
+							
+						}
+					} else {
+						
+					}
+				}
+			}
 		}
 		return texts;
 	}
-
+	
 	private int getEndOfMatch(ElementSpec spec, Node parent, String content) {
 		
 	}
 	
-	private String getMandatoryFollowings(ElementSpec spec, Node parent) {
+	private MandatoryFollowing getMandatoryFollowing(ElementSpec spec, Node parent) {
 		
 	}
 	
