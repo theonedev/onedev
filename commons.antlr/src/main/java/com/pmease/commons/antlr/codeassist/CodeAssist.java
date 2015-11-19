@@ -410,9 +410,12 @@ public abstract class CodeAssist {
 			replaceEnd += replaceStart;
 			String before = input.getContent().substring(0, replaceStart);
 			String after = input.getContent().substring(replaceEnd);
-			MandatoryFollowing mandatoryFollowing = 
-					getMandatoryFollowing(suggestion.getSpec(), suggestion.getParent());
-			
+			List<String> mandatoryFollowings;
+			if (replaceStart != replaceEnd)
+				mandatoryFollowings = getMandatoryFollowing(suggestion.getSpec(), suggestion.getParent());
+			else
+				mandatoryFollowings = new ArrayList<>();
+
 			for (CaretAwareText text: suggestion.getTexts()) {
 				String newContent;
 				if (!tokens.isEmpty()) { 
@@ -431,29 +434,55 @@ public abstract class CodeAssist {
 				} else {
 					newContent = before + text.getContent();
 				}
-				
-				for (String literal: mandatoryFollowing.getLiterals()) {
-					newContent += literal;
+				int caret = text.getCaret();
+				if (caret == text.getContent().length())
+					caret = newContent.length();
+				else
+					caret += before.length() + 1;
+
+				for (String following: mandatoryFollowings) {
+					String prevNewContent = newContent;
+					newContent += following;
 					List<Token> newTokens = lex(newContent);
 					if (!newTokens.isEmpty()) {
 						Token lastToken = newTokens.get(newTokens.size()-1);
-						if (lastToken.getStartIndex() != newContent) {
-							
+						if (lastToken.getStartIndex() != newContent.length() - following.length()
+								|| lastToken.getStopIndex() != newContent.length()-1) {
+							newContent = prevNewContent + " " + following;
 						}
 					} else {
-						
+						newContent = prevNewContent + " " + following;
 					}
 				}
+				
+				newContent += after;
+				
+				if (text.getCaret() == text.getContent().length()) {
+					List<Token> newTokens = lex(newContent.substring(caret));
+					if (!newTokens.isEmpty())
+						caret += getNextEditCaret(suggestion.getSpec(), suggestion.getParent(), newTokens);
+				}
+				
+				texts.add(new CaretAwareText(newContent, caret));
 			}
 		}
 		return texts;
 	}
 	
 	private int getEndOfMatch(ElementSpec spec, Node parent, String content) {
+		List<Token> tokens = lex(content);
+		if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {
+			
+		} else {
+			return 0;
+		}
+	}
+	
+	private List<String> getMandatoryFollowing(ElementSpec spec, Node parent) {
 		
 	}
 	
-	private MandatoryFollowing getMandatoryFollowing(ElementSpec spec, Node parent) {
+	private int getNextEditCaret(ElementSpec spec, Node parent, List<Token> tokens) {
 		
 	}
 	
