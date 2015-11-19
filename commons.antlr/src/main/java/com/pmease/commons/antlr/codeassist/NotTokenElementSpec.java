@@ -1,11 +1,8 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import com.pmease.commons.antlr.parsetree.Node;
-import com.pmease.commons.antlr.parsetree.TokenNode;
 
 public class NotTokenElementSpec extends ElementSpec {
 
@@ -28,7 +25,7 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> getFirst(Node parent) {
+	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
 		return new ArrayList<>();
 	}
 

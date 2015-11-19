@@ -1,12 +1,9 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
-
-import com.pmease.commons.antlr.parsetree.Node;
-import com.pmease.commons.antlr.parsetree.TokenNode;
 
 public class AlternativeSpec extends Spec {
 
@@ -36,11 +33,11 @@ public class AlternativeSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> getFirst(Node parent) {
-		List<TokenNode> first = new ArrayList<>();
+	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
+		List<ElementSuggestion> first = new ArrayList<>();
 		Node alternativeNode = new Node(this, parent);
 		for (ElementSpec element: elements) {
-			first.addAll(element.getFirst(alternativeNode));
+			first.addAll(element.suggestFirst(alternativeNode, matchWith));
 			if (!element.matchEmpty())
 				break;
 		}

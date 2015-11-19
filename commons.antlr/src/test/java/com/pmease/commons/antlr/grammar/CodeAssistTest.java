@@ -3,30 +3,45 @@ package com.pmease.commons.antlr.grammar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 import org.junit.Test;
 
-import com.pmease.commons.antlr.grammarspec.AlternativeSpec;
-import com.pmease.commons.antlr.grammarspec.AnyTokenElementSpec;
-import com.pmease.commons.antlr.grammarspec.ElementSpec.Multiplicity;
-import com.pmease.commons.antlr.grammarspec.CodeAssist;
-import com.pmease.commons.antlr.grammarspec.LexerRuleRefElementSpec;
-import com.pmease.commons.antlr.grammarspec.LiteralElementSpec;
-import com.pmease.commons.antlr.grammarspec.RuleRefElementSpec;
-import com.pmease.commons.antlr.grammarspec.RuleSpec;
+import com.pmease.commons.antlr.ANTLRv4Lexer;
+import com.pmease.commons.antlr.codeassist.AlternativeSpec;
+import com.pmease.commons.antlr.codeassist.AnyTokenElementSpec;
+import com.pmease.commons.antlr.codeassist.CaretAwareText;
+import com.pmease.commons.antlr.codeassist.CodeAssist;
+import com.pmease.commons.antlr.codeassist.ElementSpec;
+import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
+import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
+import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
+import com.pmease.commons.antlr.codeassist.Node;
+import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
+import com.pmease.commons.antlr.codeassist.RuleSpec;
 
-public class GrammarTest {
+public class CodeAssistTest {
 
-	private CodeAssist grammar = new CodeAssist(
+	private CodeAssist codeAssist = new CodeAssist(ANTLRv4Lexer.class, 
 			new String[]{
 					"com/pmease/commons/antlr/ANTLRv4Parser.g4", 
 					"com/pmease/commons/antlr/ANTLRv4Lexer.g4", 
 					"com/pmease/commons/antlr/LexBasic.g4", 
 					"com/pmease/commons/antlr/LexUnicode.g4"
-			}, "ANTLRv4Parser.tokens");
+			}, "ANTLRv4Parser.tokens") {
+
+				@Override
+				protected List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+						List<Token> tokens, String matchWith) {
+					return null;
+				}
+
+	};
 	
 	@Test
 	public void testGrammarSpec() {
-		RuleSpec rule = grammar.getRule("grammarSpec");
+		RuleSpec rule = codeAssist.getRule("grammarSpec");
 		assertEquals(1, rule.getAlternatives().size());
 		AlternativeSpec alternative = rule.getAlternatives().get(0);
 		assertEquals(8, alternative.getElements().size());
@@ -46,7 +61,7 @@ public class GrammarTest {
 
 	@Test
 	public void testDocComment() {
-		RuleSpec rule = grammar.getRule("DocComment");
+		RuleSpec rule = codeAssist.getRule("DocComment");
 		assertEquals(1, rule.getAlternatives().size());
 		AlternativeSpec alternative = rule.getAlternatives().get(0);
 		assertEquals(3, alternative.getElements().size());
@@ -73,7 +88,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testWs() {
-		RuleSpec rule = grammar.getRule("Ws");
+		RuleSpec rule = codeAssist.getRule("Ws");
 		assertEquals(2, rule.getAlternatives().size());
 		assertEquals(1, rule.getAlternatives().get(0).getElements().size());
 		LexerRuleRefElementSpec lexerRuleElement = (LexerRuleRefElementSpec) rule.getAlternatives().get(0).getElements().get(0);
@@ -82,7 +97,7 @@ public class GrammarTest {
 
 	@Test
 	public void testVws() {
-		RuleSpec rule = grammar.getRule("Vws");
+		RuleSpec rule = codeAssist.getRule("Vws");
 		assertEquals(1, rule.getAlternatives().size());
 		assertEquals(1, rule.getAlternatives().get(0).getElements().size());
 		assertTrue(rule.getAlternatives().get(0).getElements().get(0) instanceof AnyTokenElementSpec);
@@ -90,7 +105,7 @@ public class GrammarTest {
 
 	@Test
 	public void testNameStartChar() {
-		RuleSpec rule = grammar.getRule("NameStartChar");
+		RuleSpec rule = codeAssist.getRule("NameStartChar");
 		assertTrue(rule.getAlternatives().get(0).getElements().get(0) instanceof AnyTokenElementSpec);
 	}
 }

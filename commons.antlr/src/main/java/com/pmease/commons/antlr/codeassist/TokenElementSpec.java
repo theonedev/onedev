@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

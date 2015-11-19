@@ -1,11 +1,8 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
-
-import com.pmease.commons.antlr.parsetree.Node;
-import com.pmease.commons.antlr.parsetree.TokenNode;
 
 public abstract class Spec {
 	
@@ -17,7 +14,7 @@ public abstract class Spec {
 	
 	public abstract List<TokenNode> match(List<Token> tokens, int from);
 	
-	public abstract List<TokenNode> getFirst(Node parent);
+	public abstract List<ElementSuggestion> suggestFirst(Node parent, String matchWith);
 	
 	public abstract boolean matchEmpty();
 

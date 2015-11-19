@@ -1,8 +1,9 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +17,10 @@ import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.google.common.base.Preconditions;
@@ -42,19 +46,33 @@ import com.pmease.commons.antlr.ANTLRv4Parser.ParserRuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.SetElementContext;
-import com.pmease.commons.antlr.grammarspec.ElementSpec.Multiplicity;
+import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
+import com.pmease.commons.util.StringUtils;
 
-public class CodeAssist implements Serializable {
+public abstract class CodeAssist {
 
-	private static final long serialVersionUID = 1L;
-	
 	private static final String EOF = "EOF";
+	
+	private final Constructor<? extends Lexer> lexerConstructor;
 	
 	private final Map<String, RuleSpec> rules = new HashMap<>();
 	
 	private final Map<String, Integer> tokenTypesByLiteral = new HashMap<>();
 
 	private final Map<String, Integer> tokenTypesByRule = new HashMap<>();
+
+	public CodeAssist(Class<? extends Lexer> lexerClass) {
+		this(lexerClass, new String[]{getGrammarFile(lexerClass)}, getTokenFile(lexerClass));
+	}
+
+	private static String getGrammarFile(Class<?> lexerClass) {
+		String lexerName = lexerClass.getName().replace(".", "/");
+		return lexerName.substring(0, lexerName.length() - "Lexer".length()) + ".g4";
+	}
+	
+	private static String getTokenFile(Class<?> lexerClass) {
+		return lexerClass.getSimpleName() + ".tokens";
+	}
 	
 	/**
 	 * Construct object representation of ANTLR grammar file.
@@ -64,7 +82,13 @@ public class CodeAssist implements Serializable {
 	 * @param tokenFile
 	 * 			generated tokens file in class path, relative to class path root
 	 */
-	public CodeAssist(String grammarFiles[], String tokenFile) {
+	public CodeAssist(Class<? extends Lexer> lexerClass, String grammarFiles[], String tokenFile) {
+		try {
+			this.lexerConstructor = lexerClass.getConstructor(CharStream.class);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+		
 		rules.put(EOF, new RuleSpec(this, EOF, new ArrayList<AlternativeSpec>()));
 		tokenTypesByRule.put(EOF, -1);
 		
@@ -314,4 +338,82 @@ public class CodeAssist implements Serializable {
 	public RuleSpec getRule(String ruleName) {
 		return Preconditions.checkNotNull(rules.get(ruleName));
 	}
+	
+	public List<Token> lex(String input) {
+		try {
+			List<Token> tokens = new ArrayList<>();
+			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(input));
+			Token token = lexer.getToken();
+			while (token.getType() != Token.EOF) {
+				if (token.getChannel() == Token.DEFAULT_CHANNEL)
+					tokens.add(token);
+				token = lexer.nextToken();
+			}
+			return tokens;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	protected abstract List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+			List<Token> tokens, String matchWith);
+	
+	public List<CaretAwareText> suggest(CaretAwareText input, String ruleName) {
+		List<CaretAwareText> texts = new ArrayList<>();
+		RuleSpec rule = getRule(ruleName);
+		String contentBeforeCaret = input.getContentBeforeCaret();
+		List<Token> tokens = lex(contentBeforeCaret);
+		
+		if (!tokens.isEmpty()) {
+			Token lastToken = tokens.get(tokens.size()-1);
+			String matchWith;
+			int beyondLastToken = input.getCaret() - lastToken.getStopIndex() -1; 
+			if (beyondLastToken > 0) {
+				matchWith = contentBeforeCaret.substring(input.getCaret()-beyondLastToken, input.getCaret());
+				matchWith = StringUtils.stripStart(matchWith, " \t\n\r");
+				mergeSuggestions(suggest(rule, tokens, input, matchWith), texts);
+			} else {
+				mergeSuggestions(suggest(rule, tokens, input, ""), texts);
+
+				matchWith = tokens.get(tokens.size()-1).getText();
+				tokens.remove(tokens.size()-1);
+				mergeSuggestions(suggest(rule, tokens, input, matchWith), texts);
+			}
+		} else {
+			mergeSuggestions(suggest(rule, tokens, input, ""), texts);
+		}
+		return texts;
+	}
+	
+	private void mergeSuggestions(List<CaretAwareText> from, List<CaretAwareText> to) {
+		Set<String> includedContents = new HashSet<>();
+		for (CaretAwareText text: to)
+			includedContents.add(text.getContent());
+		for (CaretAwareText text: from) {
+			if (!includedContents.contains(text.getContent())) {
+				includedContents.add(text.getContent());
+				to.add(text);
+			}
+		}
+	}
+	
+	private List<CaretAwareText> suggest(RuleSpec spec, List<Token> tokens, 
+			CaretAwareText input, String matchWith) {
+		List<CaretAwareText> texts = new ArrayList<>();
+		int replaceStart = input.getCaret() - matchWith.length();
+		for (ElementSuggestion suggestion: suggestions) {
+			
+		}
+		return texts;
+	}
+
+	private int getEndOfMatch(ElementSpec spec, Node parent, String content) {
+		
+	}
+	
+	private String getMandatoryFollowings(ElementSpec spec, Node parent) {
+		
+	}
+	
 }

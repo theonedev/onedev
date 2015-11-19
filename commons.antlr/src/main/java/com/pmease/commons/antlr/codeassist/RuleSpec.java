@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.Token;
-
-import com.pmease.commons.antlr.parsetree.Node;
-import com.pmease.commons.antlr.parsetree.TokenNode;
 
 public class RuleSpec extends Spec {
 
@@ -32,11 +29,11 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> getFirst(@Nullable Node parent) {
+	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith) {
 		Node ruleNode =  new Node(this, parent);
-		List<TokenNode> first = new ArrayList<>();
+		List<ElementSuggestion> first = new ArrayList<>();
 		for (AlternativeSpec alternative: alternatives)
-			first.addAll(alternative.getFirst(ruleNode));
+			first.addAll(alternative.suggestFirst(ruleNode, matchWith));
 		return first;
 	}
 

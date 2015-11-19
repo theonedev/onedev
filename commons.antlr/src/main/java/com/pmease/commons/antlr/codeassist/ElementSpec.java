@@ -1,10 +1,8 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
-
-import com.pmease.commons.antlr.parsetree.TokenNode;
 
 public abstract class ElementSpec extends Spec {
 	

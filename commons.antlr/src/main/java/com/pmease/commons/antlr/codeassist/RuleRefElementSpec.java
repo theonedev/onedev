@@ -1,9 +1,6 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
-
-import com.pmease.commons.antlr.parsetree.Node;
-import com.pmease.commons.antlr.parsetree.TokenNode;
 
 public class RuleRefElementSpec extends ElementSpec {
 
@@ -29,7 +26,7 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> getFirst(Node parent) {
-		return getRule().getFirst(new Node(this, parent));
+	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
+		return getRule().suggestFirst(new Node(this, parent), matchWith);
 	}
 }

@@ -1,10 +1,9 @@
-package com.pmease.commons.antlr.grammarspec;
+package com.pmease.commons.antlr.codeassist;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.antlr.parsetree.Node;
-import com.pmease.commons.antlr.parsetree.TokenNode;
 
 public class LexerRuleRefElementSpec extends TokenElementSpec {
 
@@ -31,8 +30,8 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> getFirst(Node parent) {
-		return Lists.newArrayList(new TokenNode(this, parent, newToken(null)));
+	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
+		return Lists.newArrayList(new ElementSuggestion(this, parent, new ArrayList<CaretAwareText>()));
 	}
 
 }
