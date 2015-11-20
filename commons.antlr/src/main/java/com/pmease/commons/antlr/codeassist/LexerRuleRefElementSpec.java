@@ -65,7 +65,10 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 				}
 			}
 		} 
-		return Lists.newArrayList(StringUtils.join(mandatories, ""));
+		if (!mandatories.isEmpty())
+			return Lists.newArrayList(StringUtils.join(mandatories, ""));
+		else
+			return mandatories;
 	}
 
 	@Override

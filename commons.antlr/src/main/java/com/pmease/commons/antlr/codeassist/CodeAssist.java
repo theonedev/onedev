@@ -409,22 +409,29 @@ public abstract class CodeAssist {
 		int replaceStart = input.getCaret() - matchWith.length();
 		for (ElementSuggestion suggestion: suggestions) {
 			int replaceEnd = replaceStart;
-			TokenStream streamAfterReplaceStart = lex(input.getContent().substring(replaceStart));
+			String contentAfterReplaceStart = input.getContent().substring(replaceStart);
+			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
+			List<String> mandatories;
 			if (streamAfterReplaceStart.getFirstToken().getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getElementNode().getSpec();
 				if (elementSpec.matchesOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)
 						replaceEnd += streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
+				} else if (elementSpec instanceof TokenElementSpec) {
+					List<String> tokenMandatories = elementSpec.getMandatories();
+					if (!tokenMandatories.isEmpty()) {
+						String toBeReplaced = tokenMandatories.get(0);
+						if (contentAfterReplaceStart.startsWith(toBeReplaced))
+							replaceEnd += toBeReplaced.length();
+					}
 				}
-			} 
+				mandatories = new ArrayList<>();
+			} else {
+				mandatories = getMandatoriesAfter(suggestion.getElementNode());
+			}
 			
 			String before = input.getContent().substring(0, replaceStart);
 			String after = input.getContent().substring(replaceEnd);
-			List<String> mandatories;
-			if (replaceStart != replaceEnd)
-				mandatories = getMandatoriesAfter(suggestion.getElementNode());
-			else
-				mandatories = new ArrayList<>();
 
 			for (CaretAwareText text: suggestion.getTexts()) {
 				String newContent;
