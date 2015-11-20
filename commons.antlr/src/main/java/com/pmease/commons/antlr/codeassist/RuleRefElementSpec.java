@@ -1,5 +1,6 @@
 package com.pmease.commons.antlr.codeassist;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RuleRefElementSpec extends ElementSpec {
@@ -14,11 +15,6 @@ public class RuleRefElementSpec extends ElementSpec {
 		this.ruleName = ruleName;
 	}
 
-	@Override
-	protected boolean matchEmptyInElement() {
-		return getRule().matchEmpty();
-	}
-
 	public RuleSpec getRule() {
 		if (rule == null)
 			rule = codeAssist.getRule(ruleName);
@@ -31,28 +27,46 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public CaretMove moveCaretToEdit(TokenStream stream) {
-		if (getRule().getAlternatives().size() > 1) {
-			return new CaretMove(0, true);
-		} else {
-			int offset = 0;
-			AlternativeSpec alternativeSpec = getRule().getAlternatives().get(0);
+	public boolean skipMandatories(TokenStream stream) {
+		List<AlternativeSpec> alternatives = getRule().getAlternatives();
+		if (alternatives.size() == 1) {
+			AlternativeSpec alternativeSpec = alternatives.get(0);
 			for (ElementSpec elementSpec: alternativeSpec.getElements()) {
 				if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
 						|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
-					return new CaretMove(offset, true);
+					return false;
 				} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					CaretMove move = elementSpec.moveCaretToEdit(stream);
-					offset += move.getOffset();
-					return new CaretMove(offset, true);
+					elementSpec.skipMandatories(stream);
+					return false;
 				} else {
-					CaretMove move = elementSpec.moveCaretToEdit(stream);
-					offset += move.getOffset();
-					if (move.isStop())
-						return new CaretMove(offset, true);
+					if (!elementSpec.skipMandatories(stream))
+						return false;
 				}
 			}
-			return new CaretMove(offset, false);
+			return true;
+		} else {
+			return false;
 		}
 	}
+
+	@Override
+	public List<String> getMandatories() {
+		List<String> mandatoryLiterals = new ArrayList<>();
+		List<AlternativeSpec> alternatives = getRule().getAlternatives();
+		if (alternatives.size() == 1) {
+			for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
+				if (elementSpec.getMultiplicity() == Multiplicity.ONE 
+						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+					mandatoryLiterals.addAll(elementSpec.getMandatories());
+				}
+			}
+		} 
+		return mandatoryLiterals;
+	}
+
+	@Override
+	protected boolean matchesOnce(TokenStream stream) {
+		return getRule().matches(stream);
+	}
+
 }

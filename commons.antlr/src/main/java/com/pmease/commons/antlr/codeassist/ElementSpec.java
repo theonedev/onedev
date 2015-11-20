@@ -29,19 +29,32 @@ public abstract class ElementSpec extends Spec {
 
 	@Override
 	public List<TokenNode> match(List<Token> tokens, int from) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	public abstract boolean skipMandatories(TokenStream stream);
+	
+	public abstract List<String> getMandatories();
+	
 	@Override
-	public boolean matchEmpty() {
-		if (multiplicity == Multiplicity.ZERO_OR_MORE || multiplicity == Multiplicity.ZERO_OR_ONE)
+	public boolean matches(TokenStream stream) {
+		if (multiplicity == Multiplicity.ONE) {
+			return matchesOnce(stream);
+		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
+			if (!matchesOnce(stream)) {
+				return false;
+			} else {
+				while(matchesOnce(stream));
+				return true;
+			}
+		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
+			while (matchesOnce(stream));
 			return true;
-		else
-			return matchEmptyInElement();
+		} else {
+			matchesOnce(stream);
+			return true;
+		}
 	}
 	
-	protected abstract boolean matchEmptyInElement();
-	
-	public abstract CaretMove moveCaretToEdit(TokenStream stream);
+	protected abstract boolean matchesOnce(TokenStream stream);
 }

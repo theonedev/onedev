@@ -25,7 +25,7 @@ public class AlternativeSpec extends Spec {
 	public List<ElementSpec> getElements() {
 		return elements;
 	}
-
+	
 	@Override
 	public List<TokenNode> match(List<Token> tokens, int from) {
 		// TODO Auto-generated method stub
@@ -38,17 +38,20 @@ public class AlternativeSpec extends Spec {
 		Node alternativeNode = new Node(this, parent);
 		for (ElementSpec element: elements) {
 			first.addAll(element.suggestFirst(alternativeNode, matchWith));
-			if (!element.matchEmpty())
+			if (!element.matches(new TokenStream(new ArrayList<Token>())))
 				break;
 		}
 		return first;
 	}
 
 	@Override
-	public boolean matchEmpty() {
+	public boolean matches(TokenStream stream) {
+		int index = stream.getIndex();
 		for (ElementSpec element: elements) {
-			if (!element.matchEmpty())
+			if (!element.matches(stream)) {
+				stream.setIndex(index);
 				return false;
+			}
 		}
 		return true;
 	}

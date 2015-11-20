@@ -3,10 +3,12 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnyTokenElementSpec extends ElementSpec {
+import org.antlr.v4.runtime.Token;
 
-	public AnyTokenElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity) {
-		super(codeAssist, label, multiplicity);
+public class EofElementSpec extends TokenElementSpec {
+
+	public EofElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity) {
+		super(codeAssist, label, multiplicity, Token.EOF);
 	}
 
 	@Override
@@ -26,9 +28,7 @@ public class AnyTokenElementSpec extends ElementSpec {
 
 	@Override
 	protected boolean matchesOnce(TokenStream stream) {
-		if (!stream.isEnd())
-			stream.increaseIndex();
-		return true;
+		return stream.isEnd();
 	}
 
 }

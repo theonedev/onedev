@@ -2,9 +2,9 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.antlr.v4.runtime.Token;
+
+import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
 
 public class TokenStream {
 	
@@ -23,28 +23,19 @@ public class TokenStream {
 	public int getIndex() {
 		return index;
 	}
-
+	
 	public void setIndex(int index) {
 		this.index = index;
 	}
 	
+	public void increaseIndex() {
+		index++;
+	}
+
 	public int indexOf(Token token) {
 		return tokens.indexOf(token);
 	}
 
-	public Token getToken(int index) {
-		return tokens.get(index);
-	}
-	
-	@Nullable
-	public Token nextToken() {
-		if (index < tokens.size()) {
-			return tokens.get(index++);
-		} else {
-			return null;
-		}
-	}
-	
 	public int size() {
 		return tokens.size();
 	}
@@ -58,7 +49,44 @@ public class TokenStream {
 	}
 	
 	public Token getLastToken() {
-		return tokens.get(tokens.size()-1);
+		return tokens.get(size() - 1);
+	}
+	
+	public Token getCurrentToken() {
+		return tokens.get(index);
+	}
+	
+	public Token getNextToken() {
+		return tokens.get(index+1);
+	}
+	
+	public Token getPreviousToken() {
+		return tokens.get(index-1);
+	}
+
+	public boolean isEnd() {
+		return index >= size();
+	}
+	
+	public void skipMandatoriesAfter(Node elementNode) {
+		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
+		if (elementSpec.getMultiplicity() == Multiplicity.ONE 
+				|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
+			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
+			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
+			if (specIndex == alternativeSpec.getElements().size()-1) {
+				elementNode = elementNode.getParent().getParent().getParent();
+				if (elementNode != null)
+					skipMandatoriesAfter(elementNode);
+			} else {
+				elementSpec = alternativeSpec.getElements().get(specIndex+1);
+				if (elementSpec.getMultiplicity() == Multiplicity.ONE
+						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+					if (elementSpec.skipMandatories(this))
+						skipMandatoriesAfter(new Node(elementSpec, elementNode.getParent()));
+				}
+			}
+		}
 	}
 	
 }

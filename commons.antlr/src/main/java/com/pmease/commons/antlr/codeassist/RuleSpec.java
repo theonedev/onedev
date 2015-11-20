@@ -43,9 +43,9 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public boolean matchEmpty() {
+	public boolean matches(TokenStream stream) {
 		for (AlternativeSpec alternative: alternatives) {
-			if (alternative.matchEmpty())
+			if (alternative.matches(stream))
 				return true;
 		}
 		return false;

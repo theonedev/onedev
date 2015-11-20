@@ -16,7 +16,7 @@ public abstract class Spec {
 	
 	public abstract List<ElementSuggestion> suggestFirst(Node parent, String matchWith);
 	
-	public abstract boolean matchEmpty();
+	public abstract boolean matches(TokenStream stream);
 
 	public CodeAssist getCodeAssist() {
 		return codeAssist;
