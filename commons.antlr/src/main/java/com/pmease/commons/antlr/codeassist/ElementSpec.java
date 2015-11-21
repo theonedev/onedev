@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
-import org.antlr.v4.runtime.Token;
+import com.google.common.base.Preconditions;
 
 public abstract class ElementSpec extends Spec {
 	
@@ -28,33 +28,45 @@ public abstract class ElementSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> match(List<Token> tokens, int from) {
+	public List<TokenNode> getPartialMatches(TokenStream stream) {
+		Preconditions.checkArgument(!stream.isEnd());
+		
+		if (multiplicity == Multiplicity.ONE) {
+			return getPartialMatchesOnce(stream);
+		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
+			List<TokenNode> partialMatches = getPartialMatchesOnce(stream);
+			while (!stream.isEnd() && !partialMatches.isEmpty()) 
+				partialMatches = getPartialMatchesOnce(stream);
+			return partialMatches;
+		}
 		return null;
 	}
+	
+	protected abstract List<TokenNode> getPartialMatchesOnce(TokenStream stream);
 
 	public abstract boolean skipMandatories(TokenStream stream);
 	
 	public abstract List<String> getMandatories();
 	
 	@Override
-	public boolean matches(TokenStream stream) {
+	public boolean match(TokenStream stream) {
 		if (multiplicity == Multiplicity.ONE) {
-			return matchesOnce(stream);
+			return matchOnce(stream);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			if (!matchesOnce(stream)) {
+			if (!matchOnce(stream)) {
 				return false;
 			} else {
-				while(matchesOnce(stream));
+				while(matchOnce(stream));
 				return true;
 			}
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
-			while (matchesOnce(stream));
+			while (matchOnce(stream));
 			return true;
 		} else {
-			matchesOnce(stream);
+			matchOnce(stream);
 			return true;
 		}
 	}
 	
-	protected abstract boolean matchesOnce(TokenStream stream);
+	protected abstract boolean matchOnce(TokenStream stream);
 }

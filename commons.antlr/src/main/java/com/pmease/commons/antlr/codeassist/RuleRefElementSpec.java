@@ -65,8 +65,8 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected boolean matchesOnce(TokenStream stream) {
-		return getRule().matches(stream);
+	protected boolean matchOnce(TokenStream stream) {
+		return getRule().match(stream);
 	}
 
 }

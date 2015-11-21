@@ -37,7 +37,7 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected boolean matchesOnce(TokenStream stream) {
+	protected boolean matchOnce(TokenStream stream) {
 		if (stream.isEnd()) {
 			return !notTokenTypes.contains(Token.EOF);
 		} else {

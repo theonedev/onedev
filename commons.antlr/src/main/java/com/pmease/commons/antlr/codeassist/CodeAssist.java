@@ -404,6 +404,7 @@ public abstract class CodeAssist {
 	private List<CaretAwareText> suggest(RuleSpec spec, TokenStream stream, 
 			CaretAwareText input, String matchWith) {
 		List<CaretAwareText> texts = new ArrayList<>();
+		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		
 		int replaceStart = input.getCaret() - matchWith.length();
@@ -414,7 +415,7 @@ public abstract class CodeAssist {
 			List<String> mandatories;
 			if (streamAfterReplaceStart.getFirstToken().getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getElementNode().getSpec();
-				if (elementSpec.matchesOnce(streamAfterReplaceStart)) {
+				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)
 						replaceEnd += streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
 				} else if (elementSpec instanceof TokenElementSpec) {

@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.Token;
+import com.google.common.base.Preconditions;
 
 public class RuleSpec extends Spec {
 
@@ -38,14 +38,34 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> match(List<Token> tokens, int from) {
-		return null;
+	public List<TokenNode> getPartialMatches(TokenStream stream) {
+		Preconditions.checkArgument(!stream.isEnd());
+		List<TokenNode> partialMatches = new ArrayList<>();
+		int maxMatchDistance = 0;
+		int index = stream.getIndex();
+		for (AlternativeSpec alternative: alternatives) {
+			for (TokenNode node: alternative.getPartialMatches(stream)) {
+				int matchDistance = node.getStart().getStopIndex();
+				if (matchDistance > maxMatchDistance) {
+					maxMatchDistance = matchDistance;
+					partialMatches.clear();
+					partialMatches.add(node);
+				} else if (matchDistance == maxMatchDistance) {
+					partialMatches.add(node);
+				} 
+			}
+			stream.setIndex(index);
+		}
+
+		if (!partialMatches.isEmpty())
+			stream.setIndex(stream.indexOf(partialMatches.get(0).getStart()) + 1);
+		return partialMatches;
 	}
 
 	@Override
-	public boolean matches(TokenStream stream) {
+	public boolean match(TokenStream stream) {
 		for (AlternativeSpec alternative: alternatives) {
-			if (alternative.matches(stream))
+			if (alternative.match(stream))
 				return true;
 		}
 		return false;

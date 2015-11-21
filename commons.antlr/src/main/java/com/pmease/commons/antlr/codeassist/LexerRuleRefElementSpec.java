@@ -72,7 +72,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected boolean matchesOnce(TokenStream stream) {
+	protected boolean matchOnce(TokenStream stream) {
 		if (stream.isEnd()) {
 			return false;
 		} else if (stream.getCurrentToken().getType() == type) {

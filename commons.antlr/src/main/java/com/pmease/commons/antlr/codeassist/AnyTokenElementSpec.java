@@ -25,7 +25,7 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected boolean matchesOnce(TokenStream stream) {
+	protected boolean matchOnce(TokenStream stream) {
 		if (!stream.isEnd())
 			stream.increaseIndex();
 		return true;

@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.google.common.base.Preconditions;
+
 public class AlternativeSpec extends Spec {
 
 	private final String label;
@@ -27,9 +29,9 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> match(List<Token> tokens, int from) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<TokenNode> getPartialMatches(TokenStream stream) {
+		Preconditions.checkArgument(!stream.isEnd());
+		
 	}
 
 	@Override
@@ -38,17 +40,17 @@ public class AlternativeSpec extends Spec {
 		Node alternativeNode = new Node(this, parent);
 		for (ElementSpec element: elements) {
 			first.addAll(element.suggestFirst(alternativeNode, matchWith));
-			if (!element.matches(new TokenStream(new ArrayList<Token>())))
+			if (!element.match(new TokenStream(new ArrayList<Token>())))
 				break;
 		}
 		return first;
 	}
 
 	@Override
-	public boolean matches(TokenStream stream) {
+	public boolean match(TokenStream stream) {
 		int index = stream.getIndex();
 		for (ElementSpec element: elements) {
-			if (!element.matches(stream)) {
+			if (!element.match(stream)) {
 				stream.setIndex(index);
 				return false;
 			}

@@ -27,7 +27,7 @@ public class EofElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected boolean matchesOnce(TokenStream stream) {
+	protected boolean matchOnce(TokenStream stream) {
 		return stream.isEnd();
 	}
 
