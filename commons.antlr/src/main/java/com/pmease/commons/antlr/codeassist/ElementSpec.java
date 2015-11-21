@@ -1,8 +1,7 @@
 package com.pmease.commons.antlr.codeassist;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.base.Preconditions;
 
 public abstract class ElementSpec extends Spec {
 	
@@ -29,17 +28,38 @@ public abstract class ElementSpec extends Spec {
 
 	@Override
 	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
-		Preconditions.checkArgument(!stream.isEnd());
-		
 		if (multiplicity == Multiplicity.ONE) {
 			return getPartialMatchesOnce(stream, parent);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
 			List<TokenNode> partialMatches = getPartialMatchesOnce(stream, parent);
-			while (!stream.isEnd() && !partialMatches.isEmpty()) 
+			if (partialMatches != null && !partialMatches.isEmpty()) {
+				while (!stream.isEof()) {
+					List<TokenNode> prevPartialMatches = partialMatches;
+					partialMatches = getPartialMatchesOnce(stream, parent);
+					if (partialMatches == null || partialMatches.isEmpty())
+						return prevPartialMatches;
+				}
+			} 
+			return partialMatches;
+		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
+			List<TokenNode> partialMatches = new ArrayList<>();
+			while (!stream.isEof()) {
+				List<TokenNode> prevMatches = partialMatches;
 				partialMatches = getPartialMatchesOnce(stream, parent);
+				if (partialMatches == null || partialMatches.isEmpty())
+					return prevMatches;
+			}
+			return partialMatches;
+		} else {
+			List<TokenNode> partialMatches = getPartialMatchesOnce(stream, parent);
+			if (partialMatches != null && !partialMatches.isEmpty() && !stream.isEof()) {
+				List<TokenNode> prevMatches = partialMatches;
+				partialMatches = getPartialMatchesOnce(stream, parent);
+				if (partialMatches == null || partialMatches.isEmpty())
+					return prevMatches;
+			}
 			return partialMatches;
 		}
-		return null;
 	}
 	
 	protected abstract List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent);

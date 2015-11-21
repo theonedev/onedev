@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 public class EofElementSpec extends TokenElementSpec {
 
@@ -30,13 +30,15 @@ public class EofElementSpec extends TokenElementSpec {
 
 	@Override
 	protected boolean matchOnce(TokenStream stream) {
-		return stream.isEnd();
+		return stream.isEof();
 	}
 
 	@Override
 	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
-		Preconditions.checkArgument(!stream.isEnd());
-		return null;
+		if (stream.isEof())
+			return Lists.newArrayList(new TokenNode(this, parent, stream.getCurrentToken()));
+		else
+			return null;
 	}
 
 }

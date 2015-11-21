@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class LiteralElementSpec extends TokenElementSpec {
@@ -30,7 +29,7 @@ public class LiteralElementSpec extends TokenElementSpec {
 
 	@Override
 	public boolean skipMandatories(TokenStream stream) {
-		if (stream.isEnd()) {
+		if (stream.isEof()) {
 			return false;
 		} else if (stream.getCurrentToken().getType() == type) {
 			stream.increaseIndex();
@@ -47,7 +46,7 @@ public class LiteralElementSpec extends TokenElementSpec {
 
 	@Override
 	protected boolean matchOnce(TokenStream stream) {
-		if (stream.isEnd()) {
+		if (stream.isEof()) {
 			return false;
 		} else if (stream.getCurrentToken().getType() == type) {
 			stream.increaseIndex();
@@ -59,8 +58,6 @@ public class LiteralElementSpec extends TokenElementSpec {
 
 	@Override
 	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
-		Preconditions.checkArgument(!stream.isEnd());
-		
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();

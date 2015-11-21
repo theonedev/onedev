@@ -28,7 +28,21 @@ public class AlternativeSpec extends Spec {
 	
 	@Override
 	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
-		
+		parent = new Node(this, parent, stream.getCurrentToken());
+		int index = stream.getIndex();
+		List<TokenNode> partialMatches = new ArrayList<>();
+		for (ElementSpec elementSpec: elements) {
+			List<TokenNode> elementMatches = elementSpec.getPartialMatches(stream, parent);
+			if (elementMatches == null) {
+				stream.setIndex(index);
+				return null;
+			} else if (stream.isEof()) {
+				return elementMatches;
+			} else {
+				partialMatches = elementMatches;
+			}
+		}
+		return partialMatches;
 	}
 
 	@Override

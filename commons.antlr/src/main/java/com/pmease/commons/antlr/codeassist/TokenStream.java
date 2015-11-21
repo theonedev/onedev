@@ -27,10 +27,12 @@ public class TokenStream {
 	}
 	
 	public void setIndex(int index) {
+		Preconditions.checkArgument(index>=0 && index<size());
 		this.index = index;
 	}
 	
 	public void increaseIndex() {
+		Preconditions.checkState(!isEof());
 		index++;
 	}
 
@@ -43,19 +45,24 @@ public class TokenStream {
 	}
 	
 	public Token getCurrentToken() {
-		return tokens.get(index);
+		return getToken(index);
 	}
 	
 	public Token getNextToken() {
-		return tokens.get(index+1);
+		return getToken(index+1);
+	}
+	
+	public Token getToken(int index) {
+		Preconditions.checkArgument(index>=0 && index<size());
+		return tokens.get(index);
 	}
 	
 	public Token getPreviousToken() {
-		return tokens.get(index-1);
+		return getToken(index-1);
 	}
 
 	public boolean isEof() {
-		return index >= size()-1;
+		return index == size()-1;
 	}
 	
 	public void skipMandatoriesAfter(Node elementNode) {

@@ -40,7 +40,7 @@ public class RuleSpec extends Spec {
 		List<TokenNode> partialMatches = null;
 		int maxMatchDistance = 0;
 		int index = stream.getIndex();
-		parent = new Node(this, parent);
+		parent = new Node(this, parent, stream.getCurrentToken());
 		for (AlternativeSpec alternative: alternatives) {
 			List<TokenNode> alternativeMatches = alternative.getPartialMatches(stream, parent);
 			if (alternativeMatches != null) {

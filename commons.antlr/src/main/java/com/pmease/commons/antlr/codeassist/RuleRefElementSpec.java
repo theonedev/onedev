@@ -69,4 +69,9 @@ public class RuleRefElementSpec extends ElementSpec {
 		return getRule().match(stream);
 	}
 
+	@Override
+	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+		return getRule().getPartialMatches(stream, new Node(this, parent, stream.getCurrentToken()));
+	}
+
 }

@@ -367,8 +367,8 @@ public abstract class CodeAssist {
 		String contentBeforeCaret = input.getContentBeforeCaret();
 		TokenStream stream = lex(contentBeforeCaret);
 		
-		if (!stream.hasNonEofTokens()) {
-			Token lastToken = stream.getLastToken();
+		if (!stream.isEof()) {
+			Token lastToken = stream.getToken(stream.size()-2);
 			String matchWith;
 			int beyondLastToken = input.getCaret() - lastToken.getStopIndex() -1; 
 			if (beyondLastToken > 0) {
@@ -378,7 +378,7 @@ public abstract class CodeAssist {
 			} else {
 				mergeSuggestions(suggest(rule, stream, input, ""), texts);
 
-				matchWith = stream.getLastToken().getText();
+				matchWith = stream.getToken(stream.size()-2).getText();
 				List<Token> tokens = stream.getTokens();
 				tokens.remove(tokens.size()-1);
 				stream = new TokenStream(tokens);
@@ -414,7 +414,7 @@ public abstract class CodeAssist {
 			String contentAfterReplaceStart = input.getContent().substring(replaceStart);
 			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			List<String> mandatories;
-			if (streamAfterReplaceStart.getFirstToken().getStartIndex() == 0) {
+			if (streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getElementNode().getSpec();
 				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)
@@ -437,12 +437,12 @@ public abstract class CodeAssist {
 
 			for (CaretAwareText text: suggestion.getTexts()) {
 				String newContent;
-				if (!stream.hasNonEofTokens()) { 
+				if (!stream.isEof()) { 
 					newContent = before + text.getContent();
 					TokenStream newStream = lex(newContent);
 					if (newStream.size() >= stream.size()) {
-						Token lastToken = stream.getLastToken();
-						Token newLastToken = newStream.getLastToken();
+						Token lastToken = stream.getToken(stream.size()-2);
+						Token newLastToken = newStream.getToken(newStream.size()-2);
 						if (lastToken.getStartIndex() != newLastToken.getStartIndex()
 								|| lastToken.getStopIndex() != newLastToken.getStopIndex()) {
 							newContent = before + " " + text.getContent();
@@ -464,8 +464,8 @@ public abstract class CodeAssist {
 					newContent += mandatory;
 					if (tokenTypesByLiteral.containsKey(mandatory)) {
 						TokenStream newStream = lex(newContent);
-						if (!newStream.hasNonEofTokens()) {
-							Token lastToken = newStream.getLastToken();
+						if (!newStream.isEof()) {
+							Token lastToken = newStream.getToken(newStream.size()-2);
 							if (lastToken.getStartIndex() != newContent.length() - mandatory.length()
 									|| lastToken.getStopIndex() != newContent.length()-1) {
 								newContent = prevNewContent + " " + mandatory;

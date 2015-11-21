@@ -3,6 +3,8 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.google.common.collect.Lists;
 import com.pmease.commons.util.StringUtils;
 
@@ -73,13 +75,24 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 
 	@Override
 	protected boolean matchOnce(TokenStream stream) {
-		if (stream.isEnd()) {
+		if (stream.isEof()) {
 			return false;
 		} else if (stream.getCurrentToken().getType() == type) {
 			stream.increaseIndex();
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	@Override
+	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+		Token token = stream.getCurrentToken();
+		if (token.getType() == type) {
+			stream.increaseIndex();
+			return Lists.newArrayList(new TokenNode(this, parent, token));
+		} else {
+			return null;
 		}
 	}
 	
