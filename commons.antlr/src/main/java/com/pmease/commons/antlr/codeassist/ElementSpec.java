@@ -28,21 +28,21 @@ public abstract class ElementSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> getPartialMatches(TokenStream stream) {
+	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
 		Preconditions.checkArgument(!stream.isEnd());
 		
 		if (multiplicity == Multiplicity.ONE) {
-			return getPartialMatchesOnce(stream);
+			return getPartialMatchesOnce(stream, parent);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			List<TokenNode> partialMatches = getPartialMatchesOnce(stream);
+			List<TokenNode> partialMatches = getPartialMatchesOnce(stream, parent);
 			while (!stream.isEnd() && !partialMatches.isEmpty()) 
-				partialMatches = getPartialMatchesOnce(stream);
+				partialMatches = getPartialMatchesOnce(stream, parent);
 			return partialMatches;
 		}
 		return null;
 	}
 	
-	protected abstract List<TokenNode> getPartialMatchesOnce(TokenStream stream);
+	protected abstract List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent);
 
 	public abstract boolean skipMandatories(TokenStream stream);
 	

@@ -344,12 +344,13 @@ public abstract class CodeAssist {
 		try {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(input));
-			Token token = lexer.getToken();
-			while (token.getType() != Token.EOF) {
+			Token token;
+			do {
+				token = lexer.nextToken();
 				if (token.getChannel() == Token.DEFAULT_CHANNEL)
 					tokens.add(token);
-				token = lexer.nextToken();
-			}
+			} while (token.getType() != Token.EOF);
+			
 			return new TokenStream(tokens);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
@@ -366,7 +367,7 @@ public abstract class CodeAssist {
 		String contentBeforeCaret = input.getContentBeforeCaret();
 		TokenStream stream = lex(contentBeforeCaret);
 		
-		if (!stream.isEmpty()) {
+		if (!stream.hasNonEofTokens()) {
 			Token lastToken = stream.getLastToken();
 			String matchWith;
 			int beyondLastToken = input.getCaret() - lastToken.getStopIndex() -1; 
@@ -436,7 +437,7 @@ public abstract class CodeAssist {
 
 			for (CaretAwareText text: suggestion.getTexts()) {
 				String newContent;
-				if (!stream.isEmpty()) { 
+				if (!stream.hasNonEofTokens()) { 
 					newContent = before + text.getContent();
 					TokenStream newStream = lex(newContent);
 					if (newStream.size() >= stream.size()) {
@@ -463,7 +464,7 @@ public abstract class CodeAssist {
 					newContent += mandatory;
 					if (tokenTypesByLiteral.containsKey(mandatory)) {
 						TokenStream newStream = lex(newContent);
-						if (!newStream.isEmpty()) {
+						if (!newStream.hasNonEofTokens()) {
 							Token lastToken = newStream.getLastToken();
 							if (lastToken.getStartIndex() != newContent.length() - mandatory.length()
 									|| lastToken.getStopIndex() != newContent.length()-1) {

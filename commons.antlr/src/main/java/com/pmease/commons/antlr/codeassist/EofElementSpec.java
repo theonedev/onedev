@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.google.common.base.Preconditions;
+
 public class EofElementSpec extends TokenElementSpec {
 
 	public EofElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity) {
@@ -29,6 +31,12 @@ public class EofElementSpec extends TokenElementSpec {
 	@Override
 	protected boolean matchOnce(TokenStream stream) {
 		return stream.isEnd();
+	}
+
+	@Override
+	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+		Preconditions.checkArgument(!stream.isEnd());
+		return null;
 	}
 
 }

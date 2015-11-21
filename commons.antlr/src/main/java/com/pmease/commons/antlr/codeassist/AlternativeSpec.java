@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.google.common.base.Preconditions;
-
 public class AlternativeSpec extends Spec {
 
 	private final String label;
@@ -29,8 +27,7 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> getPartialMatches(TokenStream stream) {
-		Preconditions.checkArgument(!stream.isEnd());
+	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
 		
 	}
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
 
 public class TokenStream {
@@ -13,6 +14,7 @@ public class TokenStream {
 	private int index;
 	
 	public TokenStream(List<Token> tokens) {
+		Preconditions.checkArgument(!tokens.isEmpty() && tokens.get(tokens.size()-1).getType() == Token.EOF);
 		this.tokens = tokens;
 	}
 
@@ -40,18 +42,6 @@ public class TokenStream {
 		return tokens.size();
 	}
 	
-	public boolean isEmpty() {
-		return tokens.isEmpty();
-	}
-	
-	public Token getFirstToken() {
-		return tokens.get(0);
-	}
-	
-	public Token getLastToken() {
-		return tokens.get(size() - 1);
-	}
-	
 	public Token getCurrentToken() {
 		return tokens.get(index);
 	}
@@ -64,8 +54,8 @@ public class TokenStream {
 		return tokens.get(index-1);
 	}
 
-	public boolean isEnd() {
-		return index >= size();
+	public boolean isEof() {
+		return index >= size()-1;
 	}
 	
 	public void skipMandatoriesAfter(Node elementNode) {
