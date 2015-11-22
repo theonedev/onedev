@@ -358,9 +358,6 @@ public abstract class CodeAssist {
 		}
 	}
 	
-	protected abstract List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
-			List<Token> tokens, String matchWith);
-	
 	public List<CaretAwareText> suggest(CaretAwareText input, String ruleName) {
 		List<CaretAwareText> texts = new ArrayList<>();
 		RuleSpec rule = getRule(ruleName);
@@ -415,7 +412,7 @@ public abstract class CodeAssist {
 			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			List<String> mandatories;
 			if (streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
-				ElementSpec elementSpec = (ElementSpec) suggestion.getElementNode().getSpec();
+				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
 				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)
 						replaceEnd += streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
@@ -429,7 +426,7 @@ public abstract class CodeAssist {
 				}
 				mandatories = new ArrayList<>();
 			} else {
-				mandatories = getMandatoriesAfter(suggestion.getElementNode());
+				mandatories = getMandatoriesAfter(suggestion.getNode());
 			}
 			
 			String before = input.getContent().substring(0, replaceStart);
@@ -480,7 +477,7 @@ public abstract class CodeAssist {
 				
 				if (text.getCaret() == text.getContent().length()) {
 					TokenStream newStream = lex(newContent.substring(caret));
-					newStream.skipMandatoriesAfter(suggestion.getElementNode());
+					newStream.skipMandatoriesAfter(suggestion.getNode());
 					if (newStream.getIndex() != 0)
 						caret += newStream.getPreviousToken().getStopIndex()+1;
 				}
@@ -514,4 +511,7 @@ public abstract class CodeAssist {
 		return mandatoryFollowings;
 	}
 		
+	protected abstract List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+			String matchWith, TokenStream stream);
+	
 }

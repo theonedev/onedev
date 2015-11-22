@@ -23,8 +23,13 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
-		return Lists.newArrayList(new ElementSuggestion(new Node(this, parent), new ArrayList<CaretAwareText>()));
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
+		if (!matchWith.equals(literal) && literal.toLowerCase().startsWith(matchWith.toLowerCase())) {
+			CaretAwareText text = new CaretAwareText(literal, literal.length());
+			return Lists.newArrayList(new ElementSuggestion(new Node(this, parent), Lists.newArrayList(text)));
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	@Override

@@ -3,8 +3,6 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.Token;
-
 public class AlternativeSpec extends Spec {
 
 	private final String label;
@@ -46,12 +44,12 @@ public class AlternativeSpec extends Spec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
+	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, TokenStream stream) {
 		List<ElementSuggestion> first = new ArrayList<>();
-		Node alternativeNode = new Node(this, parent);
+		parent = new Node(this, parent);
 		for (ElementSpec element: elements) {
-			first.addAll(element.suggestFirst(alternativeNode, matchWith));
-			if (!element.match(new TokenStream(new ArrayList<Token>())))
+			first.addAll(element.suggestFirst(parent, matchWith, stream));
+			if (!element.match(codeAssist.lex("")))
 				break;
 		}
 		return first;

@@ -22,8 +22,8 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
-		return getRule().suggestFirst(new Node(this, parent), matchWith);
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
+		return getRule().suggestFirst(new Node(this, parent), matchWith, stream);
 	}
 
 	@Override

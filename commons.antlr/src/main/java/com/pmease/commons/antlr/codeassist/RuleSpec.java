@@ -27,11 +27,11 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith) {
-		Node ruleNode =  new Node(this, parent);
+	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith, TokenStream stream) {
+		parent =  new Node(this, parent);
 		List<ElementSuggestion> first = new ArrayList<>();
 		for (AlternativeSpec alternative: alternatives)
-			first.addAll(alternative.suggestFirst(ruleNode, matchWith));
+			first.addAll(alternative.suggestFirst(parent, matchWith, stream));
 		return first;
 	}
 

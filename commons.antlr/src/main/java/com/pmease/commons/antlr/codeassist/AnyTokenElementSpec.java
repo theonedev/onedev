@@ -14,7 +14,7 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
 		return new ArrayList<ElementSuggestion>();
 	}
 

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.antlr.v4.runtime.Token;
 import org.junit.Test;
 
 import com.pmease.commons.antlr.ANTLRv4Lexer;
@@ -20,6 +19,7 @@ import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.RuleSpec;
+import com.pmease.commons.antlr.codeassist.TokenStream;
 
 public class CodeAssistTest {
 
@@ -33,7 +33,7 @@ public class CodeAssistTest {
 
 				@Override
 				protected List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
-						List<Token> tokens, String matchWith) {
+						String matchWith, TokenStream stream) {
 					return null;
 				}
 

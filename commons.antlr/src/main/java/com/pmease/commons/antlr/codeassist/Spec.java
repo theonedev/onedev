@@ -20,7 +20,7 @@ public abstract class Spec {
 	@Nullable
 	public abstract List<TokenNode> getPartialMatches(TokenStream stream, Node parent);
 	
-	public abstract List<ElementSuggestion> suggestFirst(Node parent, String matchWith);
+	public abstract List<ElementSuggestion> suggestFirst(Node parent, String matchWith, TokenStream stream);
 	
 	public abstract boolean match(TokenStream stream);
 

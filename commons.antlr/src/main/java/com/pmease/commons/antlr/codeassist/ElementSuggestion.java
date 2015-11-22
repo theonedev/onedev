@@ -4,17 +4,17 @@ import java.util.List;
 
 public class ElementSuggestion {
 	
-	private final Node elementNode;
+	private final Node node;
 	
 	private final List<CaretAwareText> texts;
 	
-	public ElementSuggestion(Node elementNode, List<CaretAwareText> texts) {
-		this.elementNode = elementNode;
+	public ElementSuggestion(Node node, List<CaretAwareText> texts) {
+		this.node = node;
 		this.texts = texts;
 	}
 
-	public Node getElementNode() {
-		return elementNode;
+	public Node getNode() {
+		return node;
 	}
 
 	public List<CaretAwareText> getTexts() {

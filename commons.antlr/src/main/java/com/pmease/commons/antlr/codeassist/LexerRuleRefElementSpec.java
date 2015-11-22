@@ -28,8 +28,8 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith) {
-		return Lists.newArrayList(new ElementSuggestion(new Node(this, parent), new ArrayList<CaretAwareText>()));
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
+		return new ArrayList<>();
 	}
 
 	@Override
