@@ -379,7 +379,7 @@ public abstract class CodeAssist {
 
 				matchWith = stream.getToken(stream.size()-2).getText();
 				List<Token> tokens = stream.getTokens();
-				tokens.remove(tokens.size()-1);
+				tokens.remove(tokens.size()-2);
 				stream = new TokenStream(tokens);
 				mergeSuggestions(suggest(rule, stream, input, matchWith), texts);
 			}
@@ -406,19 +406,21 @@ public abstract class CodeAssist {
 		List<CaretAwareText> texts = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
-		List<TokenNode> partialMatches = spec.getPartialMatches(stream, null);
-		if (partialMatches != null && !partialMatches.isEmpty() && stream.isEof()) {
-			for (TokenNode match: partialMatches) {
-				ElementSpec matchSpec = (ElementSpec) match.getSpec();
-				suggestions.addAll(matchSpec.suggestNext(match.getParent(), matchWith, stream));
+		List<TokenNode> matches = spec.getPartialMatches(stream, null);
+		if (matches != null && stream.isEof()) {
+			if (!matches.isEmpty()) {
+				for (TokenNode match: matches) {
+					ElementSpec matchSpec = (ElementSpec) match.getSpec();
+					suggestions.addAll(matchSpec.suggestNext(match.getParent(), matchWith, stream));
+				}
+			} else {
+				suggestions.addAll(spec.suggestFirst(null, matchWith, stream));
 			}
-		} else {
-			suggestions.addAll(spec.suggestFirst(null, matchWith, stream));
 		}
-		
+
 		int replaceStart = input.getCaret() - matchWith.length();
 		for (ElementSuggestion suggestion: suggestions) {
-			int replaceEnd = replaceStart;
+			int replaceEnd = input.getCaret();
 			String contentAfterReplaceStart = input.getContent().substring(replaceStart);
 			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			List<String> mandatories;
@@ -426,13 +428,13 @@ public abstract class CodeAssist {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
 				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)
-						replaceEnd += streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
+						replaceEnd = replaceStart + streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
 				} else if (elementSpec instanceof TokenElementSpec) {
 					List<String> tokenMandatories = elementSpec.getMandatories();
 					if (!tokenMandatories.isEmpty()) {
 						String toBeReplaced = tokenMandatories.get(0);
 						if (contentAfterReplaceStart.startsWith(toBeReplaced))
-							replaceEnd += toBeReplaced.length();
+							replaceEnd = replaceStart + toBeReplaced.length();
 					}
 				}
 				mandatories = new ArrayList<>();
@@ -445,7 +447,7 @@ public abstract class CodeAssist {
 
 			for (CaretAwareText text: suggestion.getTexts()) {
 				String newContent;
-				if (!stream.isEof()) { 
+				if (stream.size() > 1) { 
 					newContent = before + text.getContent();
 					TokenStream newStream = lex(newContent);
 					if (newStream.size() >= stream.size()) {

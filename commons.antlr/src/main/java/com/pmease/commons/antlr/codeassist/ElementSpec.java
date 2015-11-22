@@ -33,34 +33,37 @@ public abstract class ElementSpec extends Spec {
 		if (multiplicity == Multiplicity.ONE) {
 			return getPartialMatchesOnce(stream, parent);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			List<TokenNode> partialMatches = getPartialMatchesOnce(stream, parent);
-			if (partialMatches != null && !partialMatches.isEmpty()) {
+			List<TokenNode> matches = getPartialMatchesOnce(stream, parent);
+			if (matches != null && !matches.isEmpty()) {
 				while (!stream.isEof()) {
-					List<TokenNode> prevPartialMatches = partialMatches;
-					partialMatches = getPartialMatchesOnce(stream, parent);
-					if (partialMatches == null || partialMatches.isEmpty())
-						return prevPartialMatches;
+					List<TokenNode> nextMatches = getPartialMatchesOnce(stream, parent);
+					if (nextMatches != null && !nextMatches.isEmpty())
+						matches = nextMatches;
+					else
+						break;
 				}
 			} 
-			return partialMatches;
+			return matches;
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
-			List<TokenNode> partialMatches = new ArrayList<>();
+			List<TokenNode> matches = new ArrayList<>();
 			while (!stream.isEof()) {
-				List<TokenNode> prevMatches = partialMatches;
-				partialMatches = getPartialMatchesOnce(stream, parent);
-				if (partialMatches == null || partialMatches.isEmpty())
-					return prevMatches;
+				List<TokenNode> nextMatches = getPartialMatchesOnce(stream, parent);
+				if (nextMatches != null && !nextMatches.isEmpty())
+					matches = nextMatches;
+				else
+					break;
 			}
-			return partialMatches;
+			return matches;
 		} else {
-			List<TokenNode> partialMatches = getPartialMatchesOnce(stream, parent);
-			if (partialMatches != null && !partialMatches.isEmpty() && !stream.isEof()) {
-				List<TokenNode> prevMatches = partialMatches;
-				partialMatches = getPartialMatchesOnce(stream, parent);
-				if (partialMatches == null || partialMatches.isEmpty())
-					return prevMatches;
+			List<TokenNode> matches = getPartialMatchesOnce(stream, parent);
+			if (matches == null) {
+				matches = new ArrayList<>();
+			} else if (!matches.isEmpty() && !stream.isEof()) {
+				List<TokenNode> nextMatches = getPartialMatchesOnce(stream, parent);
+				if (nextMatches != null && !nextMatches.isEmpty())
+					matches = nextMatches;
 			}
-			return partialMatches;
+			return matches;
 		}
 	}
 	

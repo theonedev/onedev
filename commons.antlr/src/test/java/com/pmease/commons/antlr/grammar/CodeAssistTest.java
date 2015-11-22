@@ -111,26 +111,26 @@ public class CodeAssistTest {
 	
 	@Test
 	public void testSuggestGrammarSpec() {
-		List<CaretAwareText> suggestions = codeAssist.suggest(new CaretAwareText(""), "grammarSpec");
+		List<CaretAwareText> suggestions;
+		
+		suggestions = codeAssist.suggest(new CaretAwareText(""), "grammarSpec");
+		assertEquals(4, suggestions.size());
 		assertEquals("/**", suggestions.get(0).getContent());
 		assertEquals("lexer", suggestions.get(1).getContent());
 		assertEquals("parser", suggestions.get(2).getContent());
 		assertEquals("grammar", suggestions.get(3).getContent());
 		
 		suggestions = codeAssist.suggest(new CaretAwareText("parser"), "grammarSpec");
-		System.out.println(suggestions);
-	}
-	
-	@Test
-	public void testSuggestGrammarSpec() {
-		List<CaretAwareText> suggestions = codeAssist.suggest(new CaretAwareText(""), "grammarSpec");
-		assertEquals("/**", suggestions.get(0).getContent());
-		assertEquals("lexer", suggestions.get(1).getContent());
-		assertEquals("parser", suggestions.get(2).getContent());
-		assertEquals("grammar", suggestions.get(3).getContent());
+		assertEquals(1, suggestions.size());
+		assertEquals("parser grammar", suggestions.get(0).getContent());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("parser"), "grammarSpec");
-		System.out.println(suggestions);
+		suggestions = codeAssist.suggest(new CaretAwareText("gr"), "grammarSpec");
+		assertEquals(1, suggestions.size());
+		assertEquals("grammar", suggestions.get(0).getContent());
+
+		suggestions = codeAssist.suggest(new CaretAwareText("grammar", 4), "grammarSpec");
+		assertEquals(1, suggestions.size());
+		assertEquals("grammar:7", suggestions.get(0).toString());
 	}
 	
 }
