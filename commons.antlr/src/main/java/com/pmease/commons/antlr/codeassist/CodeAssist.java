@@ -248,6 +248,8 @@ public abstract class CodeAssist {
 			if (lexerAtomContext.terminal().TOKEN_REF() != null) {
 				String ruleName = lexerAtomContext.terminal().TOKEN_REF().getText();
 				Integer tokenType = tokenTypesByRule.get(ruleName);
+				if (tokenType == null) // fragment rule
+					tokenType = 0;
 				if (tokenType != Token.EOF)
 					return new LexerRuleRefElementSpec(this, label, multiplicity, tokenType, ruleName);
 				else
@@ -404,6 +406,15 @@ public abstract class CodeAssist {
 		List<CaretAwareText> texts = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
+		List<TokenNode> partialMatches = spec.getPartialMatches(stream, null);
+		if (partialMatches != null && !partialMatches.isEmpty() && stream.isEof()) {
+			for (TokenNode match: partialMatches) {
+				ElementSpec matchSpec = (ElementSpec) match.getSpec();
+				suggestions.addAll(matchSpec.suggestNext(match.getParent(), matchWith, stream));
+			}
+		} else {
+			suggestions.addAll(spec.suggestFirst(null, matchWith, stream));
+		}
 		
 		int replaceStart = input.getCaret() - matchWith.length();
 		for (ElementSuggestion suggestion: suggestions) {

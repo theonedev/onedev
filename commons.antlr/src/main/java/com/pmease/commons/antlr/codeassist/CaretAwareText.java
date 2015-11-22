@@ -31,4 +31,8 @@ public class CaretAwareText {
 		return content.substring(caret, content.length());
 	}
 	
+	@Override
+	public String toString() {
+		return content + ":" + caret;
+	}
 }
