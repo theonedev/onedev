@@ -30,8 +30,8 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public boolean skipMandatories(TokenStream stream) {
-		return false;
+	public CaretMove skipMandatories(String content, int offset) {
+		return new CaretMove(offset, true);
 	}
 
 	@Override

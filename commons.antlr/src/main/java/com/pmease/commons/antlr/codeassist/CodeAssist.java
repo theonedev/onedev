@@ -338,14 +338,16 @@ public abstract class CodeAssist {
 			return newElement(null, ebnfContext.block(), null);
 	}
 	
+	@Nullable
 	public RuleSpec getRule(String ruleName) {
-		return Preconditions.checkNotNull(rules.get(ruleName));
+		return rules.get(ruleName);
 	}
 	
 	public final TokenStream lex(String input) {
 		try {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(input));
+			lexer.removeErrorListeners();
 			Token token;
 			do {
 				token = lexer.nextToken();
@@ -362,7 +364,7 @@ public abstract class CodeAssist {
 	
 	public List<CaretAwareText> suggest(CaretAwareText input, String ruleName) {
 		List<CaretAwareText> texts = new ArrayList<>();
-		RuleSpec rule = getRule(ruleName);
+		RuleSpec rule = Preconditions.checkNotNull(getRule(ruleName));
 		String contentBeforeCaret = input.getContentBeforeCaret();
 		TokenStream stream = lex(contentBeforeCaret);
 		
@@ -372,7 +374,7 @@ public abstract class CodeAssist {
 			int beyondLastToken = input.getCaret() - lastToken.getStopIndex() -1; 
 			if (beyondLastToken > 0) {
 				matchWith = contentBeforeCaret.substring(input.getCaret()-beyondLastToken, input.getCaret());
-				matchWith = StringUtils.stripStart(matchWith, " \t\n\r");
+				matchWith = StringUtils.trimStart(matchWith);
 				mergeSuggestions(suggest(rule, stream, input, matchWith), texts);
 			} else {
 				mergeSuggestions(suggest(rule, stream, input, ""), texts);
@@ -423,7 +425,6 @@ public abstract class CodeAssist {
 			int replaceEnd = input.getCaret();
 			String contentAfterReplaceStart = input.getContent().substring(replaceStart);
 			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
-			List<String> mandatories;
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
 				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
@@ -437,9 +438,14 @@ public abstract class CodeAssist {
 							replaceEnd = replaceStart + toBeReplaced.length();
 					}
 				}
-				mandatories = new ArrayList<>();
-			} else {
+			}
+			
+			List<String> mandatories;
+			if (input.getCaret() == input.getContent().length() 
+					|| Character.isWhitespace(input.getContent().charAt(input.getCaret()))) {
 				mandatories = getMandatoriesAfter(suggestion.getNode());
+			} else {
+				mandatories = new ArrayList<>();
 			}
 			
 			String before = input.getContent().substring(0, replaceStart);
@@ -452,9 +458,9 @@ public abstract class CodeAssist {
 					TokenStream newStream = lex(newContent);
 					if (newStream.size() >= stream.size()) {
 						Token lastToken = stream.getToken(stream.size()-2);
-						Token newLastToken = newStream.getToken(newStream.size()-2);
-						if (lastToken.getStartIndex() != newLastToken.getStartIndex()
-								|| lastToken.getStopIndex() != newLastToken.getStopIndex()) {
+						Token newToken = newStream.getToken(stream.size()-2);
+						if (lastToken.getStartIndex() != newToken.getStartIndex()
+								|| lastToken.getStopIndex() != newToken.getStopIndex()) {
 							newContent = before + " " + text.getContent();
 						}
 					} else {
@@ -488,11 +494,10 @@ public abstract class CodeAssist {
 				
 				newContent += after;
 				
-				if (text.getCaret() == text.getContent().length()) {
-					TokenStream newStream = lex(newContent.substring(caret));
-					newStream.skipMandatoriesAfter(suggestion.getNode());
-					if (newStream.getIndex() != 0)
-						caret += newStream.getPreviousToken().getStopIndex()+1;
+				if (text.getCaret() == text.getContent().length() 
+						&& caret < newContent.length() 
+						&& !Character.isWhitespace(newContent.charAt(caret))) {
+					caret += skipMandatoriesAfter(suggestion.getNode(), newContent.substring(caret), 0);
 				}
 				
 				texts.add(new CaretAwareText(newContent, caret));
@@ -502,7 +507,7 @@ public abstract class CodeAssist {
 	}
 	
 	private List<String> getMandatoriesAfter(Node elementNode) {
-		List<String> mandatoryFollowings = new ArrayList<>();
+		List<String> mandatories = new ArrayList<>();
 		if (elementNode.getParent().getStart() == null) {
 			ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
 			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
@@ -510,20 +515,46 @@ public abstract class CodeAssist {
 			if (specIndex == alternativeSpec.getElements().size()-1) {
 				elementNode = elementNode.getParent().getParent().getParent();
 				if (elementNode != null)
-					mandatoryFollowings.addAll(getMandatoriesAfter(elementNode));
+					mandatories.addAll(getMandatoriesAfter(elementNode));
 			} else {
 				elementSpec = alternativeSpec.getElements().get(specIndex+1);
 				if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE 
 						|| elementSpec.getMultiplicity() == Multiplicity.ONE) {
-					mandatoryFollowings.addAll(elementSpec.getMandatories());
+					mandatories.addAll(elementSpec.getMandatories());
 				}
 				elementNode = new Node(elementSpec, elementNode.getParent());
-				mandatoryFollowings.addAll(getMandatoriesAfter(elementNode));
+				mandatories.addAll(getMandatoriesAfter(elementNode));
 			}
 		}
-		return mandatoryFollowings;
+		return mandatories;
 	}
-		
+	
+	private int skipMandatoriesAfter(Node elementNode, String content, int offset) {
+		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
+		if (elementSpec.getMultiplicity() == Multiplicity.ONE 
+				|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
+			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
+			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
+			if (specIndex == alternativeSpec.getElements().size()-1) {
+				elementNode = elementNode.getParent().getParent().getParent();
+				if (elementNode != null)
+					return skipMandatoriesAfter(elementNode, content, offset);
+			} else {
+				elementSpec = alternativeSpec.getElements().get(specIndex+1);
+				if (elementSpec.getMultiplicity() == Multiplicity.ONE
+						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+					CaretMove move = elementSpec.skipMandatories(content, offset);
+					offset = move.getOffset();
+					if (!move.isStop()) {
+						elementNode = new Node(elementSpec, elementNode.getParent());
+						return skipMandatoriesAfter(elementNode, content, offset);
+					}
+				}
+			}
+		}
+		return offset;
+	}
+	
 	protected abstract List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
 			String matchWith, TokenStream stream);
 	

@@ -46,7 +46,15 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
 	public static List<String> splitAndTrim(String str) {
 		return splitAndTrim(str, ",\n");
 	}
+	
+	public static String trimStart(String str) {
+		return StringUtils.stripStart(str, " \r\n\t");
+	}
 
+	public static String trimEnd(String str) {
+		return StringUtils.stripEnd(str, " \r\n\t");
+	}
+	
 	/**
 	 * Parse specified string into tokens. Content surrounded with &quot; character
 	 * is considered as a single token. For example: echo "hello world" will be parsed 

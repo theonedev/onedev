@@ -3,6 +3,8 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
+
 public class RuleRefElementSpec extends ElementSpec {
 
 	private final String ruleName;
@@ -17,8 +19,12 @@ public class RuleRefElementSpec extends ElementSpec {
 
 	public RuleSpec getRule() {
 		if (rule == null)
-			rule = codeAssist.getRule(ruleName);
+			rule = Preconditions.checkNotNull(codeAssist.getRule(ruleName));
 		return rule;
+	}
+	
+	public String getRuleName() {
+		return ruleName;
 	}
 
 	@Override
@@ -27,25 +33,27 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public boolean skipMandatories(TokenStream stream) {
+	public CaretMove skipMandatories(String content, int offset) {
 		List<AlternativeSpec> alternatives = getRule().getAlternatives();
 		if (alternatives.size() == 1) {
 			AlternativeSpec alternativeSpec = alternatives.get(0);
 			for (ElementSpec elementSpec: alternativeSpec.getElements()) {
 				if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
 						|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
-					return false;
+					return new CaretMove(offset, true);
 				} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					elementSpec.skipMandatories(stream);
-					return false;
+					CaretMove move = elementSpec.skipMandatories(content, offset);
+					return new CaretMove(move.getOffset(), true);
 				} else {
-					if (!elementSpec.skipMandatories(stream))
-						return false;
+					CaretMove move = elementSpec.skipMandatories(content, offset);
+					offset = move.getOffset();
+					if (move.isStop())
+						return new CaretMove(offset, true);
 				}
 			}
-			return true;
+			return new CaretMove(offset, false);
 		} else {
-			return false;
+			return new CaretMove(offset, true);
 		}
 	}
 

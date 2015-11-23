@@ -3,8 +3,10 @@ package com.pmease.commons.antlr.grammar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.pmease.commons.antlr.ANTLRv4Lexer;
@@ -23,6 +25,8 @@ import com.pmease.commons.antlr.codeassist.TokenStream;
 
 public class CodeAssistTest {
 
+	private Suggester suggester;
+	
 	private CodeAssist codeAssist = new CodeAssist(ANTLRv4Lexer.class, 
 			new String[]{
 					"com/pmease/commons/antlr/ANTLRv4Parser.g4", 
@@ -34,10 +38,22 @@ public class CodeAssistTest {
 				@Override
 				protected List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
 						String matchWith, TokenStream stream) {
-					return null;
+					return suggester.suggest(spec, parent, matchWith, stream);
 				}
 
 	};
+	
+	@Before
+	public void setup() {
+		suggester = new Suggester() {
+
+			@Override
+			public List<CaretAwareText> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
+				return null;
+			}
+			
+		};
+	}
 	
 	@Test
 	public void testParseGrammarSpec() {
@@ -136,9 +152,63 @@ public class CodeAssistTest {
 	@Test
 	public void testSuggestOptionsSpec() {
 		List<CaretAwareText> suggestions;
-		
+
 		suggestions = codeAssist.suggest(new CaretAwareText(""), "optionsSpec");
-		System.out.println(suggestions);
+		assertEquals(1, suggestions.size());
+		assertEquals("options{}:8", suggestions.get(0).toString());
+		
+		suggestions = codeAssist.suggest(new CaretAwareText("options{100}", 2), "optionsSpec");
+		assertEquals(1, suggestions.size());
+		assertEquals("options{100}:8", suggestions.get(0).toString());
+		
+		suggestions = codeAssist.suggest(new CaretAwareText("options{a"), "optionsSpec");
+		assertEquals(1, suggestions.size());
+		assertEquals("options{a=:10", suggestions.get(0).toString());
+		
+		suggestions = codeAssist.suggest(new CaretAwareText("options{"), "optionsSpec");
+		assertEquals(1, suggestions.size());
+		assertEquals("options{}:9", suggestions.get(0).toString());
+		
+		suggester = new Suggester() {
+
+			@Override
+			public List<CaretAwareText> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
+				if (spec instanceof RuleRefElementSpec) {
+					RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) spec;
+					if (ruleRefElementSpec.getRuleName().equals("id")) {
+						List<CaretAwareText> texts = new ArrayList<>();
+						if ("hello".startsWith(matchWith))
+							texts.add(new CaretAwareText("hello"));
+						if ("world".startsWith(matchWith))
+							texts.add(new CaretAwareText("world"));
+						return texts;
+					}
+				}
+				return null;
+			}
+			
+		};
+		
+		suggestions = codeAssist.suggest(new CaretAwareText("options{he"), "optionsSpec");
+		assertEquals(2, suggestions.size());
+		assertEquals("options{he=:11", suggestions.get(0).toString());
+		assertEquals("options{hello=;:14", suggestions.get(1).toString());
+		
+		suggestions = codeAssist.suggest(new CaretAwareText("options{"), "optionsSpec");
+		assertEquals(3, suggestions.size());
+		assertEquals("options{hello=;:14", suggestions.get(0).toString());
+		assertEquals("options{world=;:14", suggestions.get(1).toString());
+		assertEquals("options{}:9", suggestions.get(2).toString());
+		
+		suggestions = codeAssist.suggest(new CaretAwareText("options{hello=100}", 8), "optionsSpec");
+		assertEquals(3, suggestions.size());
+		assertEquals("options{hello=100}:14", suggestions.get(0).toString());
+		assertEquals("options{world=100}:14", suggestions.get(1).toString());
+		assertEquals("options{}hello=100}:9", suggestions.get(2).toString());
 	}
 	
+	interface Suggester {
+		List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+				String matchWith, TokenStream stream);
+	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.util.StringUtils;
@@ -13,61 +14,76 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 
 	private final String ruleName;
 	
-	private transient RuleSpec rule;
+	private transient Optional<RuleSpec> rule;
 	
 	public LexerRuleRefElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity, 
 			int tokenType, String ruleName) {
 		super(codeAssist, label, multiplicity, tokenType);
-		
+
 		this.ruleName = ruleName;
 	}
 
+	public String getRuleName() {
+		return ruleName;
+	}
+	
 	public RuleSpec getRule() {
 		if (rule == null)
-			rule = codeAssist.getRule(ruleName);
-		return rule;
+			rule = Optional.fromNullable(codeAssist.getRule(ruleName));
+		return rule.orNull();
 	}
 
 	@Override
 	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
-		return getRule().suggestFirst(new Node(this, parent), matchWith, stream);
+		if (getRule() != null)
+			return getRule().suggestFirst(new Node(this, parent), matchWith, stream);
+		else
+			return new ArrayList<>();
 	}
 
 	@Override
-	public boolean skipMandatories(TokenStream stream) {
-		List<AlternativeSpec> alternatives = getRule().getAlternatives();
-		if (alternatives.size() == 1) {
-			AlternativeSpec alternativeSpec = alternatives.get(0);
-			for (ElementSpec elementSpec: alternativeSpec.getElements()) {
-				if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
-						|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
-					return false;
-				} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					elementSpec.skipMandatories(stream);
-					return false;
-				} else {
-					if (!elementSpec.skipMandatories(stream))
-						return false;
+	public CaretMove skipMandatories(String content, int offset) {
+		if (getRule() != null) {
+			List<AlternativeSpec> alternatives = getRule().getAlternatives();
+			if (alternatives.size() == 1) {
+				AlternativeSpec alternativeSpec = alternatives.get(0);
+				for (ElementSpec elementSpec: alternativeSpec.getElements()) {
+					if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
+							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
+						return new CaretMove(offset, true);
+					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+						CaretMove move = elementSpec.skipMandatories(content, offset);
+						return new CaretMove(move.getOffset(), true);
+					} else {
+						CaretMove move = elementSpec.skipMandatories(content, offset);
+						offset = move.getOffset();
+						if (move.isStop())
+							return new CaretMove(offset, true);
+					}
 				}
+				return new CaretMove(offset, false);
+			} else {
+				return new CaretMove(offset, true);
 			}
-			return true;
 		} else {
-			return false;
+			return new CaretMove(offset, true);
 		}
 	}
 
 	@Override
 	public List<String> getMandatories() {
 		List<String> mandatories = new ArrayList<>();
-		List<AlternativeSpec> alternatives = getRule().getAlternatives();
-		if (alternatives.size() == 1) {
-			for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
-				if (elementSpec.getMultiplicity() == Multiplicity.ONE 
-						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					mandatories.addAll(elementSpec.getMandatories());
+		if (getRule() != null) {
+			List<AlternativeSpec> alternatives = getRule().getAlternatives();
+			if (alternatives.size() == 1) {
+				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
+					if (elementSpec.getMultiplicity() == Multiplicity.ONE 
+							|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+						mandatories.addAll(elementSpec.getMandatories());
+					}
 				}
-			}
-		} 
+			} 
+		}
 		if (!mandatories.isEmpty())
 			return Lists.newArrayList(StringUtils.join(mandatories, ""));
 		else

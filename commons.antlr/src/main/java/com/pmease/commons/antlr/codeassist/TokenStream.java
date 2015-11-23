@@ -5,7 +5,6 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
 
 public class TokenStream {
 	
@@ -63,27 +62,6 @@ public class TokenStream {
 
 	public boolean isEof() {
 		return index == size()-1;
-	}
-	
-	public void skipMandatoriesAfter(Node elementNode) {
-		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
-		if (elementSpec.getMultiplicity() == Multiplicity.ONE 
-				|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
-			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
-			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
-			if (specIndex == alternativeSpec.getElements().size()-1) {
-				elementNode = elementNode.getParent().getParent().getParent();
-				if (elementNode != null)
-					skipMandatoriesAfter(elementNode);
-			} else {
-				elementSpec = alternativeSpec.getElements().get(specIndex+1);
-				if (elementSpec.getMultiplicity() == Multiplicity.ONE
-						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					if (elementSpec.skipMandatories(this))
-						skipMandatoriesAfter(new Node(elementSpec, elementNode.getParent()));
-				}
-			}
-		}
 	}
 	
 }

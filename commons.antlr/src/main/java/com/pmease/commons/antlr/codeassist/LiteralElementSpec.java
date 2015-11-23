@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.pmease.commons.util.StringUtils;
 
 public class LiteralElementSpec extends TokenElementSpec {
 
@@ -34,14 +35,14 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public boolean skipMandatories(TokenStream stream) {
-		if (stream.isEof()) {
-			return false;
-		} else if (stream.getCurrentToken().getType() == type) {
-			stream.increaseIndex();
-			return true;
+	public CaretMove skipMandatories(String content, int offset) {
+		String contentAfterOffset = content.substring(offset);
+		String trimmedContentAfterOffset = StringUtils.trimStart(contentAfterOffset);
+		if (trimmedContentAfterOffset.startsWith(literal)) {
+			int trimmedLen = contentAfterOffset.length() - trimmedContentAfterOffset.length();
+			return new CaretMove(offset + trimmedLen + literal.length(), false);
 		} else {
-			return false;
+			return new CaretMove(offset, true);
 		}
 	}
 

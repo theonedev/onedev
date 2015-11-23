@@ -13,7 +13,7 @@ public abstract class Spec {
 	/**
 	 * @param stream
 	 * @return
-	 * 			empty if the rule does not match part or full of the stream
+	 * 			empty if the rule does not match part or all of the stream
 	 */
 	public abstract List<TokenNode> getPartialMatches(TokenStream stream, Node parent);
 	
