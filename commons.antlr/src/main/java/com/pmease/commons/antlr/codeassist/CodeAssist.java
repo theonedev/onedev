@@ -32,6 +32,7 @@ import com.pmease.commons.antlr.ANTLRv4Parser.BlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.EbnfContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.EbnfSuffixContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.ElementContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.GrammarSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LabeledAltContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LabeledElementContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LabeledLexerElementContext;
@@ -41,6 +42,7 @@ import com.pmease.commons.antlr.ANTLRv4Parser.LexerBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LexerElementContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LexerRuleBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.LexerRuleSpecContext;
+import com.pmease.commons.antlr.ANTLRv4Parser.ModeSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.NotSetContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.ParserRuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleBlockContext;
@@ -111,9 +113,16 @@ public abstract class CodeAssist {
 				ANTLRv4Parser parser = new ANTLRv4Parser(tokens);
 				parser.removeErrorListeners();
 				parser.setErrorHandler(new BailErrorStrategy());
-				for (RuleSpecContext ruleSpecContext: parser.grammarSpec().rules().ruleSpec()) {
+				GrammarSpecContext grammarSpecContext = parser.grammarSpec();
+				for (RuleSpecContext ruleSpecContext: grammarSpecContext.rules().ruleSpec()) {
 					RuleSpec rule = newRule(ruleSpecContext);
 					rules.put(rule.getName(), rule);
+				}
+				for (ModeSpecContext modeSpecContext: grammarSpecContext.modeSpec()) {
+					for (LexerRuleSpecContext lexerRuleSpecContext: modeSpecContext.lexerRuleSpec()) {
+						RuleSpec rule = newRule(lexerRuleSpecContext);
+						rules.put(rule.getName(), rule);
+					}
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -122,21 +131,26 @@ public abstract class CodeAssist {
 	}
 	
 	private RuleSpec newRule(RuleSpecContext ruleSpecContext) {
-		String name;
-		List<AlternativeSpec> alternatives = new ArrayList<>();
 		ParserRuleSpecContext parserRuleSpecContext = ruleSpecContext.parserRuleSpec();
 		if (parserRuleSpecContext != null) {
-			name = parserRuleSpecContext.RULE_REF().getText();
+			String name = parserRuleSpecContext.RULE_REF().getText();
+			List<AlternativeSpec> alternatives = new ArrayList<>();
 			RuleBlockContext ruleBlockContext = parserRuleSpecContext.ruleBlock();
 			for (LabeledAltContext labeledAltContext: ruleBlockContext.ruleAltList().labeledAlt())
 				alternatives.add(newAltenative(labeledAltContext));
+			return new RuleSpec(this, name, alternatives);
 		} else {
-			LexerRuleSpecContext lexerRuleSpecContext = ruleSpecContext.lexerRuleSpec();
-			name = lexerRuleSpecContext.TOKEN_REF().getText();
-			LexerRuleBlockContext lexerRuleBlockContext = lexerRuleSpecContext.lexerRuleBlock();
-			for (LexerAltContext lexerAltContext: lexerRuleBlockContext.lexerAltList().lexerAlt())
-				alternatives.add(newAltenative(lexerAltContext));
+			return newRule(ruleSpecContext.lexerRuleSpec());
 		}
+	}
+	
+	private RuleSpec newRule(LexerRuleSpecContext lexerRuleSpecContext) {
+		String name;
+		List<AlternativeSpec> alternatives = new ArrayList<>();
+		name = lexerRuleSpecContext.TOKEN_REF().getText();
+		LexerRuleBlockContext lexerRuleBlockContext = lexerRuleSpecContext.lexerRuleBlock();
+		for (LexerAltContext lexerAltContext: lexerRuleBlockContext.lexerAltList().lexerAlt())
+			alternatives.add(newAltenative(lexerAltContext));
 		return new RuleSpec(this, name, alternatives);
 	}
 	

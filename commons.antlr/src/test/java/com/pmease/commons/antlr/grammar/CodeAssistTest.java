@@ -207,6 +207,20 @@ public class CodeAssistTest {
 		assertEquals("options{}hello=100}:9", suggestions.get(2).toString());
 	}
 	
+	@Test
+	public void testSuggestRuleSpec() {
+		List<CaretAwareText> suggestions;
+		suggestions = codeAssist.suggest(new CaretAwareText("query"), "ruleSpec");
+		assertEquals(7, suggestions.size());
+		assertEquals("query[]:6", suggestions.get(0).toString());
+		assertEquals("query returns[]:14", suggestions.get(1).toString());
+		assertEquals("query throws:12", suggestions.get(2).toString());
+		assertEquals("query locals[]:13", suggestions.get(3).toString());
+		assertEquals("query options{}:14", suggestions.get(4).toString());
+		assertEquals("query@{}:6", suggestions.get(5).toString());
+		assertEquals("query::6", suggestions.get(6).toString());
+	}
+	
 	interface Suggester {
 		List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
 				String matchWith, TokenStream stream);
