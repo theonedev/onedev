@@ -16,6 +16,7 @@ import com.pmease.commons.antlr.codeassist.CaretAwareText;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
+import com.pmease.commons.antlr.codeassist.EofElementSpec;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.Node;
@@ -97,9 +98,7 @@ public class CodeAssistTest {
 		assertEquals(0, literalElement.getType());
 		assertEquals("*/", literalElement.getLiteral());
 		assertEquals(1, blockRule.getAlternatives().get(1).getElements().size());
-		LexerRuleRefElementSpec lexerRuleElement = (LexerRuleRefElementSpec) blockRule.getAlternatives().get(1).getElements().get(0);
-		assertEquals(-1, lexerRuleElement.getType());
-		assertEquals("EOF", lexerRuleElement.getRule().getName());
+		assertTrue(blockRule.getAlternatives().get(1).getElements().get(0) instanceof EofElementSpec);
 	}
 	
 	@Test
@@ -131,10 +130,10 @@ public class CodeAssistTest {
 		
 		suggestions = codeAssist.suggest(new CaretAwareText(""), "grammarSpec");
 		assertEquals(4, suggestions.size());
-		assertEquals("/**", suggestions.get(0).getContent());
-		assertEquals("lexer", suggestions.get(1).getContent());
-		assertEquals("parser", suggestions.get(2).getContent());
-		assertEquals("grammar", suggestions.get(3).getContent());
+		assertEquals("/**;", suggestions.get(0).getContent());
+		assertEquals("lexer grammar;", suggestions.get(1).getContent());
+		assertEquals("parser grammar;", suggestions.get(2).getContent());
+		assertEquals("grammar;", suggestions.get(3).getContent());
 		
 		suggestions = codeAssist.suggest(new CaretAwareText("parser"), "grammarSpec");
 		assertEquals(1, suggestions.size());
@@ -142,11 +141,22 @@ public class CodeAssistTest {
 		
 		suggestions = codeAssist.suggest(new CaretAwareText("gr"), "grammarSpec");
 		assertEquals(1, suggestions.size());
-		assertEquals("grammar", suggestions.get(0).getContent());
-
+		assertEquals("grammar;", suggestions.get(0).getContent());
+		
 		suggestions = codeAssist.suggest(new CaretAwareText("grammar", 4), "grammarSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("grammar:7", suggestions.get(0).toString());
+		
+		suggestions = codeAssist.suggest(new CaretAwareText("grammar grammar1;rule1:TOKEN1;"), "grammarSpec");
+		assertEquals(8, suggestions.size());
+		assertEquals("grammar grammar1;rule1:TOKEN1;catch[]{}:36", suggestions.get(0).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;finally{}:38", suggestions.get(1).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;/**:;:33", suggestions.get(2).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;public:;:36", suggestions.get(3).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;private:;:37", suggestions.get(4).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;protected:;:39", suggestions.get(5).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;fragment:;:38", suggestions.get(6).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;mode;:34", suggestions.get(7).toString());
 	}
 	
 	@Test
@@ -210,6 +220,7 @@ public class CodeAssistTest {
 	@Test
 	public void testSuggestRuleSpec() {
 		List<CaretAwareText> suggestions;
+
 		suggestions = codeAssist.suggest(new CaretAwareText("query"), "ruleSpec");
 		assertEquals(7, suggestions.size());
 		assertEquals("query[]:6", suggestions.get(0).toString());

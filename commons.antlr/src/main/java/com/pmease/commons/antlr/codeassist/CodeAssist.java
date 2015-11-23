@@ -24,6 +24,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.antlr.AntlrUtils;
 import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.ANTLRv4Parser;
 import com.pmease.commons.antlr.ANTLRv4Parser.AlternativeContext;
@@ -62,18 +63,10 @@ public abstract class CodeAssist {
 	private final Map<String, Integer> tokenTypesByRule = new HashMap<>();
 	
 	public CodeAssist(Class<? extends Lexer> lexerClass) {
-		this(lexerClass, new String[]{getGrammarFile(lexerClass)}, getTokenFile(lexerClass));
+		this(lexerClass, new String[]{AntlrUtils.getDefaultGrammarFile(lexerClass)}, 
+				AntlrUtils.getDefaultTokenFile(lexerClass));
 	}
 
-	private static String getGrammarFile(Class<?> lexerClass) {
-		String lexerName = lexerClass.getName().replace(".", "/");
-		return lexerName.substring(0, lexerName.length() - "Lexer".length()) + ".g4";
-	}
-	
-	private static String getTokenFile(Class<?> lexerClass) {
-		return lexerClass.getSimpleName() + ".tokens";
-	}
-	
 	/**
 	 * Construct object representation of ANTLR grammar file.
 	 * 

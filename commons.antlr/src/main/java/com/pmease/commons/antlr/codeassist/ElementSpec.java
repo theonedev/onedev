@@ -2,7 +2,6 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -117,9 +116,4 @@ public abstract class ElementSpec extends Spec {
 	
 	protected abstract boolean matchOnce(TokenStream stream);
 
-	@Override
-	public String toString() {
-		return Objects.toString(this);
-	}
-	
 }
