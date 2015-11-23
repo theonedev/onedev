@@ -350,10 +350,10 @@ public abstract class CodeAssist {
 		return rules.get(ruleName);
 	}
 	
-	public final TokenStream lex(String input) {
+	public final TokenStream lex(String content) {
 		try {
 			List<Token> tokens = new ArrayList<>();
-			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(input));
+			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(content));
 			lexer.removeErrorListeners();
 			Token token;
 			do {
@@ -369,71 +369,72 @@ public abstract class CodeAssist {
 		}
 	}
 	
-	public List<CaretAwareText> suggest(CaretAwareText input, String ruleName) {
-		List<CaretAwareText> texts = new ArrayList<>();
+	public List<InputSuggestion> suggest(InputStatus inputStatus, String ruleName) {
+		List<InputSuggestion> inputSuggestions = new ArrayList<>();
 		RuleSpec rule = Preconditions.checkNotNull(getRule(ruleName));
-		String contentBeforeCaret = input.getContentBeforeCaret();
+		
+		String contentBeforeCaret = inputStatus.getContentBeforeCaret();
 		TokenStream stream = lex(contentBeforeCaret);
 		
 		if (!stream.isEof()) {
 			Token lastToken = stream.getToken(stream.size()-2);
 			String matchWith;
-			int beyondLastToken = input.getCaret() - lastToken.getStopIndex() -1; 
+			int beyondLastToken = inputStatus.getCaret() - lastToken.getStopIndex() -1; 
 			if (beyondLastToken > 0) {
-				matchWith = contentBeforeCaret.substring(input.getCaret()-beyondLastToken, input.getCaret());
+				matchWith = contentBeforeCaret.substring(inputStatus.getCaret()-beyondLastToken, inputStatus.getCaret());
 				matchWith = StringUtils.trimStart(matchWith);
-				mergeSuggestions(suggest(rule, stream, input, matchWith), texts);
+				mergeSuggestions(suggest(rule, stream, inputStatus, matchWith), inputSuggestions);
 			} else {
-				mergeSuggestions(suggest(rule, stream, input, ""), texts);
+				mergeSuggestions(suggest(rule, stream, inputStatus, ""), inputSuggestions);
 
 				matchWith = stream.getToken(stream.size()-2).getText();
 				List<Token> tokens = stream.getTokens();
 				tokens.remove(tokens.size()-2);
 				stream = new TokenStream(tokens);
-				mergeSuggestions(suggest(rule, stream, input, matchWith), texts);
+				mergeSuggestions(suggest(rule, stream, inputStatus, matchWith), inputSuggestions);
 			}
 		} else {
-			mergeSuggestions(suggest(rule, stream, input, ""), texts);
+			mergeSuggestions(suggest(rule, stream, inputStatus, ""), inputSuggestions);
 		}
-		return texts;
+		return inputSuggestions;
 	}
 	
-	private void mergeSuggestions(List<CaretAwareText> from, List<CaretAwareText> to) {
+	private void mergeSuggestions(List<InputSuggestion> from, List<InputSuggestion> to) {
 		Set<String> includedContents = new HashSet<>();
-		for (CaretAwareText text: to)
-			includedContents.add(text.getContent());
-		for (CaretAwareText text: from) {
-			if (!includedContents.contains(text.getContent())) {
-				includedContents.add(text.getContent());
-				to.add(text);
+		for (InputSuggestion suggestion: to)
+			includedContents.add(suggestion.getContent());
+		for (InputSuggestion suggestion: from) {
+			if (!includedContents.contains(suggestion.getContent())) {
+				includedContents.add(suggestion.getContent());
+				to.add(suggestion);
 			}
 		}
 	}
 	
-	private List<CaretAwareText> suggest(RuleSpec spec, TokenStream stream, 
-			CaretAwareText input, String matchWith) {
-		List<CaretAwareText> texts = new ArrayList<>();
+	private List<InputSuggestion> suggest(RuleSpec spec, TokenStream stream, 
+			InputStatus inputStatus, String matchWith) {
+		List<InputSuggestion> inputSuggestions = new ArrayList<>();
 		
-		List<ElementSuggestion> suggestions = new ArrayList<>();
+		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
 		if (stream.isEof()) {
-			suggestions.addAll(spec.suggestFirst(null, matchWith, stream));
+			elementSuggestions.addAll(spec.suggestFirst(null, matchWith, stream));
 		} else {
 			List<TokenNode> matches = spec.getPartialMatches(stream, null);
 			if (!matches.isEmpty() && stream.isEof()) {
 				for (TokenNode match: matches) {
 					ElementSpec matchSpec = (ElementSpec) match.getSpec();
-					suggestions.addAll(matchSpec.suggestNext(match.getParent(), matchWith, stream));
+					elementSuggestions.addAll(matchSpec.suggestNext(match.getParent(), matchWith, stream));
 				}
 			}
 		}
 
-		int replaceStart = input.getCaret() - matchWith.length();
-		for (ElementSuggestion suggestion: suggestions) {
-			int replaceEnd = input.getCaret();
-			String contentAfterReplaceStart = input.getContent().substring(replaceStart);
+		int replaceStart = inputStatus.getCaret() - matchWith.length();
+		for (ElementSuggestion elementSuggestion: elementSuggestions) {
+			int replaceEnd = inputStatus.getCaret();
+			String contentAfterReplaceStart = inputStatus.getContent().substring(replaceStart);
 			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
-				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
+				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
 				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)
 						replaceEnd = replaceStart + streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
@@ -448,36 +449,36 @@ public abstract class CodeAssist {
 			}
 			
 			List<String> mandatories;
-			if (input.getCaret() == input.getContent().length() 
-					|| Character.isWhitespace(input.getContent().charAt(input.getCaret()))) {
-				mandatories = getMandatoriesAfter(suggestion.getNode());
+			if (inputStatus.getCaret() == inputStatus.getContent().length() 
+					|| Character.isWhitespace(inputStatus.getContent().charAt(inputStatus.getCaret()))) {
+				mandatories = getMandatoriesAfter(elementSuggestion.getNode());
 			} else {
 				mandatories = new ArrayList<>();
 			}
 			
-			String before = input.getContent().substring(0, replaceStart);
-			String after = input.getContent().substring(replaceEnd);
+			String before = inputStatus.getContent().substring(0, replaceStart);
+			String after = inputStatus.getContent().substring(replaceEnd);
 
-			for (CaretAwareText text: suggestion.getTexts()) {
+			for (InputSuggestion inputSuggestion: elementSuggestion.getInputSuggestions()) {
 				String newContent;
 				if (stream.size() > 1) { 
-					newContent = before + text.getContent();
+					newContent = before + inputSuggestion.getContent();
 					TokenStream newStream = lex(newContent);
 					if (newStream.size() >= stream.size()) {
 						Token lastToken = stream.getToken(stream.size()-2);
 						Token newToken = newStream.getToken(stream.size()-2);
 						if (lastToken.getStartIndex() != newToken.getStartIndex()
 								|| lastToken.getStopIndex() != newToken.getStopIndex()) {
-							newContent = before + " " + text.getContent();
+							newContent = before + " " + inputSuggestion.getContent();
 						}
 					} else {
-						newContent = before + " " + text.getContent();
+						newContent = before + " " + inputSuggestion.getContent();
 					}
 				} else {
-					newContent = before + text.getContent();
+					newContent = before + inputSuggestion.getContent();
 				}
-				int caret = text.getCaret();
-				if (caret == text.getContent().length())
+				int caret = inputSuggestion.getCaret();
+				if (caret == inputSuggestion.getContent().length())
 					caret = newContent.length();
 				else
 					caret += before.length() + 1;
@@ -501,16 +502,16 @@ public abstract class CodeAssist {
 				
 				newContent += after;
 				
-				if (text.getCaret() == text.getContent().length() 
+				if (inputSuggestion.getCaret() == inputSuggestion.getContent().length() 
 						&& caret < newContent.length() 
 						&& !Character.isWhitespace(newContent.charAt(caret))) {
-					caret += skipMandatoriesAfter(suggestion.getNode(), newContent.substring(caret), 0);
+					caret += skipMandatoriesAfter(elementSuggestion.getNode(), newContent.substring(caret), 0);
 				}
 				
-				texts.add(new CaretAwareText(newContent, caret));
+				inputSuggestions.add(new InputSuggestion(newContent, caret));
 			}
 		}
-		return texts;
+		return inputSuggestions;
 	}
 	
 	private List<String> getMandatoriesAfter(Node elementNode) {
@@ -562,7 +563,7 @@ public abstract class CodeAssist {
 		return offset;
 	}
 	
-	protected abstract List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+	protected abstract List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
 			String matchWith, TokenStream stream);
 	
 }

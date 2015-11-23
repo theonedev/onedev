@@ -17,11 +17,13 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 
 import com.pmease.commons.antlr.AntlrUtils;
-import com.pmease.commons.antlr.codeassist.CaretAwareText;
+import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
+import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.TokenStream;
+import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
@@ -57,7 +59,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		codeAssist = new CodeAssist(lexerClass, grammarFiles, tokenFile) {
 
 			@Override
-			protected List<CaretAwareText> suggest(ElementSpec spec, Node parent, String matchWith,
+			protected List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith,
 					TokenStream stream) {
 				return ANTLRAssistBehavior.this.suggest(spec, parent, matchWith, stream);
 			}
@@ -67,17 +69,17 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	}
 	
 	@Override
-	protected List<InputAssist> getAssists(String input, final int caret) {
-		
+	protected List<InputSuggestion> getSuggestions(InputStatus inputStatus) {
+		return codeAssist.suggest(inputStatus, ruleName);
 	}
 
 	@Override
-	protected List<InputError> getErrors(String input) {
+	protected List<InputError> getErrors(String inputContent) {
 		final List<InputError> errors = new ArrayList<>();
 		
 		Lexer lexer;
 		try {
-			lexer = lexerCtor.newInstance(new ANTLRInputStream(input));
+			lexer = lexerCtor.newInstance(new ANTLRInputStream(inputContent));
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			throw new RuntimeException(e);
@@ -120,6 +122,19 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		return errors;
 	}
 
-	protected abstract List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+	@Override
+	protected int getAnchor(String content) {
+		TokenStream stream = codeAssist.lex(content);
+		if (stream.isEof()) {
+			return content.length();
+		} else {
+			Token lastToken = stream.getToken(stream.size()-2);
+			String contentAfterLastToken = content.substring(lastToken.getStopIndex()+1);
+			contentAfterLastToken = StringUtils.trimStart(contentAfterLastToken);
+			return content.length() - contentAfterLastToken.length();
+		}
+	}
+
+	protected abstract List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
 			String matchWith, TokenStream stream);
 }

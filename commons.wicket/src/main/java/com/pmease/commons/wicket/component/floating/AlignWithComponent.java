@@ -8,14 +8,22 @@ public class AlignWithComponent implements AlignWith {
 	
 	private final Component component;
 	
-	public AlignWithComponent(Component component) {
+	private final int index;
+	
+	public AlignWithComponent(Component component, int index) {
 		this.component = component;
+		this.index = index;
+		
 		component.setOutputMarkupId(true);
+	}
+	
+	public AlignWithComponent(Component component) {
+		this(component, -1);
 	}
 	
 	@Override
 	public String toJSON() {
-		return "'" + component.getMarkupId() + "'";
+		return String.format("{element: '%s', index: %d}", component.getMarkupId(), index);
 	}
 
 }

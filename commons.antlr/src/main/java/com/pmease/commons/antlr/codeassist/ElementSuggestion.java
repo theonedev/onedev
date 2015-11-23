@@ -6,19 +6,19 @@ public class ElementSuggestion {
 	
 	private final Node node;
 	
-	private final List<CaretAwareText> texts;
+	private final List<InputSuggestion> inputSuggestions;
 	
-	public ElementSuggestion(Node node, List<CaretAwareText> texts) {
+	public ElementSuggestion(Node node, List<InputSuggestion> inputSuggestions) {
 		this.node = node;
-		this.texts = texts;
+		this.inputSuggestions = inputSuggestions;
 	}
 
 	public Node getNode() {
 		return node;
 	}
 
-	public List<CaretAwareText> getTexts() {
-		return texts;
+	public List<InputSuggestion> getInputSuggestions() {
+		return inputSuggestions;
 	}
 	
 }

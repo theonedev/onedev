@@ -85,7 +85,7 @@ public abstract class ElementSpec extends Spec {
 	
 	@Override
 	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, TokenStream stream) {
-		List<CaretAwareText> texts = codeAssist.suggest(this, parent, matchWith, stream);
+		List<InputSuggestion> texts = codeAssist.suggest(this, parent, matchWith, stream);
 		if (texts != null)
 			return Lists.newArrayList(new ElementSuggestion(new Node(this, parent), texts));
 		else

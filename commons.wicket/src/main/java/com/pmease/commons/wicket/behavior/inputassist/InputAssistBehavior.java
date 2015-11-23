@@ -23,11 +23,14 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pmease.commons.antlr.codeassist.InputStatus;
+import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.textareacaretposition.TextareaCaretPositionResourceReference;
+import com.pmease.commons.wicket.component.floating.AlignWith;
 import com.pmease.commons.wicket.component.floating.AlignWithComponent;
 import com.pmease.commons.wicket.component.floating.Alignment;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -95,20 +98,21 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				getComponent().getMarkupId(), json);
 		target.appendJavaScript(script);
 		
-		final List<InputAssist> assists;
+		final List<InputSuggestion> suggestions;
 		
 		if (caret != null)
-			assists = getAssists(input, caret);
+			suggestions = getSuggestions(new InputStatus(input, caret));
 		else
-			assists = new ArrayList<>();
+			suggestions = new ArrayList<>();
 
-		if (!assists.isEmpty()) {
+		if (!suggestions.isEmpty()) {
+			int anchor = getAnchor(input.substring(0, caret));
 			if (dropdown == null) {
-				dropdown = new FloatingPanel(target, new AlignWithComponent(getComponent()), Alignment.bottom(0)) {
+				dropdown = new FloatingPanel(target, new AlignWithComponent(getComponent(), anchor), Alignment.bottom(0)) {
 
 					@Override
 					protected Component newContent(String id) {
-						return new AssistPanel(id, assists);
+						return new AssistPanel(id, suggestions);
 					}
 
 					@Override
@@ -123,12 +127,16 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				target.appendJavaScript(script);
 			} else {
 				Component content = dropdown.getContent();
-				Component newContent = new AssistPanel(content.getId(), assists);
+				Component newContent = new AssistPanel(content.getId(), suggestions);
 				content.replaceWith(newContent);
 				target.add(newContent);
 
 				script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
 						getComponent().getMarkupId(), dropdown.getMarkupId());
+				target.appendJavaScript(script);
+				
+				AlignWith alignWith = new AlignWithComponent(getComponent(), anchor);
+				script = String.format("$('#%s').align(%s);", dropdown.getMarkupId(), alignWith.toJSON());
 				target.appendJavaScript(script);
 			}
 		} else if (dropdown != null) {
@@ -157,7 +165,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract List<InputAssist> getAssists(String input, int caret);
+	protected abstract List<InputSuggestion> getSuggestions(InputStatus inputStatus);
 	
-	protected abstract List<InputError> getErrors(String input);
+	protected abstract List<InputError> getErrors(String inputContent);
+	
+	protected abstract int getAnchor(String content);
+	
 }

@@ -26,8 +26,9 @@ pmease.commons.floating = {
 		// use keydown as keypress does not work in chrome/safari
 		$(document).on("keydown", $floating.data("keydown"));
 		
-		if (typeof alignWith === "string") {
-			alignment.target = $("#" + alignWith);
+		if (alignWith.element) {
+			alignment.target = $("#" + alignWith.element);
+			alignment.index = alignWith.index;
 			alignment.target.addClass("floating-aligned");
 		} else {
 			alignment.target = alignWith;

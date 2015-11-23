@@ -1,20 +1,20 @@
 package com.pmease.commons.antlr.codeassist;
 
-public class CaretAwareText {
+public class InputStatus {
 	
 	private final String content;
 	
 	private final int caret;
-	
-	public CaretAwareText(String content, int caret) {
+
+	public InputStatus(String content, int caret) {
 		this.content = content;
 		this.caret = caret;
 	}
 	
-	public CaretAwareText(String content) {
+	public InputStatus(String content) {
 		this(content, content.length());
 	}
-
+	
 	public String getContent() {
 		return content;
 	}
@@ -35,4 +35,5 @@ public class CaretAwareText {
 	public String toString() {
 		return content + ":" + caret;
 	}
+	
 }

@@ -9,31 +9,32 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 
+import com.pmease.commons.antlr.codeassist.InputSuggestion;
+
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {
 
-	private final List<InputAssist> assists;
+	private final List<InputSuggestion> suggestions;
 	
-	public AssistPanel(String id, List<InputAssist> assists) {
+	public AssistPanel(String id, List<InputSuggestion> suggestions) {
 		super(id);
-		
-		this.assists = assists;
+		this.suggestions = suggestions;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<InputAssist>("assists", assists) {
+		add(new ListView<InputSuggestion>("suggestions", suggestions) {
 
 			@Override
-			protected void populateItem(ListItem<InputAssist> item) {
-				InputAssist assist = item.getModelObject();
+			protected void populateItem(ListItem<InputSuggestion> item) {
+				InputSuggestion suggestion = item.getModelObject();
 				WebMarkupContainer link = new WebMarkupContainer("link");
-				link.add(new Label("label", assist.getInput()));
+				link.add(new Label("label", suggestion.getContent()));
 				item.add(link);
-				item.add(AttributeAppender.append("data-input", assist.getInput()));
-				item.add(AttributeAppender.append("data-caret", assist.getCaret()));
+				item.add(AttributeAppender.append("data-input", suggestion.getContent()));
+				item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));
 			}
 
 		});

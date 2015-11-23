@@ -12,11 +12,12 @@ import org.junit.Test;
 import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.codeassist.AlternativeSpec;
 import com.pmease.commons.antlr.codeassist.AnyTokenElementSpec;
-import com.pmease.commons.antlr.codeassist.CaretAwareText;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
 import com.pmease.commons.antlr.codeassist.EofElementSpec;
+import com.pmease.commons.antlr.codeassist.InputStatus;
+import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.Node;
@@ -37,7 +38,7 @@ public class CodeAssistTest {
 			}, "ANTLRv4Parser.tokens") {
 
 				@Override
-				protected List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+				protected List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
 						String matchWith, TokenStream stream) {
 					return suggester.suggest(spec, parent, matchWith, stream);
 				}
@@ -49,7 +50,7 @@ public class CodeAssistTest {
 		suggester = new Suggester() {
 
 			@Override
-			public List<CaretAwareText> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
+			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
 				return null;
 			}
 			
@@ -126,28 +127,28 @@ public class CodeAssistTest {
 	
 	@Test
 	public void testSuggestGrammarSpec() {
-		List<CaretAwareText> suggestions;
+		List<InputSuggestion> suggestions;
 		
-		suggestions = codeAssist.suggest(new CaretAwareText(""), "grammarSpec");
+		suggestions = codeAssist.suggest(new InputStatus(""), "grammarSpec");
 		assertEquals(4, suggestions.size());
 		assertEquals("/**;", suggestions.get(0).getContent());
 		assertEquals("lexer grammar;", suggestions.get(1).getContent());
 		assertEquals("parser grammar;", suggestions.get(2).getContent());
 		assertEquals("grammar;", suggestions.get(3).getContent());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("parser"), "grammarSpec");
+		suggestions = codeAssist.suggest(new InputStatus("parser"), "grammarSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("parser grammar", suggestions.get(0).getContent());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("gr"), "grammarSpec");
+		suggestions = codeAssist.suggest(new InputStatus("gr"), "grammarSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("grammar;", suggestions.get(0).getContent());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("grammar", 4), "grammarSpec");
+		suggestions = codeAssist.suggest(new InputStatus("grammar", 4), "grammarSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("grammar:7", suggestions.get(0).toString());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("grammar grammar1;rule1:TOKEN1;"), "grammarSpec");
+		suggestions = codeAssist.suggest(new InputStatus("grammar grammar1;rule1:TOKEN1;"), "grammarSpec");
 		assertEquals(8, suggestions.size());
 		assertEquals("grammar grammar1;rule1:TOKEN1;catch[]{}:36", suggestions.get(0).toString());
 		assertEquals("grammar grammar1;rule1:TOKEN1;finally{}:38", suggestions.get(1).toString());
@@ -161,37 +162,37 @@ public class CodeAssistTest {
 	
 	@Test
 	public void testSuggestOptionsSpec() {
-		List<CaretAwareText> suggestions;
+		List<InputSuggestion> suggestions;
 
-		suggestions = codeAssist.suggest(new CaretAwareText(""), "optionsSpec");
+		suggestions = codeAssist.suggest(new InputStatus(""), "optionsSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("options{}:8", suggestions.get(0).toString());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("options{100}", 2), "optionsSpec");
+		suggestions = codeAssist.suggest(new InputStatus("options{100}", 2), "optionsSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("options{100}:8", suggestions.get(0).toString());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("options{a"), "optionsSpec");
+		suggestions = codeAssist.suggest(new InputStatus("options{a"), "optionsSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("options{a=:10", suggestions.get(0).toString());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("options{"), "optionsSpec");
+		suggestions = codeAssist.suggest(new InputStatus("options{"), "optionsSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("options{}:9", suggestions.get(0).toString());
 		
 		suggester = new Suggester() {
 
 			@Override
-			public List<CaretAwareText> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
+			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
 				if (spec instanceof RuleRefElementSpec) {
 					RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) spec;
 					if (ruleRefElementSpec.getRuleName().equals("id")) {
-						List<CaretAwareText> texts = new ArrayList<>();
+						List<InputSuggestion> suggestions = new ArrayList<>();
 						if ("hello".startsWith(matchWith))
-							texts.add(new CaretAwareText("hello"));
+							suggestions.add(new InputSuggestion("hello"));
 						if ("world".startsWith(matchWith))
-							texts.add(new CaretAwareText("world"));
-						return texts;
+							suggestions.add(new InputSuggestion("world"));
+						return suggestions;
 					}
 				}
 				return null;
@@ -199,18 +200,18 @@ public class CodeAssistTest {
 			
 		};
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("options{he"), "optionsSpec");
+		suggestions = codeAssist.suggest(new InputStatus("options{he"), "optionsSpec");
 		assertEquals(2, suggestions.size());
 		assertEquals("options{he=:11", suggestions.get(0).toString());
 		assertEquals("options{hello=;:14", suggestions.get(1).toString());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("options{"), "optionsSpec");
+		suggestions = codeAssist.suggest(new InputStatus("options{"), "optionsSpec");
 		assertEquals(3, suggestions.size());
 		assertEquals("options{hello=;:14", suggestions.get(0).toString());
 		assertEquals("options{world=;:14", suggestions.get(1).toString());
 		assertEquals("options{}:9", suggestions.get(2).toString());
 		
-		suggestions = codeAssist.suggest(new CaretAwareText("options{hello=100}", 8), "optionsSpec");
+		suggestions = codeAssist.suggest(new InputStatus("options{hello=100}", 8), "optionsSpec");
 		assertEquals(3, suggestions.size());
 		assertEquals("options{hello=100}:14", suggestions.get(0).toString());
 		assertEquals("options{world=100}:14", suggestions.get(1).toString());
@@ -219,9 +220,9 @@ public class CodeAssistTest {
 	
 	@Test
 	public void testSuggestRuleSpec() {
-		List<CaretAwareText> suggestions;
+		List<InputSuggestion> suggestions;
 
-		suggestions = codeAssist.suggest(new CaretAwareText("query"), "ruleSpec");
+		suggestions = codeAssist.suggest(new InputStatus("query"), "ruleSpec");
 		assertEquals(7, suggestions.size());
 		assertEquals("query[]:6", suggestions.get(0).toString());
 		assertEquals("query returns[]:14", suggestions.get(1).toString());
@@ -233,7 +234,7 @@ public class CodeAssistTest {
 	}
 	
 	interface Suggester {
-		List<CaretAwareText> suggest(ElementSpec spec, Node parent, 
+		List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
 				String matchWith, TokenStream stream);
 	}
 }
