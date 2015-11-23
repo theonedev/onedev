@@ -3,6 +3,8 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
+
 public class AlternativeSpec extends Spec {
 
 	private final String label;
@@ -26,21 +28,25 @@ public class AlternativeSpec extends Spec {
 	
 	@Override
 	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
+		Preconditions.checkArgument(!stream.isEof());
+		
 		parent = new Node(this, parent, stream.getCurrentToken());
 		int index = stream.getIndex();
-		List<TokenNode> partialMatches = new ArrayList<>();
+		List<TokenNode> matches = new ArrayList<>();
 		for (ElementSpec elementSpec: elements) {
 			List<TokenNode> elementMatches = elementSpec.getPartialMatches(stream, parent);
-			if (elementMatches == null) {
-				stream.setIndex(index);
-				return null;
+			if (elementMatches.isEmpty()) {
+				if (!elementSpec.match(codeAssist.lex(""))) {
+					stream.setIndex(index);
+					return elementMatches;
+				}
 			} else if (stream.isEof()) {
 				return elementMatches;
 			} else {
-				partialMatches = elementMatches;
+				matches = elementMatches;
 			}
 		}
-		return partialMatches;
+		return matches;
 	}
 
 	@Override

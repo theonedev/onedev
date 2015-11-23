@@ -58,7 +58,7 @@ public abstract class CodeAssist {
 	private final Map<String, Integer> tokenTypesByLiteral = new HashMap<>();
 
 	private final Map<String, Integer> tokenTypesByRule = new HashMap<>();
-
+	
 	public CodeAssist(Class<? extends Lexer> lexerClass) {
 		this(lexerClass, new String[]{getGrammarFile(lexerClass)}, getTokenFile(lexerClass));
 	}
@@ -342,7 +342,7 @@ public abstract class CodeAssist {
 		return Preconditions.checkNotNull(rules.get(ruleName));
 	}
 	
-	public TokenStream lex(String input) {
+	public final TokenStream lex(String input) {
 		try {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(input));
@@ -406,15 +406,15 @@ public abstract class CodeAssist {
 		List<CaretAwareText> texts = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
-		List<TokenNode> matches = spec.getPartialMatches(stream, null);
-		if (matches != null && stream.isEof()) {
-			if (!matches.isEmpty()) {
+		if (stream.isEof()) {
+			suggestions.addAll(spec.suggestFirst(null, matchWith, stream));
+		} else {
+			List<TokenNode> matches = spec.getPartialMatches(stream, null);
+			if (!matches.isEmpty() && stream.isEof()) {
 				for (TokenNode match: matches) {
 					ElementSpec matchSpec = (ElementSpec) match.getSpec();
 					suggestions.addAll(matchSpec.suggestNext(match.getParent(), matchWith, stream));
 				}
-			} else {
-				suggestions.addAll(spec.suggestFirst(null, matchWith, stream));
 			}
 		}
 
@@ -424,7 +424,7 @@ public abstract class CodeAssist {
 			String contentAfterReplaceStart = input.getContent().substring(replaceStart);
 			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			List<String> mandatories;
-			if (streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
+			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
 				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)

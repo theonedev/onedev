@@ -133,4 +133,12 @@ public class CodeAssistTest {
 		assertEquals("grammar:7", suggestions.get(0).toString());
 	}
 	
+	@Test
+	public void testSuggestOptionsSpec() {
+		List<CaretAwareText> suggestions;
+		
+		suggestions = codeAssist.suggest(new CaretAwareText(""), "optionsSpec");
+		System.out.println(suggestions);
+	}
+	
 }

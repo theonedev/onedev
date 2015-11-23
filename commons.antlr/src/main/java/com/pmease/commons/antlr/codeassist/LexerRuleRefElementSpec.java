@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.util.StringUtils;
 
@@ -87,12 +88,14 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 
 	@Override
 	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+		Preconditions.checkArgument(!stream.isEof());
+		
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();
 			return Lists.newArrayList(new TokenNode(this, parent, token));
 		} else {
-			return null;
+			return new ArrayList<>();
 		}
 	}
 	

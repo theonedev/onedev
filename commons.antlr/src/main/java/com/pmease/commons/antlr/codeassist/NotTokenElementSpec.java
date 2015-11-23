@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class NotTokenElementSpec extends ElementSpec {
@@ -51,13 +52,14 @@ public class NotTokenElementSpec extends ElementSpec {
 
 	@Override
 	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+		Preconditions.checkArgument(!stream.isEof());
+		
 		Token token = stream.getCurrentToken();
 		if (!notTokenTypes.contains(token.getType())) {
-			if (!stream.isEof())
-				stream.increaseIndex();
+			stream.increaseIndex();
 			return Lists.newArrayList(new TokenNode(this, parent, token));
 		} else {
-			return null;
+			return new ArrayList<>();
 		}
 	}
 	

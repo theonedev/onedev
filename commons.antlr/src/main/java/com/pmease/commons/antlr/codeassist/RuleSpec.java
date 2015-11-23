@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
+
 public class RuleSpec extends Spec {
 
 	private final String name;
@@ -37,33 +39,31 @@ public class RuleSpec extends Spec {
 
 	@Override
 	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
-		List<TokenNode> partialMatches = null;
+		Preconditions.checkArgument(!stream.isEof());
+		
+		List<TokenNode> matches = new ArrayList<>();
 		int maxMatchDistance = 0;
 		int index = stream.getIndex();
 		parent = new Node(this, parent, stream.getCurrentToken());
 		for (AlternativeSpec alternative: alternatives) {
 			List<TokenNode> alternativeMatches = alternative.getPartialMatches(stream, parent);
-			if (alternativeMatches != null) {
-				if (partialMatches == null)
-					partialMatches = new ArrayList<>();
-				for (TokenNode node: alternativeMatches) {
-					int matchDistance = node.getStart().getStopIndex();
-					if (matchDistance > maxMatchDistance) {
-						maxMatchDistance = matchDistance;
-						partialMatches.clear();
-						partialMatches.add(node);
-					} else if (matchDistance == maxMatchDistance) {
-						partialMatches.add(node);
-					} 
-				}
+			for (TokenNode node: alternativeMatches) {
+				int matchDistance = node.getStart().getStopIndex();
+				if (matchDistance > maxMatchDistance) {
+					maxMatchDistance = matchDistance;
+					matches.clear();
+					matches.add(node);
+				} else if (matchDistance == maxMatchDistance) {
+					matches.add(node);
+				} 
 			}
 			stream.setIndex(index);
 		}
 
-		if (partialMatches != null && !partialMatches.isEmpty())
-			stream.setIndex(stream.indexOf(partialMatches.get(0).getStart()) + 1);
+		if (!matches.isEmpty())
+			stream.setIndex(stream.indexOf(matches.get(0).getStart()) + 1);
 		
-		return partialMatches;
+		return matches;
 	}
 
 	@Override
