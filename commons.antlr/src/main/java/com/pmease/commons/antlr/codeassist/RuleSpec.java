@@ -1,7 +1,11 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -31,16 +35,16 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith, AssistStream stream) {
+	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
 		parent = new Node(this, parent);
 		List<ElementSuggestion> first = new ArrayList<>();
 		for (AlternativeSpec alternative: alternatives)
-			first.addAll(alternative.suggestFirst(parent, matchWith, stream));
+			first.addAll(alternative.suggestFirst(parent, matchWith, stream, new HashSet<>(checkedRules)));
 		return first;
 	}
 
 	@Override
-	public List<TokenNode> getPartialMatches(AssistStream stream, Node parent) {
+	public List<TokenNode> getPartialMatches(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		List<TokenNode> matches = new ArrayList<>();
@@ -48,7 +52,7 @@ public class RuleSpec extends Spec {
 		int index = stream.getIndex();
 		parent = new Node(this, parent, stream.getCurrentToken());
 		for (AlternativeSpec alternative: alternatives) {
-			List<TokenNode> alternativeMatches = alternative.getPartialMatches(stream, parent);
+			List<TokenNode> alternativeMatches = alternative.getPartialMatches(stream, parent, new HashMap<>(checkedIndexes));
 			for (TokenNode node: alternativeMatches) {
 				int matchDistance = node.getStart().getStopIndex();
 				if (matchDistance > maxMatchDistance) {
@@ -69,9 +73,9 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public boolean match(AssistStream stream) {
+	public boolean match(AssistStream stream, Map<String, Integer> checkedIndexes) {
 		for (AlternativeSpec alternative: alternatives) {
-			if (alternative.match(stream))
+			if (alternative.match(stream, new HashMap<>(checkedIndexes)))
 				return true;
 		}
 		return false;

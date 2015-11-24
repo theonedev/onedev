@@ -472,9 +472,9 @@ public abstract class CodeAssist implements Serializable {
 		
 		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
 		if (stream.isEof()) {
-			elementSuggestions.addAll(spec.suggestFirst(null, matchWith, stream));
+			elementSuggestions.addAll(spec.suggestFirst(null, matchWith, stream, new HashSet<String>()));
 		} else {
-			List<TokenNode> matches = spec.getPartialMatches(stream, null);
+			List<TokenNode> matches = spec.getPartialMatches(stream, null, new HashMap<String, Integer>());
 			if (!matches.isEmpty() && stream.isEof()) {
 				for (TokenNode match: matches) {
 					ElementSpec matchSpec = (ElementSpec) match.getSpec();
@@ -491,11 +491,11 @@ public abstract class CodeAssist implements Serializable {
 			AssistStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
-				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
+				if (elementSpec.matchOnce(streamAfterReplaceStart, new HashMap<String, Integer>())) {
 					if (streamAfterReplaceStart.getIndex() != 0)
 						replaceEnd = replaceStart + streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
 				} else if (elementSpec instanceof TokenElementSpec) {
-					List<String> tokenMandatories = elementSpec.getMandatories();
+					List<String> tokenMandatories = elementSpec.getMandatories(new HashSet<String>());
 					if (!tokenMandatories.isEmpty()) {
 						String toBeReplaced = tokenMandatories.get(0);
 						if (contentAfterReplaceStart.startsWith(toBeReplaced))
@@ -551,7 +551,7 @@ public abstract class CodeAssist implements Serializable {
 				elementSpec = alternativeSpec.getElements().get(specIndex+1);
 				if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE 
 						|| elementSpec.getMultiplicity() == Multiplicity.ONE) {
-					mandatories.addAll(elementSpec.getMandatories());
+					mandatories.addAll(elementSpec.getMandatories(new HashSet<String>()));
 				}
 				elementNode = new Node(elementSpec, elementNode.getParent());
 				mandatories.addAll(getMandatoriesAfter(elementNode));

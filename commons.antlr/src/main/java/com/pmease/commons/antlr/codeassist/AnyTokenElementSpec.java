@@ -2,6 +2,8 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
@@ -17,7 +19,7 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
 		return new ArrayList<ElementSuggestion>();
 	}
 
@@ -27,19 +29,19 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<String> getMandatories() {
+	public List<String> getMandatories(Set<String> checkedRules) {
 		return new ArrayList<>();
 	}
 
 	@Override
-	protected boolean matchOnce(AssistStream stream) {
+	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
 		if (!stream.isEof())
 			stream.increaseIndex();
 		return true;
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();

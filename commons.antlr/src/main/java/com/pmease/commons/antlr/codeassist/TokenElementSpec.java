@@ -16,8 +16,7 @@ public abstract class TokenElementSpec extends ElementSpec {
 	 * Get token type of this element
 	 * 
 	 * @return
-	 * 		token type of the element, 0 if the element refers to a fragment rule, -1 if the element 
-	 * 		represents EOF
+	 * 		token type of the element, 0 if the element refers to a fragment rule
 	 */
 	public int getType() {
 		return type;

@@ -1,7 +1,10 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
@@ -30,8 +33,13 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream) {
-		return getRule().suggestFirst(new Node(this, parent), matchWith, stream);
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
+		if (!checkedRules.contains(ruleName)) {
+			checkedRules.add(ruleName);
+			return getRule().suggestFirst(new Node(this, parent), matchWith, stream, checkedRules);
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	@Override
@@ -60,28 +68,46 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<String> getMandatories() {
-		List<String> mandatoryLiterals = new ArrayList<>();
-		List<AlternativeSpec> alternatives = getRule().getAlternatives();
-		if (alternatives.size() == 1) {
-			for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
-				if (elementSpec.getMultiplicity() == Multiplicity.ONE 
-						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					mandatoryLiterals.addAll(elementSpec.getMandatories());
+	public List<String> getMandatories(Set<String> checkedRules) {
+		if (!checkedRules.contains(ruleName)) {
+			checkedRules.add(ruleName);
+			List<String> mandatories = new ArrayList<>();
+			List<AlternativeSpec> alternatives = getRule().getAlternatives();
+			if (alternatives.size() == 1) {
+				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
+					if (elementSpec.getMultiplicity() == Multiplicity.ONE 
+							|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+						mandatories.addAll(elementSpec.getMandatories(new HashSet<>(checkedRules)));
+					}
 				}
-			}
-		} 
-		return mandatoryLiterals;
+			} 
+			return mandatories;
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	@Override
-	protected boolean matchOnce(AssistStream stream) {
-		return getRule().match(stream);
+	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
+		Integer index = checkedIndexes.get(ruleName);
+		if (index != null && index.intValue() == stream.getIndex()) {
+			return false;
+		} else {
+			checkedIndexes.put(ruleName, stream.getIndex());
+			return getRule().match(stream, checkedIndexes);
+		}
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent) {
-		return getRule().getPartialMatches(stream, new Node(this, parent, stream.getCurrentToken()));
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
+		Integer index = checkedIndexes.get(ruleName);
+		if (index != null && index.intValue() == stream.getIndex()) {
+			return new ArrayList<>();
+		} else {
+			checkedIndexes.put(ruleName, stream.getIndex());
+			parent = new Node(this, parent, stream.getCurrentToken());
+			return getRule().getPartialMatches(stream, parent, checkedIndexes);
+		}
 	}
 
 	@Override
