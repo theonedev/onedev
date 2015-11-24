@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
 
 public class NotTokenElementSpec extends ElementSpec {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final Set<Integer> notTokenTypes;
 	
 	public NotTokenElementSpec(CodeAssist codeAssist, String label, 
@@ -25,7 +27,7 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream) {
 		return new ArrayList<>();
 	}
 
@@ -40,7 +42,7 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(TokenStream stream) {
+	protected boolean matchOnce(AssistStream stream) {
 		if (stream.isEof()) {
 			return !notTokenTypes.contains(Token.EOF);
 		} else {
@@ -51,7 +53,7 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();

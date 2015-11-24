@@ -1,5 +1,5 @@
 pmease.commons.floating = {
-	init: function(floatingId, alignWith, alignment, closeCallback) {
+	init: function(floatingId, alignment, closeCallback) {
 		var $floating = $("#" + floatingId);
 		$floating.data("closeCallback", closeCallback);
 		
@@ -26,18 +26,13 @@ pmease.commons.floating = {
 		// use keydown as keypress does not work in chrome/safari
 		$(document).on("keydown", $floating.data("keydown"));
 		
-		if (alignWith.element) {
-			alignment.target = $("#" + alignWith.element);
-			alignment.index = alignWith.index;
-			alignment.target.addClass("floating-aligned");
-		} else {
-			alignment.target = alignWith;
-		}
+		if (alignment.target.element)
+			$(alignment.target.element).addClass("floating-aligned");
 		
 		$floating.data("alignment", alignment);
 		
 		$floating.data("ajaxCallComplete", function() {
-			$floating.show().align(alignment).trigger("open");
+			$floating.show().align($floating.data("alignment")).trigger("open");
 		});
 		Wicket.Event.subscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));
 	}, 
@@ -48,8 +43,8 @@ pmease.commons.floating = {
 		
 		var alignment = $floating.data("alignment");
 		
-		if (alignment.target instanceof jQuery || alignment.target instanceof HTMLElement)
-			alignment.target.removeClass("floating-aligned");
+		if (alignment.target.element)
+			$(alignment.target.element).removeClass("floating-aligned");
 		
 		$(document).off("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 		$(document).off("keydown", $floating.data("keydown"));

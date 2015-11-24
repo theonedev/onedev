@@ -5,8 +5,9 @@
  
 	var pageMargin = 8;
 	var scrollbarWidth = 20;
+	var textHeight = 25;
 	
-    $.fn.align = function( alignment ) {
+    $.fn.align = function(alignment) {
     	if (!this.parent().is("body")) 
     		jQuery("body").append(this);
     	if(this.css("position") != "absolute")
@@ -32,15 +33,23 @@
     	var targetWidth, targetHeight;
     	var offset = 0;
     	
-    	if (alignment.offset)
-    		offset = alignment.offset;
+    	if (alignment.placement.offset)
+    		offset = alignment.placement.offset;
 
-    	if (alignment.target instanceof jQuery || alignment.target instanceof HTMLElement) {
-    		var $targetEl = jQuery(alignment.target);
-    		targetLeft = $targetEl.offset().left;
-    		targetTop = $targetEl.offset().top;
-    		targetWidth = $targetEl.outerWidth();
-    		targetHeight = $targetEl.outerHeight();
+    	if (alignment.target.element) {
+    		var $targetEl = jQuery(alignment.target.element);
+    		if (alignment.target.index != undefined) {
+				var coord = getCaretCoordinates(alignment.target.element, alignment.target.index);
+    			targetLeft = coord.left + $targetEl.offset().left;
+    			targetWidth = 0;
+    			targetTop = coord.top + $targetEl.offset().top;
+    			targetHeight = textHeight;
+    		} else {
+        		targetLeft = $targetEl.offset().left;
+        		targetTop = $targetEl.offset().top;
+        		targetWidth = $targetEl.outerWidth();
+        		targetHeight = $targetEl.outerHeight();
+    		}
     	} else {
     		targetLeft = alignment.target.left;
     		targetTop = alignment.target.top;
@@ -48,35 +57,35 @@
     		targetHeight = alignment.target.height;
     	}
     	
-    	var anchor = targetHeight*alignment.targetY/100.0 + targetTop;
-    	top = anchor - alignment.y*height/100.0;
-    	if (alignment.targetY == 0 && alignment.y == 100)
+    	var anchor = targetHeight*alignment.placement.targetY/100.0 + targetTop;
+    	top = anchor - alignment.placement.y*height/100.0;
+    	if (alignment.placement.targetY == 0 && alignment.placement.y == 100)
     		top -= offset;
-    	else if (alignment.targetY == 100 && alignment.y == 0)
+    	else if (alignment.placement.targetY == 100 && alignment.placement.y == 0)
     		top += offset;
     		
     	if (top < borderTop || top + height > borderBottom) {
     		// flip  to see if height can fit into screen
-    		anchor = targetHeight*(100-alignment.targetY)/100.0 + targetTop;
-    		top = anchor - (100 - alignment.y) * height / 100.0;
+    		anchor = targetHeight*(100-alignment.placement.targetY)/100.0 + targetTop;
+    		top = anchor - (100 - alignment.placement.y) * height / 100.0;
 
-    		if (alignment.targetY == 0 && alignment.y == 100)
+    		if (alignment.placement.targetY == 0 && alignment.placement.y == 100)
         		top += offset;
-        	else if (alignment.targetY == 100 && alignment.y == 0)
+        	else if (alignment.placement.targetY == 100 && alignment.placement.y == 0)
         		top -= offset;
     		
     		if (top < borderTop || top + height> borderBottom) {
     			// does not fit even flipped, so we revert back
-    			anchor = targetHeight*alignment.targetY/100.0 + targetTop;
-    			top = anchor - alignment.y*height/100.0;
-    	    	if (alignment.targetY == 0 && alignment.y == 100)
+    			anchor = targetHeight*alignment.placement.targetY/100.0 + targetTop;
+    			top = anchor - alignment.placement.y*height/100.0;
+    	    	if (alignment.placement.targetY == 0 && alignment.placement.y == 100)
     	    		top -= offset;
-    	    	else if (alignment.targetY == 100 && alignment.y == 0)
+    	    	else if (alignment.placement.targetY == 100 && alignment.placement.y == 0)
     	    		top += offset;
     		}
     		
-    		if (alignment.targetX==100 && alignment.x==0 
-    				|| alignment.targetX==0 && alignment.x==100) {
+    		if (alignment.placement.targetX==100 && alignment.placement.x==0 
+    				|| alignment.placement.targetX==0 && alignment.placement.x==100) {
         		if (top + height > borderBottom)
         			top = borderBottom - height;
         		if (top < borderTop)
@@ -97,35 +106,35 @@
     	if (height < thisHeight) 
     		width += scrollbarWidth;
     	
-    	anchor = targetWidth*alignment.targetX/100.0 + targetLeft;
-    	left = anchor - alignment.x*width/100.0;
-    	if (alignment.targetX == 0 && alignment.x == 100)
+    	anchor = targetWidth*alignment.placement.targetX/100.0 + targetLeft;
+    	left = anchor - alignment.placement.x*width/100.0;
+    	if (alignment.placement.targetX == 0 && alignment.placement.x == 100)
     		left -= offset;
-    	else if (alignment.targetX == 100 && alignment.x == 0)
+    	else if (alignment.placement.targetX == 100 && alignment.placement.x == 0)
     		left += offset;
     		
     	if (left < borderLeft || left + width > borderRight) {
     		// flip  to see if width can fit into screen
-    		anchor = targetWidth*(100-alignment.targetX)/100.0 + targetLeft;
-    		left = anchor - (100 - alignment.x) * width / 100.0;
+    		anchor = targetWidth*(100-alignment.placement.targetX)/100.0 + targetLeft;
+    		left = anchor - (100 - alignment.placement.x) * width / 100.0;
 
-    		if (alignment.targetX == 0 && alignment.x == 100)
+    		if (alignment.placement.targetX == 0 && alignment.placement.x == 100)
         		left += offset;
-        	else if (alignment.targetX == 100 && alignment.x == 0)
+        	else if (alignment.placement.targetX == 100 && alignment.placement.x == 0)
         		left -= offset;
     		
     		if (left < borderLeft || left + width > borderRight) {
     			// does not fit even flipped, so we revert back
-    			anchor = targetWidth*alignment.targetX/100.0 + targetLeft;
-    			left = anchor - alignment.x*width/100.0;
-    	    	if (alignment.targetX == 0 && alignment.x == 100)
+    			anchor = targetWidth*alignment.placement.targetX/100.0 + targetLeft;
+    			left = anchor - alignment.placement.x*width/100.0;
+    	    	if (alignment.placement.targetX == 0 && alignment.placement.x == 100)
     	    		left -= offset;
-    	    	else if (alignment.targetX == 100 && alignment.x == 0)
+    	    	else if (alignment.placement.targetX == 100 && alignment.placement.x == 0)
     	    		left += offset;
     		}
     		
-    		if (alignment.targetY==100 && alignment.y==0 
-    				|| alignment.targetY==0 && alignment.y==100) {
+    		if (alignment.placement.targetY==100 && alignment.placement.y==0 
+    				|| alignment.placement.targetY==0 && alignment.placement.y==100) {
         		if (left + width > borderRight)
         			left = borderRight - width;
         		if (left < borderLeft)

@@ -1,25 +1,20 @@
 package com.pmease.commons.antlr.codeassist;
 
-import javax.annotation.Nullable;
-
 public class InputSuggestion extends InputStatus {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private final String description;
 	
-	public InputSuggestion(String content, int caret, @Nullable String description) {
+	public InputSuggestion(String content, int caret, String description) {
 		super(content, caret);
 		this.description = description;
 	}
 	
-	public InputSuggestion(String content, int caret) {
-		this(content, caret, null);
-	}
-
-	public InputSuggestion(String content) {
-		this(content, content.length());
+	public InputSuggestion(String content, String description) {
+		this(content, content.length(), description);
 	}
 	
-	@Nullable
 	public String getDescription() {
 		return description;
 	}

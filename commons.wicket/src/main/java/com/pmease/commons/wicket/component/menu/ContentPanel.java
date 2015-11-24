@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownHover;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
@@ -46,7 +46,7 @@ abstract class ContentPanel extends Panel {
 					if (menuItem instanceof Menu) {
 						final Menu menu = (Menu) menuItem;
 						item.add(new AttributeModifier("class", "submenu"));
-						item.add(new DropdownHover(menuItemComponent, new Alignment(100, 0, 0, 0)) {
+						item.add(new DropdownHover(menuItemComponent, new AlignPlacement(100, 0, 0, 0)) {
 
 							@Override
 							protected void onInitialize(FloatingPanel dropdown) {

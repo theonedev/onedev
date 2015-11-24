@@ -9,38 +9,38 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import com.pmease.commons.wicket.component.floating.AlignWith;
-import com.pmease.commons.wicket.component.floating.AlignWithComponent;
-import com.pmease.commons.wicket.component.floating.AlignWithRect;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
+import com.pmease.commons.wicket.component.floating.AlignTarget;
+import com.pmease.commons.wicket.component.floating.ComponentTarget;
+import com.pmease.commons.wicket.component.floating.RectTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
 public abstract class DropdownLink extends AjaxLink<Void> {
 
-	private final boolean alignWithMouse;
+	private final boolean alignTargetMouse;
 	
-	private final Alignment alignment;
+	private final AlignPlacement placement;
 	
 	private FloatingPanel dropdown;
 
 	public DropdownLink(String id) {
-		this(id, Alignment.bottom(0));
+		this(id, AlignPlacement.bottom(0));
 	}
 	
-	public DropdownLink(String id, Alignment alignment) {
-		this(id, false, alignment);
+	public DropdownLink(String id, AlignPlacement placement) {
+		this(id, false, placement);
 	}
 
-	public DropdownLink(String id, boolean alignWithMouse) {
-		this(id, alignWithMouse, Alignment.bottom(0));
+	public DropdownLink(String id, boolean alignTargetMouse) {
+		this(id, alignTargetMouse, AlignPlacement.bottom(0));
 	}
 	
-	public DropdownLink(String id, boolean alignWithMouse, Alignment alignment) {
+	public DropdownLink(String id, boolean alignTargetMouse, AlignPlacement placement) {
 		super(id);
 		
-		this.alignWithMouse = alignWithMouse;
-		this.alignment = alignment;
+		this.alignTargetMouse = alignTargetMouse;
+		this.placement = placement;
 	}
 	
 	@Override
@@ -68,18 +68,18 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 	@Override
 	public void onClick(AjaxRequestTarget target) {
 		if (dropdown == null) { 
-			AlignWith alignFloatingWith;
-			if (alignWithMouse) {
+			AlignTarget alignFloatingWith;
+			if (alignTargetMouse) {
 				int mouseX = RequestCycle.get().getRequest().getRequestParameters()
 						.getParameterValue("mouseX").toInt();
 				int mouseY = RequestCycle.get().getRequest().getRequestParameters()
 						.getParameterValue("mouseY").toInt();
-				alignFloatingWith = AlignWithRect.ofMouse(mouseX, mouseY);
+				alignFloatingWith = RectTarget.ofMouse(mouseX, mouseY);
 			} else { 
-				alignFloatingWith =  new AlignWithComponent(this);
+				alignFloatingWith =  new ComponentTarget(this);
 			} 
 			
-			dropdown = new FloatingPanel(target, alignFloatingWith, alignment) {
+			dropdown = new FloatingPanel(target, alignFloatingWith, placement) {
 	
 				@Override
 				protected void onInitialize() {

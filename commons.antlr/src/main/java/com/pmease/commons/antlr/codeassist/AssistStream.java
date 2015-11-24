@@ -6,13 +6,13 @@ import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Preconditions;
 
-public class TokenStream {
+public class AssistStream {
 	
 	private final List<Token> tokens;
 	
 	private int index;
 	
-	public TokenStream(List<Token> tokens) {
+	public AssistStream(List<Token> tokens) {
 		Preconditions.checkArgument(!tokens.isEmpty() && tokens.get(tokens.size()-1).getType() == Token.EOF);
 		this.tokens = tokens;
 	}

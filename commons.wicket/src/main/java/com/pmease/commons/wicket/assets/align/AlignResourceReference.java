@@ -1,6 +1,13 @@
 package com.pmease.commons.wicket.assets.align;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.markup.head.HeaderItem;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+
+import com.pmease.commons.wicket.assets.textareacaretposition.TextareaCaretPositionResourceReference;
 
 public class AlignResourceReference extends JavaScriptResourceReference {
 
@@ -12,4 +19,11 @@ public class AlignResourceReference extends JavaScriptResourceReference {
 		super(AlignResourceReference.class, "jquery.align.js");
 	}
 
+	@Override
+	public Iterable<? extends HeaderItem> getDependencies() {
+		List<HeaderItem> dependencies = new ArrayList<>();
+		dependencies.add(JavaScriptHeaderItem.forReference(TextareaCaretPositionResourceReference.INSTANCE));
+		return dependencies;
+	}
+	
 }

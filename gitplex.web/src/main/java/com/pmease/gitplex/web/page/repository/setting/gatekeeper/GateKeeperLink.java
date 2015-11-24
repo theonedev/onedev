@@ -5,7 +5,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 
@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 public abstract class GateKeeperLink extends DropdownLink {
 
 	public GateKeeperLink(String id) {
-		super(id, true, new Alignment(50, 50, 50, 50));
+		super(id, true, new AlignPlacement(50, 50, 50, 50));
 	}
 
 	@Override

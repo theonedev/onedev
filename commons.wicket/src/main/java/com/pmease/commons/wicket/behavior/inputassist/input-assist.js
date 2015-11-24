@@ -9,7 +9,7 @@ pmease.commons.inputassist = {
 		}, 100);
 		
 		$input.data("update", function($item) {
-			var value = $item.data("input");
+			var value = $item.data("content");
 			$input.val(value);
 			var caret = $item.data("caret");
 			if (caret != undefined)

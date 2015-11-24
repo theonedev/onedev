@@ -1,7 +1,11 @@
 package com.pmease.commons.antlr.codeassist;
 
-public class InputStatus {
+import java.io.Serializable;
+
+public class InputStatus implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private final String content;
 	
 	private final int caret;

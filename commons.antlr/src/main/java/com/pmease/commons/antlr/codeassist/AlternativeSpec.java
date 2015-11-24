@@ -7,6 +7,8 @@ import com.google.common.base.Preconditions;
 
 public class AlternativeSpec extends Spec {
 
+	private static final long serialVersionUID = 1L;
+
 	private final String label;
 	
 	private final List<ElementSpec> elements;
@@ -27,7 +29,7 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
+	public List<TokenNode> getPartialMatches(AssistStream stream, Node parent) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		parent = new Node(this, parent, stream.getCurrentToken());
@@ -50,7 +52,7 @@ public class AlternativeSpec extends Spec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, AssistStream stream) {
 		List<ElementSuggestion> first = new ArrayList<>();
 		parent = new Node(this, parent);
 		for (ElementSpec element: elements) {
@@ -62,7 +64,7 @@ public class AlternativeSpec extends Spec {
 	}
 
 	@Override
-	public boolean match(TokenStream stream) {
+	public boolean match(AssistStream stream) {
 		int index = stream.getIndex();
 		for (ElementSpec element: elements) {
 			if (!element.match(stream)) {

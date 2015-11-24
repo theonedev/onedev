@@ -8,6 +8,8 @@ import com.google.common.collect.Lists;
 
 public abstract class ElementSpec extends Spec {
 	
+	private static final long serialVersionUID = 1L;
+
 	public enum Multiplicity{ONE, ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE};
 	
 	private final String label;
@@ -30,7 +32,7 @@ public abstract class ElementSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
+	public List<TokenNode> getPartialMatches(AssistStream stream, Node parent) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		if (multiplicity == Multiplicity.ONE || multiplicity == Multiplicity.ZERO_OR_ONE) {
@@ -50,13 +52,13 @@ public abstract class ElementSpec extends Spec {
 		}
 	}
 	
-	protected abstract List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent);
+	protected abstract List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent);
 
 	public abstract CaretMove skipMandatories(String content, int offset);
 	
 	public abstract List<String> getMandatories();
 	
-	public List<ElementSuggestion> suggestNext(Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> suggestNext(Node parent, String matchWith, AssistStream stream) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		if (multiplicity == Multiplicity.ONE_OR_MORE || multiplicity == Multiplicity.ZERO_OR_MORE) 
 			suggestions.addAll(suggestFirst(parent, matchWith, stream));
@@ -64,7 +66,7 @@ public abstract class ElementSpec extends Spec {
 		return suggestions;
 	}
 	
-	private List<ElementSuggestion> doSuggestNext(Node parent, String matchWith, TokenStream stream) {
+	private List<ElementSuggestion> doSuggestNext(Node parent, String matchWith, AssistStream stream) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		AlternativeSpec alternativeSpec = (AlternativeSpec) parent.getSpec();
 		int specIndex = alternativeSpec.getElements().indexOf(this);
@@ -84,7 +86,7 @@ public abstract class ElementSpec extends Spec {
 	}
 	
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, AssistStream stream) {
 		List<InputSuggestion> texts = codeAssist.suggest(this, parent, matchWith, stream);
 		if (texts != null)
 			return Lists.newArrayList(new ElementSuggestion(new Node(this, parent), texts));
@@ -92,10 +94,10 @@ public abstract class ElementSpec extends Spec {
 			return doSuggestFirst(parent, matchWith, stream);
 	}
 
-	protected abstract List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream);
+	protected abstract List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream);
 	
 	@Override
-	public boolean match(TokenStream stream) {
+	public boolean match(AssistStream stream) {
 		if (multiplicity == Multiplicity.ONE) {
 			return matchOnce(stream);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
@@ -114,6 +116,6 @@ public abstract class ElementSpec extends Spec {
 		}
 	}
 	
-	protected abstract boolean matchOnce(TokenStream stream);
+	protected abstract boolean matchOnce(AssistStream stream);
 
 }

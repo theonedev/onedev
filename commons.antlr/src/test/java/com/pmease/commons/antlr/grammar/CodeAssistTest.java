@@ -23,7 +23,7 @@ import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.RuleSpec;
-import com.pmease.commons.antlr.codeassist.TokenStream;
+import com.pmease.commons.antlr.codeassist.AssistStream;
 
 public class CodeAssistTest {
 
@@ -37,9 +37,11 @@ public class CodeAssistTest {
 					"com/pmease/commons/antlr/LexUnicode.g4"
 			}, "ANTLRv4Parser.tokens") {
 
+				private static final long serialVersionUID = 1L;
+
 				@Override
 				protected List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-						String matchWith, TokenStream stream) {
+						String matchWith, AssistStream stream) {
 					return suggester.suggest(spec, parent, matchWith, stream);
 				}
 
@@ -50,7 +52,7 @@ public class CodeAssistTest {
 		suggester = new Suggester() {
 
 			@Override
-			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
+			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, AssistStream stream) {
 				return null;
 			}
 			
@@ -183,15 +185,15 @@ public class CodeAssistTest {
 		suggester = new Suggester() {
 
 			@Override
-			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, TokenStream stream) {
+			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, AssistStream stream) {
 				if (spec instanceof RuleRefElementSpec) {
 					RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) spec;
 					if (ruleRefElementSpec.getRuleName().equals("id")) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						if ("hello".startsWith(matchWith))
-							suggestions.add(new InputSuggestion("hello"));
+							suggestions.add(new InputSuggestion("hello", "hello"));
 						if ("world".startsWith(matchWith))
-							suggestions.add(new InputSuggestion("world"));
+							suggestions.add(new InputSuggestion("world", "world"));
 						return suggestions;
 					}
 				}
@@ -235,6 +237,6 @@ public class CodeAssistTest {
 	
 	interface Suggester {
 		List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-				String matchWith, TokenStream stream);
+				String matchWith, AssistStream stream);
 	}
 }

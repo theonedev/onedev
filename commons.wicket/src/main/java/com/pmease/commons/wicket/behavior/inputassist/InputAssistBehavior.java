@@ -30,9 +30,9 @@ import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.textareacaretposition.TextareaCaretPositionResourceReference;
-import com.pmease.commons.wicket.component.floating.AlignWith;
-import com.pmease.commons.wicket.component.floating.AlignWithComponent;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
+import com.pmease.commons.wicket.component.floating.AlignTarget;
+import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
@@ -84,10 +84,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-		String input = params.getParameterValue("input").toString();
-		Integer caret = params.getParameterValue("caret").toOptionalInteger();
+		String inputContent = params.getParameterValue("input").toString();
+		Integer inputCaret = params.getParameterValue("caret").toOptionalInteger();
 		
-		List<InputError> errors = joinErrors(getErrors(input));
+		List<InputError> errors = joinErrors(getErrors(inputContent));
 		String json;
 		try {
 			json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(errors);
@@ -100,15 +100,15 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		
 		final List<InputSuggestion> suggestions;
 		
-		if (caret != null)
-			suggestions = getSuggestions(new InputStatus(input, caret));
+		if (inputCaret != null)
+			suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
 		else
 			suggestions = new ArrayList<>();
 
 		if (!suggestions.isEmpty()) {
-			int anchor = getAnchor(input.substring(0, caret));
+			int anchor = getAnchor(inputContent.substring(0, inputCaret));
 			if (dropdown == null) {
-				dropdown = new FloatingPanel(target, new AlignWithComponent(getComponent(), anchor), Alignment.bottom(0)) {
+				dropdown = new FloatingPanel(target, new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0)) {
 
 					@Override
 					protected Component newContent(String id) {
@@ -131,12 +131,12 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				content.replaceWith(newContent);
 				target.add(newContent);
 
+				AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
+				script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
+				target.prependJavaScript(script);
+				
 				script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
 						getComponent().getMarkupId(), dropdown.getMarkupId());
-				target.appendJavaScript(script);
-				
-				AlignWith alignWith = new AlignWithComponent(getComponent(), anchor);
-				script = String.format("$('#%s').align(%s);", dropdown.getMarkupId(), alignWith.toJSON());
 				target.appendJavaScript(script);
 			}
 		} else if (dropdown != null) {

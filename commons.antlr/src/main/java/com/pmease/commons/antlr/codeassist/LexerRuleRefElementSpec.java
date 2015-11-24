@@ -12,6 +12,8 @@ import com.pmease.commons.util.StringUtils;
 
 public class LexerRuleRefElementSpec extends TokenElementSpec {
 
+	private static final long serialVersionUID = 1L;
+
 	private final String ruleName;
 	
 	private transient Optional<RuleSpec> rule;
@@ -34,7 +36,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream) {
 		if (getRule() != null)
 			return getRule().suggestFirst(new Node(this, parent), matchWith, stream);
 		else
@@ -91,7 +93,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(TokenStream stream) {
+	protected boolean matchOnce(AssistStream stream) {
 		if (stream.isEof()) {
 			return false;
 		} else if (stream.getCurrentToken().getType() == type) {
@@ -103,7 +105,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();

@@ -10,8 +10,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.wicket.component.floating.AlignWithComponent;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
+import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
@@ -19,33 +19,33 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 
 	private static final int DEFAULT_HOVER_DELAY = 350;
 	
-	private final Component alignWith;
+	private final Component alignTarget;
 	
-	private final Alignment alignment;
+	private final AlignPlacement placement;
 	
 	private final int hoverDelay;
 	
 	private FloatingPanel dropdown;
 	
 	public DropdownHover() {
-		this(Alignment.bottom(0));
+		this(AlignPlacement.bottom(0));
 	}
 	
-	public DropdownHover(Alignment alignment) {
-		this(alignment, DEFAULT_HOVER_DELAY);
+	public DropdownHover(AlignPlacement placement) {
+		this(placement, DEFAULT_HOVER_DELAY);
 	}
 	
-	public DropdownHover(Alignment alignment, int hoverDelay) {
-		this(null, alignment, hoverDelay);
+	public DropdownHover(AlignPlacement placement, int hoverDelay) {
+		this(null, placement, hoverDelay);
 	}
 	
-	public DropdownHover(@Nullable Component alignWith, Alignment alignment) {
-		this(alignWith, alignment, DEFAULT_HOVER_DELAY);
+	public DropdownHover(@Nullable Component alignTarget, AlignPlacement placement) {
+		this(alignTarget, placement, DEFAULT_HOVER_DELAY);
 	}
 
-	public DropdownHover(@Nullable Component alignWith, Alignment alignment, int hoverDelay) {
-		this.alignWith = alignWith;
-		this.alignment = alignment;
+	public DropdownHover(@Nullable Component alignTarget, AlignPlacement placement, int hoverDelay) {
+		this.alignTarget = alignTarget;
+		this.placement = placement;
 		this.hoverDelay = hoverDelay;
 	}
 	
@@ -56,7 +56,7 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		if (dropdown == null) {
-			dropdown = new FloatingPanel(target, new AlignWithComponent(alignWith!=null?alignWith:getComponent()), alignment) {
+			dropdown = new FloatingPanel(target, new ComponentTarget(alignTarget!=null?alignTarget:getComponent()), placement) {
 				
 				@Override
 				protected void onInitialize() {

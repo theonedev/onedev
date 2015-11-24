@@ -40,7 +40,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
@@ -341,7 +341,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		}));
 		
-		compareHead.add(new MenuLink("comparisonSelector", new Alignment(50, 100, 50, 0)) {
+		compareHead.add(new MenuLink("comparisonSelector", new AlignPlacement(50, 100, 50, 0)) {
 
 			@Override
 			protected void onInitialize(FloatingPanel dropdown) {

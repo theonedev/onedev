@@ -69,8 +69,8 @@ gitplex.symboltooltip = {
 					}
 				});
 
-				container.tooltip.alignment = {x: 0, y:0, offset:2, showIndicator: false, target: {element: symbolEl, x: 0, y: 100}};
-				$tooltip.align();
+				$tooltip.data("alignment", {position: {x: 0, y:0, offset:2, targetX: 0, targetY: 100}, target: {element: symbolEl}});
+				$tooltip.align($tooltip.data("alignment"));
 
 				queryCallback(revision, $symbol.text());
 				
@@ -79,7 +79,9 @@ gitplex.symboltooltip = {
 		};
 	},
 	doneQuery: function(contentId) {
-		$(".symbol-tooltip").empty().append($("#" + contentId).children()).align();
+		var $tooltip = $(".symbol-tooltip");
+		$tooltip.empty().append($("#" + contentId).children());
+		$tooltip.align($tooltip.data("alignment"));
 	},
 	removeTooltip: function(container) {
 		if (container.tooltip) {

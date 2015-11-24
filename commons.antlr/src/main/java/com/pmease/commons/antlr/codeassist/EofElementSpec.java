@@ -9,12 +9,14 @@ import com.google.common.base.Preconditions;
 
 public class EofElementSpec extends TokenElementSpec {
 
+	private static final long serialVersionUID = 1L;
+
 	public EofElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity) {
 		super(codeAssist, label, multiplicity, Token.EOF);
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream) {
 		return new ArrayList<ElementSuggestion>();
 	}
 
@@ -29,12 +31,12 @@ public class EofElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(TokenStream stream) {
+	protected boolean matchOnce(AssistStream stream) {
 		return stream.isEof();
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent) {
 		Preconditions.checkArgument(!stream.isEof());
 		return new ArrayList<>();
 	}

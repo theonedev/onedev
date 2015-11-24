@@ -7,6 +7,8 @@ import com.google.common.base.Preconditions;
 
 public class RuleRefElementSpec extends ElementSpec {
 
+	private static final long serialVersionUID = 1L;
+
 	private final String ruleName;
 	
 	private transient RuleSpec rule;
@@ -28,7 +30,7 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream) {
 		return getRule().suggestFirst(new Node(this, parent), matchWith, stream);
 	}
 
@@ -73,12 +75,12 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(TokenStream stream) {
+	protected boolean matchOnce(AssistStream stream) {
 		return getRule().match(stream);
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(TokenStream stream, Node parent) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent) {
 		return getRule().getPartialMatches(stream, new Node(this, parent, stream.getCurrentToken()));
 	}
 

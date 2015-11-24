@@ -9,6 +9,8 @@ import com.google.common.base.Preconditions;
 
 public class RuleSpec extends Spec {
 
+	private static final long serialVersionUID = 1L;
+
 	private final String name;
 	
 	private final List<AlternativeSpec> alternatives;
@@ -29,7 +31,7 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith, TokenStream stream) {
+	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith, AssistStream stream) {
 		parent =  new Node(this, parent);
 		List<ElementSuggestion> first = new ArrayList<>();
 		for (AlternativeSpec alternative: alternatives)
@@ -38,7 +40,7 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> getPartialMatches(TokenStream stream, Node parent) {
+	public List<TokenNode> getPartialMatches(AssistStream stream, Node parent) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		List<TokenNode> matches = new ArrayList<>();
@@ -67,7 +69,7 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public boolean match(TokenStream stream) {
+	public boolean match(AssistStream stream) {
 		for (AlternativeSpec alternative: alternatives) {
 			if (alternative.match(stream))
 				return true;

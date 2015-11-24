@@ -15,7 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.dropdown.DropdownHover;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.LinkItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -99,7 +99,7 @@ public abstract class LayoutPage extends BasePage {
 				// Use dropdown panel to mimic tooltip as the bootstrap tooltip has the issue 
 				// of disappearing when we adjust margin property when hover over the link
 				
-				prevLink.add(new DropdownHover(prevLink, new Alignment(0, 50, 100, 50, 0), 100) {
+				prevLink.add(new DropdownHover(prevLink, new AlignPlacement(0, 50, 100, 50, 0), 100) {
 
 					@Override
 					protected void onInitialize(FloatingPanel dropdown) {
@@ -122,7 +122,7 @@ public abstract class LayoutPage extends BasePage {
 				mainHead.add(new WebMarkupContainer("tooltip").setVisible(false));
 			}
 			mainHead.add(new UserLink("user", new UserModel(user), AvatarMode.AVATAR));
-			mainHead.add(new MenuLink("userMenuTrigger", new Alignment(50, 100, 50, 0, 8)) {
+			mainHead.add(new MenuLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
 
 				@Override
 				protected List<MenuItem> getMenuItems() {

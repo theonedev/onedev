@@ -9,7 +9,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.floating.Alignment;
+import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 
 @SuppressWarnings("serial")
@@ -19,16 +19,16 @@ public abstract class MenuLink extends DropdownLink {
 		super(id);
 	}
 	
-	public MenuLink(String id, Alignment alignment) {
-		super(id, alignment);
+	public MenuLink(String id, AlignPlacement placement) {
+		super(id, placement);
 	}
 
-	public MenuLink(String id, boolean alignWithMouse) {
-		super(id, alignWithMouse);
+	public MenuLink(String id, boolean alignTargetMouse) {
+		super(id, alignTargetMouse);
 	}
 	
-	public MenuLink(String id, boolean alignWithMouse, Alignment alignment) {
-		super(id, alignWithMouse, alignment);
+	public MenuLink(String id, boolean alignTargetMouse, AlignPlacement placement) {
+		super(id, alignTargetMouse, placement);
 	}
 	
 	@Override

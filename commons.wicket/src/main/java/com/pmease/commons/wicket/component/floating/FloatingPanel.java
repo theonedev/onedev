@@ -12,9 +12,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 
@@ -23,11 +20,11 @@ public abstract class FloatingPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
-	private final AlignWith alignWith;
+	private final AlignTarget alignTarget;
 	
-	private final Alignment alignment;
+	private final AlignPlacement placement;
 	
-	public FloatingPanel(AjaxRequestTarget target, AlignWith alignWith, Alignment alignment) {
+	public FloatingPanel(AjaxRequestTarget target, AlignTarget alignTarget, AlignPlacement placement) {
 		super(((CommonPage)target.getPage()).getStandalones().newChildId());
 		
 		CommonPage page = (CommonPage) target.getPage(); 
@@ -35,8 +32,8 @@ public abstract class FloatingPanel extends Panel {
 		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		target.add(this);
 
-		this.alignWith = alignWith;
-		this.alignment = alignment;
+		this.alignTarget = alignTarget;
+		this.placement = placement;
 	}
 
 	@Override
@@ -63,17 +60,8 @@ public abstract class FloatingPanel extends Panel {
 						new CssResourceReference(FloatingPanel.class, "floating.css")));
 				response.render(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
 				
-				ObjectMapper mapper = AppLoader.getInstance(ObjectMapper.class);
-				String alignmentJson;
-				try {
-					alignmentJson = mapper.writeValueAsString(alignment);
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-				
-				String script = String.format("pmease.commons.floating.init('%s', %s, %s, %s);", 
-						getMarkupId(true), alignWith.toJSON(), 
-						alignmentJson, getCallbackFunction());
+				String script = String.format("pmease.commons.floating.init('%s', {target:%s, placement:%s}, %s);", 
+						getMarkupId(true), alignTarget, placement, getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 

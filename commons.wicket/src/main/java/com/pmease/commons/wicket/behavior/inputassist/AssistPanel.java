@@ -33,7 +33,7 @@ class AssistPanel extends Panel {
 				WebMarkupContainer link = new WebMarkupContainer("link");
 				link.add(new Label("label", suggestion.getContent()));
 				item.add(link);
-				item.add(AttributeAppender.append("data-input", suggestion.getContent()));
+				item.add(AttributeAppender.append("data-content", suggestion.getContent()));
 				item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));
 			}
 

@@ -5,7 +5,7 @@ import java.util.List;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.TokenStream;
+import com.pmease.commons.antlr.codeassist.AssistStream;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 
 @SuppressWarnings("serial")
@@ -17,7 +17,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-			String matchWith, TokenStream stream) {
+			String matchWith, AssistStream stream) {
 		return null;
 	}
 

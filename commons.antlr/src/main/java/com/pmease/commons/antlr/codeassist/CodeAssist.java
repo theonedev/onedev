@@ -2,6 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.tika.io.IOUtils;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.antlr.AntlrUtils;
@@ -52,9 +53,13 @@ import com.pmease.commons.antlr.ANTLRv4Parser.SetElementContext;
 import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
 import com.pmease.commons.util.StringUtils;
 
-public abstract class CodeAssist {
+public abstract class CodeAssist implements Serializable {
 
-	private final Constructor<? extends Lexer> lexerConstructor;
+	private static final long serialVersionUID = 1L;
+
+	private final Class<? extends Lexer> lexerClass;
+	
+	private transient Constructor<? extends Lexer> lexerCtor;
 	
 	private final Map<String, RuleSpec> rules = new HashMap<>();
 	
@@ -76,20 +81,13 @@ public abstract class CodeAssist {
 	 * 			generated tokens file in class path, relative to class path root
 	 */
 	public CodeAssist(Class<? extends Lexer> lexerClass, String grammarFiles[], String tokenFile) {
-		try {
-			this.lexerConstructor = lexerClass.getConstructor(CharStream.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
-		}
-		
+		this.lexerClass = lexerClass;
 		tokenTypesByRule.put("EOF", Token.EOF);
 		
 		try (InputStream is = getClass().getClassLoader().getResourceAsStream(tokenFile)) {
-			Properties props = new Properties();
-			props.load(is);
-			for (Map.Entry<Object, Object> entry: props.entrySet()) {
-				String key = (String) entry.getKey();
-				Integer value = Integer.valueOf((String) entry.getValue());
+			for (String line: IOUtils.readLines(is)) {
+				String key = StringUtils.substringBeforeLast(line, "=");
+				Integer value = Integer.valueOf(StringUtils.substringAfterLast(line, "="));
 				if (key.startsWith("'"))
 					tokenTypesByLiteral.put(key.substring(1, key.length()-1), value);
 				else
@@ -121,6 +119,17 @@ public abstract class CodeAssist {
 				throw new RuntimeException(e);
 			}
 		}
+	}
+	
+	private Constructor<? extends Lexer> getLexerCtor() {
+		if (lexerCtor == null) {
+			try {
+				lexerCtor = lexerClass.getConstructor(CharStream.class);
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new RuntimeException(e);
+			}
+		} 
+		return lexerCtor;
 	}
 	
 	private RuleSpec newRule(RuleSpecContext ruleSpecContext) {
@@ -350,10 +359,10 @@ public abstract class CodeAssist {
 		return rules.get(ruleName);
 	}
 	
-	public final TokenStream lex(String content) {
+	public final AssistStream lex(String content) {
 		try {
 			List<Token> tokens = new ArrayList<>();
-			Lexer lexer = lexerConstructor.newInstance(new ANTLRInputStream(content));
+			Lexer lexer = getLexerCtor().newInstance(new ANTLRInputStream(content));
 			lexer.removeErrorListeners();
 			Token token;
 			do {
@@ -362,7 +371,7 @@ public abstract class CodeAssist {
 					tokens.add(token);
 			} while (token.getType() != Token.EOF);
 			
-			return new TokenStream(tokens);
+			return new AssistStream(tokens);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			throw new RuntimeException(e);
@@ -374,7 +383,7 @@ public abstract class CodeAssist {
 		RuleSpec rule = Preconditions.checkNotNull(getRule(ruleName));
 		
 		String contentBeforeCaret = inputStatus.getContentBeforeCaret();
-		TokenStream stream = lex(contentBeforeCaret);
+		AssistStream stream = lex(contentBeforeCaret);
 		
 		if (!stream.isEof()) {
 			Token lastToken = stream.getToken(stream.size()-2);
@@ -390,7 +399,7 @@ public abstract class CodeAssist {
 				matchWith = stream.getToken(stream.size()-2).getText();
 				List<Token> tokens = stream.getTokens();
 				tokens.remove(tokens.size()-2);
-				stream = new TokenStream(tokens);
+				stream = new AssistStream(tokens);
 				mergeSuggestions(suggest(rule, stream, inputStatus, matchWith), inputSuggestions);
 			}
 		} else {
@@ -411,7 +420,7 @@ public abstract class CodeAssist {
 		}
 	}
 	
-	private List<InputSuggestion> suggest(RuleSpec spec, TokenStream stream, 
+	private List<InputSuggestion> suggest(RuleSpec spec, AssistStream stream, 
 			InputStatus inputStatus, String matchWith) {
 		List<InputSuggestion> inputSuggestions = new ArrayList<>();
 		
@@ -432,7 +441,7 @@ public abstract class CodeAssist {
 		for (ElementSuggestion elementSuggestion: elementSuggestions) {
 			int replaceEnd = inputStatus.getCaret();
 			String contentAfterReplaceStart = inputStatus.getContent().substring(replaceStart);
-			TokenStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
+			AssistStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
 				if (elementSpec.matchOnce(streamAfterReplaceStart)) {
@@ -463,7 +472,7 @@ public abstract class CodeAssist {
 				String newContent;
 				if (stream.size() > 1) { 
 					newContent = before + inputSuggestion.getContent();
-					TokenStream newStream = lex(newContent);
+					AssistStream newStream = lex(newContent);
 					if (newStream.size() >= stream.size()) {
 						Token lastToken = stream.getToken(stream.size()-2);
 						Token newToken = newStream.getToken(stream.size()-2);
@@ -487,7 +496,7 @@ public abstract class CodeAssist {
 					String prevNewContent = newContent;
 					newContent += mandatory;
 					if (tokenTypesByLiteral.containsKey(mandatory)) {
-						TokenStream newStream = lex(newContent);
+						AssistStream newStream = lex(newContent);
 						if (!newStream.isEof()) {
 							Token lastToken = newStream.getToken(newStream.size()-2);
 							if (lastToken.getStartIndex() != newContent.length() - mandatory.length()
@@ -508,7 +517,7 @@ public abstract class CodeAssist {
 					caret += skipMandatoriesAfter(elementSuggestion.getNode(), newContent.substring(caret), 0);
 				}
 				
-				inputSuggestions.add(new InputSuggestion(newContent, caret));
+				inputSuggestions.add(new InputSuggestion(newContent, caret, inputSuggestion.getContent()));
 			}
 		}
 		return inputSuggestions;
@@ -564,6 +573,6 @@ public abstract class CodeAssist {
 	}
 	
 	protected abstract List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-			String matchWith, TokenStream stream);
+			String matchWith, AssistStream stream);
 	
 }
