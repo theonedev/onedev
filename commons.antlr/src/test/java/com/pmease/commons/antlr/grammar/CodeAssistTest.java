@@ -154,11 +154,11 @@ public class CodeAssistTest {
 		assertEquals(8, suggestions.size());
 		assertEquals("grammar grammar1;rule1:TOKEN1;catch[]{}:36", suggestions.get(0).toString());
 		assertEquals("grammar grammar1;rule1:TOKEN1;finally{}:38", suggestions.get(1).toString());
-		assertEquals("grammar grammar1;rule1:TOKEN1;/**:;:33", suggestions.get(2).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;/**:33", suggestions.get(2).toString());
 		assertEquals("grammar grammar1;rule1:TOKEN1;public:;:36", suggestions.get(3).toString());
 		assertEquals("grammar grammar1;rule1:TOKEN1;private:;:37", suggestions.get(4).toString());
 		assertEquals("grammar grammar1;rule1:TOKEN1;protected:;:39", suggestions.get(5).toString());
-		assertEquals("grammar grammar1;rule1:TOKEN1;fragment:;:38", suggestions.get(6).toString());
+		assertEquals("grammar grammar1;rule1:TOKEN1;fragment:38", suggestions.get(6).toString());
 		assertEquals("grammar grammar1;rule1:TOKEN1;mode;:34", suggestions.get(7).toString());
 	}
 	
@@ -169,7 +169,7 @@ public class CodeAssistTest {
 		suggestions = codeAssist.suggest(new InputStatus(""), "optionsSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("options{}:8", suggestions.get(0).toString());
-		
+
 		suggestions = codeAssist.suggest(new InputStatus("options{100}", 2), "optionsSpec");
 		assertEquals(1, suggestions.size());
 		assertEquals("options{100}:8", suggestions.get(0).toString());

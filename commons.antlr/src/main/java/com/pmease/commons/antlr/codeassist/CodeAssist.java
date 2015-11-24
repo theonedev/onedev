@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +26,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.tika.io.IOUtils;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.antlr.AntlrUtils;
 import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.ANTLRv4Parser;
 import com.pmease.commons.antlr.ANTLRv4Parser.AlternativeContext;
@@ -50,6 +50,7 @@ import com.pmease.commons.antlr.ANTLRv4Parser.ParserRuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.SetElementContext;
+import com.pmease.commons.antlr.AntlrUtils;
 import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
 import com.pmease.commons.util.StringUtils;
 
@@ -379,12 +380,12 @@ public abstract class CodeAssist implements Serializable {
 	}
 	
 	public List<InputSuggestion> suggest(InputStatus inputStatus, String ruleName) {
-		List<InputSuggestion> inputSuggestions = new ArrayList<>();
 		RuleSpec rule = Preconditions.checkNotNull(getRule(ruleName));
 		
 		String contentBeforeCaret = inputStatus.getContentBeforeCaret();
 		AssistStream stream = lex(contentBeforeCaret);
 		
+		List<ElementReplacement> replacements = new ArrayList<>();
 		if (!stream.isEof()) {
 			Token lastToken = stream.getToken(stream.size()-2);
 			String matchWith;
@@ -392,37 +393,82 @@ public abstract class CodeAssist implements Serializable {
 			if (beyondLastToken > 0) {
 				matchWith = contentBeforeCaret.substring(inputStatus.getCaret()-beyondLastToken, inputStatus.getCaret());
 				matchWith = StringUtils.trimStart(matchWith);
-				mergeSuggestions(suggest(rule, stream, inputStatus, matchWith), inputSuggestions);
+				replacements.addAll(suggest(rule, stream, inputStatus, matchWith));
 			} else {
-				mergeSuggestions(suggest(rule, stream, inputStatus, ""), inputSuggestions);
+				replacements.addAll(suggest(rule, stream, inputStatus, ""));
 
 				matchWith = stream.getToken(stream.size()-2).getText();
 				List<Token> tokens = stream.getTokens();
 				tokens.remove(tokens.size()-2);
 				stream = new AssistStream(tokens);
-				mergeSuggestions(suggest(rule, stream, inputStatus, matchWith), inputSuggestions);
+				replacements.addAll(suggest(rule, stream, inputStatus, matchWith));
 			}
 		} else {
-			mergeSuggestions(suggest(rule, stream, inputStatus, ""), inputSuggestions);
+			replacements.addAll(suggest(rule, stream, inputStatus, ""));
+		}
+		
+		String inputContent = inputStatus.getContent();
+		List<InputSuggestion> inputSuggestions = new ArrayList<>();
+		Map<String, List<ElementReplacement>> grouped = new LinkedHashMap<>();
+		for (ElementReplacement replacement: replacements) {
+			String key = inputContent.substring(0, replacement.begin) 
+					+ replacement.content + inputContent.substring(replacement.end);
+			List<ElementReplacement> value = grouped.get(key);
+			if (value == null) {
+				value = new ArrayList<>();
+				grouped.put(key, value);
+			}
+			value.add(replacement);
+		}
+		for (Map.Entry<String, List<ElementReplacement>> entry: grouped.entrySet())	 {
+			List<ElementReplacement> value = entry.getValue();
+			ElementReplacement replacement = value.get(0);
+			String description = replacement.description;
+			int caret = replacement.begin + replacement.caret;
+			String content;
+			if (value.size() == 1) {
+				List<String> mandatories;
+				if (inputStatus.getCaret() == inputContent.length() 
+						|| Character.isWhitespace(inputContent.charAt(inputStatus.getCaret()))) {
+					mandatories = getMandatoriesAfter(replacement.node);
+				} else {
+					mandatories = new ArrayList<>();
+				}
+				
+				content = inputContent.substring(0, replacement.begin) + replacement.content;
+				for (String mandatory: mandatories) {
+					String prevContent = content;
+					content += mandatory;
+					if (tokenTypesByLiteral.containsKey(mandatory)) {
+						stream = lex(content);
+						if (!stream.isEof()) {
+							Token lastToken = stream.getToken(stream.size()-2);
+							if (lastToken.getStartIndex() != content.length() - mandatory.length()
+									|| lastToken.getStopIndex() != content.length()-1) {
+								content = prevContent + " " + mandatory;
+							}
+						} else {
+							content = prevContent + " " + mandatory;
+						}
+					}
+				}
+				
+				content += inputContent.substring(replacement.end);
+			} else {
+				content = entry.getKey(); 
+			}
+			if (replacement.caret == replacement.content.length() && caret < content.length()
+					&& !Character.isWhitespace(content.charAt(caret))) {
+				caret += skipMandatoriesAfter(replacement.node, content.substring(caret), 0);
+			}
+			inputSuggestions.add(new InputSuggestion(content, caret, description));
 		}
 		return inputSuggestions;
 	}
 	
-	private void mergeSuggestions(List<InputSuggestion> from, List<InputSuggestion> to) {
-		Set<String> includedContents = new HashSet<>();
-		for (InputSuggestion suggestion: to)
-			includedContents.add(suggestion.getContent());
-		for (InputSuggestion suggestion: from) {
-			if (!includedContents.contains(suggestion.getContent())) {
-				includedContents.add(suggestion.getContent());
-				to.add(suggestion);
-			}
-		}
-	}
-	
-	private List<InputSuggestion> suggest(RuleSpec spec, AssistStream stream, 
+	private List<ElementReplacement> suggest(RuleSpec spec, AssistStream stream, 
 			InputStatus inputStatus, String matchWith) {
-		List<InputSuggestion> inputSuggestions = new ArrayList<>();
+		List<ElementReplacement> elementReplacements = new ArrayList<>();
 		
 		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
 		if (stream.isEof()) {
@@ -437,10 +483,11 @@ public abstract class CodeAssist implements Serializable {
 			}
 		}
 
+		String inputContent = inputStatus.getContent();
 		int replaceStart = inputStatus.getCaret() - matchWith.length();
 		for (ElementSuggestion elementSuggestion: elementSuggestions) {
 			int replaceEnd = inputStatus.getCaret();
-			String contentAfterReplaceStart = inputStatus.getContent().substring(replaceStart);
+			String contentAfterReplaceStart = inputContent.substring(replaceStart);
 			AssistStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
@@ -456,71 +503,38 @@ public abstract class CodeAssist implements Serializable {
 					}
 				}
 			}
-			
-			List<String> mandatories;
-			if (inputStatus.getCaret() == inputStatus.getContent().length() 
-					|| Character.isWhitespace(inputStatus.getContent().charAt(inputStatus.getCaret()))) {
-				mandatories = getMandatoriesAfter(elementSuggestion.getNode());
-			} else {
-				mandatories = new ArrayList<>();
-			}
-			
-			String before = inputStatus.getContent().substring(0, replaceStart);
-			String after = inputStatus.getContent().substring(replaceEnd);
+
+			String before = inputContent.substring(0, replaceStart);
 
 			for (InputSuggestion inputSuggestion: elementSuggestion.getInputSuggestions()) {
-				String newContent;
+				ElementReplacement elementReplacement = new ElementReplacement();
+				elementReplacement.node = elementSuggestion.getNode();
+				elementReplacement.begin = replaceStart;
+				elementReplacement.end = replaceEnd;
+				elementReplacement.description = inputSuggestion.getDescription();
+				
+				elementReplacement.content = inputSuggestion.getContent();
+				elementReplacement.caret = inputSuggestion.getCaret();
 				if (stream.size() > 1) { 
-					newContent = before + inputSuggestion.getContent();
-					AssistStream newStream = lex(newContent);
+					AssistStream newStream = lex(before + elementReplacement.content);
 					if (newStream.size() >= stream.size()) {
 						Token lastToken = stream.getToken(stream.size()-2);
 						Token newToken = newStream.getToken(stream.size()-2);
 						if (lastToken.getStartIndex() != newToken.getStartIndex()
 								|| lastToken.getStopIndex() != newToken.getStopIndex()) {
-							newContent = before + " " + inputSuggestion.getContent();
+							elementReplacement.content = " " + inputSuggestion.getContent();
+							elementReplacement.caret++;
 						}
 					} else {
-						newContent = before + " " + inputSuggestion.getContent();
+						elementReplacement.content = " " + inputSuggestion.getContent();
+						elementReplacement.caret++;
 					}
-				} else {
-					newContent = before + inputSuggestion.getContent();
-				}
-				int caret = inputSuggestion.getCaret();
-				if (caret == inputSuggestion.getContent().length())
-					caret = newContent.length();
-				else
-					caret += before.length() + 1;
-
-				for (String mandatory: mandatories) {
-					String prevNewContent = newContent;
-					newContent += mandatory;
-					if (tokenTypesByLiteral.containsKey(mandatory)) {
-						AssistStream newStream = lex(newContent);
-						if (!newStream.isEof()) {
-							Token lastToken = newStream.getToken(newStream.size()-2);
-							if (lastToken.getStartIndex() != newContent.length() - mandatory.length()
-									|| lastToken.getStopIndex() != newContent.length()-1) {
-								newContent = prevNewContent + " " + mandatory;
-							}
-						} else {
-							newContent = prevNewContent + " " + mandatory;
-						}
-					}
-				}
+				} 
 				
-				newContent += after;
-				
-				if (inputSuggestion.getCaret() == inputSuggestion.getContent().length() 
-						&& caret < newContent.length() 
-						&& !Character.isWhitespace(newContent.charAt(caret))) {
-					caret += skipMandatoriesAfter(elementSuggestion.getNode(), newContent.substring(caret), 0);
-				}
-				
-				inputSuggestions.add(new InputSuggestion(newContent, caret, inputSuggestion.getContent()));
+				elementReplacements.add(elementReplacement);
 			}
 		}
-		return inputSuggestions;
+		return elementReplacements;
 	}
 	
 	private List<String> getMandatoriesAfter(Node elementNode) {
