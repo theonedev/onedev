@@ -32,7 +32,7 @@ public class RuleSpec extends Spec {
 
 	@Override
 	public List<ElementSuggestion> suggestFirst(@Nullable Node parent, String matchWith, AssistStream stream) {
-		parent =  new Node(this, parent);
+		parent = new Node(this, parent);
 		List<ElementSuggestion> first = new ArrayList<>();
 		for (AlternativeSpec alternative: alternatives)
 			first.addAll(alternative.suggestFirst(parent, matchWith, stream));
@@ -75,6 +75,11 @@ public class RuleSpec extends Spec {
 				return true;
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "rule: " + name;
 	}
 
 }

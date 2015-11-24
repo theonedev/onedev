@@ -41,4 +41,9 @@ public class EofElementSpec extends TokenElementSpec {
 		return new ArrayList<>();
 	}
 
+	@Override
+	public String toString() {
+		return "EOF";
+	}
+	
 }

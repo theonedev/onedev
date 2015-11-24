@@ -84,4 +84,9 @@ public class RuleRefElementSpec extends ElementSpec {
 		return getRule().getPartialMatches(stream, new Node(this, parent, stream.getCurrentToken()));
 	}
 
+	@Override
+	public String toString() {
+		return "rule_ref: " + ruleName;
+	}
+
 }

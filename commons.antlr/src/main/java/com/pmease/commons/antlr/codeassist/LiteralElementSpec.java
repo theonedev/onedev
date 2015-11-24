@@ -78,4 +78,9 @@ public class LiteralElementSpec extends TokenElementSpec {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "literal: '" + literal + "'";
+	}
+	
 }

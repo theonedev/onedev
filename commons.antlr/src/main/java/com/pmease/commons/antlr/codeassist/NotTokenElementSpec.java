@@ -64,5 +64,10 @@ public class NotTokenElementSpec extends ElementSpec {
 			return new ArrayList<>();
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "not: " + notTokenTypes;
+	}
 	
 }

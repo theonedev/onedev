@@ -26,7 +26,7 @@ public class Test {
 			
 		};
 		
-		codeAssist.suggest(new InputStatus("@"), "compilationUnit");
+		codeAssist.suggest(new InputStatus(""), "packageOrTypeName");
 	}
 	
 }

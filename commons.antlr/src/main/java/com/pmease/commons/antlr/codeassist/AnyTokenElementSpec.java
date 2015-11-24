@@ -47,4 +47,9 @@ public class AnyTokenElementSpec extends ElementSpec {
 		return Lists.newArrayList(new TokenNode(this, parent, token));
 	}
 
+	@Override
+	public String toString() {
+		return "any";
+	}
+	
 }

@@ -75,4 +75,9 @@ public class AlternativeSpec extends Spec {
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		return "alternative: " + elements;
+	}
+	
 }

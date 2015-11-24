@@ -116,5 +116,10 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 			return new ArrayList<>();
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "lexer_rule_ref: " + ruleName;
+	}
 	
 }
