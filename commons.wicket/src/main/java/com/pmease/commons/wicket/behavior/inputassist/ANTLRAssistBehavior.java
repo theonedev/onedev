@@ -18,12 +18,12 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 
 import com.pmease.commons.antlr.AntlrUtils;
-import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.CodeAssist;
-import com.pmease.commons.antlr.codeassist.ElementSpec;
-import com.pmease.commons.antlr.codeassist.InputStatus;
-import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.AssistStream;
+import com.pmease.commons.antlr.codeassist.CodeAssist;
+import com.pmease.commons.antlr.codeassist.InputStatus;
+import com.pmease.commons.antlr.codeassist.InputSuggestion;
+import com.pmease.commons.antlr.codeassist.Node;
+import com.pmease.commons.antlr.codeassist.ParseTree;
 import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
@@ -60,9 +60,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		codeAssist = new CodeAssist(lexerClass, grammarFiles, tokenFile) {
 
 			@Override
-			protected List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith,
-					AssistStream stream) {
-				return ANTLRAssistBehavior.this.suggest(spec, parent, matchWith, stream);
+			protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
+				return ANTLRAssistBehavior.this.suggest(parseTree, elementNode, matchWith);
 			}
 			
 		};
@@ -165,7 +164,6 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		}
 	}
 
-	protected abstract List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-			String matchWith, AssistStream stream);
+	protected abstract List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith);
 	
 }

@@ -1,6 +1,6 @@
 div.revision-selector ul.refs {
 	width: 400px; 
-	max-height: 200px; 
+	max-height: 300px; 
 	overflow: auto;
 }
 div.revision-selector input.revision {

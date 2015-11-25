@@ -19,7 +19,8 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, 
+			ParseTree parseTree, String matchWith, Set<String> checkedRules) {
 		return new ArrayList<ElementSuggestion>();
 	}
 
@@ -41,12 +42,13 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();
 		stream.increaseIndex();
-		return Lists.newArrayList(new TokenNode(this, parent, token));
+		return Lists.newArrayList(new TokenNode(this, parent, previous, token));
 	}
 
 	@Override

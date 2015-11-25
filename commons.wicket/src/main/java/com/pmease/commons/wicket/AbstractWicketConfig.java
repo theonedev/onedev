@@ -64,7 +64,7 @@ public abstract class AbstractWicketConfig extends WebApplication {
 				for (Component component: map.values()) {
 					if (!component.getBehaviors(StickyBehavior.class).isEmpty())
 						target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", component.getMarkupId()));
-					target.appendJavaScript((String.format("$(document).trigger('replace', '%s');", component.getMarkupId())));
+					target.appendJavaScript((String.format("$(document).trigger('elementReplaced', '%s');", component.getMarkupId())));
 				}
 				
 				target.appendJavaScript("$(document.body).trigger('sticky_kit:recalc');");

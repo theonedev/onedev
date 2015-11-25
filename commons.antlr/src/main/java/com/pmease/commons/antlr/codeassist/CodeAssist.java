@@ -472,13 +472,13 @@ public abstract class CodeAssist implements Serializable {
 		
 		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
 		if (stream.isEof()) {
-			elementSuggestions.addAll(spec.suggestFirst(null, matchWith, stream, new HashSet<String>()));
+			elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
 		} else {
-			List<TokenNode> matches = spec.getPartialMatches(stream, null, new HashMap<String, Integer>());
+			List<TokenNode> matches = spec.getPartialMatches(stream, null, null, new HashMap<String, Integer>());
 			if (!matches.isEmpty() && stream.isEof()) {
 				for (TokenNode match: matches) {
 					ElementSpec matchSpec = (ElementSpec) match.getSpec();
-					elementSuggestions.addAll(matchSpec.suggestNext(match.getParent(), matchWith, stream));
+					elementSuggestions.addAll(matchSpec.suggestNext(new ParseTree(match), match.getParent(), matchWith));
 				}
 			}
 		}
@@ -539,7 +539,7 @@ public abstract class CodeAssist implements Serializable {
 	
 	private List<String> getMandatoriesAfter(Node elementNode) {
 		List<String> mandatories = new ArrayList<>();
-		if (elementNode.getParent().getStart() == null) {
+		if (elementNode.getParent().getPrevious() == null) {
 			ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
 			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
 			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
@@ -553,7 +553,7 @@ public abstract class CodeAssist implements Serializable {
 						|| elementSpec.getMultiplicity() == Multiplicity.ONE) {
 					mandatories.addAll(elementSpec.getMandatories(new HashSet<String>()));
 				}
-				elementNode = new Node(elementSpec, elementNode.getParent());
+				elementNode = new Node(elementSpec, elementNode.getParent(), null);
 				mandatories.addAll(getMandatoriesAfter(elementNode));
 			}
 		}
@@ -577,7 +577,7 @@ public abstract class CodeAssist implements Serializable {
 					CaretMove move = elementSpec.skipMandatories(content, offset);
 					offset = move.getOffset();
 					if (!move.isStop()) {
-						elementNode = new Node(elementSpec, elementNode.getParent());
+						elementNode = new Node(elementSpec, elementNode.getParent(), null);
 						return skipMandatoriesAfter(elementNode, content, offset);
 					}
 				}
@@ -586,7 +586,6 @@ public abstract class CodeAssist implements Serializable {
 		return offset;
 	}
 	
-	protected abstract List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-			String matchWith, AssistStream stream);
+	protected abstract List<InputSuggestion> suggest(@Nullable ParseTree parseTree, Node elementNode, String matchWith);
 	
 }

@@ -1,5 +1,6 @@
 .input-assist {
-	padding: 8px;
+	padding: 4px 8px;
+	margin-bottom: 0;
 }
 .input-error-mark {
 	position: absolute;

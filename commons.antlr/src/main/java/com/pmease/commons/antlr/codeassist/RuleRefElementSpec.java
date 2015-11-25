@@ -33,10 +33,11 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, ParseTree parseTree, 
+			String matchWith, Set<String> checkedRules) {
 		if (!checkedRules.contains(ruleName)) {
 			checkedRules.add(ruleName);
-			return getRule().suggestFirst(new Node(this, parent), matchWith, stream, checkedRules);
+			return getRule().suggestFirst(parseTree, new Node(this, parent, null), matchWith, checkedRules);
 		} else {
 			return new ArrayList<>();
 		}
@@ -99,14 +100,15 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Integer index = checkedIndexes.get(ruleName);
 		if (index != null && index.intValue() == stream.getIndex()) {
 			return new ArrayList<>();
 		} else {
 			checkedIndexes.put(ruleName, stream.getIndex());
-			parent = new Node(this, parent, stream.getCurrentToken());
-			return getRule().getPartialMatches(stream, parent, checkedIndexes);
+			parent = new Node(this, parent, previous);
+			return getRule().getPartialMatches(stream, parent, parent, checkedIndexes);
 		}
 	}
 

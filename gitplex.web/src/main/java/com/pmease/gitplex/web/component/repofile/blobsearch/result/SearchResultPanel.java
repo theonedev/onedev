@@ -118,7 +118,7 @@ public abstract class SearchResultPanel extends Panel {
 		String script = String.format(""
 				+ "$('#%s').find('.selectable').removeClass('active');"
 				+ "$('#%s').addClass('active');"
-				+ "gitplex.searchresult.scrollIfNecessary('%s');", 
+				+ "$('#%s>.search-result>.body').scrollIntoView('a.selectable.active', 25, 25);", 
 				getMarkupId(), activeLinkId, getMarkupId());
 		target.appendJavaScript(script);
 		

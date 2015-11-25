@@ -33,14 +33,20 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> getPartialMatches(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
+	public List<TokenNode> getPartialMatches(AssistStream stream, 
+			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
-		parent = new Node(this, parent, stream.getCurrentToken());
+		parent = new Node(this, parent, previous);
 		int index = stream.getIndex();
 		List<TokenNode> matches = new ArrayList<>();
 		for (ElementSpec elementSpec: elements) {
-			List<TokenNode> elementMatches = elementSpec.getPartialMatches(stream, parent, new HashMap<>(checkedIndexes));
+			if (!matches.isEmpty())
+				previous = matches.get(matches.size()-1);
+			else
+				previous = parent;
+			List<TokenNode> elementMatches = elementSpec.getPartialMatches(
+					stream, parent, previous, new HashMap<>(checkedIndexes));
 			if (elementMatches.isEmpty()) {
 				if (!elementSpec.match(codeAssist.lex(""), new HashMap<String, Integer>())) {
 					stream.setIndex(index);
@@ -56,11 +62,12 @@ public class AlternativeSpec extends Spec {
 	}
 
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
+	public List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 
+			String matchWith, Set<String> checkedRules) {
 		List<ElementSuggestion> first = new ArrayList<>();
-		parent = new Node(this, parent);
+		parent = new Node(this, parent, null);
 		for (ElementSpec element: elements) {
-			first.addAll(element.suggestFirst(parent, matchWith, stream, new HashSet<>(checkedRules)));
+			first.addAll(element.suggestFirst(parseTree, parent, matchWith, new HashSet<>(checkedRules)));
 			if (!element.match(codeAssist.lex(""), new HashMap<String, Integer>()))
 				break;
 		}

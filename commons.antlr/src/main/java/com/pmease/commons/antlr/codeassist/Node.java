@@ -2,26 +2,20 @@ package com.pmease.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.Token;
-
 public class Node {
 	
 	protected final Spec spec;
 	
 	protected final Node parent;
 	
-	protected final Token start;
+	protected final Node previous;
 	
-	public Node(Spec spec, Node parent, Token start) {
+	public Node(Spec spec, @Nullable Node parent, @Nullable Node previous) {
 		this.spec = spec;
 		this.parent = parent;
-		this.start = start;
+		this.previous = previous;
 	}
 
-	public Node(Spec spec, Node parent) {
-		this(spec, parent, null);
-	}
-	
 	public Spec getSpec() {
 		return spec;
 	}
@@ -32,8 +26,8 @@ public class Node {
 	}
 
 	@Nullable
-	public Token getStart() {
-		return start;
+	public Node getPrevious() {
+		return previous;
 	}
 	
 }

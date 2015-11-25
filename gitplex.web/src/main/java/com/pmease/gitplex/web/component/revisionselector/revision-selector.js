@@ -13,19 +13,6 @@ gitplex.revisionSelector = {
 		$input.bind("keydown", "return", function() {
 			callback("return");
 		});
-		function scrollIfNecessary() {
-			var margin = 8;
-			var $refs = $container.find("ul.refs");
-			var $active = $refs.find("li.active");
-			var contentTop = $refs.offset().top;
-			var activeTop = $active.offset().top;
-			if (activeTop-margin<contentTop)
-				$refs.scrollTop($refs.scrollTop()-(contentTop-activeTop+margin));
-			var contentBottom = contentTop + $refs.height();
-			var activeBottom = activeTop + $active.height();
-			if (activeBottom+margin>contentBottom) 
-				$refs.scrollTop($refs.scrollTop()+(activeBottom+margin-contentBottom));
-		};
 		$input.bind("keydown", "up", function(e) {
 			e.preventDefault();
 			var $active = $container.find("ul.refs li.active");
@@ -35,7 +22,7 @@ gitplex.revisionSelector = {
 				$prev.addClass("active");
 				callback("up");
 			}
-			scrollIfNecessary();
+			$container.find("ul.refs").scrollIntoView("li.active", 8, 8);
 		});
 		$input.bind("keydown", "down", function(e) {
 			e.preventDefault();
@@ -46,7 +33,7 @@ gitplex.revisionSelector = {
 				$next.addClass("active");
 				callback("down");
 			}
-			scrollIfNecessary();
+			$container.find("ul.refs").scrollIntoView("li.active", 8, 8);
 		});
 	}
 };

@@ -160,7 +160,7 @@ pmease.commons = {
 				pmease.commons.form.trackDirty(this);
 			});
 			
-			$(document).on("replace", function(event, componentId) {
+			$(document).on("elementReplaced", function(event, componentId) {
 				var $component = $("#" + componentId);
 				var $forms = $component.find("form");
 				if ($component.is("form"))
@@ -205,7 +205,7 @@ pmease.commons = {
 	},
 	setupAutoSize: function() {
 		autosize($("textarea"));
-		$(document).on("replace", function(event, componentId) {
+		$(document).on("elementReplaced", function(event, componentId) {
 			var $component = $("#" + componentId);
 			var $textarea = $component.find("textarea");
 			if ($component.is("textarea"))
@@ -374,7 +374,7 @@ pmease.commons = {
 
 			pmease.commons.focus.doFocus($(document));
 
-			$(document).on("replace", function(event, componentId) {
+			$(document).on("elementReplaced", function(event, componentId) {
 				if (pmease.commons.focus.$components != null)
 					pmease.commons.focus.$components = pmease.commons.focus.$components.add("#" + componentId);
 			});			

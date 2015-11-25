@@ -14,20 +14,6 @@ gitplex.repositorySelector = {
 				callback($id.val());
 		});
 
-		function scrollIfNecessary() {
-			var margin = 30;
-			var $active = $container.find("li.repository.active");
-			var $accounts = $container.find(".accounts");
-			var contentTop = $accounts.offset().top;
-			var activeTop = $active.offset().top;
-			if (activeTop-margin<contentTop)
-				$accounts.scrollTop($accounts.scrollTop()-(contentTop-activeTop+margin));
-			var contentBottom = contentTop + $accounts.height();
-			var activeBottom = activeTop + $active.height();
-			if (activeBottom+margin>contentBottom) 
-				$accounts.scrollTop($accounts.scrollTop()+(activeBottom+margin-contentBottom));
-		};
-		
 		$input.bind("keydown", "up", function(e) {
 			e.preventDefault();
 			var $active = $container.find("li.repository.active");
@@ -42,7 +28,7 @@ gitplex.repositorySelector = {
 					$prev.find("li.repository:last-child").addClass("active");
 				}
 			}
-			scrollIfNecessary();
+			$container.find(".accounts").scrollIntoView("li.repository.active", 30, 8);
 		});
 		
 		$input.bind("keydown", "down", function(e) {
@@ -59,7 +45,7 @@ gitplex.repositorySelector = {
 					$next.find("li.repository:first-child").addClass("active");
 				}
 			}
-			scrollIfNecessary();
+			$container.find(".accounts").scrollIntoView("li.repository.active", 30, 8);
 		});
 	}
 }

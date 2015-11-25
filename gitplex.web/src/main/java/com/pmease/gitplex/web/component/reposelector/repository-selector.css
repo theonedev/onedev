@@ -6,7 +6,7 @@
 }
 .repository-selector ul.accounts {
 	max-width: 600px;
-	max-height: 600px;
+	max-height: 100px;
 	overflow: auto;
 	margin: 8px 0 0 0;
 }

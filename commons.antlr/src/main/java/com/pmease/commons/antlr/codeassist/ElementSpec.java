@@ -36,16 +36,17 @@ public abstract class ElementSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> getPartialMatches(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
+	public List<TokenNode> getPartialMatches(AssistStream stream, 
+			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		if (multiplicity == Multiplicity.ONE || multiplicity == Multiplicity.ZERO_OR_ONE) {
-			return getPartialMatchesOnce(stream, parent, checkedIndexes);
+			return getPartialMatchesOnce(stream, parent, previous, checkedIndexes);
 		} else {
-			List<TokenNode> matches = getPartialMatchesOnce(stream, parent, checkedIndexes);
+			List<TokenNode> matches = getPartialMatchesOnce(stream, parent, previous, checkedIndexes);
 			if (!matches.isEmpty()) {
 				while (!stream.isEof()) {
-					List<TokenNode> nextMatches = getPartialMatchesOnce(stream, parent, checkedIndexes);
+					List<TokenNode> nextMatches = getPartialMatchesOnce(stream, parent, previous, checkedIndexes);
 					if (!nextMatches.isEmpty())
 						matches = nextMatches;
 					else
@@ -56,21 +57,22 @@ public abstract class ElementSpec extends Spec {
 		}
 	}
 	
-	protected abstract List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes);
+	protected abstract List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 
 	public abstract CaretMove skipMandatories(String content, int offset);
 	
 	public abstract List<String> getMandatories(Set<String> checkedRules);
 	
-	public List<ElementSuggestion> suggestNext(Node parent, String matchWith, AssistStream stream) {
+	public List<ElementSuggestion> suggestNext(ParseTree parseTree, Node parent, String matchWith) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		if (multiplicity == Multiplicity.ONE_OR_MORE || multiplicity == Multiplicity.ZERO_OR_MORE) 
-			suggestions.addAll(suggestFirst(parent, matchWith, stream, new HashSet<String>()));
-		suggestions.addAll(doSuggestNext(parent, matchWith, stream));
+			suggestions.addAll(suggestFirst(parseTree, parent, matchWith, new HashSet<String>()));
+		suggestions.addAll(doSuggestNext(parseTree, parent, matchWith));
 		return suggestions;
 	}
 	
-	private List<ElementSuggestion> doSuggestNext(Node parent, String matchWith, AssistStream stream) {
+	private List<ElementSuggestion> doSuggestNext(ParseTree parseTree, Node parent, String matchWith) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		AlternativeSpec alternativeSpec = (AlternativeSpec) parent.getSpec();
 		int specIndex = alternativeSpec.getElements().indexOf(this);
@@ -78,27 +80,32 @@ public abstract class ElementSpec extends Spec {
 			Node parentElementNode = parent.getParent().getParent();
 			if (parentElementNode != null) {
 				ElementSpec parentElementSpec = (ElementSpec) parentElementNode.getSpec();
-				suggestions.addAll(parentElementSpec.suggestNext(parentElementNode.getParent(), matchWith, stream));
+				suggestions.addAll(parentElementSpec.suggestNext(
+						parseTree, parentElementNode.getParent(), matchWith));
 			}
 		} else {
 			ElementSpec nextElementSpec = alternativeSpec.getElements().get(specIndex+1);
-			suggestions.addAll(nextElementSpec.suggestFirst(parent, matchWith, stream, new HashSet<String>()));
+			suggestions.addAll(nextElementSpec.suggestFirst(
+					parseTree, parent, matchWith, new HashSet<String>()));
 			if (nextElementSpec.match(codeAssist.lex(""), new HashMap<String, Integer>()))
-				suggestions.addAll(nextElementSpec.doSuggestNext(parent, matchWith, stream));
+				suggestions.addAll(nextElementSpec.doSuggestNext(parseTree, parent, matchWith));
 		}
 		return suggestions;
 	}
 	
 	@Override
-	public List<ElementSuggestion> suggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
-		List<InputSuggestion> texts = codeAssist.suggest(this, parent, matchWith, stream);
+	public List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 
+			String matchWith, Set<String> checkedRules) {
+		Node elementNode = new Node(this, parent, null);
+		List<InputSuggestion> texts = codeAssist.suggest(parseTree, elementNode, matchWith);
 		if (texts != null)
-			return Lists.newArrayList(new ElementSuggestion(new Node(this, parent), texts));
+			return Lists.newArrayList(new ElementSuggestion(elementNode, texts));
 		else
-			return doSuggestFirst(parent, matchWith, stream, checkedRules);
+			return doSuggestFirst(parent, parseTree, matchWith, checkedRules);
 	}
 
-	protected abstract List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules);
+	protected abstract List<ElementSuggestion> doSuggestFirst(Node parent, 
+			ParseTree parseTree, String matchWith, Set<String> checkedRules);
 	
 	@Override
 	public boolean match(AssistStream stream, Map<String, Integer> checkedIndexes) {

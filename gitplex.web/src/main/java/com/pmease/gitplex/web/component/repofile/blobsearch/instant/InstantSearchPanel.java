@@ -38,6 +38,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
@@ -182,6 +183,7 @@ public abstract class InstantSearchPanel extends Panel {
 			@Override
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
+				response.render(JavaScriptHeaderItem.forReference(ScrollIntoViewResourceReference.INSTANCE));
 				response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));
 				response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 

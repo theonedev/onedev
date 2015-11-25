@@ -28,7 +28,8 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, ParseTree parseTree, 
+			String matchWith, Set<String> checkedRules) {
 		return new ArrayList<>();
 	}
 
@@ -54,13 +55,14 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();
 		if (!notTokenTypes.contains(token.getType())) {
 			stream.increaseIndex();
-			return Lists.newArrayList(new TokenNode(this, parent, token));
+			return Lists.newArrayList(new TokenNode(this, parent, previous, token));
 		} else {
 			return new ArrayList<>();
 		}

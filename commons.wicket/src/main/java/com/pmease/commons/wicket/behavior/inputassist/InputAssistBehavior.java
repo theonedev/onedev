@@ -29,6 +29,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.assets.textareacaretposition.TextareaCaretPositionResourceReference;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.AlignTarget;
@@ -148,6 +149,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 
+		response.render(JavaScriptHeaderItem.forReference(ScrollIntoViewResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));

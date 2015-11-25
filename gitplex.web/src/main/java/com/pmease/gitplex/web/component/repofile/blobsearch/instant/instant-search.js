@@ -22,20 +22,6 @@ gitplex.blobInstantSearch = {
 			if (pmease.commons.form.confirmLeave())
 				callback("return");
 		});
-		$input.data("scrollIfNecessary", function($hint) {
-			var margin = 36;
-			var $container = $hint.find(".instant-search-result");
-			var $active = $hint.find("li.hit.active");
-			var containerTop = $container.offset().top;
-			var activeTop = $active.offset().top;
-			if (activeTop-margin<containerTop)
-				$container.scrollTop($container.scrollTop()-(containerTop-activeTop+margin));
-			var containerBottom = containerTop + $container.height();
-			var activeBottom = activeTop + $active.height();
-			
-			if (activeBottom+margin>containerBottom) 
-				$container.scrollTop($container.scrollTop()+(activeBottom+margin-containerBottom));
-		});
 		$input.data("keyup", function(e) {
 			var $hint = $input.data("hint");
 			if ($hint != null) {
@@ -54,7 +40,7 @@ gitplex.blobInstantSearch = {
 						callback("up");
 					}
 				}
-				$input.data("scrollIfNecessary")($hint);
+				$hint.scrollIntoView("li.hit.active", 36, 36);
 			}
 		});
 		$input.data("keydown", function(e) {
@@ -75,7 +61,7 @@ gitplex.blobInstantSearch = {
 						callback("down");
 					}
 				}
-				$input.data("scrollIfNecessary")($hint);
+				$hint.scrollIntoView("li.hit.active", 36, 36);
 			}
 		});
 		$input.bind("keydown", "return", $input.data("return"));

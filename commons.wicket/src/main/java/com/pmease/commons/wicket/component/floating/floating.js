@@ -31,10 +31,10 @@ pmease.commons.floating = {
 		
 		$floating.data("alignment", alignment);
 		
-		$floating.data("ajaxCallComplete", function() {
+		$floating.data("elementReplaced", function() {
 			$floating.show().align($floating.data("alignment")).trigger("open");
 		});
-		Wicket.Event.subscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));
+		$(document).on("elementReplaced", $floating.data("elementReplaced"));
 	}, 
 	
 	close: function($floating, callCloseCallback) {
@@ -48,7 +48,7 @@ pmease.commons.floating = {
 		
 		$(document).off("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 		$(document).off("keydown", $floating.data("keydown"));
-		Wicket.Event.unsubscribe("/ajax/call/complete", $floating.data("ajaxCallComplete"));
+		$(document).off("elementReplaced", $floating.data("elementReplaced"));
 		
 		$floating.trigger("close");
 		

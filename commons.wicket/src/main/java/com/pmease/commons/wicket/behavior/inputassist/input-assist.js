@@ -3,11 +3,19 @@ pmease.commons.inputassist = {
 		var $input = $("#" + inputId);
 		$input.data("callback", callback);
 		
-		$input.doneEvents("input mouseup keyup", function(e) {
-			if (e.keyCode != 27 && e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13) // ignore esc, enter, up and down key 
-				callback($input.val(), $input.caret());
-		}, 100);
-		
+		$input.data("prevValue", $input.val());
+		$input.data("prevCaret", -1);
+		$input.on("input mouseup keyup", function(e) {
+			var value = $input.val();
+			var caret = $input.caret();
+			if (value != $input.data("prevValue") || caret != $input.data("prevCaret")) {
+				$input.data("prevValue", value);
+				$input.data("prevCaret", caret);
+				if (e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter, up and down key 
+					callback(value, caret);
+			}
+		});
+
 		$input.data("update", function($item) {
 			var value = $item.data("content");
 			$input.val(value);
@@ -26,13 +34,13 @@ pmease.commons.inputassist = {
 					$active.removeClass("active");
 					var $prev = $active.prev();
 					if ($prev.length != 0)
-						$prev.addClass("active").focus();
+						$prev.addClass("active");
 					else
-						$dropdown.find("li.selectable").last().addClass("active").focus();
+						$dropdown.find("li.selectable").last().addClass("active");
 				} else {
-					$dropdown.find("li.selectable").last().addClass("active").focus();
+					$dropdown.find("li.selectable").last().addClass("active");
 				}
-				$input.focus();
+				$dropdown.scrollIntoView("li.active");
 				return false;
 			}
 		});
@@ -45,13 +53,13 @@ pmease.commons.inputassist = {
 					$active.removeClass("active");
 					var $next = $active.next();
 					if ($next.length != 0)
-						$next.addClass("active")[0].focus();
+						$next.addClass("active");
 					else
-						$dropdown.find("li.selectable").first().addClass("active").focus();
+						$dropdown.find("li.selectable").first().addClass("active");
 				} else {
-					$dropdown.find("li.selectable").first().addClass("active").focus();
+					$dropdown.find("li.selectable").first().addClass("active");
 				}
-				$input.focus();
+				$dropdown.scrollIntoView("li.active");
 				return false;
 			}
 		});
@@ -115,8 +123,6 @@ pmease.commons.inputassist = {
 			$input.focus();
 		});
 		var $item = $dropdown.find("li.selectable");
-		if (!$input.data("errors").length != 0)
-			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);

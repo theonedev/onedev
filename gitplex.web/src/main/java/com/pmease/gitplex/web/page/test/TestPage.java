@@ -6,10 +6,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
 
-import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.AssistStream;
+import com.pmease.commons.antlr.codeassist.ParseTree;
 import com.pmease.commons.lang.extractors.java.JavaParser;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.web.page.base.BasePage;
@@ -25,9 +24,11 @@ public class TestPage extends BasePage {
 		form.add(new TextArea<String>("input", Model.of("")).add(new ANTLRAssistBehavior(JavaParser.class, "compilationUnit") {
 			
 			@Override
-			protected List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, AssistStream stream) {
+			protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
 				return null;
 			}
+
+			
 		}));
 		add(form);
 	}

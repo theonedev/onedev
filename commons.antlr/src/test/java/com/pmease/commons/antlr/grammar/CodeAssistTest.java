@@ -13,7 +13,6 @@ import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.codeassist.AlternativeSpec;
 import com.pmease.commons.antlr.codeassist.AnyTokenElementSpec;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
-import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
 import com.pmease.commons.antlr.codeassist.EofElementSpec;
 import com.pmease.commons.antlr.codeassist.InputStatus;
@@ -21,9 +20,9 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.Node;
+import com.pmease.commons.antlr.codeassist.ParseTree;
 import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.RuleSpec;
-import com.pmease.commons.antlr.codeassist.AssistStream;
 
 public class CodeAssistTest {
 
@@ -40,9 +39,8 @@ public class CodeAssistTest {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-						String matchWith, AssistStream stream) {
-					return suggester.suggest(spec, parent, matchWith, stream);
+				protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
+					return suggester.suggest(parseTree, elementNode, matchWith);
 				}
 
 	};
@@ -52,7 +50,7 @@ public class CodeAssistTest {
 		suggester = new Suggester() {
 
 			@Override
-			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, AssistStream stream) {
+			public List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
 				return null;
 			}
 			
@@ -175,19 +173,17 @@ public class CodeAssistTest {
 		assertEquals("options{100}:8", suggestions.get(0).toString());
 		
 		suggestions = codeAssist.suggest(new InputStatus("options{a"), "optionsSpec");
-		assertEquals(1, suggestions.size());
-		assertEquals("options{a=:10", suggestions.get(0).toString());
+		assertEquals(0, suggestions.size());
 		
 		suggestions = codeAssist.suggest(new InputStatus("options{"), "optionsSpec");
-		assertEquals(1, suggestions.size());
-		assertEquals("options{}:9", suggestions.get(0).toString());
+		assertEquals(0, suggestions.size());
 		
 		suggester = new Suggester() {
 
 			@Override
-			public List<InputSuggestion> suggest(ElementSpec spec, Node parent, String matchWith, AssistStream stream) {
-				if (spec instanceof RuleRefElementSpec) {
-					RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) spec;
+			public List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
+				if (elementNode.getSpec() instanceof RuleRefElementSpec) {
+					RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) elementNode.getSpec();
 					if (ruleRefElementSpec.getRuleName().equals("id")) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						if ("hello".startsWith(matchWith))
@@ -203,21 +199,18 @@ public class CodeAssistTest {
 		};
 		
 		suggestions = codeAssist.suggest(new InputStatus("options{he"), "optionsSpec");
-		assertEquals(2, suggestions.size());
-		assertEquals("options{he=:11", suggestions.get(0).toString());
-		assertEquals("options{hello=;:14", suggestions.get(1).toString());
+		assertEquals(1, suggestions.size());
+		assertEquals("options{hello=;:14", suggestions.get(0).toString());
 		
 		suggestions = codeAssist.suggest(new InputStatus("options{"), "optionsSpec");
-		assertEquals(3, suggestions.size());
+		assertEquals(2, suggestions.size());
 		assertEquals("options{hello=;:14", suggestions.get(0).toString());
 		assertEquals("options{world=;:14", suggestions.get(1).toString());
-		assertEquals("options{}:9", suggestions.get(2).toString());
 		
 		suggestions = codeAssist.suggest(new InputStatus("options{hello=100}", 8), "optionsSpec");
-		assertEquals(3, suggestions.size());
+		assertEquals(2, suggestions.size());
 		assertEquals("options{hello=100}:14", suggestions.get(0).toString());
 		assertEquals("options{world=100}:14", suggestions.get(1).toString());
-		assertEquals("options{}hello=100}:9", suggestions.get(2).toString());
 	}
 	
 	@Test
@@ -225,18 +218,14 @@ public class CodeAssistTest {
 		List<InputSuggestion> suggestions;
 
 		suggestions = codeAssist.suggest(new InputStatus("query"), "ruleSpec");
-		assertEquals(7, suggestions.size());
-		assertEquals("query[]:6", suggestions.get(0).toString());
-		assertEquals("query returns[]:14", suggestions.get(1).toString());
-		assertEquals("query throws:12", suggestions.get(2).toString());
-		assertEquals("query locals[]:13", suggestions.get(3).toString());
-		assertEquals("query options{}:14", suggestions.get(4).toString());
-		assertEquals("query@{}:6", suggestions.get(5).toString());
-		assertEquals("query::6", suggestions.get(6).toString());
+		assertEquals(4, suggestions.size());
+		assertEquals("query returns[]:14", suggestions.get(0).toString());
+		assertEquals("query throws:12", suggestions.get(1).toString());
+		assertEquals("query locals[]:13", suggestions.get(2).toString());
+		assertEquals("query options{}:14", suggestions.get(3).toString());
 	}
 	
 	interface Suggester {
-		List<InputSuggestion> suggest(ElementSpec spec, Node parent, 
-				String matchWith, AssistStream stream);
+		List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith);
 	}
 }

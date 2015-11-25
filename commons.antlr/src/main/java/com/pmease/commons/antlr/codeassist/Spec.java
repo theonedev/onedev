@@ -20,9 +20,11 @@ public abstract class Spec implements Serializable {
 	 * @return
 	 * 			empty if the rule does not match part or all of the stream
 	 */
-	public abstract List<TokenNode> getPartialMatches(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes);
+	public abstract List<TokenNode> getPartialMatches(AssistStream stream, 
+			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 	
-	public abstract List<ElementSuggestion> suggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules);
+	public abstract List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 
+			String matchWith, Set<String> checkedRules);
 	
 	public abstract boolean match(AssistStream stream, Map<String, Integer> checkedIndexes);
 	

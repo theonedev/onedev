@@ -29,10 +29,13 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, String matchWith, AssistStream stream, Set<String> checkedRules) {
-		if (literal.length()>1 && !matchWith.equals(literal) && literal.toLowerCase().startsWith(matchWith.toLowerCase())) {
+	public List<ElementSuggestion> doSuggestFirst(Node parent, ParseTree parseTree, 
+			String matchWith, Set<String> checkedRules) {
+		if (literal.length()>1 
+				&& !matchWith.equals(literal) 
+				&& literal.toLowerCase().startsWith(matchWith.toLowerCase())) {
 			InputSuggestion text = new InputSuggestion(literal, literal.length(), literal);
-			return Lists.newArrayList(new ElementSuggestion(new Node(this, parent), Lists.newArrayList(text)));
+			return Lists.newArrayList(new ElementSuggestion(new Node(this, parent, null), Lists.newArrayList(text)));
 		} else {
 			return new ArrayList<>();
 		}
@@ -68,13 +71,14 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, Map<String, Integer> checkedIndexes) {
+	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, 
+			Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();
-			return Lists.newArrayList(new TokenNode(this, parent, token));
+			return Lists.newArrayList(new TokenNode(this, parent, previous, token));
 		} else {
 			return new ArrayList<>();
 		}
