@@ -2,6 +2,7 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,9 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	
 	private transient Constructor<? extends Lexer> lexerCtor;
 	
-	private transient Constructor<? extends Parser> parserCtor; 
+	private transient Constructor<? extends Parser> parserCtor;
+	
+	private transient Method ruleMethod;
 	
 	private final CodeAssist codeAssist;
 	
@@ -97,8 +100,19 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		return parserCtor;
 	}
 	
+	private Method getRuleMethod() {
+		if (ruleMethod == null) {
+			try {
+				ruleMethod = parserClass.getDeclaredMethod(ruleName);
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return ruleMethod;
+	}
+	
 	@Override
-	protected List<InputError> getErrors(String inputContent) {
+	protected List<InputError> getErrors(final String inputContent) {
 		final List<InputError> errors = new ArrayList<>();
 		
 		Lexer lexer;
@@ -115,7 +129,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				errors.add(new InputError(charPositionInLine, recognizer.getInputStream().index()+1));
+				int charIndex = getCharIndex(inputContent, line, charPositionInLine);
+				errors.add(new InputError(charIndex, recognizer.getInputStream().index()+1));
 			}
 			
 		});
@@ -133,18 +148,39 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
+				int fromIndex = getCharIndex(inputContent, line, charPositionInLine);
 				CommonToken token = (CommonToken) offendingSymbol;
-				int end;
+				int toIndex;
 				if (token != null && token.getType() != Token.EOF)
-					end = charPositionInLine + token.getText().length();
+					toIndex = fromIndex + token.getText().length();
 				else
-					end = charPositionInLine + 1;
-				errors.add(new InputError(charPositionInLine, end));
+					toIndex = fromIndex + 1;
+				errors.add(new InputError(fromIndex, toIndex));
 			}
 			
 		});
-		
+		try {
+			getRuleMethod().invoke(parser);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
 		return errors;
+	}
+	
+	private int getCharIndex(String content, int line, int charPositionInLine) {
+		int currentLine = 0;
+		int currentCharPositionInLine = 0;
+		for (int i=0; i<content.length(); i++) {
+			if (currentLine == line && currentCharPositionInLine == charPositionInLine) {
+				return i;
+			} else if (content.charAt(i) == '\n') {
+				currentLine++;
+				currentCharPositionInLine = 0;
+			} else {
+				currentCharPositionInLine++;
+			}
+		}
+		return 0;
 	}
 
 	@Override

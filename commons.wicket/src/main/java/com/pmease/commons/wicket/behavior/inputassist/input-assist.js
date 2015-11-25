@@ -15,6 +15,9 @@ pmease.commons.inputassist = {
 					callback(value, caret);
 			}
 		});
+		$input.on("focus", function(e) {
+			callback($input.val(), $input.caret());
+		});
 
 		$input.data("update", function($item) {
 			var value = $item.data("content");

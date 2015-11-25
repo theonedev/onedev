@@ -5,7 +5,9 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -23,6 +25,9 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.mysql.jdbc.StringUtils;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.loader.AppLoader;
@@ -56,7 +61,27 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		inputField.setOutputMarkupId(true);
 	}
 
-	private List<InputError> joinErrors(List<InputError> errors) {
+	private int getLine(String content, int charIndex) {
+		int line = 0;
+		for (int i=0; i<charIndex; i++) {
+			if (content.charAt(i) == '\n')
+				line++;
+		}
+		return line;
+	}
+	
+	private List<InputError> normalizeErrors(String inputContent, List<InputError> errors) {
+		List<String> lines = Splitter.on('\n').splitToList(inputContent);
+		Map<Integer, List<InputError>> grouped = new HashMap<>();
+		for (InputError error: errors) {
+			int fromLine = getLine(inputContent, error.getFrom());
+			int toLine = getLine(inputContent, error.getTo());
+			if (fromLine != toLine) {
+				
+			} else {
+			}
+		}
+		
 		Collections.sort(errors, new Comparator<InputError>() {
 
 			@Override
@@ -87,8 +112,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 		String inputContent = params.getParameterValue("input").toString();
 		Integer inputCaret = params.getParameterValue("caret").toOptionalInteger();
+
+		Preconditions.checkArgument(inputContent.indexOf('\r') == -1);
 		
-		List<InputError> errors = joinErrors(getErrors(inputContent));
+		List<InputError> errors = normalizeErrors(inputContent, getErrors(inputContent));
 		String json;
 		try {
 			json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(errors);
