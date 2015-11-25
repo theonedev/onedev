@@ -36,9 +36,12 @@ public class AnyTokenElementSpec extends ElementSpec {
 
 	@Override
 	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		if (!stream.isEof())
+		if (!stream.isEof()) {
 			stream.increaseIndex();
-		return true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override

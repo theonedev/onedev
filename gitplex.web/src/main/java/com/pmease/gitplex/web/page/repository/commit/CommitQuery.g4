@@ -1,6 +1,6 @@
 grammar CommitQuery;
 
-query: criteria+;
+query: criteria+ EOF;
 
 criteria: revisionCriteria | before | after | committer | author | path | message;
 
@@ -34,11 +34,9 @@ COMMITTER: 'committer';
 AUTHOR: 'author';
 PATH: 'path';
 EXCLUDE: '^';
-LPAREN: '(';
-RPAREN: ')';
 
 Range: '..' | '...';
-Value: LPAREN ([a-z])+? RPAREN;
+Value: '(' (ESCAPE|~[()\\])+? ')';
 
 fragment
 ESCAPE: '\\'[()\\];

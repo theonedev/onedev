@@ -46,11 +46,15 @@ public class NotTokenElementSpec extends ElementSpec {
 	@Override
 	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
 		if (stream.isEof()) {
-			return !notTokenTypes.contains(Token.EOF);
+			return false;
 		} else {
 			Token token = stream.getCurrentToken();
-			stream.increaseIndex();
-			return !notTokenTypes.contains(token.getType());
+			if (!notTokenTypes.contains(token.getType())) {
+				stream.increaseIndex();
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 
