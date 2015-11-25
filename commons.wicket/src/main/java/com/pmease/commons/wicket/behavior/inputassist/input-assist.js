@@ -91,16 +91,17 @@ pmease.commons.inputassist = {
 			for (var i in errors) {
 				var error = errors[i];
 				var fromCoord = getCaretCoordinates($input[0], error.from);
-				var toCoord = getCaretCoordinates($input[0], error.to);
+				var toCoord = getCaretCoordinates($input[0], error.to+1);
 				var $error = $("<div class='input-error-mark'></div>");
 				$error.appendTo($parent);
 				var inputCoord = $input.offset();
 				var parentCoord = $parent.offset();
+				var textHeight = 16;
 				var errorHeight = 5;
 				var errorOffset = 9;
 				var minWidth = 5;
 				var left = fromCoord.left + inputCoord.left - parentCoord.left;
-				var top = inputCoord.top + $input.outerHeight() - parentCoord.top - errorOffset;
+				var top = fromCoord.top + inputCoord.top - parentCoord.top + textHeight; 
 				$error.css({left: left, top: top});
 				$error.outerWidth(Math.max(toCoord.left-fromCoord.left, minWidth));
 				$error.outerHeight(errorHeight);

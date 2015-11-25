@@ -4,6 +4,6 @@
 }
 .input-error-mark {
 	position: absolute;
-    background: url(wave-line.gif) bottom repeat-x;
+    background: url(wave.png) bottom repeat-x;
     z-index: 100000;
 }

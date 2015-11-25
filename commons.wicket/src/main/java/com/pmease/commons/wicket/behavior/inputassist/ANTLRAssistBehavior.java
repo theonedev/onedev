@@ -129,8 +129,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				int charIndex = getCharIndex(inputContent, line, charPositionInLine);
-				errors.add(new InputError(charIndex, recognizer.getInputStream().index()+1));
+				int charIndex = getCharIndex(inputContent, line-1, charPositionInLine);
+				errors.add(new InputError(charIndex, recognizer.getInputStream().index()));
 			}
 			
 		});
@@ -148,13 +148,13 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				int fromIndex = getCharIndex(inputContent, line, charPositionInLine);
+				int fromIndex = getCharIndex(inputContent, line-1, charPositionInLine);
 				CommonToken token = (CommonToken) offendingSymbol;
 				int toIndex;
 				if (token != null && token.getType() != Token.EOF)
-					toIndex = fromIndex + token.getText().length();
+					toIndex = fromIndex + token.getText().length() - 1;
 				else
-					toIndex = fromIndex + 1;
+					toIndex = fromIndex;
 				errors.add(new InputError(fromIndex, toIndex));
 			}
 			
@@ -167,22 +167,6 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		return errors;
 	}
 	
-	private int getCharIndex(String content, int line, int charPositionInLine) {
-		int currentLine = 0;
-		int currentCharPositionInLine = 0;
-		for (int i=0; i<content.length(); i++) {
-			if (currentLine == line && currentCharPositionInLine == charPositionInLine) {
-				return i;
-			} else if (content.charAt(i) == '\n') {
-				currentLine++;
-				currentCharPositionInLine = 0;
-			} else {
-				currentCharPositionInLine++;
-			}
-		}
-		return 0;
-	}
-
 	@Override
 	protected int getAnchor(String content) {
 		AssistStream stream = codeAssist.lex(content);

@@ -5,9 +5,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -27,7 +25,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.mysql.jdbc.StringUtils;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.loader.AppLoader;
@@ -63,7 +60,9 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 	private int getLine(String content, int charIndex) {
 		int line = 0;
-		for (int i=0; i<charIndex; i++) {
+		if (charIndex >= content.length())
+			charIndex = content.length()-1;
+		for (int i=0; i<=charIndex; i++) {
 			if (content.charAt(i) == '\n')
 				line++;
 		}
@@ -71,17 +70,6 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	}
 	
 	private List<InputError> normalizeErrors(String inputContent, List<InputError> errors) {
-		List<String> lines = Splitter.on('\n').splitToList(inputContent);
-		Map<Integer, List<InputError>> grouped = new HashMap<>();
-		for (InputError error: errors) {
-			int fromLine = getLine(inputContent, error.getFrom());
-			int toLine = getLine(inputContent, error.getTo());
-			if (fromLine != toLine) {
-				
-			} else {
-			}
-		}
-		
 		Collections.sort(errors, new Comparator<InputError>() {
 
 			@Override
@@ -104,9 +92,43 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		}
 		if (currentError != null)
 			joinedErrors.add(currentError);
-		return joinedErrors;
+		
+		List<InputError> normalizedErrors = new ArrayList<>();
+		
+		List<String> lines = Splitter.on('\n').splitToList(inputContent);
+		for (InputError error: joinedErrors) {
+			int fromLine = getLine(inputContent, error.getFrom());
+			int toLine = getLine(inputContent, error.getTo());
+			if (fromLine != toLine) {
+				int index = getCharIndex(inputContent, fromLine, lines.get(fromLine).length()-1);
+				if (index >= error.getFrom())
+					normalizedErrors.add(new InputError(error.getFrom(), index));
+				index = getCharIndex(inputContent, toLine, 0);
+				if (index <= error.getTo())
+					normalizedErrors.add(new InputError(index, error.getTo()));
+				for (int i=fromLine+1; i<toLine; i++) {
+					String line = lines.get(i);
+					if (line.length() != 0) {
+						int from = getCharIndex(inputContent, i, 0);
+						normalizedErrors.add(new InputError(from, from+line.length()-1));
+					}
+				}
+			} else {
+				normalizedErrors.add(error);
+			}
+		}
+
+		return normalizedErrors;
 	}
 	
+	protected int getCharIndex(String content, int line, int charIndexInLine) {
+		List<String> lines = Splitter.on('\n').splitToList(content);
+		int index = 0;
+		for (int i=0; i<line; i++)
+			index += lines.get(i).length()+1;
+		return index + charIndexInLine;
+	}		
+
 	@Override
 	protected void respond(AjaxRequestTarget target) {
 		IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
