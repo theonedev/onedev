@@ -64,7 +64,12 @@ public class CodeAssistTest {
 		
 		suggestions = codeAssist.suggest(new InputStatus("cd"), "mandatories");
 		assertEquals(1, suggestions.size());
-		assertEquals("ef g:4", suggestions.get(0).toString());
+		assertEquals("cd ef g:7", suggestions.get(0).toString());
+	}
+	
+	@Test
+	public void test() {
+		System.out.println(codeAssist.suggest(new InputStatus(""), "revisionCriteria"));
 	}
 	
 	interface Suggester {

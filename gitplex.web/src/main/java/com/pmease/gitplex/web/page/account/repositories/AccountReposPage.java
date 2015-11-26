@@ -166,7 +166,7 @@ public class AccountReposPage extends AccountLayoutPage {
 
 							@Override
 							protected void onDeleted(AjaxRequestTarget target) {
-								setResponsePage(getPage());
+								setResponsePage(AccountReposPage.this);
 							}
 
 							@Override

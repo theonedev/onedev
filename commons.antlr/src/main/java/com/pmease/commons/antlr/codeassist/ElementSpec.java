@@ -62,7 +62,7 @@ public abstract class ElementSpec extends Spec {
 
 	public abstract CaretMove skipMandatories(String content, int offset);
 	
-	public abstract List<String> getMandatories(Set<String> checkedRules);
+	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
 	
 	public List<ElementSuggestion> suggestNext(ParseTree parseTree, Node parent, String matchWith) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();

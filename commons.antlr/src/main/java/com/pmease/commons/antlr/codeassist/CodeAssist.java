@@ -420,47 +420,47 @@ public abstract class CodeAssist implements Serializable {
 			}
 			value.add(replacement);
 		}
+		
 		for (Map.Entry<String, List<ElementReplacement>> entry: grouped.entrySet())	 {
 			List<ElementReplacement> value = entry.getValue();
 			ElementReplacement replacement = value.get(0);
 			String description = replacement.description;
 			int caret = replacement.begin + replacement.caret;
-			String content;
-			if (value.size() == 1) {
-				List<String> mandatories;
-				if (inputStatus.getCaret() == inputContent.length() 
-						|| Character.isWhitespace(inputContent.charAt(inputStatus.getCaret()))) {
-					mandatories = getMandatoriesAfter(replacement.node);
-				} else {
-					mandatories = new ArrayList<>();
-				}
-				
-				content = inputContent.substring(0, replacement.begin) + replacement.content;
-				for (String mandatory: mandatories) {
-					String prevContent = content;
-					content += mandatory;
-					if (tokenTypesByLiteral.containsKey(mandatory)) {
-						stream = lex(content);
-						if (!stream.isEof()) {
-							Token lastToken = stream.getToken(stream.size()-2);
-							if (lastToken.getStartIndex() != content.length() - mandatory.length()
-									|| lastToken.getStopIndex() != content.length()-1) {
+			String content = entry.getKey(); 
+			if (inputStatus.getCaret() == inputContent.length() 
+					|| Character.isWhitespace(inputContent.charAt(inputStatus.getCaret()))) {
+				List<String> contents = new ArrayList<>();
+				for (ElementReplacement each: value) {
+					content = inputContent.substring(0, each.begin) + each.content;
+					for (String mandatory: getMandatoriesAfter(each.node)) {
+						String prevContent = content;
+						content += mandatory;
+						if (tokenTypesByLiteral.containsKey(mandatory)) {
+							stream = lex(content);
+							if (!stream.isEof()) {
+								Token lastToken = stream.getToken(stream.size()-2);
+								if (lastToken.getStartIndex() != content.length() - mandatory.length()
+										|| lastToken.getStopIndex() != content.length()-1) {
+									content = prevContent + " " + mandatory;
+								}
+							} else {
 								content = prevContent + " " + mandatory;
 							}
-						} else {
-							content = prevContent + " " + mandatory;
 						}
 					}
+					
+					content += inputContent.substring(each.end);
+					
+					if (contents.isEmpty()) {
+						contents.add(content);
+					} else if (!contents.get(contents.size()-1).equals(content)) {
+						content = entry.getKey();
+						break;
+					}
 				}
-				
-				content += inputContent.substring(replacement.end);
-			} else {
-				content = entry.getKey(); 
-			}
-			if (replacement.caret == replacement.content.length() && caret < content.length()
-					&& !Character.isWhitespace(content.charAt(caret))) {
+			} 
+			if (replacement.caret == replacement.content.length() && caret < content.length()) 
 				caret += skipMandatoriesAfter(replacement.node, content.substring(caret), 0);
-			}
 			inputSuggestions.add(new InputSuggestion(content, caret, description));
 		}
 		return inputSuggestions;
@@ -494,13 +494,6 @@ public abstract class CodeAssist implements Serializable {
 				if (elementSpec.matchOnce(streamAfterReplaceStart, new HashMap<String, Integer>())) {
 					if (streamAfterReplaceStart.getIndex() != 0)
 						replaceEnd = replaceStart + streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
-				} else if (elementSpec instanceof TokenElementSpec) {
-					List<String> tokenMandatories = elementSpec.getMandatories(new HashSet<String>());
-					if (!tokenMandatories.isEmpty()) {
-						String toBeReplaced = tokenMandatories.get(0);
-						if (contentAfterReplaceStart.startsWith(toBeReplaced))
-							replaceEnd = replaceStart + toBeReplaced.length();
-					}
 				}
 			}
 
@@ -538,26 +531,30 @@ public abstract class CodeAssist implements Serializable {
 	}
 	
 	private List<String> getMandatoriesAfter(Node elementNode) {
-		List<String> mandatories = new ArrayList<>();
-		if (elementNode.getParent().getPrevious() == null) {
-			ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
+		List<String> literals = new ArrayList<>();
+		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
+		if (elementSpec.getMultiplicity() == Multiplicity.ONE 
+				|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
 			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
 			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
 			if (specIndex == alternativeSpec.getElements().size()-1) {
 				elementNode = elementNode.getParent().getParent().getParent();
 				if (elementNode != null)
-					mandatories.addAll(getMandatoriesAfter(elementNode));
+					return getMandatoriesAfter(elementNode);
 			} else {
 				elementSpec = alternativeSpec.getElements().get(specIndex+1);
-				if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE 
-						|| elementSpec.getMultiplicity() == Multiplicity.ONE) {
-					mandatories.addAll(elementSpec.getMandatories(new HashSet<String>()));
+				if (elementSpec.getMultiplicity() == Multiplicity.ONE
+						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+					MandatoryScan scan = elementSpec.scanMandatories(new HashSet<String>());
+					literals = scan.getMandatories();
+					if (!scan.isStop()) {
+						elementNode = new Node(elementSpec, elementNode.getParent(), null);
+						literals.addAll(getMandatoriesAfter(elementNode));
+					}
 				}
-				elementNode = new Node(elementSpec, elementNode.getParent(), null);
-				mandatories.addAll(getMandatoriesAfter(elementNode));
 			}
-		}
-		return mandatories;
+		} 
+		return literals;
 	}
 	
 	private int skipMandatoriesAfter(Node elementNode, String content, int offset) {

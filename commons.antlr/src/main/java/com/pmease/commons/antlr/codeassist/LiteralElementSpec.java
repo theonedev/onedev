@@ -54,8 +54,8 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<String> getMandatories(Set<String> checkedRules) {
-		return Lists.newArrayList(literal);
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+		return new MandatoryScan(Lists.newArrayList(literal), false);
 	}
 
 	@Override

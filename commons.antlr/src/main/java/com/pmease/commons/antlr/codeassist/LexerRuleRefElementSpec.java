@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.Token;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.pmease.commons.util.StringUtils;
 
 public class LexerRuleRefElementSpec extends TokenElementSpec {
 
@@ -54,8 +53,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 		if (getRule() != null) {
 			List<AlternativeSpec> alternatives = getRule().getAlternatives();
 			if (alternatives.size() == 1) {
-				AlternativeSpec alternativeSpec = alternatives.get(0);
-				for (ElementSpec elementSpec: alternativeSpec.getElements()) {
+				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
 					if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
 							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
 						return new CaretMove(offset, true);
@@ -79,28 +77,33 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<String> getMandatories(Set<String> checkedRules) {
-		if (!checkedRules.contains(ruleName)) {
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+		if (!checkedRules.contains(ruleName) && getRule() != null) {
 			checkedRules.add(ruleName);
 		
-			List<String> mandatories = new ArrayList<>();
-			if (getRule() != null) {
-				List<AlternativeSpec> alternatives = getRule().getAlternatives();
-				if (alternatives.size() == 1) {
-					for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
-						if (elementSpec.getMultiplicity() == Multiplicity.ONE 
-								|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-							mandatories.addAll(elementSpec.getMandatories(new HashSet<>(checkedRules)));
-						}
+			List<AlternativeSpec> alternatives = getRule().getAlternatives();
+			if (alternatives.size() == 1) {
+				List<String> literals = new ArrayList<>();
+				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
+					if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
+							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
+						return MandatoryScan.stop();
+					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						return new MandatoryScan(scan.getMandatories(), true);
+					} else {
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						literals.addAll(scan.getMandatories());
+						if (scan.isStop())
+							return new MandatoryScan(literals, true);
 					}
-				} 
+				}
+				return new MandatoryScan(literals, false);
+			} else {
+				return MandatoryScan.stop();
 			}
-			if (!mandatories.isEmpty())
-				return Lists.newArrayList(StringUtils.join(mandatories, ""));
-			else
-				return mandatories;
 		} else {
-			return new ArrayList<>();
+			return MandatoryScan.stop();
 		}
 	}
 

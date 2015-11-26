@@ -69,22 +69,33 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<String> getMandatories(Set<String> checkedRules) {
-		if (!checkedRules.contains(ruleName)) {
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+		if (!checkedRules.contains(ruleName) && getRule() != null) {
 			checkedRules.add(ruleName);
-			List<String> mandatories = new ArrayList<>();
+		
 			List<AlternativeSpec> alternatives = getRule().getAlternatives();
 			if (alternatives.size() == 1) {
+				List<String> literals = new ArrayList<>();
 				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
-					if (elementSpec.getMultiplicity() == Multiplicity.ONE 
-							|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-						mandatories.addAll(elementSpec.getMandatories(new HashSet<>(checkedRules)));
+					if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
+							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
+						return MandatoryScan.stop();
+					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						return new MandatoryScan(scan.getMandatories(), true);
+					} else {
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						literals.addAll(scan.getMandatories());
+						if (scan.isStop())
+							return new MandatoryScan(literals, true);
 					}
 				}
-			} 
-			return mandatories;
+				return new MandatoryScan(literals, false);
+			} else {
+				return MandatoryScan.stop();
+			}
 		} else {
-			return new ArrayList<>();
+			return MandatoryScan.stop();
 		}
 	}
 

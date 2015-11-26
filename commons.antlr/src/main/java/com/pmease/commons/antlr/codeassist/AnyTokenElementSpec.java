@@ -30,8 +30,8 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<String> getMandatories(Set<String> checkedRules) {
-		return new ArrayList<>();
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+		return MandatoryScan.stop();
 	}
 
 	@Override
