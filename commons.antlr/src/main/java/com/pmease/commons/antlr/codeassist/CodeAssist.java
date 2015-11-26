@@ -389,7 +389,7 @@ public abstract class CodeAssist implements Serializable {
 		if (!stream.isEof()) {
 			Token lastToken = stream.getToken(stream.size()-2);
 			String matchWith;
-			int beyondLastToken = inputStatus.getCaret() - lastToken.getStopIndex() -1; 
+			int beyondLastToken = inputStatus.getCaret() - lastToken.getStopIndex() - 1; 
 			if (beyondLastToken > 0) {
 				matchWith = contentBeforeCaret.substring(inputStatus.getCaret()-beyondLastToken, inputStatus.getCaret());
 				matchWith = StringUtils.trimStart(matchWith);
@@ -404,7 +404,7 @@ public abstract class CodeAssist implements Serializable {
 				replacements.addAll(suggest(rule, stream, inputStatus, matchWith));
 			}
 		} else {
-			replacements.addAll(suggest(rule, stream, inputStatus, ""));
+			replacements.addAll(suggest(rule, stream, inputStatus, contentBeforeCaret));
 		}
 		
 		String inputContent = inputStatus.getContent();
@@ -427,7 +427,7 @@ public abstract class CodeAssist implements Serializable {
 			String description = replacement.description;
 			int caret = replacement.begin + replacement.caret;
 			String content = entry.getKey(); 
-			if (replacement.begin == replacement.end) {
+			if (replacement.end <= inputStatus.getCaret()) {
 				List<String> contents = new ArrayList<>();
 				for (ElementReplacement each: value) {
 					content = inputContent.substring(0, each.begin) + each.content;

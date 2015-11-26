@@ -171,7 +171,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	protected int getAnchor(String content) {
 		AssistStream stream = codeAssist.lex(content);
 		if (stream.isEof()) {
-			return content.length();
+			return 0;
 		} else {
 			Token lastToken = stream.getToken(stream.size()-2);
 			String contentAfterLastToken = content.substring(lastToken.getStopIndex()+1);

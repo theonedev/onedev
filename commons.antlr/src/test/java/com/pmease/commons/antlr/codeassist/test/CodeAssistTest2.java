@@ -44,13 +44,15 @@ public class CodeAssistTest2 {
 	public void test() {
 		List<InputSuggestion> suggestions;
 		
+		/*
 		suggestions = codeAssist.suggest(new InputStatus(""), "revisionCriteria");
 		assertEquals(4, suggestions.size());
 		assertEquals("branch(:7", suggestions.get(0).toString());
 		assertEquals("tag(:4", suggestions.get(1).toString());
 		assertEquals("id(:3", suggestions.get(2).toString());
 		assertEquals("^:1", suggestions.get(3).toString());
-
+		*/
+		
 		suggestions = codeAssist.suggest(new InputStatus("br"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("branch(:7", suggestions.get(0).toString());

@@ -87,8 +87,10 @@ public class LogCommandDecorator extends CommitQueryBaseListener {
 	public static QueryContext parse(String query) {
 		ANTLRInputStream is = new ANTLRInputStream(query); 
 		CommitQueryLexer lexer = new CommitQueryLexer(is);
+		lexer.removeErrorListeners();
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CommitQueryParser parser = new CommitQueryParser(tokens);
+		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
 		return parser.query();
 	}

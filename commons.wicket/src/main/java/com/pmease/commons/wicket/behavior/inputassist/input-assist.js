@@ -127,6 +127,8 @@ pmease.commons.inputassist = {
 			$input.focus();
 		});
 		var $item = $dropdown.find("li.selectable");
+		if ($input.data("errors").length != 0)
+			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);
