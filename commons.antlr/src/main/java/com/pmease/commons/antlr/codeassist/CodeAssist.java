@@ -427,8 +427,7 @@ public abstract class CodeAssist implements Serializable {
 			String description = replacement.description;
 			int caret = replacement.begin + replacement.caret;
 			String content = entry.getKey(); 
-			if (inputStatus.getCaret() == inputContent.length() 
-					|| Character.isWhitespace(inputContent.charAt(inputStatus.getCaret()))) {
+			if (replacement.begin == replacement.end) {
 				List<String> contents = new ArrayList<>();
 				for (ElementReplacement each: value) {
 					content = inputContent.substring(0, each.begin) + each.content;
@@ -459,11 +458,38 @@ public abstract class CodeAssist implements Serializable {
 					}
 				}
 			} 
-			if (replacement.caret == replacement.content.length() && caret < content.length()) 
-				caret += skipMandatoriesAfter(replacement.node, content.substring(caret), 0);
+			if (replacement.caret == replacement.content.length() && caret < content.length()) { 
+				String contentAfterCaret = content.substring(caret);
+				caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(replacement.node));
+			}
 			inputSuggestions.add(new InputSuggestion(content, caret, description));
 		}
 		return inputSuggestions;
+	}
+	
+	private int skipMandatories(String content, List<String> mandatories) {
+		String mandatory = StringUtils.join(mandatories, "");
+		if (mandatory.length() != 0 && content.length() != 0) {
+			int mandatoryIndex = 0;
+			int contentIndex = 0;
+			while (true) {
+				char contentChar = content.charAt(contentIndex);
+				if (!Character.isWhitespace(contentChar)) {
+					if (contentChar != mandatory.charAt(mandatoryIndex))
+						break;
+					mandatoryIndex++;
+				} 
+				contentIndex++;
+				if (mandatoryIndex == mandatory.length() || contentIndex == content.length())
+					break;
+			}
+			if (mandatoryIndex == mandatory.length())
+				return contentIndex;
+			else
+				return 0;
+		} else {
+			return 0;
+		}
 	}
 	
 	private List<ElementReplacement> suggest(RuleSpec spec, AssistStream stream, 
@@ -557,32 +583,7 @@ public abstract class CodeAssist implements Serializable {
 		return literals;
 	}
 	
-	private int skipMandatoriesAfter(Node elementNode, String content, int offset) {
-		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
-		if (elementSpec.getMultiplicity() == Multiplicity.ONE 
-				|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
-			AlternativeSpec alternativeSpec = (AlternativeSpec) elementNode.getParent().getSpec();
-			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
-			if (specIndex == alternativeSpec.getElements().size()-1) {
-				elementNode = elementNode.getParent().getParent().getParent();
-				if (elementNode != null)
-					return skipMandatoriesAfter(elementNode, content, offset);
-			} else {
-				elementSpec = alternativeSpec.getElements().get(specIndex+1);
-				if (elementSpec.getMultiplicity() == Multiplicity.ONE
-						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					CaretMove move = elementSpec.skipMandatories(content, offset);
-					offset = move.getOffset();
-					if (!move.isStop()) {
-						elementNode = new Node(elementSpec, elementNode.getParent(), null);
-						return skipMandatoriesAfter(elementNode, content, offset);
-					}
-				}
-			}
-		}
-		return offset;
-	}
-	
-	protected abstract List<InputSuggestion> suggest(@Nullable ParseTree parseTree, Node elementNode, String matchWith);
+	protected abstract List<InputSuggestion> suggest(@Nullable ParseTree parseTree, 
+			Node elementNode, String matchWith);
 	
 }

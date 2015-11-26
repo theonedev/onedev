@@ -1,23 +1,23 @@
-package com.pmease.commons.antlr.grammar;
+package com.pmease.commons.antlr.codeassist.test;
+
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.pmease.commons.antlr.codeassist.CodeAssist;
-import com.pmease.commons.antlr.codeassist.CodeAssistTestLexer;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.ParseTree;
 
-public class CodeAssistTest {
+public class CodeAssistTest1 {
 
 	private Suggester suggester;
 	
-	private CodeAssist codeAssist = new CodeAssist(CodeAssistTestLexer.class) {
+	private CodeAssist codeAssist = new CodeAssist(CodeAssistTest1Lexer.class) {
 
 		private static final long serialVersionUID = 1L;
 
@@ -41,7 +41,7 @@ public class CodeAssistTest {
 	}
 	
 	@Test
-	public void testSelfReference()	{
+	public void test()	{
 		List<InputSuggestion> suggestions;
 		
 		suggestions = codeAssist.suggest(new InputStatus(""), "selfReference");
@@ -51,12 +51,7 @@ public class CodeAssistTest {
 		suggestions = codeAssist.suggest(new InputStatus("ab"), "selfReference");
 		assertEquals(1, suggestions.size());
 		assertEquals("ab cd:5", suggestions.get(0).toString());
-	}
-	
-	@Test
-	public void testMandatories()	{
-		List<InputSuggestion> suggestions;
-		
+
 		suggestions = codeAssist.suggest(new InputStatus(""), "mandatories");
 		assertEquals(2, suggestions.size());
 		assertEquals("ab c:4", suggestions.get(0).toString());
@@ -64,12 +59,7 @@ public class CodeAssistTest {
 		
 		suggestions = codeAssist.suggest(new InputStatus("cd"), "mandatories");
 		assertEquals(1, suggestions.size());
-		assertEquals("cd ef g:7", suggestions.get(0).toString());
-	}
-	
-	@Test
-	public void test() {
-		System.out.println(codeAssist.suggest(new InputStatus(""), "revisionCriteria"));
+		assertEquals("cd ef g h:9", suggestions.get(0).toString());
 	}
 	
 	interface Suggester {

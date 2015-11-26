@@ -34,11 +34,6 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public CaretMove skipMandatories(String content, int offset) {
-		return new CaretMove(offset, true);
-	}
-
-	@Override
 	public MandatoryScan scanMandatories(Set<String> checkedRules) {
 		return MandatoryScan.stop();
 	}

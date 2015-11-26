@@ -1,8 +1,4 @@
-grammar CodeAssistTest;
-
-selfReference:	'ab' | selfReference 'cd';
-
-mandatories: 'ab' 'c' | 'ab' 'c' | ('cd' ('ef' 'g')) 'h';
+grammar CodeAssistTest2;
 
 query: criteria+ EOF;
 

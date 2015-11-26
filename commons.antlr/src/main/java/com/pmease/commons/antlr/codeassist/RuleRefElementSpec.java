@@ -44,53 +44,29 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public CaretMove skipMandatories(String content, int offset) {
-		List<AlternativeSpec> alternatives = getRule().getAlternatives();
-		if (alternatives.size() == 1) {
-			AlternativeSpec alternativeSpec = alternatives.get(0);
-			for (ElementSpec elementSpec: alternativeSpec.getElements()) {
-				if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
-						|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
-					return new CaretMove(offset, true);
-				} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					CaretMove move = elementSpec.skipMandatories(content, offset);
-					return new CaretMove(move.getOffset(), true);
-				} else {
-					CaretMove move = elementSpec.skipMandatories(content, offset);
-					offset = move.getOffset();
-					if (move.isStop())
-						return new CaretMove(offset, true);
-				}
-			}
-			return new CaretMove(offset, false);
-		} else {
-			return new CaretMove(offset, true);
-		}
-	}
-
-	@Override
 	public MandatoryScan scanMandatories(Set<String> checkedRules) {
 		if (!checkedRules.contains(ruleName) && getRule() != null) {
 			checkedRules.add(ruleName);
 		
 			List<AlternativeSpec> alternatives = getRule().getAlternatives();
 			if (alternatives.size() == 1) {
-				List<String> literals = new ArrayList<>();
+				List<String> mandatories = new ArrayList<>();
 				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
 					if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
 							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
-						return MandatoryScan.stop();
+						return new MandatoryScan(mandatories, true);
 					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
 						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
-						return new MandatoryScan(scan.getMandatories(), true);
+						mandatories.addAll(scan.getMandatories());
+						return new MandatoryScan(mandatories, true);
 					} else {
 						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
-						literals.addAll(scan.getMandatories());
+						mandatories.addAll(scan.getMandatories());
 						if (scan.isStop())
-							return new MandatoryScan(literals, true);
+							return new MandatoryScan(mandatories, true);
 					}
 				}
-				return new MandatoryScan(literals, false);
+				return new MandatoryScan(mandatories, false);
 			} else {
 				return MandatoryScan.stop();
 			}

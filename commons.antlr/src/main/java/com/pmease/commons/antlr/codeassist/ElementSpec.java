@@ -60,8 +60,6 @@ public abstract class ElementSpec extends Spec {
 	protected abstract List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 
-	public abstract CaretMove skipMandatories(String content, int offset);
-	
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
 	
 	public List<ElementSuggestion> suggestNext(ParseTree parseTree, Node parent, String matchWith) {
