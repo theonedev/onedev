@@ -7,8 +7,6 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
-import com.google.common.base.Preconditions;
-
 public class EofElementSpec extends TokenElementSpec {
 
 	private static final long serialVersionUID = 1L;
@@ -29,15 +27,9 @@ public class EofElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		return stream.isEof();
-	}
-
-	@Override
-	protected List<TokenNode> matchOnce(AssistStream stream, 
+	protected SpecMatch matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		Preconditions.checkArgument(!stream.isEof());
-		return new ArrayList<>();
+		return new SpecMatch(new ArrayList<TokenNode>(), stream.isEof());
 	}
 
 	@Override

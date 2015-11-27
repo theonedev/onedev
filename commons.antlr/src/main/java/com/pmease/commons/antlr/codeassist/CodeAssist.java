@@ -506,20 +506,20 @@ public abstract class CodeAssist implements Serializable {
 			String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
 			elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
 		} else {
-			List<TokenNode> matches = spec.match(stream, null, null, new HashMap<String, Integer>());
-			if (matches.isEmpty()) {
+			SpecMatch match = spec.match(stream, null, null, new HashMap<String, Integer>());
+			if (match.getPaths().isEmpty()) {
 				String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
 				elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
 			} else {
-				elementSuggestions.addAll(suggest(inputStatus, matches));
-				int index = stream.getTokenIndex(matches.get(0).getToken());
+				elementSuggestions.addAll(suggest(inputStatus, match.getPaths()));
+				int index = stream.getTokenIndex(match.getPaths().get(0).getToken());
 				if (index>0) {
 					List<Token> tokens = new ArrayList<>();
 					for (int i=0; i<index; i++)
 						tokens.add(stream.getToken(i));
 					tokens.add(stream.getToken(stream.size()-1));
-					matches = spec.match(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
-					elementSuggestions.addAll(suggest(inputStatus, matches));
+					match = spec.match(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
+					elementSuggestions.addAll(suggest(inputStatus, match.getPaths()));
 				}
 			}
 		}
@@ -532,7 +532,7 @@ public abstract class CodeAssist implements Serializable {
 			AssistStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
-				if (elementSpec.matchOnce(streamAfterReplaceStart, new HashMap<String, Integer>())) {
+				if (elementSpec.matchesOnce(streamAfterReplaceStart)) {
 					if (streamAfterReplaceStart.getIndex() != 0)
 						replaceEnd = replaceStart + streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
 				}

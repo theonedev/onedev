@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Preconditions;
-
 public class AlternativeSpec extends Spec {
 
 	private static final long serialVersionUID = 1L;
@@ -35,27 +33,21 @@ public class AlternativeSpec extends Spec {
 	@Override
 	public SpecMatch match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		Preconditions.checkArgument(!stream.isEof());
-		
 		parent = new Node(this, parent, previous);
-		List<TokenNode> matches = new ArrayList<>();
+		List<TokenNode> paths = new ArrayList<>();
 		for (ElementSpec elementSpec: elements) {
-			if (!matches.isEmpty())
-				previous = matches.get(matches.size()-1);
+			if (!paths.isEmpty())
+				previous = paths.get(paths.size()-1);
 			else
 				previous = parent;
-			List<TokenNode> elementMatches = elementSpec.match(
+			SpecMatch elementMatch = elementSpec.match(
 					stream, parent, previous, new HashMap<>(checkedIndexes));
-			if (elementMatches.isEmpty()) {
-				if (!elementSpec.match(codeAssist.lex(""), new HashMap<String, Integer>()))
-					return matches;
-			} else if (stream.isEof()) {
-				return elementMatches;
-			} else {
-				matches = elementMatches;
-			}
+			if (!elementMatch.getPaths().isEmpty())
+				paths = elementMatch.getPaths();
+			if (!elementMatch.isMatched())
+				return new SpecMatch(paths, false);
 		}
-		return matches;
+		return new SpecMatch(paths, true);
 	}
 
 	@Override
@@ -65,24 +57,12 @@ public class AlternativeSpec extends Spec {
 		parent = new Node(this, parent, null);
 		for (ElementSpec element: elements) {
 			first.addAll(element.suggestFirst(parseTree, parent, matchWith, new HashSet<>(checkedRules)));
-			if (!element.match(codeAssist.lex(""), new HashMap<String, Integer>()))
+			if (!element.matches(codeAssist.lex("")))
 				break;
 		}
 		return first;
 	}
 
-	@Override
-	public boolean match(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		int index = stream.getIndex();
-		for (ElementSpec element: elements) {
-			if (!element.match(stream, new HashMap<>(checkedIndexes))) {
-				stream.setIndex(index);
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	@Override
 	public String toString() {
 		return "alternative: " + elements;

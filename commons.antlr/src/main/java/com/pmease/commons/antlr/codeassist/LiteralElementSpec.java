@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class LiteralElementSpec extends TokenElementSpec {
@@ -46,30 +45,15 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		if (stream.isEof()) {
-			return false;
-		} else if (stream.getCurrentToken().getType() == type) {
-			stream.increaseIndex();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
 	protected SpecMatch matchOnce(AssistStream stream, Node parent, 
 			Node previous, Map<String, Integer> checkedIndexes) {
-		Preconditions.checkArgument(!stream.isEof());
-		
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();
 			TokenNode tokenNode = new TokenNode(this, parent, previous, token);
-			List<TokenNode> completePaths = Lists.newArrayList(tokenNode);
-			return new SpecMatch(completePaths, new ArrayList<TokenNode>());
+			return new SpecMatch(Lists.newArrayList(tokenNode), true);
 		} else {
-			return new SpecMatch(new ArrayList<TokenNode>(), new ArrayList<TokenNode>());
+			return new SpecMatch(new ArrayList<TokenNode>(), false);
 		}
 	}
 

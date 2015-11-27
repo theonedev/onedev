@@ -1,7 +1,5 @@
 package com.pmease.commons.antlr.codeassist.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
 import org.junit.Before;

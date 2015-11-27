@@ -4,21 +4,21 @@ import java.util.List;
 
 public class SpecMatch {
 
-	private final List<TokenNode> completePaths;
+	private final List<TokenNode> paths;
 	
-	private final List<TokenNode> incompletePaths;
+	private final boolean matched;
 	
-	public SpecMatch(List<TokenNode> completePaths, List<TokenNode> incompletePaths) {
-		this.completePaths = completePaths;
-		this.incompletePaths = incompletePaths;
+	public SpecMatch(List<TokenNode> paths, boolean matched) {
+		this.paths = paths;
+		this.matched = matched;
 	}
 
-	public List<TokenNode> getCompletePaths() {
-		return completePaths;
+	public List<TokenNode> getPaths() {
+		return paths;
 	}
 
-	public List<TokenNode> getIncompletePaths() {
-		return incompletePaths;
+	public boolean isMatched() {
+		return matched;
 	}
 
 }

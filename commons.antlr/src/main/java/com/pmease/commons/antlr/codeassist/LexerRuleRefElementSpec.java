@@ -81,28 +81,17 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		if (stream.isEof()) {
-			return false;
-		} else if (stream.getCurrentToken().getType() == type) {
-			stream.increaseIndex();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	protected List<TokenNode> matchOnce(AssistStream stream, 
+	protected SpecMatch matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();
-			return Lists.newArrayList(new TokenNode(this, parent, previous, token));
+			TokenNode tokenNode = new TokenNode(this, parent, previous, token);
+			return new SpecMatch(Lists.newArrayList(tokenNode), true);
 		} else {
-			return new ArrayList<>();
+			return new SpecMatch(new ArrayList<TokenNode>(), false);
 		}
 	}
 

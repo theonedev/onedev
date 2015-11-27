@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public abstract class ElementSpec extends Spec {
@@ -36,27 +35,67 @@ public abstract class ElementSpec extends Spec {
 	public Multiplicity getMultiplicity() {
 		return multiplicity;
 	}
+
+	private Node getPrevious(SpecMatch match, Node currentPrevious) {
+		if (match.getPaths().isEmpty())
+			return currentPrevious;
+		else
+			return match.getPaths().get(match.getPaths().size()-1);
+	}
 	
 	@Override
 	public SpecMatch match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		Preconditions.checkArgument(!stream.isEof());
-		
-		if (multiplicity == Multiplicity.ONE || multiplicity == Multiplicity.ZERO_OR_ONE) {
+		if (multiplicity == Multiplicity.ONE) {
 			return matchOnce(stream, parent, previous, checkedIndexes);
-		} else {
-			List<TokenNode> matches = matchOnce(stream, parent, previous, checkedIndexes);
-			if (!matches.isEmpty()) {
-				while (!stream.isEof()) {
-					List<TokenNode> nextMatches = matchOnce(stream, parent, previous, checkedIndexes);
-					if (!nextMatches.isEmpty())
-						matches = nextMatches;
-					else
-						break;
+		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
+			SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
+			if (!match.isMatched()) {
+				return new SpecMatch(match.getPaths(), false);
+			} else if (match.getPaths().isEmpty()) {
+				return new SpecMatch(match.getPaths(), true);
+			} else {
+				List<TokenNode> paths = match.getPaths();
+				while (true) {
+					previous = getPrevious(match, previous);
+					int index = stream.getIndex();
+					match = matchOnce(stream, parent, previous, checkedIndexes);
+					if (!match.isMatched()) {
+						stream.setIndex(index);
+						return new SpecMatch(paths, true);
+					} else if (match.getPaths().isEmpty()) {
+						return new SpecMatch(paths, true);
+					} else {
+						paths = match.getPaths();
+					}
 				}
-			} 
-			return matches;
+			}
+		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
+			List<TokenNode> paths = new ArrayList<>();
+			while (true) {
+				int index = stream.getIndex();
+				SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
+				if (!match.isMatched()) {
+					stream.setIndex(index);
+					return new SpecMatch(paths, true);
+				} else if (match.getPaths().isEmpty()) {
+					return new SpecMatch(paths, true);
+				} else {
+					paths = match.getPaths();
+				}
+				previous = getPrevious(match, previous);
+			}
+		} else {
+			int index = stream.getIndex();
+			SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
+			if (!match.isMatched())
+				stream.setIndex(index);
+			return new SpecMatch(match.getPaths(), true);
 		}
+	}
+	
+	public boolean matchesOnce(AssistStream stream) {
+		return matchOnce(stream, null, null, new HashMap<String, Integer>()).isMatched();
 	}
 	
 	protected abstract SpecMatch matchOnce(AssistStream stream, 
@@ -87,7 +126,7 @@ public abstract class ElementSpec extends Spec {
 			ElementSpec nextElementSpec = alternativeSpec.getElements().get(specIndex+1);
 			suggestions.addAll(nextElementSpec.suggestFirst(
 					parseTree, parent, matchWith, new HashSet<String>()));
-			if (nextElementSpec.match(codeAssist.lex(""), new HashMap<String, Integer>()))
+			if (nextElementSpec.matches(codeAssist.lex("")))
 				suggestions.addAll(nextElementSpec.doSuggestNext(parseTree, parent, matchWith));
 		}
 		return suggestions;
@@ -107,26 +146,4 @@ public abstract class ElementSpec extends Spec {
 	protected abstract List<ElementSuggestion> doSuggestFirst(Node parent, 
 			@Nullable ParseTree parseTree, String matchWith, Set<String> checkedRules);
 	
-	@Override
-	public boolean match(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		if (multiplicity == Multiplicity.ONE) {
-			return matchOnce(stream, checkedIndexes);
-		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			if (!matchOnce(stream, checkedIndexes)) {
-				return false;
-			} else {
-				while(matchOnce(stream, checkedIndexes));
-				return true;
-			}
-		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
-			while (matchOnce(stream, checkedIndexes));
-			return true;
-		} else {
-			matchOnce(stream, checkedIndexes);
-			return true;
-		}
-	}
-	
-	protected abstract boolean matchOnce(AssistStream stream, Map<String, Integer> indexes);
-
 }

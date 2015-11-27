@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class AnyTokenElementSpec extends ElementSpec {
@@ -30,23 +29,16 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		if (!stream.isEof()) {
-			stream.increaseIndex();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
 	protected SpecMatch matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		Preconditions.checkArgument(!stream.isEof());
-		
-		Token token = stream.getCurrentToken();
-		stream.increaseIndex();
-		return Lists.newArrayList(new TokenNode(this, parent, previous, token));
+		if (stream.isEof()) {
+			return new SpecMatch(new ArrayList<TokenNode>(), false);
+		} else {
+			Token token = stream.getCurrentToken();
+			stream.increaseIndex();
+			TokenNode tokenNode = new TokenNode(this, parent, previous, token);
+			return new SpecMatch(Lists.newArrayList(tokenNode), true);
+		}
 	}
 
 	@Override

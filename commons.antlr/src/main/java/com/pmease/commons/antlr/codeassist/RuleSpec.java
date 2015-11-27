@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Preconditions;
-
 public class RuleSpec extends Spec {
 
 	private static final long serialVersionUID = 1L;
@@ -45,42 +43,36 @@ public class RuleSpec extends Spec {
 	@Override
 	public SpecMatch match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		Preconditions.checkArgument(!stream.isEof());
-		
-		List<TokenNode> paths = new ArrayList<>();
-		boolean matched;
-		int maxMatchDistance = 0;
+		List<TokenNode> matchedPaths = new ArrayList<>();
+		List<TokenNode> unmatchedPaths = new ArrayList<>();
+		boolean matched = false;
+		int maxMatchIndex = -1;
+		int maxUnmatchIndex = -1;
 		int index = stream.getIndex();
 		parent = new Node(this, parent, previous);
 		for (AlternativeSpec alternative: alternatives) {
-			SpecMatch alternativeMatch = 
-					alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes));
-			for (TokenNode path: alternativeMatch.getPaths()) {
-				int matchDistance = path.getToken().getStopIndex();
-				if (matchDistance > maxMatchDistance) {
-					maxMatchDistance = matchDistance;
-					paths.clear();
-					paths.add(path);
-				} else if (matchDistance == maxMatchDistance) {
-					paths.add(path);
-				} 
+			SpecMatch match = alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes));
+			if (match.isMatched()) {
+				if (stream.getIndex() > maxMatchIndex) {
+					maxMatchIndex = stream.getIndex();
+					matchedPaths = match.getPaths();
+				} else if (stream.getIndex() == maxMatchIndex) {
+					matchedPaths.addAll(match.getPaths());
+				}
+				matched = true;
+			} else {
+				if (stream.getIndex() > maxUnmatchIndex) {
+					maxUnmatchIndex = stream.getIndex();
+					unmatchedPaths = match.getPaths();
+				} else if (stream.getIndex() == maxUnmatchIndex) {
+					unmatchedPaths.addAll(match.getPaths());
+				}
 			}
 			stream.setIndex(index);
 		}
 
-		if (!matches.isEmpty())
-			stream.setIndex(stream.indexOf(matches.get(0).getToken()) + 1);
-		
-		return matches;
-	}
-
-	@Override
-	public boolean match(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		for (AlternativeSpec alternative: alternatives) {
-			if (alternative.match(stream, new HashMap<>(checkedIndexes)))
-				return true;
-		}
-		return false;
+		stream.setIndex(matched?maxMatchIndex:maxUnmatchIndex);
+		return new SpecMatch(matched?matchedPaths:unmatchedPaths, matched);
 	}
 
 	@Override

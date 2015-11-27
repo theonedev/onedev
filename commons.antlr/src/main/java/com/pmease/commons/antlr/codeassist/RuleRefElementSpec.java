@@ -76,22 +76,11 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected boolean matchOnce(AssistStream stream, Map<String, Integer> checkedIndexes) {
-		Integer index = checkedIndexes.get(ruleName);
-		if (index != null && index.intValue() == stream.getIndex()) {
-			return false;
-		} else {
-			checkedIndexes.put(ruleName, stream.getIndex());
-			return getRule().match(stream, checkedIndexes);
-		}
-	}
-
-	@Override
-	protected List<TokenNode> matchOnce(AssistStream stream, 
+	protected SpecMatch matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Integer index = checkedIndexes.get(ruleName);
 		if (index != null && index.intValue() == stream.getIndex()) {
-			return new ArrayList<>();
+			return new SpecMatch(new ArrayList<TokenNode>(), false);
 		} else {
 			checkedIndexes.put(ruleName, stream.getIndex());
 			parent = new Node(this, parent, previous);
