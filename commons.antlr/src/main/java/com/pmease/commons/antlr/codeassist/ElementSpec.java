@@ -38,17 +38,17 @@ public abstract class ElementSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> getPartialMatches(AssistStream stream, 
+	public SpecMatch match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		if (multiplicity == Multiplicity.ONE || multiplicity == Multiplicity.ZERO_OR_ONE) {
-			return getPartialMatchesOnce(stream, parent, previous, checkedIndexes);
+			return matchOnce(stream, parent, previous, checkedIndexes);
 		} else {
-			List<TokenNode> matches = getPartialMatchesOnce(stream, parent, previous, checkedIndexes);
+			List<TokenNode> matches = matchOnce(stream, parent, previous, checkedIndexes);
 			if (!matches.isEmpty()) {
 				while (!stream.isEof()) {
-					List<TokenNode> nextMatches = getPartialMatchesOnce(stream, parent, previous, checkedIndexes);
+					List<TokenNode> nextMatches = matchOnce(stream, parent, previous, checkedIndexes);
 					if (!nextMatches.isEmpty())
 						matches = nextMatches;
 					else
@@ -59,7 +59,7 @@ public abstract class ElementSpec extends Spec {
 		}
 	}
 	
-	protected abstract List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+	protected abstract SpecMatch matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);

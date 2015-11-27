@@ -87,7 +87,7 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+	protected List<TokenNode> matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Integer index = checkedIndexes.get(ruleName);
 		if (index != null && index.intValue() == stream.getIndex()) {
@@ -95,7 +95,7 @@ public class RuleRefElementSpec extends ElementSpec {
 		} else {
 			checkedIndexes.put(ruleName, stream.getIndex());
 			parent = new Node(this, parent, previous);
-			return getRule().getPartialMatches(stream, parent, parent, checkedIndexes);
+			return getRule().match(stream, parent, parent, checkedIndexes);
 		}
 	}
 

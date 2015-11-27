@@ -34,7 +34,7 @@ public class EofElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+	protected List<TokenNode> matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		return new ArrayList<>();

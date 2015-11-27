@@ -40,7 +40,7 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, 
+	protected SpecMatch matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		

@@ -58,16 +58,18 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected List<TokenNode> getPartialMatchesOnce(AssistStream stream, Node parent, 
+	protected SpecMatch matchOnce(AssistStream stream, Node parent, 
 			Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();
-			return Lists.newArrayList(new TokenNode(this, parent, previous, token));
+			TokenNode tokenNode = new TokenNode(this, parent, previous, token);
+			List<TokenNode> completePaths = Lists.newArrayList(tokenNode);
+			return new SpecMatch(completePaths, new ArrayList<TokenNode>());
 		} else {
-			return new ArrayList<>();
+			return new SpecMatch(new ArrayList<TokenNode>(), new ArrayList<TokenNode>());
 		}
 	}
 

@@ -506,7 +506,7 @@ public abstract class CodeAssist implements Serializable {
 			String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
 			elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
 		} else {
-			List<TokenNode> matches = spec.getPartialMatches(stream, null, null, new HashMap<String, Integer>());
+			List<TokenNode> matches = spec.match(stream, null, null, new HashMap<String, Integer>());
 			if (matches.isEmpty()) {
 				String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
 				elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
@@ -518,7 +518,7 @@ public abstract class CodeAssist implements Serializable {
 					for (int i=0; i<index; i++)
 						tokens.add(stream.getToken(i));
 					tokens.add(stream.getToken(stream.size()-1));
-					matches = spec.getPartialMatches(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
+					matches = spec.match(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
 					elementSuggestions.addAll(suggest(inputStatus, matches));
 				}
 			}

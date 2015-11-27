@@ -15,12 +15,7 @@ public abstract class Spec implements Serializable {
 		this.codeAssist = codeAssist;
 	}
 
-	/**
-	 * @param stream
-	 * @return
-	 * 			empty if the rule does not match part or all of the stream
-	 */
-	public abstract List<TokenNode> getPartialMatches(AssistStream stream, 
+	public abstract SpecMatch match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 	
 	public abstract List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 

@@ -33,25 +33,22 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> getPartialMatches(AssistStream stream, 
+	public SpecMatch match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
 		parent = new Node(this, parent, previous);
-		int index = stream.getIndex();
 		List<TokenNode> matches = new ArrayList<>();
 		for (ElementSpec elementSpec: elements) {
 			if (!matches.isEmpty())
 				previous = matches.get(matches.size()-1);
 			else
 				previous = parent;
-			List<TokenNode> elementMatches = elementSpec.getPartialMatches(
+			List<TokenNode> elementMatches = elementSpec.match(
 					stream, parent, previous, new HashMap<>(checkedIndexes));
 			if (elementMatches.isEmpty()) {
-				if (!elementSpec.match(codeAssist.lex(""), new HashMap<String, Integer>())) {
-					stream.setIndex(index);
-					return elementMatches;
-				}
+				if (!elementSpec.match(codeAssist.lex(""), new HashMap<String, Integer>()))
+					return matches;
 			} else if (stream.isEof()) {
 				return elementMatches;
 			} else {

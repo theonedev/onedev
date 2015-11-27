@@ -43,25 +43,26 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> getPartialMatches(AssistStream stream, 
+	public SpecMatch match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Preconditions.checkArgument(!stream.isEof());
 		
-		List<TokenNode> matches = new ArrayList<>();
+		List<TokenNode> paths = new ArrayList<>();
+		boolean matched;
 		int maxMatchDistance = 0;
 		int index = stream.getIndex();
 		parent = new Node(this, parent, previous);
 		for (AlternativeSpec alternative: alternatives) {
-			List<TokenNode> alternativeMatches = 
-					alternative.getPartialMatches(stream, parent, parent, new HashMap<>(checkedIndexes));
-			for (TokenNode node: alternativeMatches) {
-				int matchDistance = node.getToken().getStopIndex();
+			SpecMatch alternativeMatch = 
+					alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes));
+			for (TokenNode path: alternativeMatch.getPaths()) {
+				int matchDistance = path.getToken().getStopIndex();
 				if (matchDistance > maxMatchDistance) {
 					maxMatchDistance = matchDistance;
-					matches.clear();
-					matches.add(node);
+					paths.clear();
+					paths.add(path);
 				} else if (matchDistance == maxMatchDistance) {
-					matches.add(node);
+					paths.add(path);
 				} 
 			}
 			stream.setIndex(index);
