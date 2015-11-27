@@ -33,7 +33,8 @@ public class LiteralElementSpec extends TokenElementSpec {
 		if (!matchWith.equals(literal) 
 				&& literal.toLowerCase().startsWith(matchWith.toLowerCase())) {
 			InputSuggestion text = new InputSuggestion(literal, literal.length(), literal);
-			return Lists.newArrayList(new ElementSuggestion(new Node(this, parent, null), Lists.newArrayList(text)));
+			return Lists.newArrayList(new ElementSuggestion(parseTree, new Node(this, parent, null), 
+					matchWith, Lists.newArrayList(text)));
 		} else {
 			return new ArrayList<>();
 		}

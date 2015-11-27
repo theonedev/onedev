@@ -56,6 +56,10 @@ public class AssistStream {
 		return tokens.get(index);
 	}
 	
+	public int getTokenIndex(Token token) {
+		return tokens.indexOf(token);
+	}
+	
 	public Token getPreviousToken() {
 		return getToken(index-1);
 	}

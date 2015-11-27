@@ -150,10 +150,13 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		
 		final List<InputSuggestion> suggestions;
 		
+		long time = System.currentTimeMillis();
 		if (inputCaret != null)
 			suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
 		else
 			suggestions = new ArrayList<>();
+		
+		System.out.println(System.currentTimeMillis()-time);
 
 		if (!suggestions.isEmpty()) {
 			int anchor = getAnchor(inputContent.substring(0, inputCaret));

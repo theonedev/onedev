@@ -13,11 +13,11 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.ParseTree;
 
-public class CodeAssistTest2 {
+public class CodeAssistTest3 {
 
 	private Suggester suggester;
 	
-	private CodeAssist codeAssist = new CodeAssist(CodeAssistTest2Lexer.class) {
+	private CodeAssist codeAssist = new CodeAssist(CodeAssistTest3Lexer.class) {
 
 		private static final long serialVersionUID = 1L;
 
@@ -44,16 +44,8 @@ public class CodeAssistTest2 {
 	public void test() {
 		List<InputSuggestion> suggestions;
 		
-		suggestions = codeAssist.suggest(new InputStatus(""), "revisionCriteria");
-		assertEquals(4, suggestions.size());
-		assertEquals("branch(:7", suggestions.get(0).toString());
-		assertEquals("tag(:4", suggestions.get(1).toString());
-		assertEquals("id(:3", suggestions.get(2).toString());
-		assertEquals("^:1", suggestions.get(3).toString());
-		
-		suggestions = codeAssist.suggest(new InputStatus("br"), "query");
-		assertEquals(1, suggestions.size());
-		assertEquals("branch(:7", suggestions.get(0).toString());
+		suggestions = codeAssist.suggest(new InputStatus("title: hello world"), "query");
+		System.out.println(suggestions);
 	}
 	
 	interface Suggester {

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -92,18 +94,18 @@ public abstract class ElementSpec extends Spec {
 	}
 	
 	@Override
-	public List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 
+	public List<ElementSuggestion> suggestFirst(@Nullable ParseTree parseTree, Node parent, 
 			String matchWith, Set<String> checkedRules) {
 		Node elementNode = new Node(this, parent, null);
 		List<InputSuggestion> texts = codeAssist.suggest(parseTree, elementNode, matchWith);
 		if (texts != null)
-			return Lists.newArrayList(new ElementSuggestion(elementNode, texts));
+			return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, texts));
 		else
 			return doSuggestFirst(parent, parseTree, matchWith, checkedRules);
 	}
 
 	protected abstract List<ElementSuggestion> doSuggestFirst(Node parent, 
-			ParseTree parseTree, String matchWith, Set<String> checkedRules);
+			@Nullable ParseTree parseTree, String matchWith, Set<String> checkedRules);
 	
 	@Override
 	public boolean match(AssistStream stream, Map<String, Integer> checkedIndexes) {

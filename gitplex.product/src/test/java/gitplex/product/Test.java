@@ -1,12 +1,20 @@
 package gitplex.product;
 
-import com.google.common.base.Splitter;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.Token;
+
+import com.pmease.commons.antlr.codeassist.test.CodeAssistTest3Lexer;
 
 public class Test {
 
 	@org.junit.Test
 	public void test() {
-		System.out.println(Splitter.on('\n').splitToList("\n").size());
+		CodeAssistTest3Lexer lexer = new CodeAssistTest3Lexer(new ANTLRInputStream("title: hello world just"));
+		Token token = lexer.nextToken();
+		while (token.getType() != Token.EOF) {
+			System.out.println(token);
+			token = lexer.nextToken();
+		}
 	}
 	
 }
