@@ -25,6 +25,7 @@ import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.Suggester;
 import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
@@ -184,6 +185,13 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		}
 	}
 
-	protected abstract List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith);
+	protected abstract List<InputSuggestion> suggest(ParseTree parseTree, 
+			Node elementNode, String matchWith);
+	
+	protected List<InputSuggestion> decorate(Suggester suggester, ParseTree parseTree, 
+			Node elementNode, String matchWith, String prefix, String suffix) {
+		return codeAssist.decorate(suggester, parseTree, elementNode, 
+				matchWith, prefix, suffix);
+	}
 	
 }

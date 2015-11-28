@@ -7,6 +7,7 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.Suggester;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 
 @SuppressWarnings("serial")
@@ -19,18 +20,25 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
+	protected List<InputSuggestion> suggest(final ParseTree parseTree, Node elementNode, String matchWith) {
 		if (elementNode.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) elementNode.getSpec();
-			if (spec.getRuleName().equals("Value") 
-					&& parseTree.getLastNode().getToken().getType() == CommitQueryParser.BRANCH) {
-				List<InputSuggestion> suggestions = new ArrayList<>();
-				for (String value: BRANCHS) {
-					String bracedValue = "(" + value + ")";
-					if (bracedValue.toLowerCase().contains(matchWith.toLowerCase()))
-						suggestions.add(new InputSuggestion(bracedValue, bracedValue));
-				}
-				return suggestions;
+			if (spec.getRuleName().equals("Value")) {
+				return decorate(new Suggester() {
+
+					@Override
+					public List<InputSuggestion> suggest(String matchWith) {
+						List<InputSuggestion> suggestions = new ArrayList<>();
+						if (parseTree.getLastNode().getToken().getType() == CommitQueryParser.BRANCH) {
+							for (String value: BRANCHS) {
+								if (value.toLowerCase().contains(matchWith.toLowerCase()))
+									suggestions.add(new InputSuggestion(value, value));
+							}
+						}
+						return suggestions;
+					}
+					
+				}, parseTree, elementNode, matchWith, "(", ")");
 			}
 		}
 		return null;

@@ -146,9 +146,9 @@ public abstract class ElementSpec extends Spec {
 	public List<ElementSuggestion> suggestFirst(@Nullable ParseTree parseTree, Node parent, 
 			String matchWith, Set<String> checkedRules) {
 		Node elementNode = new Node(this, parent, null);
-		List<InputSuggestion> texts = codeAssist.suggest(parseTree, elementNode, matchWith);
-		if (texts != null)
-			return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, texts));
+		List<InputSuggestion> suggestions = codeAssist.suggest(parseTree, elementNode, matchWith);
+		if (suggestions != null && !suggestions.isEmpty())
+			return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, suggestions));
 		else
 			return doSuggestFirst(parent, parseTree, matchWith, checkedRules);
 	}

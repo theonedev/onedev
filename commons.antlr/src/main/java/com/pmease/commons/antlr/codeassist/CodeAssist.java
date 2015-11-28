@@ -601,5 +601,39 @@ public abstract class CodeAssist implements Serializable {
 	
 	protected abstract List<InputSuggestion> suggest(@Nullable ParseTree parseTree, 
 			Node elementNode, String matchWith);
-	
+
+	public List<InputSuggestion> decorate(Suggester suggester, 
+			@Nullable ParseTree parseTree, Node elementNode, String matchWith, 
+			String prefix, String suffix) {
+		if (matchWith.startsWith(prefix))
+			matchWith = matchWith.substring(prefix.length());
+		List<InputSuggestion> suggestions = suggester.suggest(matchWith);
+		List<InputSuggestion> surroundedSuggestions = new ArrayList<>();
+		
+		boolean matchFound = false;
+		for (InputSuggestion suggestion: suggestions) {
+			String content = suggestion.getContent();
+			int caret = suggestion.getCaret();
+			if (!elementNode.getSpec().matches(lex(content))) {
+				content = prefix + content + suffix;
+				if (caret == suggestion.getContent().length())
+					caret = content.length();
+				else
+					caret += prefix.length();
+				surroundedSuggestions.add(new InputSuggestion(content, caret, suggestion.getDescription()));
+			} else {
+				surroundedSuggestions.add(suggestion);
+			}
+			if (suggestion.getContent().equals(matchWith))
+				matchFound = true;
+		}
+		if (!matchFound && !elementNode.getSpec().matches(lex(matchWith))) {
+			String surroundedMatchWith = prefix + matchWith + suffix;
+			if (elementNode.getSpec().matches(lex(surroundedMatchWith))) {
+				surroundedSuggestions.add(new InputSuggestion(surroundedMatchWith, 
+						surroundedMatchWith.length(), surroundedMatchWith));
+			}
+		}
+		return surroundedSuggestions;
+	}
 }
