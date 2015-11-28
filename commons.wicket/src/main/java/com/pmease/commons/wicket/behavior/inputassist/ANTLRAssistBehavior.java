@@ -25,15 +25,14 @@ import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.ParseTree;
-import com.pmease.commons.antlr.codeassist.Suggester;
 import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
-	private final Class<? extends Lexer> lexerClass;
+	protected final Class<? extends Lexer> lexerClass;
 	
-	private final Class<? extends Parser> parserClass;
+	protected final Class<? extends Parser> parserClass;
 	
 	private transient Constructor<? extends Lexer> lexerCtor;
 	
@@ -41,9 +40,9 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	
 	private transient Method ruleMethod;
 	
-	private final CodeAssist codeAssist;
+	protected final CodeAssist codeAssist;
 	
-	private final String ruleName;
+	protected final String ruleName;
 	
 	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, String ruleName) {
 		this(parserClass, AntlrUtils.getLexerClass(parserClass), ruleName);
@@ -187,11 +186,5 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
 	protected abstract List<InputSuggestion> suggest(ParseTree parseTree, 
 			Node elementNode, String matchWith);
-	
-	protected List<InputSuggestion> decorate(Suggester suggester, ParseTree parseTree, 
-			Node elementNode, String matchWith, String prefix, String suffix) {
-		return codeAssist.decorate(suggester, parseTree, elementNode, 
-				matchWith, prefix, suffix);
-	}
 	
 }

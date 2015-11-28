@@ -4,10 +4,10 @@ query: criteria+ EOF;
 
 criteria: titleCriteria|authorCriteria;
 
-titleCriteria: 'title' ':' Value;
-authorCriteria: 'author' ':' Value;
+titleCriteria: 'title' ':' value;
+authorCriteria: 'author' ':' value;
 
-Value: QuotedValue|NQuotedValue;
+value: QuotedValue|NQuotedValue;
 
 QuotedValue: '"' (ESCAPE|~["\\])+? '"';
 NQuotedValue: [a-zA-Z1-9]+;
