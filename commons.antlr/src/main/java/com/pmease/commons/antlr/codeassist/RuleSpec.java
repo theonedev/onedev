@@ -71,8 +71,15 @@ public class RuleSpec extends Spec {
 			stream.setIndex(index);
 		}
 
-		stream.setIndex(matched?maxMatchIndex:maxUnmatchIndex);
-		return new SpecMatch(matched?matchedPaths:unmatchedPaths, matched);
+		stream.setIndex(Math.max(maxMatchIndex, maxUnmatchIndex));
+		if (maxMatchIndex == maxUnmatchIndex) {
+			matchedPaths.addAll(unmatchedPaths);
+			return new SpecMatch(matchedPaths, matched);
+		} else if (maxMatchIndex > maxUnmatchIndex) {
+			return new SpecMatch(matchedPaths, matched);
+		} else {
+			return new SpecMatch(unmatchedPaths, matched);
+		}
 	}
 
 	@Override

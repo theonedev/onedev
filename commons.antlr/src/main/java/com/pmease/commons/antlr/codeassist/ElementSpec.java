@@ -58,11 +58,14 @@ public abstract class ElementSpec extends Spec {
 				List<TokenNode> paths = match.getPaths();
 				while (true) {
 					previous = getPrevious(match, previous);
-					int index = stream.getIndex();
 					match = matchOnce(stream, parent, previous, checkedIndexes);
 					if (!match.isMatched()) {
-						stream.setIndex(index);
-						return new SpecMatch(paths, true);
+						if (!match.getPaths().isEmpty()) {
+							paths = match.getPaths();
+							return new SpecMatch(paths, false);
+						} else {
+							return new SpecMatch(paths, true);
+						}
 					} else if (match.getPaths().isEmpty()) {
 						return new SpecMatch(paths, true);
 					} else {
@@ -73,11 +76,14 @@ public abstract class ElementSpec extends Spec {
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
 			List<TokenNode> paths = new ArrayList<>();
 			while (true) {
-				int index = stream.getIndex();
 				SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
 				if (!match.isMatched()) {
-					stream.setIndex(index);
-					return new SpecMatch(paths, true);
+					if (!match.getPaths().isEmpty()) {
+						paths = match.getPaths();
+						return new SpecMatch(paths, false);
+					} else {
+						return new SpecMatch(paths, true);
+					}
 				} else if (match.getPaths().isEmpty()) {
 					return new SpecMatch(paths, true);
 				} else {
@@ -86,11 +92,15 @@ public abstract class ElementSpec extends Spec {
 				previous = getPrevious(match, previous);
 			}
 		} else {
-			int index = stream.getIndex();
 			SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
-			if (!match.isMatched())
-				stream.setIndex(index);
-			return new SpecMatch(match.getPaths(), true);
+			if (!match.isMatched()) {
+				if (!match.getPaths().isEmpty()) 
+					return new SpecMatch(match.getPaths(), false);
+				else 
+					return new SpecMatch(match.getPaths(), true);
+			} else { 
+				return match;
+			}
 		}
 	}
 	

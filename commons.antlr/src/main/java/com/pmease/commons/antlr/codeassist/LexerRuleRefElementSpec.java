@@ -9,7 +9,6 @@ import java.util.Set;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class LexerRuleRefElementSpec extends TokenElementSpec {
@@ -83,8 +82,6 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	@Override
 	protected SpecMatch matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		Preconditions.checkArgument(!stream.isEof());
-		
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();
