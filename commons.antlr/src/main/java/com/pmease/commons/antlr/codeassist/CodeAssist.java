@@ -573,12 +573,10 @@ public abstract class CodeAssist implements Serializable {
 						Token newToken = newStream.getToken(index);
 						if (lastToken.getStartIndex() != newToken.getStartIndex()
 								|| lastToken.getStopIndex() != newToken.getStopIndex()) {
-							elementReplacement.content = " " + inputSuggestion.getContent();
-							elementReplacement.caret++;
+							continue;
 						}
 					} else {
-						elementReplacement.content = " " + inputSuggestion.getContent();
-						elementReplacement.caret++;
+						continue;
 					}
 				} 
 				
