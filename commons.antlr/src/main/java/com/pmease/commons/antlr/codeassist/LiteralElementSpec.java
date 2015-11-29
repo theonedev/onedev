@@ -29,9 +29,8 @@ public class LiteralElementSpec extends TokenElementSpec {
 	@Override
 	public List<ElementSuggestion> doSuggestFirst(Node parent, ParseTree parseTree, 
 			String matchWith, Set<String> checkedRules) {
-		if (!matchWith.equals(literal) 
-				&& literal.toLowerCase().startsWith(matchWith.toLowerCase())) {
-			InputSuggestion text = new InputSuggestion(literal, literal.length(), literal);
+		if (literal.toLowerCase().startsWith(matchWith.toLowerCase())) {
+			InputSuggestion text = new InputSuggestion(literal);
 			return Lists.newArrayList(new ElementSuggestion(parseTree, new Node(this, parent, null), 
 					matchWith, Lists.newArrayList(text)));
 		} else {

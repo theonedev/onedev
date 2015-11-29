@@ -18,14 +18,13 @@ public abstract class SurroundingAware {
 	}
 	
 	public List<InputSuggestion> suggest(Node elementNode, String matchWith) {
-		String surroundlessMatchWith = matchWith;
-		if (surroundlessMatchWith.startsWith(prefix))
-			surroundlessMatchWith = surroundlessMatchWith.substring(prefix.length());
-		if (surroundlessMatchWith.endsWith(suffix))
-			surroundlessMatchWith = surroundlessMatchWith.substring(0, surroundlessMatchWith.length()-suffix.length());
-		surroundlessMatchWith = surroundlessMatchWith.trim();
+		if (matchWith.startsWith(prefix))
+			matchWith = matchWith.substring(prefix.length());
+		if (matchWith.endsWith(suffix))
+			matchWith = matchWith.substring(0, matchWith.length()-suffix.length());
+		matchWith = matchWith.trim();
 		
-		List<InputSuggestion> suggestions = match(surroundlessMatchWith);
+		List<InputSuggestion> suggestions = match(matchWith);
 		List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 		
 		boolean matchFound = false;
@@ -38,20 +37,21 @@ public abstract class SurroundingAware {
 					caret = content.length();
 				else
 					caret += prefix.length();
-				checkedSuggestions.add(new InputSuggestion(content, caret, suggestion.getDescription()));
+				String label = suggestion.getLabel();
+				if (label.equals(suggestion.getContent()))
+					label = content;
+				checkedSuggestions.add(new InputSuggestion(content, caret, 
+						label, suggestion.getDescription()));
 			} else {
 				checkedSuggestions.add(suggestion);
 			}
-			if (suggestion.getContent().equals(surroundlessMatchWith))
+			if (suggestion.getContent().equals(matchWith))
 				matchFound = true;
 		}
-		if (!matchFound && !elementNode.getSpec().matches(codeAssist.lex(surroundlessMatchWith))) {
-			String surroundedMatchWith = prefix + surroundlessMatchWith + suffix;
-			if (!surroundedMatchWith.equals(matchWith) 
-					&& elementNode.getSpec().matches(codeAssist.lex(surroundedMatchWith))) {
-				checkedSuggestions.add(new InputSuggestion(surroundedMatchWith, 
-						surroundedMatchWith.length(), surroundedMatchWith));
-			}
+		if (!matchFound && !elementNode.getSpec().matches(codeAssist.lex(matchWith))) {
+			matchWith = prefix + matchWith + suffix;
+			if (elementNode.getSpec().matches(codeAssist.lex(matchWith)))
+				checkedSuggestions.add(new InputSuggestion(matchWith));
 		}
 		return checkedSuggestions;
 	}

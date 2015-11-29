@@ -31,7 +31,7 @@ class AssistPanel extends Panel {
 			protected void populateItem(ListItem<InputSuggestion> item) {
 				InputSuggestion suggestion = item.getModelObject();
 				WebMarkupContainer link = new WebMarkupContainer("link");
-				link.add(new Label("label", suggestion.getDescription()));
+				link.add(new Label("label", suggestion.getLabel()));
 				item.add(link);
 				item.add(AttributeAppender.append("data-content", suggestion.getContent()));
 				item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));

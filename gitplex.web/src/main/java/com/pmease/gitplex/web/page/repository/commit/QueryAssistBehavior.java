@@ -32,7 +32,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						if (parseTree.getLastNode().getToken().getType() == CommitQueryParser.BRANCH) {
 							for (String value: BRANCHS) {
 								if (value.toLowerCase().contains(matchWith.toLowerCase()))
-									suggestions.add(new InputSuggestion(value, value));
+									suggestions.add(new InputSuggestion(value));
 							}
 						}
 						return suggestions;

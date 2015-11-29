@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -401,6 +402,7 @@ public abstract class CodeAssist implements Serializable {
 		for (Map.Entry<String, List<ElementReplacement>> entry: grouped.entrySet())	 {
 			List<ElementReplacement> value = entry.getValue();
 			ElementReplacement replacement = value.get(0);
+			String label = replacement.label;
 			String description = replacement.description;
 			String content = entry.getKey(); 
 			if (replacement.end <= inputStatus.getCaret()) {
@@ -455,7 +457,12 @@ public abstract class CodeAssist implements Serializable {
 				caret = replacement.begin + replacement.content.length();
 			}
 			
-			inputSuggestions.add(new InputSuggestion(content, caret, description));
+			inputSuggestions.add(new InputSuggestion(content, caret, label, description));
+		}
+		
+		for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
+			if (it.next().getContent().equals(inputStatus.getContent()))
+				it.remove();
 		}
 		return inputSuggestions;
 	}
@@ -548,6 +555,7 @@ public abstract class CodeAssist implements Serializable {
 				elementReplacement.node = elementSuggestion.getNode();
 				elementReplacement.begin = replaceStart;
 				elementReplacement.end = replaceEnd;
+				elementReplacement.label = inputSuggestion.getLabel();
 				elementReplacement.description = inputSuggestion.getDescription();
 				
 				elementReplacement.content = inputSuggestion.getContent();

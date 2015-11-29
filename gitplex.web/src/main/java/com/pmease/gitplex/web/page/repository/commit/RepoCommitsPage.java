@@ -222,6 +222,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		final QueryAssistBehavior queryAssist = new QueryAssistBehavior();
 		queryForm = new Form<Void>("query") {
 
 			@Override
@@ -229,6 +230,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				super.onSubmit();
 
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				queryAssist.close(target);
 				try {
 					if (state.query != null) // validate query
 						LogCommandDecorator.parse(state.query);
@@ -264,7 +266,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				state.query = object;
 			}
 			
-		}).add(new QueryAssistBehavior()));
+		}).add(queryAssist));
 		
 		queryForm.add(new AjaxButton("submit") {});
 		queryForm.add(new AjaxLink<Void>("clear") {

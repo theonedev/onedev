@@ -36,7 +36,7 @@ public class CodeAssistTest2 {
 							if (parseTree.getLastNode().getToken().getType() == CodeAssistTest2Lexer.BRANCH) {
 								for (String value: BRANCHS) {
 									if (value.toLowerCase().contains(matchWith.toLowerCase()))
-										suggestions.add(new InputSuggestion(value, value));
+										suggestions.add(new InputSuggestion(value));
 								}
 							}
 							return suggestions;
@@ -53,6 +53,11 @@ public class CodeAssistTest2 {
 	@Test
 	public void test() {
 		List<InputSuggestion> suggestions;
+		
+		suggestions = codeAssist.suggest(new InputStatus("branch(master)"), "revisionCriteria");
+		assertEquals(2, suggestions.size());
+		assertEquals("branch(master)..:16", suggestions.get(0).toString());
+		assertEquals("branch(master)...:17", suggestions.get(1).toString());
 		
 		suggestions = codeAssist.suggest(new InputStatus(""), "revisionCriteria");
 		assertEquals(4, suggestions.size());
@@ -72,6 +77,13 @@ public class CodeAssistTest2 {
 		assertEquals("branch(feature1):16", suggestions.get(2).toString());
 		assertEquals("branch(feature2):16", suggestions.get(3).toString());
 		
+		suggestions = codeAssist.suggest(new InputStatus("branch"), "query");
+		assertEquals(4, suggestions.size());
+		assertEquals("branch(master):14", suggestions.get(0).toString());
+		assertEquals("branch(dev):11", suggestions.get(1).toString());
+		assertEquals("branch(feature1):16", suggestions.get(2).toString());
+		assertEquals("branch(feature2):16", suggestions.get(3).toString());
+
 		suggestions = codeAssist.suggest(new InputStatus("branch( fea"), "query");
 		assertEquals(3, suggestions.size());
 		assertEquals("branch(feature1):16", suggestions.get(0).toString());

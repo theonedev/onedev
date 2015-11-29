@@ -12,6 +12,8 @@ class ElementReplacement {
 	
 	int caret;
 	
+	String label;
+	
 	String description;
 
 }

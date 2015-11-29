@@ -193,6 +193,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 			dropdown.close(target);
 		}
 	}
+	
+	public void close(AjaxRequestTarget target) {
+		dropdown.close(target);
+	}
 
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
