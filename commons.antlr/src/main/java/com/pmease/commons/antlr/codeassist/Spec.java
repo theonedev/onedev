@@ -17,7 +17,7 @@ public abstract class Spec implements Serializable {
 	}
 
 	public boolean matches(AssistStream stream) {
-		return match(stream, null, null, new HashMap<String, Integer>()).isMatched();
+		return match(stream, null, null, new HashMap<String, Integer>()).isMatched() && stream.isEof();
 	}
 	
 	public abstract SpecMatch match(AssistStream stream, 

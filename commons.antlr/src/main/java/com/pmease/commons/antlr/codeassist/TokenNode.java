@@ -16,4 +16,9 @@ public class TokenNode extends Node {
 		return token;
 	}
 
+	@Override
+	public String toString() {
+		return "spec: " + spec + ", token: " + token;
+	}
+	
 }

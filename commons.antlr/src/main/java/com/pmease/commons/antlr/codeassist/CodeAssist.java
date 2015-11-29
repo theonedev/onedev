@@ -533,8 +533,11 @@ public abstract class CodeAssist implements Serializable {
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
 				if (elementSpec.matchesOnce(streamAfterReplaceStart)) {
-					if (streamAfterReplaceStart.getIndex() != 0)
-						replaceEnd = replaceStart + streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
+					if (streamAfterReplaceStart.getIndex() != 0) {
+						int lastTokenIndex = streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
+						if (replaceStart + lastTokenIndex > replaceEnd)
+							replaceEnd = replaceStart + lastTokenIndex;
+					}
 				}
 			}
 

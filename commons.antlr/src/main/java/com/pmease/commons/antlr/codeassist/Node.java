@@ -29,5 +29,10 @@ public class Node {
 	public Node getPrevious() {
 		return previous;
 	}
+
+	@Override
+	public String toString() {
+		return "spec: " + spec;
+	}
 	
 }

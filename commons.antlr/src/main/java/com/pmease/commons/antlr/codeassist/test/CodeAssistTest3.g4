@@ -2,10 +2,7 @@ grammar CodeAssistTest3;
 
 query: criteria+ EOF;
 
-criteria: titleCriteria|authorCriteria;
-
-titleCriteria: 'title' ':' value;
-authorCriteria: 'author' ':' value;
+criteria: ('title'|'author') ':' value;
 
 value: QuotedValue|NQuotedValue;
 
