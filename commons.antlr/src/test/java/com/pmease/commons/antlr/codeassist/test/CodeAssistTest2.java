@@ -93,6 +93,10 @@ public class CodeAssistTest2 {
 		suggestions = codeAssist.suggest(new InputStatus("tag"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("tag(:4", suggestions.get(0).toString());
+		
+		suggestions = codeAssist.suggest(new InputStatus("branch(master)t"), "query");
+		assertEquals(1, suggestions.size());
+		assertEquals("branch(master)tag(:18", suggestions.get(0).toString());
 	}
 	
 }

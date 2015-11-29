@@ -17,6 +17,17 @@ public abstract class SurroundingAware {
 		this.suffix = suffix;
 	}
 	
+	private boolean matches(Spec spec, String content) {
+		AssistStream stream = codeAssist.lex(content);
+		if (stream.isEof()) {
+			return content.length() == 0 && spec.matches(stream);
+		} else {
+			int start = stream.getToken(0).getStartIndex();
+			int stop = stream.getToken(stream.size()-2).getStopIndex()+1;
+			return start == 0 && stop == content.length() && spec.matches(stream);
+		}
+	}
+	
 	public List<InputSuggestion> suggest(Node elementNode, String matchWith) {
 		if (matchWith.startsWith(prefix))
 			matchWith = matchWith.substring(prefix.length());
@@ -27,11 +38,11 @@ public abstract class SurroundingAware {
 		List<InputSuggestion> suggestions = match(matchWith);
 		List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 		
-		boolean matchFound = false;
+		boolean matchWithIncluded = false;
 		for (InputSuggestion suggestion: suggestions) {
 			String content = suggestion.getContent();
 			int caret = suggestion.getCaret();
-			if (!elementNode.getSpec().matches(codeAssist.lex(content))) {
+			if (!matches(elementNode.getSpec(), content)) {
 				content = prefix + content + suffix;
 				if (caret == suggestion.getContent().length())
 					caret = content.length();
@@ -46,11 +57,11 @@ public abstract class SurroundingAware {
 				checkedSuggestions.add(suggestion);
 			}
 			if (suggestion.getContent().equals(matchWith))
-				matchFound = true;
+				matchWithIncluded = true;
 		}
-		if (!matchFound && !elementNode.getSpec().matches(codeAssist.lex(matchWith))) {
+		if (!matchWithIncluded && !matches(elementNode.getSpec(), matchWith)) {
 			matchWith = prefix + matchWith + suffix;
-			if (elementNode.getSpec().matches(codeAssist.lex(matchWith)))
+			if (matches(elementNode.getSpec(), matchWith))
 				checkedSuggestions.add(new InputSuggestion(matchWith));
 		}
 		return checkedSuggestions;

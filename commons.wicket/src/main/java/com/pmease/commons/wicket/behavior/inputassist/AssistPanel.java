@@ -33,12 +33,16 @@ class AssistPanel extends Panel {
 				WebMarkupContainer link = new WebMarkupContainer("link");
 				link.add(new Label("label", suggestion.getLabel()));
 				item.add(link);
+				if (suggestion.getDescription() != null)
+					item.add(new Label("description", suggestion.getDescription()));
+				else
+					item.add(new Label("description").setVisible(false));
 				item.add(AttributeAppender.append("data-content", suggestion.getContent()));
 				item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));
 			}
 
 		});
-		
+
 		setOutputMarkupId(true);
 	}
 

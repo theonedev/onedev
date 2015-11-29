@@ -5,7 +5,7 @@ pmease.commons.inputassist = {
 		
 		$input.data("prevValue", $input.val());
 		$input.data("prevCaret", -1);
-		$input.on("input mouseup keyup", function(e) {
+		$input.on("input click keyup", function(e) {
 			var value = $input.val();
 			var caret = $input.caret();
 			if (value != $input.data("prevValue") || caret != $input.data("prevCaret")) {
@@ -15,8 +15,8 @@ pmease.commons.inputassist = {
 					callback(value, caret);
 			}
 		});
-		$input.on("focus", function(e) {
-			callback($input.val(), $input.caret());
+		$input.on("blur", function(e) {
+			$input.data("prevCaret", -1);
 		});
 
 		$input.data("update", function($item) {
@@ -32,18 +32,18 @@ pmease.commons.inputassist = {
 		$input.bind("keydown", "up", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				var $active = $dropdown.find("li.active");
+				var $active = $dropdown.find("tr.active");
 				if ($active.length != 0) {
 					$active.removeClass("active");
 					var $prev = $active.prev();
 					if ($prev.length != 0)
 						$prev.addClass("active");
 					else
-						$dropdown.find("li.selectable").last().addClass("active");
+						$dropdown.find("tr.selectable").last().addClass("active");
 				} else {
-					$dropdown.find("li.selectable").last().addClass("active");
+					$dropdown.find("tr.selectable").last().addClass("active");
 				}
-				$dropdown.scrollIntoView("li.active");
+				$dropdown.find(".suggestions").scrollIntoView("tr.active");
 				return false;
 			}
 		});
@@ -51,18 +51,18 @@ pmease.commons.inputassist = {
 		$input.bind("keydown", "down", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				var $active = $dropdown.find("li.active");
+				var $active = $dropdown.find("tr.active");
 				if ($active.length != 0) {
 					$active.removeClass("active");
 					var $next = $active.next();
 					if ($next.length != 0)
 						$next.addClass("active");
 					else
-						$dropdown.find("li.selectable").first().addClass("active");
+						$dropdown.find("tr.selectable").first().addClass("active");
 				} else {
-					$dropdown.find("li.selectable").first().addClass("active");
+					$dropdown.find("tr.selectable").first().addClass("active");
 				}
-				$dropdown.scrollIntoView("li.active");
+				$dropdown.find(".suggestions").scrollIntoView("tr.active");
 				return false;
 			}
 		});
@@ -70,7 +70,7 @@ pmease.commons.inputassist = {
 		$input.bind("keydown", "return", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				var $active = $dropdown.find("li.active");
+				var $active = $dropdown.find("tr.active");
 				if ($active.length != 0) {
 					$input.data("update")($active);
 					return false;
@@ -126,12 +126,22 @@ pmease.commons.inputassist = {
 		$dropdown.click(function() {
 			$input.focus();
 		});
-		var $item = $dropdown.find("li.selectable");
+		var $item = $dropdown.find("tr.selectable");
 		if ($input.data("errors").length != 0)
 			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);
 		});
+		pmease.commons.inputassist.updateHelp(dropdownId);
+	},
+	
+	updateHelp: function(dropdownId) {
+		var $dropdown = $("#" + dropdownId);
+		if ($dropdown.find("tr.active").length != 0) {
+			$dropdown.find(".help").append("Press '&uarr; &darr;' to navigate, or 'enter' to select");
+		} else {
+			$dropdown.find(".help").append("Press '&uarr; &darr;' to navigate");
+		}
 	}
 }

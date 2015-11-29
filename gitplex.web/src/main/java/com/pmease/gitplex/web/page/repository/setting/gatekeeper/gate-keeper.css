@@ -10,8 +10,10 @@
 	cursor: pointer;
 }
 .gate-keeper-selector.floating {
-	width: 600px; 
 	border-radius: 0;
+}
+.gate-keeper-selector.floating>.content {
+	width: 600px; 
 }
 .gate-keeper-selector .panel {
 	border: none; 

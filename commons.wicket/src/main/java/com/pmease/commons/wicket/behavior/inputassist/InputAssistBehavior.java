@@ -29,7 +29,6 @@ import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
-import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.assets.textareacaretposition.TextareaCaretPositionResourceReference;
@@ -195,7 +194,8 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	}
 	
 	public void close(AjaxRequestTarget target) {
-		dropdown.close(target);
+		if (dropdown != null)
+			dropdown.close(target);
 	}
 
 	@Override
@@ -205,7 +205,6 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(JavaScriptHeaderItem.forReference(ScrollIntoViewResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CaretResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(DoneEventsResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(TextareaCaretPositionResourceReference.INSTANCE));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(AssistPanel.class, "input-assist.css")));

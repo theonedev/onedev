@@ -1,7 +1,16 @@
 <wicket:panel>
-	<ul class="input-assist list-unstyled">
-		<li wicket:id="suggestions" class="selectable" tabindex="-1">
-			<a wicket:id="link"><span wicket:id="label"></span></a>
-		</li>
-	</ul>
+	<div class="input-assist">
+		<div class="suggestions">
+			<table>
+				<tr wicket:id="suggestions" class="selectable">
+					<td class="suggestion">
+						<a wicket:id="link"><span wicket:id="label"></span></a>			
+					</td>
+					<td wicket:id="description" class="description"></td>
+				</tr>
+			</table>
+		</div>
+		<div class="help">
+		</div>
+	</div>
 </wicket:panel>
