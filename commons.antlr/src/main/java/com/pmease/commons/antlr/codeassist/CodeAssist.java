@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.tika.io.IOUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.ANTLRv4Parser;
 import com.pmease.commons.antlr.ANTLRv4Parser.AlternativeContext;
@@ -460,9 +461,13 @@ public abstract class CodeAssist implements Serializable {
 			inputSuggestions.add(new InputSuggestion(content, caret, label, description));
 		}
 		
+		Set<String> suggestedContents = Sets.newHashSet(inputStatus.getContent());
 		for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
-			if (it.next().getContent().equals(inputStatus.getContent()))
+			String content = it.next().getContent();
+			if (suggestedContents.contains(content))
 				it.remove();
+			else
+				suggestedContents.add(content);
 		}
 		return inputSuggestions;
 	}

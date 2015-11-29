@@ -39,11 +39,12 @@ pmease.commons.inputassist = {
 					if ($prev.length != 0)
 						$prev.addClass("active");
 					else
-						$dropdown.find("tr.selectable").last().addClass("active");
+						$dropdown.find("tr").last().addClass("active");
 				} else {
-					$dropdown.find("tr.selectable").last().addClass("active");
+					$dropdown.find("tr").last().addClass("active");
 				}
 				$dropdown.find(".suggestions").scrollIntoView("tr.active");
+				pmease.commons.inputassist.updateHelp($dropdown);
 				return false;
 			}
 		});
@@ -58,11 +59,12 @@ pmease.commons.inputassist = {
 					if ($next.length != 0)
 						$next.addClass("active");
 					else
-						$dropdown.find("tr.selectable").first().addClass("active");
+						$dropdown.find("tr").first().addClass("active");
 				} else {
-					$dropdown.find("tr.selectable").first().addClass("active");
+					$dropdown.find("tr").first().addClass("active");
 				}
 				$dropdown.find(".suggestions").scrollIntoView("tr.active");
+				pmease.commons.inputassist.updateHelp($dropdown);
 				return false;
 			}
 		});
@@ -126,22 +128,21 @@ pmease.commons.inputassist = {
 		$dropdown.click(function() {
 			$input.focus();
 		});
-		var $item = $dropdown.find("tr.selectable");
+		var $item = $dropdown.find("tr");
 		if ($input.data("errors").length != 0)
 			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);
 		});
-		pmease.commons.inputassist.updateHelp(dropdownId);
+		pmease.commons.inputassist.updateHelp($dropdown);
 	},
 	
-	updateHelp: function(dropdownId) {
-		var $dropdown = $("#" + dropdownId);
+	updateHelp: function($dropdown) {
 		if ($dropdown.find("tr.active").length != 0) {
-			$dropdown.find(".help").append("Press '&uarr; &darr;' to navigate, or 'enter' to select");
+			$dropdown.find(".help").empty().append("Press '&uarr; &darr;' to navigate, or 'enter' to select");
 		} else {
-			$dropdown.find(".help").append("Press '&uarr; &darr;' to navigate");
+			$dropdown.find(".help").empty().append("Press '&uarr; &darr;' to navigate");
 		}
 	}
 }

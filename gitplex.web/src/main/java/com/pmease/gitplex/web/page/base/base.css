@@ -55,18 +55,18 @@ form>.actions>:last-child {
 	border-left: none;
 }
 
-li.selectable a, tr.selectable a, a.selectable {
+li.selectable a, a.selectable {
 	border: 1px solid white;
 	text-decoration: none;
 	display: block;
 	padding: 2px 4px;
 	color: #333;
 }
-li.selectable:hover a, tr.selectable:hover a, a.selectable:hover {
+li.selectable:hover a, a.selectable:hover {
 	background-color: #E0F0FC;
 	border-color: #BBDFF9;
 }
-li.selectable.active a, tr.selectable.active a, a.selectable.active {
+li.selectable.active a, a.selectable.active {
 	background-color: #CBE8FB;
 	border-color: #8BC8F9;
 }

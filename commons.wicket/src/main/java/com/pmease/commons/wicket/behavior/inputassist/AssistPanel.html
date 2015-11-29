@@ -2,9 +2,12 @@
 	<div class="input-assist">
 		<div class="suggestions">
 			<table>
-				<tr wicket:id="suggestions" class="selectable">
+				<tr wicket:id="suggestions">
 					<td class="suggestion">
-						<a wicket:id="link"><span wicket:id="label"></span></a>			
+						<a wicket:id="link">
+							<wicket:link><img src="bullet.gif"></img></wicket:link>
+							<span wicket:id="label"></span>
+						</a>			
 					</td>
 					<td wicket:id="description" class="description"></td>
 				</tr>
