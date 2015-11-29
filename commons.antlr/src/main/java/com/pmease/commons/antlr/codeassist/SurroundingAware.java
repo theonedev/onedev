@@ -18,11 +18,14 @@ public abstract class SurroundingAware {
 	}
 	
 	public List<InputSuggestion> suggest(Node elementNode, String matchWith) {
-		if (matchWith.startsWith(prefix))
-			matchWith = matchWith.substring(prefix.length());
-		matchWith = matchWith.trim();
+		String surroundlessMatchWith = matchWith;
+		if (surroundlessMatchWith.startsWith(prefix))
+			surroundlessMatchWith = surroundlessMatchWith.substring(prefix.length());
+		if (surroundlessMatchWith.endsWith(suffix))
+			surroundlessMatchWith = surroundlessMatchWith.substring(0, surroundlessMatchWith.length()-suffix.length());
+		surroundlessMatchWith = surroundlessMatchWith.trim();
 		
-		List<InputSuggestion> suggestions = match(matchWith);
+		List<InputSuggestion> suggestions = match(surroundlessMatchWith);
 		List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 		
 		boolean matchFound = false;
@@ -39,12 +42,13 @@ public abstract class SurroundingAware {
 			} else {
 				checkedSuggestions.add(suggestion);
 			}
-			if (suggestion.getContent().equals(matchWith))
+			if (suggestion.getContent().equals(surroundlessMatchWith))
 				matchFound = true;
 		}
-		if (!matchFound && !elementNode.getSpec().matches(codeAssist.lex(matchWith))) {
-			String surroundedMatchWith = prefix + matchWith + suffix;
-			if (elementNode.getSpec().matches(codeAssist.lex(surroundedMatchWith))) {
+		if (!matchFound && !elementNode.getSpec().matches(codeAssist.lex(surroundlessMatchWith))) {
+			String surroundedMatchWith = prefix + surroundlessMatchWith + suffix;
+			if (!surroundedMatchWith.equals(matchWith) 
+					&& elementNode.getSpec().matches(codeAssist.lex(surroundedMatchWith))) {
 				checkedSuggestions.add(new InputSuggestion(surroundedMatchWith, 
 						surroundedMatchWith.length(), surroundedMatchWith));
 			}
@@ -52,5 +56,5 @@ public abstract class SurroundingAware {
 		return checkedSuggestions;
 	}
 	
-	protected abstract List<InputSuggestion> match(String matchWith);
+	protected abstract List<InputSuggestion> match(String surroundlessMatchWith);
 }
