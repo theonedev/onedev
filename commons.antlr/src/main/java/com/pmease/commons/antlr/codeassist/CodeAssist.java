@@ -431,6 +431,12 @@ public abstract class CodeAssist implements Serializable {
 			String description = replacement.description;
 			String content = entry.getKey(); 
 			
+			/*
+			 * if spec of suggested text matches current input around caret, we 
+			 * will replace the match (instead of simply insert the suggested 
+			 * text), and in this case, we do not need to append mandatories as
+			 * most probably those mandatories already exist in current input
+			 */
 			if (replacement.end <= inputStatus.getCaret()) {
 				List<String> contents = new ArrayList<>();
 				for (ElementReplacement each: value) {
@@ -438,7 +444,12 @@ public abstract class CodeAssist implements Serializable {
 					for (String mandatory: getMandatoriesAfter(each.node)) {
 						String prevContent = content;
 						content += mandatory;
+
 						if (tokenTypesByLiteral.containsKey(mandatory)) {
+							/*
+							 * if mandatory can be appended without space, the last token 
+							 * position should remain unchanged in concatenated content
+							 */
 							stream = lex(content);
 							if (!stream.isEof()) {
 								Token lastToken = stream.getToken(stream.size()-2);
@@ -486,6 +497,9 @@ public abstract class CodeAssist implements Serializable {
 			inputSuggestions.add(new InputSuggestion(content, caret, label, description));
 		}
 		
+		/*
+		 * remove duplicate suggestions and suggestions the same as current input
+		 */
 		Set<String> suggestedContents = Sets.newHashSet(inputStatus.getContent());
 		for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
 			String content = it.next().getContent();
@@ -519,10 +533,24 @@ public abstract class CodeAssist implements Serializable {
 		} else {
 			SpecMatch match = spec.match(stream, null, null, new HashMap<String, Integer>());
 			if (match.getPaths().isEmpty()) {
+				// if there is not any common parts between the rule and the input 
 				String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
 				elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
 			} else {
 				elementSuggestions.addAll(suggest(inputStatus, match.getPaths()));
+				
+				/*
+				 * do another match by not considering the last token. This is necessary for 
+				 * instance for below cases:
+				 * 1. when the last token matches either a keyword or part of an identifier. 
+				 * For instance, the last token can be keyword 'for', but can also match 
+				 * identifier 'forme' if the spec allows.  
+				 * 2. assume we have a query rule containing multiple criterias, with each 
+				 * criteria composed of key/value pair key:value. value needs to be quoted 
+				 * if it contains spaces. In this case, we want to achieve the effect that 
+				 * if user input value containing spaces without surrounding quotes, we 
+				 * suggest the user to quote the value. 
+				 */
 				int index = stream.getTokenIndex(match.getPaths().get(0).getToken());
 				if (index>0) {
 					List<Token> tokens = new ArrayList<>();
@@ -544,6 +572,12 @@ public abstract class CodeAssist implements Serializable {
 			int replaceEnd = inputStatus.getCaret();
 			String contentAfterReplaceStart = inputContent.substring(replaceStart);
 			AssistStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
+			
+			/*
+			 * if input around the caret matches spec of the suggestion, we then replace 
+			 * the matched text with suggestion, instead of simply inserting the 
+			 * suggested content
+			 */
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
 				if (elementSpec.matchesOnce(streamAfterReplaceStart)) {
@@ -571,6 +605,13 @@ public abstract class CodeAssist implements Serializable {
 					AssistStream newStream = lex(before + elementReplacement.content);
 					Token lastToken = elementSuggestion.getParseTree().getLastNode().getToken();
 					int index = stream.getTokenIndex(lastToken);
+					
+					/*
+					 * ignore the suggestion if we can not append the suggested content directly. 
+					 * This normally indicates that a space is required before the suggestion, 
+					 * and we will show the suggestion when user presses the space to make the 
+					 * suggestion list less confusing
+					 */
 					if (newStream.size() > index+1) {
 						Token newToken = newStream.getToken(index);
 						if (lastToken.getStartIndex() != newToken.getStartIndex()
@@ -596,6 +637,10 @@ public abstract class CodeAssist implements Serializable {
 			int contentIndex = 0;
 			while (true) {
 				char contentChar = content.charAt(contentIndex);
+				/*
+				 * space may exist between mandatories in user input, but should 
+				 * not exist in ANTLR grammar  
+				 */
 				if (!Character.isWhitespace(contentChar)) {
 					if (contentChar != mandatory.charAt(mandatoryIndex))
 						break;
@@ -613,7 +658,15 @@ public abstract class CodeAssist implements Serializable {
 			return 0;
 		}
 	}
-	
+
+	/*
+	 * Get mandatory literals after specified node. For instance a method may have 
+	 * below rule:
+	 * methodName '(' argList ')'
+	 * The mandatories after node methodName will be '('. When a method name is 
+	 * suggested, we should add '(' and moves caret after '(' to avoid unnecessary
+	 * key strokes
+	 */
 	private List<String> getMandatoriesAfter(Node elementNode) {
 		List<String> literals = new ArrayList<>();
 		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
