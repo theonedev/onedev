@@ -9,11 +9,13 @@
 	text-decoration: none;
 	display: block;
 }
+.input-assist tr:hover td {
+	background-color: #E0F0FC;
+}
 .input-assist tr.active td {
 	background-color: #CBE8FB;
 	border-color: #8BC8F9;
 }
-
 .input-assist .suggestions {
 	max-height: 400px; 
 	overflow: auto;

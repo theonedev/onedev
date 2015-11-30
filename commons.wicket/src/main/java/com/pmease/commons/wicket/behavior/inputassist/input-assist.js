@@ -76,6 +76,8 @@ pmease.commons.inputassist = {
 				if ($active.length != 0) {
 					$input.data("update")($active);
 					return false;
+				} else {
+					pmease.commons.floating.close($dropdown, true);
 				}
 			}
 		});

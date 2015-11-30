@@ -1,5 +1,10 @@
 <wicket:extend>
-	<form wicket:id="form">
-		<input wicket:id="input" style="width:600px;"></input>
+	<form wicket:id="form" style="padding: 200px;">
+		<div class="input-group">
+			<input wicket:id="input" spellcheck="false" class="form-control" placeholder="Filter by title or author"></input>
+			<span class="input-group-btn">
+				<button wicket:id="query" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+			</span>
+		</div>
 	</form>
 </wicket:extend>

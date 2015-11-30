@@ -25,9 +25,6 @@
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<configuration>
-					<visitor>true</visitor>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
