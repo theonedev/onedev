@@ -37,7 +37,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<ElementSuggestion> doSuggestFirst(Node parent, ParseTree parseTree, 
+	public List<ElementSuggestion> doSuggestFirst(ParseTree parseTree, Node parent,  
 			String matchWith, Set<String> checkedRules) {
 		if (!checkedRules.contains(ruleName) && getRule() != null) {
 			checkedRules.add(ruleName);

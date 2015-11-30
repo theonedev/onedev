@@ -62,9 +62,13 @@ public abstract class SurroundingAware {
 		if (!matchWithIncluded && !matches(elementNode.getSpec(), matchWith)) {
 			matchWith = prefix + matchWith + suffix;
 			if (matches(elementNode.getSpec(), matchWith))
-				checkedSuggestions.add(new InputSuggestion(matchWith));
+				checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription()));
 		}
 		return checkedSuggestions;
+	}
+	
+	protected String getSurroundingDescription() {
+		return null;
 	}
 	
 	protected abstract List<InputSuggestion> match(String surroundlessMatchWith);

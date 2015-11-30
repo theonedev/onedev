@@ -7,7 +7,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
+import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.ParseTree;
 import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
@@ -50,14 +52,34 @@ public class TestPage extends BasePage {
 								}
 								return suggestions;
 							}
+
+							@Override
+							protected String getSurroundingDescription() {
+								return "value containing space has to be quoted";
+							}
 							
 						}.suggest(elementNode, matchWith);
 					}
-				}
+				} else if (elementNode.getSpec() instanceof LiteralElementSpec) {
+					LiteralElementSpec spec = (LiteralElementSpec) elementNode.getSpec();
+					if (spec.getLiteral().toLowerCase().startsWith(matchWith.toLowerCase())) {
+						String description;
+						switch (spec.getLiteral()) {
+						case "title": 
+							description = "filter by title";
+							break;
+						case "author":
+							description = "filter by author";
+							break;
+						default:
+							description = null;
+						}
+						return Lists.newArrayList(new InputSuggestion(spec.getLiteral(), description));
+					}
+				} 
 				return null;
 			}
 
-			
 		}));
 		add(form);
 	}

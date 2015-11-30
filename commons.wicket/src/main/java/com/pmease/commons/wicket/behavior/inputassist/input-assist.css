@@ -2,23 +2,12 @@
 	padding: 8px;
 }
 .input-assist td {
-	border: 1px solid white;
 	padding: 2px 4px;
-}
-.input-assist td.suggestion {
-	border-right: none;
-}
-.input-assist td.description {
-	border-left: none;
 }
 .input-assist a {
 	color: #333;
 	text-decoration: none;
 	display: block;
-}
-.input-assist td:hover {
-	background-color: #E0F0FC;
-	border-color: #BBDFF9;
 }
 .input-assist tr.active td {
 	background-color: #CBE8FB;

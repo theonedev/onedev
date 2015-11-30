@@ -7,7 +7,7 @@ criteria: ('title'|'author') ':' value;
 value: QuotedValue|NQuotedValue;
 
 QuotedValue: '"' (ESCAPE|~["\\])+? '"';
-NQuotedValue: [a-zA-Z1-9]+;
+NQuotedValue: [a-zA-Z1-9_]+;
 
 fragment
 ESCAPE: '\\'["\\];
