@@ -70,14 +70,22 @@ public abstract class CodeAssist implements Serializable {
 
 	private final Map<String, Integer> tokenTypesByRule = new HashMap<>();
 	
+	/**
+	 * Code assist constructor
+	 * @param lexerClass
+	 * 			lexer class to be used to lex code. Other required information such as 
+	 * 			grammar files and token file will be derived from the lexer class
+	 */
 	public CodeAssist(Class<? extends Lexer> lexerClass) {
 		this(lexerClass, new String[]{AntlrUtils.getDefaultGrammarFile(lexerClass)}, 
 				AntlrUtils.getDefaultTokenFile(lexerClass));
 	}
 
 	/**
-	 * Construct object representation of ANTLR grammar file.
+	 * Code assist constructor.
 	 * 
+	 * @param lexerClass
+	 * 			lexer class to be used to lex code
 	 * @param grammarFiles
 	 * 			grammar files in class path, relative to class path root
 	 * @param tokenFile
@@ -388,8 +396,24 @@ public abstract class CodeAssist implements Serializable {
 		
 		String inputContent = inputStatus.getContent();
 		List<InputSuggestion> inputSuggestions = new ArrayList<>();
+		
+		/*
+		 * Mandatory literals may come after a suggestion (for instance if a method name is suggested, 
+		 * the character '(' can be a mandatory literal), so for every suggestion, we need to 
+		 * append mandatory literals to make user typing less, however if a suggested text has two or
+		 * more different mandatories (this is possible if the suggested text comes from different 
+		 * element specs, and each spec calculates a different set of mandatories after the text), we 
+		 * should display the suggested text as a single entry in the final suggestion list without 
+		 * appending mandatories they are no longer mandatories from aspect of whole rule. Below code
+		 * mainly handles this logic.         
+		 */
 		Map<String, List<ElementReplacement>> grouped = new LinkedHashMap<>();
 		for (ElementReplacement replacement: suggest(rule, stream, inputStatus)) {
+			/*
+			 *  key will be the new input (without considering mandatories of course), and we use 
+			 *  this to group suggestions to facilitate mandatories calculation and exclusion 
+			 *  logic 
+			 */
 			String key = inputContent.substring(0, replacement.begin) 
 					+ replacement.content + inputContent.substring(replacement.end);
 			List<ElementReplacement> value = grouped.get(key);
@@ -406,6 +430,7 @@ public abstract class CodeAssist implements Serializable {
 			String label = replacement.label;
 			String description = replacement.description;
 			String content = entry.getKey(); 
+			
 			if (replacement.end <= inputStatus.getCaret()) {
 				List<String> contents = new ArrayList<>();
 				for (ElementReplacement each: value) {

@@ -11,7 +11,14 @@ public class AssistStream {
 	private final List<Token> tokens;
 	
 	private int index;
-	
+
+	/**
+	 * Construct assist stream with a list of tokens.
+	 * 
+	 * @param tokens
+	 * 			tokens to be used to construct the assist stream, the list should 
+	 * 			not be empty and the last token should be the EOF token
+	 */
 	public AssistStream(List<Token> tokens) {
 		Preconditions.checkArgument(!tokens.isEmpty() && tokens.get(tokens.size()-1).getType() == Token.EOF);
 		this.tokens = tokens;
