@@ -147,10 +147,14 @@ public abstract class ElementSpec extends Spec {
 			String matchWith, Set<String> checkedRules) {
 		Node elementNode = new Node(this, parent, null);
 		List<InputSuggestion> suggestions = codeAssist.suggest(parseTree, elementNode, matchWith);
-		if (suggestions != null && !suggestions.isEmpty())
-			return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, suggestions));
-		else
+		if (suggestions != null) {
+			if (suggestions.isEmpty() && !scanMandatories(new HashSet<String>()).getMandatories().isEmpty())
+				return doSuggestFirst(parent, parseTree, matchWith, checkedRules);
+			else
+				return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, suggestions));
+		} else {
 			return doSuggestFirst(parent, parseTree, matchWith, checkedRules);
+		}
 	}
 
 	protected abstract List<ElementSuggestion> doSuggestFirst(Node parent, 
