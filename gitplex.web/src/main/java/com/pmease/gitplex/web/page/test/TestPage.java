@@ -47,8 +47,7 @@ public class TestPage extends BasePage {
 						CommonTokenStream tokens = new CommonTokenStream(lexer);
 						PostQueryParser parser = new PostQueryParser(tokens);
 						parser.removeErrorListeners();
-						parser.setErrorHandler(new BailErrorStrategy());
-//						QueryContext query = parser.query();
+						parser.setErrorHandler(new BailErrorStrategy());						
 					} catch (Exception e) {
 						System.out.println("query syntax error");
 					}
