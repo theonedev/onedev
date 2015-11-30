@@ -497,32 +497,6 @@ public abstract class CodeAssist implements Serializable {
 		return inputSuggestions;
 	}
 	
-	private int skipMandatories(String content, List<String> mandatories) {
-		String mandatory = StringUtils.join(mandatories, "");
-		mandatory = StringUtils.deleteWhitespace(mandatory);
-		if (mandatory.length() != 0 && content.length() != 0) {
-			int mandatoryIndex = 0;
-			int contentIndex = 0;
-			while (true) {
-				char contentChar = content.charAt(contentIndex);
-				if (!Character.isWhitespace(contentChar)) {
-					if (contentChar != mandatory.charAt(mandatoryIndex))
-						break;
-					mandatoryIndex++;
-				} 
-				contentIndex++;
-				if (mandatoryIndex == mandatory.length() || contentIndex == content.length())
-					break;
-			}
-			if (mandatoryIndex == mandatory.length())
-				return contentIndex;
-			else
-				return 0;
-		} else {
-			return 0;
-		}
-	}
-	
 	private List<ElementSuggestion> suggest(InputStatus inputStatus, List<TokenNode> matches) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		for (TokenNode match: matches) {
@@ -557,6 +531,9 @@ public abstract class CodeAssist implements Serializable {
 					tokens.add(stream.getToken(stream.size()-1));
 					match = spec.match(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
 					elementSuggestions.addAll(suggest(inputStatus, match.getPaths()));
+				} else {
+					String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
+					elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
 				}
 			}
 		}
@@ -609,6 +586,32 @@ public abstract class CodeAssist implements Serializable {
 			}
 		}
 		return elementReplacements;
+	}
+	
+	private int skipMandatories(String content, List<String> mandatories) {
+		String mandatory = StringUtils.join(mandatories, "");
+		mandatory = StringUtils.deleteWhitespace(mandatory);
+		if (mandatory.length() != 0 && content.length() != 0) {
+			int mandatoryIndex = 0;
+			int contentIndex = 0;
+			while (true) {
+				char contentChar = content.charAt(contentIndex);
+				if (!Character.isWhitespace(contentChar)) {
+					if (contentChar != mandatory.charAt(mandatoryIndex))
+						break;
+					mandatoryIndex++;
+				} 
+				contentIndex++;
+				if (mandatoryIndex == mandatory.length() || contentIndex == content.length())
+					break;
+			}
+			if (mandatoryIndex == mandatory.length())
+				return contentIndex;
+			else
+				return 0;
+		} else {
+			return 0;
+		}
 	}
 	
 	private List<String> getMandatoriesAfter(Node elementNode) {

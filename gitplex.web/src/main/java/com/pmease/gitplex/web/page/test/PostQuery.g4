@@ -1,13 +1,16 @@
 grammar PostQuery;
 
-query: criteria+ EOF;
+query: (criteria|sentence)+ EOF;
+criteria: Criteria|ExcludedCriteria;
+sentence: Word+;
 
-criteria: key=('title'|'author') ':' value;
-
-value: QuotedValue|NQuotedValue;
-
-QuotedValue: '"' (ESCAPE|~["\\])+? '"';
-NQuotedValue: [a-zA-Z1-9_]+;
+Criteria: TitleCriteria|AuthorCriteria|IsCriteria;
+TitleCriteria: 'title:' (Word|QuotedValue);
+AuthorCriteria: 'author:' (Word|QuotedValue);
+IsCriteria: 'is:' ('open'|'close');
+ExcludedCriteria: '-' Criteria;
+QuotedValue: '"' (ESCAPE|~["\\])+ '"';
+Word: ~[ \t\r\n]+;
 
 fragment
 ESCAPE: '\\'["\\];

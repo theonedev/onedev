@@ -3,13 +3,13 @@ package gitplex.product;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.Token;
 
-import com.pmease.commons.antlr.codeassist.test.CodeAssistTest3Lexer;
+import com.pmease.gitplex.web.page.test.PostQueryLexer;
 
 public class Test {
 
 	@org.junit.Test
 	public void test() {
-		CodeAssistTest3Lexer lexer = new CodeAssistTest3Lexer(new ANTLRInputStream("title: hello world just"));
+		PostQueryLexer lexer = new PostQueryLexer(new ANTLRInputStream("hello world title:value"));
 		Token token = lexer.nextToken();
 		while (token.getType() != Token.EOF) {
 			System.out.println(token);
