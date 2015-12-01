@@ -1,11 +1,8 @@
 package gitplex.product;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
 
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
@@ -29,8 +26,7 @@ public class Test {
 			
 		};
 
-		String content = FileUtils.readFileToString(new File("w:\\temp\\Test.java"));
-		SpecMatch match = codeAssist.getRule("blockStatement").match(codeAssist.lex(content), null, null, new HashMap<String, Integer>());
+		SpecMatch match = codeAssist.getRule("blockStatement").match(codeAssist.lex("a(b.c());"), null, null, new HashMap<String, Integer>());
 		System.out.println(match.isMatched());
 	}
 	
