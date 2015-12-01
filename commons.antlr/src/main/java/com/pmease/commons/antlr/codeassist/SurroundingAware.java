@@ -59,6 +59,12 @@ public abstract class SurroundingAware {
 			if (suggestion.getContent().equals(matchWith))
 				matchWithIncluded = true;
 		}
+		/*
+		 * if matchWith does not appear in suggestion list, we check to see if it should be surrounded. 
+		 * For instance, you may have a rule requiring that value containing spaces should be quoted, 
+		 * in this case, below code will suggest you to quote the value if it contains spaces as 
+		 * otherwise it will fail the match below
+		 */
 		if (!matchWithIncluded && !matches(elementNode.getSpec(), matchWith)) {
 			matchWith = prefix + matchWith + suffix;
 			if (matches(elementNode.getSpec(), matchWith))
@@ -71,5 +77,15 @@ public abstract class SurroundingAware {
 		return null;
 	}
 	
+	/**
+	 * Match with provided string to give a list of suggestions
+	 * 
+	 * @param surroundlessMatchWith
+	 * 			string with surrounding literals removed 
+	 * @return
+	 * 			a list of suggestions, value containing spaces does not have to be
+	 * 			surrounded with prefix/suffix as the {@link SurroundingAware} class 
+	 * 			will add them if necessary 
+	 */
 	protected abstract List<InputSuggestion> match(String surroundlessMatchWith);
 }

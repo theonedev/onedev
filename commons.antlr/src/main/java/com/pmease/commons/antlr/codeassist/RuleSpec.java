@@ -71,6 +71,7 @@ public class RuleSpec extends Spec {
 			stream.setIndex(index);
 		}
 
+		// always select the path matching most tokens in the stream
 		stream.setIndex(Math.max(maxMatchIndex, maxUnmatchIndex));
 		if (maxMatchIndex == maxUnmatchIndex) {
 			matchedPaths.addAll(unmatchedPaths);

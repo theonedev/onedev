@@ -10,6 +10,16 @@ public class Node {
 	
 	protected final Node previous;
 	
+	/**
+	 * Construct the node 
+	 * 
+	 * @param spec
+	 * 			spec of the node
+	 * @param parent
+	 * 			parent of the node
+	 * @param previous
+	 * 			previous node, which is used to track all nodes in the parse tree
+	 */
 	public Node(Spec spec, @Nullable Node parent, @Nullable Node previous) {
 		this.spec = spec;
 		this.parent = parent;

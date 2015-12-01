@@ -9,6 +9,15 @@ public class MandatoryScan {
 	
 	private final boolean stop;
 	
+	/**
+	 * Construct mandatory scan object
+	 * 
+	 * @param mandatories
+	 * 			list of mandatory literals
+	 * @param stop
+	 * 			sign to whether or not the mandatory scan should be 
+	 * 			stopped
+	 */
 	public MandatoryScan(List<String> mandatories, boolean stop) {
 		this.mandatories = mandatories;
 		this.stop = stop;

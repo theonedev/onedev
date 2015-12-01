@@ -53,6 +53,12 @@ public abstract class ElementSpec extends Spec {
 			if (!match.isMatched()) {
 				return new SpecMatch(match.getPaths(), false);
 			} else if (match.getPaths().isEmpty()) {
+				/*
+				 * does not consume any token of the stream but match is successful? This 
+				 * tells us the element spec does not match the stream but itself (or 
+				 * everything inside it) is optional, so we do not waste any cpu cycles 
+				 * here 
+				 */
 				return new SpecMatch(match.getPaths(), true);
 			} else {
 				List<TokenNode> paths = match.getPaths();
@@ -61,14 +67,32 @@ public abstract class ElementSpec extends Spec {
 					match = matchOnce(stream, parent, previous, checkedIndexes);
 					if (!match.isMatched()) {
 						if (!match.getPaths().isEmpty()) {
+							/*
+							 * we are always greedy when matching specs against stream for performance 
+							 * reason, so if there are any tokens consumed in the stream, we use those 
+							 * tokens, and consider the whole spec as not-matched although previous 
+							 * iteration matches. This false-positive is acceptable as our purpose is 
+							 * for auto-completion...
+							 */
 							paths = match.getPaths();
 							return new SpecMatch(paths, false);
 						} else {
+							/*
+							 * does not consume any token from stream, so we will return result of 
+							 * previous match
+							 */
 							return new SpecMatch(paths, true);
 						}
 					} else if (match.getPaths().isEmpty()) {
+						/*
+						 * does not consume any tokens of the stream, so further iteration will be 
+						 * meaningless, let's return result of previous match
+						 */
 						return new SpecMatch(paths, true);
 					} else {
+						/*
+						 * can still consume tokens from stream, let's continue...
+						 */
 						paths = match.getPaths();
 					}
 				}
@@ -112,9 +136,23 @@ public abstract class ElementSpec extends Spec {
 			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
-	
+
+	/**
+	 * Provide suggestions after current element spec.
+	 * 
+	 * @param parseTree
+	 * 			current parse tree
+	 * @param parent
+	 * 			parent node of current element spec
+	 * @param matchWith
+	 * 			string to match with
+	 * @return
+	 * 			list of element suggestions of current element spec
+	 */
 	public List<ElementSuggestion> suggestNext(ParseTree parseTree, Node parent, String matchWith) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
+		
+		// if element spec can be repeated, next input candidate can also be taken from the element itself
 		if (multiplicity == Multiplicity.ONE_OR_MORE || multiplicity == Multiplicity.ZERO_OR_MORE) 
 			suggestions.addAll(suggestFirst(parseTree, parent, matchWith, new HashSet<String>()));
 		suggestions.addAll(doSuggestNext(parseTree, parent, matchWith));
@@ -136,6 +174,9 @@ public abstract class ElementSpec extends Spec {
 			ElementSpec nextElementSpec = alternativeSpec.getElements().get(specIndex+1);
 			suggestions.addAll(nextElementSpec.suggestFirst(
 					parseTree, parent, matchWith, new HashSet<String>()));
+			/*
+			 * if next element is optional, the next next element can also be input candidate
+			 */
 			if (nextElementSpec.matches(codeAssist.lex("")))
 				suggestions.addAll(nextElementSpec.doSuggestNext(parseTree, parent, matchWith));
 		}
@@ -149,10 +190,13 @@ public abstract class ElementSpec extends Spec {
 		List<InputSuggestion> suggestions = codeAssist.suggest(parseTree, elementNode, matchWith);
 		if (suggestions != null) {
 			if (suggestions.isEmpty() && !scanMandatories(new HashSet<String>()).getMandatories().isEmpty())
+				// user suppresses suggestion explicitly, so we only provide suggestion if there are 
+				// mandatory followings
 				return doSuggestFirst(parseTree, parent, matchWith, checkedRules);
 			else
 				return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, suggestions));
 		} else {
+			// user does not care about suggestion, so we continue with our default logic to drill down
 			return doSuggestFirst(parseTree, parent, matchWith, checkedRules);
 		}
 	}

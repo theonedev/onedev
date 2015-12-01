@@ -294,6 +294,7 @@ public abstract class CodeAssist implements Serializable {
 				|| lexerAtomContext.DOT() != null 
 				|| lexerAtomContext.LEXER_CHAR_SET()!=null 
 				|| lexerAtomContext.range() != null) {
+			// Use AnyTokenElementSpec here to as it does not affect our code assist analysis
 			return new AnyTokenElementSpec(this, label, multiplicity);
 		} else {
 			throw new IllegalStateException();

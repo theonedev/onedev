@@ -31,8 +31,8 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public SpecMatch match(AssistStream stream, 
-			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
+	public SpecMatch match(AssistStream stream, Node parent, Node previous, 
+			Map<String, Integer> checkedIndexes) {
 		parent = new Node(this, parent, previous);
 		List<TokenNode> paths = new ArrayList<>();
 		for (ElementSpec elementSpec: elements) {
@@ -40,8 +40,9 @@ public class AlternativeSpec extends Spec {
 				previous = paths.get(paths.size()-1);
 			else
 				previous = parent;
-			SpecMatch elementMatch = elementSpec.match(
-					stream, parent, previous, new HashMap<>(checkedIndexes));
+			SpecMatch elementMatch = elementSpec.match(stream, parent, previous, 
+					new HashMap<>(checkedIndexes));
+			
 			if (!elementMatch.getPaths().isEmpty())
 				paths = elementMatch.getPaths();
 			if (!elementMatch.isMatched())
@@ -57,6 +58,8 @@ public class AlternativeSpec extends Spec {
 		parent = new Node(this, parent, null);
 		for (ElementSpec element: elements) {
 			first.addAll(element.suggestFirst(parseTree, parent, matchWith, new HashSet<>(checkedRules)));
+			
+			// consider next element if current element is optional
 			if (!element.matches(codeAssist.lex("")))
 				break;
 		}

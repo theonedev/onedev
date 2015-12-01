@@ -8,12 +8,26 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+/**
+ * Parse tree represents parse state. It can be partial if only part of the 
+ * spec matches in the stream. Suggestion providers can use this to check 
+ * current state of the parsing, to provide meaningful suggestions if 
+ * necessary. 
+ * 
+ * @author robin
+ *
+ */
 public class ParseTree {
 	
 	private final TokenNode lastNode;
 	
 	private transient List<Node> allNodes;
 	
+	/**
+	 * Construct parse tree from last parsed token node from stream. 
+	 * 
+	 * @param lastNode
+	 */
 	public ParseTree(TokenNode lastNode) {
 		this.lastNode = lastNode;
 	}
