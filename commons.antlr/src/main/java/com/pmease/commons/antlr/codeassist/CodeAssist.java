@@ -512,14 +512,14 @@ public abstract class CodeAssist implements Serializable {
 		return inputSuggestions;
 	}
 	
-	private List<ElementSuggestion> suggest(InputStatus inputStatus, List<TokenNode> matches) {
+	private List<ElementSuggestion> suggest(InputStatus inputStatus, List<TokenNode> paths) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
-		for (TokenNode match: matches) {
+		for (TokenNode path: paths) {
 			String matchWith = inputStatus.getContent().substring(
-					match.getToken().getStopIndex()+1, inputStatus.getCaret());
+					path.getToken().getStopIndex()+1, inputStatus.getCaret());
 			matchWith = StringUtils.trimStart(matchWith);
-			ElementSpec matchSpec = (ElementSpec) match.getSpec();
-			suggestions.addAll(matchSpec.suggestNext(new ParseTree(match), match.getParent(), matchWith));
+			ElementSpec matchSpec = (ElementSpec) path.getSpec();
+			suggestions.addAll(matchSpec.suggestNext(new ParseTree(path), path.getParent(), matchWith));
 		}
 		return suggestions;
 	}
@@ -528,43 +528,44 @@ public abstract class CodeAssist implements Serializable {
 		List<ElementReplacement> elementReplacements = new ArrayList<>();
 		
 		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
-		if (stream.isEof()) {
-			String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
-			elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
+		List<TokenNode> paths = spec.match(stream, null, null, new HashMap<String, Integer>());
+		boolean suggestFirst = false;
+		if (paths == null || paths.isEmpty()) {
+			// if there is not any common parts between the rule and the input 
+			suggestFirst = true;
 		} else {
-			SpecMatch match = spec.match(stream, null, null, new HashMap<String, Integer>());
-			if (match.getPaths().isEmpty()) {
-				// if there is not any common parts between the rule and the input 
-				String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
-				elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
+			elementSuggestions.addAll(suggest(inputStatus, paths));
+			
+			/*
+			 * do another match by not considering the last token. This is necessary for 
+			 * instance for below cases:
+			 * 1. when the last token matches either a keyword or part of an identifier. 
+			 * For instance, the last token can be keyword 'for', but can also match 
+			 * identifier 'forme' if the spec allows.  
+			 * 2. assume we have a query rule containing multiple criterias, with each 
+			 * criteria composed of key/value pair key:value. value needs to be quoted 
+			 * if it contains spaces. In this case, we want to achieve the effect that 
+			 * if user input value containing spaces without surrounding quotes, we 
+			 * suggest the user to quote the value. 
+			 */
+			int index = stream.getTokenIndex(paths.get(0).getToken());
+			if (index>0) {
+				List<Token> tokens = new ArrayList<>();
+				for (int i=0; i<index; i++)
+					tokens.add(stream.getToken(i));
+				tokens.add(stream.getToken(stream.size()-1));
+				paths = spec.match(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
+				if (paths != null && !paths.isEmpty()) 
+					elementSuggestions.addAll(suggest(inputStatus, paths));
+				else 
+					suggestFirst = true;
 			} else {
-				elementSuggestions.addAll(suggest(inputStatus, match.getPaths()));
-				
-				/*
-				 * do another match by not considering the last token. This is necessary for 
-				 * instance for below cases:
-				 * 1. when the last token matches either a keyword or part of an identifier. 
-				 * For instance, the last token can be keyword 'for', but can also match 
-				 * identifier 'forme' if the spec allows.  
-				 * 2. assume we have a query rule containing multiple criterias, with each 
-				 * criteria composed of key/value pair key:value. value needs to be quoted 
-				 * if it contains spaces. In this case, we want to achieve the effect that 
-				 * if user input value containing spaces without surrounding quotes, we 
-				 * suggest the user to quote the value. 
-				 */
-				int index = stream.getTokenIndex(match.getPaths().get(0).getToken());
-				if (index>0) {
-					List<Token> tokens = new ArrayList<>();
-					for (int i=0; i<index; i++)
-						tokens.add(stream.getToken(i));
-					tokens.add(stream.getToken(stream.size()-1));
-					match = spec.match(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
-					elementSuggestions.addAll(suggest(inputStatus, match.getPaths()));
-				} else {
-					String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
-					elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));
-				}
+				suggestFirst = true;
 			}
+		}
+		if (suggestFirst) {
+			String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
+			elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));			
 		}
 
 		String inputContent = inputStatus.getContent();
@@ -581,12 +582,12 @@ public abstract class CodeAssist implements Serializable {
 			 */
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
-				if (elementSpec.matchesOnce(streamAfterReplaceStart)) {
-					if (streamAfterReplaceStart.getIndex() != 0) {
-						int lastTokenIndex = streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
-						if (replaceStart + lastTokenIndex > replaceEnd)
-							replaceEnd = replaceStart + lastTokenIndex;
-					}
+				paths = elementSpec.matchOnce(streamAfterReplaceStart, 
+						null, null, new HashMap<String, Integer>());
+				if (paths != null && !paths.isEmpty()) {
+					int lastTokenIndex = streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
+					if (replaceStart + lastTokenIndex > replaceEnd)
+						replaceEnd = replaceStart + lastTokenIndex;
 				}
 			}
 

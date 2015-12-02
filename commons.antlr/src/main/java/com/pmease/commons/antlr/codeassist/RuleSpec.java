@@ -41,46 +41,31 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public SpecMatch match(AssistStream stream, 
+	public List<TokenNode> match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		List<TokenNode> matchedPaths = new ArrayList<>();
-		List<TokenNode> unmatchedPaths = new ArrayList<>();
-		boolean matched = false;
-		int maxMatchIndex = -1;
-		int maxUnmatchIndex = -1;
+		List<TokenNode> paths = null;
+		int maxIndex = -1;
 		int index = stream.getIndex();
 		parent = new Node(this, parent, previous);
 		for (AlternativeSpec alternative: alternatives) {
-			SpecMatch match = alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes));
-			if (match.isMatched()) {
-				if (stream.getIndex() > maxMatchIndex) {
-					maxMatchIndex = stream.getIndex();
-					matchedPaths = match.getPaths();
-				} else if (stream.getIndex() == maxMatchIndex) {
-					matchedPaths.addAll(match.getPaths());
-				}
-				matched = true;
-			} else {
-				if (stream.getIndex() > maxUnmatchIndex) {
-					maxUnmatchIndex = stream.getIndex();
-					unmatchedPaths = match.getPaths();
-				} else if (stream.getIndex() == maxUnmatchIndex) {
-					unmatchedPaths.addAll(match.getPaths());
+			List<TokenNode> alternativePaths = alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes));
+			if (stream.getIndex() > maxIndex) {
+				maxIndex = stream.getIndex();
+				paths = alternativePaths;
+			} else if (stream.getIndex() == maxIndex) {
+				if (alternativePaths != null) {
+					if (paths == null)
+						paths = alternativePaths;
+					else
+						paths.addAll(alternativePaths);
 				}
 			}
 			stream.setIndex(index);
 		}
 
-		// always select the path matching most tokens in the stream
-		stream.setIndex(Math.max(maxMatchIndex, maxUnmatchIndex));
-		if (maxMatchIndex == maxUnmatchIndex) {
-			matchedPaths.addAll(unmatchedPaths);
-			return new SpecMatch(matchedPaths, matched);
-		} else if (maxMatchIndex > maxUnmatchIndex) {
-			return new SpecMatch(matchedPaths, matched);
-		} else {
-			return new SpecMatch(unmatchedPaths, matched);
-		}
+		if (maxIndex != -1)
+			stream.setIndex(maxIndex);
+		return paths;
 	}
 
 	@Override

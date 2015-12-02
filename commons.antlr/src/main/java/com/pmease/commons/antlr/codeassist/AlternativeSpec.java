@@ -31,24 +31,31 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public SpecMatch match(AssistStream stream, Node parent, Node previous, 
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
 			Map<String, Integer> checkedIndexes) {
 		parent = new Node(this, parent, previous);
 		List<TokenNode> paths = new ArrayList<>();
+		int index = stream.getIndex();
 		for (ElementSpec elementSpec: elements) {
 			if (!paths.isEmpty())
 				previous = paths.get(paths.size()-1);
 			else
 				previous = parent;
-			SpecMatch elementMatch = elementSpec.match(stream, parent, previous, 
-					new HashMap<>(checkedIndexes));
-			
-			if (!elementMatch.getPaths().isEmpty())
-				paths = elementMatch.getPaths();
-			if (!elementMatch.isMatched())
-				return new SpecMatch(paths, false);
+			List<TokenNode> elementPaths = elementSpec.match(stream, parent, previous, new HashMap<>(checkedIndexes));
+			if (elementPaths == null) {
+				stream.setIndex(index);
+				return null;
+			} else if (elementPaths.isEmpty()) {
+				if (stream.isEof())
+					return paths;
+			} else {
+				if (stream.isEof())
+					return elementPaths;
+				else
+					paths = elementPaths;
+			}
 		}
-		return new SpecMatch(paths, true);
+		return paths;
 	}
 
 	@Override

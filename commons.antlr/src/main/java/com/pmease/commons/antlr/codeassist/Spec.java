@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 public abstract class Spec implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -25,7 +27,7 @@ public abstract class Spec implements Serializable {
 	 * 			true if there is an exact match between spec and stream
 	 */
 	public boolean matches(AssistStream stream) {
-		return match(stream, null, null, new HashMap<String, Integer>()).isMatched() && stream.isEof();
+		return match(stream, null, null, new HashMap<String, Integer>()) != null && stream.isEof();
 	}
 	
 	/**
@@ -44,7 +46,8 @@ public abstract class Spec implements Serializable {
 	 * 			that we can have match paths even if the whole spec is not matched, and in 
 	 * 			that case, the paths tells to which point the match goes to 
 	 */
-	public abstract SpecMatch match(AssistStream stream, 
+	@Nullable
+	public abstract List<TokenNode> match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 	
 	public abstract List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 

@@ -27,13 +27,13 @@ public class EofElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	protected SpecMatch matchOnce(AssistStream stream, 
+	public List<TokenNode> matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		return new SpecMatch(new ArrayList<TokenNode>(), stream.isEof());
+		return new ArrayList<>();
 	}
 
 	@Override
-	public String toString() {
+	protected String asString() {
 		return "EOF";
 	}
 	

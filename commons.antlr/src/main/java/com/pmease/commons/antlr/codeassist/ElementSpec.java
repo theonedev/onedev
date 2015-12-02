@@ -1,7 +1,6 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,103 +35,48 @@ public abstract class ElementSpec extends Spec {
 		return multiplicity;
 	}
 
-	private Node getPrevious(SpecMatch match, Node currentPrevious) {
-		if (match.getPaths().isEmpty())
-			return currentPrevious;
-		else
-			return match.getPaths().get(match.getPaths().size()-1);
-	}
-	
 	@Override
-	public SpecMatch match(AssistStream stream, 
+	public List<TokenNode> match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		if (multiplicity == Multiplicity.ONE) {
 			return matchOnce(stream, parent, previous, checkedIndexes);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
-			if (!match.isMatched()) {
-				return new SpecMatch(match.getPaths(), false);
-			} else if (match.getPaths().isEmpty()) {
-				/*
-				 * does not consume any token of the stream but match is successful? This 
-				 * tells us the element spec does not match the stream but itself (or 
-				 * everything inside it) is optional, so we do not waste any cpu cycles 
-				 * here 
-				 */
-				return new SpecMatch(match.getPaths(), true);
+			List<TokenNode> paths = matchOnce(stream, parent, previous, checkedIndexes);
+			if (paths == null || paths.isEmpty() || stream.isEof()) {
+				return paths;
 			} else {
-				List<TokenNode> paths = match.getPaths();
 				while (true) {
-					previous = getPrevious(match, previous);
-					match = matchOnce(stream, parent, previous, checkedIndexes);
-					if (!match.isMatched()) {
-						if (!match.getPaths().isEmpty()) {
-							/*
-							 * we are always greedy when matching specs against stream for performance 
-							 * reason, so if there are any tokens consumed in the stream, we use those 
-							 * tokens, and consider the whole spec as not-matched although previous 
-							 * iteration matches. This false-positive is acceptable as our purpose is 
-							 * for auto-completion...
-							 */
-							paths = match.getPaths();
-							return new SpecMatch(paths, false);
-						} else {
-							/*
-							 * does not consume any token from stream, so we will return result of 
-							 * previous match
-							 */
-							return new SpecMatch(paths, true);
-						}
-					} else if (match.getPaths().isEmpty()) {
-						/*
-						 * does not consume any tokens of the stream, so further iteration will be 
-						 * meaningless, let's return result of previous match
-						 */
-						return new SpecMatch(paths, true);
-					} else {
-						/*
-						 * can still consume tokens from stream, let's continue...
-						 */
-						paths = match.getPaths();
-					}
+					previous = paths.get(paths.size()-1);
+					List<TokenNode> nextPaths = matchOnce(stream, parent, previous, checkedIndexes);
+					if (nextPaths == null || nextPaths.isEmpty())
+						return paths;
+					else if (stream.isEof())
+						return nextPaths;
+					else 
+						paths = nextPaths;
 				}
 			}
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
 			List<TokenNode> paths = new ArrayList<>();
 			while (true) {
-				SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
-				if (!match.isMatched()) {
-					if (!match.getPaths().isEmpty()) {
-						paths = match.getPaths();
-						return new SpecMatch(paths, false);
-					} else {
-						return new SpecMatch(paths, true);
-					}
-				} else if (match.getPaths().isEmpty()) {
-					return new SpecMatch(paths, true);
-				} else {
-					paths = match.getPaths();
-				}
-				previous = getPrevious(match, previous);
+				if (!paths.isEmpty())
+					previous = paths.get(paths.size()-1);
+				List<TokenNode> nextPaths = matchOnce(stream, parent, previous, checkedIndexes);
+				if (nextPaths == null || nextPaths.isEmpty() || stream.isEof()) 
+					return paths;
+				else 
+					paths = nextPaths;
 			}
 		} else {
-			SpecMatch match = matchOnce(stream, parent, previous, checkedIndexes);
-			if (!match.isMatched()) {
-				if (!match.getPaths().isEmpty()) 
-					return new SpecMatch(match.getPaths(), false);
-				else 
-					return new SpecMatch(match.getPaths(), true);
-			} else { 
-				return match;
-			}
+			List<TokenNode> paths = matchOnce(stream, parent, previous, checkedIndexes);
+			if (paths != null)
+				return paths;
+			else
+				return new ArrayList<>();
 		}
 	}
 	
-	public boolean matchesOnce(AssistStream stream) {
-		return matchOnce(stream, null, null, new HashMap<String, Integer>()).isMatched();
-	}
-	
-	protected abstract SpecMatch matchOnce(AssistStream stream, 
+	public abstract List<TokenNode> matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes);
 
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
@@ -203,5 +147,17 @@ public abstract class ElementSpec extends Spec {
 
 	protected abstract List<ElementSuggestion> doSuggestFirst(@Nullable ParseTree parseTree, 
 			Node parent, String matchWith, Set<String> checkedRules);
+
+	public final String toString() {
+		if (multiplicity == Multiplicity.ONE)
+			return asString();
+		else if (multiplicity == Multiplicity.ONE_OR_MORE)
+			return "(" + asString() + ")+";
+		else if (multiplicity == Multiplicity.ZERO_OR_MORE)
+			return "(" + asString() + ")*";
+		else
+			return "(" + asString() + ")?";
+	}
 	
+	protected abstract String asString();
 }

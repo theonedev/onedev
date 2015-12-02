@@ -82,11 +82,11 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected SpecMatch matchOnce(AssistStream stream, 
+	public List<TokenNode> matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		Integer index = checkedIndexes.get(ruleName);
 		if (index != null && index.intValue() == stream.getIndex()) {
-			return new SpecMatch(new ArrayList<TokenNode>(), false);
+			return null;
 		} else {
 			checkedIndexes.put(ruleName, stream.getIndex());
 			parent = new Node(this, parent, previous);
@@ -95,7 +95,7 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public String toString() {
+	protected String asString() {
 		return "rule_ref: " + ruleName;
 	}
 

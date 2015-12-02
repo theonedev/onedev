@@ -38,24 +38,24 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected SpecMatch matchOnce(AssistStream stream, 
+	public List<TokenNode> matchOnce(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		if (stream.isEof()) {
-			return new SpecMatch(new ArrayList<TokenNode>(), false);
+			return null;
 		} else {
 			Token token = stream.getCurrentToken();
 			if (!notTokenTypes.contains(token.getType())) {
 				stream.increaseIndex();
 				TokenNode tokenNode = new TokenNode(this, parent, previous, token);
-				return new SpecMatch(Lists.newArrayList(tokenNode), true);
+				return Lists.newArrayList(tokenNode);
 			} else {
-				return new SpecMatch(new ArrayList<TokenNode>(), false);
+				return null;
 			}
 		}
 	}
 
 	@Override
-	public String toString() {
+	protected String asString() {
 		return "not: " + notTokenTypes;
 	}
 	
