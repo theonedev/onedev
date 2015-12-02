@@ -44,8 +44,8 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, Node parent, 
-			Node previous, Map<String, Integer> checkedIndexes) {
+	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory) {
 		Token token = stream.getCurrentToken();
 		if (token.getType() == type) {
 			stream.increaseIndex();

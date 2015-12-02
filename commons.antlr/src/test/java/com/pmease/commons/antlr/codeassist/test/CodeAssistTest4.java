@@ -28,8 +28,23 @@ public class CodeAssistTest4 {
 	public void test() {
 		List<InputSuggestion> suggestions;
 
+		suggestions = codeAssist.suggest(new InputStatus("a"), "stat");
+		assertEquals(6, suggestions.size());
+		assertEquals("a*:2", suggestions.get(0).toString());
+		assertEquals("a/:2", suggestions.get(1).toString());
+		assertEquals("a+:2", suggestions.get(2).toString());
+		assertEquals("a-:2", suggestions.get(3).toString());
+		assertEquals("a;:2", suggestions.get(4).toString());
+		assertEquals("a=:2", suggestions.get(5).toString());
+
+		suggestions = codeAssist.suggest(new InputStatus(""), "stat");
+		assertEquals(2, suggestions.size());
+		assertEquals("(:1", suggestions.get(0).toString());
+		assertEquals(";:1", suggestions.get(1).toString());
+
 		suggestions = codeAssist.suggest(new InputStatus("5*"), "stat");
-		System.out.println(suggestions);
+		assertEquals(1, suggestions.size());
+		assertEquals("5*(:3", suggestions.get(0).toString());
 
 		suggestions = codeAssist.suggest(new InputStatus("5"), "stat");
 		assertEquals(5, suggestions.size());

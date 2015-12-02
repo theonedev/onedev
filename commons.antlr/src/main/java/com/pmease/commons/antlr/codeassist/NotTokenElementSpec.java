@@ -38,8 +38,8 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, 
-			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
+	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory) {
 		if (stream.isEof()) {
 			return null;
 		} else {

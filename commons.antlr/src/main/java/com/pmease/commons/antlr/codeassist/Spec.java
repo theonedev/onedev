@@ -2,6 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,7 @@ public abstract class Spec implements Serializable {
 	 * 			true if there is an exact match between spec and stream
 	 */
 	public boolean matches(AssistStream stream) {
-		return match(stream, null, null, new HashMap<String, Integer>()) != null && stream.isEof();
+		return match(stream, null, null, new HashMap<String, Set<RuleRefContext>>()) != null && stream.isEof();
 	}
 	
 	/**
@@ -47,14 +48,21 @@ public abstract class Spec implements Serializable {
 	 * 			that case, the paths tells to which point the match goes to 
 	 */
 	@Nullable
-	public abstract List<TokenNode> match(AssistStream stream, 
-			Node parent, Node previous, Map<String, Integer> checkedIndexes);
+	public abstract List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefContexts);
 	
 	public abstract List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 
 			String matchWith, Set<String> checkedRules);
 	
 	public CodeAssist getCodeAssist() {
 		return codeAssist;
+	}
+	
+	protected Map<String, Set<RuleRefContext>> copy(Map<String, Set<RuleRefContext>> ruleRefHistory) {
+		Map<String, Set<RuleRefContext>> copy = new HashMap<>();
+		for (Map.Entry<String, Set<RuleRefContext>> entry: ruleRefHistory.entrySet())
+			copy.put(entry.getKey(), new HashSet<>(entry.getValue()));
+		return copy;
 	}
 	
 }

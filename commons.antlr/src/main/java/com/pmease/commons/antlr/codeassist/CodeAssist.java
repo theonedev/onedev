@@ -528,7 +528,7 @@ public abstract class CodeAssist implements Serializable {
 		List<ElementReplacement> elementReplacements = new ArrayList<>();
 		
 		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
-		List<TokenNode> paths = spec.match(stream, null, null, new HashMap<String, Integer>());
+		List<TokenNode> paths = spec.match(stream, null, null, new HashMap<String, Set<RuleRefContext>>());
 		boolean suggestFirst = false;
 		if (paths == null || paths.isEmpty()) {
 			// if there is not any common parts between the rule and the input 
@@ -554,7 +554,8 @@ public abstract class CodeAssist implements Serializable {
 				for (int i=0; i<index; i++)
 					tokens.add(stream.getToken(i));
 				tokens.add(stream.getToken(stream.size()-1));
-				paths = spec.match(new AssistStream(tokens), null, null, new HashMap<String, Integer>());
+				paths = spec.match(new AssistStream(tokens), null, null, 
+						new HashMap<String, Set<RuleRefContext>>());
 				if (paths != null && !paths.isEmpty()) 
 					elementSuggestions.addAll(suggest(inputStatus, paths));
 				else 
@@ -583,7 +584,7 @@ public abstract class CodeAssist implements Serializable {
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
 				paths = elementSpec.matchOnce(streamAfterReplaceStart, 
-						null, null, new HashMap<String, Integer>());
+						null, null, new HashMap<String, Set<RuleRefContext>>());
 				if (paths != null && !paths.isEmpty()) {
 					int lastTokenIndex = streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
 					if (replaceStart + lastTokenIndex > replaceEnd)

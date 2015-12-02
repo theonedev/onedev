@@ -1,7 +1,6 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +40,8 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> match(AssistStream stream, 
-			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory) {
 		List<TokenNode> paths = null;
 		int maxIndex = stream.getIndex();
 		
@@ -50,7 +49,7 @@ public class RuleSpec extends Spec {
 		parent = new Node(this, parent, previous);
 		
 		for (AlternativeSpec alternative: alternatives) {
-			List<TokenNode> alternativePaths = alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes));
+			List<TokenNode> alternativePaths = alternative.match(stream, parent, parent, copy(ruleRefHistory));
 			if (stream.getIndex() > maxIndex) {
 				maxIndex = stream.getIndex();
 				paths = alternativePaths;

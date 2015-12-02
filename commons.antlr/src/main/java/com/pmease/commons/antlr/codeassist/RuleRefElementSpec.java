@@ -82,16 +82,29 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, 
-			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
-		Integer index = checkedIndexes.get(ruleName);
-		if (index != null && index.intValue() == stream.getIndex()) {
-			return null;
-		} else {
-			checkedIndexes.put(ruleName, stream.getIndex());
-			parent = new Node(this, parent, previous);
-			return getRule().match(stream, parent, parent, checkedIndexes);
+	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory) {
+		if (parent != null) {
+			AlternativeSpec alternative = (AlternativeSpec) parent.getSpec();
+			RuleRefContext context = new RuleRefContext();
+			context.elementIndex = alternative.getElements().indexOf(this);
+			RuleSpec rule = (RuleSpec) parent.getParent().getSpec();
+			context.alternativeIndex = rule.getAlternatives().indexOf(alternative);
+			context.ruleName = rule.getName();
+			context.streamIndex = stream.getIndex();
+			
+			Set<RuleRefContext> ruleRefContexts = ruleRefHistory.get(ruleName);
+			if (ruleRefContexts == null) {
+				ruleRefContexts = new HashSet<>();
+				ruleRefHistory.put(ruleName, ruleRefContexts);
+			} else if (ruleRefContexts.contains(context)) {
+				return null;
+			} else {
+				ruleRefContexts.add(context);
+			}
 		}
+		parent = new Node(this, parent, previous);
+		return getRule().match(stream, parent, parent, ruleRefHistory);
 	}
 
 	@Override

@@ -36,18 +36,18 @@ public abstract class ElementSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> match(AssistStream stream, 
-			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory) {
 		if (multiplicity == Multiplicity.ONE) {
-			return matchOnce(stream, parent, previous, checkedIndexes);
+			return matchOnce(stream, parent, previous, ruleRefHistory);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			List<TokenNode> paths = matchOnce(stream, parent, previous, checkedIndexes);
+			List<TokenNode> paths = matchOnce(stream, parent, previous, ruleRefHistory);
 			if (paths == null || paths.isEmpty() || stream.isEof()) {
 				return paths;
 			} else {
 				while (true) {
 					previous = paths.get(paths.size()-1);
-					List<TokenNode> nextPaths = matchOnce(stream, parent, previous, checkedIndexes);
+					List<TokenNode> nextPaths = matchOnce(stream, parent, previous, ruleRefHistory);
 					if (nextPaths == null || nextPaths.isEmpty())
 						return paths;
 					else if (stream.isEof())
@@ -61,14 +61,14 @@ public abstract class ElementSpec extends Spec {
 			while (true) {
 				if (!paths.isEmpty())
 					previous = paths.get(paths.size()-1);
-				List<TokenNode> nextPaths = matchOnce(stream, parent, previous, checkedIndexes);
+				List<TokenNode> nextPaths = matchOnce(stream, parent, previous, ruleRefHistory);
 				if (nextPaths == null || nextPaths.isEmpty() || stream.isEof()) 
 					return paths;
 				else 
 					paths = nextPaths;
 			}
 		} else {
-			List<TokenNode> paths = matchOnce(stream, parent, previous, checkedIndexes);
+			List<TokenNode> paths = matchOnce(stream, parent, previous, ruleRefHistory);
 			if (paths != null)
 				return paths;
 			else
@@ -76,8 +76,8 @@ public abstract class ElementSpec extends Spec {
 		}
 	}
 	
-	public abstract List<TokenNode> matchOnce(AssistStream stream, 
-			Node parent, Node previous, Map<String, Integer> checkedIndexes);
+	public abstract List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory);
 
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
 

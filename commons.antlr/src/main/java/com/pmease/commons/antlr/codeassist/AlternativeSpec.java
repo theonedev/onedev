@@ -1,7 +1,6 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,7 @@ public class AlternativeSpec extends Spec {
 	
 	@Override
 	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes) {
+			Map<String, Set<RuleRefContext>> ruleRefHistory) {
 		parent = new Node(this, parent, previous);
 		List<TokenNode> paths = new ArrayList<>();
 		int index = stream.getIndex();
@@ -41,7 +40,7 @@ public class AlternativeSpec extends Spec {
 				previous = paths.get(paths.size()-1);
 			else
 				previous = parent;
-			List<TokenNode> elementPaths = elementSpec.match(stream, parent, previous, new HashMap<>(checkedIndexes));
+			List<TokenNode> elementPaths = elementSpec.match(stream, parent, previous, copy(ruleRefHistory));
 			if (elementPaths == null) {
 				stream.setIndex(index);
 				return null;
