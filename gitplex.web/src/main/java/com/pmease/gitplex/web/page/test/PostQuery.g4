@@ -1,18 +1,25 @@
-grammar PostQuery;
+grammar PostQuery; // rename to distinguish from Expr.g4
 
-query: (criteria|sentence)+ EOF;
-criteria: Criteria|ExcludedCriteria;
-sentence: Word+;
+query:   stat (';' stat)* ;
 
-Criteria: TitleCriteria|AuthorCriteria|IsCriteria;
-TitleCriteria: 'title:' (Word|QuotedValue);
-AuthorCriteria: 'author:' (Word|QuotedValue);
-IsCriteria: 'is:' ('open'|'close');
-ExcludedCriteria: '-' Criteria;
-QuotedValue: '"' (ESCAPE|~["\\])+ '"';
-Word: ~[ \t\r\n]+;
+stat:   ID '=' expr (';'|',')?              # assign
+    |   expr (';')?                         # printExpr
+    ;
 
-fragment
-ESCAPE: '\\'["\\];
+expr:   op=('-'|'+') expr                    # signed
+    |   expr op=('*'|'/') expr               # MulDiv
+    |   expr op=('+'|'-') expr               # AddSub
+    |   ID                                   # id                 
+    |   DOUBLE                               # Double
+    |   '(' expr ')'                         # parens
+    ;
 
-WS: [ \t\r\n]+ -> skip;
+
+
+MUL :   '*' ; // assigns token name to '*' used above in grammar
+DIV :   '/' ;
+ADD :   '+' ;
+SUB :   '-' ;
+ID  :   [a-zA-Z]+ [0-9]* ;      // match identifiers
+DOUBLE :   [0-9]+ ('.' [0-9]+)? ;
+WS : [ \t\r\n]+ -> skip ;

@@ -44,33 +44,33 @@ public class RuleSpec extends Spec {
 	public List<TokenNode> match(AssistStream stream, 
 			Node parent, Node previous, Map<String, Integer> checkedIndexes) {
 		List<TokenNode> paths = null;
-		int maxIndex = -1;
+		int maxIndex = stream.getIndex();
+		
 		int index = stream.getIndex();
 		parent = new Node(this, parent, previous);
+		
 		for (AlternativeSpec alternative: alternatives) {
 			List<TokenNode> alternativePaths = alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes));
 			if (stream.getIndex() > maxIndex) {
 				maxIndex = stream.getIndex();
 				paths = alternativePaths;
-			} else if (stream.getIndex() == maxIndex) {
-				if (alternativePaths != null) {
-					if (paths == null)
-						paths = alternativePaths;
-					else
-						paths.addAll(alternativePaths);
-				}
+			} else if (stream.getIndex() == maxIndex && alternativePaths != null) {
+				if (paths == null)
+					paths = alternativePaths;
+				else
+					paths.addAll(alternativePaths);
 			}
 			stream.setIndex(index);
 		}
 
-		if (maxIndex != -1)
-			stream.setIndex(maxIndex);
+		stream.setIndex(maxIndex);
+		
 		return paths;
 	}
 
 	@Override
 	public String toString() {
-		return "rule: " + name;
+		return "name: " + name + ", alternatives: " + alternatives;
 	}
 
 }

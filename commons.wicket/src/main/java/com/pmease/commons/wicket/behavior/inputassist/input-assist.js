@@ -82,6 +82,18 @@ pmease.commons.inputassist = {
 			}
 		});
 		
+		$input.bind("keydown", "tab", function() {
+			var $dropdown = $input.data("dropdown");
+			if ($dropdown) {
+				var $active = $dropdown.find("tr.active");
+				if ($active.length != 0) 
+					$input.data("update")($active);
+				else 
+					$input.data("update")($dropdown.find("tr").first());
+				return false;
+			}
+		});
+		
 		callback($input.val());
 	},
 
@@ -131,8 +143,6 @@ pmease.commons.inputassist = {
 			$input.focus();
 		});
 		var $item = $dropdown.find("tr");
-		if ($input.data("errors").length != 0)
-			$item.first().addClass("active");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);
@@ -142,9 +152,9 @@ pmease.commons.inputassist = {
 	
 	updateHelp: function($dropdown) {
 		if ($dropdown.find("tr.active").length != 0) {
-			$dropdown.find(".help").empty().append("Press '&uarr; &darr;' to navigate, or 'enter' to select");
+			$dropdown.find(".help").empty().append("Press 'enter' to complete selected item");
 		} else {
-			$dropdown.find(".help").empty().append("Press '&uarr; &darr;' to navigate");
+			$dropdown.find(".help").empty().append("Press 'tab' to complete first item");
 		}
 	}
 }

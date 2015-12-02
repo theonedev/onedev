@@ -45,7 +45,7 @@ public class RuleRefElementSpec extends ElementSpec {
 
 	@Override
 	public MandatoryScan scanMandatories(Set<String> checkedRules) {
-		if (!checkedRules.contains(ruleName) && getRule() != null) {
+		if (!checkedRules.contains(ruleName)) {
 			checkedRules.add(ruleName);
 		
 			List<AlternativeSpec> alternatives = getRule().getAlternatives();

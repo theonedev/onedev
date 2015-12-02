@@ -95,6 +95,29 @@ public abstract class ElementSpec extends Spec {
 	 */
 	public List<ElementSuggestion> suggestNext(ParseTree parseTree, Node parent, String matchWith) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
+
+		if (this instanceof RuleRefElementSpec) {
+			Node ruleRefNode = new Node(this, parent, null);
+			RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) this;
+			RuleSpec ruleSpec = ruleRefElementSpec.getRule();
+			Node ruleNode = new Node(ruleSpec, ruleRefNode, null);
+			for (AlternativeSpec alternative: ruleRefElementSpec.getRule().getAlternatives()) {
+				Node alternativeNode = new Node(alternative, ruleNode, null);
+				if (alternative.getElements().size() > 1 
+						&& alternative.getElements().get(0) instanceof RuleRefElementSpec) {
+					RuleRefElementSpec firstElementSpec = (RuleRefElementSpec) alternative.getElements().get(0);
+					if (firstElementSpec.getRuleName().equals(ruleRefElementSpec.getRuleName())) {
+						for (int i=1; i<alternative.getElements().size(); i++) {
+							ElementSpec elementSpec = alternative.getElements().get(i);
+							suggestions.addAll(elementSpec.suggestFirst(parseTree, alternativeNode, 
+									matchWith, new HashSet<String>()));
+							if (!elementSpec.matches(codeAssist.lex("")))
+								break;
+						}
+					}
+				}
+			}
+		}
 		
 		// if element spec can be repeated, next input candidate can also be taken from the element itself
 		if (multiplicity == Multiplicity.ONE_OR_MORE || multiplicity == Multiplicity.ZERO_OR_MORE) 
