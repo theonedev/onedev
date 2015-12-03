@@ -390,13 +390,13 @@ public abstract class CodeAssist implements Serializable {
 		}
 	}
 	
-	public List<InputSuggestion> suggest(InputStatus inputStatus, String ruleName) {
+	public List<InputCompletion> suggest(InputStatus inputStatus, String ruleName) {
 		RuleSpec rule = Preconditions.checkNotNull(getRule(ruleName));
 		
 		AssistStream stream = lex(inputStatus.getContentBeforeCaret());
 		
 		String inputContent = inputStatus.getContent();
-		List<InputSuggestion> inputSuggestions = new ArrayList<>();
+		List<InputCompletion> inputSuggestions = new ArrayList<>();
 		
 		/*
 		 * Mandatory literals may come after a suggestion (for instance if a method name is suggested, 
@@ -408,28 +408,27 @@ public abstract class CodeAssist implements Serializable {
 		 * appending mandatories they are no longer mandatories from aspect of whole rule. Below code
 		 * mainly handles this logic.         
 		 */
-		Map<String, List<ElementReplacement>> grouped = new LinkedHashMap<>();
-		for (ElementReplacement replacement: suggest(rule, stream, inputStatus)) {
+		Map<String, List<ElementCompletion>> grouped = new LinkedHashMap<>();
+		for (ElementCompletion completion: suggest(rule, stream, inputStatus)) {
 			/*
 			 *  key will be the new input (without considering mandatories of course), and we use 
 			 *  this to group suggestions to facilitate mandatories calculation and exclusion 
 			 *  logic 
 			 */
-			String key = inputContent.substring(0, replacement.begin) 
-					+ replacement.content + inputContent.substring(replacement.end);
-			List<ElementReplacement> value = grouped.get(key);
+			String key = inputContent.substring(0, completion.getReplaceBegin()) 
+					+ completion.getReplaceContent() + inputContent.substring(completion.getReplaceEnd());
+			List<ElementCompletion> value = grouped.get(key);
 			if (value == null) {
 				value = new ArrayList<>();
 				grouped.put(key, value);
 			}
-			value.add(replacement);
+			value.add(completion);
 		}
 		
-		for (Map.Entry<String, List<ElementReplacement>> entry: grouped.entrySet())	 {
-			List<ElementReplacement> value = entry.getValue();
-			ElementReplacement replacement = value.get(0);
-			String label = replacement.label;
-			String description = replacement.description;
+		for (Map.Entry<String, List<ElementCompletion>> entry: grouped.entrySet())	 {
+			List<ElementCompletion> value = entry.getValue();
+			ElementCompletion completion = value.get(0);
+			String description = completion.getDescription();
 			String content = entry.getKey(); 
 			
 			/*
@@ -438,11 +437,11 @@ public abstract class CodeAssist implements Serializable {
 			 * text), and in this case, we do not need to append mandatories as
 			 * most probably those mandatories already exist in current input
 			 */
-			if (replacement.end <= inputStatus.getCaret()) {
+			if (completion.getReplaceEnd() <= inputStatus.getCaret()) {
 				List<String> contents = new ArrayList<>();
-				for (ElementReplacement each: value) {
-					content = inputContent.substring(0, each.begin) + each.content;
-					for (String mandatory: getMandatoriesAfter(each.node)) {
+				for (ElementCompletion each: value) {
+					content = inputContent.substring(0, each.getReplaceBegin()) + each.getReplaceContent();
+					for (String mandatory: getMandatoriesAfter(each.getNode())) {
 						String prevContent = content;
 						content += mandatory;
 
@@ -463,7 +462,7 @@ public abstract class CodeAssist implements Serializable {
 							}
 						}
 					}
-					content += inputContent.substring(each.end);
+					content += inputContent.substring(each.getReplaceEnd());
 					
 					if (contents.isEmpty()) {
 						contents.add(content);
@@ -481,29 +480,32 @@ public abstract class CodeAssist implements Serializable {
 			 * replacement has some place holders expecting user input. 
 			 */
 			int caret;
-			if (replacement.caret == replacement.content.length()) {
+			if (completion.getCaret() == completion.getReplaceContent().length()) {
 				// caret is not at the middle of replacement, so we need to move it to 
 				// be after mandatory tokens
-				caret = content.length() - inputContent.length() + replacement.end; 
+				caret = content.length() - inputContent.length() + completion.getReplaceEnd(); 
 				if (content.equals(entry.getKey())) { 
 					// in case mandatory tokens are not added after replacement, 
 					// we skip existing mandatory tokens in current input
 					String contentAfterCaret = content.substring(caret);
-					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(replacement.node));
+					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(completion.getNode()));
 				}
 			} else {
-				caret = replacement.begin + replacement.content.length();
+				caret = completion.getReplaceBegin() + completion.getReplaceContent().length();
 			}
 			
-			inputSuggestions.add(new InputSuggestion(content, caret, label, description));
+			String replaceContent = content.substring(completion.getReplaceBegin(), 
+					content.length()-inputContent.length()+completion.getReplaceEnd());
+			inputSuggestions.add(new InputCompletion(completion.getReplaceBegin(), 
+					completion.getReplaceEnd(), replaceContent, caret, description));
 		}
 		
 		/*
 		 * remove duplicate suggestions and suggestions the same as current input
 		 */
 		Set<String> suggestedContents = Sets.newHashSet(inputStatus.getContent());
-		for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
-			String content = it.next().getContent();
+		for (Iterator<InputCompletion> it = inputSuggestions.iterator(); it.hasNext();) {
+			String content = it.next().complete(inputStatus).getContent();
 			if (suggestedContents.contains(content))
 				it.remove();
 			else
@@ -524,8 +526,8 @@ public abstract class CodeAssist implements Serializable {
 		return suggestions;
 	}
 	
-	private List<ElementReplacement> suggest(RuleSpec spec, AssistStream stream, InputStatus inputStatus) {
-		List<ElementReplacement> elementReplacements = new ArrayList<>();
+	private List<ElementCompletion> suggest(RuleSpec spec, AssistStream stream, InputStatus inputStatus) {
+		List<ElementCompletion> elementCompletions = new ArrayList<>();
 		
 		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
 		List<TokenNode> paths = spec.match(stream, null, null, new HashMap<String, Set<RuleRefContext>>());
@@ -595,17 +597,8 @@ public abstract class CodeAssist implements Serializable {
 			String before = inputContent.substring(0, replaceStart);
 
 			for (InputSuggestion inputSuggestion: elementSuggestion.getInputSuggestions()) {
-				ElementReplacement elementReplacement = new ElementReplacement();
-				elementReplacement.node = elementSuggestion.getNode();
-				elementReplacement.begin = replaceStart;
-				elementReplacement.end = replaceEnd;
-				elementReplacement.label = inputSuggestion.getLabel();
-				elementReplacement.description = inputSuggestion.getDescription();
-				
-				elementReplacement.content = inputSuggestion.getContent();
-				elementReplacement.caret = inputSuggestion.getCaret();
 				if (elementSuggestion.getParseTree() != null) { 
-					AssistStream newStream = lex(before + elementReplacement.content);
+					AssistStream newStream = lex(before + inputSuggestion.getContent());
 					Token lastToken = elementSuggestion.getParseTree().getLastNode().getToken();
 					int index = stream.getTokenIndex(lastToken);
 					
@@ -626,10 +619,11 @@ public abstract class CodeAssist implements Serializable {
 					}
 				} 
 				
-				elementReplacements.add(elementReplacement);
+				elementCompletions.add(new ElementCompletion(elementSuggestion.getNode(), replaceStart, replaceEnd, 
+						inputSuggestion.getContent(), inputSuggestion.getCaret(), inputSuggestion.getDescription()));
 			}
 		}
-		return elementReplacements;
+		return elementCompletions;
 	}
 	
 	private int skipMandatories(String content, List<String> mandatories) {

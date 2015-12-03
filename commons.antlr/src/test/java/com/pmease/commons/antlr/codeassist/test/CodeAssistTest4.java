@@ -1,11 +1,13 @@
 package com.pmease.commons.antlr.codeassist.test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.pmease.commons.antlr.codeassist.CodeAssist;
+import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
@@ -24,11 +26,18 @@ public class CodeAssistTest4 {
 
 	};
 	
+	private List<InputStatus> suggest(InputStatus inputStatus, String ruleName) {
+		List<InputStatus> suggestions = new ArrayList<>();
+		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName))
+			suggestions.add(completion.complete(inputStatus));
+		return suggestions;
+	}
+	
 	@Test
 	public void test() {
-		List<InputSuggestion> suggestions;
+		List<InputStatus> suggestions;
 
-		suggestions = codeAssist.suggest(new InputStatus("a"), "stat");
+		suggestions = suggest(new InputStatus("a"), "stat");
 		assertEquals(6, suggestions.size());
 		assertEquals("a*:2", suggestions.get(0).toString());
 		assertEquals("a/:2", suggestions.get(1).toString());
@@ -37,16 +46,16 @@ public class CodeAssistTest4 {
 		assertEquals("a;:2", suggestions.get(4).toString());
 		assertEquals("a=:2", suggestions.get(5).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus(""), "stat");
+		suggestions = suggest(new InputStatus(""), "stat");
 		assertEquals(2, suggestions.size());
 		assertEquals("(:1", suggestions.get(0).toString());
 		assertEquals(";:1", suggestions.get(1).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("5*"), "stat");
+		suggestions = suggest(new InputStatus("5*"), "stat");
 		assertEquals(1, suggestions.size());
 		assertEquals("5*(:3", suggestions.get(0).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("5"), "stat");
+		suggestions = suggest(new InputStatus("5"), "stat");
 		assertEquals(5, suggestions.size());
 		assertEquals("5*:2", suggestions.get(0).toString());
 		assertEquals("5/:2", suggestions.get(1).toString());

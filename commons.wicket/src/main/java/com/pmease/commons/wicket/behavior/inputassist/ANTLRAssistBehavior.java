@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.TokenStream;
 import com.pmease.commons.antlr.AntlrUtils;
 import com.pmease.commons.antlr.codeassist.AssistStream;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
+import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
@@ -72,7 +73,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	}
 	
 	@Override
-	protected List<InputSuggestion> getSuggestions(InputStatus inputStatus) {
+	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 		return codeAssist.suggest(inputStatus, ruleName);
 	}
 	

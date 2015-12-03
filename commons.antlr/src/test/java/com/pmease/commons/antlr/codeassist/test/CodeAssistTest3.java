@@ -7,6 +7,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.pmease.commons.antlr.codeassist.CodeAssist;
+import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
@@ -52,45 +53,52 @@ public class CodeAssistTest3 {
 
 	};
 	
+	private List<InputStatus> suggest(InputStatus inputStatus, String ruleName) {
+		List<InputStatus> suggestions = new ArrayList<>();
+		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName))
+			suggestions.add(completion.complete(inputStatus));
+		return suggestions;
+	}
+
 	@Test
 	public void test() {
-		List<InputSuggestion> suggestions;
+		List<InputStatus> suggestions;
 
-		suggestions = codeAssist.suggest(new InputStatus("title: hello author:"), "query");
+		suggestions = suggest(new InputStatus("title: hello author:"), "query");
 		assertEquals(3, suggestions.size());
 		assertEquals("title: hello author:\"robin shen\":32", suggestions.get(0).toString());
 		assertEquals("title: hello author:\"steve luo\":31", suggestions.get(1).toString());
 		assertEquals("title: hello author:justin:26", suggestions.get(2).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("title: hello world"), "query");
+		suggestions = suggest(new InputStatus("title: hello world"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("title: \"hello world\":20", suggestions.get(0).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus(""), "query");
+		suggestions = suggest(new InputStatus(""), "query");
 		assertEquals(2, suggestions.size());
 		assertEquals("title::6", suggestions.get(0).toString());
 		assertEquals("author::7", suggestions.get(1).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus("title:"), "query");
+		suggestions = suggest(new InputStatus("title:"), "query");
 		assertEquals(0, suggestions.size());
 		
-		suggestions = codeAssist.suggest(new InputStatus("author: dustin"), "query");
+		suggestions = suggest(new InputStatus("author: dustin"), "query");
 		assertEquals(0, suggestions.size());
 		
-		suggestions = codeAssist.suggest(new InputStatus("author: dustin "), "query");
+		suggestions = suggest(new InputStatus("author: dustin "), "query");
 		assertEquals(2, suggestions.size());
 		assertEquals("author: dustin title::21", suggestions.get(0).toString());
 		assertEquals("author: dustin author::22", suggestions.get(1).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus("author: \"robin shen\""), "query");
+		suggestions = suggest(new InputStatus("author: \"robin shen\""), "query");
 		assertEquals(2, suggestions.size());
 		assertEquals("author: \"robin shen\"title::26", suggestions.get(0).toString());
 		assertEquals("author: \"robin shen\"author::27", suggestions.get(1).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus("title: hello"), "query");
+		suggestions = suggest(new InputStatus("title: hello"), "query");
 		assertEquals(0, suggestions.size());
 		
-		suggestions = codeAssist.suggest(new InputStatus("title: hello "), "query");
+		suggestions = suggest(new InputStatus("title: hello "), "query");
 		assertEquals(2, suggestions.size());
 		assertEquals("title: hello title::19", suggestions.get(0).toString());
 		assertEquals("title: hello author::20", suggestions.get(1).toString());

@@ -25,8 +25,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
-import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
@@ -147,46 +147,45 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 				getComponent().getMarkupId(), json);
 		target.appendJavaScript(script);
 		
-		final List<InputSuggestion> suggestions;
-		
-		if (inputCaret != null)
-			suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
-		else
-			suggestions = new ArrayList<>();
-		
-		if (!suggestions.isEmpty()) {
-			int anchor = getAnchor(inputContent.substring(0, inputCaret));
-			if (dropdown == null) {
-				dropdown = new FloatingPanel(target, new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0)) {
+		if (inputCaret != null) {
+			final InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
+			final List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
+			if (!suggestions.isEmpty()) {
+				int anchor = getAnchor(inputContent.substring(0, inputCaret));
+				if (dropdown == null) {
+					dropdown = new FloatingPanel(target, new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0)) {
 
-					@Override
-					protected Component newContent(String id) {
-						return new AssistPanel(id, suggestions);
-					}
+						@Override
+						protected Component newContent(String id) {
+							return new AssistPanel(id, inputStatus, suggestions);
+						}
 
-					@Override
-					protected void onClosed(AjaxRequestTarget target) {
-						super.onClosed(target);
-						dropdown = null;
-					}
+						@Override
+						protected void onClosed(AjaxRequestTarget target) {
+							super.onClosed(target);
+							dropdown = null;
+						}
+						
+					};
+					script = String.format("pmease.commons.inputassist.assistOpened('%s', '%s');", 
+							getComponent().getMarkupId(), dropdown.getMarkupId());
+					target.appendJavaScript(script);
+				} else {
+					Component content = dropdown.getContent();
+					Component newContent = new AssistPanel(content.getId(), inputStatus, suggestions);
+					content.replaceWith(newContent);
+					target.add(newContent);
+
+					AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
+					script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
+					target.prependJavaScript(script);
 					
-				};
-				script = String.format("pmease.commons.inputassist.assistOpened('%s', '%s');", 
-						getComponent().getMarkupId(), dropdown.getMarkupId());
-				target.appendJavaScript(script);
-			} else {
-				Component content = dropdown.getContent();
-				Component newContent = new AssistPanel(content.getId(), suggestions);
-				content.replaceWith(newContent);
-				target.add(newContent);
-
-				AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
-				script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
-				target.prependJavaScript(script);
-				
-				script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
-						getComponent().getMarkupId(), dropdown.getMarkupId());
-				target.appendJavaScript(script);
+					script = String.format("pmease.commons.inputassist.assistUpdated('%s', '%s');", 
+							getComponent().getMarkupId(), dropdown.getMarkupId());
+					target.appendJavaScript(script);
+				}
+			} else if (dropdown != null) {
+				dropdown.close(target);
 			}
 		} else if (dropdown != null) {
 			dropdown.close(target);
@@ -219,7 +218,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract List<InputSuggestion> getSuggestions(InputStatus inputStatus);
+	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus);
 	
 	protected abstract List<InputError> getErrors(String inputContent);
 	

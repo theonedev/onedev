@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.pmease.commons.antlr.codeassist.CodeAssist;
+import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
@@ -50,34 +51,42 @@ public class CodeAssistTest2 {
 
 	};
 	
+	private List<InputStatus> suggest(InputStatus inputStatus, String ruleName) {
+		List<InputStatus> suggestions = new ArrayList<>();
+		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName))
+			suggestions.add(completion.complete(inputStatus));
+		return suggestions;
+	}
+	
 	@Test
 	public void test() {
-		List<InputSuggestion> suggestions;
+		List<InputStatus> suggestions;
 
-		suggestions = codeAssist.suggest(new InputStatus("branch(master)"), "revisionCriteria");
+		suggestions = suggest(new InputStatus("branch(master)"), "revisionCriteria");
+		System.out.println(suggestions);
 		assertEquals(2, suggestions.size());
 		assertEquals("branch(master)..:16", suggestions.get(0).toString());
 		assertEquals("branch(master)...:17", suggestions.get(1).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus(""), "revisionCriteria");
+		suggestions = suggest(new InputStatus(""), "revisionCriteria");
 		assertEquals(4, suggestions.size());
 		assertEquals("branch(:7", suggestions.get(0).toString());
 		assertEquals("tag(:4", suggestions.get(1).toString());
 		assertEquals("id(:3", suggestions.get(2).toString());
 		assertEquals("^:1", suggestions.get(3).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus("br"), "query");
+		suggestions = suggest(new InputStatus("br"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("branch(:7", suggestions.get(0).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("branch("), "query");
+		suggestions = suggest(new InputStatus("branch("), "query");
 		assertEquals(4, suggestions.size());
 		assertEquals("branch(master):14", suggestions.get(0).toString());
 		assertEquals("branch(dev):11", suggestions.get(1).toString());
 		assertEquals("branch(feature1):16", suggestions.get(2).toString());
 		assertEquals("branch(feature2):16", suggestions.get(3).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus("branch"), "query");
+		suggestions = suggest(new InputStatus("branch"), "query");
 		assertEquals(5, suggestions.size());
 		assertEquals("branch(master):14", suggestions.get(0).toString());
 		assertEquals("branch(dev):11", suggestions.get(1).toString());
@@ -85,17 +94,17 @@ public class CodeAssistTest2 {
 		assertEquals("branch(feature2):16", suggestions.get(3).toString());
 		assertEquals("branch(:7", suggestions.get(4).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("branch( fea"), "query");
+		suggestions = suggest(new InputStatus("branch( fea"), "query");
 		assertEquals(3, suggestions.size());
 		assertEquals("branch(feature1):16", suggestions.get(0).toString());
 		assertEquals("branch(feature2):16", suggestions.get(1).toString());
 		assertEquals("branch(fea):11", suggestions.get(2).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus("tag"), "query");
+		suggestions = suggest(new InputStatus("tag"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("tag(:4", suggestions.get(0).toString());
 		
-		suggestions = codeAssist.suggest(new InputStatus("branch(master)t"), "query");
+		suggestions = suggest(new InputStatus("branch(master)t"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("branch(master)tag(:18", suggestions.get(0).toString());
 	}
