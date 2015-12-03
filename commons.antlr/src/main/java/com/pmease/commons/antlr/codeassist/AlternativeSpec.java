@@ -30,31 +30,16 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+	public Map<TokenNode, Integer> match(AssistStream stream, Node parent, Node previous, 
 			Map<String, Set<RuleRefContext>> ruleRefHistory) {
 		parent = new Node(this, parent, previous);
-		List<TokenNode> paths = new ArrayList<>();
-		int index = stream.getIndex();
+		Map<TokenNode, Integer> matches = initMatches(stream, parent, previous);
 		for (ElementSpec elementSpec: elements) {
-			if (!paths.isEmpty())
-				previous = paths.get(paths.size()-1);
-			else
-				previous = parent;
-			List<TokenNode> elementPaths = elementSpec.match(stream, parent, previous, copy(ruleRefHistory));
-			if (elementPaths == null) {
-				stream.setIndex(index);
-				return null;
-			} else if (elementPaths.isEmpty()) {
-				if (stream.isEof())
-					return paths;
-			} else {
-				if (stream.isEof())
-					return elementPaths;
-				else
-					paths = elementPaths;
-			}
+			matches = elementSpec.match(matches, stream, parent, copy(ruleRefHistory));
+			if (matches.isEmpty())
+				break;
 		}
-		return paths;
+		return matches;
 	}
 
 	@Override

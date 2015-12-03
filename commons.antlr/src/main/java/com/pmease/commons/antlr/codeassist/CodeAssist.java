@@ -190,6 +190,7 @@ public abstract class CodeAssist implements Serializable {
 		return newAltenative(label, labeledAltContext.alternative());
 	}
 	
+	@Nullable
 	private ElementSpec newElement(LexerElementContext lexerElementContext) {
 		LabeledLexerElementContext labeledLexerElementContext = lexerElementContext.labeledLexerElement();
 		if (labeledLexerElementContext != null) {
@@ -238,6 +239,7 @@ public abstract class CodeAssist implements Serializable {
 		}
 	}
 	
+	@Nullable
 	private ElementSpec newElement(String label, AtomContext atomContext, EbnfSuffixContext ebnfSuffixContext) {
 		Multiplicity multiplicity = newMultiplicity(ebnfSuffixContext);
 		if (atomContext.terminal() != null) {
@@ -247,7 +249,7 @@ public abstract class CodeAssist implements Serializable {
 				if (tokenType != Token.EOF)
 					return new LexerRuleRefElementSpec(this ,label, multiplicity, tokenType, ruleName);
 				else
-					return new EofElementSpec(this, label, multiplicity);
+					return null;
 			} else {
 				String literal = getLiteral(atomContext.terminal().STRING_LITERAL());
 				int tokenType = tokenTypesByLiteral.get(literal);
@@ -269,6 +271,7 @@ public abstract class CodeAssist implements Serializable {
 		return literal.substring(1, literal.length()-1);
 	}
 	
+	@Nullable
 	private ElementSpec newElement(String label, LexerAtomContext lexerAtomContext, EbnfSuffixContext ebnfSuffixContext) {
 		Multiplicity multiplicity = newMultiplicity(ebnfSuffixContext);
 		if (lexerAtomContext.terminal() != null) {
@@ -280,7 +283,7 @@ public abstract class CodeAssist implements Serializable {
 				if (tokenType != Token.EOF)
 					return new LexerRuleRefElementSpec(this, label, multiplicity, tokenType, ruleName);
 				else
-					return new EofElementSpec(this, label, multiplicity);
+					return null;
 			} else {
 				String literal = getLiteral(lexerAtomContext.terminal().STRING_LITERAL());
 				Integer tokenType = tokenTypesByLiteral.get(literal);

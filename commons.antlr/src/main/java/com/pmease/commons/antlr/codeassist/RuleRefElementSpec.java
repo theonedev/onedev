@@ -2,6 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,23 +83,23 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+	public Map<TokenNode, Integer> matchOnce(AssistStream stream, Node parent, Node previous, 
 			Map<String, Set<RuleRefContext>> ruleRefHistory) {
+		Map<TokenNode, Integer> matches = new LinkedHashMap<>();
 		if (parent != null) {
 			AlternativeSpec alternative = (AlternativeSpec) parent.getSpec();
-			RuleRefContext context = new RuleRefContext();
-			context.elementIndex = alternative.getElements().indexOf(this);
+			int elementIndex = alternative.getElements().indexOf(this);
 			RuleSpec rule = (RuleSpec) parent.getParent().getSpec();
-			context.alternativeIndex = rule.getAlternatives().indexOf(alternative);
-			context.ruleName = rule.getName();
-			context.streamIndex = stream.getIndex();
+			int alternativeIndex = rule.getAlternatives().indexOf(alternative);
+			RuleRefContext context = new RuleRefContext(rule.getName(), 
+					alternativeIndex, elementIndex, stream.getIndex());
 			
 			Set<RuleRefContext> ruleRefContexts = ruleRefHistory.get(ruleName);
 			if (ruleRefContexts == null) {
 				ruleRefContexts = new HashSet<>();
 				ruleRefHistory.put(ruleName, ruleRefContexts);
 			} else if (ruleRefContexts.contains(context)) {
-				return null;
+				return matches;
 			} else {
 				ruleRefContexts.add(context);
 			}

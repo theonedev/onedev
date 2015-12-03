@@ -5,14 +5,21 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 class RuleRefContext {
 	
-	String ruleName;
+	private final String ruleName;
 	
-	int alternativeIndex;
+	private final int alternativeIndex;
 	
-	int elementIndex;
+	private final int elementIndex;
 	
-	int streamIndex;
+	private final int streamIndex;
 
+	public RuleRefContext(String ruleName, int alternativeIndex, int elementIndex, int streamIndex) {
+		this.ruleName = ruleName;
+		this.alternativeIndex = alternativeIndex;
+		this.elementIndex = elementIndex;
+		this.streamIndex = streamIndex;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof RuleRefContext))

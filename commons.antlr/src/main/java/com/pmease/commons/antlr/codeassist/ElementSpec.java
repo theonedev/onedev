@@ -1,7 +1,9 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,25 +38,25 @@ public abstract class ElementSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+	public Map<TokenNode, Integer> match(AssistStream stream, Node parent, Node previous, 
 			Map<String, Set<RuleRefContext>> ruleRefHistory) {
+		return match(initMatches(stream, parent, previous), stream, parent, ruleRefHistory);
+	}
+	
+	public Map<TokenNode, Integer> match(Map<TokenNode, Integer> prevMatches, AssistStream stream, 
+			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory) {
 		if (multiplicity == Multiplicity.ONE) {
-			return matchOnce(stream, parent, previous, ruleRefHistory);
+			return matchOnce(prevMatches, stream, parent, ruleRefHistory);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			List<TokenNode> paths = matchOnce(stream, parent, previous, ruleRefHistory);
-			if (paths == null || paths.isEmpty() || stream.isEof()) {
-				return paths;
-			} else {
+			Map<TokenNode, Integer> matches = matchOnce(prevMatches, stream, parent, ruleRefHistory);
+			if (!matches.isEmpty()) {
 				while (true) {
-					previous = paths.get(paths.size()-1);
-					List<TokenNode> nextPaths = matchOnce(stream, parent, previous, ruleRefHistory);
-					if (nextPaths == null || nextPaths.isEmpty())
-						return paths;
-					else if (stream.isEof())
-						return nextPaths;
-					else 
-						paths = nextPaths;
+					matches.putAllmatchOnce(matches, stream, parent, ruleRefHistory);
+					if (matches.isEmpty())
+						break;
 				}
+			} else {
+				return matches;
 			}
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
 			List<TokenNode> paths = new ArrayList<>();
@@ -76,7 +78,17 @@ public abstract class ElementSpec extends Spec {
 		}
 	}
 	
-	public abstract List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+	public Map<TokenNode, Integer> matchOnce(Map<TokenNode, Integer> prevMatches, AssistStream stream, 
+			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory) {
+		Map<TokenNode, Integer> matches = new LinkedHashMap<>();
+		for (Map.Entry<TokenNode, Integer> entry: prevMatches.entrySet()) {
+			stream.setIndex(entry.getValue());
+			matches.putAll(matchOnce(stream, parent, entry.getKey(), copy(ruleRefHistory)));
+		}
+		return matches;
+	}
+	
+	public abstract Map<TokenNode, Integer> matchOnce(AssistStream stream, Node parent, Node previous, 
 			Map<String, Set<RuleRefContext>> ruleRefHistory);
 
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);

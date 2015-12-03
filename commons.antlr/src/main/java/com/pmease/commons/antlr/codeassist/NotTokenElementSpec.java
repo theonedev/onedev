@@ -1,13 +1,12 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
-
-import com.google.common.collect.Lists;
 
 public class NotTokenElementSpec extends ElementSpec {
 
@@ -38,20 +37,23 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+	public Map<TokenNode, Integer> matchOnce(AssistStream stream, Node parent, Node previous, 
 			Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		if (stream.isEof()) {
-			return null;
-		} else {
+		Map<TokenNode, Integer> matches = new LinkedHashMap<>();
+		if (!stream.isEof()) {
 			Token token = stream.getCurrentToken();
 			if (!notTokenTypes.contains(token.getType())) {
 				stream.increaseIndex();
 				TokenNode tokenNode = new TokenNode(this, parent, previous, token);
-				return Lists.newArrayList(tokenNode);
-			} else {
-				return null;
-			}
+				if (!stream.isEof())
+					matches.put(tokenNode, stream.getIndex());
+				else
+					matches.put(new TokenNode(null, parent, tokenNode, AssistStream.EOF), stream.getIndex());
+			} 
+		} else {
+			matches.put(new TokenNode(null, parent, previous, AssistStream.SOF), stream.getIndex());
 		}
+		return matches;
 	}
 
 	@Override

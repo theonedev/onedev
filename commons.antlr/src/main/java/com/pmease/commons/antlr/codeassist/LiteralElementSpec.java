@@ -2,10 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import org.antlr.v4.runtime.Token;
 
 import com.google.common.collect.Lists;
 
@@ -41,20 +38,6 @@ public class LiteralElementSpec extends TokenElementSpec {
 	@Override
 	public MandatoryScan scanMandatories(Set<String> checkedRules) {
 		return new MandatoryScan(Lists.newArrayList(literal), false);
-	}
-
-	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		if (!stream.isEof()) {
-			Token token = stream.getCurrentToken();
-			if (token.getType() == type) {
-				stream.increaseIndex();
-				TokenNode tokenNode = new TokenNode(this, parent, previous, token);
-				return Lists.newArrayList(tokenNode);
-			} 
-		}
-		return null;
 	}
 
 	@Override
