@@ -376,12 +376,12 @@ public abstract class CodeAssist implements Serializable {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = getLexerCtor().newInstance(new ANTLRInputStream(content));
 			lexer.removeErrorListeners();
-			Token token;
-			do {
-				token = lexer.nextToken();
+			Token token = lexer.nextToken();
+			while (token.getType() != Token.EOF) {
 				if (token.getChannel() == Token.DEFAULT_CHANNEL)
 					tokens.add(token);
-			} while (token.getType() != Token.EOF);
+				token = lexer.nextToken();
+			}
 			
 			return new AssistStream(tokens);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
@@ -452,7 +452,7 @@ public abstract class CodeAssist implements Serializable {
 							 */
 							stream = lex(content);
 							if (!stream.isEof()) {
-								Token lastToken = stream.getToken(stream.size()-2);
+								Token lastToken = stream.getToken(stream.size()-1);
 								if (lastToken.getStartIndex() != content.length() - mandatory.length()
 										|| lastToken.getStopIndex() != content.length()-1) {
 									content = prevContent + " " + mandatory;
@@ -555,7 +555,6 @@ public abstract class CodeAssist implements Serializable {
 				List<Token> tokens = new ArrayList<>();
 				for (int i=0; i<index; i++)
 					tokens.add(stream.getToken(i));
-				tokens.add(stream.getToken(stream.size()-1));
 				paths = spec.match(new AssistStream(tokens), null, null, 
 						new HashMap<String, Set<RuleRefContext>>());
 				if (paths != null && !paths.isEmpty()) 

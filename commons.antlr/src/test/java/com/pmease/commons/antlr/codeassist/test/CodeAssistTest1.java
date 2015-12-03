@@ -37,7 +37,7 @@ public class CodeAssistTest1 {
 	@Test
 	public void test()	{
 		List<InputStatus> suggestions;
-
+		
 		suggestions = suggest(new InputStatus(""), "selfReference");
 		assertEquals(1, suggestions.size());
 		assertEquals("ab:2", suggestions.get(0).toString());

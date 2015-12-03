@@ -23,7 +23,7 @@ public abstract class SurroundingAware {
 			return content.length() == 0 && spec.matches(stream);
 		} else {
 			int start = stream.getToken(0).getStartIndex();
-			int stop = stream.getToken(stream.size()-2).getStopIndex()+1;
+			int stop = stream.getToken(stream.size()-1).getStopIndex()+1;
 			return start == 0 && stop == content.length() && spec.matches(stream);
 		}
 	}

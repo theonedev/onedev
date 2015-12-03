@@ -2,7 +2,9 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenSource;
 
 import com.google.common.base.Preconditions;
 
@@ -16,11 +18,9 @@ public class AssistStream {
 	 * Construct assist stream with a list of tokens.
 	 * 
 	 * @param tokens
-	 * 			tokens to be used to construct the assist stream, the list should 
-	 * 			not be empty and the last token should be the EOF token
+	 * 			tokens to be used to construct the assist stream
 	 */
 	public AssistStream(List<Token> tokens) {
-		Preconditions.checkArgument(!tokens.isEmpty() && tokens.get(tokens.size()-1).getType() == Token.EOF);
 		this.tokens = tokens;
 	}
 
@@ -33,7 +33,7 @@ public class AssistStream {
 	}
 	
 	public void setIndex(int index) {
-		Preconditions.checkArgument(index>=0 && index<size());
+		Preconditions.checkArgument(index>=0 && index<=size());
 		this.index = index;
 	}
 	
@@ -72,7 +72,115 @@ public class AssistStream {
 	}
 
 	public boolean isEof() {
-		return index == size()-1;
+		return index == size();
 	}
 	
+	public static Token SOF = new Token() {
+
+		@Override
+		public String getText() {
+			return "SOF";
+		}
+
+		@Override
+		public int getType() {
+			return -1;
+		}
+
+		@Override
+		public int getLine() {
+			return -1;
+		}
+
+		@Override
+		public int getCharPositionInLine() {
+			return -1;
+		}
+
+		@Override
+		public int getChannel() {
+			return 0;
+		}
+
+		@Override
+		public int getTokenIndex() {
+			return -1;
+		}
+
+		@Override
+		public int getStartIndex() {
+			return -1;
+		}
+
+		@Override
+		public int getStopIndex() {
+			return -1;
+		}
+
+		@Override
+		public TokenSource getTokenSource() {
+			return null;
+		}
+
+		@Override
+		public CharStream getInputStream() {
+			return null;
+		}
+		
+	};
+	
+	public static Token EOF = new Token() {
+
+		@Override
+		public String getText() {
+			return "EOF";
+		}
+
+		@Override
+		public int getType() {
+			return -1;
+		}
+
+		@Override
+		public int getLine() {
+			return -1;
+		}
+
+		@Override
+		public int getCharPositionInLine() {
+			return -1;
+		}
+
+		@Override
+		public int getChannel() {
+			return 0;
+		}
+
+		@Override
+		public int getTokenIndex() {
+			return -1;
+		}
+
+		@Override
+		public int getStartIndex() {
+			return -1;
+		}
+
+		@Override
+		public int getStopIndex() {
+			return -1;
+		}
+
+		@Override
+		public TokenSource getTokenSource() {
+			return null;
+		}
+
+		@Override
+		public CharStream getInputStream() {
+			return null;
+		}
+		
+	};	
 }
+ 

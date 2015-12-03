@@ -63,7 +63,6 @@ public class CodeAssistTest2 {
 		List<InputStatus> suggestions;
 
 		suggestions = suggest(new InputStatus("branch(master)"), "revisionCriteria");
-		System.out.println(suggestions);
 		assertEquals(2, suggestions.size());
 		assertEquals("branch(master)..:16", suggestions.get(0).toString());
 		assertEquals("branch(master)...:17", suggestions.get(1).toString());

@@ -174,7 +174,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		if (stream.isEof()) {
 			return 0;
 		} else {
-			Token lastToken = stream.getToken(stream.size()-2);
+			Token lastToken = stream.getToken(stream.size()-1);
 			String contentAfterLastToken = content.substring(lastToken.getStopIndex()+1);
 			if (contentAfterLastToken.length() > 0) {
 				contentAfterLastToken = StringUtils.trimStart(contentAfterLastToken);

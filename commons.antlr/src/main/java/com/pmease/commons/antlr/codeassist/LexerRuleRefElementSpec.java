@@ -88,14 +88,15 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	@Override
 	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
 			Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		Token token = stream.getCurrentToken();
-		if (token.getType() == type) {
-			stream.increaseIndex();
-			TokenNode tokenNode = new TokenNode(this, parent, previous, token);
-			return Lists.newArrayList(tokenNode);
-		} else {
-			return null;
+		if (!stream.isEof()) {
+			Token token = stream.getCurrentToken();
+			if (token.getType() == type) {
+				stream.increaseIndex();
+				TokenNode tokenNode = new TokenNode(this, parent, previous, token);
+				return Lists.newArrayList(tokenNode);
+			} 
 		}
+		return null;
 	}
 
 	@Override
