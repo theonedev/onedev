@@ -45,11 +45,20 @@ public class RuleSpec extends Spec {
 		List<TokenNode> matches = new ArrayList<>();
 		int index = stream.getIndex();
 		parent = new Node(this, parent, previous);
+		boolean fakedAdded = false;
 		for (AlternativeSpec alternative: alternatives) {
-			matches.addAll(alternative.match(stream, parent, parent, copy(ruleRefHistory), fullMatch));
+			for (TokenNode match: alternative.match(stream, parent, parent, copy(ruleRefHistory), fullMatch)) {
+				if (match.getToken().getTokenIndex() == index-1) {
+					if (!fakedAdded) {
+						matches.add(new TokenNode(null, parent, parent, new FakedToken(index-1)));
+						fakedAdded = true;
+					}
+				} else {
+					matches.add(match);
+				}
+			}
 			stream.setIndex(index);
 		}
-
 		return matches;
 	}
 

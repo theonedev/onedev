@@ -2,6 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,12 +34,25 @@ public class AlternativeSpec extends Spec {
 	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
 			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
 		parent = new Node(this, parent, previous);
+		List<TokenNode> stopMatches = new ArrayList<>();
 		List<TokenNode> matches = initMatches(stream, parent, parent);
-		for (ElementSpec elementSpec: elements) {
-			matches = elementSpec.match(matches, stream, parent, copy(ruleRefHistory), fullMatch);
-			if (matches.isEmpty())
-				break;
+		if (!stream.isEof() || fullMatch) {
+			for (ElementSpec elementSpec: elements) {
+				matches = elementSpec.match(matches, stream, parent, copy(ruleRefHistory), fullMatch);
+				if (!fullMatch) {
+					for (Iterator<TokenNode> it = matches.iterator(); it.hasNext();) {
+						TokenNode match = it.next();
+						if (match.getToken().getTokenIndex() == stream.size()-1) {
+							stopMatches.add(match);
+							it.remove();
+						}
+					}
+				}
+				if (matches.isEmpty())
+					break;
+			}
 		}
+		matches.addAll(stopMatches);
 		return matches;
 	}
 

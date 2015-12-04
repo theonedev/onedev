@@ -38,10 +38,7 @@ public class CodeAssistTest5 {
 	
 	@Test
 	public void test() {
-		List<InputStatus> suggestions;
-
-		suggestions = suggest(new InputStatus("select value from "), "stat");
-		System.out.println(suggestions);
+		suggest(new InputStatus("select a, b from test_table where a = 1 "), "stat");
 	}
 	
 }

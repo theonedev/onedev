@@ -12,6 +12,10 @@ public class FakedToken implements Token {
 		this.index = stream.getIndex()-1;
 	}
 	
+	public FakedToken(int index) {
+		this.index = index;
+	}
+	
 	@Override
 	public String getText() {
 		return null;

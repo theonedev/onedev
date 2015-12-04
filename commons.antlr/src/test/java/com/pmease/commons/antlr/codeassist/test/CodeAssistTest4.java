@@ -64,4 +64,12 @@ public class CodeAssistTest4 {
 		assertEquals("5;:2", suggestions.get(4).toString());
 	}
 	
+	@Test
+	public void test2() {
+		test();
+		test();
+		long time = System.currentTimeMillis();
+		System.out.println(codeAssist.getRule("stat").matches(codeAssist.lex("5*4*2*(2+33)*(3-(3*33));")));
+		System.out.println(System.currentTimeMillis()-time);
+	}
 }
