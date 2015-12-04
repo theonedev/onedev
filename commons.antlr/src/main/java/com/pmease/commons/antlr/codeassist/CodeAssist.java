@@ -379,11 +379,11 @@ public abstract class CodeAssist implements Serializable {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = getLexerCtor().newInstance(new ANTLRInputStream(content));
 			lexer.removeErrorListeners();
-			Token token = lexer.nextToken();
-			while (token.getType() != Token.EOF) {
-				if (token.getChannel() == Token.DEFAULT_CHANNEL)
+			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+			tokenStream.fill();
+			for (Token token: tokenStream.getTokens()) {
+				if (token.getType() != Token.EOF)
 					tokens.add(token);
-				token = lexer.nextToken();
 			}
 			
 			return new AssistStream(tokens);
@@ -517,65 +517,62 @@ public abstract class CodeAssist implements Serializable {
 		return inputSuggestions;
 	}
 	
-	private List<ElementSuggestion> suggest(InputStatus inputStatus, List<TokenNode> paths) {
-		List<ElementSuggestion> suggestions = new ArrayList<>();
-		for (TokenNode path: paths) {
+	private int fillSuggestions(List<ElementSuggestion> suggestions, InputStatus inputStatus, 
+			List<TokenNode> matches, RuleSpec spec, AssistStream stream) {
+		int maxTokenIndex = getMaxIndex(matches);
+		if (maxTokenIndex != -1) {
 			String matchWith = inputStatus.getContent().substring(
-					path.getToken().getStopIndex()+1, inputStatus.getCaret());
+					stream.getToken(maxTokenIndex).getStopIndex()+1, inputStatus.getCaret());
 			matchWith = StringUtils.trimStart(matchWith);
-			ElementSpec matchSpec = (ElementSpec) path.getSpec();
-			suggestions.addAll(matchSpec.suggestNext(new ParseTree(path), path.getParent(), matchWith));
+			for (TokenNode match: matches) {
+				if (match.getToken().getTokenIndex() == maxTokenIndex) {
+					ParseTree parseTree = Preconditions.checkNotNull(ParseTree.of(match));
+					match = parseTree.getLastNode();
+					ElementSpec matchSpec = (ElementSpec) match.getSpec();
+					suggestions.addAll(matchSpec.suggestNext(parseTree, match.getParent(), matchWith));
+				}
+			}
+		} else {
+			suggestions.addAll(suggestFirst(inputStatus, spec));
 		}
-		return suggestions;
+		return maxTokenIndex;
+ 	}
+	
+	private List<ElementSuggestion> suggestFirst(InputStatus inputStatus, RuleSpec spec) {
+		String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
+		return spec.suggestFirst(null, null, matchWith, new HashSet<String>());			
 	}
 	
 	private List<ElementCompletion> suggest(RuleSpec spec, AssistStream stream, InputStatus inputStatus) {
 		List<ElementCompletion> elementCompletions = new ArrayList<>();
 		
-		List<ElementSuggestion> elementSuggestions = new ArrayList<>();
-		List<TokenNode> paths = spec.match(stream, null, null, new HashMap<String, Set<RuleRefContext>>());
-		boolean suggestFirst = false;
-		if (paths == null || paths.isEmpty()) {
-			// if there is not any common parts between the rule and the input 
-			suggestFirst = true;
-		} else {
-			elementSuggestions.addAll(suggest(inputStatus, paths));
-			
-			/*
-			 * do another match by not considering the last token. This is necessary for 
-			 * instance for below cases:
-			 * 1. when the last token matches either a keyword or part of an identifier. 
-			 * For instance, the last token can be keyword 'for', but can also match 
-			 * identifier 'forme' if the spec allows.  
-			 * 2. assume we have a query rule containing multiple criterias, with each 
-			 * criteria composed of key/value pair key:value. value needs to be quoted 
-			 * if it contains spaces. In this case, we want to achieve the effect that 
-			 * if user input value containing spaces without surrounding quotes, we 
-			 * suggest the user to quote the value. 
-			 */
-			int index = stream.getTokenIndex(paths.get(0).getToken());
-			if (index>0) {
-				List<Token> tokens = new ArrayList<>();
-				for (int i=0; i<index; i++)
-					tokens.add(stream.getToken(i));
-				paths = spec.match(new AssistStream(tokens), null, null, 
-						new HashMap<String, Set<RuleRefContext>>());
-				if (paths != null && !paths.isEmpty()) 
-					elementSuggestions.addAll(suggest(inputStatus, paths));
-				else 
-					suggestFirst = true;
-			} else {
-				suggestFirst = true;
-			}
-		}
-		if (suggestFirst) {
-			String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
-			elementSuggestions.addAll(spec.suggestFirst(null, null, matchWith, new HashSet<String>()));			
+		List<ElementSuggestion> suggestions = new ArrayList<>();
+		List<TokenNode> matches = spec.match(stream, null, null, new HashMap<String, Set<RuleRefContext>>(), false);
+		int maxIndex = fillSuggestions(suggestions, inputStatus, matches, spec, stream);
+		
+		/*
+		 * do another match by not considering the last token. This is necessary for 
+		 * instance for below cases:
+		 * 1. when the last token matches either a keyword or part of an identifier. 
+		 * For instance, the last token can be keyword 'for', but can also match 
+		 * identifier 'forme' if the spec allows.  
+		 * 2. assume we have a query rule containing multiple criterias, with each 
+		 * criteria composed of key/value pair key:value. value needs to be quoted 
+		 * if it contains spaces. In this case, we want to achieve the effect that 
+		 * if user input value containing spaces without surrounding quotes, we 
+		 * suggest the user to quote the value. 
+		 */
+		if (maxIndex>0) {
+			matches = spec.match(new AssistStream(stream.getTokens().subList(0, maxIndex)), null, null, 
+					new HashMap<String, Set<RuleRefContext>>(), false);
+			fillSuggestions(suggestions, inputStatus, matches, spec, stream);
+		} else if (maxIndex == 0) {
+			suggestions.addAll(suggestFirst(inputStatus, spec));
 		}
 
 		String inputContent = inputStatus.getContent();
-		for (ElementSuggestion elementSuggestion: elementSuggestions) {
-			int replaceStart = inputStatus.getCaret() - elementSuggestion.getMatchWith().length();
+		for (ElementSuggestion suggestion: suggestions) {
+			int replaceStart = inputStatus.getCaret() - suggestion.getMatchWith().length();
 			int replaceEnd = inputStatus.getCaret();
 			String contentAfterReplaceStart = inputContent.substring(replaceStart);
 			AssistStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
@@ -586,22 +583,22 @@ public abstract class CodeAssist implements Serializable {
 			 * suggested content
 			 */
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
-				ElementSpec elementSpec = (ElementSpec) elementSuggestion.getNode().getSpec();
-				paths = elementSpec.matchOnce(streamAfterReplaceStart, 
-						null, null, new HashMap<String, Set<RuleRefContext>>());
-				if (paths != null && !paths.isEmpty()) {
-					int lastTokenIndex = streamAfterReplaceStart.getPreviousToken().getStopIndex()+1;
-					if (replaceStart + lastTokenIndex > replaceEnd)
-						replaceEnd = replaceStart + lastTokenIndex;
+				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
+				int maxTokenIndex = getMaxIndex(elementSpec.matchOnce(streamAfterReplaceStart, 
+						null, null, new HashMap<String, Set<RuleRefContext>>(), true));
+				if (maxTokenIndex != -1) {
+					int charIndex = streamAfterReplaceStart.getToken(maxTokenIndex).getStopIndex()+1;
+					if (replaceStart + charIndex > replaceEnd)
+						replaceEnd = replaceStart + charIndex;
 				}
 			}
 
 			String before = inputContent.substring(0, replaceStart);
 
-			for (InputSuggestion inputSuggestion: elementSuggestion.getInputSuggestions()) {
-				if (elementSuggestion.getParseTree() != null) { 
+			for (InputSuggestion inputSuggestion: suggestion.getInputSuggestions()) {
+				if (suggestion.getParseTree() != null) { 
 					AssistStream newStream = lex(before + inputSuggestion.getContent());
-					Token lastToken = elementSuggestion.getParseTree().getLastNode().getToken();
+					Token lastToken = suggestion.getParseTree().getLastNode().getToken();
 					int index = stream.getTokenIndex(lastToken);
 					
 					/*
@@ -621,11 +618,20 @@ public abstract class CodeAssist implements Serializable {
 					}
 				} 
 				
-				elementCompletions.add(new ElementCompletion(elementSuggestion.getNode(), replaceStart, replaceEnd, 
+				elementCompletions.add(new ElementCompletion(suggestion.getNode(), replaceStart, replaceEnd, 
 						inputSuggestion.getContent(), inputSuggestion.getCaret(), inputSuggestion.getDescription()));
 			}
 		}
 		return elementCompletions;
+	}
+	
+	private int getMaxIndex(List<TokenNode> matches) {
+		int maxIndex = -1;
+		for (TokenNode match: matches) {
+			if (match.getToken().getTokenIndex() > maxIndex)
+				maxIndex = match.getToken().getTokenIndex();
+		}
+		return maxIndex;
 	}
 	
 	private int skipMandatories(String content, List<String> mandatories) {

@@ -45,4 +45,17 @@ public class Node {
 		return "spec: " + spec;
 	}
 	
+	@Nullable
+	public TokenNode peel() {
+		if (this instanceof TokenNode) {
+			TokenNode tokenNode = (TokenNode) this;
+			if (!(tokenNode.getToken() instanceof FakedToken))
+				return tokenNode;
+		}
+		if (getPrevious() == null)
+			return null;
+		else
+			return getPrevious().peel();
+	}
+	
 }

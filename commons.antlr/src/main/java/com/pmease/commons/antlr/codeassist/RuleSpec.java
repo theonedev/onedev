@@ -2,7 +2,6 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,13 +40,13 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public Map<TokenNode, Integer> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		Map<TokenNode, Integer> matches = new LinkedHashMap<>();
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
+		List<TokenNode> matches = new ArrayList<>();
 		int index = stream.getIndex();
 		parent = new Node(this, parent, previous);
 		for (AlternativeSpec alternative: alternatives) {
-			matches.putAll(alternative.match(stream, parent, parent, copy(ruleRefHistory)));
+			matches.addAll(alternative.match(stream, parent, parent, copy(ruleRefHistory), fullMatch));
 			stream.setIndex(index);
 		}
 

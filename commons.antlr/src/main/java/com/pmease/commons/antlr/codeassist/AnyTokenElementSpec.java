@@ -1,7 +1,6 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,19 +27,16 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Map<TokenNode, Integer> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		Map<TokenNode, Integer> matches = new LinkedHashMap<>();
+	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
+		List<TokenNode> matches = new ArrayList<>();
 		if (!stream.isEof()) {
 			Token token = stream.getCurrentToken();
 			stream.increaseIndex();
 			TokenNode tokenNode = new TokenNode(this, parent, previous, token);
-			if (!stream.isEof())
-				matches.put(tokenNode, stream.getIndex());
-			else
-				matches.put(new TokenNode(null, parent, tokenNode, AssistStream.EOF), stream.getIndex());
-		} else {
-			matches.put(new TokenNode(null, parent, previous, AssistStream.SOF), stream.getIndex());
+			matches.add(tokenNode);
+		} else if (!fullMatch) {
+			matches.add(new TokenNode(null, parent, previous, new FakedToken(stream)));
 		}
 		return matches;
 	}
@@ -49,5 +45,5 @@ public class AnyTokenElementSpec extends ElementSpec {
 	protected String asString() {
 		return "any";
 	}
-	
+
 }

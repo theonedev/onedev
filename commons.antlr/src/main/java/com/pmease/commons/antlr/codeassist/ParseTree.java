@@ -19,40 +19,19 @@ import javax.annotation.Nullable;
  */
 public class ParseTree {
 	
-	private final TokenNode lastNode;
+	private List<Node> nodes;
 	
-	private transient List<Node> allNodes;
-	
-	/**
-	 * Construct parse tree from last parsed token node from stream. 
-	 * 
-	 * @param lastNode
-	 */
-	public ParseTree(TokenNode lastNode) {
-		this.lastNode = lastNode;
+	public ParseTree(List<Node> nodes) {
+		this.nodes = nodes;
 	}
 
 	public TokenNode getLastNode() {
-		return lastNode;
+		return (TokenNode) nodes.get(nodes.size()-1);
 	}
 
-	public List<Node> getAllNodes() {
-		if (allNodes == null) {
-			allNodes = new ArrayList<>();
-			allNodes.add(lastNode);
-			
-			Node previous = lastNode.getPrevious();
-			while (previous != null) {
-				allNodes.add(previous);
-				previous = previous.getPrevious();
-			}
-		}
-		return allNodes;
-	}
-	
 	public List<Node> getChildNodes(Node parentNode) {
 		List<Node> childNodes = new ArrayList<>();
-		for (Node node: getAllNodes()) {
+		for (Node node: nodes) {
 			if (node.getParent().equals(parentNode))
 				childNodes.add(node);
 		}
@@ -60,7 +39,7 @@ public class ParseTree {
 	}
 
 	public Node getRootNode() {
-		Node node = lastNode;
+		Node node = getLastNode();
 		while (node.getParent() != null) 
 			node = node.getParent();
 		
@@ -105,7 +84,7 @@ public class ParseTree {
 
 	@Nullable
 	public Node findParentNodeByRuleName(Node childNode, String ruleName) {
-		Node node = lastNode;
+		Node node = getLastNode();
 		while (node.getParent() != null) { 
 			node = node.getParent();
 			if (node.getSpec() instanceof RuleSpec) {
@@ -128,7 +107,7 @@ public class ParseTree {
 	
 	@Nullable
 	public Node findParentNodeByLabel(Node childNode, String label) {
-		Node node = lastNode;
+		Node node = getLastNode();
 		while (node.getParent() != null) { 
 			node = node.getParent();
 			if (node.getSpec() instanceof ElementSpec) {
@@ -146,21 +125,16 @@ public class ParseTree {
 	}
 	
 	public TokenNode getFirstTokenNode() {
-		TokenNode tokenNode = lastNode;
-		Node node = lastNode;
-		while (node.getPrevious() != null) {
-			node = node.getPrevious();
+		for (Node node: nodes) {
 			if (node instanceof TokenNode)
-				tokenNode = (TokenNode)node;
+				return (TokenNode) node;
 		}
-		return tokenNode;
+		throw new IllegalStateException();
 	}
 	
 	@Nullable
 	public TokenNode getFirstTokenNode(Node parentNode) {
-		List<Node> allNodes = getAllNodes();
-		Collections.reverse(allNodes);
-		for (Node node: allNodes) {
+		for (Node node: nodes) {
 			if (node instanceof TokenNode) {
 				TokenNode tokenNode = (TokenNode) node;
 				Node currentNode = tokenNode;
@@ -176,16 +150,18 @@ public class ParseTree {
 
 	@Nullable
 	public TokenNode getPreviousTokenNode(TokenNode tokenNode, int...tokenTypes) {
-		return getNextTokenNode(getAllNodes(), tokenNode, tokenTypes);
+		List<Node> nodes = new ArrayList<>(this.nodes);
+		Collections.reverse(nodes);
+		return getNextTokenNode(nodes, tokenNode, tokenTypes);
 	}
 	
 	@Nullable
-	public TokenNode getNextTokenNode(List<Node> allNodes, TokenNode tokenNode, int...tokenTypes) {
+	public TokenNode getNextTokenNode(List<Node> nodes, TokenNode tokenNode, int...tokenTypes) {
 		Set<Integer> tokenTypeSet = new HashSet<>();
 		for (int tokenType: tokenTypes)
 			tokenTypeSet.add(tokenType);
 		boolean found = false;
-		for (Node node: allNodes) {
+		for (Node node: nodes) {
 			if (node.equals(tokenNode)) {
 				found = true;
 			} else if (found && (node instanceof TokenNode) 
@@ -198,9 +174,27 @@ public class ParseTree {
 	
 	@Nullable
 	public TokenNode getNextTokenNode(TokenNode tokenNode, int...tokenTypes) {
-		List<Node> allNodes = getAllNodes();
-		Collections.reverse(allNodes);
-		return getNextTokenNode(allNodes, tokenNode, tokenTypes);
+		return getNextTokenNode(nodes, tokenNode, tokenTypes);
+	}
+	
+	@Nullable
+	public static ParseTree of(TokenNode tokenNode) {
+		tokenNode = tokenNode.peel();
+		if (tokenNode == null)
+			return null;
+		
+		List<Node> nodes = new ArrayList<>();
+		nodes.add(tokenNode);
+		Node previousNode = tokenNode.getPrevious();
+		while (previousNode != null) {
+			if (!(previousNode instanceof TokenNode) 
+					|| !(((TokenNode) previousNode).getToken() instanceof FakedToken)) {
+				nodes.add(previousNode);
+			}
+			previousNode = previousNode.getPrevious();
+		}
+		Collections.reverse(nodes);
+		return new ParseTree(nodes);
 	}
 	
 }

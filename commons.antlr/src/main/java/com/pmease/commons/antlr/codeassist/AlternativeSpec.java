@@ -30,12 +30,12 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public Map<TokenNode, Integer> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory) {
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
 		parent = new Node(this, parent, previous);
-		Map<TokenNode, Integer> matches = initMatches(stream, parent, previous);
+		List<TokenNode> matches = initMatches(stream, parent, parent);
 		for (ElementSpec elementSpec: elements) {
-			matches = elementSpec.match(matches, stream, parent, copy(ruleRefHistory));
+			matches = elementSpec.match(matches, stream, parent, copy(ruleRefHistory), fullMatch);
 			if (matches.isEmpty())
 				break;
 		}
@@ -51,7 +51,7 @@ public class AlternativeSpec extends Spec {
 			first.addAll(element.suggestFirst(parseTree, parent, matchWith, new HashSet<>(checkedRules)));
 			
 			// consider next element if current element is optional
-			if (!element.matches(codeAssist.lex("")))
+			if (!element.isOptional())
 				break;
 		}
 		return first;
@@ -61,5 +61,5 @@ public class AlternativeSpec extends Spec {
 	public String toString() {
 		return "elements: " + elements;
 	}
-	
+
 }

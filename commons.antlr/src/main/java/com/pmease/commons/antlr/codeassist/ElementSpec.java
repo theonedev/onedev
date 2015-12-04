@@ -1,9 +1,7 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,58 +36,59 @@ public abstract class ElementSpec extends Spec {
 	}
 
 	@Override
-	public Map<TokenNode, Integer> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		return match(initMatches(stream, parent, previous), stream, parent, ruleRefHistory);
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
+		return match(initMatches(stream, parent, previous), stream, parent, ruleRefHistory, fullMatch);
 	}
 	
-	public Map<TokenNode, Integer> match(Map<TokenNode, Integer> prevMatches, AssistStream stream, 
-			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory) {
+	public List<TokenNode> match(List<TokenNode> prevMatches, AssistStream stream, 
+			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
 		if (multiplicity == Multiplicity.ONE) {
-			return matchOnce(prevMatches, stream, parent, ruleRefHistory);
+			return matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, false);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
-			Map<TokenNode, Integer> matches = matchOnce(prevMatches, stream, parent, ruleRefHistory);
-			if (!matches.isEmpty()) {
-				while (true) {
-					matches.putAllmatchOnce(matches, stream, parent, ruleRefHistory);
-					if (matches.isEmpty())
-						break;
-				}
-			} else {
-				return matches;
-			}
-		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
-			List<TokenNode> paths = new ArrayList<>();
+			List<TokenNode> matches = new ArrayList<>();
+			prevMatches = matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, false);
+			matches.addAll(prevMatches);
 			while (true) {
-				if (!paths.isEmpty())
-					previous = paths.get(paths.size()-1);
-				List<TokenNode> nextPaths = matchOnce(stream, parent, previous, ruleRefHistory);
-				if (nextPaths == null || nextPaths.isEmpty() || stream.isEof()) 
-					return paths;
-				else 
-					paths = nextPaths;
+				prevMatches = matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, true);
+				matches.addAll(prevMatches);
+				if (prevMatches.isEmpty())
+					break;
 			}
+			return matches;
+		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
+			List<TokenNode> matches = Lists.newArrayList(prevMatches);
+			while (true) {
+				prevMatches = matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, true);
+				matches.addAll(prevMatches);
+				if (prevMatches.isEmpty())
+					break;
+			}
+			return matches;
 		} else {
-			List<TokenNode> paths = matchOnce(stream, parent, previous, ruleRefHistory);
-			if (paths != null)
-				return paths;
-			else
-				return new ArrayList<>();
+			List<TokenNode> matches = Lists.newArrayList(prevMatches);
+			matches.addAll(matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, true));
+			return matches;
 		}
 	}
 	
-	public Map<TokenNode, Integer> matchOnce(Map<TokenNode, Integer> prevMatches, AssistStream stream, 
-			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		Map<TokenNode, Integer> matches = new LinkedHashMap<>();
-		for (Map.Entry<TokenNode, Integer> entry: prevMatches.entrySet()) {
-			stream.setIndex(entry.getValue());
-			matches.putAll(matchOnce(stream, parent, entry.getKey(), copy(ruleRefHistory)));
+	public List<TokenNode> matchOnce(List<TokenNode> prevMatches, AssistStream stream, 
+			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory, 
+			boolean fullMatch, boolean mustAdvance) {
+		List<TokenNode> matches = new ArrayList<>();
+		for (TokenNode prevMatch: prevMatches) {
+			int prevMatchIndex = prevMatch.getToken().getTokenIndex();
+			stream.setIndex(prevMatchIndex+1);
+			for (TokenNode match: matchOnce(stream, parent, prevMatch, copy(ruleRefHistory), fullMatch)) {
+				if (!mustAdvance || match.getToken().getTokenIndex() != prevMatchIndex)
+					matches.add(match);
+			}
 		}
 		return matches;
 	}
 	
-	public abstract Map<TokenNode, Integer> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory);
+	public abstract List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
+			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch);
 
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
 
@@ -123,7 +122,7 @@ public abstract class ElementSpec extends Spec {
 							ElementSpec elementSpec = alternative.getElements().get(i);
 							suggestions.addAll(elementSpec.suggestFirst(parseTree, alternativeNode, 
 									matchWith, new HashSet<String>()));
-							if (!elementSpec.matches(codeAssist.lex("")))
+							if (!elementSpec.isOptional())
 								break;
 						}
 					}
@@ -156,7 +155,7 @@ public abstract class ElementSpec extends Spec {
 			/*
 			 * if next element is optional, the next next element can also be input candidate
 			 */
-			if (nextElementSpec.matches(codeAssist.lex("")))
+			if (nextElementSpec.isOptional())
 				suggestions.addAll(nextElementSpec.doSuggestNext(parseTree, parent, matchWith));
 		}
 		return suggestions;
