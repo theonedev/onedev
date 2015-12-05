@@ -48,6 +48,7 @@ public class AlternativeSpec extends Spec {
 						}
 					}
 				}
+				codeAssist.prune(matches, stream);
 				if (matches.isEmpty())
 					break;
 			}
@@ -65,7 +66,7 @@ public class AlternativeSpec extends Spec {
 			first.addAll(element.suggestFirst(parseTree, parent, matchWith, new HashSet<>(checkedRules)));
 			
 			// consider next element if current element is optional
-			if (!element.isOptional())
+			if (!element.matchesEmpty())
 				break;
 		}
 		return first;

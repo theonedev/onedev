@@ -56,6 +56,14 @@ public class AssistStream {
 		return getToken(index+1);
 	}
 	
+	public boolean isLastToken(Token token) {
+		return isLastIndex(token.getTokenIndex());
+	}
+	
+	public boolean isLastIndex(int index) {
+		return index == size()-1;
+	}
+	
 	public Token getToken(int index) {
 		Preconditions.checkArgument(index>=0 && index<size());
 		return tokens.get(index);

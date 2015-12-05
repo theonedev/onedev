@@ -59,6 +59,7 @@ public class RuleSpec extends Spec {
 			}
 			stream.setIndex(index);
 		}
+		codeAssist.prune(matches, stream);
 		return matches;
 	}
 

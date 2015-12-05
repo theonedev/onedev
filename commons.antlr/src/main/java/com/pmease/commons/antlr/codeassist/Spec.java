@@ -57,13 +57,22 @@ public abstract class Spec implements Serializable {
 		return copy;
 	}
 	
-	public boolean isOptional() {
-		return matches(codeAssist.lex(""));
+	public boolean matchesEmpty() {
+		return matches("");
 	}
 	
 	public boolean matches(AssistStream stream) {
 		for (TokenNode match: match(stream, null, null, new HashMap<String, Set<RuleRefContext>>(), true)) {
 			if (match.getToken().getTokenIndex() == stream.size()-1)
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean matches(String content) {
+		AssistStream stream = codeAssist.lex(content);
+		for (TokenNode match: match(stream, null, null, new HashMap<String, Set<RuleRefContext>>(), true)) {
+			if (stream.isLastToken(match.getToken()))
 				return true;
 		}
 		return false;

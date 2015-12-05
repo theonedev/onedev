@@ -702,4 +702,33 @@ public abstract class CodeAssist implements Serializable {
 	protected abstract List<InputSuggestion> suggest(@Nullable ParseTree parseTree, 
 			Node elementNode, String matchWith);
 
+	public void prune(List<TokenNode> matches, AssistStream stream) {
+		int threshold = 100;
+
+		int maxIndex = -1;
+		Map<Integer, List<TokenNode>> index2matches = new HashMap<>();
+		for (TokenNode match: matches) {
+			int index = match.getToken().getTokenIndex();
+			if (index > maxIndex)
+				maxIndex = index;
+			List<TokenNode> matchesAtIndex = index2matches.get(index);
+			if (matchesAtIndex == null) {
+				matchesAtIndex = new ArrayList<>();
+				index2matches.put(index, matchesAtIndex);
+			}
+			matchesAtIndex.add(match);
+		}
+		matches.clear();
+
+		for (Map.Entry<Integer, List<TokenNode>> entry: index2matches.entrySet()) {
+			int index = entry.getKey();
+			if (index + threshold >= maxIndex) {
+				if (stream.isLastIndex(index)) 
+					matches.addAll(entry.getValue());
+				else
+					matches.add(entry.getValue().get(0));
+			}
+		}
+	}
+	
 }

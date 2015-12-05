@@ -55,6 +55,7 @@ public abstract class ElementSpec extends Spec {
 				if (prevMatches.isEmpty())
 					break;
 			}
+			codeAssist.prune(matches, stream);
 			return matches;
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
 			List<TokenNode> matches = Lists.newArrayList(prevMatches);
@@ -64,10 +65,12 @@ public abstract class ElementSpec extends Spec {
 				if (prevMatches.isEmpty())
 					break;
 			}
+			codeAssist.prune(matches, stream);
 			return matches;
 		} else {
 			List<TokenNode> matches = Lists.newArrayList(prevMatches);
 			matches.addAll(matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, true));
+			codeAssist.prune(matches, stream);
 			return matches;
 		}
 	}
@@ -84,6 +87,7 @@ public abstract class ElementSpec extends Spec {
 					matches.add(match);
 			}
 		}
+		codeAssist.prune(matches, stream);
 		return matches;
 	}
 	
@@ -122,7 +126,7 @@ public abstract class ElementSpec extends Spec {
 							ElementSpec elementSpec = alternative.getElements().get(i);
 							suggestions.addAll(elementSpec.suggestFirst(parseTree, alternativeNode, 
 									matchWith, new HashSet<String>()));
-							if (!elementSpec.isOptional())
+							if (!elementSpec.matchesEmpty())
 								break;
 						}
 					}
@@ -155,7 +159,7 @@ public abstract class ElementSpec extends Spec {
 			/*
 			 * if next element is optional, the next next element can also be input candidate
 			 */
-			if (nextElementSpec.isOptional())
+			if (nextElementSpec.matchesEmpty())
 				suggestions.addAll(nextElementSpec.doSuggestNext(parseTree, parent, matchWith));
 		}
 		return suggestions;
