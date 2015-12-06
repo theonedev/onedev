@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
+import com.google.common.collect.Sets;
+
 public abstract class TokenElementSpec extends ElementSpec {
 
 	private static final long serialVersionUID = 1L;
@@ -31,7 +33,7 @@ public abstract class TokenElementSpec extends ElementSpec {
 
 	@Override
 	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
+			Map<String, Integer> checkedIndexes, boolean fullMatch) {
 		List<TokenNode> matches = new ArrayList<>();
 		if (!stream.isEof()) {
 			Token token = stream.getCurrentToken();
@@ -44,6 +46,11 @@ public abstract class TokenElementSpec extends ElementSpec {
 			matches.add(new TokenNode(null, parent, previous, new FakedToken(stream)));
 		}
 		return matches;
+	}
+
+	@Override
+	protected Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules) {
+		return Sets.newHashSet(type);
 	}
 
 }

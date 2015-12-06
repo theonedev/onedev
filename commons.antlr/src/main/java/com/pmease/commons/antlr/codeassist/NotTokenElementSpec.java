@@ -1,6 +1,7 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,13 +32,13 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public MandatoryScan scanMandatories(Set<String> checkedRules) {
-		return MandatoryScan.stop();
+	public MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules) {
+		return MandatoryLiteralScan.stop();
 	}
 
 	@Override
 	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
+			Map<String, Integer> checkedIndexes, boolean fullMatch) {
 		List<TokenNode> matches = new ArrayList<>();
 		if (!stream.isEof()) {
 			Token token = stream.getCurrentToken();
@@ -55,6 +56,11 @@ public class NotTokenElementSpec extends ElementSpec {
 	@Override
 	protected String asString() {
 		return "not: " + notTokenTypes;
+	}
+
+	@Override
+	protected Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules) {
+		return new HashSet<>();
 	}
 
 }

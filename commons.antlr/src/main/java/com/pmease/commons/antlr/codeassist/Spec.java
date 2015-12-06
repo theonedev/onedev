@@ -3,7 +3,6 @@ package com.pmease.commons.antlr.codeassist;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +34,7 @@ public abstract class Spec implements Serializable {
 	 * 			that case, the paths tells to which point the match goes to 
 	 */
 	public abstract List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefContexts, boolean fullMatch);
+			Map<String, Integer> checkedIndexes, boolean fullMatch);
 	
 	public abstract List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 
 			String matchWith, Set<String> checkedRules);
@@ -50,19 +49,12 @@ public abstract class Spec implements Serializable {
 		return matches;
 	}
 	
-	protected Map<String, Set<RuleRefContext>> copy(Map<String, Set<RuleRefContext>> ruleRefHistory) {
-		Map<String, Set<RuleRefContext>> copy = new HashMap<>();
-		for (Map.Entry<String, Set<RuleRefContext>> entry: ruleRefHistory.entrySet())
-			copy.put(entry.getKey(), new HashSet<>(entry.getValue()));
-		return copy;
-	}
-	
 	public boolean matchesEmpty() {
 		return matches("");
 	}
 	
 	public boolean matches(AssistStream stream) {
-		for (TokenNode match: match(stream, null, null, new HashMap<String, Set<RuleRefContext>>(), true)) {
+		for (TokenNode match: match(stream, null, null, new HashMap<String, Integer>(), true)) {
 			if (match.getToken().getTokenIndex() == stream.size()-1)
 				return true;
 		}
@@ -71,11 +63,12 @@ public abstract class Spec implements Serializable {
 	
 	public boolean matches(String content) {
 		AssistStream stream = codeAssist.lex(content);
-		for (TokenNode match: match(stream, null, null, new HashMap<String, Set<RuleRefContext>>(), true)) {
+		for (TokenNode match: match(stream, null, null, new HashMap<String, Integer>(), true)) {
 			if (stream.isLastToken(match.getToken()))
 				return true;
 		}
 		return false;
 	}
 	
+	public abstract Set<Integer> getMandatoryTokenTypes(Set<String> checkedRules);
 }

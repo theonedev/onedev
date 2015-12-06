@@ -66,12 +66,7 @@ public class CodeAssistTest4 {
 	
 	@Test
 	public void test2() {
-		test();
-		test();
-		long time = System.currentTimeMillis();
-		for (int i=0; i<10; i++)
-		System.out.println(codeAssist.getRule("stat").matches(codeAssist.lex("5*4*2*(2+33)*(3-(3*33));")));
-		System.out.println(System.currentTimeMillis()-time);
+		System.out.println(codeAssist.getRule("stat").matches("1+2;"));
 	}
 	
 }

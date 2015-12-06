@@ -1,6 +1,7 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -32,13 +33,13 @@ public class AlternativeSpec extends Spec {
 	
 	@Override
 	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
+			Map<String, Integer> checkedIndexes, boolean fullMatch) {
 		parent = new Node(this, parent, previous);
 		List<TokenNode> stopMatches = new ArrayList<>();
 		List<TokenNode> matches = initMatches(stream, parent, parent);
 		if (!stream.isEof() || fullMatch) {
 			for (ElementSpec elementSpec: elements) {
-				matches = elementSpec.match(matches, stream, parent, copy(ruleRefHistory), fullMatch);
+				matches = elementSpec.match(matches, stream, parent, new HashMap<>(checkedIndexes), fullMatch);
 				if (!fullMatch) {
 					for (Iterator<TokenNode> it = matches.iterator(); it.hasNext();) {
 						TokenNode match = it.next();
@@ -75,6 +76,16 @@ public class AlternativeSpec extends Spec {
 	@Override
 	public String toString() {
 		return "elements: " + elements;
+	}
+
+	@Override
+	public Set<Integer> getMandatoryTokenTypes(Set<String> checkedRules) {
+		for (ElementSpec elementSpec: elements) {
+			Set<Integer> tokenTypes = elementSpec.getMandatoryTokenTypes(new HashSet<>(checkedRules));
+			if (!tokenTypes.isEmpty())
+				return tokenTypes;
+		}
+		return new HashSet<>();
 	}
 
 }

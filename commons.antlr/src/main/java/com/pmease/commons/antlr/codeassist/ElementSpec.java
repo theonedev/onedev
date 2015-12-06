@@ -1,6 +1,7 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,20 +38,20 @@ public abstract class ElementSpec extends Spec {
 
 	@Override
 	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
-		return match(initMatches(stream, parent, previous), stream, parent, ruleRefHistory, fullMatch);
+			Map<String, Integer> checkedIndexes, boolean fullMatch) {
+		return match(initMatches(stream, parent, previous), stream, parent, checkedIndexes, fullMatch);
 	}
 	
 	public List<TokenNode> match(List<TokenNode> prevMatches, AssistStream stream, 
-			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch) {
+			Node parent, Map<String, Integer> checkedIndexes, boolean fullMatch) {
 		if (multiplicity == Multiplicity.ONE) {
-			return matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, false);
+			return matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, false);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
 			List<TokenNode> matches = new ArrayList<>();
-			prevMatches = matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, false);
+			prevMatches = matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, false);
 			matches.addAll(prevMatches);
 			while (true) {
-				prevMatches = matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, true);
+				prevMatches = matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, true);
 				matches.addAll(prevMatches);
 				if (prevMatches.isEmpty())
 					break;
@@ -60,7 +61,7 @@ public abstract class ElementSpec extends Spec {
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
 			List<TokenNode> matches = Lists.newArrayList(prevMatches);
 			while (true) {
-				prevMatches = matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, true);
+				prevMatches = matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, true);
 				matches.addAll(prevMatches);
 				if (prevMatches.isEmpty())
 					break;
@@ -69,20 +70,19 @@ public abstract class ElementSpec extends Spec {
 			return matches;
 		} else {
 			List<TokenNode> matches = Lists.newArrayList(prevMatches);
-			matches.addAll(matchOnce(prevMatches, stream, parent, ruleRefHistory, fullMatch, true));
+			matches.addAll(matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, true));
 			codeAssist.prune(matches, stream);
 			return matches;
 		}
 	}
 	
 	public List<TokenNode> matchOnce(List<TokenNode> prevMatches, AssistStream stream, 
-			Node parent, Map<String, Set<RuleRefContext>> ruleRefHistory, 
-			boolean fullMatch, boolean mustAdvance) {
+			Node parent, Map<String, Integer> checkedIndexes, boolean fullMatch, boolean mustAdvance) {
 		List<TokenNode> matches = new ArrayList<>();
 		for (TokenNode prevMatch: prevMatches) {
 			int prevMatchIndex = prevMatch.getToken().getTokenIndex();
 			stream.setIndex(prevMatchIndex+1);
-			for (TokenNode match: matchOnce(stream, parent, prevMatch, copy(ruleRefHistory), fullMatch)) {
+			for (TokenNode match: matchOnce(stream, parent, prevMatch, new HashMap<>(checkedIndexes), fullMatch)) {
 				if (!mustAdvance || match.getToken().getTokenIndex() != prevMatchIndex)
 					matches.add(match);
 			}
@@ -92,9 +92,19 @@ public abstract class ElementSpec extends Spec {
 	}
 	
 	public abstract List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Set<RuleRefContext>> ruleRefHistory, boolean fullMatch);
+			Map<String, Integer> checkedIndexes, boolean fullMatch);
 
-	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
+	public abstract MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules);
+	
+	@Override
+	public Set<Integer> getMandatoryTokenTypes(Set<String> checkedRules) {
+		if (multiplicity == Multiplicity.ONE || multiplicity == Multiplicity.ONE_OR_MORE) 
+			return getMandatoryTokenTypesOnce(checkedRules);
+		else 
+			return new HashSet<>();
+	}
+	
+	protected abstract Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules);
 
 	/**
 	 * Provide suggestions after current element spec.
@@ -111,29 +121,6 @@ public abstract class ElementSpec extends Spec {
 	public List<ElementSuggestion> suggestNext(ParseTree parseTree, Node parent, String matchWith) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 
-		if (this instanceof RuleRefElementSpec) {
-			Node ruleRefNode = new Node(this, parent, null);
-			RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) this;
-			RuleSpec ruleSpec = ruleRefElementSpec.getRule();
-			Node ruleNode = new Node(ruleSpec, ruleRefNode, null);
-			for (AlternativeSpec alternative: ruleRefElementSpec.getRule().getAlternatives()) {
-				Node alternativeNode = new Node(alternative, ruleNode, null);
-				if (alternative.getElements().size() > 1 
-						&& alternative.getElements().get(0) instanceof RuleRefElementSpec) {
-					RuleRefElementSpec firstElementSpec = (RuleRefElementSpec) alternative.getElements().get(0);
-					if (firstElementSpec.getRuleName().equals(ruleRefElementSpec.getRuleName())) {
-						for (int i=1; i<alternative.getElements().size(); i++) {
-							ElementSpec elementSpec = alternative.getElements().get(i);
-							suggestions.addAll(elementSpec.suggestFirst(parseTree, alternativeNode, 
-									matchWith, new HashSet<String>()));
-							if (!elementSpec.matchesEmpty())
-								break;
-						}
-					}
-				}
-			}
-		}
-		
 		// if element spec can be repeated, next input candidate can also be taken from the element itself
 		if (multiplicity == Multiplicity.ONE_OR_MORE || multiplicity == Multiplicity.ZERO_OR_MORE) 
 			suggestions.addAll(suggestFirst(parseTree, parent, matchWith, new HashSet<String>()));
@@ -171,7 +158,7 @@ public abstract class ElementSpec extends Spec {
 		Node elementNode = new Node(this, parent, null);
 		List<InputSuggestion> suggestions = codeAssist.suggest(parseTree, elementNode, matchWith);
 		if (suggestions != null) {
-			if (suggestions.isEmpty() && !scanMandatories(new HashSet<String>()).getMandatories().isEmpty())
+			if (suggestions.isEmpty() && !scanPrefixedMandatoryLiterals(new HashSet<String>()).getMandatoryLiterals().isEmpty())
 				// user suppresses suggestion explicitly, so we only provide suggestion if there are 
 				// mandatory followings
 				return doSuggestFirst(parseTree, parent, matchWith, checkedRules);
@@ -196,6 +183,6 @@ public abstract class ElementSpec extends Spec {
 		else
 			return "(" + asString() + ")?";
 	}
-	
+
 	protected abstract String asString();
 }

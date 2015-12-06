@@ -444,7 +444,7 @@ public abstract class CodeAssist implements Serializable {
 				List<String> contents = new ArrayList<>();
 				for (ElementCompletion each: value) {
 					content = inputContent.substring(0, each.getReplaceBegin()) + each.getReplaceContent();
-					for (String mandatory: getMandatoriesAfter(each.getNode())) {
+					for (String mandatory: getMandatoryLiteralsAfter(each.getNode())) {
 						String prevContent = content;
 						content += mandatory;
 
@@ -491,7 +491,7 @@ public abstract class CodeAssist implements Serializable {
 					// in case mandatory tokens are not added after replacement, 
 					// we skip existing mandatory tokens in current input
 					String contentAfterCaret = content.substring(caret);
-					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(completion.getNode()));
+					caret += skipMandatories(contentAfterCaret, getMandatoryLiteralsAfter(completion.getNode()));
 				}
 			} else {
 				caret = completion.getReplaceBegin() + completion.getReplaceContent().length();
@@ -547,7 +547,7 @@ public abstract class CodeAssist implements Serializable {
 		List<ElementCompletion> elementCompletions = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
-		List<TokenNode> matches = spec.match(stream, null, null, new HashMap<String, Set<RuleRefContext>>(), false);
+		List<TokenNode> matches = spec.match(stream, null, null, new HashMap<String, Integer>(), false);
 		int maxIndex = fillSuggestions(suggestions, inputStatus, matches, spec, stream);
 		
 		/*
@@ -564,7 +564,7 @@ public abstract class CodeAssist implements Serializable {
 		 */
 		if (maxIndex>0) {
 			matches = spec.match(new AssistStream(stream.getTokens().subList(0, maxIndex)), null, null, 
-					new HashMap<String, Set<RuleRefContext>>(), false);
+					new HashMap<String, Integer>(), false);
 			fillSuggestions(suggestions, inputStatus, matches, spec, stream);
 		} else if (maxIndex == 0) {
 			suggestions.addAll(suggestFirst(inputStatus, spec));
@@ -585,7 +585,7 @@ public abstract class CodeAssist implements Serializable {
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
 				int maxTokenIndex = getMaxIndex(elementSpec.matchOnce(streamAfterReplaceStart, 
-						null, null, new HashMap<String, Set<RuleRefContext>>(), true));
+						null, null, new HashMap<String, Integer>(), true));
 				if (maxTokenIndex != -1) {
 					int charIndex = streamAfterReplaceStart.getToken(maxTokenIndex).getStopIndex()+1;
 					if (replaceStart + charIndex > replaceEnd)
@@ -672,7 +672,7 @@ public abstract class CodeAssist implements Serializable {
 	 * suggested, we should add '(' and moves caret after '(' to avoid unnecessary
 	 * key strokes
 	 */
-	private List<String> getMandatoriesAfter(Node elementNode) {
+	private List<String> getMandatoryLiteralsAfter(Node elementNode) {
 		List<String> literals = new ArrayList<>();
 		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
 		if (elementSpec.getMultiplicity() == Multiplicity.ONE 
@@ -682,23 +682,23 @@ public abstract class CodeAssist implements Serializable {
 			if (specIndex == alternativeSpec.getElements().size()-1) {
 				elementNode = elementNode.getParent().getParent().getParent();
 				if (elementNode != null)
-					return getMandatoriesAfter(elementNode);
+					return getMandatoryLiteralsAfter(elementNode);
 			} else {
 				elementSpec = alternativeSpec.getElements().get(specIndex+1);
 				if (elementSpec.getMultiplicity() == Multiplicity.ONE
 						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					MandatoryScan scan = elementSpec.scanMandatories(new HashSet<String>());
-					literals = scan.getMandatories();
+					MandatoryLiteralScan scan = elementSpec.scanPrefixedMandatoryLiterals(new HashSet<String>());
+					literals = scan.getMandatoryLiterals();
 					if (!scan.isStop()) {
 						elementNode = new Node(elementSpec, elementNode.getParent(), null);
-						literals.addAll(getMandatoriesAfter(elementNode));
+						literals.addAll(getMandatoryLiteralsAfter(elementNode));
 					}
 				}
 			}
 		} 
 		return literals;
 	}
-	
+
 	protected abstract List<InputSuggestion> suggest(@Nullable ParseTree parseTree, 
 			Node elementNode, String matchWith);
 
