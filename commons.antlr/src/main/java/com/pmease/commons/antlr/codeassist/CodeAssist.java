@@ -132,6 +132,11 @@ public abstract class CodeAssist implements Serializable {
 				throw new RuntimeException(e);
 			}
 		}
+		
+		for (RuleSpec rule: rules.values()) {
+			rule.matchesEmpty();
+			rule.getLeadingTokenTypes();
+		}
 	}
 	
 	private Constructor<? extends Lexer> getLexerCtor() {

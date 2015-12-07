@@ -63,4 +63,14 @@ public class NotTokenElementSpec extends ElementSpec {
 		return StringUtils.join(notTokenNames, " ");
 	}
 
+	@Override
+	public Set<Integer> getLeadingTokenTypes() {
+		return null;
+	}
+
+	@Override
+	protected boolean matchesEmptyOnce() {
+		return false;
+	}
+
 }

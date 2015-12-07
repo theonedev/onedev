@@ -76,6 +76,32 @@ public class AlternativeSpec extends Spec {
 	}
 
 	@Override
+	public Set<Integer> getLeadingTokenTypes() {
+		Set<Integer> leadingTokenTypes = new HashSet<>();
+		for (ElementSpec elementSpec: elements) {
+			Set<Integer> elementLeadingTokenTypes = elementSpec.getLeadingTokenTypes();
+			if (elementLeadingTokenTypes == null) {
+				leadingTokenTypes = null;
+				break;
+			} else {
+				leadingTokenTypes.addAll(elementLeadingTokenTypes);
+				if (!elementSpec.matchesEmpty())
+					break;
+			}
+		}
+		return leadingTokenTypes;
+	}
+
+	@Override
+	public boolean matchesEmpty() {
+		for (ElementSpec elementSpec: elements) {
+			if (!elementSpec.matchesEmpty())
+				return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		List<String> elementStrings = new ArrayList<>();
 		for (ElementSpec element: elements)

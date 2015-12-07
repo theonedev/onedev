@@ -15,13 +15,21 @@ public class Test {
 	public void test() throws IOException {
 		CodeAssist codeAssist = new CodeAssist(JavaLexer.class) {
 
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
 				return null;
 			}
 			
 		};
-		System.out.println(codeAssist.getRule("statement").matches("System.out.println()"));
+		System.out.println(codeAssist.getRule("statement").matches("a(b.c());"));
+		
+		long time = System.currentTimeMillis();
+		for (int i=0; i<100; i++) {
+			codeAssist.getRule("statement").matches("a(b.c());");
+		}
+		System.out.println(System.currentTimeMillis()-time);
 	}
 	
 }

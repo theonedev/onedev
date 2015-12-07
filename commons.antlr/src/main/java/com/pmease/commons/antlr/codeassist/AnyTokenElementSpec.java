@@ -46,4 +46,14 @@ public class AnyTokenElementSpec extends ElementSpec {
 		return ".";
 	}
 
+	@Override
+	public Set<Integer> getLeadingTokenTypes() {
+		return null;
+	}
+
+	@Override
+	protected boolean matchesEmptyOnce() {
+		return false;
+	}
+
 }

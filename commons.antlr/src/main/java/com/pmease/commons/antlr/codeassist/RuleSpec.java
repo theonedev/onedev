@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Optional;
+
 public class RuleSpec extends Spec {
 
 	private static final long serialVersionUID = 1L;
@@ -16,6 +18,10 @@ public class RuleSpec extends Spec {
 	private final String name;
 	
 	private final List<AlternativeSpec> alternatives;
+	
+	private Optional<Set<Integer>> leadingTokenTypesOptional;
+	
+	private Boolean matchesEmpty;
 
 	public RuleSpec(CodeAssist codeAssist, String name, List<AlternativeSpec> alternatives) {
 		super(codeAssist);
@@ -49,6 +55,23 @@ public class RuleSpec extends Spec {
 	@Override
 	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
 			Map<String, Integer> checkedIndexes, boolean fullMatch) {
+		if (stream.isEof()) {
+			if (fullMatch && !matchesEmpty())
+				return new ArrayList<>();
+			else
+				return initMatches(stream, parent, previous);
+		} 
+		
+		if (getLeadingTokenTypes() != null) {
+			int tokenType = stream.getCurrentToken().getType();
+			if (!getLeadingTokenTypes().contains(tokenType)) {
+				if (matchesEmpty())
+					return initMatches(stream, parent, previous);
+				else
+					return new ArrayList<>();
+			}
+		}
+
 		List<TokenNode> matches = new ArrayList<>();
 		int index = stream.getIndex();
 		Integer checkedIndex = checkedIndexes.get(name);
@@ -77,6 +100,46 @@ public class RuleSpec extends Spec {
 		return matches;
 	}
 
+	@Override
+	public Set<Integer> getLeadingTokenTypes() {
+		if (leadingTokenTypesOptional == null) {
+			// return this if this rule is invoked recursively
+			Set<Integer> recursiveTokenTypes = new HashSet<>();
+			leadingTokenTypesOptional = Optional.of(recursiveTokenTypes);
+			
+			Set<Integer> leadingTokenTypes =  new HashSet<>();
+			for (AlternativeSpec alternative: alternatives) {
+				Set<Integer> alternativeLeadingTokenTypes = alternative.getLeadingTokenTypes();
+				if (alternativeLeadingTokenTypes == null) {
+					leadingTokenTypes = null;
+					break;
+				} else {
+					leadingTokenTypes.addAll(alternativeLeadingTokenTypes);
+				}
+			}
+			leadingTokenTypesOptional = Optional.fromNullable(leadingTokenTypes);
+		}
+		return leadingTokenTypesOptional.orNull();
+	}
+	
+	@Override
+	public boolean matchesEmpty() {
+		if (matchesEmpty == null) {
+			// return this if this rule is invoked recursively
+			matchesEmpty = false; 
+			
+			boolean allowEmpty = false;
+			for (AlternativeSpec alternative: alternatives) {
+				if (alternative.matchesEmpty()) {
+					allowEmpty = true;
+					break;
+				}
+			}
+			matchesEmpty = allowEmpty;
+		}
+		return matchesEmpty;
+	}
+	
 	@Override
 	public String toString() {
 		List<String> alternativeStrings = new ArrayList<>();

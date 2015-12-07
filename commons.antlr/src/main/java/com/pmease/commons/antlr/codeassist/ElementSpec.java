@@ -156,6 +156,16 @@ public abstract class ElementSpec extends Spec {
 	protected abstract List<ElementSuggestion> doSuggestFirst(@Nullable ParseTree parseTree, 
 			Node parent, String matchWith, Set<String> checkedRules);
 
+	@Override
+	public boolean matchesEmpty() {
+		if (multiplicity == Multiplicity.ZERO_OR_MORE || multiplicity == Multiplicity.ZERO_OR_ONE)
+			return true;
+		else
+			return matchesEmptyOnce();
+	}
+	
+	protected abstract boolean matchesEmptyOnce();
+
 	public final String toString() {
 		if (multiplicity == Multiplicity.ONE)
 			return toStringOnce();

@@ -49,10 +49,6 @@ public abstract class Spec implements Serializable {
 		return matches;
 	}
 	
-	public boolean matchesEmpty() {
-		return matches("");
-	}
-	
 	public boolean matches(AssistStream stream) {
 		for (TokenNode match: match(stream, null, null, new HashMap<String, Integer>(), true)) {
 			if (match.getToken().getTokenIndex() == stream.size()-1)
@@ -69,5 +65,9 @@ public abstract class Spec implements Serializable {
 		}
 		return false;
 	}
+	
+	public abstract Set<Integer> getLeadingTokenTypes();
+	
+	public abstract boolean matchesEmpty();
 	
 }
