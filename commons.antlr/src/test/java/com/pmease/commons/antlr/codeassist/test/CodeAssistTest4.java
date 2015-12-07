@@ -62,11 +62,12 @@ public class CodeAssistTest4 {
 		assertEquals("5+:2", suggestions.get(2).toString());
 		assertEquals("5-:2", suggestions.get(3).toString());
 		assertEquals("5;:2", suggestions.get(4).toString());
-	}
-	
-	@Test
-	public void test2() {
-		System.out.println(codeAssist.getRule("stat").matches("1+2;"));
+		
+		assertTrue(codeAssist.getRule("expr").matches("(1+2)+3"));
+		assertTrue(codeAssist.getRule("expr").matches("1+(2*3)"));
+		assertFalse(codeAssist.getRule("expr").matches("(1+2)+"));
+		assertFalse(codeAssist.getRule("expr").matches("1(2*3)"));
+		assertFalse(codeAssist.getRule("expr").matches("1/2+3)"));
 	}
 	
 }

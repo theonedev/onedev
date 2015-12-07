@@ -39,7 +39,7 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules) {
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
 		if (!checkedRules.contains(ruleName)) {
 			checkedRules.add(ruleName);
 		
@@ -52,25 +52,25 @@ public class RuleRefElementSpec extends ElementSpec {
 							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
 						// next input can either be current element, or other elements, so 
 						// mandatory scan can be stopped
-						return new MandatoryLiteralScan(mandatoryLiterals, true);
+						return new MandatoryScan(mandatoryLiterals, true);
 					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-						MandatoryLiteralScan scan = elementSpec.scanPrefixedMandatoryLiterals(new HashSet<>(checkedRules));
-						mandatoryLiterals.addAll(scan.getMandatoryLiterals());
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						mandatoryLiterals.addAll(scan.getMandatories());
 						// next input can either be current element, or other elements, so 
 						// mandatory scan can be stopped
-						return new MandatoryLiteralScan(mandatoryLiterals, true);
+						return new MandatoryScan(mandatoryLiterals, true);
 					} else {
-						MandatoryLiteralScan scan = elementSpec.scanPrefixedMandatoryLiterals(new HashSet<>(checkedRules));
-						mandatoryLiterals.addAll(scan.getMandatoryLiterals());
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						mandatoryLiterals.addAll(scan.getMandatories());
 						// if internal of the element tells use to stop, let's stop 
 						if (scan.isStop())
-							return new MandatoryLiteralScan(mandatoryLiterals, true);
+							return new MandatoryScan(mandatoryLiterals, true);
 					}
 				}
-				return new MandatoryLiteralScan(mandatoryLiterals, false);
+				return new MandatoryScan(mandatoryLiterals, false);
 			} 
 		} 
-		return MandatoryLiteralScan.stop();
+		return MandatoryScan.stop();
 	}
 
 	@Override
@@ -81,13 +81,11 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected String asString() {
-		return "rule_ref: " + ruleName;
-	}
-
-	@Override
-	protected Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules) {
-		return getRule().getMandatoryTokenTypes(checkedRules);
+	protected String toStringOnce() {
+		if (codeAssist.isBlockRule(ruleName))
+			return "(" + Preconditions.checkNotNull(getRule()) + ")";
+		else 
+			return ruleName;
 	}
 
 }

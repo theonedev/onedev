@@ -59,7 +59,7 @@ import com.pmease.commons.util.StringUtils;
 public abstract class CodeAssist implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private final Class<? extends Lexer> lexerClass;
 	
 	private transient Constructor<? extends Lexer> lexerCtor;
@@ -69,6 +69,8 @@ public abstract class CodeAssist implements Serializable {
 	private final Map<String, Integer> tokenTypesByLiteral = new HashMap<>();
 
 	private final Map<String, Integer> tokenTypesByRule = new HashMap<>();
+	
+	private final Set<String> blockRuleNames = new HashSet<>();
 	
 	/**
 	 * Code assist constructor
@@ -347,6 +349,7 @@ public abstract class CodeAssist implements Serializable {
 		for (AlternativeContext alternativeContext: blockContext.altList().alternative())
 			alternatives.add(newAltenative(null, alternativeContext));
 		String ruleName = UUID.randomUUID().toString();
+		blockRuleNames.add(ruleName);
 		RuleSpec rule = new RuleSpec(this, ruleName, alternatives);
 		rules.put(ruleName, rule);
 		return new RuleRefElementSpec(this, label, newMultiplicity(ebnfSuffixContext), ruleName);
@@ -357,6 +360,7 @@ public abstract class CodeAssist implements Serializable {
 		for (LexerAltContext lexerAltContext: lexerBlockContext.lexerAltList().lexerAlt())
 			alternatives.add(newAltenative(lexerAltContext));
 		String ruleName = UUID.randomUUID().toString();
+		blockRuleNames.add(ruleName);
 		RuleSpec rule = new RuleSpec(this, ruleName, alternatives);
 		rules.put(ruleName, rule);
 		return new RuleRefElementSpec(this, label, newMultiplicity(ebnfSuffixContext), ruleName);
@@ -367,6 +371,19 @@ public abstract class CodeAssist implements Serializable {
 			return newElement(null, ebnfContext.block(), ebnfContext.blockSuffix().ebnfSuffix());
 		else
 			return newElement(null, ebnfContext.block(), null);
+	}
+	
+	public boolean isBlockRule(String ruleName) {
+		return blockRuleNames.contains(ruleName);
+	}
+	
+	@Nullable
+	public String getTokenNameByType(int tokenType) {
+		for (Map.Entry<String, Integer> entry: tokenTypesByRule.entrySet()) {
+			if (entry.getValue() == tokenType)
+				return entry.getKey();
+		}
+		return null;
 	}
 	
 	@Nullable
@@ -444,7 +461,7 @@ public abstract class CodeAssist implements Serializable {
 				List<String> contents = new ArrayList<>();
 				for (ElementCompletion each: value) {
 					content = inputContent.substring(0, each.getReplaceBegin()) + each.getReplaceContent();
-					for (String mandatory: getMandatoryLiteralsAfter(each.getNode())) {
+					for (String mandatory: getMandatoriesAfter(each.getNode())) {
 						String prevContent = content;
 						content += mandatory;
 
@@ -491,7 +508,7 @@ public abstract class CodeAssist implements Serializable {
 					// in case mandatory tokens are not added after replacement, 
 					// we skip existing mandatory tokens in current input
 					String contentAfterCaret = content.substring(caret);
-					caret += skipMandatories(contentAfterCaret, getMandatoryLiteralsAfter(completion.getNode()));
+					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(completion.getNode()));
 				}
 			} else {
 				caret = completion.getReplaceBegin() + completion.getReplaceContent().length();
@@ -672,7 +689,7 @@ public abstract class CodeAssist implements Serializable {
 	 * suggested, we should add '(' and moves caret after '(' to avoid unnecessary
 	 * key strokes
 	 */
-	private List<String> getMandatoryLiteralsAfter(Node elementNode) {
+	private List<String> getMandatoriesAfter(Node elementNode) {
 		List<String> literals = new ArrayList<>();
 		ElementSpec elementSpec = (ElementSpec) elementNode.getSpec();
 		if (elementSpec.getMultiplicity() == Multiplicity.ONE 
@@ -682,16 +699,16 @@ public abstract class CodeAssist implements Serializable {
 			if (specIndex == alternativeSpec.getElements().size()-1) {
 				elementNode = elementNode.getParent().getParent().getParent();
 				if (elementNode != null)
-					return getMandatoryLiteralsAfter(elementNode);
+					return getMandatoriesAfter(elementNode);
 			} else {
 				elementSpec = alternativeSpec.getElements().get(specIndex+1);
 				if (elementSpec.getMultiplicity() == Multiplicity.ONE
 						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					MandatoryLiteralScan scan = elementSpec.scanPrefixedMandatoryLiterals(new HashSet<String>());
-					literals = scan.getMandatoryLiterals();
+					MandatoryScan scan = elementSpec.scanMandatories(new HashSet<String>());
+					literals = scan.getMandatories();
 					if (!scan.isStop()) {
 						elementNode = new Node(elementSpec, elementNode.getParent(), null);
-						literals.addAll(getMandatoryLiteralsAfter(elementNode));
+						literals.addAll(getMandatoriesAfter(elementNode));
 					}
 				}
 			}
@@ -703,7 +720,7 @@ public abstract class CodeAssist implements Serializable {
 			Node elementNode, String matchWith);
 
 	public void prune(List<TokenNode> matches, AssistStream stream) {
-		int threshold = 100;
+		int threshold = 8;
 
 		int maxIndex = -1;
 		Map<Integer, List<TokenNode>> index2matches = new HashMap<>();

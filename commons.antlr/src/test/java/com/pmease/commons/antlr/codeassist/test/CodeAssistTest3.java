@@ -34,7 +34,7 @@ public class CodeAssistTest3 {
 						@Override
 						protected List<InputSuggestion> match(String matchWith) {
 							List<InputSuggestion> suggestions = new ArrayList<>();
-							Node criteria = parseTree.findParentNodeByRuleName(parseTree.getLastNode(), "criteria");
+							Node criteria = parseTree.findParentByRuleName(parseTree.getLastNode(), "criteria");
 							TokenNode tokenNode = parseTree.getFirstTokenNode(criteria);
 							if (tokenNode.getToken().getText().equals("author")) {
 								for (String value: AUTHORS) {

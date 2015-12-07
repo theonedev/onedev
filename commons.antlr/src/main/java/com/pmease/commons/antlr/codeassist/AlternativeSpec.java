@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class AlternativeSpec extends Spec {
 
 	private static final long serialVersionUID = 1L;
@@ -75,17 +77,10 @@ public class AlternativeSpec extends Spec {
 
 	@Override
 	public String toString() {
-		return "elements: " + elements;
-	}
-
-	@Override
-	public Set<Integer> getMandatoryTokenTypes(Set<String> checkedRules) {
-		for (ElementSpec elementSpec: elements) {
-			Set<Integer> tokenTypes = elementSpec.getMandatoryTokenTypes(new HashSet<>(checkedRules));
-			if (!tokenTypes.isEmpty())
-				return tokenTypes;
-		}
-		return new HashSet<>();
+		List<String> elementStrings = new ArrayList<>();
+		for (ElementSpec element: elements)
+			elementStrings.add(element.toString());
+		return StringUtils.join(elementStrings, " ");
 	}
 
 }

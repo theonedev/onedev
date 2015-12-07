@@ -36,13 +36,13 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules) {
-		return new MandatoryLiteralScan(Lists.newArrayList(literal), false);
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+		return new MandatoryScan(Lists.newArrayList(literal), false);
 	}
 
 	@Override
-	protected String asString() {
-		return "literal: '" + literal + "'";
+	protected String toStringOnce() {
+		return "'" + literal + "'";
 	}
 	
 }

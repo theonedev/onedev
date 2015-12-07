@@ -25,7 +25,7 @@ table_alias
    ;
 
 column_name
-   : ( ( schema_name DOT )? ID DOT )? ID ( column_name_alias )? | ( table_alias DOT )? ID | USER_VAR ( column_name_alias )?
+   : ( ( schema_name DOT )? tableName=ID DOT )? columnName=ID ( column_name_alias )? | ( table_alias DOT )? ID | USER_VAR ( column_name_alias )?
    ;
 
 column_name_alias

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class LexerRuleRefElementSpec extends TokenElementSpec {
 
@@ -42,7 +43,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules) {
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
 		if (!checkedRules.contains(ruleName) && getRule() != null) { // to avoid infinite loop
 			checkedRules.add(ruleName);
 		
@@ -55,33 +56,36 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
 						// next input can either be current element, or other elements, so 
 						// mandatory scan can be stopped
-						return new MandatoryLiteralScan(mandatories, true);
+						return new MandatoryScan(mandatories, true);
 					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-						MandatoryLiteralScan scan = elementSpec.scanPrefixedMandatoryLiterals(new HashSet<>(checkedRules));
-						mandatories.addAll(scan.getMandatoryLiterals());
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						mandatories.addAll(scan.getMandatories());
 						// next input can either be current element, or other elements, so 
 						// mandatory scan can be stopped
-						return new MandatoryLiteralScan(mandatories, true);
+						return new MandatoryScan(mandatories, true);
 					} else {
-						MandatoryLiteralScan scan = elementSpec.scanPrefixedMandatoryLiterals(new HashSet<>(checkedRules));
-						mandatories.addAll(scan.getMandatoryLiterals());
+						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
+						mandatories.addAll(scan.getMandatories());
 						// if internal of the element tells use to stop, let's stop 
 						if (scan.isStop())
-							return new MandatoryLiteralScan(mandatories, true);
+							return new MandatoryScan(mandatories, true);
 					}
 				}
-				return new MandatoryLiteralScan(mandatories, false);
+				return new MandatoryScan(mandatories, false);
 			} else {
-				return MandatoryLiteralScan.stop();
+				return MandatoryScan.stop();
 			}
 		} else {
-			return MandatoryLiteralScan.stop();
+			return MandatoryScan.stop();
 		}
 	}
 
 	@Override
-	protected String asString() {
-		return "lexer_rule_ref: " + ruleName;
+	protected String toStringOnce() {
+		if (codeAssist.isBlockRule(ruleName))
+			return "(" + Preconditions.checkNotNull(getRule()) + ")";
+		else 
+			return ruleName;
 	}
 	
 }

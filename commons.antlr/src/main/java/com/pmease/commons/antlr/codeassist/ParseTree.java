@@ -29,16 +29,30 @@ public class ParseTree {
 		return (TokenNode) nodes.get(nodes.size()-1);
 	}
 
-	public List<Node> getChildNodes(Node parentNode) {
-		List<Node> childNodes = new ArrayList<>();
+	public List<Node> getChildren(Node parent, boolean recursive) {
+		List<Node> children = new ArrayList<>();
 		for (Node node: nodes) {
-			if (node.getParent().equals(parentNode))
-				childNodes.add(node);
+			if (recursive) {
+				if (isAncestor(parent, node))
+					children.add(node);
+			} else if (node.getParent().equals(parent)) {
+				children.add(node);
+			}
 		}
-		return childNodes;
+		return children;
+	}
+	
+	public boolean isAncestor(Node parent, Node child) {
+		Node current = child.getParent();
+		while (current != null) {
+			if (current.equals(parent))
+				return true;
+			current = current.getParent();
+		}
+		return false;
 	}
 
-	public Node getRootNode() {
+	public Node getRoot() {
 		Node node = getLastNode();
 		while (node.getParent() != null) 
 			node = node.getParent();
@@ -46,44 +60,57 @@ public class ParseTree {
 		return node;
 	}
 	
-	public List<Node> getChildNodeByRuleName(Node parentNode, String ruleName) {
-		List<Node> childNodes = new ArrayList<>();
-		for (Node childNode: getChildNodes(parentNode)) {
-			if (childNode.getSpec() instanceof RuleRefElementSpec) {
-				RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) childNode.getSpec();
+	public String getText(Node node) {
+		if (node instanceof TokenNode) {
+			return ((TokenNode) node).getToken().getText();
+		} else {
+			StringBuffer buffer = new StringBuffer();
+			for (Node child: getChildren(node, true)) { 
+				if (child instanceof TokenNode) 
+					buffer.append(((TokenNode)child).getToken().getText());
+			}
+			return buffer.toString();
+		}
+	}
+	
+	public List<Node> getChildrenByRuleName(Node parent, String ruleName, boolean recursive) {
+		List<Node> children = new ArrayList<>();
+		for (Node child: getChildren(parent, recursive)) {
+			if (child.getSpec() instanceof RuleRefElementSpec) {
+				RuleRefElementSpec ruleRefElementSpec = (RuleRefElementSpec) child.getSpec();
 				if (ruleRefElementSpec.getRuleName().equals(ruleName))
-					childNodes.add(childNode);
-			} else if (childNode.getSpec() instanceof LexerRuleRefElementSpec) {
-				LexerRuleRefElementSpec lexerRuleRefElementSpec = (LexerRuleRefElementSpec) childNode.getSpec();
+					children.add(child);
+			} else if (child.getSpec() instanceof LexerRuleRefElementSpec) {
+				LexerRuleRefElementSpec lexerRuleRefElementSpec = (LexerRuleRefElementSpec) child.getSpec();
 				if (lexerRuleRefElementSpec.getRuleName().equals(ruleName))
-					childNodes.add(childNode);
-			} else if (childNode.getSpec() instanceof RuleSpec) {
-				RuleSpec ruleSpec = (RuleSpec) childNode.getSpec();
+					children.add(child);
+			} else if (child.getSpec() instanceof RuleSpec) {
+				RuleSpec ruleSpec = (RuleSpec) child.getSpec();
 				if (ruleSpec.getName().equals(ruleName))
-					childNodes.add(childNode);
+					children.add(child);
 			}
 		}
-		return childNodes;
+		return children;
 	}
 
-	public List<Node> getChildNodeByLabel(Node parentNode, String label) {
-		List<Node> childNodes = new ArrayList<>();
-		for (Node childNode: getChildNodes(parentNode)) {
-			if (childNode.getSpec() instanceof ElementSpec) {
-				ElementSpec elementSpec = (ElementSpec) childNode.getSpec();
+	public List<Node> getChildrenByLabel(Node parent, String label, boolean recursive) {
+		List<Node> children = new ArrayList<>();
+		for (Node child: getChildren(parent, recursive)) {
+			if (child.getSpec() instanceof ElementSpec) {
+				ElementSpec elementSpec = (ElementSpec) child.getSpec();
 				if (label.equals(elementSpec.getLabel()))
-					childNodes.add(childNode);
-			} else if (childNode.getSpec() instanceof AlternativeSpec) {
-				AlternativeSpec alternativeSpec = (AlternativeSpec) childNode.getSpec();
+					children.add(child);
+			} else if (child.getSpec() instanceof AlternativeSpec) {
+				AlternativeSpec alternativeSpec = (AlternativeSpec) child.getSpec();
 				if (label.equals(alternativeSpec.getLabel()))
-					childNodes.add(childNode);
+					children.add(child);
 			}
 		}
-		return childNodes;
+		return children;
 	}
 
 	@Nullable
-	public Node findParentNodeByRuleName(Node childNode, String ruleName) {
+	public Node findParentByRuleName(Node child, String ruleName) {
 		Node node = getLastNode();
 		while (node.getParent() != null) { 
 			node = node.getParent();
@@ -106,7 +133,7 @@ public class ParseTree {
 	}
 	
 	@Nullable
-	public Node findParentNodeByLabel(Node childNode, String label) {
+	public Node findParentByLabel(Node child, String label) {
 		Node node = getLastNode();
 		while (node.getParent() != null) { 
 			node = node.getParent();

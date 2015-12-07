@@ -70,5 +70,4 @@ public abstract class Spec implements Serializable {
 		return false;
 	}
 	
-	public abstract Set<Integer> getMandatoryTokenTypes(Set<String> checkedRules);
 }

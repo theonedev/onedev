@@ -21,7 +21,7 @@ public class Test {
 			}
 			
 		};
-		System.out.println(codeAssist.getRule("unaryExpressionNotPlusMinus").matches("5"));
+		System.out.println(codeAssist.getRule("statement").matches("System.out.println()"));
 	}
 	
 }

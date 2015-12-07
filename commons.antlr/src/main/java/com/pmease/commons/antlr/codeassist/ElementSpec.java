@@ -94,18 +94,8 @@ public abstract class ElementSpec extends Spec {
 	public abstract List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
 			Map<String, Integer> checkedIndexes, boolean fullMatch);
 
-	public abstract MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules);
+	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
 	
-	@Override
-	public Set<Integer> getMandatoryTokenTypes(Set<String> checkedRules) {
-		if (multiplicity == Multiplicity.ONE || multiplicity == Multiplicity.ONE_OR_MORE) 
-			return getMandatoryTokenTypesOnce(checkedRules);
-		else 
-			return new HashSet<>();
-	}
-	
-	protected abstract Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules);
-
 	/**
 	 * Provide suggestions after current element spec.
 	 * 
@@ -157,17 +147,10 @@ public abstract class ElementSpec extends Spec {
 			String matchWith, Set<String> checkedRules) {
 		Node elementNode = new Node(this, parent, null);
 		List<InputSuggestion> suggestions = codeAssist.suggest(parseTree, elementNode, matchWith);
-		if (suggestions != null) {
-			if (suggestions.isEmpty() && !scanPrefixedMandatoryLiterals(new HashSet<String>()).getMandatoryLiterals().isEmpty())
-				// user suppresses suggestion explicitly, so we only provide suggestion if there are 
-				// mandatory followings
-				return doSuggestFirst(parseTree, parent, matchWith, checkedRules);
-			else
-				return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, suggestions));
-		} else {
-			// user does not care about suggestion, so we continue with our default logic to drill down
+		if (suggestions != null)
+			return Lists.newArrayList(new ElementSuggestion(parseTree, elementNode, matchWith, suggestions));
+		else // user does not care about suggestion, so we continue with our default logic to drill down 
 			return doSuggestFirst(parseTree, parent, matchWith, checkedRules);
-		}
 	}
 
 	protected abstract List<ElementSuggestion> doSuggestFirst(@Nullable ParseTree parseTree, 
@@ -175,14 +158,14 @@ public abstract class ElementSpec extends Spec {
 
 	public final String toString() {
 		if (multiplicity == Multiplicity.ONE)
-			return asString();
+			return toStringOnce();
 		else if (multiplicity == Multiplicity.ONE_OR_MORE)
-			return "(" + asString() + ")+";
+			return toStringOnce() + "+";
 		else if (multiplicity == Multiplicity.ZERO_OR_MORE)
-			return "(" + asString() + ")*";
+			return toStringOnce() + "*";
 		else
-			return "(" + asString() + ")?";
+			return toStringOnce() + "?";
 	}
 
-	protected abstract String asString();
+	protected abstract String toStringOnce();
 }

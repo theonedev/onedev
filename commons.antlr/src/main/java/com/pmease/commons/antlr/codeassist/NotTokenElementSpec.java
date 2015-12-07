@@ -1,12 +1,14 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.Preconditions;
 
 public class NotTokenElementSpec extends ElementSpec {
 
@@ -32,8 +34,8 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules) {
-		return MandatoryLiteralScan.stop();
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+		return MandatoryScan.stop();
 	}
 
 	@Override
@@ -54,13 +56,11 @@ public class NotTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected String asString() {
-		return "not: " + notTokenTypes;
-	}
-
-	@Override
-	protected Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules) {
-		return new HashSet<>();
+	protected String toStringOnce() {
+		List<String> notTokenNames = new ArrayList<>();
+		for (int notTokenType: notTokenTypes) 
+			notTokenNames.add(Preconditions.checkNotNull(codeAssist.getTokenNameByType(notTokenType)));
+		return StringUtils.join(notTokenNames, " ");
 	}
 
 }

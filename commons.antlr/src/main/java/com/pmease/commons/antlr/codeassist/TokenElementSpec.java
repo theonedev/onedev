@@ -3,11 +3,8 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
-
-import com.google.common.collect.Sets;
 
 public abstract class TokenElementSpec extends ElementSpec {
 
@@ -46,11 +43,6 @@ public abstract class TokenElementSpec extends ElementSpec {
 			matches.add(new TokenNode(null, parent, previous, new FakedToken(stream)));
 		}
 		return matches;
-	}
-
-	@Override
-	protected Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules) {
-		return Sets.newHashSet(type);
 	}
 
 }

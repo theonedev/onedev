@@ -1,6 +1,8 @@
 grammar CodeAssistTest1;
 
-selfReference:	'ab' | selfReference 'cd';
+selfReference: 'ab' selfReferenceTail;
+
+selfReferenceTail: 'cd' selfReferenceTail|;
 
 mandatories: 'ab' 'c' | 'ab' 'c' | ('cd' ('ef' 'g')) 'h';
 

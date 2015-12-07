@@ -1,7 +1,6 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,8 +22,8 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public MandatoryLiteralScan scanPrefixedMandatoryLiterals(Set<String> checkedRules) {
-		return MandatoryLiteralScan.stop();
+	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+		return MandatoryScan.stop();
 	}
 
 	@Override
@@ -43,13 +42,8 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	protected String asString() {
-		return "any";
-	}
-
-	@Override
-	protected Set<Integer> getMandatoryTokenTypesOnce(Set<String> checkedRules) {
-		return new HashSet<>();
+	protected String toStringOnce() {
+		return ".";
 	}
 
 }
