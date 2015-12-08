@@ -1,6 +1,6 @@
 package com.pmease.commons.antlr.codeassist.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public class CodeAssistTest1 {
 	@Test
 	public void test()	{
 		List<InputStatus> suggestions;
-		
+
 		suggestions = suggest(new InputStatus("ab "), "selfReference");
 		assertEquals(1, suggestions.size());
 		assertEquals("ab cd:5", suggestions.get(0).toString());
@@ -57,6 +57,8 @@ public class CodeAssistTest1 {
 		suggestions = suggest(new InputStatus("cd "), "mandatories");
 		assertEquals(1, suggestions.size());
 		assertEquals("cd ef g h:9", suggestions.get(0).toString());
+		
+		assertTrue(codeAssist.getRule("ambiguity").matches("o p q"));
 	}
 
 }

@@ -60,7 +60,11 @@ public abstract class CodeAssist implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	private static final int DEFAULT_PRUNE_THRESHOLD = 8;
+	
 	private final Class<? extends Lexer> lexerClass;
+	
+	private final int pruneThreshold;
 	
 	private transient Constructor<? extends Lexer> lexerCtor;
 	
@@ -83,6 +87,10 @@ public abstract class CodeAssist implements Serializable {
 				AntlrUtils.getDefaultTokenFile(lexerClass));
 	}
 
+	public CodeAssist(Class<? extends Lexer> lexerClass, String grammarFiles[], String tokenFile) {
+		this(lexerClass, grammarFiles, tokenFile, DEFAULT_PRUNE_THRESHOLD);
+	}
+	
 	/**
 	 * Code assist constructor.
 	 * 
@@ -93,8 +101,10 @@ public abstract class CodeAssist implements Serializable {
 	 * @param tokenFile
 	 * 			generated tokens file in class path, relative to class path root
 	 */
-	public CodeAssist(Class<? extends Lexer> lexerClass, String grammarFiles[], String tokenFile) {
+	public CodeAssist(Class<? extends Lexer> lexerClass, String grammarFiles[], 
+			String tokenFile, int pruneThreshold) {
 		this.lexerClass = lexerClass;
+		this.pruneThreshold = pruneThreshold;
 		tokenTypesByRule.put("EOF", Token.EOF);
 		
 		try (InputStream is = getClass().getClassLoader().getResourceAsStream(tokenFile)) {
@@ -566,11 +576,11 @@ public abstract class CodeAssist implements Serializable {
 	}
 	
 	private List<ElementCompletion> suggest(RuleSpec spec, AssistStream stream, InputStatus inputStatus) {
-		List<ElementCompletion> elementCompletions = new ArrayList<>();
+		List<ElementCompletion> completions = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		List<TokenNode> matches = spec.match(stream, null, null, new HashMap<String, Integer>(), false);
-		int maxIndex = fillSuggestions(suggestions, inputStatus, matches, spec, stream);
+		int maxTokenIndex = fillSuggestions(suggestions, inputStatus, matches, spec, stream);
 		
 		/*
 		 * do another match by not considering the last token. This is necessary for 
@@ -584,11 +594,11 @@ public abstract class CodeAssist implements Serializable {
 		 * if user input value containing spaces without surrounding quotes, we 
 		 * suggest the user to quote the value. 
 		 */
-		if (maxIndex>0) {
-			matches = spec.match(new AssistStream(stream.getTokens().subList(0, maxIndex)), null, null, 
+		if (maxTokenIndex>0) {
+			matches = spec.match(new AssistStream(stream.getTokens().subList(0, maxTokenIndex)), null, null, 
 					new HashMap<String, Integer>(), false);
 			fillSuggestions(suggestions, inputStatus, matches, spec, stream);
-		} else if (maxIndex == 0) {
+		} else if (maxTokenIndex == 0) {
 			suggestions.addAll(suggestFirst(inputStatus, spec));
 		}
 
@@ -606,7 +616,7 @@ public abstract class CodeAssist implements Serializable {
 			 */
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
-				int maxTokenIndex = getMaxIndex(elementSpec.matchOnce(streamAfterReplaceStart, 
+				maxTokenIndex = getMaxIndex(elementSpec.matchOnce(streamAfterReplaceStart, 
 						null, null, new HashMap<String, Integer>(), true));
 				if (maxTokenIndex != -1) {
 					int charIndex = streamAfterReplaceStart.getToken(maxTokenIndex).getStopIndex()+1;
@@ -640,11 +650,11 @@ public abstract class CodeAssist implements Serializable {
 					}
 				} 
 				
-				elementCompletions.add(new ElementCompletion(suggestion.getNode(), replaceStart, replaceEnd, 
+				completions.add(new ElementCompletion(suggestion.getNode(), replaceStart, replaceEnd, 
 						inputSuggestion.getContent(), inputSuggestion.getCaret(), inputSuggestion.getDescription()));
 			}
 		}
-		return elementCompletions;
+		return completions;
 	}
 	
 	private int getMaxIndex(List<TokenNode> matches) {
@@ -725,8 +735,6 @@ public abstract class CodeAssist implements Serializable {
 			Node elementNode, String matchWith);
 
 	public void prune(List<TokenNode> matches, AssistStream stream) {
-		int threshold = 8;
-
 		int maxIndex = -1;
 		Map<Integer, List<TokenNode>> index2matches = new HashMap<>();
 		for (TokenNode match: matches) {
@@ -744,7 +752,7 @@ public abstract class CodeAssist implements Serializable {
 
 		for (Map.Entry<Integer, List<TokenNode>> entry: index2matches.entrySet()) {
 			int index = entry.getKey();
-			if (index + threshold >= maxIndex) {
+			if (index + pruneThreshold >= maxIndex) {
 				if (stream.isLastIndex(index)) 
 					matches.addAll(entry.getValue());
 				else
