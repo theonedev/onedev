@@ -2,9 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class Spec implements Serializable {
@@ -33,8 +31,7 @@ public abstract class Spec implements Serializable {
 	 * 			that we can have match paths even if the whole spec is not matched, and in 
 	 * 			that case, the paths tells to which point the match goes to 
 	 */
-	public abstract List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes, boolean fullMatch);
+	public abstract List<TokenNode> match(AssistStream stream, Node parent, Node previous, boolean fullMatch);
 	
 	public abstract List<ElementSuggestion> suggestFirst(ParseTree parseTree, Node parent, 
 			String matchWith, Set<String> checkedRules);
@@ -50,7 +47,7 @@ public abstract class Spec implements Serializable {
 	}
 	
 	public boolean matches(AssistStream stream) {
-		for (TokenNode match: match(stream, null, null, new HashMap<String, Integer>(), true)) {
+		for (TokenNode match: match(stream, null, null, true)) {
 			if (match.getToken().getTokenIndex() == stream.size()-1)
 				return true;
 		}
@@ -59,7 +56,7 @@ public abstract class Spec implements Serializable {
 	
 	public boolean matches(String content) {
 		AssistStream stream = codeAssist.lex(content);
-		for (TokenNode match: match(stream, null, null, new HashMap<String, Integer>(), true)) {
+		for (TokenNode match: match(stream, null, null, true)) {
 			if (stream.isLastToken(match.getToken()))
 				return true;
 		}

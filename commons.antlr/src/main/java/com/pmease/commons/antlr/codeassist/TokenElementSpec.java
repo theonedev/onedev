@@ -2,7 +2,6 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
@@ -32,8 +31,7 @@ public abstract class TokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes, boolean fullMatch) {
+	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, boolean fullMatch) {
 		List<TokenNode> matches = new ArrayList<>();
 		if (!stream.isEof()) {
 			Token token = stream.getCurrentToken();

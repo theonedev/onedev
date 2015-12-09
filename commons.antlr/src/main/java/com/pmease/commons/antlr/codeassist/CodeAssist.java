@@ -579,7 +579,7 @@ public abstract class CodeAssist implements Serializable {
 		List<ElementCompletion> completions = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
-		List<TokenNode> matches = spec.match(stream, null, null, new HashMap<String, Integer>(), false);
+		List<TokenNode> matches = spec.match(stream, null, null, false);
 		int maxTokenIndex = fillSuggestions(suggestions, inputStatus, matches, spec, stream);
 		
 		/*
@@ -595,8 +595,7 @@ public abstract class CodeAssist implements Serializable {
 		 * suggest the user to quote the value. 
 		 */
 		if (maxTokenIndex>0) {
-			matches = spec.match(new AssistStream(stream.getTokens().subList(0, maxTokenIndex)), null, null, 
-					new HashMap<String, Integer>(), false);
+			matches = spec.match(new AssistStream(stream.getTokens().subList(0, maxTokenIndex)), null, null, false);
 			fillSuggestions(suggestions, inputStatus, matches, spec, stream);
 		} else if (maxTokenIndex == 0) {
 			suggestions.addAll(suggestFirst(inputStatus, spec));
@@ -616,8 +615,7 @@ public abstract class CodeAssist implements Serializable {
 			 */
 			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
-				maxTokenIndex = getMaxIndex(elementSpec.matchOnce(streamAfterReplaceStart, 
-						null, null, new HashMap<String, Integer>(), true));
+				maxTokenIndex = getMaxIndex(elementSpec.matchOnce(streamAfterReplaceStart, null, null, true));
 				if (maxTokenIndex != -1) {
 					int charIndex = streamAfterReplaceStart.getToken(maxTokenIndex).getStopIndex()+1;
 					if (replaceStart + charIndex > replaceEnd)
@@ -753,7 +751,7 @@ public abstract class CodeAssist implements Serializable {
 		for (Map.Entry<Integer, List<TokenNode>> entry: index2matches.entrySet()) {
 			int index = entry.getKey();
 			if (index + pruneThreshold >= maxIndex) {
-				if (stream.isLastIndex(index)) 
+				if (stream.isLastIndex(index))
 					matches.addAll(entry.getValue());
 				else
 					matches.add(entry.getValue().get(0));

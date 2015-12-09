@@ -3,7 +3,6 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Preconditions;
@@ -74,10 +73,9 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes, boolean fullMatch) {
+	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, boolean fullMatch) {
 		parent = new Node(this, parent, previous);
-		return getRule().match(stream, parent, parent, checkedIndexes, fullMatch);
+		return getRule().match(stream, parent, parent, fullMatch);
 	}
 
 	@Override

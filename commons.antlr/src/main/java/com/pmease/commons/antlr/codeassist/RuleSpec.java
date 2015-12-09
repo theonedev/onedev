@@ -1,10 +1,8 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -53,8 +51,7 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes, boolean fullMatch) {
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, boolean fullMatch) {
 		if (stream.isEof()) {
 			if (fullMatch && !matchesEmpty())
 				return new ArrayList<>();
@@ -74,27 +71,20 @@ public class RuleSpec extends Spec {
 
 		List<TokenNode> matches = new ArrayList<>();
 		int index = stream.getIndex();
-		Integer checkedIndex = checkedIndexes.get(name);
-		if (checkedIndex == null || index != checkedIndex) {
-			checkedIndexes.put(name, index);
-			parent = new Node(this, parent, previous);
-			boolean fakedAdded = false;
-			for (AlternativeSpec alternative: alternatives) {
-				for (TokenNode match: alternative.match(stream, parent, parent, new HashMap<>(checkedIndexes), fullMatch)) {
-					if (match.getToken().getTokenIndex() == index-1) {
-						if (!fakedAdded) {
-							matches.add(new TokenNode(null, parent, parent, new FakedToken(index-1)));
-							fakedAdded = true;
-						}
-					} else {
-						matches.add(match);
+		parent = new Node(this, parent, previous);
+		boolean fakedAdded = false;
+		for (AlternativeSpec alternative: alternatives) {
+			for (TokenNode match: alternative.match(stream, parent, parent, fullMatch)) {
+				if (match.getToken().getTokenIndex() == index-1) {
+					if (!fakedAdded) {
+						matches.add(new TokenNode(null, parent, parent, new FakedToken(index-1)));
+						fakedAdded = true;
 					}
+				} else {
+					matches.add(match);
 				}
-				stream.setIndex(index);
 			}
-		} else {
-			throw new RuntimeException("Direct or indirect left recursion rule detected: " + name 
-					+ ", please refactor to remove it.");
+			stream.setIndex(index);
 		}
 		codeAssist.prune(matches, stream);
 		return matches;

@@ -1,11 +1,9 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,14 +32,13 @@ public class AlternativeSpec extends Spec {
 	}
 	
 	@Override
-	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes, boolean fullMatch) {
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, boolean fullMatch) {
 		parent = new Node(this, parent, previous);
 		List<TokenNode> stopMatches = new ArrayList<>();
 		List<TokenNode> matches = initMatches(stream, parent, parent);
 		if (!stream.isEof() || fullMatch) {
 			for (ElementSpec elementSpec: elements) {
-				matches = elementSpec.match(matches, stream, parent, new HashMap<>(checkedIndexes), fullMatch);
+				matches = elementSpec.match(matches, stream, parent, fullMatch);
 				if (!fullMatch) {
 					for (Iterator<TokenNode> it = matches.iterator(); it.hasNext();) {
 						TokenNode match = it.next();

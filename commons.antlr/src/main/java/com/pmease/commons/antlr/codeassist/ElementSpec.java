@@ -1,10 +1,8 @@
 package com.pmease.commons.antlr.codeassist;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -37,21 +35,19 @@ public abstract class ElementSpec extends Spec {
 	}
 
 	@Override
-	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes, boolean fullMatch) {
-		return match(initMatches(stream, parent, previous), stream, parent, checkedIndexes, fullMatch);
+	public List<TokenNode> match(AssistStream stream, Node parent, Node previous, boolean fullMatch) {
+		return match(initMatches(stream, parent, previous), stream, parent, fullMatch);
 	}
 	
-	public List<TokenNode> match(List<TokenNode> prevMatches, AssistStream stream, 
-			Node parent, Map<String, Integer> checkedIndexes, boolean fullMatch) {
+	public List<TokenNode> match(List<TokenNode> prevMatches, AssistStream stream, Node parent, boolean fullMatch) {
 		if (multiplicity == Multiplicity.ONE) {
-			return matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, false);
+			return matchOnce(prevMatches, stream, parent, fullMatch, false);
 		} else if (multiplicity == Multiplicity.ONE_OR_MORE) {
 			List<TokenNode> matches = new ArrayList<>();
-			prevMatches = matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, false);
+			prevMatches = matchOnce(prevMatches, stream, parent, fullMatch, false);
 			matches.addAll(prevMatches);
 			while (true) {
-				prevMatches = matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, true);
+				prevMatches = matchOnce(prevMatches, stream, parent, fullMatch, true);
 				matches.addAll(prevMatches);
 				if (prevMatches.isEmpty())
 					break;
@@ -61,7 +57,7 @@ public abstract class ElementSpec extends Spec {
 		} else if (multiplicity == Multiplicity.ZERO_OR_MORE) {
 			List<TokenNode> matches = Lists.newArrayList(prevMatches);
 			while (true) {
-				prevMatches = matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, true);
+				prevMatches = matchOnce(prevMatches, stream, parent, fullMatch, true);
 				matches.addAll(prevMatches);
 				if (prevMatches.isEmpty())
 					break;
@@ -70,19 +66,19 @@ public abstract class ElementSpec extends Spec {
 			return matches;
 		} else {
 			List<TokenNode> matches = Lists.newArrayList(prevMatches);
-			matches.addAll(matchOnce(prevMatches, stream, parent, checkedIndexes, fullMatch, true));
+			matches.addAll(matchOnce(prevMatches, stream, parent, fullMatch, true));
 			codeAssist.prune(matches, stream);
 			return matches;
 		}
 	}
 	
 	public List<TokenNode> matchOnce(List<TokenNode> prevMatches, AssistStream stream, 
-			Node parent, Map<String, Integer> checkedIndexes, boolean fullMatch, boolean mustAdvance) {
+			Node parent, boolean fullMatch, boolean mustAdvance) {
 		List<TokenNode> matches = new ArrayList<>();
 		for (TokenNode prevMatch: prevMatches) {
 			int prevMatchIndex = prevMatch.getToken().getTokenIndex();
 			stream.setIndex(prevMatchIndex+1);
-			for (TokenNode match: matchOnce(stream, parent, prevMatch, new HashMap<>(checkedIndexes), fullMatch)) {
+			for (TokenNode match: matchOnce(stream, parent, prevMatch, fullMatch)) {
 				if (!mustAdvance || match.getToken().getTokenIndex() != prevMatchIndex)
 					matches.add(match);
 			}
@@ -91,8 +87,7 @@ public abstract class ElementSpec extends Spec {
 		return matches;
 	}
 	
-	public abstract List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, 
-			Map<String, Integer> checkedIndexes, boolean fullMatch);
+	public abstract List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, boolean fullMatch);
 
 	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
 	
