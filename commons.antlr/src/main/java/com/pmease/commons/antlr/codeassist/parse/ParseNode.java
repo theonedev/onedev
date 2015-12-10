@@ -1,16 +1,12 @@
 package com.pmease.commons.antlr.codeassist.parse;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.pmease.commons.antlr.codeassist.AssistStream;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
-import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.RuleSpec;
 
 public class ParseNode {
@@ -23,15 +19,19 @@ public class ParseNode {
 	
 	private final int nextElementIndex;
 	
+	private final boolean nextElementMatched;
+	
 	private final List<ParseNode> children = new ArrayList<>();
 	
 	private transient List<ElementSpec> elements;
 
-	public ParseNode(int fromStreamIndex, RuleSpec rule, int alternativeIndex, int nextElementIndex) {
+	public ParseNode(int fromStreamIndex, RuleSpec rule, int alternativeIndex, int nextElementIndex, 
+			boolean nextElementMatched) {
 		this.fromStreamIndex = fromStreamIndex;
 		this.rule = rule;
 		this.alternativeIndex = alternativeIndex;
 		this.nextElementIndex = nextElementIndex;
+		this.nextElementMatched = nextElementMatched;
 	}
 	
 	public int getFromStreamIndex() {
@@ -50,35 +50,22 @@ public class ParseNode {
 		return nextElementIndex;
 	}
 
+	public boolean isNextElementMatched() {
+		return nextElementMatched;
+	}
+
 	public List<ParseNode> getChildren() {
 		return children;
 	}
 	
-	private List<ElementSpec> getElements() {
+	public List<ElementSpec> getElements() {
 		if (elements == null)
 			elements = rule.getAlternatives().get(alternativeIndex).getElements();
 		return elements;
 	}
 	
-	public Set<ParseNode> predict(AssistStream stream) {
-		Set<ParseNode> predictions = new HashSet<>();
-		if (Math.abs(nextElementIndex) < getElements().size()) {
-			ElementSpec nextElement = getElements().get(Math.abs(nextElementIndex));
-			if (nextElement instanceof RuleRefElementSpec) {
-				RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) nextElement;
-				int tokenType;
-				if (!stream.isEof())
-					tokenType = stream.getCurrentToken().getType();
-				else
-					tokenType = -1;
-				RuleSpec elementRule = ruleRefElement.getRule();
-				if (elementRule.getFirstTokenTypes().contains(tokenType)) {
-					for (int i=0; i<elementRule.getAlternatives().size(); i++)
-						predictions.add(new ParseNode(stream.getIndex(), elementRule, i, 0));
-				}
-			}
-		}
-		return predictions;
+	public boolean isCompleted() {
+		return nextElementIndex == elements.size();
 	}
 	
 	@Override
@@ -93,6 +80,7 @@ public class ParseNode {
 				.append(rule.getName(), otherNode.rule.getName())
 				.append(alternativeIndex, otherNode.alternativeIndex)
 				.append(nextElementIndex, otherNode.nextElementIndex)
+				.append(nextElementMatched, otherNode.nextElementMatched)
 				.isEquals();
 	}
 
@@ -103,6 +91,7 @@ public class ParseNode {
 				.append(rule.getName())
 				.append(alternativeIndex)
 				.append(nextElementIndex)
+				.append(nextElementMatched)
 				.toHashCode();
 	}
 	

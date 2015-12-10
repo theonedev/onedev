@@ -55,5 +55,10 @@ public abstract class TokenElementSpec extends ElementSpec {
 	protected boolean matchesEmptyOnce() {
 		return false;
 	}
+
+	@Override
+	public boolean isToken(int tokenType) {
+		return type == tokenType;
+	}
 	
 }

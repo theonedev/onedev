@@ -71,4 +71,9 @@ public class NotTokenElementSpec extends ElementSpec {
 		return false;
 	}
 
+	@Override
+	public boolean isToken(int tokenType) {
+		return !notTokenTypes.contains(tokenType);
+	}
+
 }

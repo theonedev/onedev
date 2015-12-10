@@ -54,4 +54,9 @@ public class AnyTokenElementSpec extends ElementSpec {
 		return false;
 	}
 
+	@Override
+	public boolean isToken(int tokenType) {
+		return true;
+	}
+
 }

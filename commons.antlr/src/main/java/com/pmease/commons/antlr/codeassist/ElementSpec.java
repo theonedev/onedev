@@ -159,6 +159,8 @@ public abstract class ElementSpec extends Spec {
 			return matchesEmptyOnce();
 	}
 	
+	public abstract boolean isToken(int tokenType);
+	
 	protected abstract boolean matchesEmptyOnce();
 
 	public final String toString() {

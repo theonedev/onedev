@@ -96,4 +96,9 @@ public class RuleRefElementSpec extends ElementSpec {
 		return getRule().matchesEmpty();
 	}
 
+	@Override
+	public boolean isToken(int tokenType) {
+		return false;
+	}
+
 }
