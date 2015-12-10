@@ -17,7 +17,7 @@ public class RuleSpec extends Spec {
 	
 	private final List<AlternativeSpec> alternatives;
 	
-	private Optional<Set<Integer>> leadingTokenTypesOptional;
+	private Optional<Set<Integer>> firstTokenTypesOptional;
 	
 	private Boolean matchesEmpty;
 
@@ -59,9 +59,9 @@ public class RuleSpec extends Spec {
 				return initMatches(stream, parent, previous);
 		} 
 		
-		if (getLeadingTokenTypes() != null) {
+		if (getFirstTokenTypes() != null) {
 			int tokenType = stream.getCurrentToken().getType();
-			if (!getLeadingTokenTypes().contains(tokenType)) {
+			if (!getFirstTokenTypes().contains(tokenType)) {
 				if (matchesEmpty())
 					return initMatches(stream, parent, previous);
 				else
@@ -91,15 +91,15 @@ public class RuleSpec extends Spec {
 	}
 
 	@Override
-	public Set<Integer> getLeadingTokenTypes() {
-		if (leadingTokenTypesOptional == null) {
+	public Set<Integer> getFirstTokenTypes() {
+		if (firstTokenTypesOptional == null) {
 			// return this if this rule is invoked recursively
 			Set<Integer> recursiveTokenTypes = new HashSet<>();
-			leadingTokenTypesOptional = Optional.of(recursiveTokenTypes);
+			firstTokenTypesOptional = Optional.of(recursiveTokenTypes);
 			
 			Set<Integer> leadingTokenTypes =  new HashSet<>();
 			for (AlternativeSpec alternative: alternatives) {
-				Set<Integer> alternativeLeadingTokenTypes = alternative.getLeadingTokenTypes();
+				Set<Integer> alternativeLeadingTokenTypes = alternative.getFirstTokenTypes();
 				if (alternativeLeadingTokenTypes == null) {
 					leadingTokenTypes = null;
 					break;
@@ -107,9 +107,9 @@ public class RuleSpec extends Spec {
 					leadingTokenTypes.addAll(alternativeLeadingTokenTypes);
 				}
 			}
-			leadingTokenTypesOptional = Optional.fromNullable(leadingTokenTypes);
+			firstTokenTypesOptional = Optional.fromNullable(leadingTokenTypes);
 		}
-		return leadingTokenTypesOptional.orNull();
+		return firstTokenTypesOptional.orNull();
 	}
 	
 	@Override

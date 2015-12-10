@@ -73,10 +73,10 @@ public class AlternativeSpec extends Spec {
 	}
 
 	@Override
-	public Set<Integer> getLeadingTokenTypes() {
+	public Set<Integer> getFirstTokenTypes() {
 		Set<Integer> leadingTokenTypes = new HashSet<>();
 		for (ElementSpec elementSpec: elements) {
-			Set<Integer> elementLeadingTokenTypes = elementSpec.getLeadingTokenTypes();
+			Set<Integer> elementLeadingTokenTypes = elementSpec.getFirstTokenTypes();
 			if (elementLeadingTokenTypes == null) {
 				leadingTokenTypes = null;
 				break;

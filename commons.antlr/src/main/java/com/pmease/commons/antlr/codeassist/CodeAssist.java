@@ -145,7 +145,7 @@ public abstract class CodeAssist implements Serializable {
 		
 		for (RuleSpec rule: rules.values()) {
 			rule.matchesEmpty();
-			rule.getLeadingTokenTypes();
+			rule.getFirstTokenTypes();
 		}
 	}
 	

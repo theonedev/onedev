@@ -47,7 +47,7 @@ public abstract class TokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Set<Integer> getLeadingTokenTypes() {
+	public Set<Integer> getFirstTokenTypes() {
 		return Sets.newHashSet(type);
 	}
 

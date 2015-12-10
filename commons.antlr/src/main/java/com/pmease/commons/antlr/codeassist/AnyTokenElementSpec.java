@@ -45,7 +45,7 @@ public class AnyTokenElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Set<Integer> getLeadingTokenTypes() {
+	public Set<Integer> getFirstTokenTypes() {
 		return null;
 	}
 

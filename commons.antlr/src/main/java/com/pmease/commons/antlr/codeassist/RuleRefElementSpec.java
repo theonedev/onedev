@@ -87,8 +87,8 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Set<Integer> getLeadingTokenTypes() {
-		return getRule().getLeadingTokenTypes();
+	public Set<Integer> getFirstTokenTypes() {
+		return getRule().getFirstTokenTypes();
 	}
 
 	@Override

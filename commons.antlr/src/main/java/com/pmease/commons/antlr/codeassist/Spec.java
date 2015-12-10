@@ -63,7 +63,7 @@ public abstract class Spec implements Serializable {
 		return false;
 	}
 	
-	public abstract Set<Integer> getLeadingTokenTypes();
+	public abstract Set<Integer> getFirstTokenTypes();
 	
 	public abstract boolean matchesEmpty();
 	
