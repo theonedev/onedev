@@ -1,7 +1,8 @@
-package gitplex.product;
+package com.pmease.commons.antlr.codeassist.parse;
 
-import java.io.IOException;
 import java.util.List;
+
+import org.junit.Test;
 
 import com.pmease.commons.antlr.codeassist.AssistStream;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
@@ -9,14 +10,13 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
 import com.pmease.commons.antlr.codeassist.ParseTree;
 import com.pmease.commons.antlr.codeassist.RuleSpec;
-import com.pmease.commons.antlr.codeassist.parse.EarleyParser;
-import com.pmease.commons.lang.extractors.java.JavaLexer;
+import com.pmease.commons.antlr.codeassist.test.CodeAssistTest4Lexer;
 
-public class Test {
+public class EarleyParserTest {
 
-	@org.junit.Test
-	public void test() throws IOException {
-		CodeAssist assist = new CodeAssist(JavaLexer.class) {
+	@Test
+	public void test() {
+		CodeAssist assist = new CodeAssist(CodeAssistTest4Lexer.class) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -26,18 +26,14 @@ public class Test {
 			}
 			
 		};
-		AssistStream stream = assist.lex("public class A {public class A {public class A {}}}");
-		RuleSpec rule = assist.getRule("compilationUnit");
-		EarleyParser parser = new EarleyParser(rule, stream);
+		AssistStream stream = assist.lex("2+(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))");
+		RuleSpec rule = assist.getRule("expr");
+		System.out.println(new EarleyParser(rule, stream).getMatches().size());
 		
-		System.out.println(parser.getMatches().size());
-
 		long time = System.currentTimeMillis();
-		for (int i=0; i<100; i++) {
-			stream.setIndex(0);
-			new EarleyParser(rule, stream);
-		}
+		new EarleyParser(rule, stream).getMatches();
+		new EarleyParser(rule, stream).getMatches();
 		System.out.println(System.currentTimeMillis()-time);
 	}
-	
+
 }

@@ -65,7 +65,7 @@ public class ParseNode {
 	}
 	
 	public boolean isCompleted() {
-		return nextElementIndex == elements.size();
+		return nextElementIndex == getElements().size();
 	}
 	
 	@Override
@@ -81,6 +81,7 @@ public class ParseNode {
 				.append(alternativeIndex, otherNode.alternativeIndex)
 				.append(nextElementIndex, otherNode.nextElementIndex)
 				.append(nextElementMatched, otherNode.nextElementMatched)
+				.append(children, otherNode.children)
 				.isEquals();
 	}
 
@@ -92,7 +93,20 @@ public class ParseNode {
 				.append(alternativeIndex)
 				.append(nextElementIndex)
 				.append(nextElementMatched)
+				.append(children)
 				.toHashCode();
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		for (int i=0; i<nextElementIndex; i++)
+			buffer.append(getElements().get(i)).append(" ");
+		buffer.append(nextElementMatched?"~ ":"^ ");
+		for (int i=nextElementIndex; i<getElements().size(); i++)
+			buffer.append(getElements().get(i)).append(" ");
+		
+		return rule.getName() + " -> " + buffer.toString() + ": " + fromStreamIndex;
 	}
 	
 }

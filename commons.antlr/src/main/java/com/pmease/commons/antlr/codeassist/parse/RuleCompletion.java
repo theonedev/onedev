@@ -3,15 +3,22 @@ package com.pmease.commons.antlr.codeassist.parse;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class CompletedRange {
+public class RuleCompletion {
+	
+	private final String ruleName;
 	
 	private final int fromStreamIndex;
 	
 	private final int toStreamIndex;
 	
-	public CompletedRange(int fromStreamIndex, int toStreamIndex) {
+	public RuleCompletion(String ruleName, int fromStreamIndex, int toStreamIndex) {
+		this.ruleName = ruleName;
 		this.fromStreamIndex = fromStreamIndex;
 		this.toStreamIndex = toStreamIndex;
+	}
+
+	public String getRuleName() {
+		return ruleName;
 	}
 
 	public int getFromStreamIndex() {
@@ -24,20 +31,22 @@ public class CompletedRange {
 	
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof CompletedRange))
+		if (!(other instanceof RuleCompletion))
 			return false;
 		if (this == other)
 			return true;
-		CompletedRange otherRange = (CompletedRange) other;
+		RuleCompletion otherSpan = (RuleCompletion) other;
 		return new EqualsBuilder()
-				.append(fromStreamIndex, otherRange.fromStreamIndex)
-				.append(toStreamIndex, otherRange.toStreamIndex)
+				.append(ruleName, otherSpan.ruleName)
+				.append(fromStreamIndex, otherSpan.fromStreamIndex)
+				.append(toStreamIndex, otherSpan.toStreamIndex)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
+				.append(ruleName)
 				.append(fromStreamIndex)
 				.append(toStreamIndex)
 				.toHashCode();

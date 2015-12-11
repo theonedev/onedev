@@ -411,11 +411,11 @@ public abstract class CodeAssist implements Serializable {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = getLexerCtor().newInstance(new ANTLRInputStream(content));
 			lexer.removeErrorListeners();
-			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-			tokenStream.fill();
-			for (Token token: tokenStream.getTokens()) {
-				if (token.getType() != Token.EOF)
+			Token token = lexer.nextToken();
+			while (token.getType() != Token.EOF) {
+				if (token.getChannel() == Token.DEFAULT_CHANNEL)
 					tokens.add(token);
+				token = lexer.nextToken();
 			}
 			
 			return new AssistStream(tokens);
