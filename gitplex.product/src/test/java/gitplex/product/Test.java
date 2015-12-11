@@ -26,18 +26,10 @@ public class Test {
 			}
 			
 		};
-		AssistStream stream = assist.lex("public class A {public class A {public class A {}}}");
+		AssistStream stream = assist.lex("1");
 		RuleSpec rule = assist.getRule("compilationUnit");
 		EarleyParser parser = new EarleyParser(rule, stream);
-		
 		System.out.println(parser.getMatches().size());
-
-		long time = System.currentTimeMillis();
-		for (int i=0; i<100; i++) {
-			stream.setIndex(0);
-			new EarleyParser(rule, stream);
-		}
-		System.out.println(System.currentTimeMillis()-time);
 	}
 	
 }

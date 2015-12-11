@@ -1,7 +1,5 @@
 grammar CodeAssistTest4;
 
-stat: expr ';' | ID '=' expr ';' | ';';
-expr: INT | expr ('+'|'-'|'*'|'/') expr | '(' expr ')';
-ID: [a-zA-Z]+;
-INT: [0-9]+;
+a: b+;
+b: 'c''d';
 WS: [ \t\n]+ -> skip;

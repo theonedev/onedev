@@ -26,14 +26,9 @@ public class EarleyParserTest {
 			}
 			
 		};
-		AssistStream stream = assist.lex("2+(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))*(1+2)*(3+4)*(3/(3-2))");
-		RuleSpec rule = assist.getRule("expr");
+		AssistStream stream = assist.lex("cd");
+		RuleSpec rule = assist.getRule("a");
 		System.out.println(new EarleyParser(rule, stream).getMatches().size());
-		
-		long time = System.currentTimeMillis();
-		new EarleyParser(rule, stream).getMatches();
-		new EarleyParser(rule, stream).getMatches();
-		System.out.println(System.currentTimeMillis()-time);
 	}
 
 }

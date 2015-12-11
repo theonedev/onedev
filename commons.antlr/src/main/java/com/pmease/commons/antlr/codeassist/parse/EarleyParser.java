@@ -69,7 +69,7 @@ public class EarleyParser {
 				if (state.addNode(advancedNode))
 					process(advancedNode, state);
 			}
-		} else { // complete
+		} else if (node.getFromStreamIndex() < state.getStreamIndex()) { // complete
 			ParseState fromState = states.get(node.getFromStreamIndex() - initialStreamIndex);
 			for (ParseNode fromNode: fromState.getNodes()) {
 				if (!fromNode.isCompleted()) {
