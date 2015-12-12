@@ -13,13 +13,13 @@ public class ParsedElement {
 	
 	private final ElementSpec spec;
 	
-	private final int stopTokenIndex;
+	private final int nextTokenIndex;
 	
 	private final ParseNode node;
 	
-	public ParsedElement(@Nullable ElementSpec spec, int stopTokenIndex, @Nullable ParseNode node) {
+	public ParsedElement(@Nullable ElementSpec spec, int nextTokenIndex, @Nullable ParseNode node) {
 		this.spec = spec;
-		this.stopTokenIndex = stopTokenIndex;
+		this.nextTokenIndex = nextTokenIndex;
 		this.node = node;
 	}
 
@@ -28,13 +28,21 @@ public class ParsedElement {
 		return spec;
 	}
 	
+	public boolean isRoot() {
+		return spec == null;
+	}
+	
+	public boolean isTerminal() {
+		return node == null;
+	}
+	
 	@Nullable
 	public String getLabel() {
 		return spec!=null?spec.getLabel():null;
 	}
 
-	public int getStopTokenIndex() {
-		return stopTokenIndex;
+	public int getNextTokenIndex() {
+		return nextTokenIndex;
 	}
 
 	@Nullable
@@ -44,9 +52,9 @@ public class ParsedElement {
 	
 	public List<Token> getParsedTokens(List<Token> tokens) {
 		if (node != null)
-			return tokens.subList(node.getStartTokenIndex(), stopTokenIndex);
+			return tokens.subList(node.getStartTokenIndex(), nextTokenIndex);
 		else
-			return tokens.subList(stopTokenIndex, stopTokenIndex+1);
+			return tokens.subList(nextTokenIndex, nextTokenIndex+1);
 	}
 	
 	public List<ParsedElement> getChildrenByLabel(String label, boolean recursive) {
@@ -73,16 +81,6 @@ public class ParsedElement {
 			}
 		}
 		return children;
-	}
-	
-	public List<ParsedElement> getTailElements() {
-		List<ParsedElement> tailElements = new ArrayList<>();
-		tailElements.add(this);
-		if (node != null && !node.getParsedElements().isEmpty()) { 
-			ParsedElement tailElement = node.getParsedElements().get(node.getParsedElements().size()-1);
-			tailElements.addAll(tailElement.getTailElements());
-		}
-		return tailElements;
 	}
 	
 }

@@ -2,32 +2,24 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
-import com.pmease.commons.antlr.codeassist.parse.ParentChain;
-import com.pmease.commons.antlr.codeassist.parse.ParsedElement;
+import com.pmease.commons.antlr.codeassist.parse.ParentedElement;
 
 public class ElementSuggestion {
 	
-	private final ParentChain parentChain;
-	
-	private final ParsedElement expectingElement;
+	private final ParentedElement expectingElement;
 	
 	private final String matchWith;
 	
 	private final List<InputSuggestion> inputSuggestions;
 	
-	public ElementSuggestion(ParentChain parentChain, ParsedElement expectingElement, 
+	public ElementSuggestion(ParentedElement expectingElement, 
 			String matchWith, List<InputSuggestion> inputSuggestions) {
-		this.parentChain = parentChain;
 		this.expectingElement = expectingElement;
 		this.matchWith = matchWith;
 		this.inputSuggestions = inputSuggestions;
 	}
 
-	public ParentChain getParentChain() {
-		return parentChain;
-	}
-
-	public ParsedElement getExpectingElement() {
+	public ParentedElement getExpectingElement() {
 		return expectingElement;
 	}
 

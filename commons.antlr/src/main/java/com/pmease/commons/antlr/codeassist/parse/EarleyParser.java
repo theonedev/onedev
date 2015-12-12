@@ -109,7 +109,7 @@ public class EarleyParser {
 					&& ((TerminalElementSpec)nextElement).isToken(tokenType)) {
 				ParseNode scanNode;
 				List<ParsedElement> parsedElements = new ArrayList<>(node.getParsedElements());
-				parsedElements.add(new ParsedElement(nextElement, tokenIndex, null));
+				parsedElements.add(new ParsedElement(nextElement, tokenIndex+1, null));
 				if (nextElement.getMultiplicity() == Multiplicity.ONE 
 						|| nextElement.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
 					scanNode = new ParseNode(node.getStartTokenIndex(), node.getRuleSpec(), 

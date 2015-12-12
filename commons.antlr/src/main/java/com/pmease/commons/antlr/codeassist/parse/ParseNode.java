@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.pmease.commons.antlr.codeassist.AlternativeSpec;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.RuleSpec;
 
@@ -23,6 +24,8 @@ public class ParseNode {
 	private final boolean expectedElementSpecMatchedOnce;
 	
 	private final List<ParsedElement> parsedElements;
+	
+	private transient AlternativeSpec alternativeSpec;
 	
 	private transient List<ElementSpec> elementSpecs;
 
@@ -68,9 +71,15 @@ public class ParseNode {
 		return parsedElements;
 	}
 	
+	public AlternativeSpec getAlternativeSpec() {
+		if (alternativeSpec == null)
+			alternativeSpec = ruleSpec.getAlternatives().get(alternativeSpecIndex);
+		return alternativeSpec;
+	}
+	
 	public List<ElementSpec> getElementSpecs() {
 		if (elementSpecs == null)
-			elementSpecs = ruleSpec.getAlternatives().get(alternativeSpecIndex).getElements();
+			elementSpecs = getAlternativeSpec().getElements();
 		return elementSpecs;
 	}
 	
