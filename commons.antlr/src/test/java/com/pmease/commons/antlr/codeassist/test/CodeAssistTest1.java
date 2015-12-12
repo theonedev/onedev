@@ -58,7 +58,7 @@ public class CodeAssistTest1 {
 		assertEquals(1, suggestions.size());
 		assertEquals("cd ef g h:9", suggestions.get(0).toString());
 		
-		assertTrue(codeAssist.getRule("notRealAmbiguity").matches("o p q"));
+		assertTrue(codeAssist.getRule("notRealAmbiguity").getMatchDistance("o p q"));
 	}
 
 }

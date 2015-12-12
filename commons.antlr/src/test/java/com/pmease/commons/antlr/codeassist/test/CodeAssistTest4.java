@@ -66,11 +66,11 @@ public class CodeAssistTest4 {
 		assertEquals("5-:2", suggestions.get(3).toString());
 		assertEquals("5;:2", suggestions.get(4).toString());
 		
-		assertTrue(codeAssist.getRule("expr").matches("(1+2)+3"));
-		assertTrue(codeAssist.getRule("expr").matches("1+(2*3)"));
-		assertFalse(codeAssist.getRule("expr").matches("(1+2)+"));
-		assertFalse(codeAssist.getRule("expr").matches("1(2*3)"));
-		assertFalse(codeAssist.getRule("expr").matches("1/2+3)"));
+		assertTrue(codeAssist.getRule("expr").getMatchDistance("(1+2)+3"));
+		assertTrue(codeAssist.getRule("expr").getMatchDistance("1+(2*3)"));
+		assertFalse(codeAssist.getRule("expr").getMatchDistance("(1+2)+"));
+		assertFalse(codeAssist.getRule("expr").getMatchDistance("1(2*3)"));
+		assertFalse(codeAssist.getRule("expr").getMatchDistance("1/2+3)"));
 	}
 	
 }

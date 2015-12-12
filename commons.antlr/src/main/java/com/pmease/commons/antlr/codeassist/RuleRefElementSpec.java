@@ -5,19 +5,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.antlr.v4.runtime.Token;
+
 import com.google.common.base.Preconditions;
+import com.pmease.commons.antlr.codeassist.parse.EarleyParser;
 
 public class RuleRefElementSpec extends ElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
+	private final CodeAssist codeAssist;
+	
 	private final String ruleName;
 	
 	private transient RuleSpec rule;
 	
 	public RuleRefElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity, String ruleName) {
-		super(codeAssist, label, multiplicity);
-		
+		super(label, multiplicity);
+	
+		this.codeAssist = codeAssist;
 		this.ruleName = ruleName;
 	}
 
@@ -29,12 +35,6 @@ public class RuleRefElementSpec extends ElementSpec {
 	
 	public String getRuleName() {
 		return ruleName;
-	}
-
-	@Override
-	public List<ElementSuggestion> doSuggestFirst(ParseTree parseTree, Node parent, 
-			String matchWith, Set<String> checkedRules) {
-		return getRule().suggestFirst(parseTree, new Node(this, parent, null), matchWith, checkedRules);
 	}
 
 	@Override
@@ -73,12 +73,6 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public List<TokenNode> matchOnce(AssistStream stream, Node parent, Node previous, boolean fullMatch) {
-		parent = new Node(this, parent, previous);
-		return getRule().match(stream, parent, parent, fullMatch);
-	}
-
-	@Override
 	protected String toStringOnce() {
 		if (codeAssist.isBlockRule(ruleName))
 			return "(" + Preconditions.checkNotNull(getRule()) + ")";
@@ -87,18 +81,8 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Set<Integer> getFirstTokenTypes() {
-		return getRule().getFirstTokenTypes();
+	public int getMatchDistance(List<Token> tokens) {
+		return new EarleyParser(getRule(), tokens).getMatchDistance();
 	}
-
-	@Override
-	protected boolean matchesEmptyOnce() {
-		return getRule().matchesEmpty();
-	}
-
-	@Override
-	public boolean isToken(int tokenType) {
-		return false;
-	}
-
+	
 }

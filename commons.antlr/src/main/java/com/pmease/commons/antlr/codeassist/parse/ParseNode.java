@@ -1,7 +1,8 @@
 package com.pmease.commons.antlr.codeassist.parse;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -11,63 +12,72 @@ import com.pmease.commons.antlr.codeassist.RuleSpec;
 
 public class ParseNode {
 	
-	private final int fromStreamIndex;
+	private final int startTokenIndex;
 	
-	private final RuleSpec rule;
+	private final RuleSpec ruleSpec;
 	
-	private final int alternativeIndex;
+	private final int alternativeSpecIndex;
 	
-	private final int nextElementIndex;
+	private final int expectedElementSpecIndex;
 	
-	private final boolean nextElementMatched;
+	private final boolean expectedElementSpecMatchedOnce;
 	
-	private final List<ParseNode> children = new ArrayList<>();
+	private final List<ParsedElement> parsedElements;
 	
-	private transient List<ElementSpec> elements;
+	private transient List<ElementSpec> elementSpecs;
 
-	public ParseNode(int fromStreamIndex, RuleSpec rule, int alternativeIndex, int nextElementIndex, 
-			boolean nextElementMatched) {
-		this.fromStreamIndex = fromStreamIndex;
-		this.rule = rule;
-		this.alternativeIndex = alternativeIndex;
-		this.nextElementIndex = nextElementIndex;
-		this.nextElementMatched = nextElementMatched;
+	public ParseNode(int startTokenIndex, RuleSpec ruleSpec, int alternativeSpecIndex, int nextElementSpecIndex, 
+			boolean nextElementSpecMatchedOnce, List<ParsedElement> parsedElements) {
+		this.startTokenIndex = startTokenIndex;
+		this.ruleSpec = ruleSpec;
+		this.alternativeSpecIndex = alternativeSpecIndex;
+		this.expectedElementSpecIndex = nextElementSpecIndex;
+		this.expectedElementSpecMatchedOnce = nextElementSpecMatchedOnce;
+		this.parsedElements = parsedElements;
 	}
 	
-	public int getFromStreamIndex() {
-		return fromStreamIndex;
-	}
-
-	public RuleSpec getRule() {
-		return rule;
+	public int getStartTokenIndex() {
+		return startTokenIndex;
 	}
 
-	public int getAlternativeIndex() {
-		return alternativeIndex;
+	public RuleSpec getRuleSpec() {
+		return ruleSpec;
 	}
 
-	public int getNextElementIndex() {
-		return nextElementIndex;
+	public int getAlternativeSpecIndex() {
+		return alternativeSpecIndex;
 	}
 
-	public boolean isNextElementMatched() {
-		return nextElementMatched;
+	public int getExpectedElementSpecIndex() {
+		return expectedElementSpecIndex;
 	}
 
-	public List<ParseNode> getChildren() {
-		return children;
+	public boolean isExpectedElementSpecMatchedOnce() {
+		return expectedElementSpecMatchedOnce;
 	}
 	
-	public List<ElementSpec> getElements() {
-		if (elements == null)
-			elements = rule.getAlternatives().get(alternativeIndex).getElements();
-		return elements;
+	@Nullable
+	public ElementSpec getExpectedElementSpec() {
+		if (isCompleted())
+			return null;
+		else
+			return getElementSpecs().get(expectedElementSpecIndex);
+	}
+
+	public List<ParsedElement> getParsedElements() {
+		return parsedElements;
+	}
+	
+	public List<ElementSpec> getElementSpecs() {
+		if (elementSpecs == null)
+			elementSpecs = ruleSpec.getAlternatives().get(alternativeSpecIndex).getElements();
+		return elementSpecs;
 	}
 	
 	public boolean isCompleted() {
-		return nextElementIndex == getElements().size();
+		return expectedElementSpecIndex == getElementSpecs().size();
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof ParseNode))
@@ -76,37 +86,37 @@ public class ParseNode {
 			return true;
 		ParseNode otherNode = (ParseNode) other;
 		return new EqualsBuilder()
-				.append(fromStreamIndex, otherNode.fromStreamIndex)
-				.append(rule.getName(), otherNode.rule.getName())
-				.append(alternativeIndex, otherNode.alternativeIndex)
-				.append(nextElementIndex, otherNode.nextElementIndex)
-				.append(nextElementMatched, otherNode.nextElementMatched)
-				.append(children, otherNode.children)
+				.append(startTokenIndex, otherNode.startTokenIndex)
+				.append(ruleSpec.getName(), otherNode.ruleSpec.getName())
+				.append(alternativeSpecIndex, otherNode.alternativeSpecIndex)
+				.append(expectedElementSpecIndex, otherNode.expectedElementSpecIndex)
+				.append(expectedElementSpecMatchedOnce, otherNode.expectedElementSpecMatchedOnce)
+				.append(parsedElements, otherNode.parsedElements)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(fromStreamIndex)
-				.append(rule.getName())
-				.append(alternativeIndex)
-				.append(nextElementIndex)
-				.append(nextElementMatched)
-				.append(children)
+				.append(startTokenIndex)
+				.append(ruleSpec.getName())
+				.append(alternativeSpecIndex)
+				.append(expectedElementSpecIndex)
+				.append(expectedElementSpecMatchedOnce)
+				.append(parsedElements)
 				.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for (int i=0; i<nextElementIndex; i++)
-			buffer.append(getElements().get(i)).append(" ");
-		buffer.append(nextElementMatched?"~ ":"^ ");
-		for (int i=nextElementIndex; i<getElements().size(); i++)
-			buffer.append(getElements().get(i)).append(" ");
+		for (int i=0; i<expectedElementSpecIndex; i++)
+			buffer.append(getElementSpecs().get(i)).append(" ");
+		buffer.append(expectedElementSpecMatchedOnce?"~ ":"^ ");
+		for (int i=expectedElementSpecIndex; i<getElementSpecs().size(); i++)
+			buffer.append(getElementSpecs().get(i)).append(" ");
 		
-		return rule.getName() + " -> " + buffer.toString() + ": " + fromStreamIndex;
+		return ruleSpec.getName() + " -> " + buffer.toString() + ": " + startTokenIndex;
 	}
 	
 }

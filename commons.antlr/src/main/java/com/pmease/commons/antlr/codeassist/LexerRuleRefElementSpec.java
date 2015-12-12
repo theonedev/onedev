@@ -8,18 +8,24 @@ import java.util.Set;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-public class LexerRuleRefElementSpec extends TokenElementSpec {
+public class LexerRuleRefElementSpec extends TerminalElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
+	private final CodeAssist codeAssist;
+	
+	private final int tokenType;
+	
 	private final String ruleName;
 	
 	private transient Optional<RuleSpec> rule;
 	
 	public LexerRuleRefElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity, 
 			int tokenType, String ruleName) {
-		super(codeAssist, label, multiplicity, tokenType);
-
+		super(label, multiplicity);
+		
+		this.codeAssist = codeAssist;
+		this.tokenType = tokenType;
 		this.ruleName = ruleName;
 	}
 
@@ -31,15 +37,6 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 		if (rule == null)
 			rule = Optional.fromNullable(codeAssist.getRule(ruleName));
 		return rule.orNull();
-	}
-
-	@Override
-	public List<ElementSuggestion> doSuggestFirst(ParseTree parseTree, Node parent,  
-			String matchWith, Set<String> checkedRules) {
-		if (getRule() != null)
-			return getRule().suggestFirst(parseTree, new Node(this, parent, null), matchWith, checkedRules);
-		else
-			return new ArrayList<>();
 	}
 
 	@Override
@@ -86,6 +83,11 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 			return "(" + Preconditions.checkNotNull(getRule()) + ")";
 		else 
 			return ruleName;
+	}
+
+	@Override
+	public boolean isToken(int tokenType) {
+		return tokenType == this.tokenType;
 	}
 	
 }

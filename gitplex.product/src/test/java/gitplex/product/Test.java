@@ -3,7 +3,8 @@ package gitplex.product;
 import java.io.IOException;
 import java.util.List;
 
-import com.pmease.commons.antlr.codeassist.AssistStream;
+import org.antlr.v4.runtime.Token;
+
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
@@ -26,9 +27,9 @@ public class Test {
 			}
 			
 		};
-		AssistStream stream = assist.lex("1");
+		List<Token> tokens = assist.lex("1");
 		RuleSpec rule = assist.getRule("compilationUnit");
-		EarleyParser parser = new EarleyParser(rule, stream);
+		EarleyParser parser = new EarleyParser(rule, tokens);
 		System.out.println(parser.getMatches().size());
 	}
 	

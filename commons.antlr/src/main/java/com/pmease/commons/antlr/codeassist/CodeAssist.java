@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,6 +55,11 @@ import com.pmease.commons.antlr.ANTLRv4Parser.RuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.SetElementContext;
 import com.pmease.commons.antlr.AntlrUtils;
 import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
+import com.pmease.commons.antlr.codeassist.parse.EarleyParser;
+import com.pmease.commons.antlr.codeassist.parse.ParentChain;
+import com.pmease.commons.antlr.codeassist.parse.ParseNode;
+import com.pmease.commons.antlr.codeassist.parse.ParseState;
+import com.pmease.commons.antlr.codeassist.parse.ParsedElement;
 import com.pmease.commons.util.StringUtils;
 
 public abstract class CodeAssist implements Serializable {
@@ -142,11 +148,6 @@ public abstract class CodeAssist implements Serializable {
 				throw new RuntimeException(e);
 			}
 		}
-		
-		for (RuleSpec rule: rules.values()) {
-			rule.matchesEmpty();
-			rule.getFirstTokenTypes();
-		}
 	}
 	
 	private Constructor<? extends Lexer> getLexerCtor() {
@@ -168,7 +169,7 @@ public abstract class CodeAssist implements Serializable {
 			RuleBlockContext ruleBlockContext = parserRuleSpecContext.ruleBlock();
 			for (LabeledAltContext labeledAltContext: ruleBlockContext.ruleAltList().labeledAlt())
 				alternatives.add(newAltenative(labeledAltContext));
-			return new RuleSpec(this, name, alternatives);
+			return new RuleSpec(name, alternatives);
 		} else {
 			return newRule(ruleSpecContext.lexerRuleSpec());
 		}
@@ -181,7 +182,7 @@ public abstract class CodeAssist implements Serializable {
 		LexerRuleBlockContext lexerRuleBlockContext = lexerRuleSpecContext.lexerRuleBlock();
 		for (LexerAltContext lexerAltContext: lexerRuleBlockContext.lexerAltList().lexerAlt())
 			alternatives.add(newAltenative(lexerAltContext));
-		return new RuleSpec(this, name, alternatives);
+		return new RuleSpec(name, alternatives);
 	}
 	
 	private AlternativeSpec newAltenative(LexerAltContext lexerAltContext) {
@@ -194,7 +195,7 @@ public abstract class CodeAssist implements Serializable {
 			}
 		}
 		
-		return new AlternativeSpec(this, null, elements);
+		return new AlternativeSpec(null, elements);
 	}
 	
 	private AlternativeSpec newAltenative(LabeledAltContext labeledAltContext) {
@@ -234,7 +235,7 @@ public abstract class CodeAssist implements Serializable {
 				elements.add(element);
 		}
 		
-		return new AlternativeSpec(this, label, elements);
+		return new AlternativeSpec(label, elements);
 	}
 	
 	@Nullable
@@ -270,14 +271,14 @@ public abstract class CodeAssist implements Serializable {
 			} else {
 				String literal = getLiteral(atomContext.terminal().STRING_LITERAL());
 				int tokenType = tokenTypesByLiteral.get(literal);
-				return new LiteralElementSpec(this, label, multiplicity, tokenType, literal);
+				return new LiteralElementSpec(label, multiplicity, tokenType, literal);
 			}
 		} else if (atomContext.ruleref() != null) {
 			return new RuleRefElementSpec(this, label, multiplicity, atomContext.ruleref().RULE_REF().getText());
 		} else if (atomContext.notSet() != null) {
 			return new NotTokenElementSpec(this, label, multiplicity, getNegativeTokenTypes(atomContext.notSet()));
 		} else if (atomContext.DOT() != null) {
-			return new AnyTokenElementSpec(this, label, multiplicity);
+			return new AnyTokenElementSpec(label, multiplicity);
 		} else {
 			throw new IllegalStateException();
 		}
@@ -306,7 +307,7 @@ public abstract class CodeAssist implements Serializable {
 				Integer tokenType = tokenTypesByLiteral.get(literal);
 				if (tokenType == null)
 					tokenType = 0;
-				return new LiteralElementSpec(this, label, multiplicity, tokenType, literal);
+				return new LiteralElementSpec(label, multiplicity, tokenType, literal);
 			}
 		} else if (lexerAtomContext.RULE_REF() != null) {
 			return new RuleRefElementSpec(this, label, multiplicity, lexerAtomContext.RULE_REF().getText());
@@ -315,7 +316,7 @@ public abstract class CodeAssist implements Serializable {
 				|| lexerAtomContext.LEXER_CHAR_SET()!=null 
 				|| lexerAtomContext.range() != null) {
 			// Use AnyTokenElementSpec here to as it does not affect our code assist analysis
-			return new AnyTokenElementSpec(this, label, multiplicity);
+			return new AnyTokenElementSpec(label, multiplicity);
 		} else {
 			throw new IllegalStateException();
 		}
@@ -365,7 +366,7 @@ public abstract class CodeAssist implements Serializable {
 			alternatives.add(newAltenative(null, alternativeContext));
 		String ruleName = UUID.randomUUID().toString();
 		blockRuleNames.add(ruleName);
-		RuleSpec rule = new RuleSpec(this, ruleName, alternatives);
+		RuleSpec rule = new RuleSpec(ruleName, alternatives);
 		rules.put(ruleName, rule);
 		return new RuleRefElementSpec(this, label, newMultiplicity(ebnfSuffixContext), ruleName);
 	}
@@ -376,7 +377,7 @@ public abstract class CodeAssist implements Serializable {
 			alternatives.add(newAltenative(lexerAltContext));
 		String ruleName = UUID.randomUUID().toString();
 		blockRuleNames.add(ruleName);
-		RuleSpec rule = new RuleSpec(this, ruleName, alternatives);
+		RuleSpec rule = new RuleSpec(ruleName, alternatives);
 		rules.put(ruleName, rule);
 		return new RuleRefElementSpec(this, label, newMultiplicity(ebnfSuffixContext), ruleName);
 	}
@@ -406,7 +407,7 @@ public abstract class CodeAssist implements Serializable {
 		return rules.get(ruleName);
 	}
 	
-	public final AssistStream lex(String content) {
+	public final List<Token> lex(String content) {
 		try {
 			List<Token> tokens = new ArrayList<>();
 			Lexer lexer = getLexerCtor().newInstance(new ANTLRInputStream(content));
@@ -418,7 +419,7 @@ public abstract class CodeAssist implements Serializable {
 				token = lexer.nextToken();
 			}
 			
-			return new AssistStream(tokens);
+			return tokens;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			throw new RuntimeException(e);
@@ -427,8 +428,6 @@ public abstract class CodeAssist implements Serializable {
 	
 	public List<InputCompletion> suggest(InputStatus inputStatus, String ruleName) {
 		RuleSpec rule = Preconditions.checkNotNull(getRule(ruleName));
-		
-		AssistStream stream = lex(inputStatus.getContentBeforeCaret());
 		
 		String inputContent = inputStatus.getContent();
 		List<InputCompletion> inputSuggestions = new ArrayList<>();
@@ -549,39 +548,59 @@ public abstract class CodeAssist implements Serializable {
 		return inputSuggestions;
 	}
 	
-	private int fillSuggestions(List<ElementSuggestion> suggestions, InputStatus inputStatus, 
-			List<TokenNode> matches, RuleSpec spec, AssistStream stream) {
-		int maxTokenIndex = getMaxIndex(matches);
-		if (maxTokenIndex != -1) {
-			String matchWith = inputStatus.getContent().substring(
-					stream.getToken(maxTokenIndex).getStopIndex()+1, inputStatus.getCaret());
+	private void fillSuggestions(List<ElementSuggestion> suggestions, EarleyParser parser, 
+			ParseState state, InputStatus inputStatus) {
+		for (ParseNode node: state.getNodesExpectingTerminal()) {
+			List<ParsedElement> rootElements = parser.assumeCompleted(node, state.getNextTokenIndex());
+			String matchWith;
+			if (state.getNextTokenIndex() != 0) {
+				int stopIndex = parser.getTokens().get(state.getNextTokenIndex()-1).getStopIndex()+1;
+				matchWith = inputStatus.getContent().substring(stopIndex, inputStatus.getCaret());
+			} else {
+				matchWith = inputStatus.getContentBeforeCaret();
+			}
 			matchWith = StringUtils.trimStart(matchWith);
-			for (TokenNode match: matches) {
-				if (match.getToken().getTokenIndex() == maxTokenIndex) {
-					ParseTree parseTree = Preconditions.checkNotNull(ParseTree.of(match));
-					match = parseTree.getLastNode();
-					ElementSpec matchSpec = (ElementSpec) match.getSpec();
-					suggestions.addAll(matchSpec.suggestNext(parseTree, match.getParent(), matchWith));
+			for (ParsedElement rootElement: rootElements) {
+				List<ParsedElement> incompleteElements = rootElement.getTailElements();
+				Preconditions.checkState(incompleteElements.size()>1);
+				List<ParsedElement> expectingElements = new ArrayList<>();
+				expectingElements.add(incompleteElements.get(incompleteElements.size()-1));
+				for (int i=incompleteElements.size()-1; i>0; i--) {
+					ParsedElement parentElement = incompleteElements.get(i-1);
+					if (parentElement.getNode().getParsedElements().size() == 1) 
+						expectingElements.add(parentElement);
+					else
+						break;
+				}
+				for (int i=expectingElements.size()-1; i>=0; i--) {
+					ParsedElement expectingElement = expectingElements.get(i);
+					int missingElementIndex = incompleteElements.indexOf(expectingElement);
+					List<ParsedElement> parents = new ArrayList<>(incompleteElements.subList(0, missingElementIndex));
+					Collections.reverse(parents);
+					ParentChain parentChain = new ParentChain(parents);
+					List<InputSuggestion> inputSuggestions = suggest(parentChain, expectingElement, matchWith);
+					if (inputSuggestions != null) {
+						suggestions.add(new ElementSuggestion(parentChain, expectingElement, matchWith, inputSuggestions));
+						break;
+					}
 				}
 			}
-		} else {
-			suggestions.addAll(suggestFirst(inputStatus, spec));
 		}
-		return maxTokenIndex;
  	}
 	
-	private List<ElementSuggestion> suggestFirst(InputStatus inputStatus, RuleSpec spec) {
-		String matchWith = StringUtils.trimStart(inputStatus.getContentBeforeCaret());
-		return spec.suggestFirst(null, null, matchWith, new HashSet<String>());			
-	}
-	
-	private List<ElementCompletion> suggest(RuleSpec spec, AssistStream stream, InputStatus inputStatus) {
+	private List<ElementCompletion> suggest(RuleSpec spec, InputStatus inputStatus) {
 		List<ElementCompletion> completions = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
-		List<TokenNode> matches = spec.match(stream, null, null, false);
-		int maxTokenIndex = fillSuggestions(suggestions, inputStatus, matches, spec, stream);
 		
+		List<Token> tokens = lex(inputStatus.getContentBeforeCaret());
+		EarleyParser parser = new EarleyParser(spec, tokens);
+		
+		if (parser.getStates().size() >= 1) {
+			ParseState lastState = parser.getStates().get(parser.getStates().size()-1);
+			fillSuggestions(suggestions, parser, lastState, inputStatus);
+		}
+
 		/*
 		 * do another match by not considering the last token. This is necessary for 
 		 * instance for below cases:
@@ -594,11 +613,9 @@ public abstract class CodeAssist implements Serializable {
 		 * if user input value containing spaces without surrounding quotes, we 
 		 * suggest the user to quote the value. 
 		 */
-		if (maxTokenIndex>0) {
-			matches = spec.match(new AssistStream(stream.getTokens().subList(0, maxTokenIndex)), null, null, false);
-			fillSuggestions(suggestions, inputStatus, matches, spec, stream);
-		} else if (maxTokenIndex == 0) {
-			suggestions.addAll(suggestFirst(inputStatus, spec));
+		if (parser.getStates().size() >= 2) {
+			ParseState stateBeforeLast = parser.getStates().get(parser.getStates().size()-2);
+			fillSuggestions(suggestions, parser, stateBeforeLast, inputStatus);
 		}
 
 		String inputContent = inputStatus.getContent();
@@ -606,18 +623,18 @@ public abstract class CodeAssist implements Serializable {
 			int replaceStart = inputStatus.getCaret() - suggestion.getMatchWith().length();
 			int replaceEnd = inputStatus.getCaret();
 			String contentAfterReplaceStart = inputContent.substring(replaceStart);
-			AssistStream streamAfterReplaceStart = lex(contentAfterReplaceStart);
+			List<Token> tokensAfterReplaceStart = lex(contentAfterReplaceStart);
 			
 			/*
 			 * if input around the caret matches spec of the suggestion, we then replace 
 			 * the matched text with suggestion, instead of simply inserting the 
 			 * suggested content
 			 */
-			if (!streamAfterReplaceStart.isEof() && streamAfterReplaceStart.getToken(0).getStartIndex() == 0) {
-				ElementSpec elementSpec = (ElementSpec) suggestion.getNode().getSpec();
-				maxTokenIndex = getMaxIndex(elementSpec.matchOnce(streamAfterReplaceStart, null, null, true));
-				if (maxTokenIndex != -1) {
-					int charIndex = streamAfterReplaceStart.getToken(maxTokenIndex).getStopIndex()+1;
+			if (!tokensAfterReplaceStart.isEmpty() && tokensAfterReplaceStart.get(0).getStartIndex() == 0) {
+				ElementSpec elementSpec = (ElementSpec) suggestion.getExpectingElement().getSpec();
+				int matchDistance = elementSpec.getMatchDistance(tokensAfterReplaceStart);
+				if (matchDistance != -1) {
+					int charIndex = tokensAfterReplaceStart.get(matchDistance).getStopIndex()+1;
 					if (replaceStart + charIndex > replaceEnd)
 						replaceEnd = replaceStart + charIndex;
 				}
@@ -658,8 +675,8 @@ public abstract class CodeAssist implements Serializable {
 	private int getMaxIndex(List<TokenNode> matches) {
 		int maxIndex = -1;
 		for (TokenNode match: matches) {
-			if (match.getToken().getTokenIndex() > maxIndex)
-				maxIndex = match.getToken().getTokenIndex();
+			if (match.getToken().getNextTokenIndex() > maxIndex)
+				maxIndex = match.getToken().getNextTokenIndex();
 		}
 		return maxIndex;
 	}
@@ -729,34 +746,7 @@ public abstract class CodeAssist implements Serializable {
 		return literals;
 	}
 
-	protected abstract List<InputSuggestion> suggest(@Nullable ParseTree parseTree, 
-			Node elementNode, String matchWith);
+	protected abstract List<InputSuggestion> suggest(ParentChain parentChain, 
+			ParsedElement missingElement, String matchWith);
 
-	public void prune(List<TokenNode> matches, AssistStream stream) {
-		int maxIndex = -1;
-		Map<Integer, List<TokenNode>> index2matches = new HashMap<>();
-		for (TokenNode match: matches) {
-			int index = match.getToken().getTokenIndex();
-			if (index > maxIndex)
-				maxIndex = index;
-			List<TokenNode> matchesAtIndex = index2matches.get(index);
-			if (matchesAtIndex == null) {
-				matchesAtIndex = new ArrayList<>();
-				index2matches.put(index, matchesAtIndex);
-			}
-			matchesAtIndex.add(match);
-		}
-		matches.clear();
-
-		for (Map.Entry<Integer, List<TokenNode>> entry: index2matches.entrySet()) {
-			int index = entry.getKey();
-			if (index + pruneThreshold >= maxIndex) {
-				if (stream.isLastIndex(index))
-					matches.addAll(entry.getValue());
-				else
-					matches.add(entry.getValue().get(0));
-			}
-		}
-	}
-	
 }

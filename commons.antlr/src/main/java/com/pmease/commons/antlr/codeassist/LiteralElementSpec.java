@@ -1,38 +1,27 @@
 package com.pmease.commons.antlr.codeassist;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
 
-public class LiteralElementSpec extends TokenElementSpec {
+public class LiteralElementSpec extends TerminalElementSpec {
 
 	private static final long serialVersionUID = 1L;
 	
+	private final int tokenType;
+	
 	private final String literal;
 	
-	public LiteralElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity, 
+	public LiteralElementSpec(String label, Multiplicity multiplicity, 
 			int tokenType, String literal) {
-		super(codeAssist, label, multiplicity, tokenType);
+		super(label, multiplicity);
 		
+		this.tokenType = tokenType;
 		this.literal = literal;
 	}
 
 	public String getLiteral() {
 		return literal;
-	}
-
-	@Override
-	public List<ElementSuggestion> doSuggestFirst(ParseTree parseTree, Node parent, 
-			String matchWith, Set<String> checkedRules) {
-		if (literal.toLowerCase().startsWith(matchWith.toLowerCase())) {
-			InputSuggestion text = new InputSuggestion(literal);
-			return Lists.newArrayList(new ElementSuggestion(parseTree, new Node(this, parent, null), 
-					matchWith, Lists.newArrayList(text)));
-		} else {
-			return new ArrayList<>();
-		}
 	}
 
 	@Override
@@ -43,6 +32,11 @@ public class LiteralElementSpec extends TokenElementSpec {
 	@Override
 	protected String toStringOnce() {
 		return "'" + literal + "'";
+	}
+
+	@Override
+	public boolean isToken(int tokenType) {
+		return tokenType == this.tokenType;
 	}
 	
 }

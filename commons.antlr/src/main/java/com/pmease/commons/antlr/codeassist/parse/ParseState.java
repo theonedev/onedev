@@ -5,9 +5,12 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.antlr.codeassist.ElementSpec;
+import com.pmease.commons.antlr.codeassist.TerminalElementSpec;
+
 public class ParseState {
 	
-	private final int streamIndex;
+	private final int nextTokenIndex;
 	
 	private final Set<ParseNode> nodes;
 	
@@ -17,19 +20,19 @@ public class ParseState {
 		return nodes;
 	}
 	
-	public ParseState(int streamIndex, Set<ParseNode> nodes) {
-		this.streamIndex = streamIndex;
+	public ParseState(int tokenIndex, Set<ParseNode> nodes) {
+		this.nextTokenIndex = tokenIndex;
 		this.nodes = nodes;
 		for (ParseNode node: nodes) {
 			if (node.isCompleted())
-				ruleCompletions.add(new RuleCompletion(node.getRule().getName(), node.getFromStreamIndex(), streamIndex));
+				ruleCompletions.add(new RuleCompletion(node.getRuleSpec().getName(), node.getStartTokenIndex(), tokenIndex));
 		}
 	}
 	
 	@Nullable
 	private RuleCompletion getRuleCompletion(ParseNode node) {
 		if (node.isCompleted())
-			return new RuleCompletion(node.getRule().getName(), node.getFromStreamIndex(), streamIndex);
+			return new RuleCompletion(node.getRuleSpec().getName(), node.getStartTokenIndex(), nextTokenIndex);
 		else
 			return null;
 	}
@@ -52,8 +55,29 @@ public class ParseState {
 		return false;
 	}
 
-	public int getStreamIndex() {
-		return streamIndex;
+	public int getNextTokenIndex() {
+		return nextTokenIndex;
+	}
+	
+	public Set<ParseNode> getMatches(String ruleName) {
+		Set<ParseNode> matches = new HashSet<>();
+		for (ParseNode node: nodes) {
+			if (node.getRuleSpec().getName().equals(ruleName) 
+					&& node.getStartTokenIndex() == 0 && node.isCompleted()) {
+				matches.add(node);
+			}
+		}
+		return matches;
+	}
+	
+	public Set<ParseNode> getNodesExpectingTerminal() {
+		Set<ParseNode> nodesExpectingTerminal = new HashSet<>();
+		for (ParseNode node: nodes) {
+			ElementSpec expectingSpec = node.getExpectedElementSpec();
+			if (expectingSpec instanceof TerminalElementSpec)
+				nodesExpectingTerminal.add(node);
+		}
+		return nodesExpectingTerminal;
 	}
 
 	@Override

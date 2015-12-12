@@ -3,6 +3,8 @@ package com.pmease.commons.antlr.codeassist;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 public abstract class SurroundingAware {
 	
 	private final CodeAssist codeAssist;
@@ -17,18 +19,23 @@ public abstract class SurroundingAware {
 		this.suffix = suffix;
 	}
 	
-	private boolean matches(Spec spec, String content) {
-		AssistStream stream = codeAssist.lex(content);
-		if (stream.isEof()) {
-			return content.length() == 0 && spec.matches(stream);
+	private boolean matches(ElementSpec spec, String content) {
+		List<Token> tokens = codeAssist.lex(content);
+		int start;
+		int stop;
+		if (tokens.isEmpty()) {
+			start = stop = 0;
 		} else {
-			int start = stream.getToken(0).getStartIndex();
-			int stop = stream.getToken(stream.size()-1).getStopIndex()+1;
-			return start == 0 && stop == content.length() && spec.matches(stream);
+			start = tokens.get(0).getStartIndex();
+			stop = tokens.get(tokens.size()-1).getStopIndex()+1;
 		}
+		if (start == 0 && stop == content.length())
+			return spec.getMatchDistance(tokens) != -1;
+		else 
+			return false;
 	}
 	
-	public List<InputSuggestion> suggest(Node elementNode, String matchWith) {
+	public List<InputSuggestion> suggest(ElementSpec spec, String matchWith) {
 		if (matchWith.startsWith(prefix))
 			matchWith = matchWith.substring(prefix.length());
 		if (matchWith.endsWith(suffix))
@@ -42,7 +49,7 @@ public abstract class SurroundingAware {
 		for (InputSuggestion suggestion: suggestions) {
 			String content = suggestion.getContent();
 			int caret = suggestion.getCaret();
-			if (!matches(elementNode.getSpec(), content)) {
+			if (!matches(spec, content)) {
 				content = prefix + content + suffix;
 				if (caret == suggestion.getContent().length())
 					caret = content.length();
@@ -61,9 +68,9 @@ public abstract class SurroundingAware {
 		 * in this case, below code will suggest you to quote the value if it contains spaces as 
 		 * otherwise it will fail the match below
 		 */
-		if (!matchWithIncluded && !matches(elementNode.getSpec(), matchWith)) {
+		if (!matchWithIncluded && !matches(spec, matchWith)) {
 			matchWith = prefix + matchWith + suffix;
-			if (matches(elementNode.getSpec(), matchWith))
+			if (matches(spec, matchWith))
 				checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription()));
 		}
 		return checkedSuggestions;

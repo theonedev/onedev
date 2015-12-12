@@ -2,33 +2,33 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import com.pmease.commons.antlr.codeassist.parse.ParentChain;
+import com.pmease.commons.antlr.codeassist.parse.ParsedElement;
 
 public class ElementSuggestion {
 	
-	private final ParseTree parseTree; 
+	private final ParentChain parentChain;
+	
+	private final ParsedElement expectingElement;
 	
 	private final String matchWith;
 	
-	private final Node node;
-	
 	private final List<InputSuggestion> inputSuggestions;
 	
-	public ElementSuggestion(@Nullable ParseTree parseTree, Node node, String matchWith, 
-			List<InputSuggestion> inputSuggestions) {
-		this.parseTree = parseTree;
-		this.node = node;
+	public ElementSuggestion(ParentChain parentChain, ParsedElement expectingElement, 
+			String matchWith, List<InputSuggestion> inputSuggestions) {
+		this.parentChain = parentChain;
+		this.expectingElement = expectingElement;
 		this.matchWith = matchWith;
 		this.inputSuggestions = inputSuggestions;
 	}
 
-	@Nullable
-	public ParseTree getParseTree() {
-		return parseTree;
+	public ParentChain getParentChain() {
+		return parentChain;
 	}
 
-	public Node getNode() {
-		return node;
+	public ParsedElement getExpectingElement() {
+		return expectingElement;
 	}
 
 	public String getMatchWith() {

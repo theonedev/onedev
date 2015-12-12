@@ -2,9 +2,9 @@ package com.pmease.commons.antlr.codeassist.parse;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
 import org.junit.Test;
 
-import com.pmease.commons.antlr.codeassist.AssistStream;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.Node;
@@ -26,9 +26,9 @@ public class EarleyParserTest {
 			}
 			
 		};
-		AssistStream stream = assist.lex("cd");
+		List<Token> tokens = assist.lex("cd");
 		RuleSpec rule = assist.getRule("a");
-		System.out.println(new EarleyParser(rule, stream).getMatches().size());
+		System.out.println(new EarleyParser(rule, tokens).getMatches().size());
 	}
 
 }
