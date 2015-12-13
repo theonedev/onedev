@@ -17,9 +17,9 @@ import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
+import com.pmease.commons.antlr.codeassist.parse.Element;
 
 /**
  * This test case uses MySQL select grammar.
@@ -53,8 +53,8 @@ public class CodeAssistTest5 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(final ParseTree parseTree, Node elementNode, String matchWith) {
-			ElementSpec spec = (ElementSpec) elementNode.getSpec();
+		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith) {
+			ElementSpec spec = element.getSpec();
 			if (spec instanceof RuleRefElementSpec) {
 				RuleRefElementSpec ruleElementSpec = (RuleRefElementSpec) spec;
 				if (ruleElementSpec.getRuleName().equals("schema_name")) {
@@ -69,11 +69,11 @@ public class CodeAssistTest5 {
 				LexerRuleRefElementSpec lexerRuleRefElementSpec = (LexerRuleRefElementSpec) spec;
 				if ("tableName".equals(lexerRuleRefElementSpec.getLabel())) {
 					List<InputSuggestion> suggestions = new ArrayList<>();
-					Node columnNameNode = parseTree.findParentByRuleName(parseTree.getLastNode(), "column_name");
+					Element columnNameElement = element.findParentByRule("column_name");
 					String schemaName;
-					List<Node> schemaNameNodes = parseTree.getChildrenByRuleName(columnNameNode, "schema_name", true);
-					if (!schemaNameNodes.isEmpty())
-						schemaName = parseTree.getText(schemaNameNodes.get(0));
+					List<Element> schemaNameElements = columnNameElement.getChildrenByRule("schema_name", true);
+					if (!schemaNameElements.isEmpty())
+						schemaName = schemaNameElements.get(0).getMatchedText();
 					else
 						schemaName = DEFAULT_SCHEMA;
 					if (SCHEMA_TABLES.containsKey(schemaName)) {
@@ -85,10 +85,10 @@ public class CodeAssistTest5 {
 					return suggestions;
 				} else if ("columnName".equals(lexerRuleRefElementSpec.getLabel())) {
 					List<InputSuggestion> suggestions = new ArrayList<>();
-					Node columnNameNode = parseTree.findParentByRuleName(parseTree.getLastNode(), "column_name");
-					List<Node> tableNameNodes = parseTree.getChildrenByLabel(columnNameNode, "tableName", true);
-					if (!tableNameNodes.isEmpty()) {
-						String tableName = parseTree.getText(tableNameNodes.get(0));
+					Element columnNameElement = element.getRoot().findParentByRule("column_name");
+					List<Element> tableNameElements = columnNameElement.getChildrenByLabel("tableName", true);
+					if (!tableNameElements.isEmpty()) {
+						String tableName = tableNameElements.get(0).getMatchedText();
 						if (TABLE_COLUMNS.containsKey(tableName)) {
 							for (String columnName: TABLE_COLUMNS.get(tableName)) {
 								if (columnName.startsWith(matchWith))

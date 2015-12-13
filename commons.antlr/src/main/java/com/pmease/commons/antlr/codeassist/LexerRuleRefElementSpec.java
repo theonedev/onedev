@@ -12,7 +12,7 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
-	private final CodeAssist codeAssist;
+	private final Grammar grammar;
 	
 	private final int tokenType;
 	
@@ -20,11 +20,11 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 	
 	private transient Optional<RuleSpec> rule;
 	
-	public LexerRuleRefElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity, 
+	public LexerRuleRefElementSpec(Grammar grammar, String label, Multiplicity multiplicity, 
 			int tokenType, String ruleName) {
 		super(label, multiplicity);
 		
-		this.codeAssist = codeAssist;
+		this.grammar = grammar;
 		this.tokenType = tokenType;
 		this.ruleName = ruleName;
 	}
@@ -35,7 +35,7 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 	
 	public RuleSpec getRule() {
 		if (rule == null)
-			rule = Optional.fromNullable(codeAssist.getRule(ruleName));
+			rule = Optional.fromNullable(grammar.getRule(ruleName));
 		return rule.orNull();
 	}
 
@@ -79,7 +79,7 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 
 	@Override
 	protected String toStringOnce() {
-		if (codeAssist.isBlockRule(ruleName))
+		if (grammar.isBlockRule(ruleName))
 			return "(" + Preconditions.checkNotNull(getRule()) + ")";
 		else 
 			return ruleName;

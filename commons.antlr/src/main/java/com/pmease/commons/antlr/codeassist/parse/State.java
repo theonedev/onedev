@@ -8,37 +8,37 @@ import javax.annotation.Nullable;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.TerminalElementSpec;
 
-public class ParseState {
+public class State {
 	
-	private final int nextTokenIndex;
+	private final int endTokenIndex;
 	
-	private final Set<ParseNode> nodes;
+	private final Set<Node> nodes;
 	
 	private Set<RuleCompletion> ruleCompletions = new HashSet<>();
 	
-	public Set<ParseNode> getNodes() {
+	public Set<Node> getNodes() {
 		return nodes;
 	}
 	
-	public ParseState(int tokenIndex, Set<ParseNode> nodes) {
-		this.nextTokenIndex = tokenIndex;
+	public State(int tokenIndex, Set<Node> nodes) {
+		this.endTokenIndex = tokenIndex;
 		this.nodes = nodes;
-		for (ParseNode node: nodes) {
+		for (Node node: nodes) {
 			if (node.isCompleted())
-				ruleCompletions.add(new RuleCompletion(node.getRuleSpec().getName(), node.getStartTokenIndex(), tokenIndex));
+				ruleCompletions.add(new RuleCompletion(node.getRuleSpec().getName(), node.getBeginTokenIndex(), tokenIndex));
 		}
 	}
 	
 	@Nullable
-	private RuleCompletion getRuleCompletion(ParseNode node) {
+	private RuleCompletion getRuleCompletion(Node node) {
 		if (node.isCompleted())
-			return new RuleCompletion(node.getRuleSpec().getName(), node.getStartTokenIndex(), nextTokenIndex);
+			return new RuleCompletion(node.getRuleSpec().getName(), node.getBeginTokenIndex(), endTokenIndex);
 		else
 			return null;
 	}
 	
 
-	public boolean addNode(ParseNode node) {
+	public boolean addNode(Node node) {
 		if (!nodes.contains(node)) {
 			RuleCompletion ruleCompletion = getRuleCompletion(node);
 			if (ruleCompletion != null) {
@@ -55,24 +55,24 @@ public class ParseState {
 		return false;
 	}
 
-	public int getNextTokenIndex() {
-		return nextTokenIndex;
+	public int getEndTokenIndex() {
+		return endTokenIndex;
 	}
 	
-	public Set<ParseNode> getMatches(String ruleName) {
-		Set<ParseNode> matches = new HashSet<>();
-		for (ParseNode node: nodes) {
+	public Set<Node> getMatches(String ruleName) {
+		Set<Node> matches = new HashSet<>();
+		for (Node node: nodes) {
 			if (node.getRuleSpec().getName().equals(ruleName) 
-					&& node.getStartTokenIndex() == 0 && node.isCompleted()) {
+					&& node.getBeginTokenIndex() == 0 && node.isCompleted()) {
 				matches.add(node);
 			}
 		}
 		return matches;
 	}
 	
-	public Set<ParseNode> getNodesExpectingTerminal() {
-		Set<ParseNode> nodesExpectingTerminal = new HashSet<>();
-		for (ParseNode node: nodes) {
+	public Set<Node> getNodesExpectingTerminal() {
+		Set<Node> nodesExpectingTerminal = new HashSet<>();
+		for (Node node: nodes) {
 			ElementSpec expectingSpec = node.getExpectedElementSpec();
 			if (expectingSpec instanceof TerminalElementSpec)
 				nodesExpectingTerminal.add(node);
@@ -83,7 +83,7 @@ public class ParseState {
 	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for (ParseNode node: nodes)
+		for (Node node: nodes)
 			buffer.append(node).append("\n");
 		return buffer.toString();
 	}

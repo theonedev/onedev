@@ -7,8 +7,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.SurroundingAware;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 
@@ -22,16 +21,16 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParseTree parseTree, Node elementNode, String matchWith) {
-		if (elementNode.getSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) elementNode.getSpec();
+	protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith) {
+		if (element.getSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) element.getSpec();
 			if (spec.getRuleName().equals("Value")) {
-				return new SurroundingAware(codeAssist, "(", ")") {
+				return new SurroundingAware(codeAssist.getGrammar(), "(", ")") {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
-						if (parseTree.getLastNode().getToken().getType() == CommitQueryParser.BRANCH) {
+						if (element.getRoot().getLastMatchedToken().getType() == CommitQueryParser.BRANCH) {
 							for (String value: BRANCHS) {
 								if (value.toLowerCase().contains(matchWith.toLowerCase()))
 									suggestions.add(new InputSuggestion(value));
@@ -40,10 +39,10 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						return suggestions;
 					}
 					
-				}.suggest(elementNode, matchWith);
+				}.suggest(element.getSpec(), matchWith);
 			}
-		} else if (elementNode.getSpec() instanceof LiteralElementSpec) {
-			LiteralElementSpec spec = (LiteralElementSpec) elementNode.getSpec();
+		} else if (element.getSpec() instanceof LiteralElementSpec) {
+			LiteralElementSpec spec = (LiteralElementSpec) element.getSpec();
 			if (spec.getLiteral().toLowerCase().startsWith(matchWith.toLowerCase())) {
 				String description;
 				switch (spec.getLiteral()) {

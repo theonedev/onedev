@@ -1,8 +1,6 @@
 package com.pmease.commons.antlr.codeassist.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +11,7 @@ import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.ParentedElement;
 
 public class CodeAssistTest4 {
 
@@ -23,7 +20,7 @@ public class CodeAssistTest4 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(final ParseTree parseTree, Node elementNode, String matchWith) {
+		protected List<InputSuggestion> suggest(ParentedElement element, String matchWith) {
 			return null;
 		}
 
@@ -65,12 +62,6 @@ public class CodeAssistTest4 {
 		assertEquals("5+:2", suggestions.get(2).toString());
 		assertEquals("5-:2", suggestions.get(3).toString());
 		assertEquals("5;:2", suggestions.get(4).toString());
-		
-		assertTrue(codeAssist.getRule("expr").getMatchDistance("(1+2)+3"));
-		assertTrue(codeAssist.getRule("expr").getMatchDistance("1+(2*3)"));
-		assertFalse(codeAssist.getRule("expr").getMatchDistance("(1+2)+"));
-		assertFalse(codeAssist.getRule("expr").getMatchDistance("1(2*3)"));
-		assertFalse(codeAssist.getRule("expr").getMatchDistance("1/2+3)"));
 	}
 	
 }

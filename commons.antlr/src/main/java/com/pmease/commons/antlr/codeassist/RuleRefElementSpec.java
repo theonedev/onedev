@@ -14,22 +14,22 @@ public class RuleRefElementSpec extends ElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
-	private final CodeAssist codeAssist;
+	private final Grammar grammar;
 	
 	private final String ruleName;
 	
 	private transient RuleSpec rule;
 	
-	public RuleRefElementSpec(CodeAssist codeAssist, String label, Multiplicity multiplicity, String ruleName) {
+	public RuleRefElementSpec(Grammar grammar, String label, Multiplicity multiplicity, String ruleName) {
 		super(label, multiplicity);
 	
-		this.codeAssist = codeAssist;
+		this.grammar = grammar;
 		this.ruleName = ruleName;
 	}
 
 	public RuleSpec getRule() {
 		if (rule == null)
-			rule = Preconditions.checkNotNull(codeAssist.getRule(ruleName));
+			rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
 		return rule;
 	}
 	
@@ -74,7 +74,7 @@ public class RuleRefElementSpec extends ElementSpec {
 
 	@Override
 	protected String toStringOnce() {
-		if (codeAssist.isBlockRule(ruleName))
+		if (grammar.isBlockRule(ruleName))
 			return "(" + Preconditions.checkNotNull(getRule()) + ")";
 		else 
 			return ruleName;
@@ -82,7 +82,7 @@ public class RuleRefElementSpec extends ElementSpec {
 
 	@Override
 	public int getMatchDistance(List<Token> tokens) {
-		return new EarleyParser(getRule(), tokens).getMatchDistance();
+		return new EarleyParser(getRule(), tokens).getEndOfMatch();
 	}
 	
 }

@@ -7,20 +7,20 @@ import org.antlr.v4.runtime.Token;
 
 public abstract class SurroundingAware {
 	
-	private final CodeAssist codeAssist;
+	private final Grammar grammar;
 	
 	private final String prefix;
 	
 	private final String suffix;
 	
-	public SurroundingAware(CodeAssist codeAssist, String prefix, String suffix) {
-		this.codeAssist = codeAssist;
+	public SurroundingAware(Grammar grammar, String prefix, String suffix) {
+		this.grammar = grammar;
 		this.prefix = prefix;
 		this.suffix = suffix;
 	}
 	
 	private boolean matches(ElementSpec spec, String content) {
-		List<Token> tokens = codeAssist.lex(content);
+		List<Token> tokens = grammar.lex(content);
 		int start;
 		int stop;
 		if (tokens.isEmpty()) {

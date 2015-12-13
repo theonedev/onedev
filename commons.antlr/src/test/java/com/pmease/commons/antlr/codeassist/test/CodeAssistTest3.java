@@ -1,20 +1,20 @@
 package com.pmease.commons.antlr.codeassist.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.SurroundingAware;
-import com.pmease.commons.antlr.codeassist.TokenNode;
+import com.pmease.commons.antlr.codeassist.parse.Element;
 
 public class CodeAssistTest3 {
 
@@ -25,18 +25,17 @@ public class CodeAssistTest3 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(final ParseTree parseTree, Node elementNode, String matchWith) {
-			if (elementNode.getSpec() instanceof RuleRefElementSpec) {
-				RuleRefElementSpec spec = (RuleRefElementSpec) elementNode.getSpec();
+		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith) {
+			if (element.getSpec() instanceof RuleRefElementSpec) {
+				RuleRefElementSpec spec = (RuleRefElementSpec) element.getSpec();
 				if (spec.getRuleName().equals("value")) {
-					return new SurroundingAware(codeAssist, "\"", "\"") {
+					return new SurroundingAware(codeAssist.getGrammar(), "\"", "\"") {
 
 						@Override
 						protected List<InputSuggestion> match(String matchWith) {
 							List<InputSuggestion> suggestions = new ArrayList<>();
-							Node criteria = parseTree.findParentByRuleName(parseTree.getLastNode(), "criteria");
-							TokenNode tokenNode = parseTree.getFirstTokenNode(criteria);
-							if (tokenNode.getToken().getText().equals("author")) {
+							Element criteriaElement = element.findParentByRule("criteria");
+							if (criteriaElement.getFirstMatchedToken().getText().equals("author")) {
 								for (String value: AUTHORS) {
 									if (value.toLowerCase().contains(matchWith.toLowerCase()))
 										suggestions.add(new InputSuggestion(value));
@@ -45,7 +44,7 @@ public class CodeAssistTest3 {
 							return suggestions;
 						}
 						
-					}.suggest(elementNode, matchWith);
+					}.suggest(element.getSpec(), matchWith);
 				}
 			}
 			return null;

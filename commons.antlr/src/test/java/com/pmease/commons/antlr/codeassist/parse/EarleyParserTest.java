@@ -1,34 +1,33 @@
 package com.pmease.commons.antlr.codeassist.parse;
 
-import java.util.List;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import org.antlr.v4.runtime.Token;
 import org.junit.Test;
 
-import com.pmease.commons.antlr.codeassist.CodeAssist;
-import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
-import com.pmease.commons.antlr.codeassist.RuleSpec;
+import com.pmease.commons.antlr.codeassist.Grammar;
+import com.pmease.commons.antlr.codeassist.test.CodeAssistTest1Lexer;
 import com.pmease.commons.antlr.codeassist.test.CodeAssistTest4Lexer;
 
 public class EarleyParserTest {
 
+	private Grammar grammar;
+	
+	private boolean matches(String ruleName, String text) {
+		return new EarleyParser(grammar.getRule(ruleName), grammar.lex(text)).matches();
+	}
+	
 	@Test
 	public void test() {
-		CodeAssist assist = new CodeAssist(CodeAssistTest4Lexer.class) {
+		grammar = new Grammar(CodeAssistTest1Lexer.class);
+		assertTrue(matches("notRealAmbiguity", "cd"));
 
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
-				return null;
-			}
-			
-		};
-		List<Token> tokens = assist.lex("cd");
-		RuleSpec rule = assist.getRule("a");
-		System.out.println(new EarleyParser(rule, tokens).getMatches().size());
+		grammar = new Grammar(CodeAssistTest4Lexer.class);
+		assertTrue(matches("expr", "(1+2)+3"));
+		assertTrue(matches("expr", "1+(2*3)"));
+		assertFalse(matches("expr", "(1+2)+"));
+		assertFalse(matches("expr", "1(2*3)"));
+		assertFalse(matches("expr", "1/2+3)"));
 	}
 
 }

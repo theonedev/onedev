@@ -2,8 +2,6 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.util.List;
 
-import com.pmease.commons.antlr.codeassist.parse.ParentedElement;
-
 public class ElementSuggestion {
 	
 	private final ParentedElement expectingElement;

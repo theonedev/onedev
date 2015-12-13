@@ -12,8 +12,7 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.SurroundingAware;
 
 public class CodeAssistTest2 {
@@ -25,16 +24,16 @@ public class CodeAssistTest2 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(final ParseTree parseTree, Node elementNode, String matchWith) {
-			if (elementNode.getSpec() instanceof LexerRuleRefElementSpec) {
-				LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) elementNode.getSpec();
+		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith) {
+			if (element.getSpec() instanceof LexerRuleRefElementSpec) {
+				LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) element.getSpec();
 				if (spec.getRuleName().equals("Value")) {
-					return new SurroundingAware(codeAssist, "(", ")") {
+					return new SurroundingAware(codeAssist.getGrammar(), "(", ")") {
 
 						@Override
 						protected List<InputSuggestion> match(String matchWith) {
 							List<InputSuggestion> suggestions = new ArrayList<>();
-							if (parseTree.getLastNode().getToken().getType() == CodeAssistTest2Lexer.BRANCH) {
+							if (element.getRoot().getLastMatchedToken().getType() == CodeAssistTest2Lexer.BRANCH) {
 								for (String value: BRANCHS) {
 									if (value.toLowerCase().contains(matchWith.toLowerCase()))
 										suggestions.add(new InputSuggestion(value));
@@ -43,7 +42,7 @@ public class CodeAssistTest2 {
 							return suggestions;
 						}
 						
-					}.suggest(elementNode, matchWith);
+					}.suggest(element.getSpec(), matchWith);
 				}
 			}
 			return null;

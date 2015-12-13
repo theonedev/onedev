@@ -1,31 +1,28 @@
-package com.pmease.commons.antlr.codeassist.parse;
+package com.pmease.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
-public class ParentedElement {
+import com.pmease.commons.antlr.codeassist.parse.Element;
+
+public class ParentedElement extends Element {
 
 	private final ParentedElement parent;
 	
-	private final ParsedElement element;
-	
-	public ParentedElement(@Nullable ParentedElement parent, ParsedElement element) {
+	public ParentedElement(@Nullable ParentedElement parent, Element element) {
+		super(element.getParser(), element.getSpec(), element.getEndTokenIndex(), element.getNode());
+		
 		this.parent = parent;
-		this.element = element;
 	}
 
 	public ParentedElement getParent() {
 		return parent;
 	}
 
-	public ParsedElement getElement() {
-		return element;
-	}
-
 	@Nullable
 	public ParentedElement findParentByLabel(String label) {
 		ParentedElement current = parent;
 		while (current != null) {
-			if (label.equals(current.element.getLabel()))
+			if (label.equals(current.getLabel()))
 				return current;
 			current = current.parent;
 		}
@@ -36,7 +33,7 @@ public class ParentedElement {
 	public ParentedElement findParentByRule(String ruleName) {
 		ParentedElement current = parent;
 		while (current != null) {
-			if (ruleName.equals(current.element.getNode().getRuleSpec().getName()))
+			if (ruleName.equals(current.getNode().getRuleSpec().getName()))
 				return current;
 			current = current.parent;
 		}
@@ -49,5 +46,5 @@ public class ParentedElement {
 		else
 			return parent.getRoot();
 	}
-	
+
 }

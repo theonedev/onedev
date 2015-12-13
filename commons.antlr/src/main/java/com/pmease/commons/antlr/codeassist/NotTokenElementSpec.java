@@ -12,15 +12,15 @@ public class NotTokenElementSpec extends TerminalElementSpec {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final CodeAssist codeAssist;
+	private final Grammar grammar;
 	
 	private final Set<Integer> notTokenTypes;
 	
-	public NotTokenElementSpec(CodeAssist codeAssist, String label, 
+	public NotTokenElementSpec(Grammar grammar, String label, 
 			Multiplicity multiplicity, Set<Integer> notTokenTypes) {
 		super(label, multiplicity);
 		
-		this.codeAssist = codeAssist;
+		this.grammar = grammar;
 		this.notTokenTypes = notTokenTypes;
 	}
 
@@ -37,7 +37,7 @@ public class NotTokenElementSpec extends TerminalElementSpec {
 	protected String toStringOnce() {
 		List<String> notTokenNames = new ArrayList<>();
 		for (int notTokenType: notTokenTypes) 
-			notTokenNames.add(Preconditions.checkNotNull(codeAssist.getTokenNameByType(notTokenType)));
+			notTokenNames.add(Preconditions.checkNotNull(grammar.getTokenNameByType(notTokenType)));
 		return StringUtils.join(notTokenNames, " ");
 	}
 

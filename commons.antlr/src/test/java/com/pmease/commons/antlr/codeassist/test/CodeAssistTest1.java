@@ -1,6 +1,6 @@
 package com.pmease.commons.antlr.codeassist.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,7 @@ import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.ParentedElement;
 
 public class CodeAssistTest1 {
 
@@ -21,7 +20,7 @@ public class CodeAssistTest1 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
+		protected List<InputSuggestion> suggest(ParentedElement element, String matchWith) {
 			return null;
 		}
 
@@ -57,8 +56,6 @@ public class CodeAssistTest1 {
 		suggestions = suggest(new InputStatus("cd "), "mandatories");
 		assertEquals(1, suggestions.size());
 		assertEquals("cd ef g h:9", suggestions.get(0).toString());
-		
-		assertTrue(codeAssist.getRule("notRealAmbiguity").getMatchDistance("o p q"));
 	}
 
 }

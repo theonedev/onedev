@@ -11,9 +11,9 @@ import com.pmease.commons.antlr.codeassist.AlternativeSpec;
 import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.RuleSpec;
 
-public class ParseNode {
+public class Node {
 	
-	private final int startTokenIndex;
+	private final int beginTokenIndex;
 	
 	private final RuleSpec ruleSpec;
 	
@@ -23,24 +23,24 @@ public class ParseNode {
 	
 	private final boolean expectedElementSpecMatchedOnce;
 	
-	private final List<ParsedElement> parsedElements;
+	private final List<Element> elements;
 	
 	private transient AlternativeSpec alternativeSpec;
 	
 	private transient List<ElementSpec> elementSpecs;
 
-	public ParseNode(int startTokenIndex, RuleSpec ruleSpec, int alternativeSpecIndex, int nextElementSpecIndex, 
-			boolean nextElementSpecMatchedOnce, List<ParsedElement> parsedElements) {
-		this.startTokenIndex = startTokenIndex;
+	public Node(int beginTokenIndex, RuleSpec ruleSpec, int alternativeSpecIndex, int nextElementSpecIndex, 
+			boolean nextElementSpecMatchedOnce, List<Element> elements) {
+		this.beginTokenIndex = beginTokenIndex;
 		this.ruleSpec = ruleSpec;
 		this.alternativeSpecIndex = alternativeSpecIndex;
 		this.expectedElementSpecIndex = nextElementSpecIndex;
 		this.expectedElementSpecMatchedOnce = nextElementSpecMatchedOnce;
-		this.parsedElements = parsedElements;
+		this.elements = elements;
 	}
 	
-	public int getStartTokenIndex() {
-		return startTokenIndex;
+	public int getBeginTokenIndex() {
+		return beginTokenIndex;
 	}
 
 	public RuleSpec getRuleSpec() {
@@ -67,8 +67,8 @@ public class ParseNode {
 			return getElementSpecs().get(expectedElementSpecIndex);
 	}
 
-	public List<ParsedElement> getParsedElements() {
-		return parsedElements;
+	public List<Element> getElements() {
+		return elements;
 	}
 	
 	public AlternativeSpec getAlternativeSpec() {
@@ -89,30 +89,30 @@ public class ParseNode {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof ParseNode))
+		if (!(other instanceof Node))
 			return false;
 		if (this == other)
 			return true;
-		ParseNode otherNode = (ParseNode) other;
+		Node otherNode = (Node) other;
 		return new EqualsBuilder()
-				.append(startTokenIndex, otherNode.startTokenIndex)
+				.append(beginTokenIndex, otherNode.beginTokenIndex)
 				.append(ruleSpec.getName(), otherNode.ruleSpec.getName())
 				.append(alternativeSpecIndex, otherNode.alternativeSpecIndex)
 				.append(expectedElementSpecIndex, otherNode.expectedElementSpecIndex)
 				.append(expectedElementSpecMatchedOnce, otherNode.expectedElementSpecMatchedOnce)
-				.append(parsedElements, otherNode.parsedElements)
+				.append(elements, otherNode.elements)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(startTokenIndex)
+				.append(beginTokenIndex)
 				.append(ruleSpec.getName())
 				.append(alternativeSpecIndex)
 				.append(expectedElementSpecIndex)
 				.append(expectedElementSpecMatchedOnce)
-				.append(parsedElements)
+				.append(elements)
 				.toHashCode();
 	}
 
@@ -125,7 +125,7 @@ public class ParseNode {
 		for (int i=expectedElementSpecIndex; i<getElementSpecs().size(); i++)
 			buffer.append(getElementSpecs().get(i)).append(" ");
 		
-		return ruleSpec.getName() + " -> " + buffer.toString() + ": " + startTokenIndex;
+		return ruleSpec.getName() + " -> " + buffer.toString() + ": " + beginTokenIndex;
 	}
 	
 }

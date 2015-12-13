@@ -19,13 +19,11 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 
 import com.pmease.commons.antlr.AntlrUtils;
-import com.pmease.commons.antlr.codeassist.AssistStream;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.Node;
-import com.pmease.commons.antlr.codeassist.ParseTree;
+import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
@@ -64,8 +62,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		codeAssist = new CodeAssist(lexerClass, grammarFiles, tokenFile) {
 
 			@Override
-			protected List<InputSuggestion> suggest(ParseTree parseTree, Node elementNode, String matchWith) {
-				return ANTLRAssistBehavior.this.suggest(parseTree, elementNode, matchWith);
+			protected List<InputSuggestion> suggest(ParentedElement element, String matchWith) {
+				return ANTLRAssistBehavior.this.suggest(element, matchWith);
 			}
 			
 		};
@@ -170,11 +168,11 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	
 	@Override
 	protected int getAnchor(String content) {
-		AssistStream stream = codeAssist.lex(content);
-		if (stream.isEof()) {
+		List<Token> tokens = codeAssist.getGrammar().lex(content);
+		if (tokens.isEmpty()) {
 			return 0;
 		} else {
-			Token lastToken = stream.getToken(stream.size()-1);
+			Token lastToken = tokens.get(tokens.size()-1);
 			String contentAfterLastToken = content.substring(lastToken.getStopIndex()+1);
 			if (contentAfterLastToken.length() > 0) {
 				contentAfterLastToken = StringUtils.trimStart(contentAfterLastToken);
@@ -185,7 +183,6 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		}
 	}
 
-	protected abstract List<InputSuggestion> suggest(ParseTree parseTree, 
-			Node elementNode, String matchWith);
+	protected abstract List<InputSuggestion> suggest(ParentedElement element, String matchWith);
 	
 }

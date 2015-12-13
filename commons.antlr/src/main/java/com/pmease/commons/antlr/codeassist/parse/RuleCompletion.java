@@ -7,26 +7,26 @@ public class RuleCompletion {
 	
 	private final String ruleName;
 	
-	private final int fromStreamIndex;
+	private final int beginTokenIndex;
 	
-	private final int toStreamIndex;
+	private final int endTokenIndex;
 	
-	public RuleCompletion(String ruleName, int fromStreamIndex, int toStreamIndex) {
+	public RuleCompletion(String ruleName, int beginTokenIndex, int endTokenIndex) {
 		this.ruleName = ruleName;
-		this.fromStreamIndex = fromStreamIndex;
-		this.toStreamIndex = toStreamIndex;
+		this.beginTokenIndex = beginTokenIndex;
+		this.endTokenIndex = endTokenIndex;
 	}
 
 	public String getRuleName() {
 		return ruleName;
 	}
 
-	public int getFromStreamIndex() {
-		return fromStreamIndex;
+	public int getBeginTokenIndex() {
+		return beginTokenIndex;
 	}
 
-	public int getToStreamIndex() {
-		return toStreamIndex;
+	public int getEndTokenIndex() {
+		return endTokenIndex;
 	}
 	
 	@Override
@@ -35,11 +35,11 @@ public class RuleCompletion {
 			return false;
 		if (this == other)
 			return true;
-		RuleCompletion otherSpan = (RuleCompletion) other;
+		RuleCompletion otherCompletion = (RuleCompletion) other;
 		return new EqualsBuilder()
-				.append(ruleName, otherSpan.ruleName)
-				.append(fromStreamIndex, otherSpan.fromStreamIndex)
-				.append(toStreamIndex, otherSpan.toStreamIndex)
+				.append(ruleName, otherCompletion.ruleName)
+				.append(beginTokenIndex, otherCompletion.beginTokenIndex)
+				.append(endTokenIndex, otherCompletion.endTokenIndex)
 				.isEquals();
 	}
 
@@ -47,8 +47,8 @@ public class RuleCompletion {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
 				.append(ruleName)
-				.append(fromStreamIndex)
-				.append(toStreamIndex)
+				.append(beginTokenIndex)
+				.append(endTokenIndex)
 				.toHashCode();
 	}
 

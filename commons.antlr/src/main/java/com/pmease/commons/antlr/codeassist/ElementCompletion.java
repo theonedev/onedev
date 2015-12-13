@@ -1,7 +1,5 @@
 package com.pmease.commons.antlr.codeassist;
 
-import com.pmease.commons.antlr.codeassist.parse.ParentedElement;
-
 public class ElementCompletion extends InputCompletion {
 
 	private static final long serialVersionUID = 1L;
