@@ -35,7 +35,7 @@ public class EarleyParser {
 			nodes.add(new Node(tokenIndex, rule, i, 0, false, new ArrayList<Element>()));
 
 		while (!nodes.isEmpty()) {
-			State state = new State(tokenIndex, nodes);
+			State state = new State(this, tokenIndex, nodes);
 			states.add(state);
 			for (Node node: Lists.newArrayList(state.getNodes()))
 				process(node, state);
@@ -52,9 +52,9 @@ public class EarleyParser {
 	
 	private void process(Node node, State state) {
 		if (!node.isCompleted()) { // predict
-			ElementSpec nextElement = node.getElementSpecs().get(node.getExpectedElementSpecIndex());
-			if (nextElement instanceof RuleRefElementSpec) {
-				RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) nextElement;
+			ElementSpec expectedElementSpec = node.getExpectedElementSpec();
+			if (expectedElementSpec instanceof RuleRefElementSpec) {
+				RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) expectedElementSpec;
 				RuleSpec elementRule = ruleRefElement.getRule();
 				for (int i=0; i<elementRule.getAlternatives().size(); i++) {
 					Node predictedNode = new Node(tokenIndex, 
@@ -63,9 +63,7 @@ public class EarleyParser {
 						process(predictedNode, state);
 				}
 			}
-			if (nextElement.getMultiplicity() == Multiplicity.ZERO_OR_MORE 
-					|| nextElement.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
-					|| node.isExpectedElementSpecMatchedOnce()) {
+			if (expectedElementSpec.isOptional() || node.isExpectedElementSpecMatchedOnce()) {
 				Node advancedNode = new Node(node.getBeginTokenIndex(), node.getRuleSpec(), 
 						node.getAlternativeSpecIndex(), node.getExpectedElementSpecIndex()+1, false, 
 						new ArrayList<>(node.getElements()));
@@ -76,16 +74,15 @@ public class EarleyParser {
 			State startState = states.get(node.getBeginTokenIndex());
 			for (Node startNode: startState.getNodes()) {
 				if (!startNode.isCompleted()) {
-					ElementSpec nextElement = startNode.getExpectedElementSpec();
-					if (nextElement instanceof RuleRefElementSpec) {
-						RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) nextElement;
+					ElementSpec expectedElementSpec = startNode.getExpectedElementSpec();
+					if (expectedElementSpec instanceof RuleRefElementSpec) {
+						RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) expectedElementSpec;
 						if (ruleRefElement.getRuleName().equals(node.getRuleSpec().getName())) {
 							Node advancedNode;
 							List<Element> elements = new ArrayList<>(startNode.getElements());
 							if (!node.getElements().isEmpty())
 								elements.add(new Element(this, ruleRefElement, state.getEndTokenIndex(), node));
-							if (nextElement.getMultiplicity() == Multiplicity.ONE 
-									|| nextElement.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
+							if (!expectedElementSpec.isMultiple()) {
 								advancedNode = new Node(startNode.getBeginTokenIndex(), 
 										startNode.getRuleSpec(), startNode.getAlternativeSpecIndex(), 
 										startNode.getExpectedElementSpecIndex()+1, false, elements);
@@ -167,6 +164,18 @@ public class EarleyParser {
 			return new ArrayList<>();
 	}
 	
+	/**
+	 * Get the next token index after the match. 
+	 * 
+	 * @param tokens
+	 * 			tokens to match against
+	 * @return
+	 * 			next token index after the match.
+	 * 			<ul><li>greater than 0 if the rule matches part of the tokens
+	 * 			<li>0 if the rule does not match any tokens, and the rule allows to be empty
+	 * 			<li>-1 if the rule does not match any tokens, and the rule does not allow 
+	 * 			to be empty
+	 */
 	public int getEndOfMatch() {
 		for (int i=states.size()-1; i>=0; i--) {
 			State state = states.get(i);

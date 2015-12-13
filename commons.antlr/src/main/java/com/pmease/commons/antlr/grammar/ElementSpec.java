@@ -63,6 +63,18 @@ public abstract class ElementSpec implements Serializable {
 			return toStringOnce() + "?";
 	}
 	
+	/**
+	 * Get the next token index after match of current spec. 
+	 * 
+	 * @param tokens
+	 * 			tokens to match against
+	 * @return
+	 * 			next token index after the match.
+	 * 			<ul><li>greater than 0 if the element matches part of the tokens
+	 * 			<li>0 if the element does not match any tokens, and the element allows to be empty
+	 * 			<li>-1 if the element does not match any tokens, and the element does not allow 
+	 * 			to be empty
+	 */
 	public abstract int getEndOfMatch(List<Token> tokens);
 	
 	protected abstract String toStringOnce();

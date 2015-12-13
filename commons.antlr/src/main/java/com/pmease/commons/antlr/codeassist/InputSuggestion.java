@@ -9,7 +9,20 @@ public class InputSuggestion extends InputStatus {
 	private final boolean complete;
 	
 	private final String description;
-	
+
+	/**
+	 * Construct the input suggestion.
+	 * 
+	 * @param content
+	 * 			content of the suggestion
+	 * @param caret
+	 * 			caret of the suggestion
+	 * @param complete
+	 * 			whether or not the suggested content is a complete representation of 
+	 * 			corresponding element spec
+	 * @param description
+	 * 			description of the suggestion
+	 */
 	public InputSuggestion(String content, int caret, boolean complete, @Nullable String description) {
 		super(content, caret);
 		this.complete = complete;

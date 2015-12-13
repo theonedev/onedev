@@ -5,10 +5,14 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.antlr.v4.runtime.Token;
+
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.TerminalElementSpec;
 
 public class State {
+	
+	private final EarleyParser parser;
 	
 	private final int endTokenIndex;
 	
@@ -20,7 +24,8 @@ public class State {
 		return nodes;
 	}
 	
-	public State(int tokenIndex, Set<Node> nodes) {
+	public State(EarleyParser parser, int tokenIndex, Set<Node> nodes) {
+		this.parser = parser;
 		this.endTokenIndex = tokenIndex;
 		this.nodes = nodes;
 		for (Node node: nodes) {
@@ -57,6 +62,20 @@ public class State {
 
 	public int getEndTokenIndex() {
 		return endTokenIndex;
+	}
+	
+	/**
+	 * Get the token being scanned to create this state.
+	 * 
+	 * @return
+	 * 			the token being scanned to create this state, or <tt>null</tt> for initial state
+	 */
+	@Nullable
+	public Token getInitiatingToken() {
+		if (endTokenIndex > 0)
+			return parser.getTokens().get(endTokenIndex-1);
+		else
+			return null;
 	}
 	
 	public Set<Node> getMatches(String ruleName) {

@@ -4,18 +4,25 @@ public class ElementCompletion extends InputCompletion {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final ParentedElement expectingElement;
+	private final boolean complete;
 	
-	public ElementCompletion(ParentedElement expectingElement, int replaceBegin, 
+	private final ParentedElement expectedElement;
+	
+	public ElementCompletion(ParentedElement expectedElement, int replaceBegin, 
 			int replaceEnd, String replaceContent, int caret, boolean complete, 
 			String description) {
-		super(replaceBegin, replaceEnd, replaceContent, caret, complete, description);
+		super(replaceBegin, replaceEnd, replaceContent, caret, description);
 		
-		this.expectingElement = expectingElement;
+		this.complete = complete;
+		this.expectedElement = expectedElement;
 	}
 
-	public ParentedElement getExpectingElement() {
-		return expectingElement;
+	public ParentedElement getExpectedElement() {
+		return expectedElement;
+	}
+
+	public boolean isComplete() {
+		return complete;
 	}
 
 }

@@ -44,6 +44,14 @@ public class Element {
 		return spec!=null?spec.getLabel():null;
 	}
 
+	/**
+	 * Get index of the next token after the match 
+	 * 
+	 * @return
+	 * 			token index after match of this element, this is NOT index of the 
+	 * 			last token matching the element, it is index of the next token 
+	 * 			after the match
+	 */
 	public int getEndTokenIndex() {
 		return endTokenIndex;
 	}
@@ -53,13 +61,29 @@ public class Element {
 		return node;
 	}
 	
+	/**
+	 * Get tokens matched by this element so far.
+	 * 
+	 * @return
+	 * 			tokens matched by this element so far, or empty if this element does not 
+	 * 			match any tokens yet
+	 */
 	public List<Token> getMatchedTokens() {
 		if (node != null)
 			return parser.getTokens().subList(node.getBeginTokenIndex(), endTokenIndex);
-		else
+		else if (endTokenIndex > 0)
 			return parser.getTokens().subList(endTokenIndex-1, endTokenIndex);
+		else
+			return new ArrayList<>();
 	}
 	
+	/**
+	 * Get the first token matched by this element. 
+	 * 
+	 * @return
+	 * 			first token matched by this element, or <tt>null</tt> if this element 
+	 * 			does not match any tokens yet
+	 */
 	@Nullable
 	public Token getFirstMatchedToken() {
 		if (node != null) {
@@ -67,11 +91,20 @@ public class Element {
 				return parser.getTokens().get(node.getBeginTokenIndex());
 			else
 				return null;
-		} else {
+		} else if (endTokenIndex > 0) {
 			return parser.getTokens().get(endTokenIndex-1);
+		} else {
+			return null;
 		}
 	}
 	
+	/**
+	 * Get the last token matched by this element. 
+	 * 
+	 * @return
+	 * 			last token matched by this element, or <tt>null</tt> if this element does not 
+	 * 			match any tokens yet
+	 */
 	@Nullable
 	public Token getLastMatchedToken() {
 		if (node != null) {
@@ -79,8 +112,10 @@ public class Element {
 				return parser.getTokens().get(endTokenIndex-1);
 			else
 				return null;
-		} else {
+		} else if (endTokenIndex > 0) {
 			return parser.getTokens().get(endTokenIndex-1);
+		} else {
+			return null;
 		}
 	}
 	

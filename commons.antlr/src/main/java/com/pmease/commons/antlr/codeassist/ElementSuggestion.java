@@ -4,21 +4,21 @@ import java.util.List;
 
 public class ElementSuggestion {
 	
-	private final ParentedElement expectingElement;
+	private final ParentedElement expectedElement;
 	
 	private final String matchWith;
 	
 	private final List<InputSuggestion> inputSuggestions;
 	
-	public ElementSuggestion(ParentedElement expectingElement, 
+	public ElementSuggestion(ParentedElement expectedElement, 
 			String matchWith, List<InputSuggestion> inputSuggestions) {
-		this.expectingElement = expectingElement;
+		this.expectedElement = expectedElement;
 		this.matchWith = matchWith;
 		this.inputSuggestions = inputSuggestions;
 	}
 
-	public ParentedElement getExpectingElement() {
-		return expectingElement;
+	public ParentedElement getExpectedElement() {
+		return expectedElement;
 	}
 
 	public String getMatchWith() {
