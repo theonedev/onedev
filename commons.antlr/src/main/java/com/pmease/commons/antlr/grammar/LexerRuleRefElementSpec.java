@@ -8,13 +8,11 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.antlr.Grammar;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
-public class LexerRuleRefElementSpec extends TerminalElementSpec {
+public class LexerRuleRefElementSpec extends TokenElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Grammar grammar;
-	
-	private final int tokenType;
 	
 	private final String ruleName;
 	
@@ -22,10 +20,9 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 	
 	public LexerRuleRefElementSpec(Grammar grammar, String label, Multiplicity multiplicity, 
 			int tokenType, String ruleName) {
-		super(label, multiplicity);
+		super(label, multiplicity, tokenType);
 		
 		this.grammar = grammar;
-		this.tokenType = tokenType;
 		this.ruleName = ruleName;
 	}
 
@@ -56,26 +53,51 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public boolean isToken(int tokenType) {
-		return tokenType == this.tokenType;
-	}
-
-	@Override
-	public Set<String> getFirstSet(Set<String> checkedRules) {
-		Set<String> firstSet = new HashSet<>();
+	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
+		Set<String> leadingLiterals = new HashSet<>();
 		RuleSpec rule = getRule();
 		if (rule != null && !checkedRules.contains(getRuleName())) {
 			checkedRules.add(getRuleName());
 			for (AlternativeSpec alternative: rule.getAlternatives()) {
 				for (ElementSpec elementSpec: alternative.getElements()) {
-					TerminalElementSpec terminalElementSpec = (TerminalElementSpec) elementSpec;
-					firstSet.addAll(terminalElementSpec.getFirstSet(new HashSet<>(checkedRules)));
-					if (!terminalElementSpec.matchesEmpty())
+					if (elementSpec instanceof TokenElementSpec) {
+						TokenElementSpec tokenElementSpec = (TokenElementSpec) elementSpec;
+						leadingLiterals.addAll(tokenElementSpec.getLeadingLiterals(new HashSet<>(checkedRules)));
+						if (!tokenElementSpec.matchesEmpty(new HashSet<String>()))
+							break;
+					} else if (!elementSpec.isOptional()) {
 						break;
+					}
 				}
 			}
 		}
-		return firstSet;
+		return leadingLiterals;
+	}
+
+	@Override
+	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
+		RuleSpec rule = getRule();
+		if (rule != null && !checkedRules.contains(getRuleName())) {
+			checkedRules.add(getRuleName());
+			for (AlternativeSpec alternative: rule.getAlternatives()) {
+				boolean matchesEmpty = true;
+				for (ElementSpec elementSpec: alternative.getElements()) {
+					if (elementSpec instanceof TokenElementSpec) {
+						TokenElementSpec tokenElementSpec = (TokenElementSpec) elementSpec;
+						if (!tokenElementSpec.matchesEmpty(checkedRules)) {
+							matchesEmpty = false;
+							break;
+						}
+					} else if (!elementSpec.isOptional()) {
+						matchesEmpty = false;
+						break;
+					}
+				}
+				if (matchesEmpty)
+					return true;
+			}
+		}
+		return false;
 	}
 	
 }

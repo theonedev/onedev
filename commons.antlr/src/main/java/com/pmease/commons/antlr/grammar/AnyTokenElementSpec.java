@@ -29,8 +29,13 @@ public class AnyTokenElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public Set<String> getFirstSet(Set<String> checkedRules) {
+	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
 		return Sets.newHashSet();
+	}
+
+	@Override
+	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
+		return false;
 	}
 
 }

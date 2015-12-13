@@ -1,7 +1,6 @@
 package com.pmease.commons.antlr.grammar;
 
 import java.util.List;
-import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
@@ -22,7 +21,5 @@ public abstract class TerminalElementSpec extends ElementSpec {
 		else 
 			return -1;
 	}
-	
-	public abstract Set<String> getFirstSet(Set<String> checkedRules);
 	
 }

@@ -6,19 +6,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
-public class LiteralElementSpec extends TerminalElementSpec {
+public class LiteralElementSpec extends TokenElementSpec {
 
 	private static final long serialVersionUID = 1L;
-	
-	private final int tokenType;
 	
 	private final String literal;
 	
 	public LiteralElementSpec(String label, Multiplicity multiplicity, 
 			int tokenType, String literal) {
-		super(label, multiplicity);
+		super(label, multiplicity, tokenType);
 		
-		this.tokenType = tokenType;
 		this.literal = literal;
 	}
 
@@ -37,13 +34,13 @@ public class LiteralElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public boolean isToken(int tokenType) {
-		return tokenType == this.tokenType;
+	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
+		return Sets.newHashSet(literal);
 	}
 
 	@Override
-	public Set<String> getFirstSet(Set<String> checkedRules) {
-		return Sets.newHashSet(literal);
+	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
+		return false;
 	}
 	
 }

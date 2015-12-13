@@ -69,6 +69,21 @@ public class RuleSpec implements Serializable {
 		}
 	}
 
+	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
+		Set<String> leadingLiterals = new HashSet<>();
+		if (!checkedRules.contains(name)) {
+			checkedRules.add(name);
+			for (AlternativeSpec alternative: alternatives) {
+				for (ElementSpec elementSpec: alternative.getElements()) {
+					leadingLiterals.addAll(elementSpec.getLeadingLiterals(new HashSet<>(checkedRules)));
+					if (!elementSpec.matchesEmpty(new HashSet<String>()))
+						break;
+				}
+			}
+		}
+		return leadingLiterals;
+	}
+
 	@Override
 	public String toString() {
 		List<String> alternativeStrings = new ArrayList<>();

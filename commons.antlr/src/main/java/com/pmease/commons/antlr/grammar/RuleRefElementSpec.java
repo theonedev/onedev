@@ -54,5 +54,16 @@ public class RuleRefElementSpec extends ElementSpec {
 	public int getEndOfMatch(List<Token> tokens) {
 		return new EarleyParser(getRule(), tokens).getEndOfMatch();
 	}
+
+	@Override
+	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
+		return getRule().;
+	}
 	
 }

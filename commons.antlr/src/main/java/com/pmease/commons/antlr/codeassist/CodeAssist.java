@@ -20,6 +20,7 @@ import com.pmease.commons.antlr.grammar.AlternativeSpec;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammar.RuleSpec;
+import com.pmease.commons.antlr.grammar.TerminalElementSpec;
 import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
 import com.pmease.commons.antlr.parser.EarleyParser;
 import com.pmease.commons.antlr.parser.Element;
@@ -263,7 +264,13 @@ public abstract class CodeAssist implements Serializable {
 					}
 				}
 				if (inputSuggestions == null) {
-					
+					TerminalElementSpec spec = (TerminalElementSpec) elementExpectingTerminal.getSpec();
+					for (String leadingLiteral: spec.getLeadingLiterals(new HashSet<String>())) {
+						List<Token> tokens = grammar.lex(leadingLiteral);
+						if (tokens.size() == 1 && tokens.get(0).getType() == spec.getType()) {
+							
+						}
+					}
 				}
 			}
 		}

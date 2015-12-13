@@ -45,13 +45,18 @@ public class NotTokenElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public boolean isToken(int tokenType) {
-		return !notTokenTypes.contains(tokenType);
+	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
+		return Sets.newHashSet();
 	}
 
 	@Override
-	public Set<String> getFirstSet(Set<String> checkedRules) {
-		return Sets.newHashSet();
+	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
+		return false;
+	}
+
+	@Override
+	public boolean isToken(int tokenType) {
+		return !notTokenTypes.contains(tokenType);
 	}
 
 }

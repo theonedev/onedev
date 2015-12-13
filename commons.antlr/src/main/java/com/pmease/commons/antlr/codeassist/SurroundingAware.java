@@ -58,7 +58,7 @@ public abstract class SurroundingAware {
 					caret = content.length();
 				else
 					caret += prefix.length();
-				checkedSuggestions.add(new InputSuggestion(content, caret, suggestion.getDescription()));
+				checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription()));
 			} else {
 				checkedSuggestions.add(suggestion);
 			}
