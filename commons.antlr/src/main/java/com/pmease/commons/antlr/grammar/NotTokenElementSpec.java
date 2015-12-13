@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.Grammar;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
@@ -46,6 +47,11 @@ public class NotTokenElementSpec extends TerminalElementSpec {
 	@Override
 	public boolean isToken(int tokenType) {
 		return !notTokenTypes.contains(tokenType);
+	}
+
+	@Override
+	public Set<String> getFirstSet(Set<String> checkedRules) {
+		return Sets.newHashSet();
 	}
 
 }

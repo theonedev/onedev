@@ -3,6 +3,7 @@ package com.pmease.commons.antlr.grammar;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
 public class LiteralElementSpec extends TerminalElementSpec {
@@ -38,6 +39,11 @@ public class LiteralElementSpec extends TerminalElementSpec {
 	@Override
 	public boolean isToken(int tokenType) {
 		return tokenType == this.tokenType;
+	}
+
+	@Override
+	public Set<String> getFirstSet(Set<String> checkedRules) {
+		return Sets.newHashSet(literal);
 	}
 	
 }

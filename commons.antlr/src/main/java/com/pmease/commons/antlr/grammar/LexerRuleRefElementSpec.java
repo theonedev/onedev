@@ -1,8 +1,6 @@
 package com.pmease.commons.antlr.grammar;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Optional;
@@ -43,40 +41,10 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 
 	@Override
 	public MandatoryScan scanMandatories(Set<String> checkedRules) {
-		if (!checkedRules.contains(ruleName) && getRule() != null) { // to avoid infinite loop
-			checkedRules.add(ruleName);
-		
-			List<AlternativeSpec> alternatives = getRule().getAlternatives();
-			// nothing will be mandatory if we have multiple alternatives 
-			if (alternatives.size() == 1) {
-				List<String> mandatories = new ArrayList<>();
-				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
-					if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
-							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
-						// next input can either be current element, or other elements, so 
-						// mandatory scan can be stopped
-						return new MandatoryScan(mandatories, true);
-					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
-						mandatories.addAll(scan.getMandatories());
-						// next input can either be current element, or other elements, so 
-						// mandatory scan can be stopped
-						return new MandatoryScan(mandatories, true);
-					} else {
-						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
-						mandatories.addAll(scan.getMandatories());
-						// if internal of the element tells use to stop, let's stop 
-						if (scan.isStop())
-							return new MandatoryScan(mandatories, true);
-					}
-				}
-				return new MandatoryScan(mandatories, false);
-			} else {
-				return MandatoryScan.stop();
-			}
-		} else {
+		if (getRule() != null) 
+			return getRule().scanMandatories(checkedRules);
+		else 
 			return MandatoryScan.stop();
-		}
 	}
 
 	@Override
@@ -90,6 +58,24 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 	@Override
 	public boolean isToken(int tokenType) {
 		return tokenType == this.tokenType;
+	}
+
+	@Override
+	public Set<String> getFirstSet(Set<String> checkedRules) {
+		Set<String> firstSet = new HashSet<>();
+		RuleSpec rule = getRule();
+		if (rule != null && !checkedRules.contains(getRuleName())) {
+			checkedRules.add(getRuleName());
+			for (AlternativeSpec alternative: rule.getAlternatives()) {
+				for (ElementSpec elementSpec: alternative.getElements()) {
+					TerminalElementSpec terminalElementSpec = (TerminalElementSpec) elementSpec;
+					firstSet.addAll(terminalElementSpec.getFirstSet(new HashSet<>(checkedRules)));
+					if (!terminalElementSpec.matchesEmpty())
+						break;
+				}
+			}
+		}
+		return firstSet;
 	}
 	
 }

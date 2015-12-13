@@ -226,8 +226,8 @@ public abstract class CodeAssist implements Serializable {
 		return rootElements;
 	}
 	
-	private void fillSuggestions(List<ElementSuggestion> suggestions, EarleyParser parser, 
-			State state, InputStatus inputStatus) {
+	private List<ElementSuggestion> suggest(EarleyParser parser, State state, InputStatus inputStatus) {
+		List<ElementSuggestion> suggestions = new ArrayList<>();
 		for (Node node: state.getNodesExpectingTerminal()) {
 			List<Element> rootElements = assumeCompleted(parser, node, state.getEndTokenIndex());
 			String matchWith;
@@ -240,9 +240,9 @@ public abstract class CodeAssist implements Serializable {
 			matchWith = StringUtils.trimStart(matchWith);
 			for (Element rootElement: rootElements) {
 				List<ParentedElement> expectingElements = new ArrayList<>();
-				ParentedElement expectingElement = getElementExpectingTerminal(null, rootElement);
-				expectingElements.add(expectingElement);
-				expectingElement = expectingElement.getParent();
+				ParentedElement elementExpectingTerminal = getElementExpectingTerminal(null, rootElement);
+				expectingElements.add(elementExpectingTerminal);
+				ParentedElement expectingElement = elementExpectingTerminal.getParent();
 				while (expectingElement != null) {
 					if (expectingElement.getNode().getElements().size() == 1) {
 						expectingElements.add(expectingElement);
@@ -253,16 +253,21 @@ public abstract class CodeAssist implements Serializable {
 				}
 				
 				Collections.reverse(expectingElements);
-
+				
+				List<InputSuggestion> inputSuggestions = null;
 				for (ParentedElement element: expectingElements) {
-					List<InputSuggestion> inputSuggestions = suggest(element, matchWith);
+					inputSuggestions = suggest(element, matchWith);
 					if (inputSuggestions != null) {
 						suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
 						break;
 					}
 				}
+				if (inputSuggestions == null) {
+					
+				}
 			}
 		}
+		return suggestions;
  	}
 	
 	private List<ElementCompletion> suggest(RuleSpec spec, InputStatus inputStatus) {
@@ -275,7 +280,7 @@ public abstract class CodeAssist implements Serializable {
 		
 		if (parser.getStates().size() >= 1) {
 			State lastState = parser.getStates().get(parser.getStates().size()-1);
-			fillSuggestions(suggestions, parser, lastState, inputStatus);
+			suggestions.addAll(suggest(parser, lastState, inputStatus));
 		}
 
 		/*
@@ -292,7 +297,7 @@ public abstract class CodeAssist implements Serializable {
 		 */
 		if (parser.getStates().size() >= 2) {
 			State stateBeforeLast = parser.getStates().get(parser.getStates().size()-2);
-			fillSuggestions(suggestions, parser, stateBeforeLast, inputStatus);
+			suggestions.addAll(suggest(parser, stateBeforeLast, inputStatus));
 		}
 
 		String inputContent = inputStatus.getContent();
@@ -309,7 +314,7 @@ public abstract class CodeAssist implements Serializable {
 			 */
 			if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getExpectingElement().getSpec();
-				int matchDistance = elementSpec.getMatchDistance(tokens);
+				int matchDistance = elementSpec.getEndOfMatch(tokens);
 				if (matchDistance > 0) {
 					int charIndex = tokens.get(matchDistance-1).getStopIndex()+1;
 					if (replaceStart + charIndex > replaceEnd)

@@ -2,6 +2,7 @@ package com.pmease.commons.antlr.grammar;
 
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
 public class AnyTokenElementSpec extends TerminalElementSpec {
@@ -25,6 +26,11 @@ public class AnyTokenElementSpec extends TerminalElementSpec {
 	@Override
 	public boolean isToken(int tokenType) {
 		return true;
+	}
+
+	@Override
+	public Set<String> getFirstSet(Set<String> checkedRules) {
+		return Sets.newHashSet();
 	}
 
 }

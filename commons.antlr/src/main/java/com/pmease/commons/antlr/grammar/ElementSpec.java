@@ -44,7 +44,7 @@ public abstract class ElementSpec implements Serializable {
 			return toStringOnce() + "?";
 	}
 	
-	public abstract int getMatchDistance(List<Token> tokens);
+	public abstract int getEndOfMatch(List<Token> tokens);
 	
 	protected abstract String toStringOnce();
 }

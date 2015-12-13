@@ -33,7 +33,7 @@ public abstract class SurroundingAware {
 			stop = tokens.get(tokens.size()-1).getStopIndex()+1;
 		}
 		if (start == 0 && stop == content.length())
-			return spec.getMatchDistance(tokens) != -1;
+			return spec.getEndOfMatch(tokens) != -1;
 		else 
 			return false;
 	}
