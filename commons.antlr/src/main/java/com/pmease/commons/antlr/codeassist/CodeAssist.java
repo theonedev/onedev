@@ -3,7 +3,6 @@ package com.pmease.commons.antlr.codeassist;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,8 +19,7 @@ import com.pmease.commons.antlr.grammar.AlternativeSpec;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammar.RuleSpec;
-import com.pmease.commons.antlr.grammar.TerminalElementSpec;
-import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
+import com.pmease.commons.antlr.grammar.TokenElementSpec;
 import com.pmease.commons.antlr.parser.EarleyParser;
 import com.pmease.commons.antlr.parser.Element;
 import com.pmease.commons.antlr.parser.Node;
@@ -66,7 +64,7 @@ public abstract class CodeAssist implements Serializable {
 		RuleSpec rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
 		
 		String inputContent = inputStatus.getContent();
-		List<InputCompletion> inputSuggestions = new ArrayList<>();
+		List<InputCompletion> inputCompletions = new ArrayList<>();
 		
 		/*
 		 * Mandatory literals may come after a suggestion (for instance if a method name is suggested, 
@@ -79,20 +77,20 @@ public abstract class CodeAssist implements Serializable {
 		 * mainly handles this logic.         
 		 */
 		Map<String, List<ElementCompletion>> grouped = new LinkedHashMap<>();
-		for (ElementCompletion completion: suggest(rule, inputStatus)) {
+		for (ElementCompletion elementCompletion: suggest(rule, inputStatus)) {
 			/*
 			 *  key will be the new input (without considering mandatories of course), and we use 
 			 *  this to group suggestions to facilitate mandatories calculation and exclusion 
 			 *  logic 
 			 */
-			String key = inputContent.substring(0, completion.getReplaceBegin()) 
-					+ completion.getReplaceContent() + inputContent.substring(completion.getReplaceEnd());
+			String key = inputContent.substring(0, elementCompletion.getReplaceBegin()) 
+					+ elementCompletion.getReplaceContent() + inputContent.substring(elementCompletion.getReplaceEnd());
 			List<ElementCompletion> value = grouped.get(key);
 			if (value == null) {
 				value = new ArrayList<>();
 				grouped.put(key, value);
 			}
-			value.add(completion);
+			value.add(elementCompletion);
 		}
 		
 		for (Map.Entry<String, List<ElementCompletion>> entry: grouped.entrySet())	 {
@@ -170,7 +168,7 @@ public abstract class CodeAssist implements Serializable {
 			
 			String replaceContent = content.substring(completion.getReplaceBegin(), 
 					content.length()-inputContent.length()+completion.getReplaceEnd());
-			inputSuggestions.add(new InputCompletion(completion.getReplaceBegin(), 
+			inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
 					completion.getReplaceEnd(), replaceContent, caret, description));
 		}
 		
@@ -178,14 +176,14 @@ public abstract class CodeAssist implements Serializable {
 		 * remove duplicate suggestions and suggestions the same as current input
 		 */
 		Set<String> suggestedContents = Sets.newHashSet(inputStatus.getContent());
-		for (Iterator<InputCompletion> it = inputSuggestions.iterator(); it.hasNext();) {
+		for (Iterator<InputCompletion> it = inputCompletions.iterator(); it.hasNext();) {
 			String content = it.next().complete(inputStatus).getContent();
 			if (suggestedContents.contains(content))
 				it.remove();
 			else
 				suggestedContents.add(content);
 		}
-		return inputSuggestions;
+		return inputCompletions;
 	}
 	
 	private ParentedElement getElementExpectingTerminal(ParentedElement parent, Element element) {
@@ -259,18 +257,21 @@ public abstract class CodeAssist implements Serializable {
 				for (ParentedElement element: expectingElements) {
 					inputSuggestions = suggest(element, matchWith);
 					if (inputSuggestions != null) {
-						suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
+						if (!inputSuggestions.isEmpty())
+							suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
 						break;
 					}
 				}
-				if (inputSuggestions == null) {
-					TerminalElementSpec spec = (TerminalElementSpec) elementExpectingTerminal.getSpec();
-					for (String leadingLiteral: spec.getLeadingLiterals(new HashSet<String>())) {
-						List<Token> tokens = grammar.lex(leadingLiteral);
-						if (tokens.size() == 1 && tokens.get(0).getType() == spec.getType()) {
-							
-						}
+				if (inputSuggestions == null && elementExpectingTerminal.getSpec() instanceof TokenElementSpec) {
+					inputSuggestions = new ArrayList<>();
+					TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
+					for (String leadingChoice: spec.getLeadingChoices()) {
+						List<Token> tokens = grammar.lex(leadingChoice);
+						boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
+						inputSuggestions.add(new InputSuggestion(leadingChoice, leadingChoice.length(), complete, null));
 					}
+					if (!inputSuggestions.isEmpty())
+						suggestions.add(new ElementSuggestion(elementExpectingTerminal, matchWith, inputSuggestions));
 				}
 			}
 		}
@@ -401,8 +402,7 @@ public abstract class CodeAssist implements Serializable {
 	 */
 	private List<String> getMandatoriesAfter(ParentedElement parentElement, ElementSpec elementSpec) {
 		List<String> literals = new ArrayList<>();
-		if (parentElement != null && elementSpec != null 
-				&& (elementSpec.getMultiplicity() == Multiplicity.ONE || elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE)) {
+		if (parentElement != null && elementSpec != null && !elementSpec.isMultiple()) {
 			AlternativeSpec alternativeSpec = parentElement.getNode().getAlternativeSpec();
 			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
 			if (specIndex == alternativeSpec.getElements().size()-1) {
@@ -411,9 +411,8 @@ public abstract class CodeAssist implements Serializable {
 				return getMandatoriesAfter(parentElement, elementSpec);
 			} else {
 				elementSpec = alternativeSpec.getElements().get(specIndex+1);
-				if (elementSpec.getMultiplicity() == Multiplicity.ONE
-						|| elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-					MandatoryScan scan = elementSpec.scanMandatories(new HashSet<String>());
+				if (!elementSpec.isOptional()) {
+					MandatoryScan scan = elementSpec.scanMandatories();
 					literals = scan.getMandatories();
 					if (!scan.isStop())
 						literals.addAll(getMandatoriesAfter(parentElement, elementSpec));

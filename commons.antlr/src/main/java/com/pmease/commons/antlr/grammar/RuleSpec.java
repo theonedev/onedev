@@ -19,6 +19,12 @@ public class RuleSpec implements Serializable {
 	
 	private final List<AlternativeSpec> alternatives;
 	
+	private Set<String> leadingChoices;
+	
+	private Boolean allowEmpty;
+	
+	private MandatoryScan mandatoryScan;
+	
 	public RuleSpec(String name, List<AlternativeSpec> alternatives) {
 		this.name = name;
 		this.alternatives = alternatives;
@@ -32,56 +38,96 @@ public class RuleSpec implements Serializable {
 		return alternatives;
 	}
 
-	public MandatoryScan scanMandatories(Set<String> checkedRules) {
-		if (!checkedRules.contains(name)) { // to avoid infinite loop
-			checkedRules.add(name);
-		
-			List<AlternativeSpec> alternatives = getAlternatives();
-			// nothing will be mandatory if we have multiple alternatives 
-			if (alternatives.size() == 1) {
-				List<String> mandatories = new ArrayList<>();
-				for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
-					if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
-							|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
-						// next input can either be current element, or other elements, so 
-						// mandatory scan can be stopped
+	private MandatoryScan doScanMandatories() {
+		List<AlternativeSpec> alternatives = getAlternatives();
+		// nothing will be mandatory if we have multiple alternatives 
+		if (alternatives.size() == 1) {
+			List<String> mandatories = new ArrayList<>();
+			for (ElementSpec elementSpec: alternatives.get(0).getElements()) {
+				if (elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_ONE 
+						|| elementSpec.getMultiplicity() == Multiplicity.ZERO_OR_MORE) {
+					// next input can either be current element, or other elements, so 
+					// mandatory scan can be stopped
+					return new MandatoryScan(mandatories, true);
+				} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
+					MandatoryScan scan = elementSpec.scanMandatories();
+					mandatories.addAll(scan.getMandatories());
+					// next input can either be current element, or other elements, so 
+					// mandatory scan can be stopped
+					return new MandatoryScan(mandatories, true);
+				} else {
+					MandatoryScan scan = elementSpec.scanMandatories();
+					mandatories.addAll(scan.getMandatories());
+					// if internal of the element tells use to stop, let's stop 
+					if (scan.isStop())
 						return new MandatoryScan(mandatories, true);
-					} else if (elementSpec.getMultiplicity() == Multiplicity.ONE_OR_MORE) {
-						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
-						mandatories.addAll(scan.getMandatories());
-						// next input can either be current element, or other elements, so 
-						// mandatory scan can be stopped
-						return new MandatoryScan(mandatories, true);
-					} else {
-						MandatoryScan scan = elementSpec.scanMandatories(new HashSet<>(checkedRules));
-						mandatories.addAll(scan.getMandatories());
-						// if internal of the element tells use to stop, let's stop 
-						if (scan.isStop())
-							return new MandatoryScan(mandatories, true);
-					}
 				}
-				return new MandatoryScan(mandatories, false);
-			} else {
-				return MandatoryScan.stop();
 			}
+			return new MandatoryScan(mandatories, false);
 		} else {
 			return MandatoryScan.stop();
 		}
 	}
-
-	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
-		Set<String> leadingLiterals = new HashSet<>();
-		if (!checkedRules.contains(name)) {
-			checkedRules.add(name);
-			for (AlternativeSpec alternative: alternatives) {
-				for (ElementSpec elementSpec: alternative.getElements()) {
-					leadingLiterals.addAll(elementSpec.getLeadingLiterals(new HashSet<>(checkedRules)));
-					if (!elementSpec.matchesEmpty(new HashSet<String>()))
-						break;
-				}
+	
+	public MandatoryScan scanMandatories() {
+		if (mandatoryScan == null) {
+			// initialize this to return a meaningful value in case this method is 
+			// invoked recursively
+			mandatoryScan = MandatoryScan.stop(); 
+			
+			mandatoryScan = doScanMandatories();
+		}
+		return mandatoryScan;
+	}
+	
+	private Set<String> doGetLeadingChoices() {
+		Set<String> leadingChoices = new HashSet<>();
+		
+		for (AlternativeSpec alternative: alternatives) {
+			for (ElementSpec elementSpec: alternative.getElements()) {
+				leadingChoices.addAll(elementSpec.getLeadingChoices());
+				if (!elementSpec.isAllowEmpty())
+					break;
 			}
 		}
-		return leadingLiterals;
+		return leadingChoices;
+	}
+
+	public Set<String> getLeadingChoices() {
+		if (leadingChoices == null) {
+			// initialize this to return a meaningful value in case this method is 
+			// invoked recursively
+			leadingChoices = new HashSet<>();
+			
+			leadingChoices = doGetLeadingChoices();
+		}
+		return leadingChoices;
+	}
+
+	private boolean doIsAllowEmpty() {
+		for (AlternativeSpec alternative: getAlternatives()) {
+			boolean allowEmpty = true;
+			for (ElementSpec elementSpec: alternative.getElements()) {
+				if (!elementSpec.isAllowEmpty()) {
+					allowEmpty = false;
+					break;
+				}
+			}
+			if (allowEmpty)
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isAllowEmpty() {
+		if (allowEmpty == null) {
+			// initialize this to return a meaningful value in case this method is 
+			// invoked recursively
+			allowEmpty = false; 
+
+			allowEmpty = doIsAllowEmpty();
+		}
+		return allowEmpty;
 	}
 
 	@Override

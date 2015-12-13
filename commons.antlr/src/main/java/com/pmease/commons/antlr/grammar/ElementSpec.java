@@ -35,18 +35,22 @@ public abstract class ElementSpec implements Serializable {
 		return multiplicity == Multiplicity.ZERO_OR_MORE || multiplicity == Multiplicity.ZERO_OR_ONE;
 	}
 
-	public abstract Set<String> getLeadingLiterals(Set<String> checkedRules);
-	
-	protected abstract boolean matchesEmptyOnce(Set<String> checkedRules);
-	
-	public boolean matchesEmpty(Set<String> checkedRules) {
-		if (getMultiplicity() == Multiplicity.ZERO_OR_MORE || getMultiplicity() == Multiplicity.ZERO_OR_ONE)
-			return true;
-		else
-			return matchesEmptyOnce(checkedRules);
+	public boolean isMultiple() {
+		return multiplicity == Multiplicity.ONE_OR_MORE || multiplicity == Multiplicity.ZERO_OR_MORE;
 	}
 	
-	public abstract MandatoryScan scanMandatories(Set<String> checkedRules);
+	public abstract Set<String> getLeadingChoices();
+	
+	protected abstract boolean isAllowEmptyOnce();
+	
+	public boolean isAllowEmpty() {
+		if (isOptional())
+			return true;
+		else
+			return isAllowEmptyOnce();
+	}
+	
+	public abstract MandatoryScan scanMandatories();
 	
 	public final String toString() {
 		if (multiplicity == Multiplicity.ONE)

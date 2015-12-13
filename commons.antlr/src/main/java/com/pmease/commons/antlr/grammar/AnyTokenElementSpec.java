@@ -14,7 +14,7 @@ public class AnyTokenElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+	public MandatoryScan scanMandatories() {
 		return MandatoryScan.stop();
 	}
 
@@ -29,12 +29,12 @@ public class AnyTokenElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
+	public Set<String> getLeadingChoices() {
 		return Sets.newHashSet();
 	}
 
 	@Override
-	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
+	protected boolean isAllowEmptyOnce() {
 		return false;
 	}
 

@@ -38,8 +38,8 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public MandatoryScan scanMandatories(Set<String> checkedRules) {
-		return getRule().scanMandatories(checkedRules);
+	public MandatoryScan scanMandatories() {
+		return getRule().scanMandatories();
 	}
 
 	@Override
@@ -56,14 +56,13 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
-		// TODO Auto-generated method stub
-		return null;
+	public Set<String> getLeadingChoices() {
+		return getRule().getLeadingChoices();
 	}
 
 	@Override
-	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
-		return getRule().;
+	protected boolean isAllowEmptyOnce() {
+		return getRule().isAllowEmpty();
 	}
 	
 }

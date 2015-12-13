@@ -135,6 +135,14 @@ public class Grammar implements Serializable {
 				throw new RuntimeException(e);
 			}
 		}
+
+		// initialize rule properties to avoid changing grammar after 
+		// the constructor
+		for (RuleSpec rule: rules.values()) {
+			rule.isAllowEmpty();
+			rule.getLeadingChoices();
+			rule.scanMandatories();
+		}
 	}
 	
 	private Constructor<? extends Lexer> getLexerCtor() {

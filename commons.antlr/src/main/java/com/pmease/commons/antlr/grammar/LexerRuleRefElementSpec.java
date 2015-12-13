@@ -1,10 +1,10 @@
 package com.pmease.commons.antlr.grammar;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.Grammar;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
@@ -37,9 +37,9 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+	public MandatoryScan scanMandatories() {
 		if (getRule() != null) 
-			return getRule().scanMandatories(checkedRules);
+			return getRule().scanMandatories();
 		else 
 			return MandatoryScan.stop();
 	}
@@ -53,51 +53,19 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
-		Set<String> leadingLiterals = new HashSet<>();
-		RuleSpec rule = getRule();
-		if (rule != null && !checkedRules.contains(getRuleName())) {
-			checkedRules.add(getRuleName());
-			for (AlternativeSpec alternative: rule.getAlternatives()) {
-				for (ElementSpec elementSpec: alternative.getElements()) {
-					if (elementSpec instanceof TokenElementSpec) {
-						TokenElementSpec tokenElementSpec = (TokenElementSpec) elementSpec;
-						leadingLiterals.addAll(tokenElementSpec.getLeadingLiterals(new HashSet<>(checkedRules)));
-						if (!tokenElementSpec.matchesEmpty(new HashSet<String>()))
-							break;
-					} else if (!elementSpec.isOptional()) {
-						break;
-					}
-				}
-			}
-		}
-		return leadingLiterals;
+	public Set<String> getLeadingChoices() {
+		if (getRule() != null)
+			return getRule().getLeadingChoices();
+		else
+			return Sets.newHashSet();
 	}
 
 	@Override
-	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
-		RuleSpec rule = getRule();
-		if (rule != null && !checkedRules.contains(getRuleName())) {
-			checkedRules.add(getRuleName());
-			for (AlternativeSpec alternative: rule.getAlternatives()) {
-				boolean matchesEmpty = true;
-				for (ElementSpec elementSpec: alternative.getElements()) {
-					if (elementSpec instanceof TokenElementSpec) {
-						TokenElementSpec tokenElementSpec = (TokenElementSpec) elementSpec;
-						if (!tokenElementSpec.matchesEmpty(checkedRules)) {
-							matchesEmpty = false;
-							break;
-						}
-					} else if (!elementSpec.isOptional()) {
-						matchesEmpty = false;
-						break;
-					}
-				}
-				if (matchesEmpty)
-					return true;
-			}
-		}
-		return false;
+	protected boolean isAllowEmptyOnce() {
+		if (getRule() != null)
+			return getRule().isAllowEmpty();
+		else
+			return false;
 	}
 	
 }

@@ -7,8 +7,9 @@ public class ElementCompletion extends InputCompletion {
 	private final ParentedElement expectingElement;
 	
 	public ElementCompletion(ParentedElement expectingElement, int replaceBegin, 
-			int replaceEnd, String replaceContent, int caret, String description) {
-		super(replaceBegin, replaceEnd, replaceContent, caret, description);
+			int replaceEnd, String replaceContent, int caret, boolean complete, 
+			String description) {
+		super(replaceBegin, replaceEnd, replaceContent, caret, complete, description);
 		
 		this.expectingElement = expectingElement;
 	}

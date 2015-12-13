@@ -8,15 +8,15 @@ public class InputCompletion implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private int replaceBegin;
+	private final int replaceBegin;
 	
-	private int replaceEnd;
+	private final int replaceEnd;
 	
-	private String replaceContent;
+	private final String replaceContent;
 	
-	private int caret;
+	private final int caret;
 	
-	private String description;
+	private final String description;
 	
 	public InputCompletion(int replaceBegin, int replaceEnd, String replaceContent, 
 			int caret, @Nullable String description) {

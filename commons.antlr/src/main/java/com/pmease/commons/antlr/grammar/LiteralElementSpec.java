@@ -24,7 +24,7 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public MandatoryScan scanMandatories(Set<String> checkedRules) {
+	public MandatoryScan scanMandatories() {
 		return new MandatoryScan(Lists.newArrayList(literal), false);
 	}
 
@@ -34,12 +34,12 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals(Set<String> checkedRules) {
+	public Set<String> getLeadingChoices() {
 		return Sets.newHashSet(literal);
 	}
 
 	@Override
-	protected boolean matchesEmptyOnce(Set<String> checkedRules) {
+	protected boolean isAllowEmptyOnce() {
 		return false;
 	}
 	
