@@ -1,12 +1,12 @@
-package com.pmease.commons.antlr.codeassist.parse;
+package com.pmease.commons.antlr.parser;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.antlr.codeassist.ElementSpec;
-import com.pmease.commons.antlr.codeassist.TerminalElementSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.antlr.grammar.TerminalElementSpec;
 
 public class State {
 	

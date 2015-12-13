@@ -15,11 +15,16 @@ import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
-import com.pmease.commons.antlr.codeassist.parse.EarleyParser;
-import com.pmease.commons.antlr.codeassist.parse.Element;
-import com.pmease.commons.antlr.codeassist.parse.Node;
-import com.pmease.commons.antlr.codeassist.parse.State;
+import com.pmease.commons.antlr.Grammar;
+import com.pmease.commons.antlr.grammar.AlternativeSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
+import com.pmease.commons.antlr.grammar.RuleSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
+import com.pmease.commons.antlr.parser.EarleyParser;
+import com.pmease.commons.antlr.parser.Element;
+import com.pmease.commons.antlr.parser.Node;
+import com.pmease.commons.antlr.parser.State;
 import com.pmease.commons.util.StringUtils;
 
 public abstract class CodeAssist implements Serializable {

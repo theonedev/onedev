@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist;
+package com.pmease.commons.antlr;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,8 +48,15 @@ import com.pmease.commons.antlr.ANTLRv4Parser.ParserRuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleBlockContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.RuleSpecContext;
 import com.pmease.commons.antlr.ANTLRv4Parser.SetElementContext;
-import com.pmease.commons.antlr.AntlrUtils;
-import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
+import com.pmease.commons.antlr.grammar.AlternativeSpec;
+import com.pmease.commons.antlr.grammar.AnyTokenElementSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
+import com.pmease.commons.antlr.grammar.LiteralElementSpec;
+import com.pmease.commons.antlr.grammar.NotTokenElementSpec;
+import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
+import com.pmease.commons.antlr.grammar.RuleSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
 import com.pmease.commons.util.StringUtils;
 
 public class Grammar implements Serializable {

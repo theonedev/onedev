@@ -5,10 +5,10 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
-import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.SurroundingAware;
+import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
+import com.pmease.commons.antlr.grammar.LiteralElementSpec;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 
 @SuppressWarnings("serial")

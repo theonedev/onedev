@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.parse;
+package com.pmease.commons.antlr.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.Token;
 
-import com.pmease.commons.antlr.codeassist.ElementSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec;
 
 public class Element {
 	

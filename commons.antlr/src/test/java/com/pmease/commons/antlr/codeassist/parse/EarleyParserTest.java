@@ -5,9 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.pmease.commons.antlr.codeassist.Grammar;
+import com.pmease.commons.antlr.Grammar;
 import com.pmease.commons.antlr.codeassist.test.CodeAssistTest1Lexer;
 import com.pmease.commons.antlr.codeassist.test.CodeAssistTest4Lexer;
+import com.pmease.commons.antlr.parser.EarleyParser;
 
 public class EarleyParserTest {
 

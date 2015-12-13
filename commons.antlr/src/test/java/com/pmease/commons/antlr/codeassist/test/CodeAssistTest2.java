@@ -11,9 +11,9 @@ import com.pmease.commons.antlr.codeassist.CodeAssist;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.SurroundingAware;
+import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 
 public class CodeAssistTest2 {
 

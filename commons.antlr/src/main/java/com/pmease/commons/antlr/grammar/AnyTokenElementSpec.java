@@ -1,6 +1,8 @@
-package com.pmease.commons.antlr.codeassist;
+package com.pmease.commons.antlr.grammar;
 
 import java.util.Set;
+
+import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
 public class AnyTokenElementSpec extends TerminalElementSpec {
 

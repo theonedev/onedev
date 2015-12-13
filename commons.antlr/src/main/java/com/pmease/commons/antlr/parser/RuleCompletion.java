@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.parse;
+package com.pmease.commons.antlr.parser;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

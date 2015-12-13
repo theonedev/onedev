@@ -1,47 +1,47 @@
-package com.pmease.commons.antlr.codeassist;
+package com.pmease.commons.antlr.grammar;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import org.antlr.v4.runtime.Token;
 
-public class LexerRuleRefElementSpec extends TerminalElementSpec {
+import com.google.common.base.Preconditions;
+import com.pmease.commons.antlr.Grammar;
+import com.pmease.commons.antlr.codeassist.MandatoryScan;
+import com.pmease.commons.antlr.parser.EarleyParser;
+
+public class RuleRefElementSpec extends ElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Grammar grammar;
 	
-	private final int tokenType;
-	
 	private final String ruleName;
 	
-	private transient Optional<RuleSpec> rule;
+	private transient RuleSpec rule;
 	
-	public LexerRuleRefElementSpec(Grammar grammar, String label, Multiplicity multiplicity, 
-			int tokenType, String ruleName) {
+	public RuleRefElementSpec(Grammar grammar, String label, Multiplicity multiplicity, String ruleName) {
 		super(label, multiplicity);
-		
+	
 		this.grammar = grammar;
-		this.tokenType = tokenType;
 		this.ruleName = ruleName;
 	}
 
-	public String getRuleName() {
-		return ruleName;
-	}
-	
 	public RuleSpec getRule() {
 		if (rule == null)
-			rule = Optional.fromNullable(grammar.getRule(ruleName));
-		return rule.orNull();
+			rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
+		return rule;
+	}
+	
+	public String getRuleName() {
+		return ruleName;
 	}
 
 	@Override
 	public MandatoryScan scanMandatories(Set<String> checkedRules) {
-		if (!checkedRules.contains(ruleName) && getRule() != null) { // to avoid infinite loop
+		if (!checkedRules.contains(ruleName)) {
 			checkedRules.add(ruleName);
 		
 			List<AlternativeSpec> alternatives = getRule().getAlternatives();
@@ -69,12 +69,9 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 					}
 				}
 				return new MandatoryScan(mandatories, false);
-			} else {
-				return MandatoryScan.stop();
-			}
-		} else {
-			return MandatoryScan.stop();
-		}
+			} 
+		} 
+		return MandatoryScan.stop();
 	}
 
 	@Override
@@ -86,8 +83,8 @@ public class LexerRuleRefElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public boolean isToken(int tokenType) {
-		return tokenType == this.tokenType;
+	public int getMatchDistance(List<Token> tokens) {
+		return new EarleyParser(getRule(), tokens).getEndOfMatch();
 	}
 	
 }

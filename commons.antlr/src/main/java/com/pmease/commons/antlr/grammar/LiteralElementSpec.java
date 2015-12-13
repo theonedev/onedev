@@ -1,8 +1,9 @@
-package com.pmease.commons.antlr.codeassist;
+package com.pmease.commons.antlr.grammar;
 
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
 public class LiteralElementSpec extends TerminalElementSpec {
 

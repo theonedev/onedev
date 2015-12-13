@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.parse;
+package com.pmease.commons.antlr.parser;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,11 +10,11 @@ import javax.annotation.Nullable;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.collect.Lists;
-import com.pmease.commons.antlr.codeassist.ElementSpec;
-import com.pmease.commons.antlr.codeassist.ElementSpec.Multiplicity;
-import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
-import com.pmease.commons.antlr.codeassist.RuleSpec;
-import com.pmease.commons.antlr.codeassist.TerminalElementSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
+import com.pmease.commons.antlr.grammar.RuleSpec;
+import com.pmease.commons.antlr.grammar.TerminalElementSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
 
 public class EarleyParser {
 

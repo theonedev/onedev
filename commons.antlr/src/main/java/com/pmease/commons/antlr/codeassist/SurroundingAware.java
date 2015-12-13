@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.pmease.commons.antlr.Grammar;
+import com.pmease.commons.antlr.grammar.ElementSpec;
+
 public abstract class SurroundingAware {
 	
 	private final Grammar grammar;

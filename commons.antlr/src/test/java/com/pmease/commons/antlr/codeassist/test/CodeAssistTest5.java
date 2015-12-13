@@ -11,15 +11,15 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.codeassist.CodeAssist;
-import com.pmease.commons.antlr.codeassist.ElementSpec;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
-import com.pmease.commons.antlr.codeassist.LexerRuleRefElementSpec;
-import com.pmease.commons.antlr.codeassist.LiteralElementSpec;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.codeassist.RuleRefElementSpec;
-import com.pmease.commons.antlr.codeassist.parse.Element;
+import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
+import com.pmease.commons.antlr.grammar.LiteralElementSpec;
+import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
+import com.pmease.commons.antlr.parser.Element;
 
 /**
  * This test case uses MySQL select grammar.

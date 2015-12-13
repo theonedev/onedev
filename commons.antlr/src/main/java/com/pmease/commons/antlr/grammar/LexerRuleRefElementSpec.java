@@ -1,45 +1,49 @@
-package com.pmease.commons.antlr.codeassist;
+package com.pmease.commons.antlr.grammar;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.antlr.v4.runtime.Token;
-
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.antlr.codeassist.parse.EarleyParser;
+import com.pmease.commons.antlr.Grammar;
+import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
-public class RuleRefElementSpec extends ElementSpec {
+public class LexerRuleRefElementSpec extends TerminalElementSpec {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Grammar grammar;
 	
+	private final int tokenType;
+	
 	private final String ruleName;
 	
-	private transient RuleSpec rule;
+	private transient Optional<RuleSpec> rule;
 	
-	public RuleRefElementSpec(Grammar grammar, String label, Multiplicity multiplicity, String ruleName) {
+	public LexerRuleRefElementSpec(Grammar grammar, String label, Multiplicity multiplicity, 
+			int tokenType, String ruleName) {
 		super(label, multiplicity);
-	
+		
 		this.grammar = grammar;
+		this.tokenType = tokenType;
 		this.ruleName = ruleName;
 	}
 
-	public RuleSpec getRule() {
-		if (rule == null)
-			rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
-		return rule;
-	}
-	
 	public String getRuleName() {
 		return ruleName;
+	}
+	
+	public RuleSpec getRule() {
+		if (rule == null)
+			rule = Optional.fromNullable(grammar.getRule(ruleName));
+		return rule.orNull();
 	}
 
 	@Override
 	public MandatoryScan scanMandatories(Set<String> checkedRules) {
-		if (!checkedRules.contains(ruleName)) {
+		if (!checkedRules.contains(ruleName) && getRule() != null) { // to avoid infinite loop
 			checkedRules.add(ruleName);
 		
 			List<AlternativeSpec> alternatives = getRule().getAlternatives();
@@ -67,9 +71,12 @@ public class RuleRefElementSpec extends ElementSpec {
 					}
 				}
 				return new MandatoryScan(mandatories, false);
-			} 
-		} 
-		return MandatoryScan.stop();
+			} else {
+				return MandatoryScan.stop();
+			}
+		} else {
+			return MandatoryScan.stop();
+		}
 	}
 
 	@Override
@@ -81,8 +88,8 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public int getMatchDistance(List<Token> tokens) {
-		return new EarleyParser(getRule(), tokens).getEndOfMatch();
+	public boolean isToken(int tokenType) {
+		return tokenType == this.tokenType;
 	}
 	
 }

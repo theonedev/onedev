@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.pmease.commons.antlr.codeassist.Grammar;
-import com.pmease.commons.antlr.codeassist.RuleSpec;
-import com.pmease.commons.antlr.codeassist.parse.EarleyParser;
+import com.pmease.commons.antlr.Grammar;
+import com.pmease.commons.antlr.grammar.RuleSpec;
+import com.pmease.commons.antlr.parser.EarleyParser;
 import com.pmease.commons.lang.extractors.java.JavaLexer;
 
 public class Test {

@@ -1,10 +1,12 @@
-package com.pmease.commons.antlr.codeassist;
+package com.pmease.commons.antlr.grammar;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
+
+import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
 public abstract class ElementSpec implements Serializable {
 	

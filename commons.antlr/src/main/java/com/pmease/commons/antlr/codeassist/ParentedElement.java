@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.antlr.codeassist.parse.Element;
+import com.pmease.commons.antlr.parser.Element;
 
 public class ParentedElement extends Element {
 
