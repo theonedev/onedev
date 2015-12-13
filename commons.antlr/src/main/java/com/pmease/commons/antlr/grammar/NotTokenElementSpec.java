@@ -46,7 +46,7 @@ public class NotTokenElementSpec extends TerminalElementSpec {
 
 	@Override
 	public Set<String> getLeadingChoices() {
-		return Sets.newHashSet();
+		return Sets.newLinkedHashSet();
 	}
 
 	@Override

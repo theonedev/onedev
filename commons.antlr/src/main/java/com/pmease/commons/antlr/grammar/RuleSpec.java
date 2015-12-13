@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.grammar;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -81,7 +81,7 @@ public class RuleSpec implements Serializable {
 	}
 	
 	private Set<String> doGetLeadingChoices() {
-		Set<String> leadingChoices = new HashSet<>();
+		Set<String> leadingChoices = new LinkedHashSet<>();
 		
 		for (AlternativeSpec alternative: alternatives) {
 			for (ElementSpec elementSpec: alternative.getElements()) {
@@ -97,7 +97,7 @@ public class RuleSpec implements Serializable {
 		if (leadingChoices == null) {
 			// initialize this to return a meaningful value in case this method is 
 			// invoked recursively
-			leadingChoices = new HashSet<>();
+			leadingChoices = new LinkedHashSet<>();
 			
 			leadingChoices = doGetLeadingChoices();
 		}

@@ -1,6 +1,8 @@
 package com.pmease.commons.antlr.parser;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -78,8 +80,8 @@ public class State {
 			return null;
 	}
 	
-	public Set<Node> getMatches(String ruleName) {
-		Set<Node> matches = new HashSet<>();
+	public List<Node> getMatches(String ruleName) {
+		List<Node> matches = new ArrayList<>();
 		for (Node node: nodes) {
 			if (node.getRuleSpec().getName().equals(ruleName) 
 					&& node.getBeginTokenIndex() == 0 && node.isCompleted()) {
@@ -89,8 +91,8 @@ public class State {
 		return matches;
 	}
 	
-	public Set<Node> getNodesExpectingTerminal() {
-		Set<Node> nodesExpectingTerminal = new HashSet<>();
+	public List<Node> getNodesExpectingTerminal() {
+		List<Node> nodesExpectingTerminal = new ArrayList<>();
 		for (Node node: nodes) {
 			ElementSpec expectingSpec = node.getExpectedElementSpec();
 			if (expectingSpec instanceof TerminalElementSpec)

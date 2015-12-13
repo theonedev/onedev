@@ -57,7 +57,7 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 		if (getRule() != null)
 			return getRule().getLeadingChoices();
 		else
-			return Sets.newHashSet();
+			return Sets.newLinkedHashSet();
 	}
 
 	@Override

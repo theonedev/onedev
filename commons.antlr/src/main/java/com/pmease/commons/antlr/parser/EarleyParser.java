@@ -1,7 +1,7 @@
 package com.pmease.commons.antlr.parser;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,10 +11,10 @@ import org.antlr.v4.runtime.Token;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammar.RuleSpec;
 import com.pmease.commons.antlr.grammar.TerminalElementSpec;
-import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
 
 public class EarleyParser {
 
@@ -30,7 +30,7 @@ public class EarleyParser {
 		this.rule = rule;
 		this.tokens = tokens;
 		
-		Set<Node> nodes = new HashSet<>();
+		Set<Node> nodes = new LinkedHashSet<>();
 		for (int i=0; i<rule.getAlternatives().size(); i++) 
 			nodes.add(new Node(tokenIndex, rule, i, 0, false, new ArrayList<Element>()));
 
@@ -43,7 +43,7 @@ public class EarleyParser {
 			if (tokenIndex == tokens.size())
 				break;
 			
-			nodes = new HashSet<>();
+			nodes = new LinkedHashSet<>();
 			for (Node node: state.getNodes()) 
 				scan(node, nodes);
 			tokenIndex++;
@@ -136,11 +136,11 @@ public class EarleyParser {
 		return tokens;
 	}
 
-	public Set<Node> getMatches() {
+	public List<Node> getMatches() {
 		if (states.size() == tokens.size()+1) 
 			return states.get(tokens.size()).getMatches(rule.getName());
 		else
-			return new HashSet<>();
+			return new ArrayList<>();
 	}
 	
 	public boolean matches() {

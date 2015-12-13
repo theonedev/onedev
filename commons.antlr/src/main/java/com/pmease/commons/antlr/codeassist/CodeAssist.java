@@ -99,12 +99,11 @@ public abstract class CodeAssist implements Serializable {
 			String content = entry.getKey(); 
 			
 			/*
-			 * if spec of suggested text matches current input around caret, we 
-			 * will replace the match (instead of simply insert the suggested 
-			 * text), and in this case, we do not need to append mandatories as
-			 * most probably those mandatories already exist in current input
+			 * only append mandatory literals if suggested content is complete and it does not 
+			 * replace any part of current input. We do not append mandatories in the latter case
+			 * as most probably they already exist in the current input
 			 */
-			if (completion.getReplaceEnd() <= inputStatus.getCaret()) {
+			if (completion.isComplete() && completion.getReplaceEnd() == inputStatus.getCaret()) {
 				List<String> contents = new ArrayList<>();
 				for (ElementCompletion each: value) {
 					content = inputContent.substring(0, each.getReplaceBegin()) + each.getReplaceContent();
@@ -143,15 +142,15 @@ public abstract class CodeAssist implements Serializable {
 			} 
 
 			/*
-			 * Adjust caret to move it to next place expecting user input, that is, we move 
-			 * it after all mandatory tokens after the replacement, unless user puts caret 
-			 * explicitly in the middle of replacement via suggestion, indicating the 
-			 * replacement has some place holders expecting user input. 
+			 * Adjust caret to move it to next place expecting user input if suggestion is 
+			 * complete, that is, we move it after all mandatory tokens after the replacement, 
+			 * unless user puts caret explicitly in the middle of replacement via suggestion, 
+			 * indicating the replacement has some place holders expecting user input. 
 			 */
-			int caret;
-			if (completion.getCaret() == completion.getReplaceContent().length()) {
+			int caret = completion.getCaret();
+			if (completion.isComplete() && caret == completion.getReplaceContent().length()) {
 				// caret is not at the middle of replacement, so we need to move it to 
-				// be after mandatory tokens
+				// be after mandatory tokens if provided suggestion is complete
 				caret = content.length() - inputContent.length() + completion.getReplaceEnd(); 
 				if (content.equals(entry.getKey())) { 
 					// in case mandatory tokens are not added after replacement, 
@@ -162,7 +161,7 @@ public abstract class CodeAssist implements Serializable {
 					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(parentElement, elementSpec));
 				}
 			} else {
-				caret = completion.getReplaceBegin() + completion.getReplaceContent().length();
+				caret += completion.getReplaceBegin();
 			}
 			
 			String replaceContent = content.substring(completion.getReplaceBegin(), 
@@ -328,18 +327,19 @@ public abstract class CodeAssist implements Serializable {
 				ElementSpec elementSpec = (ElementSpec) suggestion.getExpectedElement().getSpec();
 				int endOfMatch = elementSpec.getEndOfMatch(tokens);
 				if (endOfMatch > 0) { // there exist an element match
-					int charIndex = tokens.get(endOfMatch-1).getStopIndex()+1;
-					if (replaceBegin + charIndex > replaceEnd)
-						replaceEnd = replaceBegin + charIndex;
+					int charIndex = replaceBegin + tokens.get(endOfMatch-1).getStopIndex()+1;
+					if (charIndex > replaceEnd)
+						replaceEnd = charIndex;
 				}
 			}
 
 			String before = inputContent.substring(0, replaceBegin);
 
 			for (InputSuggestion inputSuggestion: suggestion.getInputSuggestions()) {
-				int endTokenIndex = suggestion.getExpectedElement().getEndTokenIndex();
+				int endTokenIndex = suggestion.getExpectedElement().getRoot().getEndTokenIndex();
 				if (endTokenIndex != 0) { 
-					Token lastToken = parser.getTokens().get(endTokenIndex-1);
+					int lastMatchedTokenIndex = endTokenIndex-1;
+					Token lastMatchedToken = parser.getTokens().get(lastMatchedTokenIndex);
 					tokens = grammar.lex(before + inputSuggestion.getContent());
 					
 					/*
@@ -348,10 +348,10 @@ public abstract class CodeAssist implements Serializable {
 					 * and we will show the suggestion when user presses the space to make the 
 					 * suggestion list less confusing
 					 */
-					if (tokens.size() > endTokenIndex) {
-						Token newToken = tokens.get(endTokenIndex-1);
-						if (lastToken.getStartIndex() != newToken.getStartIndex()
-								|| lastToken.getStopIndex() != newToken.getStopIndex()) {
+					if (tokens.size() > lastMatchedTokenIndex) {
+						Token newToken = tokens.get(lastMatchedTokenIndex);
+						if (lastMatchedToken.getStartIndex() != newToken.getStartIndex()
+								|| lastMatchedToken.getStopIndex() != newToken.getStopIndex()) {
 							continue;
 						}
 					} else {

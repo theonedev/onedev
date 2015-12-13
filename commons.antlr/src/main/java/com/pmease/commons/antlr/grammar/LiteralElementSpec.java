@@ -1,9 +1,9 @@
 package com.pmease.commons.antlr.grammar;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
 public class LiteralElementSpec extends TokenElementSpec {
@@ -35,7 +35,9 @@ public class LiteralElementSpec extends TokenElementSpec {
 
 	@Override
 	public Set<String> getLeadingChoices() {
-		return Sets.newHashSet(literal);
+		Set<String> leadingChoices = new LinkedHashSet<>();
+		leadingChoices.add(literal);
+		return leadingChoices;
 	}
 
 	@Override
