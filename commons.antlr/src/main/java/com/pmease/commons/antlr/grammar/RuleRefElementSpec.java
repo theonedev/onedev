@@ -6,7 +6,6 @@ import java.util.Set;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.antlr.Grammar;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 import com.pmease.commons.antlr.parser.EarleyParser;
 

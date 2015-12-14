@@ -32,14 +32,16 @@ public class CodeAssistTest2 {
 
 						@Override
 						protected List<InputSuggestion> match(String matchWith) {
-							List<InputSuggestion> suggestions = new ArrayList<>();
 							if (element.getRoot().getLastMatchedToken().getType() == CodeAssistTest2Lexer.BRANCH) {
+								List<InputSuggestion> suggestions = new ArrayList<>();
 								for (String value: BRANCHS) {
 									if (value.toLowerCase().contains(matchWith.toLowerCase()))
 										suggestions.add(new InputSuggestion(value));
 								}
+								return suggestions;
+							} else {
+								return null;
 							}
-							return suggestions;
 						}
 						
 					}.suggest(element.getSpec(), matchWith);
@@ -61,17 +63,25 @@ public class CodeAssistTest2 {
 	public void test() {
 		List<InputStatus> suggestions;
 
-		suggestions = suggest(new InputStatus("branch(master)"), "revisionCriteria");
-		assertEquals(2, suggestions.size());
-		assertEquals("branch(master)..:16", suggestions.get(0).toString());
-		assertEquals("branch(master)...:17", suggestions.get(1).toString());
-		
+		suggestions = suggest(new InputStatus("branch"), "query");
+		assertEquals(5, suggestions.size());
+		assertEquals("branch(master):14", suggestions.get(0).toString());
+		assertEquals("branch(dev):11", suggestions.get(1).toString());
+		assertEquals("branch(feature1):16", suggestions.get(2).toString());
+		assertEquals("branch(feature2):16", suggestions.get(3).toString());
+		assertEquals("branch(:7", suggestions.get(4).toString());
+
 		suggestions = suggest(new InputStatus(""), "revisionCriteria");
 		assertEquals(4, suggestions.size());
 		assertEquals("branch(:7", suggestions.get(0).toString());
 		assertEquals("tag(:4", suggestions.get(1).toString());
 		assertEquals("id(:3", suggestions.get(2).toString());
 		assertEquals("^:1", suggestions.get(3).toString());
+		
+		suggestions = suggest(new InputStatus("branch(master)"), "revisionCriteria");
+		assertEquals(2, suggestions.size());
+		assertEquals("branch(master)..:16", suggestions.get(0).toString());
+		assertEquals("branch(master)...:17", suggestions.get(1).toString());
 		
 		suggestions = suggest(new InputStatus("br"), "query");
 		assertEquals(1, suggestions.size());
@@ -84,14 +94,6 @@ public class CodeAssistTest2 {
 		assertEquals("branch(feature1):16", suggestions.get(2).toString());
 		assertEquals("branch(feature2):16", suggestions.get(3).toString());
 		
-		suggestions = suggest(new InputStatus("branch"), "query");
-		assertEquals(5, suggestions.size());
-		assertEquals("branch(master):14", suggestions.get(0).toString());
-		assertEquals("branch(dev):11", suggestions.get(1).toString());
-		assertEquals("branch(feature1):16", suggestions.get(2).toString());
-		assertEquals("branch(feature2):16", suggestions.get(3).toString());
-		assertEquals("branch(:7", suggestions.get(4).toString());
-
 		suggestions = suggest(new InputStatus("branch( fea"), "query");
 		assertEquals(3, suggestions.size());
 		assertEquals("branch(feature1):16", suggestions.get(0).toString());

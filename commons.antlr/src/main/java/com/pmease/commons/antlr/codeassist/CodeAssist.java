@@ -2,20 +2,24 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.pmease.commons.antlr.Grammar;
 import com.pmease.commons.antlr.grammar.AlternativeSpec;
 import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.antlr.grammar.Grammar;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammar.RuleSpec;
 import com.pmease.commons.antlr.grammar.TokenElementSpec;
@@ -270,15 +274,45 @@ public abstract class CodeAssist implements Serializable {
 					inputSuggestions = new ArrayList<>();
 					TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
 					for (String leadingChoice: spec.getLeadingChoices()) {
-						List<Token> tokens = grammar.lex(leadingChoice);
-						boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
-						inputSuggestions.add(new InputSuggestion(leadingChoice, leadingChoice.length(), complete, null));
+						if (leadingChoice.startsWith(matchWith)) {
+							List<Token> tokens = grammar.lex(leadingChoice);
+							boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
+							inputSuggestions.add(new InputSuggestion(leadingChoice, leadingChoice.length(), complete, null));
+						}
 					}
 					if (!inputSuggestions.isEmpty())
 						suggestions.add(new ElementSuggestion(elementExpectingTerminal, matchWith, inputSuggestions));
 				}
 			}
 		}
+		Collections.sort(suggestions, new Comparator<ElementSuggestion>() {
+
+			@Override
+			public int compare(ElementSuggestion suggestion1, ElementSuggestion suggestion2) {
+				ParentedElement root1 = suggestion1.getExpectedElement().getRoot();
+				ParentedElement root2 = suggestion2.getExpectedElement().getRoot();
+				return compare(root1, root2);
+			}
+			
+			private int compare(Element element1, Element element2) {
+				Preconditions.checkState(element1.getNode() != null && element2.getNode() != null);
+				int alternativeSpecIndex1 = element1.getNode().getAlternativeSpecIndex();
+				int alternativeSpecIndex2 = element2.getNode().getAlternativeSpecIndex();
+				if (alternativeSpecIndex1 != alternativeSpecIndex2)
+					return alternativeSpecIndex1 - alternativeSpecIndex2;
+				int expectedElementSpecIndex1 = element1.getNode().getExpectedElementSpecIndex();
+				int expectedElementSpecIndex2 = element2.getNode().getExpectedElementSpecIndex();
+				if (expectedElementSpecIndex1 != expectedElementSpecIndex2)
+					return expectedElementSpecIndex1 - expectedElementSpecIndex2;
+				element1 = element1.getNode().getElements().get(element1.getNode().getElements().size()-1);
+				element2 = element2.getNode().getElements().get(element2.getNode().getElements().size()-1);
+				if (element1.getNode() == null || element2.getNode() == null)
+					return 0;
+				else
+					return compare(element1, element2);
+			}
+			
+		});
 		return suggestions;
  	}
 	
@@ -433,6 +467,19 @@ public abstract class CodeAssist implements Serializable {
 		return grammar;
 	}
 
+	/**
+	 * Provide suggestions for expected element matching specified string 
+	 * 
+	 * @param expectedElement
+	 * 			the element to expect. 
+	 * @param matchWith
+	 * 			the string the suggestion has to match with
+	 * @return
+	 * 			a list of suggestions. If you do not have any suggestions and want code assist to 
+	 * 			drill down the element to provide default suggestions, return a <tt>null</tt> value 
+	 * 			instead of an empty list
+	 */
+	@Nullable
 	protected abstract List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith);
 
 }

@@ -155,5 +155,16 @@ public class Element {
 	public EarleyParser getParser() {
 		return parser;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder("(");
+		if (spec != null)
+			builder.append("spec: " + spec + ", ");
+		if (node != null)
+			builder.append("node: " + node + ", ");
+		builder.append("endTokenIndex: " + endTokenIndex + ")");
+		return builder.toString();
+	}
 	
 }

@@ -1,7 +1,8 @@
 package com.pmease.commons.antlr.parser;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,11 +12,21 @@ import org.antlr.v4.runtime.Token;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.grammar.ElementSpec;
-import com.pmease.commons.antlr.grammar.ElementSpec.Multiplicity;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammar.RuleSpec;
 import com.pmease.commons.antlr.grammar.TerminalElementSpec;
 
+/**
+ * A earley parser (https://en.wikipedia.org/wiki/Earley_parser) to parse user inputs. 
+ * It is very suited for code assistance purpose as it can provide partial 
+ * parse results and tell us what terminals are expected next. Note that for large 
+ * inputs (thousands of lines for example), our earley implementation performs bad 
+ * and consumes a lot of memory, but it serves our purpose to provide a mini code 
+ * assistance for web input 
+ * 
+ * @author robin
+ *
+ */
 public class EarleyParser {
 
 	private final RuleSpec rule;
@@ -30,20 +41,20 @@ public class EarleyParser {
 		this.rule = rule;
 		this.tokens = tokens;
 		
-		Set<Node> nodes = new LinkedHashSet<>();
+		Set<Node> nodes = new HashSet<>();
 		for (int i=0; i<rule.getAlternatives().size(); i++) 
 			nodes.add(new Node(tokenIndex, rule, i, 0, false, new ArrayList<Element>()));
 
 		while (!nodes.isEmpty()) {
 			State state = new State(this, tokenIndex, nodes);
 			states.add(state);
-			for (Node node: Lists.newArrayList(state.getNodes()))
+			for (Node node: Lists.newArrayList(state.getNodes())) // avoid concurrent modification
 				process(node, state);
 
 			if (tokenIndex == tokens.size())
 				break;
 			
-			nodes = new LinkedHashSet<>();
+			nodes = new HashSet<>();
 			for (Node node: state.getNodes()) 
 				scan(node, nodes);
 			tokenIndex++;
@@ -72,7 +83,12 @@ public class EarleyParser {
 			}
 		} else { // complete
 			State startState = states.get(node.getBeginTokenIndex());
-			for (Node startNode: startState.getNodes()) {
+			Collection<Node> startNodes;
+			if (node.getBeginTokenIndex() == state.getEndTokenIndex())
+				startNodes = Lists.newArrayList(startState.getNodes()); // avoid concurrent modification
+			else
+				startNodes = startState.getNodes();
+			for (Node startNode: startNodes) {
 				if (!startNode.isCompleted()) {
 					ElementSpec expectedElementSpec = startNode.getExpectedElementSpec();
 					if (expectedElementSpec instanceof RuleRefElementSpec) {
@@ -102,15 +118,14 @@ public class EarleyParser {
 	
 	private void scan(Node node, Set<Node> nextNodes) {
 		if (!node.isCompleted()) {
-			ElementSpec nextElement = node.getElementSpecs().get(node.getExpectedElementSpecIndex());
+			ElementSpec expectedElementSpec = node.getExpectedElementSpec();
 			int tokenType = tokens.get(tokenIndex).getType();
-			if ((nextElement instanceof TerminalElementSpec) 
-					&& ((TerminalElementSpec)nextElement).isToken(tokenType)) {
+			if ((expectedElementSpec instanceof TerminalElementSpec) 
+					&& ((TerminalElementSpec)expectedElementSpec).isToken(tokenType)) {
 				Node scanNode;
 				List<Element> elements = new ArrayList<>(node.getElements());
-				elements.add(new Element(this, nextElement, tokenIndex+1, null));
-				if (nextElement.getMultiplicity() == Multiplicity.ONE 
-						|| nextElement.getMultiplicity() == Multiplicity.ZERO_OR_ONE) {
+				elements.add(new Element(this, expectedElementSpec, tokenIndex+1, null));
+				if (!expectedElementSpec.isMultiple()) {
 					scanNode = new Node(node.getBeginTokenIndex(), node.getRuleSpec(), 
 							node.getAlternativeSpecIndex(), node.getExpectedElementSpecIndex()+1, 
 							false, elements);

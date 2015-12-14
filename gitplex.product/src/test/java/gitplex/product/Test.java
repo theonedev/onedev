@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.pmease.commons.antlr.Grammar;
+import com.pmease.commons.antlr.grammar.Grammar;
 import com.pmease.commons.antlr.grammar.RuleSpec;
 import com.pmease.commons.antlr.parser.EarleyParser;
 import com.pmease.commons.lang.extractors.java.JavaLexer;

@@ -37,6 +37,9 @@ public class CodeAssistTest1 {
 	public void test()	{
 		List<InputStatus> suggestions;
 
+		suggestions = suggest(new InputStatus("ab"), "selfReference");
+		assertEquals(0, suggestions.size());
+
 		suggestions = suggest(new InputStatus("ab "), "selfReference");
 		assertEquals(1, suggestions.size());
 		assertEquals("ab cd:5", suggestions.get(0).toString());
@@ -45,9 +48,6 @@ public class CodeAssistTest1 {
 		assertEquals(1, suggestions.size());
 		assertEquals("ab:2", suggestions.get(0).toString());
 		
-		suggestions = suggest(new InputStatus("ab"), "selfReference");
-		assertEquals(0, suggestions.size());
-
 		suggestions = suggest(new InputStatus(""), "mandatories");
 		assertEquals(2, suggestions.size());
 		assertEquals("ab c:4", suggestions.get(0).toString());

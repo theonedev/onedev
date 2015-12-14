@@ -5,7 +5,6 @@ import java.util.Set;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.pmease.commons.antlr.Grammar;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
 public class LexerRuleRefElementSpec extends TokenElementSpec {

@@ -1,13 +1,13 @@
 grammar CodeAssistTest1;
 
-selfReference: 'ab' selfReferenceTail;
-
-selfReferenceTail: 'cd' selfReferenceTail|;
+selfReference: 'ab' | selfReference 'cd';
 
 mandatories: 'ab' 'c' | 'ab' 'c' | ('cd' ('ef' 'g')) 'h';
 
-notRealAmbiguity: ID+ ID;
+notRealAmbiguity: NUMBER+ NUMBER;
 
-ID: [a-zA-Z]+;
+NUMBER: [1-9]+;
+
+ID: [a-z]+;
 
 WS: [ \t\r\n]+ -> skip;
