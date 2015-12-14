@@ -506,6 +506,20 @@ public abstract class CodeAssist implements Serializable {
 	@Nullable
 	protected abstract List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith);
 
+	/**
+	 * Provide suggestion of specified terminal element
+	 * 
+	 * @param expectedElement
+	 * 			terminal element expecting to be matched next
+	 * @param literal
+	 * 			a possible literal of above terminal element defined in grammar
+	 * @param complete
+	 * 			whether or not this literal is a complete representation of the 
+	 * 			expected element
+	 * @return
+	 * 			suggestion wrapper of the literal, or <tt>null</tt> to suppress 
+	 * 			this suggestion
+	 */
 	@Nullable
 	protected InputSuggestion suggestLiteral(ParentedElement expectedElement, String literal, boolean complete) {
 		return new InputSuggestion(literal, literal.length(), complete, null);
