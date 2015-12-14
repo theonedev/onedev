@@ -9,11 +9,18 @@ public class ParentedElement extends Element {
 	private final ParentedElement parent;
 	
 	public ParentedElement(@Nullable ParentedElement parent, Element element) {
-		super(element.getParser(), element.getSpec(), element.getEndTokenIndex(), element.getNode());
+		super(element.getParser(), element.getSpec(), element.getPosition(), element.getState());
 		
 		this.parent = parent;
 	}
 
+	/**
+	 * Get parent element
+	 * 
+	 * @return
+	 * 			parent element, or <tt>null</tt> if current element is root
+	 */
+	@Nullable
 	public ParentedElement getParent() {
 		return parent;
 	}
@@ -33,13 +40,19 @@ public class ParentedElement extends Element {
 	public ParentedElement findParentByRule(String ruleName) {
 		ParentedElement current = parent;
 		while (current != null) {
-			if (ruleName.equals(current.getNode().getRuleSpec().getName()))
+			if (ruleName.equals(current.getState().getRuleSpec().getName()))
 				return current;
 			current = current.parent;
 		}
 		return null;
 	}
 	
+	/**
+	 * Get root element
+	 * 
+	 * @return
+	 * 			root element
+	 */
 	public ParentedElement getRoot() {
 		if (parent == null)
 			return this;

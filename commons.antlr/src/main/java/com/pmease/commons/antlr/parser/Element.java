@@ -9,23 +9,36 @@ import org.antlr.v4.runtime.Token;
 
 import com.pmease.commons.antlr.grammar.ElementSpec;
 
+/**
+ * Represent a matched element.  
+ * 
+ * @author robin
+ *
+ */
 public class Element {
 	
 	private final ElementSpec spec;
 	
-	private final int endTokenIndex;
+	private final int position;
 	
-	private final Node node;
+	private final State state;
 	
 	private final EarleyParser parser;
 	
-	public Element(EarleyParser parser, @Nullable ElementSpec spec, int endTokenIndex, @Nullable Node node) {
+	public Element(EarleyParser parser, @Nullable ElementSpec spec, int position, @Nullable State state) {
 		this.parser = parser;
 		this.spec = spec;
-		this.endTokenIndex = endTokenIndex;
-		this.node = node;
+		this.position = position;
+		this.state = state;
 	}
 
+	/**
+	 * Get spec of this element
+	 * 
+	 * @return
+	 * 			spec of this element, or <tt>null</tt> for root element, as root element 
+	 * 			is a pseudo element wrapping the root state
+	 */
 	@Nullable
 	public ElementSpec getSpec() {
 		return spec;
@@ -36,29 +49,42 @@ public class Element {
 	}
 	
 	public boolean isTerminal() {
-		return node == null;
+		return state == null;
 	}
 	
+	/**
+	 * Get label of this element defined in grammar
+	 * 
+	 * @return
+	 * 			label of this element, or <tt>null</tt> if there is no label associated 
+	 * 			with the element 
+	 */
 	@Nullable
 	public String getLabel() {
 		return spec!=null?spec.getLabel():null;
 	}
 
 	/**
-	 * Get index of the next token after the match 
+	 * Get position of the chart the element is matched in 
 	 * 
 	 * @return
-	 * 			token index after match of this element, this is NOT index of the 
-	 * 			last token matching the element, it is index of the next token 
-	 * 			after the match
+	 * 			position of the chart the element is matched in. It also represents index of 
+	 * 			next token after matching of this element
 	 */
-	public int getEndTokenIndex() {
-		return endTokenIndex;
+	public int getPosition() {
+		return position;
 	}
 
+	/**
+	 * Get associated state of the element
+	 * 
+	 * @return
+	 * 			associated state of the element, or <tt>null</tt> if this element represents 
+	 * 			a terminal element which will be created by scanning a matched token
+	 */
 	@Nullable
-	public Node getNode() {
-		return node;
+	public State getState() {
+		return state;
 	}
 	
 	/**
@@ -69,10 +95,10 @@ public class Element {
 	 * 			match any tokens yet
 	 */
 	public List<Token> getMatchedTokens() {
-		if (node != null)
-			return parser.getTokens().subList(node.getBeginTokenIndex(), endTokenIndex);
-		else if (endTokenIndex > 0)
-			return parser.getTokens().subList(endTokenIndex-1, endTokenIndex);
+		if (state != null)
+			return parser.getTokens().subList(state.getOriginPosition(), position);
+		else if (position > 0)
+			return parser.getTokens().subList(position-1, position);
 		else
 			return new ArrayList<>();
 	}
@@ -86,13 +112,13 @@ public class Element {
 	 */
 	@Nullable
 	public Token getFirstMatchedToken() {
-		if (node != null) {
-			if (endTokenIndex > node.getBeginTokenIndex())
-				return parser.getTokens().get(node.getBeginTokenIndex());
+		if (state != null) {
+			if (position > state.getOriginPosition())
+				return parser.getTokens().get(state.getOriginPosition());
 			else
 				return null;
-		} else if (endTokenIndex > 0) {
-			return parser.getTokens().get(endTokenIndex-1);
+		} else if (position > 0) {
+			return parser.getTokens().get(position-1);
 		} else {
 			return null;
 		}
@@ -107,13 +133,13 @@ public class Element {
 	 */
 	@Nullable
 	public Token getLastMatchedToken() {
-		if (node != null) {
-			if (endTokenIndex > node.getBeginTokenIndex())
-				return parser.getTokens().get(endTokenIndex-1);
+		if (state != null) {
+			if (position > state.getOriginPosition())
+				return parser.getTokens().get(position-1);
 			else
 				return null;
-		} else if (endTokenIndex > 0) {
-			return parser.getTokens().get(endTokenIndex-1);
+		} else if (position > 0) {
+			return parser.getTokens().get(position-1);
 		} else {
 			return null;
 		}
@@ -126,27 +152,47 @@ public class Element {
 		return builder.toString();
 	}
 	
-	public List<Element> getChildrenByLabel(String label, boolean recursive) {
+	/**
+	 * Find children by label defined in grammar
+	 * 
+	 * @param label
+	 * 			element label defined in grammar 
+	 * @param recursive
+	 * 			whether or not search recursively
+	 * @return
+	 * 			list of children with specified label
+	 */
+	public List<Element> findChildrenByLabel(String label, boolean recursive) {
 		List<Element> children = new ArrayList<>();
-		if (node != null) {
-			for (Element child: node.getElements()) {
+		if (state != null) {
+			for (Element child: state.getElements()) {
 				if (label.equals(child.getLabel()))
 					children.add(child);
 				if (recursive)
-					children.addAll(child.getChildrenByLabel(label, recursive));
+					children.addAll(child.findChildrenByLabel(label, recursive));
 			}
 		}
 		return children;
 	}
 	
-	public List<Element> getChildrenByRule(String ruleName, boolean recursive) {
+	/**
+	 * Find children by rule name
+	 * 
+	 * @param ruleName
+	 * 			name of the rule
+	 * @param recursive
+	 * 			whether or not search recursively
+	 * @return
+	 * 			list of children with specified rule name
+	 */
+	public List<Element> findChildrenByRule(String ruleName, boolean recursive) {
 		List<Element> children = new ArrayList<>();
-		if (node != null) {
-			for (Element child: node.getElements()) {
-				if (ruleName.equals(child.getNode().getRuleSpec().getName()))
+		if (state != null) {
+			for (Element child: state.getElements()) {
+				if (child.getState() != null && ruleName.equals(child.getState().getRuleSpec().getName()))
 					children.add(child);
 				if (recursive)
-					children.addAll(child.getChildrenByRule(ruleName, recursive));
+					children.addAll(child.findChildrenByRule(ruleName, recursive));
 			}
 		}
 		return children;
@@ -161,9 +207,9 @@ public class Element {
 		StringBuilder builder = new StringBuilder("(");
 		if (spec != null)
 			builder.append("spec: " + spec + ", ");
-		if (node != null)
-			builder.append("node: " + node + ", ");
-		builder.append("endTokenIndex: " + endTokenIndex + ")");
+		if (state != null)
+			builder.append("state: " + state + ", ");
+		builder.append("endTokenIndex: " + position + ")");
 		return builder.toString();
 	}
 	

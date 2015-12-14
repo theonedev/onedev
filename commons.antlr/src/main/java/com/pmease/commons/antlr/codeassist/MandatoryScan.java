@@ -1,10 +1,13 @@
 package com.pmease.commons.antlr.codeassist;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MandatoryScan {
+public class MandatoryScan implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private final List<String> mandatories;
 	
 	private final boolean stop;

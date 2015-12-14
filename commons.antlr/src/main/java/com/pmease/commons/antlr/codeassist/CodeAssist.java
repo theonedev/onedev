@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,8 +26,8 @@ import com.pmease.commons.antlr.grammar.RuleSpec;
 import com.pmease.commons.antlr.grammar.TokenElementSpec;
 import com.pmease.commons.antlr.parser.EarleyParser;
 import com.pmease.commons.antlr.parser.Element;
-import com.pmease.commons.antlr.parser.Node;
 import com.pmease.commons.antlr.parser.State;
+import com.pmease.commons.antlr.parser.Chart;
 import com.pmease.commons.util.StringUtils;
 
 public abstract class CodeAssist implements Serializable {
@@ -190,101 +191,124 @@ public abstract class CodeAssist implements Serializable {
 	
 	private ParentedElement getElementExpectingTerminal(ParentedElement parent, Element element) {
 		parent = new ParentedElement(parent, element);
-		Node node = element.getNode();
-		if (node != null) { 
-			element = node.getElements().get(node.getElements().size()-1);
+		State state = element.getState();
+		if (state != null) { 
+			// the last element is always the element assumed completed 
+			element = state.getElements().get(state.getElements().size()-1);
 			return getElementExpectingTerminal(parent, element);
 		} else {
 			return parent;
 		}
 	}
 	
-	private List<Element> assumeCompleted(EarleyParser parser, Node node, int endTokenIndex) {
-		List<Element> rootElements = new ArrayList<>();
-		if (node.getBeginTokenIndex() == 0 && node.getRuleSpec().getName().equals(parser.getRule().getName())) {
-			rootElements.add(new Element(parser, null, endTokenIndex, node));
-		} else {
-			State startState = parser.getStates().get(node.getBeginTokenIndex());
-			for (Node startNode: startState.getNodes()) {
-				if (!startNode.isCompleted()) {
-					ElementSpec nextElement = startNode.getExpectedElementSpec();
-					if (nextElement instanceof RuleRefElementSpec) {
-						RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) nextElement;
-						if (ruleRefElement.getRuleName().equals(node.getRuleSpec().getName())) {
-							List<Element> elements = new ArrayList<>(startNode.getElements());
-							elements.add(new Element(parser, ruleRefElement, endTokenIndex, node));
-							Node parentNode = new Node(startNode.getBeginTokenIndex(), 
-									startNode.getRuleSpec(), startNode.getAlternativeSpecIndex(), 
-									startNode.getExpectedElementSpecIndex(), 
-									startNode.isExpectedElementSpecMatchedOnce(), 
-									elements);
-							rootElements.addAll(assumeCompleted(parser, parentNode, endTokenIndex));
-						}
+	private void assumeCompleted(EarleyParser parser, State state, int position, Set<State> statesAssumeCompleted) {
+		Chart startChart = parser.getCharts().get(state.getOriginPosition());
+		for (State startState: startChart.getStates()) {
+			if (!startState.isCompleted()) {
+				ElementSpec nextElement = startState.getExpectedElementSpec();
+				if (nextElement instanceof RuleRefElementSpec) {
+					RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) nextElement;
+					if (ruleRefElement.getRuleName().equals(state.getRuleSpec().getName())) {
+						List<Element> elements = new ArrayList<>(startState.getElements());
+						elements.add(new Element(parser, ruleRefElement, position, state));
+						State parentState = new State(startState.getOriginPosition(), 
+								startState.getRuleSpec(), startState.getAlternativeSpecIndex(), 
+								startState.getExpectedElementSpecIndex(), 
+								startState.isExpectedElementSpecMatchedOnce(), 
+								elements);
+						if (statesAssumeCompleted.add(parentState))
+							assumeCompleted(parser, parentState, position, statesAssumeCompleted);
 					}
-				}
-			}
-		} 
-		return rootElements;
-	}
-	
-	private List<ElementSuggestion> suggest(EarleyParser parser, State state, InputStatus inputStatus) {
-		List<ElementSuggestion> suggestions = new ArrayList<>();
-		for (Node node: state.getNodesExpectingTerminal()) {
-			int endTokenIndex = state.getEndTokenIndex();
-			List<Element> elements = new ArrayList<>(node.getElements());
-			elements.add(new Element(parser, node.getExpectedElementSpec(), 0, null));
-			node = new Node(node.getBeginTokenIndex(), node.getRuleSpec(), 
-					node.getAlternativeSpecIndex(), node.getExpectedElementSpecIndex(), 
-					node.isExpectedElementSpecMatchedOnce(), elements);
-			
-			List<Element> rootElements = assumeCompleted(parser, node, endTokenIndex);
-			String matchWith;
-			Token token = state.getInitiatingToken();
-			if (token != null) {
-				int endCharIndex = token.getStopIndex()+1;
-				matchWith = inputStatus.getContent().substring(endCharIndex, inputStatus.getCaret());
-			} else {
-				matchWith = inputStatus.getContentBeforeCaret();
-			}
-			matchWith = StringUtils.trimStart(matchWith);
-			for (Element rootElement: rootElements) {
-				List<ParentedElement> expectedElements = new ArrayList<>();
-				ParentedElement elementExpectingTerminal = getElementExpectingTerminal(null, rootElement);
-				expectedElements.add(elementExpectingTerminal);
-				ParentedElement expectedElement = elementExpectingTerminal.getParent();
-				while (expectedElement != null) {
-					if (expectedElement.getNode().getElements().size() == 1) {
-						expectedElements.add(expectedElement);
-						expectedElement = expectedElement.getParent();
-					} else {
-						break;
-					}
-				}
-				
-				List<InputSuggestion> inputSuggestions = null;
-				for (ParentedElement element: expectedElements) {
-					inputSuggestions = suggest(element, matchWith);
-					if (inputSuggestions != null) {
-						if (!inputSuggestions.isEmpty())
-							suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
-						break;
-					}
-				}
-				if (inputSuggestions == null && elementExpectingTerminal.getSpec() instanceof TokenElementSpec) {
-					inputSuggestions = new ArrayList<>();
-					TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
-					for (String leadingChoice: spec.getLeadingChoices()) {
-						if (leadingChoice.startsWith(matchWith)) {
-							List<Token> tokens = grammar.lex(leadingChoice);
-							boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
-							inputSuggestions.add(new InputSuggestion(leadingChoice, leadingChoice.length(), complete, null));
-						}
-					}
-					if (!inputSuggestions.isEmpty())
-						suggestions.add(new ElementSuggestion(elementExpectingTerminal, matchWith, inputSuggestions));
 				}
 			}
 		}
+	}
+
+	private List<ElementSuggestion> suggest(EarleyParser parser, Chart chart, InputStatus inputStatus) {
+		List<ElementSuggestion> suggestions = new ArrayList<>();
+		int position = chart.getPosition();
+		String matchWith;
+		Token token = chart.getOriginatingToken();
+		if (token != null) {
+			int endCharIndex = token.getStopIndex()+1;
+			matchWith = inputStatus.getContent().substring(endCharIndex, inputStatus.getCaret());
+		} else {
+			matchWith = inputStatus.getContentBeforeCaret();
+		}
+		matchWith = StringUtils.trimStart(matchWith);
+
+		for (State stateExpectingTerminal: chart.getStatesExpectingTerminal()) {
+			List<Element> elements = new ArrayList<>(stateExpectingTerminal.getElements());
+			elements.add(new Element(parser, stateExpectingTerminal.getExpectedElementSpec(), 0, null));
+			stateExpectingTerminal = new State(stateExpectingTerminal.getOriginPosition(), stateExpectingTerminal.getRuleSpec(), 
+					stateExpectingTerminal.getAlternativeSpecIndex(), stateExpectingTerminal.getExpectedElementSpecIndex(), 
+					stateExpectingTerminal.isExpectedElementSpecMatchedOnce(), elements);
+			
+			/*
+			 * Calculate all states assuming completed, this way we can get to the root state to 
+			 * construct a partial parse tree to provide suggestion contexts
+			 */
+			Set<State> statesAssumeCompleted = new HashSet<>();
+			if (statesAssumeCompleted.add(stateExpectingTerminal))
+				assumeCompleted(parser, stateExpectingTerminal, position, statesAssumeCompleted);
+			
+			for (State stateAssumeCompleted: statesAssumeCompleted) {
+				if (stateAssumeCompleted.getRuleSpec().getName().equals(parser.getRule().getName()) 
+						&& stateAssumeCompleted.getOriginPosition() == 0) {
+					Element rootElement = new Element(parser, null, position, stateAssumeCompleted);
+					List<ParentedElement> expectedElements = new ArrayList<>();
+					
+					ParentedElement elementExpectingTerminal = getElementExpectingTerminal(null, rootElement);
+					expectedElements.add(elementExpectingTerminal);
+					
+					/*
+					 * Find out all parent elements not containing any matched tokens, and we will 
+					 * ask if there are suggestions for these parent elements later. For instance, 
+					 * if we input "Math.", we can provide suggestion for whole method element like 
+					 * "max(a, b)"; otherwise, we can only provide suggestion for method name "max".  
+					 */
+					ParentedElement expectedElement = elementExpectingTerminal.getParent();
+					while (expectedElement != null) {
+						if (expectedElement.getState().getElements().size() == 1) {
+							expectedElements.add(expectedElement);
+							expectedElement = expectedElement.getParent();
+						} else {
+							break;
+						}
+					}
+					
+					// go from top to down to check if there are suggestions for expected element 
+					List<InputSuggestion> inputSuggestions = null;
+					for (ParentedElement element: expectedElements) {
+						inputSuggestions = suggest(element, matchWith);
+						if (inputSuggestions != null) {
+							if (!inputSuggestions.isEmpty())
+								suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
+							break;
+						}
+					}
+					
+					// no suggestions, let's see if we can provide some default suggestions 
+					if (inputSuggestions == null && elementExpectingTerminal.getSpec() instanceof TokenElementSpec) {
+						inputSuggestions = new ArrayList<>();
+						TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
+						for (String leadingLiteral: spec.getLeadingLiterals()) {
+							if (leadingLiteral.startsWith(matchWith)) {
+								List<Token> tokens = grammar.lex(leadingLiteral);
+								boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
+								InputSuggestion suggestion = suggestLiteral(elementExpectingTerminal, leadingLiteral, complete);
+								if (suggestion != null)
+									inputSuggestions.add(suggestion);
+							}
+						}
+						if (!inputSuggestions.isEmpty())
+							suggestions.add(new ElementSuggestion(elementExpectingTerminal, matchWith, inputSuggestions));
+					}
+				}
+			}
+		}
+		
+		// sort suggestions to make it the same order as appearing in grammar definition
 		Collections.sort(suggestions, new Comparator<ElementSuggestion>() {
 
 			@Override
@@ -295,18 +319,18 @@ public abstract class CodeAssist implements Serializable {
 			}
 			
 			private int compare(Element element1, Element element2) {
-				Preconditions.checkState(element1.getNode() != null && element2.getNode() != null);
-				int alternativeSpecIndex1 = element1.getNode().getAlternativeSpecIndex();
-				int alternativeSpecIndex2 = element2.getNode().getAlternativeSpecIndex();
+				Preconditions.checkState(element1.getState() != null && element2.getState() != null);
+				int alternativeSpecIndex1 = element1.getState().getAlternativeSpecIndex();
+				int alternativeSpecIndex2 = element2.getState().getAlternativeSpecIndex();
 				if (alternativeSpecIndex1 != alternativeSpecIndex2)
 					return alternativeSpecIndex1 - alternativeSpecIndex2;
-				int expectedElementSpecIndex1 = element1.getNode().getExpectedElementSpecIndex();
-				int expectedElementSpecIndex2 = element2.getNode().getExpectedElementSpecIndex();
+				int expectedElementSpecIndex1 = element1.getState().getExpectedElementSpecIndex();
+				int expectedElementSpecIndex2 = element2.getState().getExpectedElementSpecIndex();
 				if (expectedElementSpecIndex1 != expectedElementSpecIndex2)
 					return expectedElementSpecIndex1 - expectedElementSpecIndex2;
-				element1 = element1.getNode().getElements().get(element1.getNode().getElements().size()-1);
-				element2 = element2.getNode().getElements().get(element2.getNode().getElements().size()-1);
-				if (element1.getNode() == null || element2.getNode() == null)
+				element1 = element1.getState().getElements().get(element1.getState().getElements().size()-1);
+				element2 = element2.getState().getElements().get(element2.getState().getElements().size()-1);
+				if (element1.getState() == null || element2.getState() == null)
 					return 0;
 				else
 					return compare(element1, element2);
@@ -324,14 +348,14 @@ public abstract class CodeAssist implements Serializable {
 		List<Token> tokens = grammar.lex(inputStatus.getContentBeforeCaret());
 		EarleyParser parser = new EarleyParser(spec, tokens);
 		
-		if (parser.getStates().size() >= 1) {
-			State lastState = parser.getStates().get(parser.getStates().size()-1);
+		if (parser.getCharts().size() >= 1) {
+			Chart lastState = parser.getCharts().get(parser.getCharts().size()-1);
 			suggestions.addAll(suggest(parser, lastState, inputStatus));
 		}
 
 		/*
-		 * do another match by not considering the last token. This is necessary for 
-		 * instance for below cases:
+		 * do another match by not considering the last matched token. This is useful
+		 * for below cases:
 		 * 1. when the last token matches either a keyword or part of an identifier. 
 		 * For instance, the last token can be keyword 'for', but can also match 
 		 * identifier 'forme' if the spec allows.  
@@ -341,8 +365,8 @@ public abstract class CodeAssist implements Serializable {
 		 * if user input value containing spaces without surrounding quotes, we 
 		 * suggest the user to quote the value. 
 		 */
-		if (parser.getStates().size() >= 2) {
-			State stateBeforeLast = parser.getStates().get(parser.getStates().size()-2);
+		if (parser.getCharts().size() >= 2) {
+			Chart stateBeforeLast = parser.getCharts().get(parser.getCharts().size()-2);
 			suggestions.addAll(suggest(parser, stateBeforeLast, inputStatus));
 		}
 
@@ -370,9 +394,9 @@ public abstract class CodeAssist implements Serializable {
 			String before = inputContent.substring(0, replaceBegin);
 
 			for (InputSuggestion inputSuggestion: suggestion.getInputSuggestions()) {
-				int endTokenIndex = suggestion.getExpectedElement().getRoot().getEndTokenIndex();
-				if (endTokenIndex != 0) { 
-					int lastMatchedTokenIndex = endTokenIndex-1;
+				int position = suggestion.getExpectedElement().getRoot().getPosition();
+				if (position != 0) { 
+					int lastMatchedTokenIndex = position-1;
 					Token lastMatchedToken = parser.getTokens().get(lastMatchedTokenIndex);
 					tokens = grammar.lex(before + inputSuggestion.getContent());
 					
@@ -434,17 +458,17 @@ public abstract class CodeAssist implements Serializable {
 	}
 
 	/*
-	 * Get mandatory literals after specified node. For instance a method may have 
+	 * Get mandatory literals after specified element. For instance a method may have 
 	 * below rule:
 	 * methodName '(' argList ')'
-	 * The mandatories after node methodName will be '('. When a method name is 
+	 * The mandatories after element methodName will be '('. When a method name is 
 	 * suggested, we should add '(' and moves caret after '(' to avoid unnecessary
 	 * key strokes
 	 */
 	private List<String> getMandatoriesAfter(ParentedElement parentElement, ElementSpec elementSpec) {
 		List<String> literals = new ArrayList<>();
 		if (parentElement != null && elementSpec != null && !elementSpec.isMultiple()) {
-			AlternativeSpec alternativeSpec = parentElement.getNode().getAlternativeSpec();
+			AlternativeSpec alternativeSpec = parentElement.getState().getAlternativeSpec();
 			int specIndex = alternativeSpec.getElements().indexOf(elementSpec);
 			if (specIndex == alternativeSpec.getElements().size()-1) {
 				elementSpec = parentElement.getSpec();
@@ -482,4 +506,9 @@ public abstract class CodeAssist implements Serializable {
 	@Nullable
 	protected abstract List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith);
 
+	@Nullable
+	protected InputSuggestion suggestLiteral(ParentedElement expectedElement, String literal, boolean complete) {
+		return new InputSuggestion(literal, literal.length(), complete, null);
+	}
+	
 }

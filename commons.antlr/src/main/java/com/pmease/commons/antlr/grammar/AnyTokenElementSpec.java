@@ -29,7 +29,7 @@ public class AnyTokenElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingChoices() {
+	public Set<String> getLeadingLiterals() {
 		return Sets.newLinkedHashSet();
 	}
 

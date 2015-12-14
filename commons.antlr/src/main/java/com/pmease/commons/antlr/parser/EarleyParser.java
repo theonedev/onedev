@@ -17,7 +17,7 @@ import com.pmease.commons.antlr.grammar.RuleSpec;
 import com.pmease.commons.antlr.grammar.TerminalElementSpec;
 
 /**
- * A earley parser (https://en.wikipedia.org/wiki/Earley_parser) to parse user inputs. 
+ * A Earley parser (https://en.wikipedia.org/wiki/Earley_parser) to parse user inputs. 
  * It is very suited for code assistance purpose as it can provide partial 
  * parse results and tell us what terminals are expected next. Note that for large 
  * inputs (thousands of lines for example), our earley implementation performs bad 
@@ -35,80 +35,80 @@ public class EarleyParser {
 	
 	private int tokenIndex = 0;
 	
-	private final List<State> states = new ArrayList<>();
+	private final List<Chart> charts = new ArrayList<>();
 
 	public EarleyParser(RuleSpec rule, List<Token> tokens) {
 		this.rule = rule;
 		this.tokens = tokens;
 		
-		Set<Node> nodes = new HashSet<>();
+		Set<State> states = new HashSet<>();
 		for (int i=0; i<rule.getAlternatives().size(); i++) 
-			nodes.add(new Node(tokenIndex, rule, i, 0, false, new ArrayList<Element>()));
+			states.add(new State(tokenIndex, rule, i, 0, false, new ArrayList<Element>()));
 
-		while (!nodes.isEmpty()) {
-			State state = new State(this, tokenIndex, nodes);
-			states.add(state);
-			for (Node node: Lists.newArrayList(state.getNodes())) // avoid concurrent modification
-				process(node, state);
+		while (!states.isEmpty()) {
+			Chart chart = new Chart(this, tokenIndex, states);
+			charts.add(chart);
+			for (State state: Lists.newArrayList(chart.getStates())) // avoid concurrent modification
+				process(state, chart);
 
 			if (tokenIndex == tokens.size())
 				break;
 			
-			nodes = new HashSet<>();
-			for (Node node: state.getNodes()) 
-				scan(node, nodes);
+			states = new HashSet<>();
+			for (State state: chart.getStates()) 
+				scan(state, states);
 			tokenIndex++;
 		}
 	}
 	
-	private void process(Node node, State state) {
-		if (!node.isCompleted()) { // predict
-			ElementSpec expectedElementSpec = node.getExpectedElementSpec();
+	private void process(State state, Chart chart) {
+		if (!state.isCompleted()) { // predict
+			ElementSpec expectedElementSpec = state.getExpectedElementSpec();
 			if (expectedElementSpec instanceof RuleRefElementSpec) {
 				RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) expectedElementSpec;
 				RuleSpec elementRule = ruleRefElement.getRule();
 				for (int i=0; i<elementRule.getAlternatives().size(); i++) {
-					Node predictedNode = new Node(tokenIndex, 
+					State predictedState = new State(tokenIndex, 
 							elementRule, i, 0, false, new ArrayList<Element>());
-					if (state.addNode(predictedNode))
-						process(predictedNode, state);
+					if (chart.getStates().add(predictedState))
+						process(predictedState, chart);
 				}
 			}
-			if (expectedElementSpec.isOptional() || node.isExpectedElementSpecMatchedOnce()) {
-				Node advancedNode = new Node(node.getBeginTokenIndex(), node.getRuleSpec(), 
-						node.getAlternativeSpecIndex(), node.getExpectedElementSpecIndex()+1, false, 
-						new ArrayList<>(node.getElements()));
-				if (state.addNode(advancedNode))
-					process(advancedNode, state);
+			if (expectedElementSpec.isOptional() || state.isExpectedElementSpecMatchedOnce()) {
+				State advancedState = new State(state.getOriginPosition(), state.getRuleSpec(), 
+						state.getAlternativeSpecIndex(), state.getExpectedElementSpecIndex()+1, false, 
+						new ArrayList<>(state.getElements()));
+				if (chart.getStates().add(advancedState))
+					process(advancedState, chart);
 			}
 		} else { // complete
-			State startState = states.get(node.getBeginTokenIndex());
-			Collection<Node> startNodes;
-			if (node.getBeginTokenIndex() == state.getEndTokenIndex())
-				startNodes = Lists.newArrayList(startState.getNodes()); // avoid concurrent modification
+			Chart startChart = charts.get(state.getOriginPosition());
+			Collection<State> startStates;
+			if (state.getOriginPosition() == chart.getPosition())
+				startStates = Lists.newArrayList(startChart.getStates()); // avoid concurrent modification
 			else
-				startNodes = startState.getNodes();
-			for (Node startNode: startNodes) {
-				if (!startNode.isCompleted()) {
-					ElementSpec expectedElementSpec = startNode.getExpectedElementSpec();
+				startStates = startChart.getStates();
+			for (State startState: startStates) {
+				if (!startState.isCompleted()) {
+					ElementSpec expectedElementSpec = startState.getExpectedElementSpec();
 					if (expectedElementSpec instanceof RuleRefElementSpec) {
 						RuleRefElementSpec ruleRefElement = (RuleRefElementSpec) expectedElementSpec;
-						if (ruleRefElement.getRuleName().equals(node.getRuleSpec().getName())) {
-							Node advancedNode;
-							List<Element> elements = new ArrayList<>(startNode.getElements());
-							if (!node.getElements().isEmpty())
-								elements.add(new Element(this, ruleRefElement, state.getEndTokenIndex(), node));
+						if (ruleRefElement.getRuleName().equals(state.getRuleSpec().getName())) {
+							State advancedState;
+							List<Element> elements = new ArrayList<>(startState.getElements());
+							if (!state.getElements().isEmpty())
+								elements.add(new Element(this, ruleRefElement, chart.getPosition(), state));
 							if (!expectedElementSpec.isMultiple()) {
-								advancedNode = new Node(startNode.getBeginTokenIndex(), 
-										startNode.getRuleSpec(), startNode.getAlternativeSpecIndex(), 
-										startNode.getExpectedElementSpecIndex()+1, false, elements);
+								advancedState = new State(startState.getOriginPosition(), 
+										startState.getRuleSpec(), startState.getAlternativeSpecIndex(), 
+										startState.getExpectedElementSpecIndex()+1, false, elements);
 							} else {
-								advancedNode = new Node(startNode.getBeginTokenIndex(), 
-										startNode.getRuleSpec(), startNode.getAlternativeSpecIndex(), 
-										startNode.getExpectedElementSpecIndex(), true, elements);
+								advancedState = new State(startState.getOriginPosition(), 
+										startState.getRuleSpec(), startState.getAlternativeSpecIndex(), 
+										startState.getExpectedElementSpecIndex(), true, elements);
 							}
-							if (state.addNode(advancedNode))
-								process(advancedNode, state);
+							if (chart.getStates().add(advancedState))
+								process(advancedState, chart);
 						}
 					}
 				}
@@ -116,31 +116,31 @@ public class EarleyParser {
 		}
 	}
 	
-	private void scan(Node node, Set<Node> nextNodes) {
-		if (!node.isCompleted()) {
-			ElementSpec expectedElementSpec = node.getExpectedElementSpec();
+	private void scan(State state, Set<State> nextStates) {
+		if (!state.isCompleted()) {
+			ElementSpec expectedElementSpec = state.getExpectedElementSpec();
 			int tokenType = tokens.get(tokenIndex).getType();
 			if ((expectedElementSpec instanceof TerminalElementSpec) 
 					&& ((TerminalElementSpec)expectedElementSpec).isToken(tokenType)) {
-				Node scanNode;
-				List<Element> elements = new ArrayList<>(node.getElements());
+				State scannedState;
+				List<Element> elements = new ArrayList<>(state.getElements());
 				elements.add(new Element(this, expectedElementSpec, tokenIndex+1, null));
 				if (!expectedElementSpec.isMultiple()) {
-					scanNode = new Node(node.getBeginTokenIndex(), node.getRuleSpec(), 
-							node.getAlternativeSpecIndex(), node.getExpectedElementSpecIndex()+1, 
+					scannedState = new State(state.getOriginPosition(), state.getRuleSpec(), 
+							state.getAlternativeSpecIndex(), state.getExpectedElementSpecIndex()+1, 
 							false, elements);
 				} else {
-					scanNode = new Node(node.getBeginTokenIndex(), node.getRuleSpec(), 
-							node.getAlternativeSpecIndex(), node.getExpectedElementSpecIndex(), 
+					scannedState = new State(state.getOriginPosition(), state.getRuleSpec(), 
+							state.getAlternativeSpecIndex(), state.getExpectedElementSpecIndex(), 
 							true, elements);
 				}
-				nextNodes.add(scanNode);
+				nextStates.add(scannedState);
 			}
 		}
 	}
 	
-	public List<State> getStates() {
-		return states;
+	public List<Chart> getCharts() {
+		return charts;
 	}
 	
 	public RuleSpec getRule() {
@@ -151,9 +151,9 @@ public class EarleyParser {
 		return tokens;
 	}
 
-	public List<Node> getMatches() {
-		if (states.size() == tokens.size()+1) 
-			return states.get(tokens.size()).getMatches(rule.getName());
+	public List<State> getMatches() {
+		if (charts.size() == tokens.size()+1) 
+			return charts.get(tokens.size()).getMatches();
 		else
 			return new ArrayList<>();
 	}
@@ -192,9 +192,9 @@ public class EarleyParser {
 	 * 			to be empty
 	 */
 	public int getEndOfMatch() {
-		for (int i=states.size()-1; i>=0; i--) {
-			State state = states.get(i);
-			if (!state.getMatches(rule.getName()).isEmpty())
+		for (int i=charts.size()-1; i>=0; i--) {
+			Chart state = charts.get(i);
+			if (!state.getMatches().isEmpty())
 				return i;
 		}
 		return -1;

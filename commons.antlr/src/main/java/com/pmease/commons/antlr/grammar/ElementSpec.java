@@ -39,7 +39,7 @@ public abstract class ElementSpec implements Serializable {
 		return multiplicity == Multiplicity.ONE_OR_MORE || multiplicity == Multiplicity.ZERO_OR_MORE;
 	}
 	
-	public abstract Set<String> getLeadingChoices();
+	public abstract Set<String> getLeadingLiterals();
 	
 	protected abstract boolean isAllowEmptyOnce();
 	

@@ -19,7 +19,7 @@ public class RuleSpec implements Serializable {
 	
 	private final List<AlternativeSpec> alternatives;
 	
-	private Set<String> leadingChoices;
+	private Set<String> leadingLiterals;
 	
 	private Boolean allowEmpty;
 	
@@ -80,12 +80,12 @@ public class RuleSpec implements Serializable {
 		return mandatoryScan;
 	}
 	
-	private Set<String> doGetLeadingChoices() {
+	private Set<String> doGetLeadingLiterals() {
 		Set<String> leadingChoices = new LinkedHashSet<>();
 		
 		for (AlternativeSpec alternative: alternatives) {
 			for (ElementSpec elementSpec: alternative.getElements()) {
-				leadingChoices.addAll(elementSpec.getLeadingChoices());
+				leadingChoices.addAll(elementSpec.getLeadingLiterals());
 				if (!elementSpec.isAllowEmpty())
 					break;
 			}
@@ -93,15 +93,15 @@ public class RuleSpec implements Serializable {
 		return leadingChoices;
 	}
 
-	public Set<String> getLeadingChoices() {
-		if (leadingChoices == null) {
+	public Set<String> getLeadingLiterals() {
+		if (leadingLiterals == null) {
 			// initialize this to return a meaningful value in case this method is 
 			// invoked recursively
-			leadingChoices = new LinkedHashSet<>();
+			leadingLiterals = new LinkedHashSet<>();
 			
-			leadingChoices = doGetLeadingChoices();
+			leadingLiterals = doGetLeadingLiterals();
 		}
-		return leadingChoices;
+		return leadingLiterals;
 	}
 
 	private boolean doIsAllowEmpty() {

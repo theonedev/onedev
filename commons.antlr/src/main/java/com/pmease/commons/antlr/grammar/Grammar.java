@@ -133,7 +133,7 @@ public class Grammar implements Serializable {
 		// the constructor
 		for (RuleSpec rule: rules.values()) {
 			rule.isAllowEmpty();
-			rule.getLeadingChoices();
+			rule.getLeadingLiterals();
 			rule.scanMandatories();
 		}
 	}

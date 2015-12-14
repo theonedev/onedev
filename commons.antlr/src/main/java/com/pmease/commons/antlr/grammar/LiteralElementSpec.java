@@ -34,7 +34,7 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingChoices() {
+	public Set<String> getLeadingLiterals() {
 		Set<String> leadingChoices = new LinkedHashSet<>();
 		leadingChoices.add(literal);
 		return leadingChoices;

@@ -17,7 +17,6 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.pmease.commons.antlr.grammar.LiteralElementSpec;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.parser.Element;
 
@@ -71,7 +70,7 @@ public class CodeAssistTest5 {
 					List<InputSuggestion> suggestions = new ArrayList<>();
 					Element columnNameElement = element.findParentByRule("column_name");
 					String schemaName;
-					List<Element> schemaNameElements = columnNameElement.getChildrenByRule("schema_name", true);
+					List<Element> schemaNameElements = columnNameElement.findChildrenByRule("schema_name", true);
 					if (!schemaNameElements.isEmpty())
 						schemaName = schemaNameElements.get(0).getMatchedText();
 					else
@@ -85,8 +84,8 @@ public class CodeAssistTest5 {
 					return suggestions;
 				} else if ("columnName".equals(lexerRuleRefElementSpec.getLabel())) {
 					List<InputSuggestion> suggestions = new ArrayList<>();
-					Element columnNameElement = element.getRoot().findParentByRule("column_name");
-					List<Element> tableNameElements = columnNameElement.getChildrenByLabel("tableName", true);
+					Element columnNameElement = element.findParentByRule("column_name");
+					List<Element> tableNameElements = columnNameElement.findChildrenByLabel("tableName", true);
 					if (!tableNameElements.isEmpty()) {
 						String tableName = tableNameElements.get(0).getMatchedText();
 						if (TABLE_COLUMNS.containsKey(tableName)) {
@@ -98,12 +97,16 @@ public class CodeAssistTest5 {
 					}
 					return suggestions;
 				}
-			} else if (spec instanceof LiteralElementSpec) {
-				LiteralElementSpec literalElementSpec = (LiteralElementSpec) spec;
-				if (literalElementSpec.getLiteral().length() == 1)
-					return new ArrayList<>();
-			}
+			} 
 			return null;
+		}
+
+		@Override
+		protected InputSuggestion suggestLiteral(ParentedElement expectedElement, String literal, boolean complete) {
+			if (literal.length() > 1)
+				return super.suggestLiteral(expectedElement, literal, complete);
+			else
+				return null;
 		}
 
 	};
@@ -138,7 +141,6 @@ public class CodeAssistTest5 {
 		assertEquals(2, suggestions.size());
 		assertEquals("select tableA.:14", suggestions.get(0).toString());
 		assertEquals("select tableB.:14", suggestions.get(1).toString());
-		
 	}
 	
 }

@@ -55,8 +55,8 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingChoices() {
-		return getRule().getLeadingChoices();
+	public Set<String> getLeadingLiterals() {
+		return getRule().getLeadingLiterals();
 	}
 
 	@Override

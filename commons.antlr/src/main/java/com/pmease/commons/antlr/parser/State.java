@@ -1,112 +1,181 @@
 package com.pmease.commons.antlr.parser;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.Token;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.pmease.commons.antlr.grammar.AlternativeSpec;
 import com.pmease.commons.antlr.grammar.ElementSpec;
-import com.pmease.commons.antlr.grammar.TerminalElementSpec;
+import com.pmease.commons.antlr.grammar.RuleSpec;
 
+/**
+ * Represents a Earley state as mentioned in https://en.wikipedia.org/wiki/Earley_parser
+ * 
+ * @author robin
+ *
+ */
 public class State {
 	
-	private final EarleyParser parser;
+	private final int originPosition;
 	
-	private final int endTokenIndex;
+	private final RuleSpec ruleSpec;
 	
-	private final Set<Node> nodes;
+	private final int alternativeSpecIndex;
 	
-	private Set<RuleCompletion> ruleCompletions = new HashSet<>();
+	private final int expectedElementSpecIndex;
 	
-	public Set<Node> getNodes() {
-		return nodes;
-	}
+	private final boolean expectedElementSpecMatchedOnce;
 	
-	public State(EarleyParser parser, int tokenIndex, Set<Node> nodes) {
-		this.parser = parser;
-		this.endTokenIndex = tokenIndex;
-		this.nodes = nodes;
-		for (Node node: nodes) {
-			if (node.isCompleted())
-				ruleCompletions.add(new RuleCompletion(node.getRuleSpec().getName(), node.getBeginTokenIndex(), tokenIndex));
-		}
-	}
+	private final List<Element> elements;
 	
-	@Nullable
-	private RuleCompletion getRuleCompletion(Node node) {
-		if (node.isCompleted())
-			return new RuleCompletion(node.getRuleSpec().getName(), node.getBeginTokenIndex(), endTokenIndex);
-		else
-			return null;
-	}
+	private transient AlternativeSpec alternativeSpec;
 	
+	private transient List<ElementSpec> elementSpecs;
 
-	public boolean addNode(Node node) {
-		if (!nodes.contains(node)) {
-			RuleCompletion ruleCompletion = getRuleCompletion(node);
-			if (ruleCompletion != null) {
-				if (!ruleCompletions.contains(ruleCompletion)) {
-					ruleCompletions.add(ruleCompletion);
-					nodes.add(node);
-					return true;
-				}
-			} else {
-				nodes.add(node);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public int getEndTokenIndex() {
-		return endTokenIndex;
+	/**
+	 * Construct a Earley state.
+	 * 
+	 * @param originPosition
+	 *			position of the chart originating this state. Representing index of first token matched by the state 
+	 * @param ruleSpec
+	 * 			rule spec of the state
+	 * @param alternativeSpecIndex
+	 * 			index of alternative spec above rule 
+	 * @param expectedElementSpecIndex
+	 * 			index of element spec expecting to be matched, representing dot position 
+	 * 			of the state
+	 * @param expectedElementSpecMatchedOnce
+	 * 			whether or not the expected element spec has been matched at least once to
+	 * 			facilitate handling of element multiplicity (* and +)
+	 * @param elements
+	 * 			already matched elements in this state
+	 */
+	public State(int originPosition, RuleSpec ruleSpec, int alternativeSpecIndex, int expectedElementSpecIndex, 
+			boolean expectedElementSpecMatchedOnce, List<Element> elements) {
+		this.originPosition = originPosition;
+		this.ruleSpec = ruleSpec;
+		this.alternativeSpecIndex = alternativeSpecIndex;
+		this.expectedElementSpecIndex = expectedElementSpecIndex;
+		this.expectedElementSpecMatchedOnce = expectedElementSpecMatchedOnce;
+		this.elements = elements;
 	}
 	
 	/**
-	 * Get the token being scanned to create this state.
+	 * Get origin position of this state
 	 * 
 	 * @return
-	 * 			the token being scanned to create this state, or <tt>null</tt> for initial state
+	 * 			position of the chart originating this state. Representing index of first token matched by the state
+	 */
+	public int getOriginPosition() {
+		return originPosition;
+	}
+
+	public RuleSpec getRuleSpec() {
+		return ruleSpec;
+	}
+
+	public int getAlternativeSpecIndex() {
+		return alternativeSpecIndex;
+	}
+
+	public int getExpectedElementSpecIndex() {
+		return expectedElementSpecIndex;
+	}
+
+	public boolean isExpectedElementSpecMatchedOnce() {
+		return expectedElementSpecMatchedOnce;
+	}
+	
+	/**
+	 * Get expected element spec
+	 * 
+	 * @return
+	 * 			element spec expected to be matched next, or <tt>null</tt> if 
+	 * 			the state is completed
 	 */
 	@Nullable
-	public Token getInitiatingToken() {
-		if (endTokenIndex > 0)
-			return parser.getTokens().get(endTokenIndex-1);
-		else
+	public ElementSpec getExpectedElementSpec() {
+		if (isCompleted())
 			return null;
+		else
+			return getElementSpecs().get(expectedElementSpecIndex);
+	}
+
+	/**
+	 * Get elements already matched in this state
+	 * 
+	 * @return
+	 * 			elements already matched in this state
+	 */
+	public List<Element> getElements() {
+		return elements;
 	}
 	
-	public List<Node> getMatches(String ruleName) {
-		List<Node> matches = new ArrayList<>();
-		for (Node node: nodes) {
-			if (node.getRuleSpec().getName().equals(ruleName) 
-					&& node.getBeginTokenIndex() == 0 && node.isCompleted()) {
-				matches.add(node);
-			}
-		}
-		return matches;
+	public AlternativeSpec getAlternativeSpec() {
+		if (alternativeSpec == null)
+			alternativeSpec = ruleSpec.getAlternatives().get(alternativeSpecIndex);
+		return alternativeSpec;
 	}
 	
-	public List<Node> getNodesExpectingTerminal() {
-		List<Node> nodesExpectingTerminal = new ArrayList<>();
-		for (Node node: nodes) {
-			ElementSpec expectingSpec = node.getExpectedElementSpec();
-			if (expectingSpec instanceof TerminalElementSpec)
-				nodesExpectingTerminal.add(node);
-		}
-		return nodesExpectingTerminal;
+	public List<ElementSpec> getElementSpecs() {
+		if (elementSpecs == null)
+			elementSpecs = getAlternativeSpec().getElements();
+		return elementSpecs;
+	}
+	
+	public boolean isCompleted() {
+		return expectedElementSpecIndex == getElementSpecs().size();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof State))
+			return false;
+		if (this == other)
+			return true;
+		State otherState = (State) other;
+		
+		/*
+		 * The standard Earley parser should also consider parsed elements into 
+		 * account when compare state, however it will cause state to increase 
+		 * quickly in case of ambiguity rules. By excluding parsed elements from 
+		 * comparison, we normally get only the first possibility amongst all 
+		 * the ambiguity possibilities, which is totally acceptable for our 
+		 * code assistance purpose  
+		 */
+		return new EqualsBuilder()
+				.append(originPosition, otherState.originPosition)
+				.append(ruleSpec.getName(), otherState.ruleSpec.getName())
+				.append(alternativeSpecIndex, otherState.alternativeSpecIndex)
+				.append(expectedElementSpecIndex, otherState.expectedElementSpecIndex)
+				.append(expectedElementSpecMatchedOnce, otherState.expectedElementSpecMatchedOnce)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+				.append(originPosition)
+				.append(ruleSpec.getName())
+				.append(alternativeSpecIndex)
+				.append(expectedElementSpecIndex)
+				.append(expectedElementSpecMatchedOnce)
+				.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for (Node node: nodes)
-			buffer.append(node).append("\n");
-		return buffer.toString();
+		for (int i=0; i<expectedElementSpecIndex; i++)
+			buffer.append(getElementSpecs().get(i)).append(" ");
+		buffer.append(expectedElementSpecMatchedOnce?"~ ":"^ ");
+		for (int i=expectedElementSpecIndex; i<getElementSpecs().size(); i++)
+			buffer.append(getElementSpecs().get(i)).append(" ");
+		
+		return ruleSpec.getName() + " -> " + buffer.toString() + ": " + originPosition;
 	}
 	
 }

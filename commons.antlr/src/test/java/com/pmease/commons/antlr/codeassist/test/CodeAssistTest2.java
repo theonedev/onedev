@@ -64,6 +64,7 @@ public class CodeAssistTest2 {
 		List<InputStatus> suggestions;
 
 		suggestions = suggest(new InputStatus("branch"), "query");
+		System.out.println(suggestions);
 		assertEquals(5, suggestions.size());
 		assertEquals("branch(master):14", suggestions.get(0).toString());
 		assertEquals("branch(dev):11", suggestions.get(1).toString());

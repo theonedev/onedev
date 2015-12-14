@@ -52,9 +52,9 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingChoices() {
+	public Set<String> getLeadingLiterals() {
 		if (getRule() != null)
-			return getRule().getLeadingChoices();
+			return getRule().getLeadingLiterals();
 		else
 			return Sets.newLinkedHashSet();
 	}
