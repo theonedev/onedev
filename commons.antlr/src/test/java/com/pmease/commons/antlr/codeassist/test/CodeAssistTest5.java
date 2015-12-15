@@ -102,9 +102,9 @@ public class CodeAssistTest5 {
 		}
 
 		@Override
-		protected InputSuggestion suggest(ParentedElement expectedElement, String literal, boolean complete) {
+		protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, String literal, boolean complete) {
 			if (literal.length() > 1)
-				return super.suggest(expectedElement, literal, complete);
+				return super.wrapAsSuggestion(expectedElement, literal, complete);
 			else
 				return null;
 		}

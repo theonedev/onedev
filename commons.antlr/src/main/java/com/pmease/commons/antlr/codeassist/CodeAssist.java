@@ -300,7 +300,7 @@ public abstract class CodeAssist implements Serializable {
 							if (leadingLiteral.startsWith(matchWith) && leadingLiteral.length()>matchWith.length()) {
 								List<Token> tokens = grammar.lex(leadingLiteral);
 								boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
-								InputSuggestion suggestion = suggest(elementExpectingTerminal, leadingLiteral, complete);
+								InputSuggestion suggestion = wrapAsSuggestion(elementExpectingTerminal, leadingLiteral, complete);
 								if (suggestion != null)
 									inputSuggestions.add(suggestion);
 							}
@@ -511,22 +511,22 @@ public abstract class CodeAssist implements Serializable {
 	protected abstract List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith);
 
 	/**
-	 * Provide suggestion of specified terminal element
+	 * Wrap specified literal of specified terminal element as suggestion.
 	 * 
 	 * @param expectedElement
 	 * 			terminal element expecting to be matched next
-	 * @param literal
+	 * @param suggestedLiteral
 	 * 			a proposed literal of above terminal element defined in grammar
 	 * @param complete
 	 * 			whether or not above literal is a complete representation of the 
 	 * 			expected terminal element
 	 * @return
-	 * 			suggestion wrapper of the literal, or <tt>null</tt> to suppress 
-	 * 			this suggestion
+	 * 			suggestion of the literal, or <tt>null</tt> to suppress this suggestion
 	 */
 	@Nullable
-	protected InputSuggestion suggest(ParentedElement expectedElement, String literal, boolean complete) {
-		return new InputSuggestion(literal, literal.length(), complete, null);
+	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
+			String suggestedLiteral, boolean complete) {
+		return new InputSuggestion(suggestedLiteral, suggestedLiteral.length(), complete, null);
 	}
 	
 }
