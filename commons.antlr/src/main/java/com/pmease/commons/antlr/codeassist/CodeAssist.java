@@ -282,6 +282,10 @@ public abstract class CodeAssist implements Serializable {
 					for (ParentedElement element: expectedElements) {
 						inputSuggestions = suggest(element, matchWith);
 						if (inputSuggestions != null) {
+							for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
+								if (it.next().getContent().equals(matchWith))
+									it.remove();
+							}
 							if (!inputSuggestions.isEmpty())
 								suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
 							break;
@@ -293,10 +297,10 @@ public abstract class CodeAssist implements Serializable {
 						inputSuggestions = new ArrayList<>();
 						TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
 						for (String leadingLiteral: spec.getLeadingLiterals()) {
-							if (leadingLiteral.startsWith(matchWith)) {
+							if (leadingLiteral.startsWith(matchWith) && leadingLiteral.length()>matchWith.length()) {
 								List<Token> tokens = grammar.lex(leadingLiteral);
 								boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
-								InputSuggestion suggestion = suggestLiteral(elementExpectingTerminal, leadingLiteral, complete);
+								InputSuggestion suggestion = suggest(elementExpectingTerminal, leadingLiteral, complete);
 								if (suggestion != null)
 									inputSuggestions.add(suggestion);
 							}
@@ -512,16 +516,16 @@ public abstract class CodeAssist implements Serializable {
 	 * @param expectedElement
 	 * 			terminal element expecting to be matched next
 	 * @param literal
-	 * 			a possible literal of above terminal element defined in grammar
+	 * 			a proposed literal of above terminal element defined in grammar
 	 * @param complete
-	 * 			whether or not this literal is a complete representation of the 
-	 * 			expected element
+	 * 			whether or not above literal is a complete representation of the 
+	 * 			expected terminal element
 	 * @return
 	 * 			suggestion wrapper of the literal, or <tt>null</tt> to suppress 
 	 * 			this suggestion
 	 */
 	@Nullable
-	protected InputSuggestion suggestLiteral(ParentedElement expectedElement, String literal, boolean complete) {
+	protected InputSuggestion suggest(ParentedElement expectedElement, String literal, boolean complete) {
 		return new InputSuggestion(literal, literal.length(), complete, null);
 	}
 	

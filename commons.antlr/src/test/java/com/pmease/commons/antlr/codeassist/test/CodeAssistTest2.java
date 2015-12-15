@@ -63,14 +63,16 @@ public class CodeAssistTest2 {
 	public void test() {
 		List<InputStatus> suggestions;
 
+		suggestions = suggest(new InputStatus("message"), "query");
+		assertEquals(1, suggestions.size());
+		assertEquals("message(:8", suggestions.get(0).toString());
+		
 		suggestions = suggest(new InputStatus("branch"), "query");
-		System.out.println(suggestions);
-		assertEquals(5, suggestions.size());
+		assertEquals(4, suggestions.size());
 		assertEquals("branch(master):14", suggestions.get(0).toString());
 		assertEquals("branch(dev):11", suggestions.get(1).toString());
 		assertEquals("branch(feature1):16", suggestions.get(2).toString());
 		assertEquals("branch(feature2):16", suggestions.get(3).toString());
-		assertEquals("branch(:7", suggestions.get(4).toString());
 
 		suggestions = suggest(new InputStatus(""), "revisionCriteria");
 		assertEquals(4, suggestions.size());
