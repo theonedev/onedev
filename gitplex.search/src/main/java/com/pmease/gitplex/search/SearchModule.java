@@ -1,6 +1,7 @@
 package com.pmease.gitplex.search;
 
 import com.pmease.commons.loader.AbstractPluginModule;
+import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
 
 /**
@@ -19,6 +20,7 @@ public class SearchModule extends AbstractPluginModule {
 		
 		contribute(IndexListener.class, DefaultSearchManager.class);
 		contribute(RepositoryListener.class, DefaultIndexManager.class);
+		contribute(RefListener.class, DefaultIndexManager.class);
 	}
 
 }

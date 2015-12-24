@@ -52,6 +52,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
@@ -75,7 +76,7 @@ import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultPullRequestManager implements PullRequestManager, RepositoryListener, LifecycleListener {
+public class DefaultPullRequestManager implements PullRequestManager, RepositoryListener, RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
@@ -553,7 +554,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 							String integrateRef = request.getIntegrateRef();
 							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)
 									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && git.isAncestor(targetHead, requestHead)
-											&& git.log(targetHead, requestHead, null, 0, 0).size() == 1) {
+											&& git.log(targetHead, requestHead, null, 0, 0, false).size() == 1) {
 								preview.setIntegrated(requestHead);
 								git.updateRef(integrateRef, requestHead, null, null);
 							} else {

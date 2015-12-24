@@ -4,45 +4,29 @@ import com.google.common.base.Preconditions;
 
 public abstract class ObjectReference<T> {
 	
-	private int count = 0;
+	private int count;
 	
-	private T object = null;
+	private T object;
 
 	protected abstract T openObject();
 	
-	public synchronized T getObject() {
-		if (object != null) {
-			return object;
-		} else if (count > 0) {
+	protected abstract void closeObject(T object);
+	
+	public synchronized T open() {
+		if (count++ == 0)
 			object = openObject();
-			Preconditions.checkNotNull(object);
-			return object;
-		} else {
-			return null;
-		}
-		
-	}
-	
-	public synchronized void increase() {
-		count++;
-	}
-	
-	public synchronized void decrease() {
-		if (count > 0)
-			count--;
-		if (count == 0 && object != null) {
-			closeObject(object);
-			object = null;
-		}
-	}
-	
-	public synchronized void reset() {
-		count = 0;
-		if (object != null) {
-			closeObject(object);
-			object = null;
-		}
+		return object;
 	}
 
-	protected abstract void closeObject(T object);
+	public synchronized void close() {
+		if (--count == 0) {
+			closeObject(object);
+			object = null;
+		}
+	}
+	
+	public T get() {
+		return Preconditions.checkNotNull(object);
+	}
+	
 }

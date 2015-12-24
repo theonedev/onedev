@@ -31,8 +31,6 @@ public interface UnitOfWork {
 	
 	void asyncCall(Runnable runnable);
 	
-	void reset();
-	
 	Session getSession();
 	
 	SessionFactory getSessionFactory();

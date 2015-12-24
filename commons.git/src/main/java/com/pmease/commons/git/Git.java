@@ -356,7 +356,7 @@ public class Git implements Serializable {
 	}
 	
 	public List<Commit> log(@Nullable String fromRev, @Nullable String toRev, 
-			@Nullable String path, int maxCount, int skip) {
+			@Nullable String path, int maxCount, int skip, boolean listChangedFiles) {
 		List<String> paths = new ArrayList<>();
 		if (path != null)
 			paths.add(path);
@@ -382,7 +382,7 @@ public class Git implements Serializable {
 	}
 	
 	public Commit retrieveLastCommmit(String revision, @Nullable String path) {
-		return log(null, revision, path, 1, 0).get(0);
+		return log(null, revision, path, 1, 0, false).get(0);
 	}
 	
 	public Git addNote(String object, String message) {

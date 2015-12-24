@@ -35,7 +35,7 @@ public class LogCommandTest extends AbstractGitTest {
 
 		bareGit.addNote("master", "hello\nworld");
 
-		List<Commit> commits = bareGit.log(null, "master", null, 0, 0);
+		List<Commit> commits = bareGit.log(null, "master", null, 0, 0, false);
 		assertEquals(commits.size(), 6);
 		assertEquals(commits.get(0).getSubject(), "add dir/file");
 		assertEquals(commits.get(0).getBody(), "add dir/file to test files under a directory");
@@ -49,14 +49,14 @@ public class LogCommandTest extends AbstractGitTest {
 		addFileAndCommit("dir/file2", "file2", "add dir/file2");
 		git.merge("dev", null, null, null, null);
 		
-		commits = git.log(null, "master", null, 0, 0);
+		commits = git.log(null, "master", null, 0, 0, false);
 		
 		assertEquals(commits.get(0).getParentHashes().size(), 2);
 		
-		commits = git.log(null, "master", "a", 0, 0);
+		commits = git.log(null, "master", "a", 0, 0, false);
 		assertEquals(commits.size(), 3);
 		
-		commits = git.log("dev", "master", "dir", 0, 0);
+		commits = git.log("dev", "master", "dir", 0, 0, false);
 		assertEquals(commits.size(), 2);
 
 		assertEquals(git.showRevision(commits.get(0).getHash()).getHash(), commits.get(0).getHash()); 

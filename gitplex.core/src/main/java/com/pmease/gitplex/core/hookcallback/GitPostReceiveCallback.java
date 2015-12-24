@@ -22,7 +22,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.listeners.RepositoryListener;
+import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 
@@ -34,10 +34,10 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     private final Dao dao;
     
-    private final Provider<Set<RepositoryListener>> listenersProvider;
+    private final Provider<Set<RefListener>> listenersProvider;
     
     @Inject
-    public GitPostReceiveCallback(Dao dao, Provider<Set<RepositoryListener>> listenersProvider) {
+    public GitPostReceiveCallback(Dao dao, Provider<Set<RefListener>> listenersProvider) {
     	this.dao = dao;
         this.listenersProvider = listenersProvider;
     }
@@ -89,7 +89,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         		repository.cacheObjectId(refName, null);
         	}
         	
-    		for (RepositoryListener listener: listenersProvider.get())
+    		for (RefListener listener: listenersProvider.get())
     			listener.onRefUpdate(repository, refName, newCommitHash);
     		
         	field = field.substring(40);

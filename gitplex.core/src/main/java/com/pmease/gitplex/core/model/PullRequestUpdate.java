@@ -154,7 +154,7 @@ public class PullRequestUpdate extends AbstractEntity {
 					CachedInfo cachedInfo = new CachedInfo();
 
 					Git git = getRequest().getTargetRepo().git();
-					List<Commit> log = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0);
+					List<Commit> log = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0, false);
 					if (log.isEmpty())
 						log = Lists.newArrayList(getRequest().getTargetRepo().getCommit(getHeadCommitHash()));
 					cachedInfo.setLogCommits(log);

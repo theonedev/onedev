@@ -78,7 +78,7 @@ import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.listeners.RepositoryListener;
+import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
@@ -738,7 +738,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
     public void deleteBranch(String branch) {
 		git().deleteBranch(branch);
-		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 			listener.onRefUpdate(this, GitUtils.branch2ref(branch), null);
     }
     

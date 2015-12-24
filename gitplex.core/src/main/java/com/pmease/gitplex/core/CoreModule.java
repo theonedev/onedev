@@ -21,8 +21,10 @@ import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.listeners.ConfigListener;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.CommentReplyManager;
@@ -41,6 +43,7 @@ import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultAuxiliaryManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCommentReplyManager;
@@ -154,10 +157,13 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BranchWatchManager.class).to(DefaultBranchWatchManager.class);
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
+		bind(AuxiliaryManager.class).to(DefaultAuxiliaryManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 
 		contribute(RepositoryListener.class, DefaultPullRequestManager.class);
+		contribute(RepositoryListener.class, DefaultAuxiliaryManager.class);
+		contribute(RefListener.class, DefaultPullRequestManager.class);
 		contribute(PullRequestListener.class, DefaultNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
 		contribute(LifecycleListener.class, DefaultPullRequestManager.class);

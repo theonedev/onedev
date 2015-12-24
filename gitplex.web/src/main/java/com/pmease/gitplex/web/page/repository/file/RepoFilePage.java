@@ -56,7 +56,7 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.listeners.RepositoryListener;
+import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -540,7 +540,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					repository.cacheObjectId(branch, newCommitId);
 					BlobIdent committed = new BlobIdent(
 							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
-		    		for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+		    		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 		    			listener.onRefUpdate(repository, refName, newCommitId.name());
 
 	    			RepoFileState state = getState();
@@ -598,7 +598,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 								break;
 							}
 						}
-						for (RepositoryListener listener: GitPlex.getExtensions(RepositoryListener.class))
+						for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 			    			listener.onRefUpdate(repository, refName, newCommitId.name());
 						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 						RepoFileState state = getState();

@@ -73,10 +73,6 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		}
 
 		@Override
-		public void reset() {
-		}
-
-		@Override
 		public Session getSession() {
 			return null;
 		}

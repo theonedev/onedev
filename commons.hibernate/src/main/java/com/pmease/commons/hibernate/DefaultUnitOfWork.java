@@ -56,11 +56,11 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 	}
 
 	public void begin() {
-		sessionReferenceHolder.get().increase();
+		sessionReferenceHolder.get().open();
 	}
 
 	public void end() {
-		sessionReferenceHolder.get().decrease();
+		sessionReferenceHolder.get().close();
 	}
 
 	public Session get() {
@@ -68,16 +68,11 @@ public class DefaultUnitOfWork implements UnitOfWork, Provider<Session> {
 	}
 
 	public Session getSession() {
-		return sessionReferenceHolder.get().getObject();
+		return sessionReferenceHolder.get().get();
 	}
 	
 	public SessionFactory getSessionFactory() {
 		return sessionFactoryProvider.get();
-	}
-
-	@Override
-	public void reset() {
-		sessionReferenceHolder.get().reset();
 	}
 
 	@Override

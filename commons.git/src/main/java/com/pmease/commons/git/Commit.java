@@ -19,23 +19,29 @@ public class Commit extends BriefCommit {
     private final String note;
     
     private final List<String> parentHashes;
+    
+    private final List<String> changedFiles;
 
     public Commit(String hash, PersonIdent committer, PersonIdent author, String subject, 
-    		@Nullable String body, List<String> parentHashes, @Nullable String note) {
+    		@Nullable String body, List<String> parentHashes, @Nullable String note, 
+    		@Nullable List<String> changedFiles) {
     	super(hash, committer, author, subject);
     	
     	this.body = body;
     	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
     	this.note = note;
+    	this.changedFiles = changedFiles;
     }
     
     public Commit(BriefCommit briefCommit, @Nullable String body, 
-    		List<String> parentHashes, @Nullable String note) {
+    		List<String> parentHashes, @Nullable String note, 
+    		@Nullable List<String> changedFiles) {
     	super(briefCommit);
     	
     	this.body = body;
     	this.parentHashes = new ArrayList<>(checkNotNull(parentHashes, "parentHashes"));
     	this.note = note;
+    	this.changedFiles = changedFiles;
     }
     
 	public String getMessage() {
@@ -59,16 +65,24 @@ public class Commit extends BriefCommit {
 		return body;
 	}
 
-    public static class Builder extends BriefCommit.Builder {
+	@Nullable
+    public List<String> getChangedFiles() {
+		return changedFiles;
+	}
+
+	public static class Builder extends BriefCommit.Builder {
     	
     	public String body;
 		
     	public List<String> parentHashes = new ArrayList<>();
 		
     	public String note;
+    	
+    	public List<String> changedFiles;
 		
 		public Commit build() {
-			return new Commit(super.build(), StringUtils.isNotBlank(body)?body.trim():null, parentHashes, note);
+			return new Commit(super.build(), StringUtils.isNotBlank(body)?body.trim():null, 
+					parentHashes, note, changedFiles);
 		}
 	}
 	

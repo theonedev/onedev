@@ -154,7 +154,7 @@ public class BranchComparePage extends RepositoryPage {
 			@Override
 			protected List<Commit> load() {
 				RepoAndBranch source = sourceModel.getObject();
-				return source.getRepository().git().log(mergeBaseModel.getObject(), source.getHead(), null, 0, 0);
+				return source.getRepository().git().log(mergeBaseModel.getObject(), source.getHead(), null, 0, 0, false);
 			}
 			
 		};

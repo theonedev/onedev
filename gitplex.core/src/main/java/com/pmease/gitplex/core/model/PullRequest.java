@@ -821,7 +821,7 @@ public class PullRequest extends AbstractEntity {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
 			Repository repo = getTargetRepo();
-			for (Commit commit: repo.git().log(getTarget().getHead(), getLatestUpdate().getHeadCommitHash(), null, 0, 0))
+			for (Commit commit: repo.git().log(getTarget().getHead(), getLatestUpdate().getHeadCommitHash(), null, 0, 0, false))
 				pendingCommits.add(commit.getHash());
 		}
 		return pendingCommits;
@@ -848,7 +848,7 @@ public class PullRequest extends AbstractEntity {
 			mergedCommits = new HashSet<>();
 
 			Repository repo = getTargetRepo();
-			for (Commit commit: repo.git().log(getBaseCommitHash(), getTarget().getHead(), null, 0, 0))
+			for (Commit commit: repo.git().log(getBaseCommitHash(), getTarget().getHead(), null, 0, 0, false))
 				mergedCommits.add(commit);
 		}
 		return mergedCommits;

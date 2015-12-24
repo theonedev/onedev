@@ -207,7 +207,7 @@ public class NewRequestPage extends PullRequestPage {
 			protected List<Commit> load() {
 				PullRequest request = getPullRequest();
 				List<Commit> commits = request.git().log(request.getBaseCommitHash(), 
-						request.getLatestUpdate().getHeadCommitHash(), null, 0, 0);
+						request.getLatestUpdate().getHeadCommitHash(), null, 0, 0, false);
 				Collections.reverse(commits);
 				return commits;
 			}

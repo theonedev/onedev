@@ -26,7 +26,7 @@ class LastCommitPanel extends Panel {
 		this.repoModel = repoModel;
 
 		// call git command line for performance reason
-		commit = repoModel.getObject().git().log(null, blob.revision, blob.path, 1, 0).iterator().next();
+		commit = repoModel.getObject().git().log(null, blob.revision, blob.path, 1, 0, false).iterator().next();
 	}
 
 	@Override

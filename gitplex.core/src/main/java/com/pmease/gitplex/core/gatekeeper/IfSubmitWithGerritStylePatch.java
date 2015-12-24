@@ -17,7 +17,7 @@ public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
 	protected CheckResult doCheckRequest(PullRequest request) {
 		String branchHead = request.getBaseCommitHash();
 		String requestHead = request.getLatestUpdate().getHeadCommitHash();
-		if (request.git().log(branchHead, requestHead, null, 0, 0).size() > 1) {
+		if (request.git().log(branchHead, requestHead, null, 0, 0, false).size() > 1) {
 			return failed(Lists.newArrayList("Please squash/rebase your commits."));
 		} else {
 			return passed(Lists.newArrayList("No more than one commit."));
