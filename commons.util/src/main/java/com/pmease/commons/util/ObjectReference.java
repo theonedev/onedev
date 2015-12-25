@@ -13,16 +13,18 @@ public abstract class ObjectReference<T> {
 	protected abstract void closeObject(T object);
 	
 	public synchronized T open() {
-		if (count++ == 0)
+		if (count == 0)
 			object = openObject();
+		count++;
 		return object;
 	}
 
 	public synchronized void close() {
-		if (--count == 0) {
+		if (count == 1) {
 			closeObject(object);
 			object = null;
 		}
+		count--;
 	}
 	
 	public synchronized T get() {
