@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     private int skip;
     
     private boolean parentRewriting;
+    
+    private boolean listChangedFiles;
     
     private List<String> messages = new ArrayList<>();
     
@@ -107,6 +110,11 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		this.skip = skip;
 		return this;
 	}
+	
+	public LogCommand listChangedFiles(boolean listChangedFiles) {
+		this.listChangedFiles = listChangedFiles;
+		return this;
+	}
 
 	public List<String> messages() {
 		return messages;
@@ -144,8 +152,7 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		return this;
 	}
 	
-	@Override
-    public List<Commit> call() {
+	public void run(final CommitConsumer consumer) {
         Commandline cmd = cmd();
         cmd.addArgs("log",
                         "--format=*** commit_begin ***%n%B%n*** commit_message_end ***%n%N"
@@ -184,31 +191,37 @@ public class LogCommand extends GitCommand<List<Commit>> {
         if (parentRewriting)
         	cmd.addArgs("--parents");
         
+        if (listChangedFiles)
+        	cmd.addArgs("--name-only");
+        
         cmd.addArgs("--");
         
         for (String path: paths)
         	cmd.addArgs(path);
 
-        final List<Commit> commits = new ArrayList<>();
-        
         final Commit.Builder commitBuilder = Commit.builder();
         
         final AtomicBoolean commitMessageBlock = new AtomicBoolean();
         final AtomicBoolean commitNoteBlock = new AtomicBoolean();
+        final AtomicBoolean changedFilesBlock = new AtomicBoolean();
         
         cmd.execute(new LineConsumer() {
 
             @Override
             public void consume(String line) {
             	if (line.equals("*** commit_begin ***")) {
-            		if (commitBuilder.hash!= null) {
-	            		commits.add(commitBuilder.build());
-	            		commitBuilder.parentHashes.clear();
-	            		commitBuilder.subject = null;
-	            		commitBuilder.body = null;
-	            		commitBuilder.note = null;
-            		}
+            		if (commitBuilder.hash!= null)
+	            		consumer.consume(commitBuilder.build());
+            		commitBuilder.parentHashes.clear();
+            		commitBuilder.subject = null;
+            		commitBuilder.body = null;
+            		commitBuilder.note = null;
             		commitMessageBlock.set(true);
+            		changedFilesBlock.set(false);
+            		if (listChangedFiles)
+            			commitBuilder.changedFiles = new ArrayList<>();
+            		else
+            			commitBuilder.changedFiles = null;
             	} else if (line.equals("*** commit_message_end ***")) {
             		commitMessageBlock.set(false);
             		commitNoteBlock.set(true);
@@ -226,16 +239,15 @@ public class LogCommand extends GitCommand<List<Commit>> {
             			commitBuilder.note = line;
             		else
             			commitBuilder.note += "\n" + line;
+            	} else if (changedFilesBlock.get()) {
+    				if (line.trim().length() != 0 && commitBuilder.changedFiles != null)
+    					commitBuilder.changedFiles.add(QuotedString.GIT_PATH.dequote(line));
             	} else if (line.startsWith("hash:")) {
                 	commitBuilder.hash = line.substring("hash:".length());
             	} else if (line.startsWith("author:")) {
                 	commitBuilder.authorName = line.substring("author:".length());
             	} else if (line.startsWith("committer:")) {
                 	commitBuilder.committerName = line.substring("committer:".length());
-            	} else if (line.startsWith("authorDate:")) {
-                	commitBuilder.authorDate = GitUtils.parseRawDate(line.substring("authorDate:".length()).trim());
-            	} else if (line.startsWith("committerDate:")) {
-                	commitBuilder.committerDate = GitUtils.parseRawDate(line.substring("committerDate:".length()).trim());
             	} else if (line.startsWith("authorEmail:")) {
                 	commitBuilder.authorEmail = line.substring("authorEmail:".length());
             	} else if (line.startsWith("committerEmail:")) {
@@ -243,7 +255,13 @@ public class LogCommand extends GitCommand<List<Commit>> {
             	} else if (line.startsWith("parents:")) {
                 	for (String each: StringUtils.split(line.substring("parents:".length()), " "))
                 		commitBuilder.parentHashes.add(each);
-                }
+            	} else if (line.startsWith("committerDate:")) {
+                	commitBuilder.committerDate = GitUtils.parseRawDate(line.substring("committerDate:".length()).trim());
+            	} else if (line.startsWith("authorDate:")) {
+	            	commitBuilder.authorDate = GitUtils.parseRawDate(line.substring("authorDate:".length()).trim());
+	            	if (commitBuilder.changedFiles != null)
+	            		changedFilesBlock.set(true);
+            	}
             }
             
         }, new LineConsumer() {
@@ -256,9 +274,22 @@ public class LogCommand extends GitCommand<List<Commit>> {
         }).checkReturnCode();
 
         if (commitBuilder.hash != null)
-        	commits.add(commitBuilder.build());
+        	consumer.consume(commitBuilder.build());
+	}
+	
+	@Override
+    public List<Commit> call() {
+        final List<Commit> commits = new ArrayList<>();
+        
+        run(new CommitConsumer() {
 
+			@Override
+			public void consume(Commit commit) {
+				commits.add(commit);
+			}
+        		
+        });
         return commits;
     }
-    
+	
 }

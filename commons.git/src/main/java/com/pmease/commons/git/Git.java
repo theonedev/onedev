@@ -369,7 +369,8 @@ public class Git implements Serializable {
 		else if (fromRev == null && toRev != null)
 			revisions.add(toRev);
 		return new LogCommand(repoDir).revisions(revisions)
-				.paths(paths).count(maxCount).skip(skip).call();
+				.paths(paths).count(maxCount).skip(skip)
+				.listChangedFiles(listChangedFiles).call();
 	}
 	
 	public List<Commit> log(@Nullable Date after, @Nullable Date before, 

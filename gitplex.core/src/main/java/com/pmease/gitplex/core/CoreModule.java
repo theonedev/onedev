@@ -36,12 +36,14 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuxiliaryManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
@@ -55,12 +57,14 @@ import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultRepositoryManager;
+import com.pmease.gitplex.core.manager.impl.DefaultSequentialWorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultWorkManager;
 import com.pmease.gitplex.core.model.Config;
 import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.security.SecurityRealm;
@@ -158,6 +162,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 		bind(AuxiliaryManager.class).to(DefaultAuxiliaryManager.class);
+		bind(WorkManager.class).to(DefaultWorkManager.class);
+		bind(SequentialWorkManager.class).to(DefaultSequentialWorkManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 

@@ -5,20 +5,21 @@ import java.util.Set;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
+import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
 
 public interface AuxiliaryManager {
 	
 	void check(Repository repository, String refName);
 	
-	Map<String, Set<String>> getParents(Set<String> commitHashes); 
+	Map<String, Commit> getCommits(Repository repository, Set<String> commitHashes); 
 	
-	Set<PersonIdent> getAuthors();
+	Set<PersonIdent> getAuthors(Repository repository);
 	
-	Set<PersonIdent> getCommitters();
+	Set<PersonIdent> getCommitters(Repository repository);
 	
-	Set<PersonIdent> getAuthorsModified(String file);
+	Set<PersonIdent> getAuthorsModified(Repository repository, String file);
 	
-	Set<PersonIdent> getCommittersModified(String file);
+	Set<PersonIdent> getCommittersModified(Repository repository, String file);
 
 }

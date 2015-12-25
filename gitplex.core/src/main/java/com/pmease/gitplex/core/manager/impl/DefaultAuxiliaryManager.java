@@ -1,31 +1,40 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.command.CommitConsumer;
+import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.ObjectReference;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 
-import javassist.bytecode.ByteArray;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
 import jetbrains.exodus.env.Environments;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.StoreConfig;
@@ -33,49 +42,95 @@ import jetbrains.exodus.env.Transaction;
 import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
+@Singleton
 public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryListener {
 
 	private static final String AUXILIARY_DIR = "auxiliary";
 	
 	private final StorageManager storageManager;
 	
-	private final ExecutorService executorService;
+	private final WorkManager workManager;
+	
+	private final SequentialWorkManager sequentialWorkManager;
 	
 	private final Map<Long, ObjectReference<Environment>> envRefs = new HashMap<>();
 	
 	@Inject
-	public DefaultAuxiliaryManager(StorageManager storageManager, ExecutorService executorService) {
+	public DefaultAuxiliaryManager(StorageManager storageManager, WorkManager workManager, 
+			SequentialWorkManager sequentialWorkManager) {
 		this.storageManager = storageManager;
-		this.executorService = executorService;
+		this.workManager = workManager;
+		this.sequentialWorkManager = sequentialWorkManager;
 	}
 	
 	@Override
 	public void check(final Repository repository, final String refName) {
-		executorService.execute(new Runnable() {
+		String sequentialKey = "repository-" + repository.getId() + "-checkAuxiliary";
+		sequentialWorkManager.execute(sequentialKey, new Runnable() {
 
 			@Override
 			public void run() {
-				executeInEnv(repository, new EnvExecutable() {
+				try {
+					workManager.submit(new Runnable() {
 
-					@Override
-					public void execute(Environment env) {
-						final Store lastCommitStore = getStore(env, "lastCommit");
-						final Store commitsStore = getStore(env, "commits");
-						env.executeInTransaction(new TransactionalExecutable() {
-							
-							@Override
-							public void execute(Transaction txn) {
-								byte[] value = getBytes(lastCommitStore.get(txn, new StringByteIterable("lastCommit")));
-								String lastCommit = value!=null?new String(value):null;
-								Git git = repository.git();
-								for (Commit commit: git.log(lastCommit, refName, null, 0, 0, true)) {
-									
+						@Override
+						public void run() {
+							executeInEnv(repository, new EnvExecutable() {
+
+								@Override
+								public void execute(Environment env) {
+									final Store lastCommitStore = getStore(env, "lastCommit");
+									final Store commitsStore = getStore(env, "commits");
+									env.executeInTransaction(new TransactionalExecutable() {
+										
+										@Override
+										public void execute(final Transaction txn) {
+											ByteIterable lastCommitKey = new StringByteIterable("lastCommit");
+											byte[] value = getBytes(lastCommitStore.get(txn, lastCommitKey));
+											String lastCommit = value!=null?new String(value):null;
+											Git git = repository.git();
+											final AtomicLong count = new AtomicLong(0);
+
+											LogCommand log = new LogCommand(git.repoDir());
+											List<String> revisions = new ArrayList<>();
+											if (lastCommit != null)
+												revisions.add(lastCommit + ".." + refName);
+											else 
+												revisions.add(refName);
+											
+											final AtomicReference<Commit> lastCommitRef = new AtomicReference<>(null);
+											log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
+
+												@Override
+												public void consume(Commit commit) {
+													ByteIterable key = new StringByteIterable(commit.getHash());
+													if (commitsStore.get(txn, key) == null) {
+														byte[] commitBytes = SerializationUtils.serialize(commit);
+														commitsStore.put(txn, key, new ArrayByteIterable(commitBytes));
+													}
+													if (count.incrementAndGet() % 100 == 0)
+														txn.flush();
+													if (lastCommitRef.get() == null)
+														lastCommitRef.set(commit);
+												}
+												
+											});
+											
+											if (lastCommitRef.get() != null) {
+												value = lastCommitRef.get().getHash().getBytes();
+												lastCommitStore.put(txn, lastCommitKey, new ArrayByteIterable(value));
+											}
+										}
+									});
 								}
-							}
-						});
-					}
-					
-				});
+								
+							});
+						}
+						
+					}).get();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new RuntimeException(e);
+				}
 			}
 			
 		});
@@ -108,7 +163,9 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 				@Override
 				protected Environment openObject() {
-					return Environments.newInstance(getAuxiliaryDir(repository));
+					EnvironmentConfig config = new EnvironmentConfig();
+					config.setLogCacheShared(false);
+					return Environments.newInstance(getAuxiliaryDir(repository), config);
 				}
 
 				@Override
@@ -139,31 +196,51 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
-	public Map<String, Set<String>> getParents(Set<String> commitHashes) {
+	public Map<String, Commit> getCommits(final Repository repository, final Set<String> commitHashes) {
+		return computeInEnv(repository, new EnvComputable<Map<String, Commit>>() {
+
+			@Override
+			public Map<String, Commit> compute(Environment env) {
+				final Store commitsStore = getStore(env, "commits");
+
+				return env.computeInReadonlyTransaction(new TransactionalComputable<Map<String, Commit>>() {
+
+					@Override
+					public Map<String, Commit> compute(Transaction txn) {
+						Map<String, Commit> commits = new HashMap<>();
+						for (String commitHash: commitHashes) {
+							byte[] value = getBytes(commitsStore.get(txn, new StringByteIterable(commitHash)));
+							if (value != null) 
+								commits.put(commitHash, (Commit) SerializationUtils.deserialize(value));
+						}
+						return commits;
+					}
+				});
+			}
+			
+		});
+	}
+
+	@Override
+	public Set<PersonIdent> getAuthors(Repository repository) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Set<PersonIdent> getAuthors() {
+	public Set<PersonIdent> getCommitters(Repository repository) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Set<PersonIdent> getCommitters() {
+	public Set<PersonIdent> getAuthorsModified(Repository repository, String file) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Set<PersonIdent> getAuthorsModified(String file) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Set<PersonIdent> getCommittersModified(String file) {
+	public Set<PersonIdent> getCommittersModified(Repository repository, String file) {
 		// TODO Auto-generated method stub
 		return null;
 	}

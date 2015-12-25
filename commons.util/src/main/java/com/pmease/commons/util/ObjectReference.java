@@ -25,7 +25,7 @@ public abstract class ObjectReference<T> {
 		}
 	}
 	
-	public T get() {
+	public synchronized T get() {
 		return Preconditions.checkNotNull(object);
 	}
 	

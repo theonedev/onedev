@@ -9,10 +9,11 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Objects;
 
-@SuppressWarnings("serial")
 public class BriefCommit implements Serializable {
 
-    private final String hash;
+	private static final long serialVersionUID = 1L;
+
+	private final String hash;
     
     private final String subject;
     

@@ -11,10 +11,11 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
-@SuppressWarnings("serial")
 public class Commit extends BriefCommit {
 
-    private final String body;
+	private static final long serialVersionUID = 1L;
+
+	private final String body;
     
     private final String note;
     

@@ -1,7 +1,12 @@
 package com.pmease.gitplex.web.page.test;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.wicket.markup.html.link.Link;
 
+import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
@@ -15,7 +20,7 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Link<Void>("test") {
+		add(new Link<Void>("check") {
 
 			@Override
 			public void onClick() {
@@ -24,6 +29,24 @@ public class TestPage extends BasePage {
 			}
 			
 		});
+		
+		add(new Link<Void>("getCommits") {
+
+			@Override
+			public void onClick() {
+				Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+				List<Commit> commits = repository.git().log(null, "master", null, 100, 0, false);
+				Set<String> commitHashes = new HashSet<>();
+				for (Commit commit: commits)
+					commitHashes.add(commit.getHash());
+				
+				long time = System.currentTimeMillis();
+				GitPlex.getInstance(AuxiliaryManager.class).getCommits(repository, commitHashes);
+				System.out.println(System.currentTimeMillis()-time);
+			}
+			
+		});
+		
 	}
 
 }
