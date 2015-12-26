@@ -39,8 +39,8 @@ public class TestPage extends BasePage {
 				long time = System.currentTimeMillis();
 				
 				Set<String> files = new HashSet<>();
-				for (File file: new File("w:\\linux\\init").listFiles())
-					files.add("init/" + file.getName());
+				for (File file: new File("/home/robin/chromium/pdf").listFiles())
+					files.add("pdf/" + file.getName());
 				Map<String, Map<NameAndEmail, Long>> contributors = GitPlex.getInstance(AuxiliaryManager.class).getContributors(repository, files);
 				for (String file: files) {
 					System.out.println(file + ": " + contributors.get(file).size());
