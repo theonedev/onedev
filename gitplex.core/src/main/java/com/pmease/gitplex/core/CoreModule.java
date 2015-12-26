@@ -175,6 +175,9 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LifecycleListener.class, DefaultPullRequestManager.class);
 		contribute(LifecycleListener.class, DefaultUserManager.class);
 		contribute(LifecycleListener.class, DefaultRepositoryManager.class);
+		contribute(LifecycleListener.class, DefaultAuxiliaryManager.class);
+		contribute(LifecycleListener.class, DefaultWorkManager.class);
+		contribute(LifecycleListener.class, DefaultSequentialWorkManager.class);
 		
 		contribute(ConfigListener.class, new ConfigListener() {
 

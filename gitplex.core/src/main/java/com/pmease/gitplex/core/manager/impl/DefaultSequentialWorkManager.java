@@ -9,12 +9,13 @@ import java.util.concurrent.Future;
 
 import javax.inject.Singleton;
 
+import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 
 @Singleton
-public class DefaultSequentialWorkManager implements SequentialWorkManager {
+public class DefaultSequentialWorkManager implements SequentialWorkManager, LifecycleListener {
 
-	private final Map<String, ExecutorService> sequentialExecutors = new HashMap<>();
+	private final Map<String, ExecutorService> executors = new HashMap<>();
 	
 	@Override
 	public <T> Future<T> submit(String key, Callable<T> task) {
@@ -32,12 +33,39 @@ public class DefaultSequentialWorkManager implements SequentialWorkManager {
 	}
 	
 	private synchronized ExecutorService getRepositoryExecutor(String key) {
-		ExecutorService executor = sequentialExecutors.get(key);
+		ExecutorService executor = executors.get(key);
 		if (executor == null) {
 			executor = Executors.newSingleThreadExecutor();
-			sequentialExecutors.put(key, executor);
+			executors.put(key, executor);
 		}
 		return executor;
+	}
+
+	@Override
+	public void systemStarting() {
+	}
+
+	@Override
+	public void systemStarted() {
+	}
+
+	@Override
+	public synchronized void systemStopping() {
+		for (ExecutorService executor: executors.values())
+			executor.shutdown();
+	}
+
+	@Override
+	public void systemStopped() {
+	}
+
+	@Override
+	public synchronized void removeExecutor(String key) {
+		ExecutorService executor = executors.get(key);
+		if (executor != null) {
+			executor.shutdown();
+			executors.remove(key);
+		}
 	}
 
 }

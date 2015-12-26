@@ -9,5 +9,7 @@ public interface SequentialWorkManager {
 
 	Future<?> submit(String key, Runnable task);
 	
-	void execute(String key, Runnable runnable);
+	void removeExecutor(String key);
+	
+	void execute(String key, Runnable command);
 }

@@ -7,10 +7,11 @@ import java.util.concurrent.Future;
 
 import javax.inject.Singleton;
 
+import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.WorkManager;
 
 @Singleton
-public class DefaultWorkManager implements WorkManager {
+public class DefaultWorkManager implements WorkManager, LifecycleListener {
 
 	private final ExecutorService executor = 
 			Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -28,6 +29,23 @@ public class DefaultWorkManager implements WorkManager {
 	@Override
 	public Future<?> submit(Runnable task) {
 		return executor.submit(task);
+	}
+
+	@Override
+	public void systemStarting() {
+	}
+
+	@Override
+	public void systemStarted() {
+	}
+
+	@Override
+	public void systemStopping() {
+		executor.shutdown();
+	}
+
+	@Override
+	public void systemStopped() {
 	}
 
 }
