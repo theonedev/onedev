@@ -149,6 +149,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Collection<String> branches;
     
+    private transient Collection<String> tags;
+    
     private transient String defaultBranch;
     
 	public User getOwner() {
@@ -254,11 +256,31 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 
 	public Collection<String> getBranches() {
-		if (branches == null)
-			branches = git().listBranches();
+		if (branches == null) {
+			branches = new ArrayList<>();
+			try (FileRepository jgitRepo = openAsJGitRepo()) {
+				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Git.REFS_HEADS).values())
+					branches.add(GitUtils.ref2branch(ref.getName()));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
         return branches;
     }
 
+	public Collection<String> getTags() {
+		if (tags == null) {
+			tags = new ArrayList<>();
+			try (FileRepository jgitRepo = openAsJGitRepo()) {
+				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Git.REFS_TAGS).values())
+					tags.add(GitUtils.ref2tag(ref.getName()));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+        return tags;
+    }
+	
     @Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof Repository) {

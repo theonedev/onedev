@@ -264,7 +264,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				state.query = object;
 			}
 			
-		}).add(new QueryAssistBehavior()));
+		}).add(new QueryAssistBehavior(repoModel)));
 		
 		queryForm.add(new AjaxButton("submit") {});
 		queryForm.add(new AjaxLink<Void>("clear") {

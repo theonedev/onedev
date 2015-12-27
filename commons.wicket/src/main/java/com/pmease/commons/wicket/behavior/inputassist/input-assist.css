@@ -26,6 +26,8 @@
 }
 .input-assist .suggestion a {
 	padding-right: 12px;
+	font-family: monospace;
+	font-size: 13px;
 }
 .input-assist .help {
 	margin-top: 8px;

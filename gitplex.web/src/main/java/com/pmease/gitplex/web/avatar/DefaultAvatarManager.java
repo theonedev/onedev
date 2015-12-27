@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.codec.Base64;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -72,7 +73,13 @@ public class DefaultAvatarManager implements AvatarManager {
 			Lock avatarLock = LockUtils.getLock("avatars:" + encoded);
 			avatarLock.lock();
 			try {
-				String letters = getLetter(name);
+				String letters;
+				if (StringUtils.isNotBlank(name))
+					letters = getLetter(name);
+				else if (StringUtils.isNotBlank(email))
+					letters = getLetter(email);
+				else
+					letters = getLetter("Unknown");
 				BufferedImage bi = AvatarGenerator.generate(letters, email);
 				ImageIO.write(bi, "PNG", avatarFile);
 			} catch (NoSuchAlgorithmException | IOException e) {

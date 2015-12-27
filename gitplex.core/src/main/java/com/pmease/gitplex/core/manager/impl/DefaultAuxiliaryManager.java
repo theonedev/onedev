@@ -29,6 +29,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -37,6 +38,7 @@ import com.pmease.commons.git.command.CommitConsumer;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
@@ -45,7 +47,7 @@ import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 
 @Singleton
-public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryListener, LifecycleListener {
+public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryListener, RefListener, LifecycleListener {
 
 	private static final String AUXILIARY_DIR = "auxiliary";
 	
@@ -145,15 +147,21 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 													else
 														contributors.set(new HashSet<NameAndEmail>());
 												}
-												NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
-												if (!contributors.get().contains(contributor)) {
-													contributors.get().add(contributor);
-													contributorsChanged.set(true);
+												if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
+														|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
+													NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
+													if (!contributors.get().contains(contributor)) {
+														contributors.get().add(contributor);
+														contributorsChanged.set(true);
+													}
 												}
-												contributor = new NameAndEmail(commit.getCommitter());
-												if (!contributors.get().contains(contributor)) {
-													contributors.get().add(contributor);
-													contributorsChanged.set(true);
+												if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
+														|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
+													NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
+													if (!contributors.get().contains(contributor)) {
+														contributors.get().add(contributor);
+														contributorsChanged.set(true);
+													}
 												}
 												
 												for (String file: commit.getChangedFiles()) {
@@ -164,17 +172,23 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 														contributors = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(bytes);
 													else
 														contributors = new HashMap<>();
-													contributor = new NameAndEmail(commit.getAuthor());
-													long authorTime = commit.getAuthor().getWhen().getTime();
-													Long when = contributors.get(contributor);
-													if (when == null || when.longValue() < authorTime)
-														contributors.put(contributor, authorTime);
-														
-													contributor = new NameAndEmail(commit.getCommitter());
-													long committerTime = commit.getCommitter().getWhen().getTime();
-													when = contributors.get(contributor);
-													if (when == null || when.longValue() < committerTime)
-														contributors.put(contributor, committerTime);
+													if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
+															|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
+														NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
+														long authorTime = commit.getAuthor().getWhen().getTime();
+														Long when = contributors.get(contributor);
+														if (when == null || when.longValue() < authorTime)
+															contributors.put(contributor, authorTime);
+													}													
+
+													if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
+															|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
+														NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
+														long committerTime = commit.getCommitter().getWhen().getTime();
+														Long when = contributors.get(contributor);
+														if (when == null || when.longValue() < committerTime)
+															contributors.put(contributor, committerTime);
+													}
 													
 													bytes = SerializationUtils.serialize((Serializable) contributors);
 													filesStore.put(txn, fileKey, new ArrayByteIterable(bytes));
@@ -195,12 +209,9 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 										bytes = lastCommit.get().getBytes();
 										defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(bytes));
 									}
-									
-									System.out.println("***************");
 								}
 							});
 						}
-						
 					}).get();
 				} catch (InterruptedException | ExecutionException e) {
 					throw new RuntimeException(e);
@@ -325,6 +336,12 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 	@Override
 	public void systemStopped() {
+	}
+
+	@Override
+	public void onRefUpdate(Repository repository, String refName, String newCommitHash) {
+		if (refName.startsWith(Git.REFS_HEADS))
+			check(repository, refName);
 	}
 	
 }

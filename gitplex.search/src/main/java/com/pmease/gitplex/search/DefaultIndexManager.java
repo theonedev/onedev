@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
@@ -383,7 +384,9 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public void onRefUpdate(Repository repository, String refName, final String newCommitHash) {
-		if (newCommitHash != null) {
+		// only index branches at back end, tags will be indexed on demand from GUI 
+		// as many tags might be pushed all at once when the repository is imported 
+		if (refName.startsWith(Git.REFS_HEADS) && newCommitHash != null) {
 			final Long repoId = repository.getId();
 			unitOfWork.asyncCall(new Runnable() {
 

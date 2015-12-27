@@ -6,6 +6,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -64,6 +66,12 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			@Override
 			protected List<InputSuggestion> suggest(ParentedElement element, String matchWith) {
 				return ANTLRAssistBehavior.this.suggest(element, matchWith);
+			}
+
+			@Override
+			protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, String suggestedLiteral,
+					boolean complete) {
+				return ANTLRAssistBehavior.this.wrapAsSuggestion(expectedElement, suggestedLiteral, complete);
 			}
 			
 		};
@@ -185,4 +193,9 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 
 	protected abstract List<InputSuggestion> suggest(ParentedElement element, String matchWith);
 	
+	@Nullable
+	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
+			String suggestedLiteral, boolean complete) {
+		return new InputSuggestion(suggestedLiteral, suggestedLiteral.length(), complete, null);
+	}
 }

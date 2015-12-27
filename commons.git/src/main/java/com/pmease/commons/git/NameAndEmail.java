@@ -6,7 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.PersonIdent;
 
-public class NameAndEmail implements Serializable {
+public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -47,6 +47,11 @@ public class NameAndEmail implements Serializable {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37).append(name).append(emailAddress).toHashCode();
+	}
+
+	@Override
+	public int compareTo(NameAndEmail nameAndEmail) {
+		return name.compareTo(nameAndEmail.name);
 	}
 	
 }
