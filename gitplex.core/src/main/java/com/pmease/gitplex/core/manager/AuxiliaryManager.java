@@ -10,6 +10,8 @@ public interface AuxiliaryManager {
 	
 	void check(Repository repository, String refName);
 	
+	byte[] getPaths(Repository repository);
+	
 	Set<NameAndEmail> getContributors(Repository repository);
 	
 	Map<String, Map<NameAndEmail, Long>> getContributors(Repository repository, Set<String> files);

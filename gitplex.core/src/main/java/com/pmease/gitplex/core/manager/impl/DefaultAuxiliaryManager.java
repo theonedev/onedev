@@ -61,6 +61,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	
 	private static final ByteIterable CONTRIBUTORS_KEY = new StringByteIterable("contributors");
 	
+	private static final ByteIterable PATHS_KEY = new StringByteIterable("paths");
+	
 	private final StorageManager storageManager;
 	
 	private final WorkManager workManager;
@@ -131,6 +133,9 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 									final AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
 									final AtomicBoolean contributorsChanged = new AtomicBoolean(false);
 									
+									final AtomicReference<Set<String>> paths = new AtomicReference<>(null);
+									final AtomicBoolean pathsChanged = new AtomicBoolean(false);
+									
 									log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
 
 										@SuppressWarnings("unchecked")
@@ -164,6 +169,14 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 													}
 												}
 												
+												if (paths.get() == null) {
+													byte[] bytes = getBytes(defaultStore.get(txn, PATHS_KEY));
+													if (bytes != null)
+														paths.set((Set<String>) SerializationUtils.deserialize(bytes));
+													else
+														paths.set(new HashSet<String>());
+												}
+												
 												for (String file: commit.getChangedFiles()) {
 													ByteIterable fileKey = new StringByteIterable(file);
 													byte[] bytes = getBytes(filesStore.get(txn, fileKey));
@@ -192,6 +205,11 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 													
 													bytes = SerializationUtils.serialize((Serializable) contributors);
 													filesStore.put(txn, fileKey, new ArrayByteIterable(bytes));
+													
+													if (!paths.get().contains(file)) {
+														paths.get().add(file);
+														pathsChanged.set(true);
+													}
 												}
 												
 												if (lastCommit.get() == null)
@@ -204,6 +222,10 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 									if (contributorsChanged.get()) {
 										bytes = SerializationUtils.serialize((Serializable) contributors.get());
 										defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
+									}
+									if (pathsChanged.get()) {
+										bytes = SerializationUtils.serialize((Serializable) paths.get());
+										defaultStore.put(txn, PATHS_KEY, new ArrayByteIterable(bytes));
 									}
 									if (lastCommit.get() != null) {
 										bytes = lastCommit.get().getBytes();
@@ -268,6 +290,21 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 		});
 	}
 
+	@Override
+	public byte[] getPaths(Repository repository) {
+		Environment env = getEnv(repository);
+		final Store defaultStore = getStore(env, DEFAULT_STORE);
+
+		return env.computeInReadonlyTransaction(new TransactionalComputable<byte[]>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public byte[] compute(Transaction txn) {
+				return getBytes(defaultStore.get(txn, PATHS_KEY));
+			}
+		});
+	}
+	
 	@Override
 	public Map<String, Map<NameAndEmail, Long>> getContributors(Repository repository, final Set<String> files) {
 		Environment env = getEnv(repository);
@@ -343,5 +380,5 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 		if (refName.startsWith(Git.REFS_HEADS))
 			check(repository, refName);
 	}
-	
+
 }

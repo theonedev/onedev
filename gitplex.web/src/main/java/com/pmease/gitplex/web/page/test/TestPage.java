@@ -1,8 +1,5 @@
 package com.pmease.gitplex.web.page.test;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.wicket.markup.html.link.Link;
@@ -31,20 +28,15 @@ public class TestPage extends BasePage {
 			
 		});
 		
-		add(new Link<Void>("getCommits") {
+		add(new Link<Void>("getPaths") {
 
 			@Override
 			public void onClick() {
 				Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 				long time = System.currentTimeMillis();
 				
-				Set<String> files = new HashSet<>();
-				for (File file: new File("/home/robin/chromium/pdf").listFiles())
-					files.add("pdf/" + file.getName());
-				Map<String, Map<NameAndEmail, Long>> contributors = GitPlex.getInstance(AuxiliaryManager.class).getContributors(repository, files);
-				for (String file: files) {
-					System.out.println(file + ": " + contributors.get(file).size());
-				}
+				byte[] paths = GitPlex.getInstance(AuxiliaryManager.class).getPaths(repository);
+				System.out.println("paths: " + paths.length);
 				System.out.println("cost time: " + (System.currentTimeMillis()-time));
 			}
 			

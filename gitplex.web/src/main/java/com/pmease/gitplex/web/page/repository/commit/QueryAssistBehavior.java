@@ -17,13 +17,19 @@ import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
+	private static final int MAX_SUGGESTIONS = 64;
+
 	private final IModel<Repository> repoModel;
 	
-	private static final int MAX_SUGGESTIONS = 64;
+	private static final String[] DATE_EXAMPLES = new String[]{
+			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
+			"yesterday midnight", "3 days ago", "last week", "last Monday", 
+			"4 weeks ago", "1 month 2 days ago"}; 
 	
 	public QueryAssistBehavior(IModel<Repository> repoModel) {
 		super(CommitQueryParser.class, "query");
@@ -76,6 +82,14 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									suggestions.add(new InputSuggestion(content.trim()));
 								}
 							}
+						} else if (tokenType == CommitQueryParser.BEFORE 
+								|| tokenType == CommitQueryParser.AFTER) {
+							suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
+							suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
+							for (String dateExample: DATE_EXAMPLES) 
+								suggestions.add(new InputSuggestion(dateExample));
+						} else if (tokenType == CommitQueryParser.PATH) {
+							
 						}
 						return suggestions;
 					}
