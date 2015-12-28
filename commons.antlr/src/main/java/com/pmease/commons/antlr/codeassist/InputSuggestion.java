@@ -30,7 +30,7 @@ public class InputSuggestion extends InputStatus {
 	}
 	
 	public InputSuggestion(String content, @Nullable String description) {
-		this(content, content.length(), true, description);
+		this(content, -1, true, description);
 	}
 	
 	public InputSuggestion(String content) {

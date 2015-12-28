@@ -153,7 +153,7 @@ public abstract class CodeAssist implements Serializable {
 			 * indicating the replacement has some place holders expecting user input. 
 			 */
 			int caret = completion.getCaret();
-			if (completion.isComplete() && caret == completion.getReplaceContent().length()) {
+			if (completion.isComplete() && caret == -1) {
 				// caret is not at the middle of replacement, so we need to move it to 
 				// be after mandatory tokens if provided suggestion is complete
 				caret = content.length() - inputContent.length() + completion.getReplaceEnd(); 
@@ -166,6 +166,8 @@ public abstract class CodeAssist implements Serializable {
 					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(parentElement, elementSpec));
 				}
 			} else {
+				if (caret == -1)
+					caret = completion.getReplaceContent().length();
 				caret += completion.getReplaceBegin();
 			}
 			
@@ -526,7 +528,7 @@ public abstract class CodeAssist implements Serializable {
 	@Nullable
 	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
 			String suggestedLiteral, boolean complete) {
-		return new InputSuggestion(suggestedLiteral, suggestedLiteral.length(), complete, null);
+		return new InputSuggestion(suggestedLiteral, -1, complete, null);
 	}
 	
 }

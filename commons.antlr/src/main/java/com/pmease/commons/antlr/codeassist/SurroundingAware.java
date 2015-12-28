@@ -53,9 +53,7 @@ public abstract class SurroundingAware {
 				int caret = suggestion.getCaret();
 				if (!matches(spec, content)) {
 					content = prefix + content + suffix;
-					if (caret == suggestion.getContent().length())
-						caret = content.length();
-					else
+					if (caret != -1)
 						caret += prefix.length();
 					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription()));
 				} else {

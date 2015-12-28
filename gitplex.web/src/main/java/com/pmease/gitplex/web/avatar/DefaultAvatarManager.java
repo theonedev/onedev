@@ -11,8 +11,7 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.codec.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -22,6 +21,7 @@ import com.google.common.collect.Iterables;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.util.LockUtils;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
@@ -79,7 +79,8 @@ public class DefaultAvatarManager implements AvatarManager {
 				else if (StringUtils.isNotBlank(email))
 					letters = getLetter(email);
 				else
-					letters = getLetter("Unknown");
+					letters = "?";
+				
 				BufferedImage bi = AvatarGenerator.generate(letters, email);
 				ImageIO.write(bi, "PNG", avatarFile);
 			} catch (NoSuchAlgorithmException | IOException e) {
@@ -94,7 +95,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	private String encode(String name, String email, int version) {
 		String concatenated = name + ":" + email + ":" + version;
-		return new String(Base64.encode(concatenated.getBytes()));
+		return Hex.encodeHexString(concatenated.getBytes());
 	}
 	
 	@Override
@@ -106,22 +107,17 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 
 	private String getLetter(String name) {
-		String[] tokens = Iterables.toArray(Splitter.on(" ").split(name),
-				String.class);
+		String[] tokens = Iterables.toArray(Splitter.on(" ").split(name.trim()), String.class);
 
 		char c = tokens[0].charAt(0);
 		StringBuffer sb = new StringBuffer();
-		if (Character.isLetter(c)) {
-			sb.append(c);
-		}
+		sb.append(c);
 
 		if (tokens.length > 1) {
 			c = tokens[1].charAt(0);
-			if (Character.isLetter(c)) {
-				sb.append(c);
-			}
+			sb.append(c);
 		}
-
+		
 		return sb.toString();
 	}
 

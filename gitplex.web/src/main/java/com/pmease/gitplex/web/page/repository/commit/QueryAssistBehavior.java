@@ -115,8 +115,14 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								}
 							}
 							
-							for (String suggestedInput: suggestedInputs) 
-								suggestions.add(new InputSuggestion(suggestedInput));
+							for (String suggestedInput: suggestedInputs) { 
+								int caret;
+								if (suggestedInput.endsWith("/"))
+									caret = suggestedInput.length();
+								else
+									caret = -1;
+								suggestions.add(new InputSuggestion(suggestedInput, caret, true, null));
+							}
 						}
 						return suggestions;
 					}
