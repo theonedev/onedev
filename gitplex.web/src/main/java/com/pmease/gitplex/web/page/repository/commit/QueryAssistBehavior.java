@@ -1,8 +1,11 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -51,28 +54,26 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
-						matchWith = matchWith.toLowerCase();
+						String lowerCaseMatchWith = matchWith.toLowerCase();
 						int count = 0;
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						int tokenType = element.getRoot().getLastMatchedToken().getType();
 						if (tokenType == CommitQueryParser.BRANCH) {
 							for (String value: repoModel.getObject().getBranches()) {
-								if (value.toLowerCase().contains(matchWith) && count++<MAX_SUGGESTIONS)
+								if (value.toLowerCase().contains(lowerCaseMatchWith) && count++<MAX_SUGGESTIONS)
 									suggestions.add(new InputSuggestion(value));
 							}
 						} else if (tokenType == CommitQueryParser.TAG) {
 							for (String value: repoModel.getObject().getTags()) {
-								if (value.toLowerCase().contains(matchWith) && count++<MAX_SUGGESTIONS)
+								if (value.toLowerCase().contains(lowerCaseMatchWith) && count++<MAX_SUGGESTIONS)
 									suggestions.add(new InputSuggestion(value));
 							}
 						} else if (tokenType == CommitQueryParser.AUTHOR 
 								|| tokenType == CommitQueryParser.COMMITTER) {
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
-							List<NameAndEmail> contributors = new ArrayList<>(auxiliaryManager
-									.getContributors(repoModel.getObject()));
-							Collections.sort(contributors);
+							List<NameAndEmail> contributors = auxiliaryManager.getContributors(repoModel.getObject());
 							for (NameAndEmail contributor: contributors) {
-								if ((contributor.getName().toLowerCase().contains(matchWith) || contributor.getEmailAddress().toLowerCase().contains(matchWith)) 
+								if ((contributor.getName().toLowerCase().contains(lowerCaseMatchWith) || contributor.getEmailAddress().toLowerCase().contains(lowerCaseMatchWith)) 
 										&& count++<MAX_SUGGESTIONS) {
 									String content;
 									if (StringUtils.isNotBlank(contributor.getEmailAddress()))
@@ -89,7 +90,33 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							for (String dateExample: DATE_EXAMPLES) 
 								suggestions.add(new InputSuggestion(dateExample));
 						} else if (tokenType == CommitQueryParser.PATH) {
+							Set<String> suggestedInputs = new LinkedHashSet<>();
+							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
+							lowerCaseMatchWith = StringUtils.replace(lowerCaseMatchWith, "(", "\\(");
+							lowerCaseMatchWith = StringUtils.replace(lowerCaseMatchWith, ")", "\\)");
+							lowerCaseMatchWith = StringUtils.replace(lowerCaseMatchWith, "?", ".");
+							lowerCaseMatchWith = "^" + StringUtils.replace(lowerCaseMatchWith, "*", ".*");
+							Pattern pattern = Pattern.compile(lowerCaseMatchWith);
+							for (String path: auxiliaryManager.getFiles(repoModel.getObject())) {
+								Matcher matcher = pattern.matcher(path.toLowerCase());
+								if (matcher.find()) {
+									String suffix = path.substring(matcher.end());
+									int index = suffix.indexOf('/');
+									String suggestedInput;
+									if (index != -1)
+										suggestedInput = matchWith + suffix.substring(0, index) + "/";
+									else
+										suggestedInput = matchWith + suffix;
+									if (!suggestedInputs.contains(suggestedInput)) {
+										suggestedInputs.add(suggestedInput);
+										if (suggestedInputs.size() == MAX_SUGGESTIONS)
+											break;
+									}
+								}
+							}
 							
+							for (String suggestedInput: suggestedInputs) 
+								suggestions.add(new InputSuggestion(suggestedInput));
 						}
 						return suggestions;
 					}

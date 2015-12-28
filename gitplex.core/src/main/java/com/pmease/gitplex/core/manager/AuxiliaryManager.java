@@ -1,5 +1,6 @@
 package com.pmease.gitplex.core.manager;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,10 +11,10 @@ public interface AuxiliaryManager {
 	
 	void check(Repository repository, String refName);
 	
-	byte[] getPaths(Repository repository);
+	List<String> getFiles(Repository repository);
 	
-	Set<NameAndEmail> getContributors(Repository repository);
+	List<NameAndEmail> getContributors(Repository repository);
 	
-	Map<String, Map<NameAndEmail, Long>> getContributors(Repository repository, Set<String> files);
+	Map<String, Map<NameAndEmail, Long>> getContributions(Repository repository, Set<String> files);
 
 }

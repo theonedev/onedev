@@ -2,13 +2,17 @@ package com.pmease.gitplex.core.manager.impl;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,17 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.EnvironmentConfig;
-import jetbrains.exodus.env.Environments;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
-import jetbrains.exodus.env.TransactionalExecutable;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +39,17 @@ import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 
+import jetbrains.exodus.ArrayByteIterable;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
+import jetbrains.exodus.env.Environments;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.TransactionalComputable;
+import jetbrains.exodus.env.TransactionalExecutable;
+
 @Singleton
 public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryListener, RefListener, LifecycleListener {
 
@@ -55,13 +59,13 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	
 	private static final String COMMITS_STORE = "commmits";
 	
-	private static final String FILES_STORE = "files";
+	private static final String CONTRIBUTIONS_STORE = "contributions";
 	
 	private static final ByteIterable LAST_COMMIT_KEY = new StringByteIterable("lastCommit");
 	
 	private static final ByteIterable CONTRIBUTORS_KEY = new StringByteIterable("contributors");
 	
-	private static final ByteIterable PATHS_KEY = new StringByteIterable("paths");
+	private static final ByteIterable FILES_KEY = new StringByteIterable("files");
 	
 	private final StorageManager storageManager;
 	
@@ -70,6 +74,10 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	private final SequentialWorkManager sequentialWorkManager;
 	
 	private final Map<Long, Environment> envs = new HashMap<>();
+	
+	private final Map<Long, List<String>> files = new ConcurrentHashMap<>();
+	
+	private final Map<Long, List<NameAndEmail>> contributors = new ConcurrentHashMap<>();
 	
 	@Inject
 	public DefaultAuxiliaryManager(StorageManager storageManager, WorkManager workManager, 
@@ -97,7 +105,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 							Environment env = getEnv(repository);
 							final Store defaultStore = getStore(env, DEFAULT_STORE);
 							final Store commitsStore = getStore(env, COMMITS_STORE);
-							final Store filesStore = getStore(env, FILES_STORE);
+							final Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE);
 
 							final AtomicReference<String> lastCommit = new AtomicReference<>();
 							env.executeInTransaction(new TransactionalExecutable() {
@@ -133,8 +141,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 									final AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
 									final AtomicBoolean contributorsChanged = new AtomicBoolean(false);
 									
-									final AtomicReference<Set<String>> paths = new AtomicReference<>(null);
-									final AtomicBoolean pathsChanged = new AtomicBoolean(false);
+									final AtomicReference<Set<String>> files = new AtomicReference<>(null);
+									final AtomicBoolean filesChanged = new AtomicBoolean(false);
 									
 									log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
 
@@ -169,46 +177,46 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 													}
 												}
 												
-												if (paths.get() == null) {
-													byte[] bytes = getBytes(defaultStore.get(txn, PATHS_KEY));
+												if (files.get() == null) {
+													byte[] bytes = getBytes(defaultStore.get(txn, FILES_KEY));
 													if (bytes != null)
-														paths.set((Set<String>) SerializationUtils.deserialize(bytes));
+														files.set((Set<String>) SerializationUtils.deserialize(bytes));
 													else
-														paths.set(new HashSet<String>());
+														files.set(new HashSet<String>());
 												}
 												
 												for (String file: commit.getChangedFiles()) {
 													ByteIterable fileKey = new StringByteIterable(file);
-													byte[] bytes = getBytes(filesStore.get(txn, fileKey));
-													Map<NameAndEmail, Long> contributors;
+													byte[] bytes = getBytes(contributionsStore.get(txn, fileKey));
+													Map<NameAndEmail, Long> fileContributions;
 													if (bytes != null)
-														contributors = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(bytes);
+														fileContributions = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(bytes);
 													else
-														contributors = new HashMap<>();
+														fileContributions = new HashMap<>();
 													if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
 															|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
 														NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
-														long authorTime = commit.getAuthor().getWhen().getTime();
-														Long when = contributors.get(contributor);
-														if (when == null || when.longValue() < authorTime)
-															contributors.put(contributor, authorTime);
+														long contributionTime = commit.getAuthor().getWhen().getTime();
+														Long lastContributionTime = fileContributions.get(contributor);
+														if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
+															fileContributions.put(contributor, contributionTime);
 													}													
 
 													if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
 															|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
 														NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
-														long committerTime = commit.getCommitter().getWhen().getTime();
-														Long when = contributors.get(contributor);
-														if (when == null || when.longValue() < committerTime)
-															contributors.put(contributor, committerTime);
+														long contributionTime = commit.getCommitter().getWhen().getTime();
+														Long lastContributionTime = fileContributions.get(contributor);
+														if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
+															fileContributions.put(contributor, contributionTime);
 													}
 													
-													bytes = SerializationUtils.serialize((Serializable) contributors);
-													filesStore.put(txn, fileKey, new ArrayByteIterable(bytes));
+													bytes = SerializationUtils.serialize((Serializable) fileContributions);
+													contributionsStore.put(txn, fileKey, new ArrayByteIterable(bytes));
 													
-													if (!paths.get().contains(file)) {
-														paths.get().add(file);
-														pathsChanged.set(true);
+													if (!files.get().contains(file)) {
+														files.get().add(file);
+														filesChanged.set(true);
 													}
 												}
 												
@@ -223,9 +231,10 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 										bytes = SerializationUtils.serialize((Serializable) contributors.get());
 										defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
 									}
-									if (pathsChanged.get()) {
-										bytes = SerializationUtils.serialize((Serializable) paths.get());
-										defaultStore.put(txn, PATHS_KEY, new ArrayByteIterable(bytes));
+									if (filesChanged.get()) {
+										bytes = SerializationUtils.serialize((Serializable) files.get());
+										defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
+										DefaultAuxiliaryManager.this.files.remove(repository.getId());
 									}
 									if (lastCommit.get() != null) {
 										bytes = lastCommit.get().getBytes();
@@ -248,7 +257,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 		if (env == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setLogCacheShared(false);
-			config.setMemoryUsage(1024*1024*10);
+			config.setMemoryUsage(1024*1024*64);
 			env = Environments.newInstance(getAuxiliaryDir(repository), config);
 			envs.put(repository.getId(), env);
 		}
@@ -272,61 +281,87 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
-	public Set<NameAndEmail> getContributors(Repository repository) {
-		Environment env = getEnv(repository);
-		final Store defaultStore = getStore(env, DEFAULT_STORE);
+	public List<NameAndEmail> getContributors(Repository repository) {
+		List<NameAndEmail> repoContributors = contributors.get(repository.getId());
+		if (repoContributors == null) {
+			Environment env = getEnv(repository);
+			final Store store = getStore(env, DEFAULT_STORE);
 
-		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<NameAndEmail>>() {
+			repoContributors = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
 
-			@SuppressWarnings("unchecked")
-			@Override
-			public Set<NameAndEmail> compute(Transaction txn) {
-				byte[] value = getBytes(defaultStore.get(txn, CONTRIBUTORS_KEY));
-				if (value != null)
-					return (Set<NameAndEmail>) SerializationUtils.deserialize(value);
-				else
-					return new HashSet<>();
-			}
-		});
+				@SuppressWarnings("unchecked")
+				@Override
+				public List<NameAndEmail> compute(Transaction txn) {
+					byte[] bytes = getBytes(store.get(txn, CONTRIBUTORS_KEY));
+					if (bytes != null) { 
+						List<NameAndEmail> repoContributors = 
+								new ArrayList<>((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
+						Collections.sort(repoContributors);
+						return repoContributors;
+					} else { 
+						return new ArrayList<>();
+					}
+				}
+			});
+			contributors.put(repository.getId(), repoContributors);
+		}
+		return repoContributors;	
 	}
 
 	@Override
-	public byte[] getPaths(Repository repository) {
-		Environment env = getEnv(repository);
-		final Store defaultStore = getStore(env, DEFAULT_STORE);
+	public List<String> getFiles(Repository repository) {
+		List<String> repoFiles = files.get(repository.getId());
+		if (repoFiles == null) {
+			Environment env = getEnv(repository);
+			final Store store = getStore(env, DEFAULT_STORE);
 
-		return env.computeInReadonlyTransaction(new TransactionalComputable<byte[]>() {
+			repoFiles = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
 
-			@SuppressWarnings("unchecked")
-			@Override
-			public byte[] compute(Transaction txn) {
-				return getBytes(defaultStore.get(txn, PATHS_KEY));
-			}
-		});
+				@SuppressWarnings("unchecked")
+				@Override
+				public List<String> compute(Transaction txn) {
+					byte[] bytes = getBytes(store.get(txn, FILES_KEY));
+					if (bytes != null) {
+						List<Path> paths = new ArrayList<>();
+						for (String file: (Set<String>)SerializationUtils.deserialize(bytes))
+							paths.add(Paths.get(file));
+						Collections.sort(paths);
+						List<String> files = new ArrayList<>();
+						for (Path path: paths)
+							files.add(path.toString().replace('\\', '/'));
+						return files;
+					} else {
+						return new ArrayList<>();
+					}
+				}
+			});
+			files.put(repository.getId(), repoFiles);
+		}
+		return repoFiles;
 	}
 	
 	@Override
-	public Map<String, Map<NameAndEmail, Long>> getContributors(Repository repository, final Set<String> files) {
+	public Map<String, Map<NameAndEmail, Long>> getContributions(Repository repository, final Set<String> files) {
 		Environment env = getEnv(repository);
-		final Store filesStore = getStore(env, FILES_STORE);
+		final Store store = getStore(env, CONTRIBUTIONS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<String, Map<NameAndEmail, Long>>>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
 			public Map<String, Map<NameAndEmail, Long>> compute(Transaction txn) {
-				Map<String, Map<NameAndEmail, Long>> file2authors = new HashMap<>();
+				Map<String, Map<NameAndEmail, Long>> fileContributors = new HashMap<>();
 				for (String file: files) {
 					ByteIterable fileKey = new StringByteIterable(file);
-					Map<NameAndEmail, Long> authors;
-					byte[] value = getBytes(filesStore.get(txn, fileKey));
+					Map<NameAndEmail, Long> contributions;
+					byte[] value = getBytes(store.get(txn, fileKey));
 					if (value != null)
-						authors = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(value);
+						contributions = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(value);
 					else
-						authors = new HashMap<>();
-					file2authors.put(file, authors);
+						contributions = new HashMap<>();
+					fileContributors.put(file, contributions);
 				}
-				return file2authors;
+				return fileContributors;
 			}
 		});
 	}
@@ -341,6 +376,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 		Environment env = envs.remove(repository.getId());
 		if (env != null)
 			env.close();
+		files.remove(repository.getId());
 		FileUtils.deleteDir(getAuxiliaryDir(repository));
 	}
 	

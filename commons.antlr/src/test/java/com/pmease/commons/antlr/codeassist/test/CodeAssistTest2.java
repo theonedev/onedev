@@ -73,6 +73,21 @@ public class CodeAssistTest2 {
 		assertEquals("branch(dev):11", suggestions.get(1).toString());
 		assertEquals("branch(feature1):16", suggestions.get(2).toString());
 		assertEquals("branch(feature2):16", suggestions.get(3).toString());
+		
+		suggestions = suggest(new InputStatus("branch(feature)"), "query");
+		assertEquals(12, suggestions.size());
+		assertEquals("branch(feature)^:16", suggestions.get(0).toString());
+		assertEquals("branch(feature)branch(:22", suggestions.get(1).toString());
+		assertEquals("branch(feature)tag(:19", suggestions.get(2).toString());
+		assertEquals("branch(feature)id(:18", suggestions.get(3).toString());
+		assertEquals("branch(feature)..:17", suggestions.get(4).toString());
+		assertEquals("branch(feature)...:18", suggestions.get(5).toString());
+		assertEquals("branch(feature)before(:22", suggestions.get(6).toString());
+		assertEquals("branch(feature)after(:21", suggestions.get(7).toString());
+		assertEquals("branch(feature)committer(:25", suggestions.get(8).toString());
+		assertEquals("branch(feature)author(:22", suggestions.get(9).toString());
+		assertEquals("branch(feature)path(:20", suggestions.get(10).toString());
+		assertEquals("branch(feature)message(:23", suggestions.get(11).toString());
 
 		suggestions = suggest(new InputStatus(""), "revisionCriteria");
 		assertEquals(4, suggestions.size());

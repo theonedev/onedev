@@ -36,10 +36,11 @@ public abstract class SurroundingAware {
 	}
 	
 	public List<InputSuggestion> suggest(ElementSpec spec, String matchWith) {
+		if (matchWith.endsWith(suffix))
+			return new ArrayList<>();
+		
 		if (matchWith.startsWith(prefix))
 			matchWith = matchWith.substring(prefix.length());
-		if (matchWith.endsWith(suffix))
-			matchWith = matchWith.substring(0, matchWith.length()-suffix.length());
 		matchWith = matchWith.trim();
 		
 		List<InputSuggestion> suggestions = match(matchWith);

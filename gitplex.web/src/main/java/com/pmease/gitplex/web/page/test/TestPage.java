@@ -1,10 +1,10 @@
 package com.pmease.gitplex.web.page.test;
 
-import java.util.Set;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.wicket.markup.html.link.Link;
 
-import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
@@ -35,8 +35,11 @@ public class TestPage extends BasePage {
 				Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 				long time = System.currentTimeMillis();
 				
-				byte[] paths = GitPlex.getInstance(AuxiliaryManager.class).getPaths(repository);
-				System.out.println("paths: " + paths.length);
+				List<String> paths = GitPlex.getInstance(AuxiliaryManager.class).getFiles(repository);
+				Pattern pattern = Pattern.compile("hello.*world/linux.");
+				for (String path: paths) {
+					pattern.matcher(path).find();
+				}
 				System.out.println("cost time: " + (System.currentTimeMillis()-time));
 			}
 			
