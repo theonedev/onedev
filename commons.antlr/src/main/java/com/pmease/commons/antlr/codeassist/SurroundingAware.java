@@ -53,9 +53,12 @@ public abstract class SurroundingAware {
 				int caret = suggestion.getCaret();
 				if (!matches(spec, content)) {
 					content = prefix + content + suffix;
-					if (caret != -1)
+					Highlight highlight = suggestion.getHighlight();
+					if (caret != -1) 
 						caret += prefix.length();
-					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription()));
+					if (highlight != null)
+						highlight = new Highlight(highlight.getFrom()+prefix.length(), highlight.getTo()+prefix.length());
+					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), highlight));
 				} else {
 					checkedSuggestions.add(suggestion);
 				}
@@ -71,8 +74,10 @@ public abstract class SurroundingAware {
 			 */
 			if (!matchWithIncluded && !matches(spec, matchWith)) {
 				matchWith = prefix + matchWith + suffix;
-				if (matches(spec, matchWith))
-					checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription()));
+				if (matches(spec, matchWith)) {
+					Highlight highlight = new Highlight(1, matchWith.length()-1);
+					checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription(), highlight));
+				}
 			}
 			return checkedSuggestions;
 		} else {

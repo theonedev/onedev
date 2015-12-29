@@ -18,13 +18,16 @@ public class InputCompletion implements Serializable {
 	
 	private final String description;
 	
+	private final Highlight highlight;
+	
 	public InputCompletion(int replaceBegin, int replaceEnd, String replaceContent, 
-			int caret, @Nullable String description) {
+			int caret, @Nullable String description, @Nullable Highlight highlight) {
 		this.replaceBegin = replaceBegin;
 		this.replaceEnd = replaceEnd;
 		this.replaceContent = replaceContent;
 		this.caret = caret;
 		this.description = description;
+		this.highlight = highlight;
 	}
 	
 	public int getReplaceBegin() {
@@ -47,6 +50,10 @@ public class InputCompletion implements Serializable {
 		return description;
 	}
 	
+	public Highlight getHighlight() {
+		return highlight;
+	}
+
 	public InputStatus complete(InputStatus inputStatus) {
 		String beforeContent = inputStatus.getContent().substring(0, replaceBegin);
 		String afterContent = inputStatus.getContent().substring(replaceEnd, inputStatus.getContent().length());

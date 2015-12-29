@@ -34,12 +34,11 @@ pmease.commons.inputassist = {
 			if ($dropdown) {
 				var $active = $dropdown.find("tr.active");
 				if ($active.length != 0) {
-					$active.removeClass("active");
 					var $prev = $active.prev();
-					if ($prev.length != 0)
+					if ($prev.length != 0) {
 						$prev.addClass("active");
-					else
-						$dropdown.find("tr").last().addClass("active");
+						$active.removeClass("active");
+					}
 				} else {
 					$dropdown.find("tr").last().addClass("active");
 				}
@@ -54,12 +53,11 @@ pmease.commons.inputassist = {
 			if ($dropdown) {
 				var $active = $dropdown.find("tr.active");
 				if ($active.length != 0) {
-					$active.removeClass("active");
 					var $next = $active.next();
-					if ($next.length != 0)
+					if ($next.length != 0) {
 						$next.addClass("active");
-					else
-						$dropdown.find("tr").first().addClass("active");
+						$active.removeClass("active");
+					}
 				} else {
 					$dropdown.find("tr").first().addClass("active");
 				}

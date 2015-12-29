@@ -174,7 +174,8 @@ public abstract class CodeAssist implements Serializable {
 			String replaceContent = content.substring(completion.getReplaceBegin(), 
 					content.length()-inputContent.length()+completion.getReplaceEnd());
 			inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
-					completion.getReplaceEnd(), replaceContent, caret, description));
+					completion.getReplaceEnd(), replaceContent, caret, description, 
+					completion.getHighlight()));
 		}
 		
 		/*
@@ -427,7 +428,8 @@ public abstract class CodeAssist implements Serializable {
 						// replace only if provided suggestion is a complete representation of the element
 						inputSuggestion.isComplete()?replaceEnd:inputStatus.getCaret(),  
 						inputSuggestion.getContent(), inputSuggestion.getCaret(), 
-						inputSuggestion.isComplete(), inputSuggestion.getDescription()));
+						inputSuggestion.isComplete(), inputSuggestion.getDescription(), 
+						inputSuggestion.getHighlight()));
 			}
 		}
 		return completions;
@@ -530,7 +532,7 @@ public abstract class CodeAssist implements Serializable {
 	@Nullable
 	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
 			String suggestedLiteral, boolean complete) {
-		return new InputSuggestion(suggestedLiteral, -1, complete, null);
+		return new InputSuggestion(suggestedLiteral, -1, complete, null, null);
 	}
 	
 }

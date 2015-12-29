@@ -1,5 +1,7 @@
 package com.pmease.commons.antlr.codeassist;
 
+import javax.annotation.Nullable;
+
 public class ElementCompletion extends InputCompletion {
 
 	private static final long serialVersionUID = 1L;
@@ -10,8 +12,8 @@ public class ElementCompletion extends InputCompletion {
 	
 	public ElementCompletion(ParentedElement expectedElement, int replaceBegin, 
 			int replaceEnd, String replaceContent, int caret, boolean complete, 
-			String description) {
-		super(replaceBegin, replaceEnd, replaceContent, caret, description);
+			@Nullable String description, @Nullable Highlight highlight) {
+		super(replaceBegin, replaceEnd, replaceContent, caret, description, highlight);
 		
 		this.complete = complete;
 		this.expectedElement = expectedElement;

@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.antlr.codeassist.Highlight;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.SurroundingAware;
@@ -58,13 +59,19 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						int tokenType = element.getRoot().getLastMatchedToken().getType();
 						if (tokenType == CommitQueryParser.BRANCH) {
 							for (String value: repoModel.getObject().getBranches()) {
-								if (value.toLowerCase().contains(lowerCaseMatchWith) && numSuggestions++<count)
-									suggestions.add(new InputSuggestion(value));
+								int index = value.toLowerCase().indexOf(lowerCaseMatchWith);
+								if (index != -1 && numSuggestions++<count) {
+									Highlight highlight = new Highlight(index, index+lowerCaseMatchWith.length());
+									suggestions.add(new InputSuggestion(value, highlight));
+								}
 							}
 						} else if (tokenType == CommitQueryParser.TAG) {
 							for (String value: repoModel.getObject().getTags()) {
-								if (value.toLowerCase().contains(lowerCaseMatchWith) && numSuggestions++<count)
-									suggestions.add(new InputSuggestion(value));
+								int index = value.toLowerCase().indexOf(lowerCaseMatchWith);
+								if (index != -1 && numSuggestions++<count) {
+									Highlight highlight = new Highlight(index, index+lowerCaseMatchWith.length());
+									suggestions.add(new InputSuggestion(value, highlight));
+								}
 							}
 						} else if (tokenType == CommitQueryParser.AUTHOR 
 								|| tokenType == CommitQueryParser.COMMITTER) {
@@ -78,15 +85,19 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 										content = contributor.getName() + " <" + contributor.getEmailAddress() + ">";
 									else
 										content = contributor.getName();
-									suggestions.add(new InputSuggestion(content.trim()));
+									int index = content.toLowerCase().indexOf(lowerCaseMatchWith);
+									Highlight highlight = new Highlight(index, index+lowerCaseMatchWith.length());
+									suggestions.add(new InputSuggestion(content.trim(), highlight));
 								}
 							}
 						} else if (tokenType == CommitQueryParser.BEFORE 
 								|| tokenType == CommitQueryParser.AFTER) {
-							suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
-							suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
-							for (String dateExample: DATE_EXAMPLES) 
-								suggestions.add(new InputSuggestion(dateExample));
+							if (!matchWith.endsWith(")")) {
+								suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
+								suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
+								for (String dateExample: DATE_EXAMPLES) 
+									suggestions.add(new InputSuggestion(dateExample));
+							}
 						} else if (tokenType == CommitQueryParser.PATH) {
 							Set<String> suggestedInputs = new LinkedHashSet<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
@@ -119,7 +130,9 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									caret = suggestedInput.length();
 								else
 									caret = -1;
-								suggestions.add(new InputSuggestion(suggestedInput, caret, true, null));
+								int index = suggestedInput.toLowerCase().indexOf(matchWith.toLowerCase());
+								Highlight highlight = new Highlight(index, index+matchWith.length());
+								suggestions.add(new InputSuggestion(suggestedInput, caret, true, null, highlight));
 							}
 						}
 						return suggestions;
@@ -173,7 +186,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 		default:
 			description = null;
 		}
-		return new InputSuggestion(suggestedLiteral, description);
+		return new InputSuggestion(suggestedLiteral, description, null);
 	}
 
 }

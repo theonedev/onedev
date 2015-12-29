@@ -2,6 +2,7 @@ package com.pmease.commons.wicket.behavior.inputassist;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -13,6 +14,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
+import com.pmease.commons.antlr.codeassist.Highlight;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 
@@ -84,7 +86,16 @@ class AssistPanel extends Panel {
 	private Component newSuggestionItem(String itemId, InputCompletion suggestion) {
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		WebMarkupContainer link = new WebMarkupContainer("link");
-		link.add(new Label("label", suggestion.getReplaceContent()));
+		Highlight highlight = suggestion.getHighlight();
+		if (highlight != null) {
+			String content = suggestion.getReplaceContent();
+			String prefix = StringEscapeUtils.escapeHtml4(content.substring(0, highlight.getFrom()));
+			String suffix = StringEscapeUtils.escapeHtml4(content.substring(highlight.getTo()));
+			String matched = StringEscapeUtils.escapeHtml4(content.substring(highlight.getFrom(), highlight.getTo()));
+			link.add(new Label("label", prefix + "<b>" + matched + "</b>" + suffix).setEscapeModelStrings(false));
+		} else {
+			link.add(new Label("label", suggestion.getReplaceContent()));
+		}
 		item.add(link);
 		if (suggestion.getDescription() != null)
 			item.add(new Label("description", suggestion.getDescription()));
