@@ -25,7 +25,7 @@ public class CodeAssistTest3 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith) {
+		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith, int count) {
 			if (element.getSpec() instanceof RuleRefElementSpec) {
 				RuleRefElementSpec spec = (RuleRefElementSpec) element.getSpec();
 				if (spec.getRuleName().equals("value")) {
@@ -54,7 +54,7 @@ public class CodeAssistTest3 {
 	
 	private List<InputStatus> suggest(InputStatus inputStatus, String ruleName) {
 		List<InputStatus> suggestions = new ArrayList<>();
-		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName))
+		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName, Integer.MAX_VALUE))
 			suggestions.add(completion.complete(inputStatus));
 		return suggestions;
 	}

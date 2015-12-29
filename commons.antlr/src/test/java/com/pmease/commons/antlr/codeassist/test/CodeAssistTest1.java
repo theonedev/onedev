@@ -20,7 +20,7 @@ public class CodeAssistTest1 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(ParentedElement element, String matchWith) {
+		protected List<InputSuggestion> suggest(ParentedElement element, String matchWith, int count) {
 			return null;
 		}
 
@@ -28,7 +28,7 @@ public class CodeAssistTest1 {
 	
 	private List<InputStatus> suggest(InputStatus inputStatus, String ruleName) {
 		List<InputStatus> suggestions = new ArrayList<>();
-		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName))
+		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName, Integer.MAX_VALUE))
 			suggestions.add(completion.complete(inputStatus));
 		return suggestions;
 	}

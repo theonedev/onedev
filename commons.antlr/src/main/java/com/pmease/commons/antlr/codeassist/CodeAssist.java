@@ -64,7 +64,7 @@ public abstract class CodeAssist implements Serializable {
 		this(new Grammar(lexerClass, grammarFiles, tokenFile));
 	}
 	
-	public List<InputCompletion> suggest(InputStatus inputStatus, String ruleName) {
+	public List<InputCompletion> suggest(InputStatus inputStatus, String ruleName, int count) {
 		RuleSpec rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
 		
 		String inputContent = inputStatus.getContent();
@@ -81,7 +81,7 @@ public abstract class CodeAssist implements Serializable {
 		 * mainly handles this logic.         
 		 */
 		Map<String, List<ElementCompletion>> grouped = new LinkedHashMap<>();
-		for (ElementCompletion elementCompletion: suggest(rule, inputStatus)) {
+		for (ElementCompletion elementCompletion: suggest(rule, inputStatus, count)) {
 			/*
 			 *  key will be the new input (without considering mandatories of course), and we use 
 			 *  this to group suggestions to facilitate mandatories calculation and exclusion 
@@ -226,7 +226,7 @@ public abstract class CodeAssist implements Serializable {
 		}
 	}
 
-	private List<ElementSuggestion> suggest(EarleyParser parser, Chart chart, InputStatus inputStatus) {
+	private List<ElementSuggestion> suggest(EarleyParser parser, Chart chart, InputStatus inputStatus, int count) {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		int position = chart.getPosition();
 		String matchWith;
@@ -282,7 +282,7 @@ public abstract class CodeAssist implements Serializable {
 					// go from top to down to check if there are suggestions for expected element 
 					List<InputSuggestion> inputSuggestions = null;
 					for (ParentedElement element: expectedElements) {
-						inputSuggestions = suggest(element, matchWith);
+						inputSuggestions = suggest(element, matchWith, count);
 						if (inputSuggestions != null) {
 							for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
 								if (it.next().getContent().equals(matchWith))
@@ -346,7 +346,7 @@ public abstract class CodeAssist implements Serializable {
 		return suggestions;
  	}
 	
-	private List<ElementCompletion> suggest(RuleSpec spec, InputStatus inputStatus) {
+	private List<ElementCompletion> suggest(RuleSpec spec, InputStatus inputStatus, int count) {
 		List<ElementCompletion> completions = new ArrayList<>();
 		
 		List<ElementSuggestion> suggestions = new ArrayList<>();
@@ -356,7 +356,7 @@ public abstract class CodeAssist implements Serializable {
 		
 		if (parser.getCharts().size() >= 1) {
 			Chart lastState = parser.getCharts().get(parser.getCharts().size()-1);
-			suggestions.addAll(suggest(parser, lastState, inputStatus));
+			suggestions.addAll(suggest(parser, lastState, inputStatus, count));
 		}
 
 		/*
@@ -373,7 +373,7 @@ public abstract class CodeAssist implements Serializable {
 		 */
 		if (parser.getCharts().size() >= 2) {
 			Chart stateBeforeLast = parser.getCharts().get(parser.getCharts().size()-2);
-			suggestions.addAll(suggest(parser, stateBeforeLast, inputStatus));
+			suggestions.addAll(suggest(parser, stateBeforeLast, inputStatus, count));
 		}
 
 		String inputContent = inputStatus.getContent();
@@ -504,13 +504,15 @@ public abstract class CodeAssist implements Serializable {
 	 * 			the element to expect. 
 	 * @param matchWith
 	 * 			the string the suggestion has to match with
+	 * @param count
+	 * 			maximum number of suggestions to return
 	 * @return
 	 * 			a list of suggestions. If you do not have any suggestions and want code assist to 
 	 * 			drill down the element to provide default suggestions, return a <tt>null</tt> value 
 	 * 			instead of an empty list
 	 */
 	@Nullable
-	protected abstract List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith);
+	protected abstract List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith, int count);
 
 	/**
 	 * Wrap specified literal of specified terminal element as suggestion.

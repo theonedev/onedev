@@ -40,6 +40,8 @@ import com.pmease.commons.wicket.component.floating.FloatingPanel;
 @SuppressWarnings("serial")
 public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
+	static final int PAGE_SIZE = 25;
+	
 	private FloatingPanel dropdown;
 	
 	@Override
@@ -149,7 +151,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		
 		if (inputCaret != null) {
 			final InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
-			final List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
+			final List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret), PAGE_SIZE);
 			if (!suggestions.isEmpty()) {
 				int anchor = getAnchor(inputContent.substring(0, inputCaret));
 				if (dropdown == null) {
@@ -157,7 +159,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 						@Override
 						protected Component newContent(String id) {
-							return new AssistPanel(id, inputStatus, suggestions);
+							return new AssistPanel(id, InputAssistBehavior.this, inputStatus, suggestions);
 						}
 
 						@Override
@@ -172,7 +174,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 					target.appendJavaScript(script);
 				} else {
 					Component content = dropdown.getContent();
-					Component newContent = new AssistPanel(content.getId(), inputStatus, suggestions);
+					Component newContent = new AssistPanel(content.getId(), InputAssistBehavior.this, inputStatus, suggestions);
 					content.replaceWith(newContent);
 					target.add(newContent);
 
@@ -196,6 +198,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		if (dropdown != null)
 			dropdown.close(target);
 	}
+	
+	Component getInputField() {
+		return super.getComponent();
+	}
 
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
@@ -218,7 +224,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus);
+	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus, int count);
 	
 	protected abstract List<InputError> getErrors(String inputContent);
 	

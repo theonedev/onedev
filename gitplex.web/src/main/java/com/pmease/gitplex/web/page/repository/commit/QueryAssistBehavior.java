@@ -25,8 +25,6 @@ import com.pmease.gitplex.web.Constants;
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
-	private static final int MAX_SUGGESTIONS = 64;
-
 	private final IModel<Repository> repoModel;
 	
 	private static final String[] DATE_EXAMPLES = new String[]{
@@ -46,7 +44,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith) {
+	protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith, final int count) {
 		if (element.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) element.getSpec();
 			if (spec.getRuleName().equals("Value")) {
@@ -55,17 +53,17 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						String lowerCaseMatchWith = matchWith.toLowerCase();
-						int count = 0;
+						int numSuggestions = 0;
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						int tokenType = element.getRoot().getLastMatchedToken().getType();
 						if (tokenType == CommitQueryParser.BRANCH) {
 							for (String value: repoModel.getObject().getBranches()) {
-								if (value.toLowerCase().contains(lowerCaseMatchWith) && count++<MAX_SUGGESTIONS)
+								if (value.toLowerCase().contains(lowerCaseMatchWith) && numSuggestions++<count)
 									suggestions.add(new InputSuggestion(value));
 							}
 						} else if (tokenType == CommitQueryParser.TAG) {
 							for (String value: repoModel.getObject().getTags()) {
-								if (value.toLowerCase().contains(lowerCaseMatchWith) && count++<MAX_SUGGESTIONS)
+								if (value.toLowerCase().contains(lowerCaseMatchWith) && numSuggestions++<count)
 									suggestions.add(new InputSuggestion(value));
 							}
 						} else if (tokenType == CommitQueryParser.AUTHOR 
@@ -74,7 +72,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							List<NameAndEmail> contributors = auxiliaryManager.getContributors(repoModel.getObject());
 							for (NameAndEmail contributor: contributors) {
 								if ((contributor.getName().toLowerCase().contains(lowerCaseMatchWith) || contributor.getEmailAddress().toLowerCase().contains(lowerCaseMatchWith)) 
-										&& count++<MAX_SUGGESTIONS) {
+										&& numSuggestions++<count) {
 									String content;
 									if (StringUtils.isNotBlank(contributor.getEmailAddress()))
 										content = contributor.getName() + " <" + contributor.getEmailAddress() + ">";
@@ -109,7 +107,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 										suggestedInput = matchWith + suffix;
 									if (!suggestedInputs.contains(suggestedInput)) {
 										suggestedInputs.add(suggestedInput);
-										if (suggestedInputs.size() == MAX_SUGGESTIONS)
+										if (suggestedInputs.size() == count)
 											break;
 									}
 								}

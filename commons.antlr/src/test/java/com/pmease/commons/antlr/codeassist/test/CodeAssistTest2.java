@@ -24,7 +24,7 @@ public class CodeAssistTest2 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith) {
+		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith, int count) {
 			if (element.getSpec() instanceof LexerRuleRefElementSpec) {
 				LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) element.getSpec();
 				if (spec.getRuleName().equals("Value")) {
@@ -54,7 +54,7 @@ public class CodeAssistTest2 {
 	
 	private List<InputStatus> suggest(InputStatus inputStatus, String ruleName) {
 		List<InputStatus> suggestions = new ArrayList<>();
-		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName))
+		for (InputCompletion completion: codeAssist.suggest(inputStatus, ruleName, Integer.MAX_VALUE))
 			suggestions.add(completion.complete(inputStatus));
 		return suggestions;
 	}

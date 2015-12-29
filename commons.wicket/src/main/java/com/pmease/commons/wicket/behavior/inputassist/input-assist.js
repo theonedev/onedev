@@ -12,7 +12,7 @@ pmease.commons.inputassist = {
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
 				if (e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter, up and down key 
-					callback(value, caret);
+					callback(value, caret, 1);
 			}
 		});
 		$input.on("blur", function(e) {
@@ -26,7 +26,7 @@ pmease.commons.inputassist = {
 			if (caret != undefined)
 				$input.caret(caret);
 			$input.focus();
-			$input.data("callback")(value, $input.caret());
+			$input.data("callback")(value, $input.caret(), 1);
 		});
 		
 		$input.bind("keydown", "up", function() {
@@ -148,6 +148,13 @@ pmease.commons.inputassist = {
 			$input.data("update")($this);
 		});
 		pmease.commons.inputassist.updateHelp($dropdown);
+	},
+	
+	initInfiniteScroll: function(assistId, callback) {
+		$("#" + assistId + " .suggestions").scroll(function() {
+			if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight)
+				callback();
+		});
 	},
 	
 	updateHelp: function($dropdown) {
