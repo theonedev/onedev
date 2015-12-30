@@ -98,7 +98,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			Commits commits = new Commits();
 			
 			LogCommand logCommand = new LogCommand(getRepository().git().repoDir());
-			logCommand.parentRewriting(true);
+			logCommand.parentRewriting(true).ignoreCase(true);
 			
 			List<Commit> logCommits;
 			try {

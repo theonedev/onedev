@@ -35,6 +35,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private boolean parentRewriting;
     
+    private boolean ignoreCase;
+    
     private boolean listChangedFiles;
     
     private List<String> messages = new ArrayList<>();
@@ -116,6 +118,15 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		return this;
 	}
 
+	public boolean ignoreCase() {
+		return ignoreCase;
+	}
+	
+	public LogCommand ignoreCase(boolean ignoreCase) {
+		this.ignoreCase = ignoreCase;
+		return this;
+	}
+	
 	public List<String> messages() {
 		return messages;
 	}
@@ -193,6 +204,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         if (listChangedFiles)
         	cmd.addArgs("--name-only");
+        
+        if (ignoreCase)
+        	cmd.addArgs("-i");
         
         cmd.addArgs("--");
         

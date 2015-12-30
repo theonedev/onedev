@@ -50,4 +50,13 @@ public class WildcardUtilsTest {
 		assertTrue(matchString("+*.java, -*.java, *.c", "hello.java"));
 	}
 
+	@Test
+	public void shouldApplyWildcard() {
+		assertEquals("he*llo", applyWildcard("hello", "e*l", false));
+		assertEquals(null, applyWildcard("hello world", "*he ld", false));
+		assertEquals("*he*ld 2", applyWildcard("hello world 2", "*he*ld", false));
+		assertEquals("hello", applyWildcard("hello", "", false));
+		assertEquals("*", applyWildcard("hello", "*", false));
+		assertEquals("**", applyWildcard("hello", "**", false));
+	}
 }

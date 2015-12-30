@@ -1,5 +1,10 @@
 package com.pmease.commons.util.pattern;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 public class WildcardUtils {
 	
 	private static final PatternMatcher stringPatternSetMatcher = new PatternSetMatcher(new WildcardStringMatcher());
@@ -42,7 +47,6 @@ public class WildcardUtils {
     	return pathPatternSetMatcher.matches(patterns, path);
     }
 	
-    
     /**
      * Tests whether or not a string matches against specified patterns. 
      * <p>
@@ -83,4 +87,57 @@ public class WildcardUtils {
     	return (input.indexOf('*') != -1 || input.indexOf('?') != -1);
     }
     
+    @Nullable
+    public static String applyWildcard(String text, String wildcard, boolean caseSensitive) {
+		String normalizedText;
+		String normalizedWildcard;
+		if (caseSensitive) {
+			normalizedText = text;
+			normalizedWildcard = wildcard;
+		} else {
+			normalizedText = text.toLowerCase();
+			normalizedWildcard = wildcard.toLowerCase();
+		}
+		List<LiteralRange> literalRanges = new ArrayList<>();
+		int pos = 0;
+		int index = normalizedWildcard.indexOf('*');
+		while (index != -1) {
+			if (index>pos)
+				literalRanges.add(new LiteralRange(pos, index));
+			pos = index+1;
+			index = normalizedWildcard.indexOf('*', pos);
+		}
+		if (normalizedWildcard.length()>pos)
+			literalRanges.add(new LiteralRange(pos, normalizedWildcard.length()));
+
+		String applied = wildcard;
+		int first = -1;
+		int last = 0;
+		pos = 0;
+		for (LiteralRange literalRange: literalRanges) {
+			String literal = wildcard.substring(literalRange.getFrom(), literalRange.getTo());
+			index = normalizedText.indexOf(literal, pos);
+			if (index != -1) {
+				if (first == -1)
+					first = index;
+				pos = index+literal.length();
+				last = pos;
+				applied = replaceLiteral(applied, literalRange, text.substring(index, pos));
+			} else {
+				return null;
+			}
+		}
+		if (first != -1 && wildcard.charAt(0) != '*')
+			applied = text.substring(0, first) + applied;
+		if (wildcard.length() == 0 || wildcard.charAt(wildcard.length()-1) != '*')
+			applied = applied + text.substring(last);
+		return applied;
+    }
+	
+	private static String replaceLiteral(String text, LiteralRange literalRange, String literal) {
+		String prefix = text.substring(0, literalRange.getFrom());
+		String suffix = text.substring(literalRange.getTo());
+		return prefix + literal + suffix;
+	}
+	
 }

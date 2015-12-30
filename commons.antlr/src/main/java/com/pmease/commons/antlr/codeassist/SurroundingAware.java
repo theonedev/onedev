@@ -66,17 +66,19 @@ public abstract class SurroundingAware {
 					matchWithIncluded = true;
 			}
 			
-			/*
-			 * if matchWith does not appear in suggestion list, we check to see if it should be surrounded. 
-			 * For instance, you may have a rule requiring that value containing spaces should be quoted, 
-			 * in this case, below code will suggest you to quote the value if it contains spaces as 
-			 * otherwise it will fail the match below
-			 */
-			if (!matchWithIncluded && !matches(spec, matchWith)) {
-				matchWith = prefix + matchWith + suffix;
-				if (matches(spec, matchWith)) {
-					Highlight highlight = new Highlight(1, matchWith.length()-1);
-					checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription(), highlight));
+			if (checkedSuggestions.isEmpty()) {
+				/*
+				 * if matchWith does not appear in suggestion list, we check to see if it should be surrounded. 
+				 * For instance, you may have a rule requiring that value containing spaces should be quoted, 
+				 * in this case, below code will suggest you to quote the value if it contains spaces as 
+				 * otherwise it will fail the match below
+				 */
+				if (!matchWithIncluded && !matches(spec, matchWith)) {
+					matchWith = prefix + matchWith + suffix;
+					if (matches(spec, matchWith)) {
+						Highlight highlight = new Highlight(1, matchWith.length()-1);
+						checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription(), highlight));
+					}
 				}
 			}
 			return checkedSuggestions;
