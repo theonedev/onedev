@@ -1,24 +1,37 @@
 package gitplex.product;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
-import org.antlr.v4.runtime.Token;
-
-import com.pmease.commons.antlr.grammar.Grammar;
-import com.pmease.commons.antlr.grammar.RuleSpec;
-import com.pmease.commons.antlr.parser.EarleyParser;
-import com.pmease.commons.lang.extractors.java.JavaLexer;
 
 public class Test {
 
 	@org.junit.Test
 	public void test() throws IOException {
-		Grammar grammar = new Grammar(JavaLexer.class);
-		List<Token> tokens = grammar.lex("1");
-		RuleSpec rule = grammar.getRule("compilationUnit");
-		EarleyParser parser = new EarleyParser(rule, tokens);
-		System.out.println(parser.matches());
+		List<Path> paths = new ArrayList<>();
+		paths.add(Paths.get("a/b"));
+		paths.add(Paths.get("a/b/c"));
+		paths.add(Paths.get("a/c"));
+		paths.add(Paths.get("a/c/d"));
+		Collections.sort(paths, new Comparator<Path>() {
+
+			@Override
+			public int compare(Path path1, Path path2) {
+				int count1 = path1.getNameCount();
+				int count2 = path2.getNameCount();
+				if (count1 != count2)
+					return count1 - count2;
+				else
+					return path1.compareTo(path2);
+			}
+			
+		});
+		for (Path path: paths) 
+			System.out.println(path);
 	}
 	
 }

@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.StringUtils;
 
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.AfterContext;
@@ -71,7 +72,9 @@ public class LogCommandDecorator extends CommitQueryBaseListener {
 	
 	@Override
 	public void exitAuthor(AuthorContext ctx) {
-		logCommand.authors().add(getValue(ctx.Value()));
+		String value = getValue(ctx.Value());
+		value = StringUtils.replace(value, "*", ".*");
+		logCommand.authors().add(value);
 	}
 	
 	@Override

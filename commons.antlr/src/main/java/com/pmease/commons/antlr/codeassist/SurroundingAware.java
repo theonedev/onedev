@@ -50,20 +50,24 @@ public abstract class SurroundingAware {
 			boolean matchWithIncluded = false;
 			for (InputSuggestion suggestion: suggestions) {
 				String content = suggestion.getContent();
-				int caret = suggestion.getCaret();
-				if (!matches(spec, content)) {
-					content = prefix + content + suffix;
-					Highlight highlight = suggestion.getHighlight();
-					if (caret != -1) 
-						caret += prefix.length();
-					if (highlight != null)
-						highlight = new Highlight(highlight.getFrom()+prefix.length(), highlight.getTo()+prefix.length());
-					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), highlight));
+				if (content.length() != 0) { // process non-hint suggestions
+					int caret = suggestion.getCaret();
+					if (!matches(spec, content)) {
+						content = prefix + content + suffix;
+						Highlight highlight = suggestion.getHighlight();
+						if (caret != -1) 
+							caret += prefix.length();
+						if (highlight != null)
+							highlight = new Highlight(highlight.getFrom()+prefix.length(), highlight.getTo()+prefix.length());
+						checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), highlight));
+					} else {
+						checkedSuggestions.add(suggestion);
+					}
+					if (suggestion.getContent().equals(matchWith))
+						matchWithIncluded = true;
 				} else {
 					checkedSuggestions.add(suggestion);
 				}
-				if (suggestion.getContent().equals(matchWith))
-					matchWithIncluded = true;
 			}
 			
 			if (checkedSuggestions.isEmpty()) {

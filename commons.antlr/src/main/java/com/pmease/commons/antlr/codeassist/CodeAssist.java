@@ -82,19 +82,23 @@ public abstract class CodeAssist implements Serializable {
 		 */
 		Map<String, List<ElementCompletion>> grouped = new LinkedHashMap<>();
 		for (ElementCompletion elementCompletion: suggest(rule, inputStatus, count)) {
-			/*
-			 *  key will be the new input (without considering mandatories of course), and we use 
-			 *  this to group suggestions to facilitate mandatories calculation and exclusion 
-			 *  logic 
-			 */
-			String key = inputContent.substring(0, elementCompletion.getReplaceBegin()) 
-					+ elementCompletion.getReplaceContent() + inputContent.substring(elementCompletion.getReplaceEnd());
-			List<ElementCompletion> value = grouped.get(key);
-			if (value == null) {
-				value = new ArrayList<>();
-				grouped.put(key, value);
+			if (elementCompletion.getReplaceContent().length() == 0) { // if this is input hint
+				inputCompletions.add(new InputCompletion(elementCompletion));
+			} else {
+				/*
+				 *  key will be the new input (without considering mandatories of course), and we use 
+				 *  this to group suggestions to facilitate mandatories calculation and exclusion 
+				 *  logic 
+				 */
+				String key = inputContent.substring(0, elementCompletion.getReplaceBegin()) 
+						+ elementCompletion.getReplaceContent() + inputContent.substring(elementCompletion.getReplaceEnd());
+				List<ElementCompletion> value = grouped.get(key);
+				if (value == null) {
+					value = new ArrayList<>();
+					grouped.put(key, value);
+				}
+				value.add(elementCompletion);
 			}
-			value.add(elementCompletion);
 		}
 		
 		for (Map.Entry<String, List<ElementCompletion>> entry: grouped.entrySet())	 {
@@ -183,11 +187,14 @@ public abstract class CodeAssist implements Serializable {
 		 */
 		Set<String> suggestedContents = Sets.newHashSet(inputStatus.getContent());
 		for (Iterator<InputCompletion> it = inputCompletions.iterator(); it.hasNext();) {
-			String content = it.next().complete(inputStatus).getContent();
-			if (suggestedContents.contains(content))
-				it.remove();
-			else
-				suggestedContents.add(content);
+			InputCompletion completion = it.next();
+			if (completion.getReplaceContent().length() != 0) { // remove non-hint duplicate suggestions
+				String content = completion.complete(inputStatus).getContent();
+				if (suggestedContents.contains(content))
+					it.remove();
+				else
+					suggestedContents.add(content);
+			}
 		}
 		return inputCompletions;
 	}
@@ -286,7 +293,8 @@ public abstract class CodeAssist implements Serializable {
 						inputSuggestions = suggest(element, matchWith, count);
 						if (inputSuggestions != null) {
 							for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
-								if (it.next().getContent().equals(matchWith))
+								InputSuggestion suggestion = it.next();
+								if (suggestion.getContent().length() != 0 && suggestion.getContent().equals(matchWith))
 									it.remove();
 							}
 							if (!inputSuggestions.isEmpty())

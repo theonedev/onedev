@@ -225,6 +225,10 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	}
 
 	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus, int count);
+
+	protected String getHelp(InputStatus inputStatus) {
+		return null;
+	}
 	
 	protected abstract List<InputError> getErrors(String inputContent);
 	

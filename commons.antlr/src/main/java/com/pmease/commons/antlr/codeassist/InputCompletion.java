@@ -30,6 +30,11 @@ public class InputCompletion implements Serializable {
 		this.highlight = highlight;
 	}
 	
+	public InputCompletion(InputCompletion completion) {
+		this(completion.getReplaceBegin(), completion.getReplaceEnd(), completion.getReplaceContent(), 
+				completion.getCaret(), completion.getDescription(), completion.getHighlight());
+	}
+	
 	public int getReplaceBegin() {
 		return replaceBegin;
 	}

@@ -113,10 +113,9 @@ public class CodeAssistTest2 {
 		assertEquals("branch(feature2):16", suggestions.get(3).toString());
 		
 		suggestions = suggest(new InputStatus("branch( fea"), "query");
-		assertEquals(3, suggestions.size());
+		assertEquals(2, suggestions.size());
 		assertEquals("branch(feature1):16", suggestions.get(0).toString());
 		assertEquals("branch(feature2):16", suggestions.get(1).toString());
-		assertEquals("branch(fea):11", suggestions.get(2).toString());
 		
 		suggestions = suggest(new InputStatus("tag"), "query");
 		assertEquals(1, suggestions.size());

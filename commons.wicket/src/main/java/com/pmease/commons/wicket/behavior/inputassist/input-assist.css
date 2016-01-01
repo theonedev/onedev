@@ -34,6 +34,12 @@
 	background: #EEE;
 	padding: 0 4px;
 }
+.input-assist .context-help {
+	margin-top: 8px;
+	margin-bottom: -8px;
+	background: #EEE;
+	padding: 0 4px;
+}
 .input-error-mark {
 	position: absolute;
     background: url(wave.png) bottom repeat-x;
