@@ -1,6 +1,8 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +17,7 @@ import com.pmease.commons.antlr.codeassist.SurroundingAware;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.pattern.WildcardApplied;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -84,9 +87,9 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									content = contributor.getName() + " <" + contributor.getEmailAddress() + ">";
 								else
 									content = contributor.getName();
-								String wildcarded = WildcardUtils.applyWildcard(content, lowerCaseMatchWith, false);
-								if (wildcarded != null) {
-									suggestedInputs.add(wildcarded);
+								WildcardApplied applied = WildcardUtils.applyWildcard(content, lowerCaseMatchWith, false);
+								if (applied != null) {
+									suggestedInputs.add(applied.getText());
 									if (suggestedInputs.size() == count)
 										break;
 								}
@@ -106,24 +109,36 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									suggestions.add(new InputSuggestion(dateExample));
 							}
 						} else if (tokenType == CommitQueryParser.PATH) {
+							long time = System.currentTimeMillis();
 							suggestions.add(InputSuggestion.hint("Use * to match any string"));
-							Set<String> suggestedInputs = new LinkedHashSet<>();
+							List<WildcardApplied> allApplied = new ArrayList<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							for (String path: auxiliaryManager.getFiles(repoModel.getObject())) {
-								String wildcarded = WildcardUtils.applyWildcard(path, lowerCaseMatchWith, false);
-								if (wildcarded != null) {
-									int matchEnd = wildcarded.toLowerCase().indexOf(lowerCaseMatchWith) + lowerCaseMatchWith.length();
-									String suffix = wildcarded.substring(matchEnd);
-									int index = suffix.indexOf('/');
-									String suggestedInput = wildcarded.substring(0, matchEnd);
-									if (index != -1)
-										suggestedInput += suffix.substring(0, index) + "/";
-									else
-										suggestedInput += suffix;
-									suggestedInputs.add(suggestedInput);
-									if (suggestedInputs.size() == count)
-										break;
+								WildcardApplied applied = WildcardUtils.applyWildcard(path, lowerCaseMatchWith, false);
+								if (applied != null) 
+									allApplied.add(applied);
+							}
+							Collections.sort(allApplied, new Comparator<WildcardApplied>() {
+
+								@Override
+								public int compare(WildcardApplied o1, WildcardApplied o2) {
+									return o1.getFrom() - o2.getFrom();
 								}
+								
+							});
+
+							Set<String> suggestedInputs = new LinkedHashSet<>();
+							for (WildcardApplied applied: allApplied) {
+								String suffix = applied.getText().substring(applied.getTo());
+								int index = suffix.indexOf('/');
+								String suggestedInput = applied.getText().substring(0, applied.getTo());
+								if (index != -1)
+									suggestedInput += suffix.substring(0, index) + "/";
+								else
+									suggestedInput += suffix;
+								suggestedInputs.add(suggestedInput);
+								if (suggestedInputs.size() == count)
+									break;
 							}
 							
 							for (String suggestedInput: suggestedInputs) { 
@@ -138,6 +153,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								if (suggestions.size() == count)
 									break;
 							}
+							System.out.println(System.currentTimeMillis()-time);
 						}
 						return suggestions;
 					}

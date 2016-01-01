@@ -29,16 +29,13 @@
 	font-family: monospace;
 	font-size: 13px;
 }
-.input-assist .help {
+.input-assist .hint {
 	margin-top: 8px;
-	background: #EEE;
-	padding: 0 4px;
-}
-.input-assist .context-help {
-	margin-top: 8px;
-	margin-bottom: -8px;
-	background: #EEE;
-	padding: 0 4px;
+	margin-bottom: 0;
+	background: #F0F0F0;
+	padding: 2px 4px;
+	border: 1px dashed #CCC;
+	color: #666;
 }
 .input-error-mark {
 	position: absolute;

@@ -330,12 +330,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 							@Override
 							public int compare(Path path1, Path path2) {
-								int count1 = path1.getNameCount();
-								int count2 = path2.getNameCount();
-								if (count1 != count2)
-									return count1 - count2;
-								else
-									return path1.compareTo(path2);
+								return path1.compareTo(path2);
 							}
 							
 						});

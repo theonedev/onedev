@@ -45,13 +45,13 @@ class AssistPanel extends Panel {
 		
 		suggestionsView = new RepeatingView("suggestions");
 		add(suggestionsView);
-		RepeatingView contextHelpsView = new RepeatingView("contextHelps");
-		add(contextHelpsView);
+		RepeatingView contextHintsView = new RepeatingView("contextHints");
+		add(contextHintsView);
 		for (InputCompletion suggestion: suggestions) {
 			if (suggestion.getReplaceContent().length() != 0)
 				suggestionsView.add(newSuggestionItem(suggestionsView.newChildId(), suggestion));
 			else if (suggestion.getDescription() != null)
-				contextHelpsView.add(new Label(contextHelpsView.newChildId(), suggestion.getDescription()));
+				contextHintsView.add(new Label(contextHintsView.newChildId(), suggestion.getDescription()));
 		}
 		
 		add(new AbstractDefaultAjaxBehavior() {

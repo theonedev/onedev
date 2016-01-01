@@ -52,11 +52,11 @@ public class WildcardUtilsTest {
 
 	@Test
 	public void shouldApplyWildcard() {
-		assertEquals("he*llo", applyWildcard("hello", "e*l", false));
+		assertEquals("he*llo:1-4", applyWildcard("hello", "e*l", false).toString());
 		assertEquals(null, applyWildcard("hello world", "*he ld", false));
-		assertEquals("*he*ld 2", applyWildcard("hello world 2", "*he*ld", false));
-		assertEquals("hello", applyWildcard("hello", "", false));
-		assertEquals("*", applyWildcard("hello", "*", false));
-		assertEquals("**", applyWildcard("hello", "**", false));
+		assertEquals("*he*ld 2:0-6", applyWildcard("hello world 2", "*he*ld", false).toString());
+		assertEquals("hello:0-0", applyWildcard("hello", "", false).toString());
+		assertEquals("*:0-1", applyWildcard("hello", "*", false).toString());
+		assertEquals("**:0-2", applyWildcard("hello", "**", false).toString());
 	}
 }

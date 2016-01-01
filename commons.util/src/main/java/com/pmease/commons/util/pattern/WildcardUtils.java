@@ -88,7 +88,7 @@ public class WildcardUtils {
     }
     
     @Nullable
-    public static String applyWildcard(String text, String wildcard, boolean caseSensitive) {
+    public static WildcardApplied applyWildcard(String text, String wildcard, boolean caseSensitive) {
 		String normalizedText;
 		String normalizedWildcard;
 		if (caseSensitive) {
@@ -110,7 +110,7 @@ public class WildcardUtils {
 		if (normalizedWildcard.length()>pos)
 			literalRanges.add(new LiteralRange(pos, normalizedWildcard.length()));
 
-		String applied = wildcard;
+		String appliedText = wildcard;
 		int first = -1;
 		int last = 0;
 		pos = 0;
@@ -122,16 +122,23 @@ public class WildcardUtils {
 					first = index;
 				pos = index+literal.length();
 				last = pos;
-				applied = replaceLiteral(applied, literalRange, text.substring(index, pos));
+				appliedText = replaceLiteral(appliedText, literalRange, text.substring(index, pos));
 			} else {
 				return null;
 			}
 		}
 		if (first != -1 && wildcard.charAt(0) != '*')
-			applied = text.substring(0, first) + applied;
-		if (wildcard.length() == 0 || wildcard.charAt(wildcard.length()-1) != '*')
-			applied = applied + text.substring(last);
-		return applied;
+			appliedText = text.substring(0, first) + appliedText;
+		else 
+			first = 0;
+		if (wildcard.length() == 0 || wildcard.charAt(wildcard.length()-1) != '*') {
+			String suffix = text.substring(last);
+			last = appliedText.length();
+			appliedText = appliedText + suffix;
+		} else {
+			last = appliedText.length();
+		}
+		return new WildcardApplied(appliedText, first, last);
     }
 	
 	private static String replaceLiteral(String text, LiteralRange literalRange, String literal) {
