@@ -33,7 +33,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	private static final String[] DATE_EXAMPLES = new String[]{
 			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
-			"4 weeks ago", "1 month 2 days ago"}; 
+			"4 weeks ago", "1 month 2 days ago", "1 year ago"}; 
 	
 	public QueryAssistBehavior(IModel<Repository> repoModel) {
 		super(CommitQueryParser.class, "query");
