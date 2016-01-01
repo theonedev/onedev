@@ -2,6 +2,8 @@ package com.pmease.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.util.pattern.Highlight;
+
 public class ElementCompletion extends InputCompletion {
 
 	private static final long serialVersionUID = 1L;

@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist;
+package com.pmease.commons.util.pattern;
 
 import java.io.Serializable;
 
@@ -23,4 +23,8 @@ public class Highlight implements Serializable {
 		return to;
 	}
 	
+	@Override
+	public String toString() {
+		return from+ "-" + to;
+	}
 }

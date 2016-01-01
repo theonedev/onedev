@@ -138,7 +138,7 @@ public class WildcardUtils {
 		} else {
 			last = appliedText.length();
 		}
-		return new WildcardApplied(appliedText, first, last);
+		return new WildcardApplied(appliedText, new Highlight(first, last));
     }
 	
 	private static String replaceLiteral(String text, LiteralRange literalRange, String literal) {

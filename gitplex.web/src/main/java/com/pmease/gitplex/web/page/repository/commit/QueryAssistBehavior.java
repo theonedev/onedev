@@ -3,20 +3,20 @@ package com.pmease.gitplex.web.page.repository.commit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.antlr.codeassist.Highlight;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.SurroundingAware;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.pattern.Highlight;
 import com.pmease.commons.util.pattern.WildcardApplied;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
@@ -55,30 +55,30 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
-						String lowerCaseMatchWith = matchWith.toLowerCase();
+						matchWith = matchWith.toLowerCase();
 						int numSuggestions = 0;
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						int tokenType = element.getRoot().getLastMatchedToken().getType();
 						if (tokenType == CommitQueryParser.BRANCH) {
 							for (String value: repoModel.getObject().getBranches()) {
-								int index = value.toLowerCase().indexOf(lowerCaseMatchWith);
+								int index = value.toLowerCase().indexOf(matchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+lowerCaseMatchWith.length());
+									Highlight highlight = new Highlight(index, index+matchWith.length());
 									suggestions.add(new InputSuggestion(value, highlight));
 								}
 							}
 						} else if (tokenType == CommitQueryParser.TAG) {
 							for (String value: repoModel.getObject().getTags()) {
-								int index = value.toLowerCase().indexOf(lowerCaseMatchWith);
+								int index = value.toLowerCase().indexOf(matchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+lowerCaseMatchWith.length());
+									Highlight highlight = new Highlight(index, index+matchWith.length());
 									suggestions.add(new InputSuggestion(value, highlight));
 								}
 							}
 						} else if (tokenType == CommitQueryParser.AUTHOR 
 								|| tokenType == CommitQueryParser.COMMITTER) {
-							suggestions.add(InputSuggestion.hint("Use * to match any string"));
-							Set<String> suggestedInputs = new LinkedHashSet<>();
+							suggestions.add(InputSuggestion.hint("Use * to match any string in name/email"));
+							Map<String, Highlight> suggestedInputs = new LinkedHashMap<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							List<NameAndEmail> contributors = auxiliaryManager.getContributors(repoModel.getObject());
 							for (NameAndEmail contributor: contributors) {
@@ -87,34 +87,30 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									content = contributor.getName() + " <" + contributor.getEmailAddress() + ">";
 								else
 									content = contributor.getName();
-								WildcardApplied applied = WildcardUtils.applyWildcard(content, lowerCaseMatchWith, false);
+								WildcardApplied applied = WildcardUtils.applyWildcard(content, matchWith, false);
 								if (applied != null) {
-									suggestedInputs.add(applied.getText());
+									suggestedInputs.put(applied.getText(), applied.getHighlight());
 									if (suggestedInputs.size() == count)
 										break;
 								}
 							}
 							
-							for (String suggestedInput: suggestedInputs) { 
-								int index = suggestedInput.toLowerCase().indexOf(lowerCaseMatchWith.toLowerCase());
-								Highlight highlight = new Highlight(index, index+lowerCaseMatchWith.length());
-								suggestions.add(new InputSuggestion(suggestedInput, -1, true, null, highlight));
-							}
+							for (Map.Entry<String, Highlight> entry: suggestedInputs.entrySet()) 
+								suggestions.add(new InputSuggestion(entry.getKey(), -1, true, null, entry.getValue()));
 						} else if (tokenType == CommitQueryParser.BEFORE 
 								|| tokenType == CommitQueryParser.AFTER) {
-							if (!lowerCaseMatchWith.endsWith(")")) {
+							if (!matchWith.endsWith(")")) {
 								suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
 								suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
 								for (String dateExample: DATE_EXAMPLES) 
 									suggestions.add(new InputSuggestion(dateExample));
 							}
 						} else if (tokenType == CommitQueryParser.PATH) {
-							long time = System.currentTimeMillis();
-							suggestions.add(InputSuggestion.hint("Use * to match any string"));
+							suggestions.add(InputSuggestion.hint("Use * to match any string in path"));
 							List<WildcardApplied> allApplied = new ArrayList<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							for (String path: auxiliaryManager.getFiles(repoModel.getObject())) {
-								WildcardApplied applied = WildcardUtils.applyWildcard(path, lowerCaseMatchWith, false);
+								WildcardApplied applied = WildcardUtils.applyWildcard(path, matchWith, false);
 								if (applied != null) 
 									allApplied.add(applied);
 							}
@@ -122,38 +118,35 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 								@Override
 								public int compare(WildcardApplied o1, WildcardApplied o2) {
-									return o1.getFrom() - o2.getFrom();
+									return o1.getHighlight().getFrom() - o2.getHighlight().getFrom();
 								}
 								
 							});
 
-							Set<String> suggestedInputs = new LinkedHashSet<>();
+							Map<String, Highlight> suggestedInputs = new LinkedHashMap<>();
 							for (WildcardApplied applied: allApplied) {
-								String suffix = applied.getText().substring(applied.getTo());
+								Highlight highlight = applied.getHighlight();
+								String suffix = applied.getText().substring(highlight.getTo());
 								int index = suffix.indexOf('/');
-								String suggestedInput = applied.getText().substring(0, applied.getTo());
+								String suggestedInput = applied.getText().substring(0, highlight.getTo());
 								if (index != -1)
 									suggestedInput += suffix.substring(0, index) + "/";
 								else
 									suggestedInput += suffix;
-								suggestedInputs.add(suggestedInput);
+								suggestedInputs.put(suggestedInput, highlight);
 								if (suggestedInputs.size() == count)
 									break;
 							}
 							
-							for (String suggestedInput: suggestedInputs) { 
+							for (Map.Entry<String, Highlight> entry: suggestedInputs.entrySet()) { 
+								String text = entry.getKey();
 								int caret;
-								if (suggestedInput.endsWith("/"))
-									caret = suggestedInput.length();
+								if (text.endsWith("/"))
+									caret = text.length();
 								else
 									caret = -1;
-								int index = suggestedInput.toLowerCase().indexOf(lowerCaseMatchWith.toLowerCase());
-								Highlight highlight = new Highlight(index, index+lowerCaseMatchWith.length());
-								suggestions.add(new InputSuggestion(suggestedInput, caret, true, null, highlight));
-								if (suggestions.size() == count)
-									break;
+								suggestions.add(new InputSuggestion(text, caret, true, null, entry.getValue()));
 							}
-							System.out.println(System.currentTimeMillis()-time);
 						}
 						return suggestions;
 					}

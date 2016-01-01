@@ -14,9 +14,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
-import com.pmease.commons.antlr.codeassist.Highlight;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
+import com.pmease.commons.util.pattern.Highlight;
 
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {

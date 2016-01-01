@@ -231,6 +231,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 									if (contributorsChanged.get()) {
 										bytes = SerializationUtils.serialize((Serializable) contributors.get());
 										defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
+										DefaultAuxiliaryManager.this.contributors.remove(repository.getId());
 									}
 									if (filesChanged.get()) {
 										bytes = SerializationUtils.serialize((Serializable) files.get());

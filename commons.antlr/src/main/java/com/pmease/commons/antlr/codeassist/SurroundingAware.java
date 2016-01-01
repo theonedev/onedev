@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.Token;
 
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.Grammar;
+import com.pmease.commons.util.pattern.Highlight;
 
 public abstract class SurroundingAware {
 	
@@ -48,6 +49,7 @@ public abstract class SurroundingAware {
 			List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 			
 			boolean matchWithIncluded = false;
+			boolean hasNonHintSuggestions = false;
 			for (InputSuggestion suggestion: suggestions) {
 				String content = suggestion.getContent();
 				if (content.length() != 0) { // process non-hint suggestions
@@ -65,12 +67,13 @@ public abstract class SurroundingAware {
 					}
 					if (suggestion.getContent().equals(matchWith))
 						matchWithIncluded = true;
+					hasNonHintSuggestions = true;					
 				} else {
 					checkedSuggestions.add(suggestion);
 				}
 			}
 			
-			if (checkedSuggestions.isEmpty()) {
+			if (!hasNonHintSuggestions) {
 				/*
 				 * if matchWith does not appear in suggestion list, we check to see if it should be surrounded. 
 				 * For instance, you may have a rule requiring that value containing spaces should be quoted, 

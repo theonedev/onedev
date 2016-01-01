@@ -17,7 +17,7 @@
 	border-color: #8BC8F9;
 }
 .input-assist .suggestions {
-	max-height: 400px; 
+	max-height: 300px; 
 	overflow: auto;
 }
 .input-assist .description {

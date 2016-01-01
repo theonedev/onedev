@@ -2,6 +2,8 @@ package com.pmease.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.util.pattern.Highlight;
+
 public class InputSuggestion extends InputStatus {
 	
 	private static final long serialVersionUID = 1L;

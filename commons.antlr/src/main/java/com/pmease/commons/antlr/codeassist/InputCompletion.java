@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.util.pattern.Highlight;
+
 public class InputCompletion implements Serializable {
 
 	private static final long serialVersionUID = 1L;

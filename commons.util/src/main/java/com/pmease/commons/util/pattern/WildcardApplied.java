@@ -8,30 +8,23 @@ public class WildcardApplied implements Serializable {
 
 	private final String text;
 	
-	private final int from;
+	private final Highlight highlight;
 	
-	private final int to;
-	
-	public WildcardApplied(String text, int from, int to) {
+	public WildcardApplied(String text, Highlight highlight) {
 		this.text = text;
-		this.from = from;
-		this.to = to;
+		this.highlight = highlight;
 	}
 
 	public String getText() {
 		return text;
 	}
 
-	public int getFrom() {
-		return from;
+	public Highlight getHighlight() {
+		return highlight;
 	}
 
-	public int getTo() {
-		return to;
-	}
-	
 	@Override
 	public String toString() {
-		return text + ":" + from + "-" + to;
+		return text + ":" + highlight;
 	}
 }
