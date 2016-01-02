@@ -41,6 +41,10 @@ public class Chart {
 		this.states = states;
 	}
 	
+	public EarleyParser getParser() {
+		return parser;
+	}
+
 	/**
 	 * Get position of this chart
 	 * 

@@ -48,44 +48,33 @@ public abstract class SurroundingAware {
 		if (suggestions != null) {
 			List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 			
-			boolean matchWithIncluded = false;
-			boolean hasNonHintSuggestions = false;
 			for (InputSuggestion suggestion: suggestions) {
 				String content = suggestion.getContent();
-				if (content.length() != 0) { // process non-hint suggestions
-					int caret = suggestion.getCaret();
-					if (!matches(spec, content)) {
-						content = prefix + content + suffix;
-						Highlight highlight = suggestion.getHighlight();
-						if (caret != -1) 
-							caret += prefix.length();
-						if (highlight != null)
-							highlight = new Highlight(highlight.getFrom()+prefix.length(), highlight.getTo()+prefix.length());
-						checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), highlight));
-					} else {
-						checkedSuggestions.add(suggestion);
-					}
-					if (suggestion.getContent().equals(matchWith))
-						matchWithIncluded = true;
-					hasNonHintSuggestions = true;					
+				int caret = suggestion.getCaret();
+				if (!matches(spec, content)) {
+					content = prefix + content + suffix;
+					Highlight highlight = suggestion.getHighlight();
+					if (caret != -1) 
+						caret += prefix.length();
+					if (highlight != null)
+						highlight = new Highlight(highlight.getFrom()+prefix.length(), highlight.getTo()+prefix.length());
+					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), highlight));
 				} else {
 					checkedSuggestions.add(suggestion);
 				}
 			}
 			
-			if (!hasNonHintSuggestions) {
-				/*
-				 * if matchWith does not appear in suggestion list, we check to see if it should be surrounded. 
-				 * For instance, you may have a rule requiring that value containing spaces should be quoted, 
-				 * in this case, below code will suggest you to quote the value if it contains spaces as 
-				 * otherwise it will fail the match below
-				 */
-				if (!matchWithIncluded && !matches(spec, matchWith)) {
-					matchWith = prefix + matchWith + suffix;
-					if (matches(spec, matchWith)) {
-						Highlight highlight = new Highlight(1, matchWith.length()-1);
-						checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription(), highlight));
-					}
+			/*
+			 * Check to see if the matchWith should be surrounded and return as a suggestion if no other 
+			 * suggestions. For instance, you may have a rule requiring that value containing spaces 
+			 * should be quoted, in this case, below code will suggest you to quote the value if it 
+			 * contains spaces as otherwise it will fail the match below
+			 */
+			if (checkedSuggestions.isEmpty() && !matches(spec, matchWith)) {
+				matchWith = prefix + matchWith + suffix;
+				if (matches(spec, matchWith)) {
+					Highlight highlight = new Highlight(1, matchWith.length()-1);
+					checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription(), highlight));
 				}
 			}
 			return checkedSuggestions;

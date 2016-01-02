@@ -47,9 +47,9 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith, final int count) {
-		if (element.getSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) element.getSpec();
+	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, final int count) {
+		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
 				return new SurroundingAware(codeAssist.getGrammar(), "(", ")") {
 
@@ -58,7 +58,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						matchWith = matchWith.toLowerCase();
 						int numSuggestions = 0;
 						List<InputSuggestion> suggestions = new ArrayList<>();
-						int tokenType = element.getRoot().getLastMatchedToken().getType();
+						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
 						if (tokenType == CommitQueryParser.BRANCH) {
 							for (String value: repoModel.getObject().getBranches()) {
 								int index = value.toLowerCase().indexOf(matchWith);
@@ -77,7 +77,6 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							}
 						} else if (tokenType == CommitQueryParser.AUTHOR 
 								|| tokenType == CommitQueryParser.COMMITTER) {
-							suggestions.add(InputSuggestion.hint("Use * to match any string in name/email"));
 							Map<String, Highlight> suggestedInputs = new LinkedHashMap<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							List<NameAndEmail> contributors = auxiliaryManager.getContributors(repoModel.getObject());
@@ -106,7 +105,6 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									suggestions.add(new InputSuggestion(dateExample));
 							}
 						} else if (tokenType == CommitQueryParser.PATH) {
-							suggestions.add(InputSuggestion.hint("Use * to match any string in path"));
 							List<WildcardApplied> allApplied = new ArrayList<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							for (String path: auxiliaryManager.getFiles(repoModel.getObject())) {
@@ -151,12 +149,33 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						return suggestions;
 					}
 					
-				}.suggest(element.getSpec(), matchWith);
+				}.suggest(expectedElement.getSpec(), matchWith);
 			}
 		} 
 		return null;
 	}
 	
+	@Override
+	protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
+		List<String> hints = new ArrayList<>();
+		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
+			if (spec.getRuleName().equals("Value")) {
+				int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
+				if (tokenType == CommitQueryParser.COMMITTER) {
+					hints.add("Use * to match any part of committer");
+				} else if (tokenType == CommitQueryParser.AUTHOR) {
+					hints.add("Use * to match any part of author");
+				} else if (tokenType == CommitQueryParser.PATH) {
+					hints.add("Use * to match any part of path");
+				} else if (tokenType == CommitQueryParser.MESSAGE) {
+					hints.add("Use * to match any part of message");
+				}
+			}
+		} 
+		return hints;
+	}
+
 	@Override
 	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
 			String suggestedLiteral, boolean complete) {

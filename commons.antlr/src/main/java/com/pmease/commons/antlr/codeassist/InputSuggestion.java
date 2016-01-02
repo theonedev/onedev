@@ -64,8 +64,4 @@ public class InputSuggestion extends InputStatus {
 		return highlight;
 	}
 
-	public static InputSuggestion hint(String hint) {
-		return new InputSuggestion("", -1, false, hint, null);		
-	}
-	
 }

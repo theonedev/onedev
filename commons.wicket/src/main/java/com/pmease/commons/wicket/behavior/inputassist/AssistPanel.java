@@ -27,16 +27,19 @@ class AssistPanel extends Panel {
 	
 	private List<InputCompletion> suggestions;
 	
+	private List<String> hints;
+	
 	private RepeatingView suggestionsView;
 	
 	private int page = 1;
 	
-	public AssistPanel(String id, InputAssistBehavior assistBehavior, 
-			InputStatus inputStatus, List<InputCompletion> suggestions) {
+	public AssistPanel(String id, InputAssistBehavior assistBehavior, InputStatus inputStatus, 
+			List<InputCompletion> suggestions, List<String> hints) {
 		super(id);
 		this.assistBehavior = assistBehavior;
 		this.inputStatus = inputStatus;
 		this.suggestions = suggestions;
+		this.hints = hints;
 	}
 
 	@Override
@@ -45,14 +48,13 @@ class AssistPanel extends Panel {
 		
 		suggestionsView = new RepeatingView("suggestions");
 		add(suggestionsView);
-		RepeatingView contextHintsView = new RepeatingView("contextHints");
-		add(contextHintsView);
-		for (InputCompletion suggestion: suggestions) {
-			if (suggestion.getReplaceContent().length() != 0)
-				suggestionsView.add(newSuggestionItem(suggestionsView.newChildId(), suggestion));
-			else if (suggestion.getDescription() != null)
-				contextHintsView.add(new Label(contextHintsView.newChildId(), suggestion.getDescription()));
-		}
+		for (InputCompletion suggestion: suggestions) 
+			suggestionsView.add(newSuggestionItem(suggestionsView.newChildId(), suggestion));
+
+		RepeatingView hintsView = new RepeatingView("hints");
+		add(hintsView);
+		for (String hint: hints) 
+			hintsView.add(new Label(hintsView.newChildId(), hint));
 		
 		add(new AbstractDefaultAjaxBehavior() {
 

@@ -159,7 +159,8 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 						@Override
 						protected Component newContent(String id) {
-							return new AssistPanel(id, InputAssistBehavior.this, inputStatus, suggestions);
+							return new AssistPanel(id, InputAssistBehavior.this, inputStatus, 
+									suggestions, getHints(inputStatus));
 						}
 
 						@Override
@@ -174,7 +175,8 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 					target.appendJavaScript(script);
 				} else {
 					Component content = dropdown.getContent();
-					Component newContent = new AssistPanel(content.getId(), InputAssistBehavior.this, inputStatus, suggestions);
+					Component newContent = new AssistPanel(content.getId(), InputAssistBehavior.this, 
+							inputStatus, suggestions, getHints(inputStatus));
 					content.replaceWith(newContent);
 					target.add(newContent);
 
@@ -226,8 +228,8 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 	protected abstract List<InputCompletion> getSuggestions(InputStatus inputStatus, int count);
 
-	protected String getHelp(InputStatus inputStatus) {
-		return null;
+	protected List<String> getHints(InputStatus inputStatus) {
+		return new ArrayList<>();
 	}
 	
 	protected abstract List<InputError> getErrors(String inputContent);

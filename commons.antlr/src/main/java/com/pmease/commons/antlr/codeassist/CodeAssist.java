@@ -39,7 +39,7 @@ public abstract class CodeAssist implements Serializable {
 	public CodeAssist(Grammar grammar) {
 		this.grammar = grammar;
 	}
-
+	
 	/**
 	 * Code assist constructor
 	 * @param lexerClass
@@ -64,6 +64,22 @@ public abstract class CodeAssist implements Serializable {
 		this(new Grammar(lexerClass, grammarFiles, tokenFile));
 	}
 	
+	public List<String> getHints(InputStatus inputStatus, String ruleName) {
+		RuleSpec rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
+		List<Token> tokens = grammar.lex(inputStatus.getContentBeforeCaret());
+		EarleyParser parser = new EarleyParser(rule, tokens);
+		
+		List<String> hints = new ArrayList<>();
+		for (Chart chart: getTerminatingCharts(parser)) {
+			String matchWith = getMatchWith(chart, inputStatus);
+			for (List<ParentedElement> expectChain: getExpectChains(chart)) {
+				for (ParentedElement element: expectChain) 
+					hints.addAll(getHints(element, matchWith));
+			}
+		}
+		return hints;
+	}
+	
 	public List<InputCompletion> suggest(InputStatus inputStatus, String ruleName, int count) {
 		RuleSpec rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
 		
@@ -82,23 +98,19 @@ public abstract class CodeAssist implements Serializable {
 		 */
 		Map<String, List<ElementCompletion>> grouped = new LinkedHashMap<>();
 		for (ElementCompletion elementCompletion: suggest(rule, inputStatus, count)) {
-			if (elementCompletion.getReplaceContent().length() == 0) { // if this is input hint
-				inputCompletions.add(new InputCompletion(elementCompletion));
-			} else {
-				/*
-				 *  key will be the new input (without considering mandatories of course), and we use 
-				 *  this to group suggestions to facilitate mandatories calculation and exclusion 
-				 *  logic 
-				 */
-				String key = inputContent.substring(0, elementCompletion.getReplaceBegin()) 
-						+ elementCompletion.getReplaceContent() + inputContent.substring(elementCompletion.getReplaceEnd());
-				List<ElementCompletion> value = grouped.get(key);
-				if (value == null) {
-					value = new ArrayList<>();
-					grouped.put(key, value);
-				}
-				value.add(elementCompletion);
+			/*
+			 *  key will be the new input (without considering mandatories of course), and we use 
+			 *  this to group suggestions to facilitate mandatories calculation and exclusion 
+			 *  logic 
+			 */
+			String key = inputContent.substring(0, elementCompletion.getReplaceBegin()) 
+					+ elementCompletion.getReplaceContent() + inputContent.substring(elementCompletion.getReplaceEnd());
+			List<ElementCompletion> value = grouped.get(key);
+			if (value == null) {
+				value = new ArrayList<>();
+				grouped.put(key, value);
 			}
+			value.add(elementCompletion);
 		}
 		
 		for (Map.Entry<String, List<ElementCompletion>> entry: grouped.entrySet())	 {
@@ -187,14 +199,11 @@ public abstract class CodeAssist implements Serializable {
 		 */
 		Set<String> suggestedContents = Sets.newHashSet(inputStatus.getContent());
 		for (Iterator<InputCompletion> it = inputCompletions.iterator(); it.hasNext();) {
-			InputCompletion completion = it.next();
-			if (completion.getReplaceContent().length() != 0) { // remove non-hint duplicate suggestions
-				String content = completion.complete(inputStatus).getContent();
-				if (suggestedContents.contains(content))
-					it.remove();
-				else
-					suggestedContents.add(content);
-			}
+			String content = it.next().complete(inputStatus).getContent();
+			if (suggestedContents.contains(content))
+				it.remove();
+			else
+				suggestedContents.add(content);
 		}
 		return inputCompletions;
 	}
@@ -234,19 +243,10 @@ public abstract class CodeAssist implements Serializable {
 		}
 	}
 
-	private List<ElementSuggestion> suggest(EarleyParser parser, Chart chart, InputStatus inputStatus, int count) {
-		List<ElementSuggestion> suggestions = new ArrayList<>();
+	private List<List<ParentedElement>> getExpectChains(Chart chart) {
 		int position = chart.getPosition();
-		String matchWith;
-		Token token = chart.getOriginatingToken();
-		if (token != null) {
-			int endCharIndex = token.getStopIndex()+1;
-			matchWith = inputStatus.getContent().substring(endCharIndex, inputStatus.getCaret());
-		} else {
-			matchWith = inputStatus.getContentBeforeCaret();
-		}
-		matchWith = StringUtils.trimStart(matchWith);
-
+		EarleyParser parser = chart.getParser();
+		List<List<ParentedElement>> expectChains = new ArrayList<>();
 		for (State stateExpectingTerminal: chart.getStatesExpectingTerminal()) {
 			List<Element> elements = new ArrayList<>(stateExpectingTerminal.getElements());
 			elements.add(new Element(parser, stateExpectingTerminal.getExpectedElementSpec(), 0, null));
@@ -266,10 +266,10 @@ public abstract class CodeAssist implements Serializable {
 				if (stateAssumeCompleted.getRuleSpec().getName().equals(parser.getRule().getName()) 
 						&& stateAssumeCompleted.getOriginPosition() == 0) {
 					Element rootElement = new Element(parser, null, position, stateAssumeCompleted);
-					List<ParentedElement> expectedElements = new ArrayList<>();
+					List<ParentedElement> expectChain = new ArrayList<>();
 					
 					ParentedElement elementExpectingTerminal = getElementExpectingTerminal(null, rootElement);
-					expectedElements.add(elementExpectingTerminal);
+					expectChain.add(elementExpectingTerminal);
 					
 					/*
 					 * Find out all parent elements not containing any matched tokens, and we will 
@@ -280,46 +280,69 @@ public abstract class CodeAssist implements Serializable {
 					ParentedElement expectedElement = elementExpectingTerminal.getParent();
 					while (expectedElement != null) {
 						if (expectedElement.getState().getElements().size() == 1) {
-							expectedElements.add(expectedElement);
+							expectChain.add(expectedElement);
 							expectedElement = expectedElement.getParent();
 						} else {
 							break;
 						}
 					}
 					
-					// go from top to down to check if there are suggestions for expected element 
-					List<InputSuggestion> inputSuggestions = null;
-					for (ParentedElement element: expectedElements) {
-						inputSuggestions = suggest(element, matchWith, count);
-						if (inputSuggestions != null) {
-							for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
-								InputSuggestion suggestion = it.next();
-								if (suggestion.getContent().length() != 0 && suggestion.getContent().equals(matchWith))
-									it.remove();
-							}
-							if (!inputSuggestions.isEmpty())
-								suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
-							break;
-						}
+					expectChains.add(expectChain);
+				}
+			}
+		}
+		return expectChains;
+	}
+	
+	private String getMatchWith(Chart chart, InputStatus inputStatus) {
+		String matchWith;
+		Token token = chart.getOriginatingToken();
+		if (token != null) {
+			int endCharIndex = token.getStopIndex()+1;
+			matchWith = inputStatus.getContent().substring(endCharIndex, inputStatus.getCaret());
+		} else {
+			matchWith = inputStatus.getContentBeforeCaret();
+		}
+		return StringUtils.trimStart(matchWith);
+	}
+	
+	private List<ElementSuggestion> suggest(Chart chart, InputStatus inputStatus, int count) {
+		List<ElementSuggestion> suggestions = new ArrayList<>();
+		String matchWith = getMatchWith(chart, inputStatus);
+		
+		for (List<ParentedElement> expectChain: getExpectChains(chart)) {
+			// goes through the expect chain to check if there are suggestions for expected element 
+			List<InputSuggestion> inputSuggestions = null;
+			for (ParentedElement element: expectChain) {
+				inputSuggestions = suggest(element, matchWith, count);
+				if (inputSuggestions != null) {
+					for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
+						InputSuggestion suggestion = it.next();
+						if (suggestion.getContent().length() != 0 && suggestion.getContent().equals(matchWith))
+							it.remove();
 					}
-					
-					// no suggestions, let's see if we can provide some default suggestions 
-					if (inputSuggestions == null && elementExpectingTerminal.getSpec() instanceof TokenElementSpec) {
-						inputSuggestions = new ArrayList<>();
-						TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
-						for (String leadingLiteral: spec.getLeadingLiterals()) {
-							if (leadingLiteral.startsWith(matchWith) && leadingLiteral.length()>matchWith.length()) {
-								List<Token> tokens = grammar.lex(leadingLiteral);
-								boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
-								InputSuggestion suggestion = wrapAsSuggestion(elementExpectingTerminal, leadingLiteral, complete);
-								if (suggestion != null)
-									inputSuggestions.add(suggestion);
-							}
-						}
-						if (!inputSuggestions.isEmpty())
-							suggestions.add(new ElementSuggestion(elementExpectingTerminal, matchWith, inputSuggestions));
+					if (!inputSuggestions.isEmpty())
+						suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
+					break;
+				}
+			}
+			
+			ParentedElement elementExpectingTerminal = expectChain.get(0);
+			// no suggestions, let's see if we can provide some default suggestions 
+			if (inputSuggestions == null && elementExpectingTerminal.getSpec() instanceof TokenElementSpec) {
+				inputSuggestions = new ArrayList<>();
+				TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
+				for (String leadingLiteral: spec.getLeadingLiterals()) {
+					if (leadingLiteral.startsWith(matchWith) && leadingLiteral.length()>matchWith.length()) {
+						List<Token> tokens = grammar.lex(leadingLiteral);
+						boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
+						InputSuggestion suggestion = wrapAsSuggestion(elementExpectingTerminal, leadingLiteral, complete);
+						if (suggestion != null)
+							inputSuggestions.add(suggestion);
 					}
 				}
+				if (!inputSuggestions.isEmpty())
+					suggestions.add(new ElementSuggestion(elementExpectingTerminal, matchWith, inputSuggestions));
 			}
 		}
 		
@@ -355,18 +378,11 @@ public abstract class CodeAssist implements Serializable {
 		return suggestions;
  	}
 	
-	private List<ElementCompletion> suggest(RuleSpec spec, InputStatus inputStatus, int count) {
-		List<ElementCompletion> completions = new ArrayList<>();
+	private List<Chart> getTerminatingCharts(EarleyParser parser) {
+		List<Chart> terminatingCharts = new ArrayList<>();
 		
-		List<ElementSuggestion> suggestions = new ArrayList<>();
-		
-		List<Token> tokens = grammar.lex(inputStatus.getContentBeforeCaret());
-		EarleyParser parser = new EarleyParser(spec, tokens);
-		
-		if (parser.getCharts().size() >= 1) {
-			Chart lastState = parser.getCharts().get(parser.getCharts().size()-1);
-			suggestions.addAll(suggest(parser, lastState, inputStatus, count));
-		}
+		if (parser.getCharts().size() >= 1)
+			terminatingCharts.add(parser.getCharts().get(parser.getCharts().size()-1));
 
 		/*
 		 * do another match by not considering the last matched token. This is useful
@@ -380,11 +396,23 @@ public abstract class CodeAssist implements Serializable {
 		 * if user input value containing spaces without surrounding quotes, we 
 		 * suggest the user to quote the value. 
 		 */
-		if (parser.getCharts().size() >= 2) {
-			Chart stateBeforeLast = parser.getCharts().get(parser.getCharts().size()-2);
-			suggestions.addAll(suggest(parser, stateBeforeLast, inputStatus, count));
-		}
+		if (parser.getCharts().size() >= 2) 
+			terminatingCharts.add(parser.getCharts().get(parser.getCharts().size()-2));
+		
+		return terminatingCharts;
+	}
+	
+	private List<ElementCompletion> suggest(RuleSpec spec, InputStatus inputStatus, int count) {
+		List<ElementCompletion> completions = new ArrayList<>();
+		
+		List<ElementSuggestion> suggestions = new ArrayList<>();
 
+		List<Token> tokens = grammar.lex(inputStatus.getContentBeforeCaret());
+		EarleyParser parser = new EarleyParser(spec, tokens);
+		
+		for (Chart chart: getTerminatingCharts(parser))
+			suggestions.addAll(suggest(chart, inputStatus, count));
+		
 		String inputContent = inputStatus.getContent();
 		for (ElementSuggestion suggestion: suggestions) {
 			int replaceBegin = inputStatus.getCaret() - suggestion.getMatchWith().length();
@@ -523,6 +551,10 @@ public abstract class CodeAssist implements Serializable {
 	 */
 	@Nullable
 	protected abstract List<InputSuggestion> suggest(ParentedElement expectedElement, String matchWith, int count);
+	
+	protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
+		return new ArrayList<>();
+	}
 
 	/**
 	 * Wrap specified literal of specified terminal element as suggestion.

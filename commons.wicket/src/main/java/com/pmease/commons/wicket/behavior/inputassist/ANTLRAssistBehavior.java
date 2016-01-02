@@ -69,6 +69,11 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			}
 
 			@Override
+			protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
+				return ANTLRAssistBehavior.this.getHints(expectedElement, matchWith);
+			}
+
+			@Override
 			protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, String suggestedLiteral,
 					boolean complete) {
 				return ANTLRAssistBehavior.this.wrapAsSuggestion(expectedElement, suggestedLiteral, complete);
@@ -192,6 +197,15 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	}
 
 	protected abstract List<InputSuggestion> suggest(ParentedElement element, String matchWith, int count);
+	
+	@Override
+	protected final List<String> getHints(InputStatus inputStatus) {
+		return codeAssist.getHints(inputStatus, ruleName);
+	}
+
+	protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
+		return new ArrayList<>();
+	}
 	
 	@Nullable
 	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 

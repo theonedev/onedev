@@ -157,9 +157,9 @@ pmease.commons.inputassist = {
 	
 	updateHelp: function($dropdown) {
 		if ($dropdown.find("tr.active").length != 0) {
-			$dropdown.find(".hint>.completion").empty().append("Press 'enter' to complete selected item");
+			$dropdown.find(".help>.completion").empty().append("Press 'enter' to complete selected item");
 		} else {
-			$dropdown.find(".hint>.completion").empty().append("Press 'tab' to complete first item");
+			$dropdown.find(".help>.completion").empty().append("Press 'tab' to complete first item");
 		}
 	}
 }
