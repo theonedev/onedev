@@ -417,23 +417,28 @@ public abstract class CodeAssist implements Serializable {
 		for (ElementSuggestion suggestion: suggestions) {
 			int replaceBegin = inputStatus.getCaret() - suggestion.getMatchWith().length();
 			int replaceEnd = inputStatus.getCaret();
-
+			
 			/*
 			 * if input around the caret matches spec of the suggestion, we then replace 
 			 * the matched text with suggestion, instead of simply inserting the 
 			 * suggested content
 			 */
-			tokens = grammar.lex(inputContent.substring(replaceBegin));
-			if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {   
-				ElementSpec elementSpec = (ElementSpec) suggestion.getExpectedElement().getSpec();
-				int endOfMatch = elementSpec.getEndOfMatch(tokens);
-				if (endOfMatch > 0) { // there exist an element match
-					int charIndex = replaceBegin + tokens.get(endOfMatch-1).getStopIndex()+1;
-					if (charIndex > replaceEnd)
-						replaceEnd = charIndex;
-				}
-			}
+			ElementSpec elementSpec = suggestion.getExpectedElement().getSpec();
+			String contentAfterReplaceBegin = inputContent.substring(replaceBegin);
 
+			tokens = grammar.lex(contentAfterReplaceBegin);
+			if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {   
+				int endOfMatch = getEndOfMatch(elementSpec, contentAfterReplaceBegin);
+				if (endOfMatch <= 0) {
+					endOfMatch = elementSpec.getEndOfMatch(tokens);
+					if (endOfMatch > 0) // there exist an element match
+						endOfMatch = tokens.get(endOfMatch-1).getStopIndex()+1; // convert to char index
+				}
+				endOfMatch += replaceBegin;
+				if (endOfMatch > replaceEnd)
+					replaceEnd = endOfMatch; 
+			}
+			
 			String before = inputContent.substring(0, replaceBegin);
 
 			for (InputSuggestion inputSuggestion: suggestion.getInputSuggestions()) {
@@ -556,6 +561,10 @@ public abstract class CodeAssist implements Serializable {
 		return new ArrayList<>();
 	}
 
+	protected int getEndOfMatch(ElementSpec spec, String content) {
+		return 0;
+	}
+	
 	/**
 	 * Wrap specified literal of specified terminal element as suggestion.
 	 * 

@@ -11,7 +11,7 @@ import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.Grammar;
 import com.pmease.commons.util.pattern.Highlight;
 
-public abstract class SurroundingAware {
+public abstract class SurroundAware {
 	
 	private final Grammar grammar;
 	
@@ -19,7 +19,7 @@ public abstract class SurroundingAware {
 	
 	private final String suffix;
 	
-	public SurroundingAware(Grammar grammar, String prefix, String suffix) {
+	public SurroundAware(Grammar grammar, String prefix, String suffix) {
 		this.grammar = grammar;
 		this.prefix = prefix;
 		this.suffix = suffix;
@@ -74,7 +74,7 @@ public abstract class SurroundingAware {
 				matchWith = prefix + matchWith + suffix;
 				if (matches(spec, matchWith)) {
 					Highlight highlight = new Highlight(1, matchWith.length()-1);
-					checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundingDescription(), highlight));
+					checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundDescription(), highlight));
 				}
 			}
 			return checkedSuggestions;
@@ -83,7 +83,7 @@ public abstract class SurroundingAware {
 		}
 	}
 	
-	protected String getSurroundingDescription() {
+	protected String getSurroundDescription() {
 		return null;
 	}
 	

@@ -12,7 +12,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.codeassist.SurroundingAware;
+import com.pmease.commons.antlr.codeassist.SurroundAware;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.StringUtils;
@@ -51,7 +51,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
-				return new SurroundingAware(codeAssist.getGrammar(), "(", ")") {
+				return new SurroundAware(codeAssist.getGrammar(), "(", ")") {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {

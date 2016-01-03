@@ -26,6 +26,7 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
+import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
@@ -78,6 +79,11 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 					boolean complete) {
 				return ANTLRAssistBehavior.this.wrapAsSuggestion(expectedElement, suggestedLiteral, complete);
 			}
+
+			@Override
+			protected int getEndOfMatch(ElementSpec spec, String content) {
+				return ANTLRAssistBehavior.this.getEndOfMatch(spec, content);
+			}
 			
 		};
 		this.ruleName = ruleName;
@@ -86,6 +92,10 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	@Override
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
 		return codeAssist.suggest(inputStatus, ruleName, count);
+	}
+	
+	protected int getEndOfMatch(ElementSpec spec, String content) {
+		return 0;
 	}
 	
 	private Constructor<? extends Lexer> getLexerCtor() {

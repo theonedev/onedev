@@ -12,7 +12,7 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.codeassist.SurroundingAware;
+import com.pmease.commons.antlr.codeassist.SurroundAware;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.parser.Element;
 
@@ -29,7 +29,7 @@ public class CodeAssistTest3 {
 			if (element.getSpec() instanceof RuleRefElementSpec) {
 				RuleRefElementSpec spec = (RuleRefElementSpec) element.getSpec();
 				if (spec.getRuleName().equals("value")) {
-					return new SurroundingAware(codeAssist.getGrammar(), "\"", "\"") {
+					return new SurroundAware(codeAssist.getGrammar(), "\"", "\"") {
 
 						@Override
 						protected List<InputSuggestion> match(String matchWith) {
