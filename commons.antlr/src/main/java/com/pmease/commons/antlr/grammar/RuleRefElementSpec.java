@@ -55,10 +55,15 @@ public class RuleRefElementSpec extends ElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals() {
-		return getRule().getLeadingLiterals();
+	public Set<String> getPossiblePrefixes() {
+		return getRule().getPossiblePrefixes();
 	}
 
+	@Override
+	public Set<String> getPossibleSuffixes() {
+		return getRule().getPossibleSuffixes();
+	}
+	
 	@Override
 	protected boolean isAllowEmptyOnce() {
 		return getRule().isAllowEmpty();

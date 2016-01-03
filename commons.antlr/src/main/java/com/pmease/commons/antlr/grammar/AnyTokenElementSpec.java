@@ -29,10 +29,15 @@ public class AnyTokenElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals() {
+	public Set<String> getPossiblePrefixes() {
 		return Sets.newLinkedHashSet();
 	}
 
+	@Override
+	public Set<String> getPossibleSuffixes() {
+		return Sets.newLinkedHashSet();
+	}
+	
 	@Override
 	protected boolean isAllowEmptyOnce() {
 		return false;

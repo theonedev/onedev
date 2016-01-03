@@ -34,10 +34,17 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals() {
-		Set<String> leadingChoices = new LinkedHashSet<>();
-		leadingChoices.add(literal);
-		return leadingChoices;
+	public Set<String> getPossiblePrefixes() {
+		Set<String> possiblePrefixes = new LinkedHashSet<>();
+		possiblePrefixes.add(literal);
+		return possiblePrefixes;
+	}
+
+	@Override
+	public Set<String> getPossibleSuffixes() {
+		Set<String> possibleSuffixes = new LinkedHashSet<>();
+		possibleSuffixes.add(literal);
+		return possibleSuffixes;
 	}
 
 	@Override

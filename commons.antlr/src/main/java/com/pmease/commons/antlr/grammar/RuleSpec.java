@@ -19,7 +19,9 @@ public class RuleSpec implements Serializable {
 	
 	private final List<AlternativeSpec> alternatives;
 	
-	private Set<String> leadingLiterals;
+	private Set<String> possiblePrefixes;
+	
+	private Set<String> possibleSuffixes;
 	
 	private Boolean allowEmpty;
 	
@@ -80,28 +82,53 @@ public class RuleSpec implements Serializable {
 		return mandatoryScan;
 	}
 	
-	private Set<String> doGetLeadingLiterals() {
-		Set<String> leadingChoices = new LinkedHashSet<>();
+	private Set<String> doGetPossiblePrefixes() {
+		Set<String> possiblePrefixes = new LinkedHashSet<>();
 		
 		for (AlternativeSpec alternative: alternatives) {
 			for (ElementSpec elementSpec: alternative.getElements()) {
-				leadingChoices.addAll(elementSpec.getLeadingLiterals());
+				possiblePrefixes.addAll(elementSpec.getPossiblePrefixes());
 				if (!elementSpec.isAllowEmpty())
 					break;
 			}
 		}
-		return leadingChoices;
+		return possiblePrefixes;
 	}
 
-	public Set<String> getLeadingLiterals() {
-		if (leadingLiterals == null) {
+	public Set<String> getPossiblePrefixes() {
+		if (possiblePrefixes == null) {
 			// initialize this to return a meaningful value in case this method is 
 			// invoked recursively
-			leadingLiterals = new LinkedHashSet<>();
+			possiblePrefixes = new LinkedHashSet<>();
 			
-			leadingLiterals = doGetLeadingLiterals();
+			possiblePrefixes = doGetPossiblePrefixes();
 		}
-		return leadingLiterals;
+		return possiblePrefixes;
+	}
+
+	private Set<String> doGetPossibleSuffixes() {
+		Set<String> possibleSuffixes = new LinkedHashSet<>();
+		
+		for (AlternativeSpec alternative: alternatives) {
+			for (int i=alternative.getElements().size()-1; i>=0; i--) {
+				ElementSpec elementSpec = alternative.getElements().get(i);
+				possibleSuffixes.addAll(elementSpec.getPossibleSuffixes());
+				if (!elementSpec.isAllowEmpty())
+					break;
+			}
+		}
+		return possibleSuffixes;
+	}
+
+	public Set<String> getPossibleSuffixes() {
+		if (possibleSuffixes == null) {
+			// initialize this to return a meaningful value in case this method is 
+			// invoked recursively
+			possibleSuffixes = new LinkedHashSet<>();
+			
+			possibleSuffixes = doGetPossibleSuffixes();
+		}
+		return possibleSuffixes;
 	}
 
 	private boolean doIsAllowEmpty() {

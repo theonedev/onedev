@@ -332,7 +332,7 @@ public abstract class CodeAssist implements Serializable {
 			if (inputSuggestions == null && elementExpectingTerminal.getSpec() instanceof TokenElementSpec) {
 				inputSuggestions = new ArrayList<>();
 				TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
-				for (String leadingLiteral: spec.getLeadingLiterals()) {
+				for (String leadingLiteral: spec.getPossiblePrefixes()) {
 					if (leadingLiteral.startsWith(matchWith) && leadingLiteral.length()>matchWith.length()) {
 						List<Token> tokens = grammar.lex(leadingLiteral);
 						boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 

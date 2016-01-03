@@ -52,9 +52,17 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getLeadingLiterals() {
+	public Set<String> getPossiblePrefixes() {
 		if (getRule() != null)
-			return getRule().getLeadingLiterals();
+			return getRule().getPossiblePrefixes();
+		else
+			return Sets.newLinkedHashSet();
+	}
+
+	@Override
+	public Set<String> getPossibleSuffixes() {
+		if (getRule() != null)
+			return getRule().getPossibleSuffixes();
 		else
 			return Sets.newLinkedHashSet();
 	}
