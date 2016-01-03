@@ -49,11 +49,6 @@ public class NotTokenElementSpec extends TerminalElementSpec {
 	}
 
 	@Override
-	public Set<String> getPossibleSuffixes() {
-		return Sets.newLinkedHashSet();
-	}
-	
-	@Override
 	protected boolean isAllowEmptyOnce() {
 		return false;
 	}

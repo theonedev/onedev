@@ -95,7 +95,14 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	}
 	
 	protected int getEndOfMatch(ElementSpec spec, String content) {
-		return 0;
+		int endOfMatch = 0;
+		List<Token> tokens = codeAssist.getGrammar().lex(content);
+		if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {   
+			endOfMatch = spec.getEndOfMatch(tokens);
+			if (endOfMatch > 0) // there exist an element match
+				endOfMatch = tokens.get(endOfMatch-1).getStopIndex()+1; // convert to char index
+		}
+		return endOfMatch;
 	}
 	
 	private Constructor<? extends Lexer> getLexerCtor() {

@@ -21,8 +21,6 @@ public class RuleSpec implements Serializable {
 	
 	private Set<String> possiblePrefixes;
 	
-	private Set<String> possibleSuffixes;
-	
 	private Boolean allowEmpty;
 	
 	private MandatoryScan mandatoryScan;
@@ -104,31 +102,6 @@ public class RuleSpec implements Serializable {
 			possiblePrefixes = doGetPossiblePrefixes();
 		}
 		return possiblePrefixes;
-	}
-
-	private Set<String> doGetPossibleSuffixes() {
-		Set<String> possibleSuffixes = new LinkedHashSet<>();
-		
-		for (AlternativeSpec alternative: alternatives) {
-			for (int i=alternative.getElements().size()-1; i>=0; i--) {
-				ElementSpec elementSpec = alternative.getElements().get(i);
-				possibleSuffixes.addAll(elementSpec.getPossibleSuffixes());
-				if (!elementSpec.isAllowEmpty())
-					break;
-			}
-		}
-		return possibleSuffixes;
-	}
-
-	public Set<String> getPossibleSuffixes() {
-		if (possibleSuffixes == null) {
-			// initialize this to return a meaningful value in case this method is 
-			// invoked recursively
-			possibleSuffixes = new LinkedHashSet<>();
-			
-			possibleSuffixes = doGetPossibleSuffixes();
-		}
-		return possibleSuffixes;
 	}
 
 	private boolean doIsAllowEmpty() {

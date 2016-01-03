@@ -426,18 +426,10 @@ public abstract class CodeAssist implements Serializable {
 			ElementSpec elementSpec = suggestion.getExpectedElement().getSpec();
 			String contentAfterReplaceBegin = inputContent.substring(replaceBegin);
 
+			int endOfMatch = getEndOfMatch(elementSpec, contentAfterReplaceBegin) + replaceBegin;
 			tokens = grammar.lex(contentAfterReplaceBegin);
-			if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {   
-				int endOfMatch = getEndOfMatch(elementSpec, contentAfterReplaceBegin);
-				if (endOfMatch <= 0) {
-					endOfMatch = elementSpec.getEndOfMatch(tokens);
-					if (endOfMatch > 0) // there exist an element match
-						endOfMatch = tokens.get(endOfMatch-1).getStopIndex()+1; // convert to char index
-				}
-				endOfMatch += replaceBegin;
-				if (endOfMatch > replaceEnd)
-					replaceEnd = endOfMatch; 
-			}
+			if (endOfMatch > replaceEnd)
+				replaceEnd = endOfMatch; 
 			
 			String before = inputContent.substring(0, replaceBegin);
 
@@ -561,8 +553,26 @@ public abstract class CodeAssist implements Serializable {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * Get index of next character after the match. 
+	 * 
+	 * @param spec
+	 * 			spec to be matched
+	 * @param content
+	 * 			content to match against
+	 * @return
+	 * 			index of next character after the match, or 0 if the rule 
+	 * 			does not match any part of the string
+	 */
 	protected int getEndOfMatch(ElementSpec spec, String content) {
-		return 0;
+		int endOfMatch = 0;
+		List<Token> tokens = grammar.lex(content);
+		if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {   
+			endOfMatch = spec.getEndOfMatch(tokens);
+			if (endOfMatch > 0) // there exist an element match
+				endOfMatch = tokens.get(endOfMatch-1).getStopIndex()+1; // convert to char index
+		}
+		return endOfMatch;
 	}
 	
 	/**

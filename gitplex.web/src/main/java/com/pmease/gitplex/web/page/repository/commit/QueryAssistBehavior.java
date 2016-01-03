@@ -13,6 +13,7 @@ import org.apache.wicket.model.IModel;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.SurroundAware;
+import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.StringUtils;
@@ -148,6 +149,11 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						}
 						return suggestions;
 					}
+
+					@Override
+					protected String getSurroundDescription() {
+						return "value needs to be enclosed in brackets";
+					}
 					
 				}.suggest(expectedElement.getSpec(), matchWith);
 			}
@@ -174,6 +180,14 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		return hints;
+	}
+
+	@Override
+	protected int getEndOfMatch(ElementSpec spec, String content) {
+		if (content.startsWith("()"))
+			return 2;
+		else
+			return super.getEndOfMatch(spec, content);
 	}
 
 	@Override

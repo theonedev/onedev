@@ -41,8 +41,6 @@ public abstract class ElementSpec implements Serializable {
 	
 	public abstract Set<String> getPossiblePrefixes();
 	
-	public abstract Set<String> getPossibleSuffixes();
-	
 	protected abstract boolean isAllowEmptyOnce();
 	
 	public boolean isAllowEmpty() {
@@ -71,11 +69,8 @@ public abstract class ElementSpec implements Serializable {
 	 * @param tokens
 	 * 			tokens to match against
 	 * @return
-	 * 			next token index after the match.
-	 * 			<ul><li>greater than 0 if the element matches part of the tokens
-	 * 			<li>0 if the element does not match any tokens, and the element allows to be empty
-	 * 			<li>-1 if the element does not match any tokens, and the element does not allow 
-	 * 			to be empty
+	 * 			index of next token after the match, or 0 if the spec does not 
+	 * 			match any tokens
 	 */
 	public abstract int getEndOfMatch(List<Token> tokens);
 	

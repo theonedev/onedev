@@ -41,13 +41,6 @@ public class LiteralElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getPossibleSuffixes() {
-		Set<String> possibleSuffixes = new LinkedHashSet<>();
-		possibleSuffixes.add(literal);
-		return possibleSuffixes;
-	}
-
-	@Override
 	protected boolean isAllowEmptyOnce() {
 		return false;
 	}

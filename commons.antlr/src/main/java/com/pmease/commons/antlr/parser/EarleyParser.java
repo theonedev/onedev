@@ -185,11 +185,7 @@ public class EarleyParser {
 	 * @param tokens
 	 * 			tokens to match against
 	 * @return
-	 * 			next token index after the match.
-	 * 			<ul><li>greater than 0 if the rule matches part of the tokens
-	 * 			<li>0 if the rule does not match any tokens, and the rule allows to be empty
-	 * 			<li>-1 if the rule does not match any tokens, and the rule does not allow 
-	 * 			to be empty
+	 * 			index of next token after the match, or 0 if the rule does not match any tokens
 	 */
 	public int getEndOfMatch() {
 		for (int i=charts.size()-1; i>=0; i--) {
@@ -197,7 +193,7 @@ public class EarleyParser {
 			if (!state.getMatches().isEmpty())
 				return i;
 		}
-		return -1;
+		return 0;
 	}
 	
 }

@@ -60,14 +60,6 @@ public class LexerRuleRefElementSpec extends TokenElementSpec {
 	}
 
 	@Override
-	public Set<String> getPossibleSuffixes() {
-		if (getRule() != null)
-			return getRule().getPossibleSuffixes();
-		else
-			return Sets.newLinkedHashSet();
-	}
-
-	@Override
 	protected boolean isAllowEmptyOnce() {
 		if (getRule() != null)
 			return getRule().isAllowEmpty();
