@@ -55,29 +55,32 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 				return new SurroundAware(codeAssist.getGrammar(), "(", ")") {
 
 					@Override
-					protected List<InputSuggestion> match(String matchWith) {
-						matchWith = matchWith.toLowerCase();
+					protected List<InputSuggestion> match(String unsurroundedMatchWith) {
+						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
+						unsurroundedMatchWith = unsurroundedMatchWith.toLowerCase();
 						int numSuggestions = 0;
 						List<InputSuggestion> suggestions = new ArrayList<>();
-						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
-						if (tokenType == CommitQueryParser.BRANCH) {
+						switch (tokenType) {
+						case CommitQueryParser.BRANCH:
 							for (String value: repoModel.getObject().getBranches()) {
-								int index = value.toLowerCase().indexOf(matchWith);
+								int index = value.toLowerCase().indexOf(unsurroundedMatchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+matchWith.length());
+									Highlight highlight = new Highlight(index, index+unsurroundedMatchWith.length());
 									suggestions.add(new InputSuggestion(value, highlight));
 								}
 							}
-						} else if (tokenType == CommitQueryParser.TAG) {
+							break;
+						case CommitQueryParser.TAG:
 							for (String value: repoModel.getObject().getTags()) {
-								int index = value.toLowerCase().indexOf(matchWith);
+								int index = value.toLowerCase().indexOf(unsurroundedMatchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+matchWith.length());
+									Highlight highlight = new Highlight(index, index+unsurroundedMatchWith.length());
 									suggestions.add(new InputSuggestion(value, highlight));
 								}
 							}
-						} else if (tokenType == CommitQueryParser.AUTHOR 
-								|| tokenType == CommitQueryParser.COMMITTER) {
+							break;
+						case CommitQueryParser.AUTHOR:
+						case CommitQueryParser.COMMITTER:
 							Map<String, Highlight> suggestedInputs = new LinkedHashMap<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							List<NameAndEmail> contributors = auxiliaryManager.getContributors(repoModel.getObject());
@@ -87,7 +90,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									content = contributor.getName() + " <" + contributor.getEmailAddress() + ">";
 								else
 									content = contributor.getName();
-								WildcardApplied applied = WildcardUtils.applyWildcard(content, matchWith, false);
+								WildcardApplied applied = WildcardUtils.applyWildcard(content, unsurroundedMatchWith, false);
 								if (applied != null) {
 									suggestedInputs.put(applied.getText(), applied.getHighlight());
 									if (suggestedInputs.size() == count)
@@ -97,19 +100,21 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							
 							for (Map.Entry<String, Highlight> entry: suggestedInputs.entrySet()) 
 								suggestions.add(new InputSuggestion(entry.getKey(), -1, true, null, entry.getValue()));
-						} else if (tokenType == CommitQueryParser.BEFORE 
-								|| tokenType == CommitQueryParser.AFTER) {
-							if (!matchWith.endsWith(")")) {
+							break;
+						case CommitQueryParser.BEFORE:
+						case CommitQueryParser.AFTER:
+							if (!unsurroundedMatchWith.endsWith(")")) {
 								suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
 								suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
 								for (String dateExample: DATE_EXAMPLES) 
 									suggestions.add(new InputSuggestion(dateExample));
 							}
-						} else if (tokenType == CommitQueryParser.PATH) {
+							break;
+						case CommitQueryParser.PATH:
 							List<WildcardApplied> allApplied = new ArrayList<>();
-							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
+							auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							for (String path: auxiliaryManager.getFiles(repoModel.getObject())) {
-								WildcardApplied applied = WildcardUtils.applyWildcard(path, matchWith, false);
+								WildcardApplied applied = WildcardUtils.applyWildcard(path, unsurroundedMatchWith, false);
 								if (applied != null) 
 									allApplied.add(applied);
 							}
@@ -122,7 +127,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								
 							});
 
-							Map<String, Highlight> suggestedInputs = new LinkedHashMap<>();
+							suggestedInputs = new LinkedHashMap<>();
 							for (WildcardApplied applied: allApplied) {
 								Highlight highlight = applied.getHighlight();
 								String suffix = applied.getText().substring(highlight.getTo());
@@ -146,7 +151,8 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									caret = -1;
 								suggestions.add(new InputSuggestion(text, caret, true, null, entry.getValue()));
 							}
-						}
+							break;
+						} 
 						return suggestions;
 					}
 
@@ -166,7 +172,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
-			if (spec.getRuleName().equals("Value")) {
+			if (spec.getRuleName().equals("Value") && !matchWith.endsWith(")")) {
 				int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
 				if (tokenType == CommitQueryParser.COMMITTER) {
 					hints.add("Use * to match any part of committer");

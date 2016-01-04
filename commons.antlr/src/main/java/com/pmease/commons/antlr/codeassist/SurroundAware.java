@@ -37,14 +37,14 @@ public abstract class SurroundAware {
 	}
 	
 	public List<InputSuggestion> suggest(ElementSpec spec, String matchWith) {
-		if (matchWith.endsWith(suffix))
+		String unsurroundedMatchWith = matchWith;
+		if (matchWith.startsWith(prefix))
+			unsurroundedMatchWith = unsurroundedMatchWith.substring(prefix.length());
+		unsurroundedMatchWith = unsurroundedMatchWith.trim();
+		if (unsurroundedMatchWith.endsWith(suffix))
 			return new ArrayList<>();
 		
-		if (matchWith.startsWith(prefix))
-			matchWith = matchWith.substring(prefix.length());
-		matchWith = matchWith.trim();
-		
-		List<InputSuggestion> suggestions = match(matchWith);
+		List<InputSuggestion> suggestions = match(unsurroundedMatchWith);
 		if (suggestions != null) {
 			List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 			
@@ -70,13 +70,16 @@ public abstract class SurroundAware {
 			 * should be quoted, in this case, below code will suggest you to quote the value if it 
 			 * contains spaces as otherwise it will fail the match below
 			 */
-			if (checkedSuggestions.isEmpty() && !matches(spec, matchWith)) {
-				matchWith = prefix + matchWith + suffix;
-				if (matches(spec, matchWith)) {
-					Highlight highlight = new Highlight(1, matchWith.length()-1);
-					checkedSuggestions.add(new InputSuggestion(matchWith, getSurroundDescription(), highlight));
+			if (checkedSuggestions.isEmpty() && matchWith.length() != 0 && !matches(spec, unsurroundedMatchWith)) {
+				unsurroundedMatchWith = prefix + unsurroundedMatchWith + suffix;
+				if (matches(spec, unsurroundedMatchWith)) {
+					Highlight highlight = new Highlight(1, unsurroundedMatchWith.length()-1);
+					checkedSuggestions.add(new InputSuggestion(unsurroundedMatchWith, getSurroundDescription(), highlight));
 				}
 			}
+			
+			if (checkedSuggestions.isEmpty())
+				checkedSuggestions.add(new InputSuggestion(prefix, null, null));
 			return checkedSuggestions;
 		} else {
 			return null;
