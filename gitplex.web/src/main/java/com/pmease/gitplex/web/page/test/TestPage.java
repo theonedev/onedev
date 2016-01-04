@@ -1,14 +1,15 @@
 package com.pmease.gitplex.web.page.test;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.commons.antlr.codeassist.InputCompletion;
+import com.pmease.commons.antlr.codeassist.InputStatus;
+import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
+import com.pmease.commons.wicket.behavior.inputassist.InputError;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -18,33 +19,28 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Link<Void>("check") {
+		Form<?> form = new Form<Void>("form");
+		form.add(new TextField<Void>("input").add(new InputAssistBehavior() {
 
 			@Override
-			public void onClick() {
-				Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-				GitPlex.getInstance(AuxiliaryManager.class).check(repository, "master");
+			protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
+				List<InputCompletion> suggestions = new ArrayList<>();
+				suggestions.add(new InputCompletion(0, 0, "hello world just do it well we can handle it", 0, "hello world just do it well we c", null));
+				return suggestions;
 			}
-			
-		});
-		
-		add(new Link<Void>("getPaths") {
 
 			@Override
-			public void onClick() {
-				Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-				long time = System.currentTimeMillis();
-				
-				List<String> paths = GitPlex.getInstance(AuxiliaryManager.class).getFiles(repository);
-				Pattern pattern = Pattern.compile("hello.*world/linux.");
-				for (String path: paths) {
-					pattern.matcher(path).find();
-				}
-				System.out.println("cost time: " + (System.currentTimeMillis()-time));
+			protected List<InputError> getErrors(String inputContent) {
+				return new ArrayList<>();
+			}
+
+			@Override
+			protected int getAnchor(String content) {
+				return 0;
 			}
 			
-		});
-		
+		}));
+		add(form);
 	}
 
 }
