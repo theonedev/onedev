@@ -12,7 +12,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.codeassist.SurroundAware;
+import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.NameAndEmail;
@@ -30,6 +30,10 @@ import com.pmease.gitplex.web.Constants;
 public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Repository> repoModel;
+	
+	private static final String VALUE_OPEN = "(";
+	
+	private static final String VALUE_CLOSE = ")";
 	
 	private static final String[] DATE_EXAMPLES = new String[]{
 			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
@@ -52,29 +56,29 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
-				return new SurroundAware(codeAssist.getGrammar(), "(", ")") {
+				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
 
 					@Override
-					protected List<InputSuggestion> match(String unsurroundedMatchWith) {
+					protected List<InputSuggestion> match(String unfencedMatchWith) {
 						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
-						unsurroundedMatchWith = unsurroundedMatchWith.toLowerCase();
+						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
 						int numSuggestions = 0;
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
 							for (String value: repoModel.getObject().getBranches()) {
-								int index = value.toLowerCase().indexOf(unsurroundedMatchWith);
+								int index = value.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+unsurroundedMatchWith.length());
+									Highlight highlight = new Highlight(index, index+unfencedLowerCaseMatchWith.length());
 									suggestions.add(new InputSuggestion(value, highlight));
 								}
 							}
 							break;
 						case CommitQueryParser.TAG:
 							for (String value: repoModel.getObject().getTags()) {
-								int index = value.toLowerCase().indexOf(unsurroundedMatchWith);
+								int index = value.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+unsurroundedMatchWith.length());
+									Highlight highlight = new Highlight(index, index+unfencedLowerCaseMatchWith.length());
 									suggestions.add(new InputSuggestion(value, highlight));
 								}
 							}
@@ -91,7 +95,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								else
 									content = contributor.getName();
 								content = content.trim();
-								WildcardApplied applied = WildcardUtils.applyWildcard(content, unsurroundedMatchWith, false);
+								WildcardApplied applied = WildcardUtils.applyWildcard(content, unfencedLowerCaseMatchWith, false);
 								if (applied != null) {
 									suggestedInputs.put(applied.getText(), applied.getHighlight());
 									if (suggestedInputs.size() == count)
@@ -104,7 +108,12 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							break;
 						case CommitQueryParser.BEFORE:
 						case CommitQueryParser.AFTER:
-							if (!unsurroundedMatchWith.endsWith(")")) {
+							if (!unfencedMatchWith.contains(VALUE_CLOSE)) {
+								if (unfencedMatchWith.length() != 0) {
+									String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
+									Highlight highlight = new Highlight(0, fenced.length());
+									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), highlight));
+								}
 								suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
 								suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
 								for (String dateExample: DATE_EXAMPLES) 
@@ -115,7 +124,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							List<WildcardApplied> allApplied = new ArrayList<>();
 							auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							for (String path: auxiliaryManager.getFiles(repoModel.getObject())) {
-								WildcardApplied applied = WildcardUtils.applyWildcard(path, unsurroundedMatchWith, false);
+								WildcardApplied applied = WildcardUtils.applyWildcard(path, unfencedLowerCaseMatchWith, false);
 								if (applied != null) 
 									allApplied.add(applied);
 							}
@@ -158,7 +167,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 					}
 
 					@Override
-					protected String getSurroundDescription() {
+					protected String getFencingDescription() {
 						return "value needs to be enclosed in brackets";
 					}
 					
@@ -173,7 +182,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
-			if (spec.getRuleName().equals("Value") && !matchWith.endsWith(")")) {
+			if (spec.getRuleName().equals("Value") && !matchWith.contains(VALUE_CLOSE)) {
 				int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
 				if (tokenType == CommitQueryParser.COMMITTER) {
 					hints.add("Use * to match any part of committer");
@@ -191,7 +200,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected int getEndOfMatch(ElementSpec spec, String content) {
-		if (content.startsWith("()"))
+		if (content.startsWith(VALUE_OPEN+VALUE_CLOSE))
 			return 2;
 		else
 			return super.getEndOfMatch(spec, content);

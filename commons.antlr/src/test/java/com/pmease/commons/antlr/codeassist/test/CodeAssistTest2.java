@@ -12,7 +12,7 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.codeassist.SurroundAware;
+import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 
 public class CodeAssistTest2 {
@@ -28,7 +28,7 @@ public class CodeAssistTest2 {
 			if (element.getSpec() instanceof LexerRuleRefElementSpec) {
 				LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) element.getSpec();
 				if (spec.getRuleName().equals("Value")) {
-					return new SurroundAware(codeAssist.getGrammar(), "(", ")") {
+					return new FenceAware(codeAssist.getGrammar(), "(", ")") {
 
 						@Override
 						protected List<InputSuggestion> match(String matchWith) {

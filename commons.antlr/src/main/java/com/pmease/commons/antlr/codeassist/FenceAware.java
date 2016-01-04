@@ -11,18 +11,18 @@ import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.Grammar;
 import com.pmease.commons.util.pattern.Highlight;
 
-public abstract class SurroundAware {
+public abstract class FenceAware {
 	
 	private final Grammar grammar;
 	
-	private final String prefix;
+	private final String open;
 	
-	private final String suffix;
+	private final String close;
 	
-	public SurroundAware(Grammar grammar, String prefix, String suffix) {
+	public FenceAware(Grammar grammar, String open, String close) {
 		this.grammar = grammar;
-		this.prefix = prefix;
-		this.suffix = suffix;
+		this.open = open;
+		this.close = close;
 	}
 	
 	private boolean matches(ElementSpec spec, String content) {
@@ -37,14 +37,12 @@ public abstract class SurroundAware {
 	}
 	
 	public List<InputSuggestion> suggest(ElementSpec spec, String matchWith) {
-		String unsurroundedMatchWith = matchWith;
-		if (matchWith.startsWith(prefix))
-			unsurroundedMatchWith = unsurroundedMatchWith.substring(prefix.length());
-		unsurroundedMatchWith = unsurroundedMatchWith.trim();
-		if (unsurroundedMatchWith.endsWith(suffix))
-			return new ArrayList<>();
+		String unfencedMatchWith = matchWith;
+		if (matchWith.startsWith(open))
+			unfencedMatchWith = unfencedMatchWith.substring(open.length());
+		unfencedMatchWith = unfencedMatchWith.trim();
 		
-		List<InputSuggestion> suggestions = match(unsurroundedMatchWith);
+		List<InputSuggestion> suggestions = match(unfencedMatchWith);
 		if (suggestions != null) {
 			List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 			
@@ -52,12 +50,12 @@ public abstract class SurroundAware {
 				String content = suggestion.getContent();
 				int caret = suggestion.getCaret();
 				if (!matches(spec, content)) {
-					content = prefix + content + suffix;
+					content = open + content + close;
 					Highlight highlight = suggestion.getHighlight();
 					if (caret != -1) 
-						caret += prefix.length();
+						caret += open.length();
 					if (highlight != null)
-						highlight = new Highlight(highlight.getFrom()+prefix.length(), highlight.getTo()+prefix.length());
+						highlight = new Highlight(highlight.getFrom()+open.length(), highlight.getTo()+open.length());
 					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), highlight));
 				} else {
 					checkedSuggestions.add(suggestion);
@@ -70,36 +68,36 @@ public abstract class SurroundAware {
 			 * should be quoted, in this case, below code will suggest you to quote the value if it 
 			 * contains spaces as otherwise it will fail the match below
 			 */
-			if (checkedSuggestions.isEmpty() && matchWith.length() != 0 && !matches(spec, unsurroundedMatchWith)) {
-				unsurroundedMatchWith = prefix + unsurroundedMatchWith + suffix;
-				if (matches(spec, unsurroundedMatchWith)) {
-					Highlight highlight = new Highlight(1, unsurroundedMatchWith.length()-1);
-					checkedSuggestions.add(new InputSuggestion(unsurroundedMatchWith, getSurroundDescription(), highlight));
+			if (checkedSuggestions.isEmpty() && matchWith.length() != 0 && !matches(spec, unfencedMatchWith)) {
+				unfencedMatchWith = open + unfencedMatchWith + close;
+				if (matches(spec, unfencedMatchWith)) {
+					Highlight highlight = new Highlight(1, unfencedMatchWith.length()-1);
+					checkedSuggestions.add(new InputSuggestion(unfencedMatchWith, getFencingDescription(), highlight));
 				}
 			}
 			
-			if (checkedSuggestions.isEmpty())
-				checkedSuggestions.add(new InputSuggestion(prefix, null, null));
+			if (checkedSuggestions.isEmpty() && matchWith.length() == 0)
+				checkedSuggestions.add(new InputSuggestion(open, null, null));
 			return checkedSuggestions;
 		} else {
 			return null;
 		}
 	}
 	
-	protected String getSurroundDescription() {
+	protected String getFencingDescription() {
 		return null;
 	}
 	
 	/**
 	 * Match with provided string to give a list of suggestions
 	 * 
-	 * @param surroundlessMatchWith
-	 * 			string with surrounding literals removed 
+	 * @param unfencedMatchWith
+	 * 			string with fencing literals removed 
 	 * @return
 	 * 			a list of suggestions. If you do not have any suggestions and want code assist to 
 	 * 			drill down the element to provide default suggestions, return a <tt>null</tt> value 
 	 * 			instead of an empty list
 	 */
 	@Nullable
-	protected abstract List<InputSuggestion> match(String surroundlessMatchWith);
+	protected abstract List<InputSuggestion> match(String unfencedMatchWith);
 }

@@ -49,6 +49,7 @@ pmease.commons.inputassist = {
 				}
 				$dropdown.find(".suggestions").scrollIntoView("tr.active");
 				pmease.commons.inputassist.updateHelp($dropdown);
+				$dropdown.align($dropdown.data("alignment"));
 				return false;
 			}
 		});
@@ -68,6 +69,7 @@ pmease.commons.inputassist = {
 				}
 				$dropdown.find(".suggestions").scrollIntoView("tr.active");
 				pmease.commons.inputassist.updateHelp($dropdown);
+				$dropdown.align($dropdown.data("alignment"));
 				return false;
 			}
 		});

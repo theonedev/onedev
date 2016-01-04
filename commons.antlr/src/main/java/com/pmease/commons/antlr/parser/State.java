@@ -1,5 +1,6 @@
 package com.pmease.commons.antlr.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -130,6 +131,21 @@ public class State {
 		return expectedElementSpecIndex == getElementSpecs().size();
 	}
 
+	public State getScannedState(EarleyParser parser, int tokenIndex) {
+		ElementSpec expectedElementSpec = getExpectedElementSpec();
+		List<Element> elements = new ArrayList<>(getElements());
+		elements.add(new Element(parser, expectedElementSpec, tokenIndex+1, null));
+		if (!expectedElementSpec.isMultiple()) {
+			return new State(getOriginPosition(), getRuleSpec(), 
+					getAlternativeSpecIndex(), getExpectedElementSpecIndex()+1, 
+					false, elements);
+		} else {
+			return new State(getOriginPosition(), getRuleSpec(), 
+					getAlternativeSpecIndex(), getExpectedElementSpecIndex(), 
+					true, elements);
+		}
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof State))
