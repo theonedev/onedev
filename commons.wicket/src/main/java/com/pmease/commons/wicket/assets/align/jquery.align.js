@@ -12,11 +12,14 @@
     		jQuery("body").append(this);
     	if(this.css("position") != "absolute")
     		this.css("position", "absolute");
-    	
+
+    	var autoSize = this.find(".autosize");
+    	if (autoSize.length == 0)
+    		autoSize = this;
     	// reset width and height as otherwise the dimension will not change
     	// even if enclosed content changes
-    	this.css("width", "auto");
-    	this.css("height", "auto");
+    	autoSize.css("width", "auto");
+    	autoSize.css("height", "auto");
     	
     	var borderTop = jQuery(window).scrollTop() + pageMargin;
     	var borderBottom = borderTop + jQuery(window).height() - 2*pageMargin;
@@ -154,19 +157,19 @@
     	
     	var overflow = false;
     	if (height < thisHeight) {
-        	this.outerHeight(height);
+        	autoSize.outerHeight(autoSize.outerHeight()+height-thisHeight);
         	overflow = true;
     	}
     	if (overflow) {
     		// when vertical scroll bar appears, we adjust width to 
     		// avoid unnecessary line wrappings
-    		this.outerWidth(width);
+    		autoSize.outerWidth(autoSize.outerWidth()+width-thisWidth);
     	} else if (width < thisWidth) {
-            this.outerWidth(width);
+    		autoSize.outerWidth(autoSize.outerWidth()+width-thisWidth);
             overflow = true;
     	}
     	if (overflow)
-        	this.css({"overflow": "auto"});
+        	autoSize.css({"overflow": "auto"});
     	
     	return this;
     };

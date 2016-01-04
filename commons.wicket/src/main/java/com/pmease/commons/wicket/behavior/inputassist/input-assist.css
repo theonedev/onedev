@@ -16,10 +16,6 @@
 	background-color: #CBE8FB;
 	border-color: #8BC8F9;
 }
-.input-assist .suggestions {
-	max-height: 300px; 
-	overflow: auto;
-}
 .input-assist .description {
 	color: #999;
 	text-align: right;
