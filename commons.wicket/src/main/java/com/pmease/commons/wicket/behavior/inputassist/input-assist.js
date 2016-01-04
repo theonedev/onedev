@@ -1,19 +1,24 @@
 pmease.commons.inputassist = {
 	init: function(inputId, callback) {
 		var $input = $("#" + inputId);
-		$input.data("callback", callback);
 		
 		$input.data("prevValue", $input.val());
 		$input.data("prevCaret", -1);
 		$input.on("input click keyup", function(e) {
 			var value = $input.val();
-			var caret = $input.caret();
+			var caret;
+			if ($input.is(":focus"))
+				caret = $input.caret();
+			else
+				caret = -1;
 			if (value != $input.data("prevValue") || caret != $input.data("prevCaret")) {
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
-				if (e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter, up and down key 
+				if ($input.is(":focus") && e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter
 					callback(value, caret, 1);
 			}
+			if (value.trim().length == 0)
+				pmease.commons.inputassist.markErrors(inputId, []);
 		});
 		$input.on("blur", function(e) {
 			$input.data("prevCaret", -1);
@@ -26,7 +31,7 @@ pmease.commons.inputassist = {
 			if (caret != undefined)
 				$input.caret(caret);
 			$input.focus();
-			$input.data("callback")(value, $input.caret(), 1);
+			$input.trigger("input");
 		});
 		
 		$input.bind("keydown", "up", function() {
@@ -94,7 +99,7 @@ pmease.commons.inputassist = {
 		
 		callback($input.val());
 	},
-
+	
 	markErrors: function(inputId, errors) {
 		var $input = $("#" + inputId);
 		$input.data("errors", errors);

@@ -20,6 +20,9 @@
 	color: #999;
 	text-align: right;
 }
+.input-assist .suggestions {
+	max-height: 400px;
+}
 .input-assist .suggestion a {
 	padding-right: 12px;
 	font-family: monospace;

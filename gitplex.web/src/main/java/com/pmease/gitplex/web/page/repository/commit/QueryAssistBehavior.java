@@ -90,6 +90,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 									content = contributor.getName() + " <" + contributor.getEmailAddress() + ">";
 								else
 									content = contributor.getName();
+								content = content.trim();
 								WildcardApplied applied = WildcardUtils.applyWildcard(content, unsurroundedMatchWith, false);
 								if (applied != null) {
 									suggestedInputs.put(applied.getText(), applied.getHighlight());
@@ -229,11 +230,11 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 			description = "touching specified path";
 			break;
 		case "^":
-			description = "exclude";
+			description = "exclude revision";
 			break;
 		case "..":
 		case "...":
-			description = "range";
+			description = "revision range";
 			break;
 		default:
 			description = null;

@@ -20,6 +20,7 @@
     	// even if enclosed content changes
     	autoSize.css("width", "auto");
     	autoSize.css("height", "auto");
+    	autoSize.css("overflow", "auto");
     	
     	var borderTop = jQuery(window).scrollTop() + pageMargin;
     	var borderBottom = borderTop + jQuery(window).height() - 2*pageMargin;
@@ -104,11 +105,6 @@
     		}
     	}
 
-    	// vertical scroll bar occupies width, and we increase width
-    	// in order not to wrap lines unnecessarily
-    	if (height < thisHeight) 
-    		width += scrollbarWidth;
-    	
     	anchor = targetWidth*alignment.placement.targetX/100.0 + targetLeft;
     	left = anchor - alignment.placement.x*width/100.0;
     	if (alignment.placement.targetX == 0 && alignment.placement.x == 100)
@@ -155,21 +151,14 @@
     	
     	this.css({left:left, top:top});	
     	
-    	var overflow = false;
-    	if (height < thisHeight) {
+    	if (height < thisHeight)
         	autoSize.outerHeight(autoSize.outerHeight()+height-thisHeight);
-        	overflow = true;
-    	}
-    	if (overflow) {
-    		// when vertical scroll bar appears, we adjust width to 
-    		// avoid unnecessary line wrappings
+    	
+    	if (width < thisWidth)
     		autoSize.outerWidth(autoSize.outerWidth()+width-thisWidth);
-    	} else if (width < thisWidth) {
-    		autoSize.outerWidth(autoSize.outerWidth()+width-thisWidth);
-            overflow = true;
-    	}
-    	if (overflow)
-        	autoSize.css({"overflow": "auto"});
+
+    	if (autoSize.height() < autoSize[0].scrollHeight)
+    		autoSize.outerWidth(autoSize.outerWidth()+scrollbarWidth);
     	
     	return this;
     };

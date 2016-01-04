@@ -1,0 +1,16 @@
+input.clearable::-ms-clear {
+	display: none;
+}
+.input-clear {
+	background: url("clear.png") no-repeat; 
+	margin-left: -20px; 
+	z-index: 1000; 
+	position: relative; 
+	cursor: pointer; 
+	top: 8px; 
+	color: #333; 
+	display: none;
+}	
+@-moz-document url-prefix() {
+    .input-clear {top: 7px;}
+}

@@ -467,24 +467,6 @@ pmease.commons = {
 		},
 	},
 
-	setupClearableInput: function(inputId) {
-		var $input = $("#" + inputId);
-		$input.addClass("clearable");
-		$input.after("<span class='input-clear'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
-		$input.next().click(function() {
-			$input.val("");
-			$(this).hide();
-			$input.trigger("donetyping");
-		});
-		$input.keyup(function() {
-			var value = $(this).val();
-			if (value.trim().length != 0)
-				$input.next().show();
-			else
-				$input.next().hide();
-		});
-	},
-
 	history: {
 		init: function(callback) {
 			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:"");

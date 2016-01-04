@@ -47,6 +47,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
@@ -246,6 +247,12 @@ public class RepoCommitsPage extends RepositoryPage {
 				
 				RequestCycle.get().find(AjaxRequestTarget.class).add(feedback);
 			}
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript("gitplex.repocommits.initQuery();"));
+			}
 			
 		};
 		queryForm.add(new TextField<String>("input", new IModel<String>() {
@@ -267,16 +274,6 @@ public class RepoCommitsPage extends RepositoryPage {
 		}).add(new QueryAssistBehavior(repoModel)));
 		
 		queryForm.add(new AjaxButton("submit") {});
-		queryForm.add(new AjaxLink<Void>("clear") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				state.query = null;
-				target.add(queryForm);
-				updateCommits(target);
-			}
-			
-		});
 		queryForm.setOutputMarkupId(true);
 		add(queryForm);
 		
@@ -552,6 +549,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		response.render(JavaScriptHeaderItem.forReference(ClearableResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(SnapSvgResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(RepoCommitsPage.class, "repo-commits.js")));
