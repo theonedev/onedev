@@ -1,5 +1,9 @@
 package com.pmease.gitplex.web.component.commitmessage;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -9,10 +13,14 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.unbescape.html.HtmlEscape;
 
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.wicket.component.MultilineLabel;
+import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.Transformer;
+import com.pmease.commons.util.highlighter.PatternHighlighter;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 
@@ -23,13 +31,46 @@ public class CommitMessagePanel extends Panel {
 	
 	private final IModel<Commit> commitModel;
 	
-	public CommitMessagePanel(String id, IModel<Repository> repoModel, IModel<Commit> commitModel) {
+	private final IModel<List<Pattern>> patternsModel;
+	
+	public CommitMessagePanel(String id, IModel<Repository> repoModel, 
+			IModel<Commit> commitModel, IModel<List<Pattern>> patternsModel) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.commitModel = commitModel;
+		this.patternsModel = patternsModel;
 	}
 
+	public CommitMessagePanel(String id, IModel<Repository> repoModel, IModel<Commit> commitModel) {
+		this(id, repoModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
+
+			@Override
+			protected List<Pattern> load() {
+				return new ArrayList<>();
+			}
+			
+		});
+	}
+	
+	private String highlight(String text) {
+		return new PatternHighlighter(patternsModel.getObject(), new Transformer() {
+
+			@Override
+			public String transform(String text) {
+				return "<span class='highlight'>" + HtmlEscape.escapeHtml5(text) + "</span>";
+			}
+			
+		}, new Transformer() {
+
+			@Override
+			public String transform(String text) {
+				return HtmlEscape.escapeHtml5(text);
+			}
+			
+		}).highlight(text);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -43,15 +84,17 @@ public class CommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return commitModel.getObject().getSubject();
+				return highlight(commitModel.getObject().getSubject());
 			}
-		}));
+			
+		}).setEscapeModelStrings(false));
 
-		add(new MultilineLabel("detail", new AbstractReadOnlyModel<String>() {
+		add(new Label("detail", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return commitModel.getObject().getBody();
+				String highlighted = highlight(commitModel.getObject().getBody());
+				return StringUtils.replace(StringUtils.replace(highlighted, "\r\n", "<br>"), "\n", "<b>");
 			}
 			
 		}) {
@@ -62,7 +105,7 @@ public class CommitMessagePanel extends Panel {
 				
 				setVisible(commitModel.getObject().getBody() != null);
 			}
-		});
+		}.setEscapeModelStrings(false));
 		
 		WebMarkupContainer detailedToggle = new WebMarkupContainer("toggle") {
 			@Override
@@ -86,6 +129,7 @@ public class CommitMessagePanel extends Panel {
 	protected void onDetach() {
 		repoModel.detach();
 		commitModel.detach();
+		patternsModel.detach();
 		
 		super.onDetach();
 	}

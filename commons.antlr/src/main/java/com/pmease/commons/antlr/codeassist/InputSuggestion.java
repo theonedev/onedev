@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.util.pattern.Highlight;
+import com.pmease.commons.util.Range;
 
 public class InputSuggestion extends InputStatus {
 	
@@ -12,7 +12,7 @@ public class InputSuggestion extends InputStatus {
 	
 	private final String description;
 	
-	private final Highlight highlight;
+	private final Range matchRange;
 
 	/**
 	 * Construct the input suggestion.
@@ -26,24 +26,23 @@ public class InputSuggestion extends InputStatus {
 	 * 			corresponding element spec
 	 * @param description
 	 * 			description of the suggestion
-	 * @param highlight
-	 * 			optionally indicate part of the content to be highlighted, normally this is 
-	 * 			occurring position of the string to be matched
+	 * @param matchRange
+	 * 			optionally specifies range of the string being matched against user input
 	 */
 	public InputSuggestion(String content, int caret, boolean complete, @Nullable String description, 
-			@Nullable Highlight highlight) {
+			@Nullable Range matchRange) {
 		super(content, caret);
 		this.complete = complete;
 		this.description = description;
-		this.highlight = highlight;
+		this.matchRange = matchRange;
 	}
 	
-	public InputSuggestion(String content, @Nullable String description, @Nullable Highlight highlight) {
+	public InputSuggestion(String content, @Nullable String description, @Nullable Range highlight) {
 		this(content, -1, true, description, highlight);
 	}
 	
-	public InputSuggestion(String content, @Nullable Highlight highlight) {
-		this(content, null, highlight);
+	public InputSuggestion(String content, @Nullable Range matchRange) {
+		this(content, null, matchRange);
 	}
 	
 	public InputSuggestion(String content) {
@@ -60,8 +59,8 @@ public class InputSuggestion extends InputStatus {
 	}
 
 	@Nullable
-	public Highlight getHighlight() {
-		return highlight;
+	public Range getMatchRange() {
+		return matchRange;
 	}
 
 }

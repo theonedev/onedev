@@ -52,6 +52,7 @@ import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.loader.InheritableThreadLocalData;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
@@ -456,7 +457,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		String authorDate;
 		
-		List<Blame.Range> ranges;
+		List<Range> ranges;
 	}
 	
 }

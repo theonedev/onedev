@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.codeassist;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.util.pattern.Highlight;
+import com.pmease.commons.util.Range;
 
 public class ElementCompletion extends InputCompletion {
 
@@ -14,7 +14,7 @@ public class ElementCompletion extends InputCompletion {
 	
 	public ElementCompletion(ParentedElement expectedElement, int replaceBegin, 
 			int replaceEnd, String replaceContent, int caret, boolean complete, 
-			@Nullable String description, @Nullable Highlight highlight) {
+			@Nullable String description, @Nullable Range highlight) {
 		super(replaceBegin, replaceEnd, replaceContent, caret, description, highlight);
 		
 		this.complete = complete;

@@ -27,6 +27,7 @@ import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.grammar.ElementSpec;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.util.StringUtils;
 
 @SuppressWarnings("serial")
@@ -141,8 +142,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	}
 	
 	@Override
-	protected List<InputError> getErrors(final String inputContent) {
-		final List<InputError> errors = new ArrayList<>();
+	protected List<Range> getErrors(final String inputContent) {
+		final List<Range> errors = new ArrayList<>();
 		
 		Lexer lexer;
 		try {
@@ -159,7 +160,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
 				int charIndex = getCharIndex(inputContent, line-1, charPositionInLine);
-				errors.add(new InputError(charIndex, recognizer.getInputStream().index()));
+				errors.add(new Range(charIndex, recognizer.getInputStream().index()));
 			}
 			
 		});
@@ -184,7 +185,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 					toIndex = fromIndex + token.getText().length() - 1;
 				else
 					toIndex = fromIndex;
-				errors.add(new InputError(fromIndex, toIndex));
+				errors.add(new Range(fromIndex, toIndex));
 			}
 			
 		});

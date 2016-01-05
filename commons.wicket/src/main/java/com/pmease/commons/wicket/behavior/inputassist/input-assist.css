@@ -35,6 +35,11 @@
 	padding: 2px 4px;
 	border: 1px dashed #CCC;
 	color: #666;
+	max-width: 400px;
+}
+.input-assist .help.multiple li {
+	list-style: disc;
+	margin-left: 18px;
 }
 .input-error-mark {
 	position: absolute;

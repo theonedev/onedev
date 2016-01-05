@@ -49,6 +49,10 @@
 			<artifactId>gitplex.rest</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.unbescape</groupId>
+			<artifactId>unbescape</artifactId>
+		</dependency>
 
 		<!-- JERSEY CLIENT -->
 		<dependency>

@@ -191,7 +191,7 @@ public abstract class CodeAssist implements Serializable {
 					content.length()-inputContent.length()+completion.getReplaceEnd());
 			inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
 					completion.getReplaceEnd(), replaceContent, caret, description, 
-					completion.getHighlight()));
+					completion.getMatchRange()));
 		}
 		
 		/*
@@ -462,7 +462,7 @@ public abstract class CodeAssist implements Serializable {
 						inputSuggestion.isComplete()?replaceEnd:inputStatus.getCaret(),  
 						inputSuggestion.getContent(), inputSuggestion.getCaret(), 
 						inputSuggestion.isComplete(), inputSuggestion.getDescription(), 
-						inputSuggestion.getHighlight()));
+						inputSuggestion.getMatchRange()));
 			}
 		}
 		return completions;

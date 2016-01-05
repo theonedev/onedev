@@ -99,7 +99,7 @@ pmease.commons.inputassist = {
 			}
 		});
 		
-		callback($input.val());
+		callback($input.val());		
 	},
 	
 	markErrors: function(inputId, errors) {
@@ -163,6 +163,8 @@ pmease.commons.inputassist = {
 	},
 	
 	updateHelp: function($dropdown) {
+		if ($dropdown.find(".help>li").length > 1)
+			$dropdown.find(".help").addClass("multiple");
 		if ($dropdown.find("tr.active").length != 0) {
 			$dropdown.find(".help>.completion").empty().append("Press 'enter' to complete selected item");
 		} else {

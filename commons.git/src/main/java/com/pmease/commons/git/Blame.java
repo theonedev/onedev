@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.pmease.commons.util.Range;
+
 public class Blame {
 	
 	private final BriefCommit commit;
@@ -33,29 +35,4 @@ public class Blame {
 		return StringUtils.stripEnd(builder.toString(), ", ");
 	}
 
-	public static class Range {
-		
-		private final int beginLine; // 0-indexed, inclusive
-		
-		private final int endLine; // 0-indexed, exclusive
-		
-		public Range(int beginLine, int endLine) {
-			this.beginLine = beginLine;
-			this.endLine = endLine;
-		}
-
-		public int getBeginLine() {
-			return beginLine;
-		}
-
-		public int getEndLine() {
-			return endLine;
-		}
-
-		@Override
-		public String toString() {
-			return beginLine + "-" + endLine;
-		}
-		
-	}
 }

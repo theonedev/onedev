@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.BriefCommit;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.util.execution.Commandline;
 import com.pmease.commons.util.execution.ExecuteResult;
 import com.pmease.commons.util.execution.LineConsumer;
@@ -96,10 +97,10 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 					if (commit != null && !commitBuilder.hash.equals(commit.getHash())) {
 						Blame blame = blames.get(commit.getHash());
 						if (blame == null) {
-							blame = new Blame(commit, new ArrayList<Blame.Range>());
+							blame = new Blame(commit, new ArrayList<Range>());
 							blames.put(commit.getHash(), blame);
 						}
-						blame.getRanges().add(new Blame.Range(beginLine.get(), endLine.get()));
+						blame.getRanges().add(new Range(beginLine.get(), endLine.get()));
 						commitRef.set(null);
 						beginLine.set(endLine.get());
 					}
@@ -144,10 +145,10 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 			BriefCommit commit = commitRef.get();
 			Blame blame = blames.get(commit.getHash());
 			if (blame == null) {
-				blame = new Blame(commit, new ArrayList<Blame.Range>());
+				blame = new Blame(commit, new ArrayList<Range>());
 				blames.put(commit.getHash(), blame);
 			}
-			blame.getRanges().add(new Blame.Range(beginLine.get(), endLine.get()));
+			blame.getRanges().add(new Range(beginLine.get(), endLine.get()));
 		}
 		
 		if (System.currentTimeMillis()-time > CACHE_THRESHOLD)

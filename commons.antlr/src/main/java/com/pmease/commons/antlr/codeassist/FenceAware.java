@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
 
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.Grammar;
-import com.pmease.commons.util.pattern.Highlight;
+import com.pmease.commons.util.Range;
 
 public abstract class FenceAware {
 	
@@ -51,12 +51,12 @@ public abstract class FenceAware {
 				int caret = suggestion.getCaret();
 				if (!matches(spec, content)) {
 					content = open + content + close;
-					Highlight highlight = suggestion.getHighlight();
+					Range matchRange = suggestion.getMatchRange();
 					if (caret != -1) 
 						caret += open.length();
-					if (highlight != null)
-						highlight = new Highlight(highlight.getFrom()+open.length(), highlight.getTo()+open.length());
-					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), highlight));
+					if (matchRange != null)
+						matchRange = new Range(matchRange.getFrom()+open.length(), matchRange.getTo()+open.length());
+					checkedSuggestions.add(new InputSuggestion(content, caret, true, suggestion.getDescription(), matchRange));
 				} else {
 					checkedSuggestions.add(suggestion);
 				}
@@ -71,8 +71,8 @@ public abstract class FenceAware {
 			if (checkedSuggestions.isEmpty() && matchWith.length() != 0 && !matches(spec, unfencedMatchWith)) {
 				unfencedMatchWith = open + unfencedMatchWith + close;
 				if (matches(spec, unfencedMatchWith)) {
-					Highlight highlight = new Highlight(1, unfencedMatchWith.length()-1);
-					checkedSuggestions.add(new InputSuggestion(unfencedMatchWith, getFencingDescription(), highlight));
+					Range matchRange = new Range(1, unfencedMatchWith.length()-1);
+					checkedSuggestions.add(new InputSuggestion(unfencedMatchWith, getFencingDescription(), matchRange));
 				}
 			}
 			

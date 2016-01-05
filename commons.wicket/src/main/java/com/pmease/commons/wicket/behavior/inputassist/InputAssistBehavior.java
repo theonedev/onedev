@@ -3,8 +3,6 @@ package com.pmease.commons.wicket.behavior.inputassist;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -28,6 +26,8 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.util.JoinedRanges;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
@@ -70,48 +70,25 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		return line;
 	}
 	
-	private List<InputError> normalizeErrors(String inputContent, List<InputError> errors) {
-		Collections.sort(errors, new Comparator<InputError>() {
-
-			@Override
-			public int compare(InputError o1, InputError o2) {
-				return o1.getFrom() - o2.getFrom();
-			}
-			
-		});
-		List<InputError> joinedErrors = new ArrayList<>();
-		InputError currentError = null;
-		for (InputError error: errors) {
-			if (currentError == null) {
-				currentError = error;
-			} else if (error.getFrom() <= currentError.getTo()) {
-				currentError = new InputError(currentError.getFrom(), Math.max(currentError.getTo(), error.getTo()));
-			} else {
-				joinedErrors.add(currentError);
-				currentError = error;
-			}
-		}
-		if (currentError != null)
-			joinedErrors.add(currentError);
-		
-		List<InputError> normalizedErrors = new ArrayList<>();
+	private List<Range> normalizeErrors(String inputContent, List<Range> errors) {
+		List<Range> normalizedErrors = new ArrayList<>();
 		
 		List<String> lines = Splitter.on('\n').splitToList(inputContent);
-		for (InputError error: joinedErrors) {
+		for (Range error: new JoinedRanges(errors)) {
 			int fromLine = getLine(inputContent, error.getFrom());
 			int toLine = getLine(inputContent, error.getTo());
 			if (fromLine != toLine) {
 				int index = getCharIndex(inputContent, fromLine, lines.get(fromLine).length()-1);
 				if (index >= error.getFrom())
-					normalizedErrors.add(new InputError(error.getFrom(), index));
+					normalizedErrors.add(new Range(error.getFrom(), index));
 				index = getCharIndex(inputContent, toLine, 0);
 				if (index <= error.getTo())
-					normalizedErrors.add(new InputError(index, error.getTo()));
+					normalizedErrors.add(new Range(index, error.getTo()));
 				for (int i=fromLine+1; i<toLine; i++) {
 					String line = lines.get(i);
 					if (line.length() != 0) {
 						int from = getCharIndex(inputContent, i, 0);
-						normalizedErrors.add(new InputError(from, from+line.length()-1));
+						normalizedErrors.add(new Range(from, from+line.length()-1));
 					}
 				}
 			} else {
@@ -138,7 +115,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 		Preconditions.checkArgument(inputContent.indexOf('\r') == -1);
 		
-		List<InputError> errors = normalizeErrors(inputContent, getErrors(inputContent));
+		List<Range> errors = normalizeErrors(inputContent, getErrors(inputContent));
 		String json;
 		try {
 			json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(errors);
@@ -232,7 +209,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		return new ArrayList<>();
 	}
 	
-	protected abstract List<InputError> getErrors(String inputContent);
+	protected abstract List<Range> getErrors(String inputContent);
 	
 	protected abstract int getAnchor(String content);
 	

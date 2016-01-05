@@ -2,29 +2,31 @@ package com.pmease.commons.util.pattern;
 
 import java.io.Serializable;
 
+import com.pmease.commons.util.Range;
+
 public class WildcardApplied implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String text;
 	
-	private final Highlight highlight;
+	private final Range matchRange;
 	
-	public WildcardApplied(String text, Highlight highlight) {
+	public WildcardApplied(String text, Range matchRange) {
 		this.text = text;
-		this.highlight = highlight;
+		this.matchRange = matchRange;
 	}
 
 	public String getText() {
 		return text;
 	}
 
-	public Highlight getHighlight() {
-		return highlight;
+	public Range getMatchRange() {
+		return matchRange;
 	}
 
 	@Override
 	public String toString() {
-		return text + ":" + highlight;
+		return text + ":" + matchRange;
 	}
 }

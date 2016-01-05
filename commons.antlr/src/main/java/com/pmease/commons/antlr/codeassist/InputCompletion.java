@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.util.pattern.Highlight;
+import com.pmease.commons.util.Range;
 
 public class InputCompletion implements Serializable {
 
@@ -20,21 +20,21 @@ public class InputCompletion implements Serializable {
 	
 	private final String description;
 	
-	private final Highlight highlight;
+	private final Range matchRange;
 	
 	public InputCompletion(int replaceBegin, int replaceEnd, String replaceContent, 
-			int caret, @Nullable String description, @Nullable Highlight highlight) {
+			int caret, @Nullable String description, @Nullable Range matchRange) {
 		this.replaceBegin = replaceBegin;
 		this.replaceEnd = replaceEnd;
 		this.replaceContent = replaceContent;
 		this.caret = caret;
 		this.description = description;
-		this.highlight = highlight;
+		this.matchRange = matchRange;
 	}
 	
 	public InputCompletion(InputCompletion completion) {
 		this(completion.getReplaceBegin(), completion.getReplaceEnd(), completion.getReplaceContent(), 
-				completion.getCaret(), completion.getDescription(), completion.getHighlight());
+				completion.getCaret(), completion.getDescription(), completion.getMatchRange());
 	}
 	
 	public int getReplaceBegin() {
@@ -57,8 +57,8 @@ public class InputCompletion implements Serializable {
 		return description;
 	}
 	
-	public Highlight getHighlight() {
-		return highlight;
+	public Range getMatchRange() {
+		return matchRange;
 	}
 
 	public InputStatus complete(InputStatus inputStatus) {

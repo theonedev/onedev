@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.util.Range;
+
 public class WildcardUtils {
 	
 	private static final PatternMatcher stringPatternSetMatcher = new PatternSetMatcher(new WildcardStringMatcher());
@@ -98,23 +100,23 @@ public class WildcardUtils {
 			normalizedText = text.toLowerCase();
 			normalizedWildcard = wildcard.toLowerCase();
 		}
-		List<LiteralRange> literalRanges = new ArrayList<>();
+		List<Range> literalRanges = new ArrayList<>();
 		int pos = 0;
 		int index = normalizedWildcard.indexOf('*');
 		while (index != -1) {
 			if (index>pos)
-				literalRanges.add(new LiteralRange(pos, index));
+				literalRanges.add(new Range(pos, index));
 			pos = index+1;
 			index = normalizedWildcard.indexOf('*', pos);
 		}
 		if (normalizedWildcard.length()>pos)
-			literalRanges.add(new LiteralRange(pos, normalizedWildcard.length()));
+			literalRanges.add(new Range(pos, normalizedWildcard.length()));
 
 		String appliedText = wildcard;
 		int first = -1;
 		int last = 0;
 		pos = 0;
-		for (LiteralRange literalRange: literalRanges) {
+		for (Range literalRange: literalRanges) {
 			String literal = wildcard.substring(literalRange.getFrom(), literalRange.getTo());
 			index = normalizedText.indexOf(literal, pos);
 			if (index != -1) {
@@ -138,10 +140,10 @@ public class WildcardUtils {
 		} else {
 			last = appliedText.length();
 		}
-		return new WildcardApplied(appliedText, new Highlight(first, last));
+		return new WildcardApplied(appliedText, new Range(first, last));
     }
 	
-	private static String replaceLiteral(String text, LiteralRange literalRange, String literal) {
+	private static String replaceLiteral(String text, Range literalRange, String literal) {
 		String prefix = text.substring(0, literalRange.getFrom());
 		String suffix = text.substring(literalRange.getTo());
 		return prefix + literal + suffix;

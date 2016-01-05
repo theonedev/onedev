@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
+import org.unbescape.java.JavaEscape;
 
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.AfterContext;
@@ -67,12 +68,14 @@ public class LogCommandDecorator extends CommitQueryBaseListener {
 	
 	@Override
 	public void exitCommitter(CommitterContext ctx) {
-		logCommand.committers().add(getValue(ctx.Value()));
+		String value = JavaEscape.unescapeJava(getValue(ctx.Value()));
+		value = StringUtils.replace(value, "*", ".*");
+		logCommand.committers().add(value);
 	}
 	
 	@Override
 	public void exitAuthor(AuthorContext ctx) {
-		String value = getValue(ctx.Value());
+		String value = JavaEscape.unescapeJava(getValue(ctx.Value()));
 		value = StringUtils.replace(value, "*", ".*");
 		logCommand.authors().add(value);
 	}
@@ -84,7 +87,7 @@ public class LogCommandDecorator extends CommitQueryBaseListener {
 	
 	@Override
 	public void exitMessage(MessageContext ctx) {
-		logCommand.messages().add(getValue(ctx.Value()));
+		logCommand.messages().add(JavaEscape.unescapeJava(getValue(ctx.Value())));
 	}
 	
 	public static QueryContext parse(String query) {

@@ -16,7 +16,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
-import com.pmease.commons.util.pattern.Highlight;
+import com.pmease.commons.util.Range;
 
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {
@@ -54,7 +54,7 @@ class AssistPanel extends Panel {
 		RepeatingView hintsView = new RepeatingView("hints");
 		add(hintsView);
 		for (String hint: hints) 
-			hintsView.add(new Label(hintsView.newChildId(), hint));
+			hintsView.add(new Label(hintsView.newChildId(), hint).setEscapeModelStrings(false));
 		
 		add(new AbstractDefaultAjaxBehavior() {
 
@@ -94,12 +94,12 @@ class AssistPanel extends Panel {
 	private Component newSuggestionItem(String itemId, InputCompletion suggestion) {
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		WebMarkupContainer link = new WebMarkupContainer("link");
-		Highlight highlight = suggestion.getHighlight();
-		if (highlight != null) {
+		Range matchRange = suggestion.getMatchRange();
+		if (matchRange != null) {
 			String content = suggestion.getReplaceContent();
-			String prefix = StringEscapeUtils.escapeHtml4(content.substring(0, highlight.getFrom()));
-			String suffix = StringEscapeUtils.escapeHtml4(content.substring(highlight.getTo()));
-			String matched = StringEscapeUtils.escapeHtml4(content.substring(highlight.getFrom(), highlight.getTo()));
+			String prefix = StringEscapeUtils.escapeHtml4(content.substring(0, matchRange.getFrom()));
+			String suffix = StringEscapeUtils.escapeHtml4(content.substring(matchRange.getTo()));
+			String matched = StringEscapeUtils.escapeHtml4(content.substring(matchRange.getFrom(), matchRange.getTo()));
 			link.add(new Label("label", prefix + "<b>" + matched + "</b>" + suffix).setEscapeModelStrings(false));
 		} else {
 			link.add(new Label("label", suggestion.getReplaceContent()));

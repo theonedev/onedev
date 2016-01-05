@@ -17,7 +17,7 @@ import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.util.pattern.Highlight;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.util.pattern.WildcardApplied;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
@@ -69,8 +69,8 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							for (String value: repoModel.getObject().getBranches()) {
 								int index = value.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+unfencedLowerCaseMatchWith.length());
-									suggestions.add(new InputSuggestion(value, highlight));
+									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
+									suggestions.add(new InputSuggestion(value, matchRange));
 								}
 							}
 							break;
@@ -78,14 +78,14 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							for (String value: repoModel.getObject().getTags()) {
 								int index = value.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
-									Highlight highlight = new Highlight(index, index+unfencedLowerCaseMatchWith.length());
-									suggestions.add(new InputSuggestion(value, highlight));
+									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
+									suggestions.add(new InputSuggestion(value, matchRange));
 								}
 							}
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
-							Map<String, Highlight> suggestedInputs = new LinkedHashMap<>();
+							Map<String, Range> suggestedInputs = new LinkedHashMap<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 							List<NameAndEmail> contributors = auxiliaryManager.getContributors(repoModel.getObject());
 							for (NameAndEmail contributor: contributors) {
@@ -97,13 +97,13 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								content = content.trim();
 								WildcardApplied applied = WildcardUtils.applyWildcard(content, unfencedLowerCaseMatchWith, false);
 								if (applied != null) {
-									suggestedInputs.put(applied.getText(), applied.getHighlight());
+									suggestedInputs.put(applied.getText(), applied.getMatchRange());
 									if (suggestedInputs.size() == count)
 										break;
 								}
 							}
 							
-							for (Map.Entry<String, Highlight> entry: suggestedInputs.entrySet()) 
+							for (Map.Entry<String, Range> entry: suggestedInputs.entrySet()) 
 								suggestions.add(new InputSuggestion(entry.getKey(), -1, true, null, entry.getValue()));
 							break;
 						case CommitQueryParser.BEFORE:
@@ -111,8 +111,8 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							if (!unfencedMatchWith.contains(VALUE_CLOSE)) {
 								if (unfencedMatchWith.length() != 0) {
 									String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
-									Highlight highlight = new Highlight(0, fenced.length());
-									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), highlight));
+									Range matchRange = new Range(0, fenced.length());
+									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
 								}
 								suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
 								suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
@@ -132,27 +132,27 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
 								@Override
 								public int compare(WildcardApplied o1, WildcardApplied o2) {
-									return o1.getHighlight().getFrom() - o2.getHighlight().getFrom();
+									return o1.getMatchRange().getFrom() - o2.getMatchRange().getFrom();
 								}
 								
 							});
 
 							suggestedInputs = new LinkedHashMap<>();
 							for (WildcardApplied applied: allApplied) {
-								Highlight highlight = applied.getHighlight();
-								String suffix = applied.getText().substring(highlight.getTo());
+								Range matchRange = applied.getMatchRange();
+								String suffix = applied.getText().substring(matchRange.getTo());
 								int index = suffix.indexOf('/');
-								String suggestedInput = applied.getText().substring(0, highlight.getTo());
+								String suggestedInput = applied.getText().substring(0, matchRange.getTo());
 								if (index != -1)
 									suggestedInput += suffix.substring(0, index) + "/";
 								else
 									suggestedInput += suffix;
-								suggestedInputs.put(suggestedInput, highlight);
+								suggestedInputs.put(suggestedInput, matchRange);
 								if (suggestedInputs.size() == count)
 									break;
 							}
 							
-							for (Map.Entry<String, Highlight> entry: suggestedInputs.entrySet()) { 
+							for (Map.Entry<String, Range> entry: suggestedInputs.entrySet()) { 
 								String text = entry.getKey();
 								int caret;
 								if (text.endsWith("/"))
@@ -191,7 +191,9 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 				} else if (tokenType == CommitQueryParser.PATH) {
 					hints.add("Use * to match any part of path");
 				} else if (tokenType == CommitQueryParser.MESSAGE) {
-					hints.add("Use * to match any part of message");
+					hints.add("Git log basic regular expression is accepted here");
+					hints.add("Use '\\\\' to escape special characters in regular expression");
+					hints.add("Use '\\(' and '\\)' to represent brackets in message");
 				}
 			}
 		} 

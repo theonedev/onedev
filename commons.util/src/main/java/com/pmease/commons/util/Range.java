@@ -1,8 +1,8 @@
-package com.pmease.commons.util.pattern;
+package com.pmease.commons.util;
 
 import java.io.Serializable;
 
-public class LiteralRange implements Serializable {
+public class Range implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -10,7 +10,7 @@ public class LiteralRange implements Serializable {
 	
 	private final int to;
 	
-	public LiteralRange(int from, int to) {
+	public Range(int from, int to) {
 		this.from = from;
 		this.to = to;
 	}
@@ -22,10 +22,10 @@ public class LiteralRange implements Serializable {
 	public int getTo() {
 		return to;
 	}
-
+	
 	@Override
 	public String toString() {
-		return from + "-" + to;
+		return from+ "-" + to;
 	}
 	
 }

@@ -106,7 +106,6 @@ public class RepoCommitsPage extends RepositoryPage {
 				state.applyTo(logCommand);
 				logCommits = logCommand.call();
 			} catch (Exception e) {
-				
 				if (e.getMessage() != null && e.getMessage().contains(GIT_ERROR_START)) {
 					queryForm.error(StringUtils.substringAfter(e.getMessage(), GIT_ERROR_START));
 					logCommits = new ArrayList<>();

@@ -8,8 +8,8 @@ import org.apache.wicket.markup.html.form.TextField;
 
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
-import com.pmease.commons.wicket.behavior.inputassist.InputError;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -30,7 +30,7 @@ public class TestPage extends BasePage {
 			}
 
 			@Override
-			protected List<InputError> getErrors(String inputContent) {
+			protected List<Range> getErrors(String inputContent) {
 				return new ArrayList<>();
 			}
 
