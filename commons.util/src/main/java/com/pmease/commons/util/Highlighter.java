@@ -1,12 +1,9 @@
-package com.pmease.commons.util.highlighter;
+package com.pmease.commons.util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.pmease.commons.util.JoinedRanges;
-import com.pmease.commons.util.Range;
 
 public class Highlighter {
 
@@ -36,12 +33,24 @@ public class Highlighter {
 	
 	public static String highlightLiterals(String text, List<String> literals, boolean caseSensitive,
 			Transformer<String> matchedTransformer, Transformer<String> unmatchedTransformer) {
+		String normalizedText;
+		if (!caseSensitive)
+			normalizedText = text.toLowerCase();
+		else
+			normalizedText = text;
 		List<Range> ranges = new ArrayList<>();
 		for (String literal: literals) {
-			text.indexOf(literal);
-	    	Matcher matcher = pattern.matcher(text);
-	    	while (matcher.find()) 
-	    		ranges.add(new Range(matcher.start(), matcher.end()));
+			String normalizedLiteral;
+			if (!caseSensitive)
+				normalizedLiteral = literal.toLowerCase();
+			else
+				normalizedLiteral = literal;
+			int index = normalizedText.indexOf(normalizedLiteral);
+			while (index != -1) {
+				Range range = new Range(index, index+normalizedLiteral.length());
+				ranges.add(range);
+				index = normalizedText.indexOf(normalizedLiteral, range.getTo());
+			}
 		}
 		return highlightRanges(text, ranges, matchedTransformer, unmatchedTransformer);
 	}

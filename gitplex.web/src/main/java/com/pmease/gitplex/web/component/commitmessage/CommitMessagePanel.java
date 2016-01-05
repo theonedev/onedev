@@ -18,9 +18,9 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.unbescape.html.HtmlEscape;
 
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.util.Highlighter;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.Transformer;
-import com.pmease.commons.util.highlighter.PatternHighlighter;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 
@@ -54,21 +54,21 @@ public class CommitMessagePanel extends Panel {
 	}
 	
 	private String highlight(String text) {
-		return new PatternHighlighter(patternsModel.getObject(), new Transformer() {
+		return Highlighter.highlightPatterns(text, patternsModel.getObject(), new Transformer<String>() {
 
 			@Override
 			public String transform(String text) {
 				return "<span class='highlight'>" + HtmlEscape.escapeHtml5(text) + "</span>";
 			}
 			
-		}, new Transformer() {
+		}, new Transformer<String>() {
 
 			@Override
 			public String transform(String text) {
 				return HtmlEscape.escapeHtml5(text);
 			}
 			
-		}).highlight(text);
+		});
 	}
 	
 	@Override
@@ -94,7 +94,7 @@ public class CommitMessagePanel extends Panel {
 			@Override
 			public String getObject() {
 				String highlighted = highlight(commitModel.getObject().getBody());
-				return StringUtils.replace(StringUtils.replace(highlighted, "\r\n", "<br>"), "\n", "<b>");
+				return StringUtils.replace(StringUtils.replace(highlighted, "\r\n", "<br>"), "\n", "<br>");
 			}
 			
 		}) {

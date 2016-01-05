@@ -1,8 +1,5 @@
 package com.pmease.gitplex.web.page.repository.commit;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
@@ -15,19 +12,18 @@ import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.BeforeCon
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CommitterContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.MessageContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.PathContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionExclusionContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionRangeContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.SingleRevisionContext;
 
-public class LogCommandDecorator extends CommitQueryBaseListener {
+public class LogCommandFiller extends CommitQueryBaseListener {
 
 	private final LogCommand logCommand;
 	
 	private ParseTreeProperty<String> value = new ParseTreeProperty<>();
 
-	public LogCommandDecorator(LogCommand logCommand) {
+	public LogCommandFiller(LogCommand logCommand) {
 		this.logCommand = logCommand;
 	}
 
@@ -88,17 +84,6 @@ public class LogCommandDecorator extends CommitQueryBaseListener {
 	@Override
 	public void exitMessage(MessageContext ctx) {
 		logCommand.messages().add(JavaEscape.unescapeJava(getValue(ctx.Value())));
-	}
-	
-	public static QueryContext parse(String query) {
-		ANTLRInputStream is = new ANTLRInputStream(query); 
-		CommitQueryLexer lexer = new CommitQueryLexer(is);
-		lexer.removeErrorListeners();
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		CommitQueryParser parser = new CommitQueryParser(tokens);
-		parser.removeErrorListeners();
-		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.query();
 	}
 	
 }

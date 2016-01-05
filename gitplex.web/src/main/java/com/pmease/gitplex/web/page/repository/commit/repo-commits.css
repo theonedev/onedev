@@ -47,7 +47,9 @@
 #repo-commits>.body li.commit:hover, #repo-commits>.body li.commit.hover {
 	background: #F7ECB9;
 }
-
+#repo-commits>.body .commit-message .highlight {
+	background: yellow;
+}
 #repo-commits>.body .commit-message>.full {
 	margin-bottom: 4px;
 }

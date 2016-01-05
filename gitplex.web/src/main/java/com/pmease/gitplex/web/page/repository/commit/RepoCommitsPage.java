@@ -8,7 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -38,9 +44,11 @@ import org.eclipse.jgit.lib.Ref;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.java.JavaEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -57,6 +65,8 @@ import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CriteriaContext;
+import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
@@ -114,9 +124,9 @@ public class RepoCommitsPage extends RepositoryPage {
 				}
 			}
 			
-			hasMore = logCommits.size() == state.step*COUNT;
+			hasMore = logCommits.size() == state.getStep()*COUNT;
 			
-			int lastMaxCount = (state.step-1)*COUNT;
+			int lastMaxCount = (state.getStep()-1)*COUNT;
 
 			commits.last = new ArrayList<>();
 			
@@ -230,11 +240,10 @@ public class RepoCommitsPage extends RepositoryPage {
 
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				try {
-					if (state.query != null) // validate query
-						LogCommandDecorator.parse(state.query);
+					state.getParseTree(); // validate query
 					updateCommits(target);
 				} catch (Exception e) {
-					logger.error("Error parsing commit query string: " + state.query, e);
+					logger.error("Error parsing commit query string: " + state.getQuery(), e);
 					error("Syntax error in query string");
 					target.add(feedback);
 				}
@@ -262,12 +271,12 @@ public class RepoCommitsPage extends RepositoryPage {
 
 			@Override
 			public String getObject() {
-				return state.query;
+				return state.getQuery();
 			}
 
 			@Override
 			public void setObject(String object) {
-				state.query = object;
+				state.setQuery(object);
 			}
 			
 		}).add(new QueryAssistBehavior(repoModel)));
@@ -306,7 +315,7 @@ public class RepoCommitsPage extends RepositoryPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				state.step++;
+				state.setStep(state.getStep()+1);
 				
 				Commits commits = commitsModel.getObject();
 				int commitIndex = 0;
@@ -356,7 +365,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(hasMore && state.step < MAX_STEPS);
+				setVisible(hasMore && state.getStep() < MAX_STEPS);
 			}
 			
 		});
@@ -365,7 +374,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(state.step==MAX_STEPS);
+				setVisible(state.getStep() == MAX_STEPS);
 			}
 			
 		});
@@ -373,7 +382,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	}
 	
 	private void updateCommits(AjaxRequestTarget target) {
-		state.step = 1;
+		state.setStep(1);
 
 		target.add(feedback);
 		body.replace(commitsView = newCommitsView());
@@ -429,6 +438,24 @@ public class RepoCommitsPage extends RepositoryPage {
 					return commitsModel.getObject().current.get(index);
 				}
 				
+			}, new LoadableDetachableModel<List<Pattern>>() {
+
+				@Override
+				protected List<Pattern> load() {
+					List<Pattern> patterns =  new ArrayList<>();
+					QueryContext parseTree = state.getParseTree();
+					if (parseTree != null) {
+						for (CriteriaContext criteria: parseTree.criteria()) {
+							String message = criteria.message().Value().getText();
+							message = message.substring(1);
+							message = message.substring(0, message.length()-1);
+							message = JavaEscape.unescapeJava(message);
+							patterns.add(Pattern.compile(message, Pattern.CASE_INSENSITIVE));
+						}
+					}
+					return patterns;
+				}
+				
 			}));
 
 			RepeatingView labelsView = new RepeatingView("labels");
@@ -464,10 +491,10 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	public static PageParameters paramsOf(Repository repository, HistoryState state) {
 		PageParameters params = paramsOf(repository);
-		if (state.query != null)
-			params.set(PARAM_QUERY, state.query);
-		if (state.step != 1)
-			params.set(PARAM_STEP, state.step);
+		if (state.getQuery() != null)
+			params.set(PARAM_QUERY, state.getQuery());
+		if (state.getStep() != 1)
+			params.set(PARAM_STEP, state.getStep());
 		return params;
 	}
 	
@@ -587,6 +614,8 @@ public class RepoCommitsPage extends RepositoryPage {
 		
 		private int step = 1;
 		
+		private transient Optional<QueryContext> parseTree;
+		
 		public HistoryState() {
 		}
 		
@@ -608,6 +637,7 @@ public class RepoCommitsPage extends RepositoryPage {
 
 		public void setQuery(String query) {
 			this.query = query;
+			parseTree = null;
 		}
 
 		public int getStep() {
@@ -618,14 +648,34 @@ public class RepoCommitsPage extends RepositoryPage {
 			this.step = step;
 		}
 		
+		@Nullable
+		public QueryContext getParseTree() {
+			if (parseTree == null) {
+				if (query != null) {
+					ANTLRInputStream is = new ANTLRInputStream(query); 
+					CommitQueryLexer lexer = new CommitQueryLexer(is);
+					lexer.removeErrorListeners();
+					CommonTokenStream tokens = new CommonTokenStream(lexer);
+					CommitQueryParser parser = new CommitQueryParser(tokens);
+					parser.removeErrorListeners();
+					parser.setErrorHandler(new BailErrorStrategy());
+					parseTree = Optional.of(parser.query());
+				} else {
+					parseTree = Optional.fromNullable(null);
+				}
+			}
+			return parseTree.orNull();
+		}
+		
 		public void applyTo(LogCommand logCommand) {
 			if (step > MAX_STEPS)
 				throw new RuntimeException("Step should be no more than " + MAX_STEPS);
 			
 			logCommand.count(step*COUNT);
 
-			if (query != null) 
-				new ParseTreeWalker().walk(new LogCommandDecorator(logCommand), LogCommandDecorator.parse(query));
+			QueryContext parseTree = getParseTree();
+			if (parseTree != null) 
+				new ParseTreeWalker().walk(new LogCommandFiller(logCommand), parseTree);
 		}
 		
 	}

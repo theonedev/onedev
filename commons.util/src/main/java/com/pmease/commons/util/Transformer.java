@@ -1,5 +1,7 @@
 package com.pmease.commons.util;
 
-public interface Transformer {
-	String transform(String text);
+import java.io.Serializable;
+
+public interface Transformer<T> extends Serializable {
+	T transform(T text);
 }
