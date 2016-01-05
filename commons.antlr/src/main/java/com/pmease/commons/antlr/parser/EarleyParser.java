@@ -2,7 +2,7 @@ package com.pmease.commons.antlr.parser;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,7 +41,7 @@ public class EarleyParser {
 		this.rule = rule;
 		this.tokens = tokens;
 		
-		Set<State> states = new HashSet<>();
+		Set<State> states = new LinkedHashSet<>();
 		for (int i=0; i<rule.getAlternatives().size(); i++) 
 			states.add(new State(tokenIndex, rule, i, 0, false, new ArrayList<Element>()));
 
@@ -54,7 +54,7 @@ public class EarleyParser {
 			if (tokenIndex == tokens.size())
 				break;
 			
-			states = new HashSet<>();
+			states = new LinkedHashSet<>();
 			for (State state: chart.getStates()) 
 				scan(state, states);
 			tokenIndex++;
