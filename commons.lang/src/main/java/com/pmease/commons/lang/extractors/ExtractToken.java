@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.antlr.v4.runtime.Token;
 
+import com.pmease.commons.util.Range;
+
 public class ExtractToken implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -19,8 +21,7 @@ public class ExtractToken implements Serializable {
 	public ExtractToken(Token antlrToken) {
 		type = antlrToken.getType();
 		text = antlrToken.getText();
-		TokenPosition.Range range = new TokenPosition.Range(
-				antlrToken.getCharPositionInLine(), 
+		Range range = new Range(antlrToken.getCharPositionInLine(), 
 				antlrToken.getCharPositionInLine() + text.length());
 		pos = new TokenPosition(antlrToken.getLine()-1, range);
 	}

@@ -1,9 +1,12 @@
 package com.pmease.commons.wicket.component.clearable;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
+
+import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 
 @SuppressWarnings("serial")
 public class ClearableTextField<T> extends TextField<T> {
@@ -28,7 +31,8 @@ public class ClearableTextField<T> extends TextField<T> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		String script = String.format("pmease.commons.setupClearableInput('%s');", getMarkupId(true));
+		response.render(JavaScriptHeaderItem.forReference(ClearableResourceReference.INSTANCE));
+		String script = String.format("$('#%s').clearable();", getMarkupId(true));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

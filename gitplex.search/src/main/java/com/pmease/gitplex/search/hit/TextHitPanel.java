@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.util.Range;
 
 @SuppressWarnings("serial")
 public class TextHitPanel extends Panel {
@@ -34,10 +34,10 @@ public class TextHitPanel extends Panel {
 				List<Segment> segments = new ArrayList<>();
 				
 				String lineContent = hit.getLineContent();
-				TokenPosition.Range range = hit.getTokenPos().getRange();
-				segments.add(new Segment(lineContent.substring(0, range.getStart()), false));
-				segments.add(new Segment(lineContent.substring(range.getStart(), range.getEnd()), true));
-				segments.add(new Segment(lineContent.substring(range.getEnd()), false));
+				Range range = hit.getTokenPos().getRange();
+				segments.add(new Segment(lineContent.substring(0, range.getFrom()), false));
+				segments.add(new Segment(lineContent.substring(range.getFrom(), range.getTo()), true));
+				segments.add(new Segment(lineContent.substring(range.getTo()), false));
 				return segments;
 			}
 			
@@ -47,7 +47,7 @@ public class TextHitPanel extends Panel {
 			protected void populateItem(ListItem<Segment> item) {
 				item.add(new Label("segment", item.getModelObject().text));
 				if (item.getModelObject().matched)
-					item.add(AttributeModifier.append("style", "background: #E2C7F3;"));
+					item.add(AttributeModifier.append("style", "font-weight: bold;"));
 			}
 			
 		});

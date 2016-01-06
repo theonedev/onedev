@@ -24,6 +24,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.util.ContentDetector;
+import com.pmease.commons.util.Range;
 import com.pmease.gitplex.search.IndexConstants;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
@@ -97,7 +98,7 @@ public class TextQuery extends BlobQuery {
 							if (line.length() <= MAX_LINE_LEN) {
 								Matcher matcher = pattern.matcher(line);
 								while (matcher.find()) {
-									TokenPosition.Range range = new TokenPosition.Range(matcher.start(), matcher.end());
+									Range range = new Range(matcher.start(), matcher.end());
 									hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
 									if (hits.size() >= getCount())
 										break;
@@ -139,13 +140,13 @@ public class TextQuery extends BlobQuery {
 										afterChar = line.charAt(end);
 									
 									if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
-										TokenPosition.Range range = new TokenPosition.Range(start, end);
+										Range range = new Range(start, end);
 										hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
 										if (hits.size() >= getCount())
 											break;
 									}
 								} else {
-									TokenPosition.Range range = new TokenPosition.Range(start, end);
+									Range range = new Range(start, end);
 									hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
 									if (hits.size() >= getCount())
 										break;

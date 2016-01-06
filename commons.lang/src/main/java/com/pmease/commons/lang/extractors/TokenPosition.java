@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.util.Range;
+
 public class TokenPosition implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -26,26 +28,4 @@ public class TokenPosition implements Serializable {
 		return range;
 	}
 
-	public static class Range implements Serializable {
-		
-		private static final long serialVersionUID = 1L;
-
-		private final int start;
-		
-		private final int end;
-		
-		public Range(int start, int end) {
-			this.start = start;
-			this.end = end;
-		}
-
-		public int getStart() {
-			return start;
-		}
-
-		public int getEnd() {
-			return end;
-		}
-		
-	}
 }

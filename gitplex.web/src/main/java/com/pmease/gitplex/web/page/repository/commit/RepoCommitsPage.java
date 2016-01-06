@@ -244,7 +244,10 @@ public class RepoCommitsPage extends RepositoryPage {
 					updateCommits(target);
 				} catch (Exception e) {
 					logger.error("Error parsing commit query string: " + state.getQuery(), e);
-					error("Syntax error in query string");
+					if (e.getCause().getMessage() != null)
+						error("Syntax error in query: " + e.getCause().getMessage());
+					else
+						error("Syntax error in query: " + e.getCause().getClass().getSimpleName());
 					target.add(feedback);
 				}
 			}
@@ -446,11 +449,13 @@ public class RepoCommitsPage extends RepositoryPage {
 					QueryContext parseTree = state.getParseTree();
 					if (parseTree != null) {
 						for (CriteriaContext criteria: parseTree.criteria()) {
-							String message = criteria.message().Value().getText();
-							message = message.substring(1);
-							message = message.substring(0, message.length()-1);
-							message = JavaEscape.unescapeJava(message);
-							patterns.add(Pattern.compile(message, Pattern.CASE_INSENSITIVE));
+							if (criteria.message() != null) {
+								String message = criteria.message().Value().getText();
+								message = message.substring(1);
+								message = message.substring(0, message.length()-1);
+								message = JavaEscape.unescapeJava(message);
+								patterns.add(Pattern.compile(message, Pattern.CASE_INSENSITIVE));
+							}
 						}
 					}
 					return patterns;

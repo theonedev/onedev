@@ -6,6 +6,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.util.Range;
 
 public class TextHit extends QueryHit {
 
@@ -27,10 +28,10 @@ public class TextHit extends QueryHit {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(getTokenPos().getLine()).append(": ");
-		TokenPosition.Range range = getTokenPos().getRange();
-		builder.append(lineContent.substring(0, range.getStart()));
-		builder.append("[").append(lineContent.substring(range.getStart(), range.getEnd())).append("]");
-		builder.append(lineContent.substring(range.getEnd()));
+		Range range = getTokenPos().getRange();
+		builder.append(lineContent.substring(0, range.getFrom()));
+		builder.append("[").append(lineContent.substring(range.getFrom(), range.getTo())).append("]");
+		builder.append(lineContent.substring(range.getTo()));
 		return builder.toString();
 	}
 

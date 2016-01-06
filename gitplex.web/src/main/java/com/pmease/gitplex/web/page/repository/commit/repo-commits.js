@@ -269,7 +269,7 @@ gitplex.repocommits = {
 			return paper.select("#commit-dot-" + index);
 		}
 		function onMouseEnter(e) {
-			getCommitDot(e).attr("strokeWidth", 4);
+			getCommitDot(e).attr("strokeWidth", 3);
 		}
 		function onMouseLeave(e) {
 			getCommitDot(e).attr("strokeWidth", 0);
@@ -284,7 +284,7 @@ gitplex.repocommits = {
 		var columnWidth = 12;
 		var topOffset = 22;
 		var rightOffset = 12;
-		var dotSize = 4;
+		var dotSize = 3;
 		
 		var dotColorClass = "commit-dot-color";
 		var lineColorClass = "commit-line-color";

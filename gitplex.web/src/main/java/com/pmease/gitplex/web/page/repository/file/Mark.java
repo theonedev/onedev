@@ -34,8 +34,8 @@ public class Mark implements Serializable {
 	}
 	
 	public Mark(TokenPosition tokenPos) {
-		this(tokenPos.getLine(), tokenPos.getRange().getStart(), 
-				tokenPos.getLine(), tokenPos.getRange().getEnd());
+		this(tokenPos.getLine(), tokenPos.getRange().getFrom(), 
+				tokenPos.getLine(), tokenPos.getRange().getTo());
 	}
 
 	public Mark(String str) {
