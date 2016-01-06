@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
@@ -29,8 +31,12 @@ import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.lang.extractors.java.JavaExtractor;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.concurrent.PrioritizedCallable;
+import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.manager.IndexResult;
+import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -64,7 +70,11 @@ public class IndexAndSearchTest extends AbstractGitTest {
 
 		@Override
 		public <T> T call(Callable<T> callable) {
-			return null;
+			try {
+				return callable.call();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		@Override
@@ -80,6 +90,80 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		@Override
 		public SessionFactory getSessionFactory() {
 			return null;
+		}
+		
+	};
+	
+	private WorkManager workManager = new WorkManager() {
+
+		@Override
+		public <T> Future<T> submit(PrioritizedCallable<T> task) {
+			try {
+				return new CompletedFuture<T>(task.call());
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public Future<?> submit(PrioritizedRunnable task) {
+			task.run();
+			return new CompletedFuture<Void>(null);
+		}
+
+		@Override
+		public <T> Future<T> submit(PrioritizedRunnable task, T result) {
+			task.run();
+			return new CompletedFuture<T>(result);
+		}
+
+		@Override
+		public void execute(PrioritizedRunnable command) {
+			command.run();
+		}
+
+		@Override
+		public boolean remove(Runnable task) {
+			return false;
+		}
+		
+	};
+	
+	private SequentialWorkManager sequentialWorkManager = new SequentialWorkManager() {
+
+		@Override
+		public <T> Future<T> submit(String key, PrioritizedCallable<T> task) {
+			try {
+				return new CompletedFuture<T>(task.call());
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public Future<?> submit(String key, PrioritizedRunnable task) {
+			task.run();
+			return new CompletedFuture<Void>(null);
+		}
+
+		@Override
+		public <T> Future<T> submit(String key, PrioritizedRunnable task, T result) {
+			task.run();
+			return new CompletedFuture<T>(result);
+		}
+
+		@Override
+		public void execute(String key, PrioritizedRunnable command) {
+			command.run();
+		}
+
+		@Override
+		public void removeExecutor(String key) {
+		}
+
+		@Override
+		public boolean remove(String key, Runnable task) {
+			return false;
 		}
 		
 	};
@@ -116,11 +200,11 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		searchManager = new DefaultSearchManager(storageManager);
 		
 		indexManager = new DefaultIndexManager(Sets.<IndexListener>newHashSet(searchManager), 
-				unitOfWork, storageManager, extractors, dao);
+				storageManager, workManager, sequentialWorkManager, extractors, unitOfWork, dao);
 	}
 
 	@Test
-	public void testBasic() throws InterruptedException {
+	public void testBasic() throws InterruptedException, ExecutionException {
 		String code = ""
 				+ "public class Dog {\n"
 				+ "  public String name;\n"
@@ -134,7 +218,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		addFileAndCommit("Cat.java", code, "add cat");
 		
 		String commitHash = git.parseRevision("master", true);
-		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
+		assertEquals(2, indexManager.index(repository, commitHash).get().getIndexed());
 		
 		BlobQuery query = new TextQuery("public", false, false, false, null, null, Integer.MAX_VALUE);
 		List<QueryHit> hits = searchManager.search(repository, commitHash, query);
@@ -164,7 +248,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		addFileAndCommit("Dog.java", code, "add dog age");		
 
 		commitHash = git.parseRevision("master", true);
-		assertEquals(1, indexManager.index(repository, commitHash).getIndexed());
+		assertEquals(1, indexManager.index(repository, commitHash).get().getIndexed());
 
 		query = new TextQuery("strin", false, false, false, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, query);
@@ -189,12 +273,12 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		commitHash = git.parseRevision("master", true);
 		
-		IndexResult indexResult = indexManager.index(repository, commitHash);
+		IndexResult indexResult = indexManager.index(repository, commitHash).get();
 		assertEquals(2, indexResult.getChecked());
 		assertEquals(1, indexResult.getIndexed());
 		
 		commitHash = git.parseRevision("master~2", true);
-		assertEquals(0, indexManager.index(repository, commitHash).getChecked());
+		assertEquals(0, indexManager.index(repository, commitHash).get().getChecked());
 		
 		when(extractors.getVersion()).thenReturn("java:2");
 		when(extractors.getExtractor(anyString())).thenReturn(new Extractor() {
@@ -245,7 +329,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 			
 		});
 		
-		assertEquals(2, indexManager.index(repository, commitHash).getIndexed());
+		assertEquals(2, indexManager.index(repository, commitHash).get().getIndexed());
 		
 		query = new SymbolQuery("tiger", false, true, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(repository, commitHash, query);

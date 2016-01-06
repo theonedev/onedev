@@ -54,10 +54,12 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
@@ -77,6 +79,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 public class RepoCommitsPage extends RepositoryPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RepoCommitsPage.class);
+	
+	private static final int LOG_PRIORITY = 1;
 	
 	private static final String GIT_ERROR_START = "Command error output: ";
 	
@@ -108,13 +112,20 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected Commits load() {
 			Commits commits = new Commits();
 			
-			LogCommand logCommand = new LogCommand(getRepository().git().repoDir());
+			final LogCommand logCommand = new LogCommand(getRepository().git().repoDir());
 			logCommand.parentRewriting(true).ignoreCase(true);
 			
 			List<Commit> logCommits;
 			try {
 				state.applyTo(logCommand);
-				logCommits = logCommand.call();
+				logCommits = GitPlex.getInstance(WorkManager.class).submit(new PrioritizedCallable<List<Commit>>(LOG_PRIORITY) {
+
+					@Override
+					public List<Commit> call() throws Exception {
+						return logCommand.call();
+					}
+					
+				}).get();
 			} catch (Exception e) {
 				if (e.getMessage() != null && e.getMessage().contains(GIT_ERROR_START)) {
 					queryForm.error(StringUtils.substringAfter(e.getMessage(), GIT_ERROR_START));

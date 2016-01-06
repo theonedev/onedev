@@ -31,6 +31,7 @@ import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.git.command.CommitConsumer;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
@@ -68,6 +69,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	
 	private static final ByteIterable FILES_KEY = new StringByteIterable("files");
 	
+	private static final int PRIORITY = 100;
+	
 	private final StorageManager storageManager;
 	
 	private final WorkManager workManager;
@@ -94,12 +97,12 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	
 	@Override
 	public void check(final Repository repository, final String refName) {
-		sequentialWorkManager.execute(getSequentialExecutorKey(repository), new Runnable() {
+		sequentialWorkManager.execute(getSequentialExecutorKey(repository), new PrioritizedRunnable(PRIORITY) {
 
 			@Override
 			public void run() {
 				try {
-					workManager.submit(new Runnable() {
+					workManager.submit(new PrioritizedRunnable(PRIORITY) {
 
 						@Override
 						public void run() {
@@ -245,12 +248,13 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 								}
 							});
 						}
+
 					}).get();
 				} catch (InterruptedException | ExecutionException e) {
 					throw new RuntimeException(e);
 				}
 			}
-			
+
 		});
 	}
 	

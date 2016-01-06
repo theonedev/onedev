@@ -46,7 +46,6 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
-import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
@@ -365,16 +364,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
 				if (!indexManager.isIndexed(getRepository(), blobIdent.revision)) {
-					final Long repoId = getRepository().getId();
-					GitPlex.getInstance(UnitOfWork.class).asyncCall(new Runnable() {
-
-						@Override
-						public void run() {
-							Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
-							GitPlex.getInstance(IndexManager.class).index(repo, blobIdent.revision);
-						}
-						
-					});
+					GitPlex.getInstance(IndexManager.class).index(getRepository(), blobIdent.revision);
 					setVisible(true);
 				} else {
 					setVisible(false);

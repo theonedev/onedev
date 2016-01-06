@@ -17,10 +17,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -28,6 +24,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Query;
@@ -49,6 +46,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
@@ -61,6 +59,7 @@ import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.CloseInfo;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
@@ -80,6 +79,10 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
+	private static final int UI_PREVIEW_PRIORITY = 10;
+	
+	private static final int BACKEND_PREVIEW_PRIORITY = 50;
+	
 	private final Dao dao;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
@@ -98,35 +101,24 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	
 	private final Set<Long> integrationPreviewCalculatingRequestIds = new ConcurrentHashSet<>();
 
-	private final ThreadPoolExecutor integrationPreviewExecutor;
+	private final WorkManager workManager;
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
 			StorageManager storageManager, ReviewInvitationManager reviewInvitationManager, 
 			UserManager userManager, NotificationManager notificationManager, 
 			CommentManager commentManager, MarkdownManager markdownManager, 
-			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
+			WorkManager workManager, UnitOfWork unitOfWork, 
+			Set<PullRequestListener> pullRequestListeners) {
 		this.dao = dao;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.storageManager = storageManager;
 		this.reviewInvitationManager = reviewInvitationManager;
 		this.commentManager = commentManager;
 		this.userManager = userManager;
+		this.workManager = workManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
-		
-		BlockingDeque<Runnable> queue = new LinkedBlockingDeque<Runnable>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public boolean offer(Runnable e) {
-				return super.offerFirst(e);
-			}
-			
-		};
-		int workers = Runtime.getRuntime().availableProcessors();			
-		integrationPreviewExecutor = new ThreadPoolExecutor(workers, workers, 0L, TimeUnit.MILLISECONDS, queue);
 	}
 
 	@Transactional
@@ -364,8 +356,8 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			@Override
 			public void run() {
 				IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-				integrationPreviewExecutor.remove(task);
-				integrationPreviewExecutor.execute(task);
+				workManager.remove(task);
+				workManager.execute(task);
 			}
 			
 		});
@@ -400,8 +392,8 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		closeIfMerged(request);
 		if (request.isOpen()) {
 			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-			integrationPreviewExecutor.remove(task);
-			integrationPreviewExecutor.execute(task);
+			workManager.remove(task);
+			workManager.execute(task);
 		}
 	}
 
@@ -519,19 +511,20 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		IntegrationPreview preview = request.getLastIntegrationPreview();
 		if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-			integrationPreviewExecutor.remove(task);
-			integrationPreviewExecutor.execute(task);
+			workManager.remove(task);
+			workManager.execute(task);
 			return null;
 		} else {
 			return preview;
 		}
 	}
 	
-	private class IntegrationPreviewTask implements Runnable {
+	private class IntegrationPreviewTask extends PrioritizedRunnable {
 
 		private final Long requestId;
 		
 		public IntegrationPreviewTask(Long requestId) {
+			super(RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY);
 			this.requestId = requestId;
 		}
 		
@@ -541,6 +534,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			try {
 				if (!integrationPreviewCalculatingRequestIds.contains(requestId)) {
 					integrationPreviewCalculatingRequestIds.add(requestId);
+					logger.info("Calculating integration preview of pull request #{}...", requestId);
 					try {
 						PullRequest request = dao.load(PullRequest.class, requestId);
 						IntegrationPreview preview = request.getLastIntegrationPreview();
@@ -618,6 +612,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 						}
 					} finally {
 						integrationPreviewCalculatingRequestIds.remove(requestId);
+						logger.info("Integration preview of pull request #{} is calculated.", requestId);
 					}
 				}
 			} catch (Exception e) {
@@ -641,7 +636,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37).append(requestId).toHashCode();
 		}
-		
+
 	}
 
 	@Override
@@ -671,7 +666,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 	@Override
 	public void systemStopped() {
-		integrationPreviewExecutor.shutdown();
 	}
 
 	@Transactional

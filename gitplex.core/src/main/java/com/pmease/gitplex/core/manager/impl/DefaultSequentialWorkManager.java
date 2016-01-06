@@ -2,40 +2,52 @@ package com.pmease.gitplex.core.manager.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.inject.Singleton;
 
+import com.pmease.commons.util.concurrent.PrioritizedCallable;
+import com.pmease.commons.util.concurrent.PrioritizedExecutor;
+import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 
 @Singleton
 public class DefaultSequentialWorkManager implements SequentialWorkManager, LifecycleListener {
 
-	private final Map<String, ExecutorService> executors = new HashMap<>();
+	private final Map<String, ThreadPoolExecutor> executors = new HashMap<>();
 	
 	@Override
-	public <T> Future<T> submit(String key, Callable<T> task) {
-		return getRepositoryExecutor(key).submit(task);
+	public <T> Future<T> submit(String key, PrioritizedCallable<T> task) {
+		return getExecutor(key).submit(task);
 	}
 
 	@Override
-	public Future<?> submit(String key, Runnable task) {
-		return getRepositoryExecutor(key).submit(task);
+	public Future<?> submit(String key, PrioritizedRunnable task) {
+		return getExecutor(key).submit(task);
 	}
 
 	@Override
-	public void execute(String key, Runnable command) {
-		getRepositoryExecutor(key).execute(command);
+	public <T> Future<T> submit(String key, PrioritizedRunnable task, T result) {
+		return getExecutor(key).submit(task, result);
+	}
+
+	@Override
+	public void execute(String key, PrioritizedRunnable command) {
+		getExecutor(key).execute(command);
+	}
+
+	@Override
+	public boolean remove(String key, Runnable task) {
+		return getExecutor(key).remove(task);
 	}
 	
-	private synchronized ExecutorService getRepositoryExecutor(String key) {
-		ExecutorService executor = executors.get(key);
+	private synchronized ThreadPoolExecutor getExecutor(String key) {
+		ThreadPoolExecutor executor = executors.get(key);
 		if (executor == null) {
-			executor = Executors.newSingleThreadExecutor();
+			executor = new PrioritizedExecutor(1);
 			executors.put(key, executor);
 		}
 		return executor;

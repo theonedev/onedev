@@ -1,15 +1,10 @@
 package com.pmease.gitplex.web.page.test;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.wicket.markup.html.link.Link;
 
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-
-import com.pmease.commons.antlr.codeassist.InputCompletion;
-import com.pmease.commons.antlr.codeassist.InputStatus;
-import com.pmease.commons.util.Range;
-import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
+import com.pmease.commons.util.concurrent.PrioritizedRunnable;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -18,29 +13,28 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		Form<?> form = new Form<Void>("form");
-		form.add(new TextField<Void>("input").add(new InputAssistBehavior() {
-
-			@Override
-			protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
-				List<InputCompletion> suggestions = new ArrayList<>();
-				suggestions.add(new InputCompletion(0, 0, "hello world just do it well we can handle it", 0, "hello world just do it well we c", null));
-				return suggestions;
-			}
+		
+		add(new Link<Void>("test") {
 
 			@Override
-			protected List<Range> getErrors(String inputContent) {
-				return new ArrayList<>();
-			}
-
-			@Override
-			protected int getAnchor(String content) {
-				return 0;
+			public void onClick() {
+				GitPlex.getInstance(WorkManager.class).execute(new PrioritizedRunnable(0) {
+					
+					@Override
+					public void run() {
+						try {
+							System.out.println("begin");
+							Thread.sleep(30000);
+							System.out.println("end");
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
 			}
 			
-		}));
-		add(form);
+		});
 	}
 
 }

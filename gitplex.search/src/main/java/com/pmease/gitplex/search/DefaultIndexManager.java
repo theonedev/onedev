@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -46,6 +48,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
@@ -67,9 +70,11 @@ import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.LockUtils;
+import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.gitplex.core.manager.IndexResult;
+import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 
 @Singleton
@@ -77,9 +82,17 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIndexManager.class);
 	
+	private static final int UI_INDEXING_PRIORITY = 10;
+	
+	private static final int BACKEND_INDEXING_PRIORITY = 50;
+	
 	private static final int INDEX_VERSION = 1;
 	
 	private final StorageManager storageManager;
+	
+	private final WorkManager workManager;
+	
+	private final SequentialWorkManager sequentialWorkManager;
 	
 	private final Set<IndexListener> listeners;
 	
@@ -90,12 +103,15 @@ public class DefaultIndexManager implements IndexManager {
 	private final Dao dao;
 	
 	@Inject
-	public DefaultIndexManager(Set<IndexListener> listeners, UnitOfWork unitOfWork, 
-			StorageManager storageManager, Extractors extractors, Dao dao) {
+	public DefaultIndexManager(Set<IndexListener> listeners, StorageManager storageManager, 
+			WorkManager workManager, SequentialWorkManager sequentialWorkManager, 
+			Extractors extractors, UnitOfWork unitOfWork, Dao dao) {
 		this.listeners = listeners;
-		this.unitOfWork = unitOfWork;
 		this.storageManager = storageManager;
+		this.workManager = workManager;
+		this.sequentialWorkManager = sequentialWorkManager;
 		this.extractors = extractors;
+		this.unitOfWork = unitOfWork;
 		this.dao = dao;
 	}
 
@@ -288,53 +304,82 @@ public class DefaultIndexManager implements IndexManager {
 		return config;
 	}
 	
+	private String getSequentialExecutorKey(Repository repository) {
+		return "repository-" + repository.getId() + "-indexBlob";
+	}
+	
 	@Override
-	public IndexResult index(final Repository repository, final String revision) {
-		final AnyObjectId commitId = repository.getObjectId(revision);
+	public Future<IndexResult> index(Repository repository, final String revision) {
+		final Long repoId = repository.getId();
+		final int priority;
+		if (RequestCycle.get() != null)
+			priority = UI_INDEXING_PRIORITY;
+		else
+			priority = BACKEND_INDEXING_PRIORITY;
 		
-		logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository);
-		
-		return LockUtils.call(getLockName(repository), new Callable<IndexResult>() {
+		return sequentialWorkManager.submit(getSequentialExecutorKey(repository), 
+				new PrioritizedCallable<IndexResult>(priority) {
 
 			@Override
 			public IndexResult call() throws Exception {
-				IndexResult indexResult;
-				File indexDir = storageManager.getIndexDir(repository);
-				try (Directory directory = FSDirectory.open(indexDir)) {
-					if (DirectoryReader.indexExists(directory)) {
-						try (IndexReader reader = DirectoryReader.open(directory)) {
-							IndexSearcher searcher = new IndexSearcher(reader);
-							try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-								try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
-									indexResult = index(jgitRepo, commitId, writer, searcher);
-									writer.commit();
-								} catch (Exception e) {
-									writer.rollback();
-									throw Throwables.propagate(e);
+				try {
+					return workManager.submit(new PrioritizedCallable<IndexResult>(priority) {
+
+						@Override
+						public IndexResult call() throws Exception {
+							return unitOfWork.call(new Callable<IndexResult>() {
+
+								@Override
+								public IndexResult call() throws Exception {
+									Repository repository = dao.load(Repository.class, repoId);
+									AnyObjectId commitId = repository.getObjectId(revision);
+									logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository);
+									IndexResult indexResult;
+									File indexDir = storageManager.getIndexDir(repository);
+									try (Directory directory = FSDirectory.open(indexDir)) {
+										if (DirectoryReader.indexExists(directory)) {
+											try (IndexReader reader = DirectoryReader.open(directory)) {
+												IndexSearcher searcher = new IndexSearcher(reader);
+												try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
+													try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
+														indexResult = index(jgitRepo, commitId, writer, searcher);
+														writer.commit();
+													} catch (Exception e) {
+														writer.rollback();
+														throw Throwables.propagate(e);
+													}
+												}
+											}
+										} else {
+											try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
+												try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
+													indexResult = index(jgitRepo, commitId, writer, null);
+													writer.commit();
+												} catch (Exception e) {
+													writer.rollback();
+													throw Throwables.propagate(e);
+												}
+											}
+										}
+									}
+									logger.info("Commit {} indexed (checked blobs: {}, indexed blobs: {})", 
+											commitId.getName(), indexResult.getChecked(), indexResult.getIndexed());
+									
+									for (IndexListener listener: listeners)
+										listener.commitIndexed(repository, revision);
+									
+									return indexResult;
 								}
-							}
+								
+							});
 						}
-					} else {
-						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-							try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
-								indexResult = index(jgitRepo, commitId, writer, null);
-								writer.commit();
-							} catch (Exception e) {
-								writer.rollback();
-								throw Throwables.propagate(e);
-							}
-						}
-					}
+
+					}).get();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new RuntimeException(e);
 				}
-				logger.info("Commit {} indexed (checked blobs: {}, indexed blobs: {})", 
-						commitId.getName(), indexResult.getChecked(), indexResult.getIndexed());
-				
-				for (IndexListener listener: listeners)
-					listener.commitIndexed(repository, revision);
-				
-				return indexResult;
 			}
-			
+
 		});
 	}
 
@@ -367,10 +412,6 @@ public class DefaultIndexManager implements IndexManager {
 		}
 	}
 	
-	private String getLockName(Repository repository) {
-		return "index: " + repository.getId();
-	}
-
 	@Override
 	public void beforeDelete(Repository repository) {
 	}
@@ -386,17 +427,8 @@ public class DefaultIndexManager implements IndexManager {
 	public void onRefUpdate(Repository repository, String refName, final String newCommitHash) {
 		// only index branches at back end, tags will be indexed on demand from GUI 
 		// as many tags might be pushed all at once when the repository is imported 
-		if (refName.startsWith(Git.REFS_HEADS) && newCommitHash != null) {
-			final Long repoId = repository.getId();
-			unitOfWork.asyncCall(new Runnable() {
-
-				@Override
-				public void run() {
-					Repository repo = dao.load(Repository.class, repoId);
-					index(repo, newCommitHash);
-				}
-				
-			});
-		}
+		if (refName.startsWith(Git.REFS_HEADS) && newCommitHash != null)
+			index(repository, newCommitHash);
 	}
+	
 }

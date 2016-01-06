@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,8 +16,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.pmease.gitplex.core.GitPlex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -32,18 +31,23 @@ import com.pmease.commons.git.command.AdvertiseUploadRefsCommand;
 import com.pmease.commons.git.command.ReceiveCommand;
 import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.git.exception.GitException;
+import com.pmease.commons.util.concurrent.PrioritizedRunnable;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.setting.ServerConfig;
+import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.setting.ServerConfig;
 
 @Singleton
 public class GitFilter implements Filter {
 	
 	private static final Logger logger = LoggerFactory.getLogger(GitFilter.class);
 
+	private static final int PRIORITY = 2;
+	
 	private static final String INFO_REFS = "info/refs";
 	
 	private final GitPlex gitPlex;
@@ -52,13 +56,17 @@ public class GitFilter implements Filter {
 	
 	private final RepositoryManager repositoryManager;
 	
+	private final WorkManager workManager;
+	
 	private final ServerConfig serverConfig;
 	
 	@Inject
-	public GitFilter(GitPlex gitPlex, StorageManager storageManager, RepositoryManager repositoryManager, ServerConfig serverConfig) {
+	public GitFilter(GitPlex gitPlex, StorageManager storageManager, RepositoryManager repositoryManager, 
+			WorkManager workManager, ServerConfig serverConfig) {
 		this.gitPlex = gitPlex;
 		this.storageManager = storageManager;
 		this.repositoryManager = repositoryManager;
+		this.workManager = workManager;
 		this.serverConfig = serverConfig;
 	}
 	
@@ -97,7 +105,8 @@ public class GitFilter implements Filter {
 		response.setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
 	}
 	
-	protected void processPacks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void processPacks(final HttpServletRequest request, final HttpServletResponse response) 
+			throws ServletException, IOException, InterruptedException, ExecutionException {
 		String pathInfo = getPathInfo(request);
 		
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
@@ -108,7 +117,7 @@ public class GitFilter implements Filter {
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-		Map<String, String> environments = new HashMap<>();
+		final Map<String, String> environments = new HashMap<>();
 		String serverUrl;
         if (serverConfig.getHttpPort() != 0)
             serverUrl = "http://localhost:" + serverConfig.getHttpPort();
@@ -118,18 +127,46 @@ public class GitFilter implements Filter {
 		environments.put("GITPLEX_URL", serverUrl);
 		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
 		environments.put("GITPLEX_REPOSITORY_ID", repository.getId().toString());
-		File gitDir = storageManager.getRepoDir(repository);
+		final File gitDir = storageManager.getRepoDir(repository);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
-			new UploadCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
+			workManager.submit(new PrioritizedRunnable(PRIORITY) {
+				
+				@Override
+				public void run() {
+					try {
+						new UploadCommand(gitDir, environments)
+								.input(ServletUtils.getInputStream(request))
+								.output(response.getOutputStream())
+								.call();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				
+			}).get();
 		} else {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(repository))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
-			new ReceiveCommand(gitDir, environments).input(ServletUtils.getInputStream(request)).output(response.getOutputStream()).call();
+			workManager.submit(new PrioritizedRunnable(PRIORITY) {
+				
+				@Override
+				public void run() {
+					try {
+						new ReceiveCommand(gitDir, environments)
+								.input(ServletUtils.getInputStream(request))
+								.output(response.getOutputStream())
+								.call();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				
+			}).get();
 		}
 	}
 	
@@ -192,7 +229,7 @@ public class GitFilter implements Filter {
 			} else {
 				chain.doFilter(request, response);
 			}
-		} catch (GitException e) {
+		} catch (GitException|InterruptedException|ExecutionException e) {
 			logger.error("Error serving git request", e);
 			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		}
