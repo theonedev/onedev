@@ -320,17 +320,45 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * 			<tt>true</tt> if valid; <tt>false</tt> otherwise
 	 */
 	public boolean isValid() {
+		return isUpdateHookValid() && isPostReceiveHookValid();
+	}
+	
+	public boolean isUpdateHookValid() {
         File updateHook = new File(git().repoDir(), "hooks/update");
         if (!updateHook.exists()) 
         	return false;
         
         try {
 			String content = FileUtils.readFileToString(updateHook);
-			return content.contains("GITPLEX_USER_ID");
+			if (!content.contains("GITPLEX_USER_ID"))
+				return false;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		
+        if (!updateHook.canExecute())
+        	return false;
+        
+        return true;
+	}
+	
+	public boolean isPostReceiveHookValid() {
+        File postReceiveHook = new File(git().repoDir(), "hooks/post-receive");
+        if (!postReceiveHook.exists()) 
+        	return false;
+        
+        try {
+			String content = FileUtils.readFileToString(postReceiveHook);
+			if (!content.contains("GITPLEX_USER_ID"))
+				return false;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+        if (!postReceiveHook.canExecute())
+        	return false;
+        
+        return true;
 	}
 	
 	public GateKeeper getGateKeeper() {
