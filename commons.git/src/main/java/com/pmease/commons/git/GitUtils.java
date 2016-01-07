@@ -13,6 +13,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.util.SystemReader;
 
 import com.google.common.base.Joiner;
@@ -50,7 +51,17 @@ public class GitUtils {
 	public static String abbreviateSHA(String sha) {
 		return abbreviateSHA(sha, SHORT_SHA_LENGTH);
 	}
+	
+	public static String getShortMessage(RevCommit commit) {
+		return StringUtils.substringBefore(commit.getFullMessage(), "\n").trim();
+	}
 
+	@Nullable
+	public static String getDetailMessage(RevCommit commit) {
+		String body = StringUtils.substringAfter(commit.getFullMessage(), "\n").trim();
+		return body.length()!=0?body:null;
+	}
+	
 	public static String getBlobTypeName(int blobType) {
 		if (blobType == FileMode.TYPE_FILE)
 			return "File";

@@ -1,4 +1,39 @@
 <wicket:extend>
-	<div class="padder repo-commit">
+	<div id="repo-commit">
+		<div class="summary clearfix">
+			<div wicket:id="title" class="pull-left"></div>
+			<div class="pull-right">
+				<span wicket:id="hash"></span>
+				<a wicket:id="code" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
+			</div>
+		</div>
+		<div wicket:id="detail" class="detail"></div>
+		<div class="refs">
+			<wicket:container wicket:id="refs">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+			</wicket:container>
+		</div>
+		<div class="origin-and-parents clearfix">
+			<div class="origin pull-left">
+				<span wicket:id="author" class="author"></span>
+				authored
+				<span wicket:id="age" class="age"></span>
+			</div>
+			<div class="parents pull-right">
+				parents: 
+				<wicket:container wicket:id="parents">
+					<a wicket:id="link" class="parent"><span wicket:id="label"></span></a>
+				</wicket:container>
+			</div>
+		</div>
+		<div class="compare-options clearfix">
+			<div wicket:id="diffOption" class="pull-left"></div>
+			<wicket:enclosure child="compareWith">
+			<div class="pull-right">
+				Parent to compare: <select wicket:id="compareWith"></select>
+			</div>
+			</wicket:enclosure>
+		</div>
+		<div wicket:id="compareResult"></div>
 	</div>
 </wicket:extend>

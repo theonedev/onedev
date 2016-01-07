@@ -570,13 +570,18 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		
 		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
-			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				ObjectId objectId = jgitRepo.resolve(revision);
-				optional = Optional.fromNullable(objectId);
-				objectIdCache.put(revision, optional);
-			} catch (RevisionSyntaxException | IOException e) {
-				throw new RuntimeException(e);
+			ObjectId objectId;
+			if (GitUtils.isHash(revision)) {
+				objectId = ObjectId.fromString(revision);
+			} else {
+				try (FileRepository jgitRepo = openAsJGitRepo()) {
+					objectId = jgitRepo.resolve(revision);
+				} catch (RevisionSyntaxException | IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
+			optional = Optional.fromNullable(objectId);
+			objectIdCache.put(revision, optional);
 		}
 		if (mustExist && !optional.isPresent())
 			throw new ObjectNotExistException("Unable to find revision '" + revision + "'");
