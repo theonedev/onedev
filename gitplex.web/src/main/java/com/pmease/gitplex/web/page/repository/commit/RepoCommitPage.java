@@ -59,7 +59,7 @@ public class RepoCommitPage extends RepositoryPage {
 	
 	protected String revision;
 	
-	private HistoryState state = new HistoryState();
+	private HistoryState state;
 	
 	private IModel<RevCommit> commitModel = new LoadableDetachableModel<RevCommit>() {
 
@@ -177,64 +177,53 @@ public class RepoCommitPage extends RepositoryPage {
 			
 		});
 		
-		add(new DropDownChoice<String>("compareWith", new IModel<String>() {
+		if (getCommit().getParentCount() > 1) {
+			add(new DropDownChoice<String>("parentChoice", new IModel<String>() {
 
-			@Override
-			public void detach() {
-			}
+				@Override
+				public void detach() {
+				}
 
-			@Override
-			public String getObject() {
-				return getCompareWith();
-			}
+				@Override
+				public String getObject() {
+					return getCompareWith();
+				}
 
-			@Override
-			public void setObject(String object) {
-				RepoCommitPage.this.state.compareWith = object;
-			}
-			
-		}, new LoadableDetachableModel<List<String>>() {
+				@Override
+				public void setObject(String object) {
+					setCompareWith(object);
+				}
+				
+			}, getParents(), new IChoiceRenderer<String>() {
 
-			@Override
-			protected List<String> load() {
-				return getParents();
-			}
-			
-		}, new IChoiceRenderer<String>() {
+				@Override
+				public Object getDisplayValue(String object) {
+					return GitUtils.abbreviateSHA(object);
+				}
 
-			@Override
-			public Object getDisplayValue(String object) {
-				return GitUtils.abbreviateSHA(object);
-			}
-
-			@Override
-			public String getIdValue(String object, int index) {
-				return object;
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getCommit().getParentCount()>1);
-			}
-			
-		}.add(new OnChangeAjaxBehavior() {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-			}
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				newCompareResult(target);
-				pushState(target);
-			}
-			
-		}));
+				@Override
+				public String getIdValue(String object, int index) {
+					return object;
+				}
+				
+			}).add(new OnChangeAjaxBehavior() {
+	
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+				}
+	
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					newCompareResult(target);
+					pushState(target);
+				}
+	
+			}));
+		} else {
+			add(new WebMarkupContainer("compareWith").setVisible(false));
+		}
 		
 		if (getCommit().getParentCount() != 0) {
 			add(diffOption = new DiffOptionPanel("diffOption", repoModel, getCommit().name()) {
@@ -262,6 +251,16 @@ public class RepoCommitPage extends RepositoryPage {
 			add(new WebMarkupContainer("diffOption").setVisible(false));
 			add(new WebMarkupContainer("compareResult").setVisible(false));
 		}
+	}
+	
+	private String getCompareWith() {
+		if (state.compareWith == null)
+			state.compareWith = getParents().get(0);
+		return state.compareWith;
+	}
+	
+	private void setCompareWith(String compareWith) {
+		state.compareWith = compareWith;
 	}
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
@@ -313,12 +312,6 @@ public class RepoCommitPage extends RepositoryPage {
 		setResponsePage(RepoCommitsPage.class, paramsOf(repository));
 	}
 	
-	private String getCompareWith() {
-		if (state.compareWith == null)
-			state.compareWith = getCommit().getParents()[0].name();
-		return state.compareWith;
-	}
-	
 	@Override
 	protected void onDetach() {
 		commitModel.detach();
@@ -355,5 +348,6 @@ public class RepoCommitPage extends RepositoryPage {
 			compareWith = params.get(PARAM_COMPARE_WITH).toString();
 			path = params.get(PARAM_PATH).toString();
 		}
+		
 	}
 }
