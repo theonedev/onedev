@@ -99,7 +99,7 @@ public enum PullRequestOperation {
 			Git git = request.getTargetRepo().git();
 			String sourceHead = request.getSource().getHead();
 			return git.parseRevision(sourceHead, false) == null 
-					|| !git.isAncestor(sourceHead, request.getTarget().getHead());
+					|| !request.getTargetRepo().isAncestor(sourceHead, request.getTarget().getHead());
 		}
 
 		@Override

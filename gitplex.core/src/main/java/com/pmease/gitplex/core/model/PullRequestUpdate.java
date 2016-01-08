@@ -153,17 +153,18 @@ public class PullRequestUpdate extends AbstractEntity {
 				public CachedInfo call() throws Exception {
 					CachedInfo cachedInfo = new CachedInfo();
 
-					Git git = getRequest().getTargetRepo().git();
+					Repository targetRepo = getRequest().getTargetRepo();
+					Git git = targetRepo.git();
 					List<Commit> log = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0, false);
 					if (log.isEmpty())
-						log = Lists.newArrayList(getRequest().getTargetRepo().getCommit(getHeadCommitHash()));
+						log = Lists.newArrayList(targetRepo.getCommit(getHeadCommitHash()));
 					cachedInfo.setLogCommits(log);
 					
 					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHead());
 
-					if (git.isAncestor(getBaseCommitHash(), mergeBase)) { 
+					if (targetRepo.isAncestor(getBaseCommitHash(), mergeBase)) { 
 						cachedInfo.setChangedFiles(git.listChangedFiles(mergeBase, getHeadCommitHash(), null));					
-					} else if (git.isAncestor(mergeBase, getBaseCommitHash())) {
+					} else if (targetRepo.isAncestor(mergeBase, getBaseCommitHash())) {
 						cachedInfo.setChangedFiles(git.listChangedFiles(getBaseCommitHash(), getHeadCommitHash(), null));					
 					} else {
 						File tempDir = FileUtils.createTempDir();

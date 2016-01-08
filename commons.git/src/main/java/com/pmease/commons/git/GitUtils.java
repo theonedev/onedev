@@ -1,5 +1,6 @@
 package com.pmease.commons.git;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,8 +13,12 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.util.SystemReader;
 
 import com.google.common.base.Joiner;
@@ -60,6 +65,21 @@ public class GitUtils {
 	public static String getDetailMessage(RevCommit commit) {
 		String body = StringUtils.substringAfter(commit.getFullMessage(), "\n").trim();
 		return body.length()!=0?body:null;
+	}
+	
+	public static RevCommit getMergeBase(Repository repository, ObjectId ancestorId, ObjectId descendantId) {
+		try (RevWalk walk = new RevWalk(repository)) {
+			walk.setRevFilter(RevFilter.MERGE_BASE);
+			walk.markStart(walk.lookupCommit(ancestorId));
+			walk.markStart(walk.lookupCommit(descendantId));
+			return walk.next();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} 			
+	}
+	
+	public static boolean isAncestor(Repository repository, ObjectId ancestorId, ObjectId descendantId) {
+		return getMergeBase(repository, ancestorId, descendantId).equals(ancestorId);
 	}
 	
 	public static String getBlobTypeName(int blobType) {

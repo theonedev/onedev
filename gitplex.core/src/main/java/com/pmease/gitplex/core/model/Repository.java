@@ -45,6 +45,7 @@ import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.OrTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
@@ -422,6 +423,20 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			affinals.addAll(findForkDescendants());
 		}
 		return affinals;
+	}
+	
+	public boolean isAncestor(String ancestor, String descendant) {
+		try (	FileRepository jgitRepo = openAsJGitRepo();
+				RevWalk walk = new RevWalk(jgitRepo);) {
+			walk.setRevFilter(RevFilter.MERGE_BASE);
+			ObjectId ancestorId = getObjectId(ancestor);
+			walk.markStart(walk.lookupCommit(ancestorId));
+			ObjectId descendantId = getObjectId(descendant);
+			walk.markStart(walk.lookupCommit(descendantId));
+			return walk.next().name().equals(ancestorId.name());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} 			
 	}
 
 	public String getUrl() {

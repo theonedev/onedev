@@ -46,6 +46,7 @@ import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.branches.compare.BranchComparePage;
+import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
@@ -96,7 +97,7 @@ public abstract class RepositoryPage extends AccountPage {
 		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new RepoTab(Model.of("Files"), "fa fa-fw fa-file-text-o", RepoFilePage.class));
-		tabs.add(new RepoTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", RepoCommitsPage.class));
+		tabs.add(new RepoTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", RepoCommitsPage.class, RepoCommitPage.class));
 		tabs.add(new RepoTab(Model.of("Branches"), "fa fa-fw fa-ext fa-branch", 
 				RepoBranchesPage.class, BranchComparePage.class));
 		tabs.add(new RepoTab(Model.of("Tags"), "fa fa-fw fa-tag", RepoTagsPage.class));

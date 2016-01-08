@@ -328,7 +328,7 @@ public class RepoCommitPage extends RepositoryPage {
 	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getRepository(), getCommit().name(), state);
-		CharSequence url = RequestCycle.get().urlFor(RepoCommitsPage.class, params);
+		CharSequence url = RequestCycle.get().urlFor(RepoCommitPage.class, params);
 		pushState(target, url.toString(), state);
 	}
 	

@@ -613,10 +613,9 @@ public class PullRequest extends AbstractEntity {
 		if (effectiveUpdates == null) {
 			effectiveUpdates = new ArrayList<PullRequestUpdate>();
 
-			Git git = getTargetRepo().git();
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = getSortedUpdates().get(i);
-				if (!git.isAncestor(update.getHeadCommitHash(), getTarget().getHead()))
+				if (!getTargetRepo().isAncestor(update.getHeadCommitHash(), getTarget().getHead()))
 					effectiveUpdates.add(update);
 				else 
 					break;

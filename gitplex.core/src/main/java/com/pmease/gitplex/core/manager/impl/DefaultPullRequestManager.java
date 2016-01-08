@@ -399,8 +399,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 	@Transactional
 	private void closeIfMerged(PullRequest request) {
-		Git git = request.getTargetRepo().git();
-		if (git.isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHead())) {
+		if (request.getTargetRepo().isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHead())) {
 			PullRequestActivity activity = new PullRequestActivity();
 			activity.setRequest(request);
 			activity.setUser(GitPlex.getInstance(UserManager.class).getRoot());
@@ -541,13 +540,14 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
 							String targetHead = request.getTarget().getHead();
+							Repository targetRepo = request.getTargetRepo();
 							Git git = request.getTargetRepo().git();
 							preview = new IntegrationPreview(targetHead, 
 									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
 							request.setLastIntegrationPreview(preview);
 							String integrateRef = request.getIntegrateRef();
-							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && git.isAncestor(targetHead, requestHead)
-									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && git.isAncestor(targetHead, requestHead)
+							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetRepo.isAncestor(targetHead, requestHead)
+									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && targetRepo.isAncestor(targetHead, requestHead)
 											&& git.log(targetHead, requestHead, null, 0, 0, false).size() == 1) {
 								preview.setIntegrated(requestHead);
 								git.updateRef(integrateRef, requestHead, null, null);

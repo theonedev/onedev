@@ -164,7 +164,7 @@ public class NewRequestPage extends PullRequestPage {
 			if (target.getRepository().equals(source.getRepository())) {
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(
 						target.getHead(), source.getHead()));			
-				if (target.getRepository().git().isAncestor(source.getHead(), target.getHead())) {
+				if (target.getRepository().isAncestor(source.getHead(), target.getHead())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
 					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
