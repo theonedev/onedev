@@ -53,6 +53,8 @@ public class RepoCommitPage extends RepositoryPage {
 
 	private static final String PARAM_REVISION = "revision";
 	
+	// make sure to use a different value from wicket:id according to wicket bug:
+	// https://issues.apache.org/jira/browse/WICKET-6069
 	private static final String PARAM_COMPARE_WITH = "compareWith";
 	
 	private static final String PARAM_PATH = "path";

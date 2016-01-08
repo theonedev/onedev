@@ -82,7 +82,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					true, paths.toArray(new String[paths.size()]));
 			List<BlobChange> diffableChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
-	    		if (diffableChanges.size() < 10) {
+	    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
 		    		diffableChanges.add(new BlobChange(oldRev, newRev, entry) {
 
 						@Override
