@@ -1,46 +1,29 @@
 package com.pmease.gitplex.web.page.test;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.markup.html.link.Link;
 
-import com.google.common.collect.Lists;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
-	private String choice = "a";
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new DropDownChoice<String>("choice", new IModel<String>() {
+		add(new Link<Void>("test") {
 
 			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return choice;
-			}
-
-			@Override
-			public void setObject(String object) {
-				choice = object;
+			public void onClick() {
+				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+				GitPlex.getInstance(AuxiliaryManager.class).check(repo, "master");
 			}
 			
-		}, Lists.newArrayList("a", "b")).add(new OnChangeAjaxBehavior() {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				System.out.println(choice);
-			}
-			
-		}));		
+		});
 	}
 
 }

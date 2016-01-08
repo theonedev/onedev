@@ -224,7 +224,7 @@ public class RepoCommitPage extends RepositoryPage {
 	
 			}));
 		} else {
-			add(new WebMarkupContainer("compareWith").setVisible(false));
+			add(new WebMarkupContainer("parentChoice").setVisible(false));
 		}
 		
 		if (getCommit().getParentCount() != 0) {
