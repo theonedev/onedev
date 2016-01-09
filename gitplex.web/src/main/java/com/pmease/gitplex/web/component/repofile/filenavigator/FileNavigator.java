@@ -34,6 +34,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -43,7 +44,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.component.DropdownLink;
@@ -303,14 +303,14 @@ public abstract class FileNavigator extends Panel {
 				protected void onConfigure() {
 					super.onConfigure();
 					
-					setEnabled(repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision));
+					setEnabled(repoModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision));
 				}
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
 					
-					if (!repoModel.getObject().getRefs(Git.REFS_HEADS).containsKey(file.revision))
+					if (!repoModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision))
 						tag.put("title", "Must on a branch to add or propose add of a file");
 					else
 						tag.put("title", "Create new file here");

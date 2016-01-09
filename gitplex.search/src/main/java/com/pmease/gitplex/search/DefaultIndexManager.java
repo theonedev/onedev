@@ -51,6 +51,7 @@ import org.apache.lucene.util.Version;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -61,7 +62,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
@@ -427,7 +427,7 @@ public class DefaultIndexManager implements IndexManager {
 	public void onRefUpdate(Repository repository, String refName, final String newCommitHash) {
 		// only index branches at back end, tags will be indexed on demand from GUI 
 		// as many tags might be pushed all at once when the repository is imported 
-		if (refName.startsWith(Git.REFS_HEADS) && newCommitHash != null)
+		if (refName.startsWith(Constants.R_HEADS) && newCommitHash != null)
 			index(repository, newCommitHash);
 	}
 	

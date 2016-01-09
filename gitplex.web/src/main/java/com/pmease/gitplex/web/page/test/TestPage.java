@@ -19,8 +19,37 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
+				/*
 				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
-				GitPlex.getInstance(AuxiliaryManager.class).check(repo, "master");
+				try (	FileRepository jgitRepo = repo.openAsJGitRepo();
+						RevWalk revWalk = new RevWalk(jgitRepo);) {
+					ObjectId masterId = jgitRepo.resolve("master~10000");
+					for (Ref ref: jgitRepo.getRefDatabase().getRefs(Constants.R_TAGS).values()) {
+						jgitRepo.peel(ref);
+						ObjectId commitId = null;
+						RevObject revObject = revWalk.parseAny(ref.getObjectId());
+						if (revObject instanceof RevTag) {
+							RevTag revTag = (RevTag) revObject;
+							if (revTag.getObject() instanceof RevCommit) {
+								revWalk.markStart((RevCommit)revTag.getObject());
+							}
+						} else {
+							commitId = ref.getObjectId();
+							revWalk.markStart(revWalk.lookupCommit(commitId));
+						}
+					}
+					revWalk.setRevFilter(RevFilter.MERGE_BASE);
+					System.out.println(revWalk.next().getId());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				*/
+				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
+//				GitPlex.getInstance(AuxiliaryManager.class).check(repo, "master");
+				long time = System.currentTimeMillis();
+				System.out.println(GitPlex.getInstance(AuxiliaryManager.class).getDescendants(repo, repo.getObjectId("master~1000")).size());
+				System.out.println(System.currentTimeMillis()-time);
 			}
 			
 		});

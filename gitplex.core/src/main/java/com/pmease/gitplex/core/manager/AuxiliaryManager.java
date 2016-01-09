@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.gitplex.core.model.Repository;
 
@@ -17,4 +19,5 @@ public interface AuxiliaryManager {
 	
 	Map<String, Map<NameAndEmail, Long>> getContributions(Repository repository, Set<String> files);
 
+	Set<ObjectId> getDescendants(Repository repository, ObjectId ancestor);
 }

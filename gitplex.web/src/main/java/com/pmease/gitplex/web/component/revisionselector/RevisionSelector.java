@@ -36,9 +36,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Throwables;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
@@ -97,9 +97,9 @@ public abstract class RevisionSelector extends Panel {
 				List<String> refs = new ArrayList<>();
 				
 				if (branchesActive)
-					refs.addAll(repoModel.getObject().getRefs(Git.REFS_HEADS).keySet());
+					refs.addAll(repoModel.getObject().getRefs(Constants.R_HEADS).keySet());
 				else
-					refs.addAll(repoModel.getObject().getRefs(Git.REFS_TAGS).keySet());
+					refs.addAll(repoModel.getObject().getRefs(Constants.R_TAGS).keySet());
 				Collections.sort(refs);
 				return refs;
 			}
@@ -249,9 +249,9 @@ public abstract class RevisionSelector extends Panel {
 			@Override
 			protected String load() {
 				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
-					if (jgitRepo.getRefDatabase().getRef(Git.REFS_HEADS + revision) != null)
+					if (jgitRepo.getRefDatabase().getRef(Constants.R_HEADS + revision) != null)
 						return "fa fa-ext fa-branch";
-					else if (jgitRepo.getRefDatabase().getRef(Git.REFS_TAGS + revision) != null)
+					else if (jgitRepo.getRefDatabase().getRef(Constants.R_TAGS + revision) != null)
 						return "fa fa-tag";
 					else
 						return "fa fa-ext fa-commit";

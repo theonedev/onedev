@@ -51,7 +51,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
@@ -113,7 +112,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			Commits commits = new Commits();
 			
 			final LogCommand logCommand = new LogCommand(getRepository().git().repoDir());
-			logCommand.parentRewriting(true).ignoreCase(true);
+			logCommand.ignoreCase(true);
 			
 			List<Commit> logCommits;
 			try {
@@ -166,7 +165,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected Map<String, List<String>> load() {
 			Map<String, List<String>> labels = new HashMap<>();
 			Map<String, Ref> refs = new HashMap<>();
-			refs.putAll(getRepository().getRefs(Git.REFS_HEADS));
+			refs.putAll(getRepository().getRefs(org.eclipse.jgit.lib.Constants.R_HEADS));
 			for (Map.Entry<String, Ref> entry: refs.entrySet()) {
 				String commitHash = entry.getValue().getObjectId().name();
 				List<String> commitLabels = labels.get(commitHash);

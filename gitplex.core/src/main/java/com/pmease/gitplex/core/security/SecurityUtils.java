@@ -4,13 +4,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.pmease.commons.git.Git;
+import org.eclipse.jgit.lib.Constants;
+
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Review;
@@ -72,7 +73,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
-				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch).isPassed();
+				&& repository.getGateKeeper().checkRef(currentUser, repository, Constants.R_HEADS + branch).isPassed();
 	}
 
 	public static boolean canModify(RepoAndBranch repoAndBranch) {
@@ -83,7 +84,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
-				&& repository.getGateKeeper().checkRef(currentUser, repository, Git.REFS_HEADS + branch).isPassed();
+				&& repository.getGateKeeper().checkRef(currentUser, repository, Constants.R_HEADS + branch).isPassed();
 	}
 
 	public static boolean canManage(User account) {

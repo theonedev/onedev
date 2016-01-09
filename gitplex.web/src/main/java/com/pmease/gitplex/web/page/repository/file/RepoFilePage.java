@@ -34,6 +34,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -43,7 +44,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -917,7 +917,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public boolean isOnBranch() {
-		return getRepository().getRefs(Git.REFS_HEADS).containsKey(blobIdent.revision);
+		return getRepository().getRefs(Constants.R_HEADS).containsKey(blobIdent.revision);
 	}
 
 	@Override

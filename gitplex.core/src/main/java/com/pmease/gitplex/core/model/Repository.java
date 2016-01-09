@@ -260,7 +260,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		if (branches == null) {
 			branches = new ArrayList<>();
 			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Git.REFS_HEADS).values())
+				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Constants.R_HEADS).values())
 					branches.add(GitUtils.ref2branch(ref.getName()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -273,7 +273,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		if (tags == null) {
 			tags = new ArrayList<>();
 			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Git.REFS_TAGS).values())
+				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Constants.R_TAGS).values())
 					tags.add(GitUtils.ref2tag(ref.getName()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);

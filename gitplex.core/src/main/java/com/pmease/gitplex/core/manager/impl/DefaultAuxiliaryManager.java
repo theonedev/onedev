@@ -24,6 +24,8 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -153,10 +155,32 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 										@SuppressWarnings("unchecked")
 										@Override
 										public void consume(Commit commit) {
-											ByteIterable key = new StringByteIterable(commit.getHash());
-											ByteIterable value = new ArrayByteIterable(new byte[0]);
-											if (!commitsStore.exists(txn, key, value)) {
-												commitsStore.put(txn, key, value);
+											byte[] keyBytes = new byte[20];
+											ObjectId commitId = ObjectId.fromString(commit.getHash());
+											commitId.copyRawTo(keyBytes, 0);
+											ByteIterable key = new ArrayByteIterable(keyBytes);
+											byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+											if (valueBytes == null || valueBytes.length%2 == 1) {
+												byte[] newValueBytes;
+												if (valueBytes == null) {
+													newValueBytes = new byte[1];
+												} else {
+													newValueBytes = new byte[valueBytes.length+1];
+													System.arraycopy(valueBytes, 0, newValueBytes, 1, valueBytes.length);
+												}
+												commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
+												for (String parentHash: commit.getParentHashes()) {
+													keyBytes = new byte[20];
+													ObjectId.fromString(parentHash).copyRawTo(keyBytes, 0);
+													key = new ArrayByteIterable(keyBytes);
+													valueBytes = getBytes(commitsStore.get(txn, key));
+													if (valueBytes != null) 
+														newValueBytes = new byte[valueBytes.length+20];
+													else
+														newValueBytes = new byte[20];
+													commitId.copyRawTo(newValueBytes, newValueBytes.length-20);
+													commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
+												}
 												if (contributors.get() == null) {
 													byte[] bytes = getBytes(defaultStore.get(txn, CONTRIBUTORS_KEY));
 													if (bytes != null)
@@ -380,6 +404,49 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
+	public Set<ObjectId> getDescendants(Repository repository, final ObjectId ancestor) {
+		Environment env = getEnv(repository);
+		final Store store = getStore(env, COMMITS_STORE);
+
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
+
+			@Override
+			public Set<ObjectId> compute(Transaction txn) {
+				Set<ObjectId> descendants = new HashSet<>();
+				descendants.add(ancestor);
+				fillDescendants(txn, descendants, ancestor);
+				return descendants;
+			}
+			
+			private void fillDescendants(Transaction txn, Set<ObjectId> descendants, ObjectId current) {
+				byte[] keyBytes = new byte[20];
+				current.copyRawTo(keyBytes, 0);
+				byte[] valueBytes = getBytes(store.get(txn, new ArrayByteIterable(keyBytes)));
+				if (valueBytes != null) {
+					if (valueBytes.length % 2 == 0) {
+						for (int i=0; i<valueBytes.length/20; i++) {
+							ObjectId child = ObjectId.fromRaw(valueBytes, i*20);
+							if (!descendants.contains(child)) {
+								descendants.add(child);
+								fillDescendants(txn, descendants, child);
+							}
+						}
+					} else {
+						for (int i=0; i<(valueBytes.length-1)/20; i++) {
+							ObjectId child = ObjectId.fromRaw(valueBytes, i*20+1);
+							if (!descendants.contains(child)) {
+								descendants.add(child);
+								fillDescendants(txn, descendants, child);
+							}
+						}
+					}
+				}
+			}
+			
+		});
+	}
+
+	@Override
 	public void beforeDelete(Repository repository) {
 	}
 
@@ -426,7 +493,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 	@Override
 	public void onRefUpdate(Repository repository, String refName, String newCommitHash) {
-		if (refName.startsWith(Git.REFS_HEADS))
+		if (refName.startsWith(Constants.R_HEADS))
 			check(repository, refName);
 	}
 

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -202,14 +203,14 @@ public class GitUtils {
      * 			does not represent a branch
      */ 
     public static @Nullable String ref2branch(String refName) {
-		if (refName.startsWith(Git.REFS_HEADS)) 
-			return refName.substring(Git.REFS_HEADS.length());
+		if (refName.startsWith(Constants.R_HEADS)) 
+			return refName.substring(Constants.R_HEADS.length());
 		else
 			return null;
     }
     
     public static String branch2ref(String branch) {
-    	return Git.REFS_HEADS + branch; 
+    	return Constants.R_HEADS + branch; 
     }    
 
 	/**
@@ -222,14 +223,14 @@ public class GitUtils {
      * 			does not represent a tag
      */ 
     public static @Nullable String ref2tag(String refName) {
-		if (refName.startsWith(Git.REFS_TAGS)) 
-			return refName.substring(Git.REFS_TAGS.length());
+		if (refName.startsWith(Constants.R_TAGS)) 
+			return refName.substring(Constants.R_TAGS.length());
 		else
 			return null;
     }
     
     public static String tag2ref(String tag) {
-    	return Git.REFS_HEADS + tag; 
+    	return Constants.R_HEADS + tag; 
     }    
     
     public static BlobIdent getOldBlobIdent(DiffEntry diffEntry, String oldRev) {

@@ -33,8 +33,6 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private int skip;
     
-    private boolean parentRewriting;
-    
     private boolean ignoreCase;
     
     private boolean listChangedFiles;
@@ -154,15 +152,6 @@ public class LogCommand extends GitCommand<List<Commit>> {
 		return this;
 	}
 	
-	public boolean parentRewriting() {
-		return parentRewriting;
-	}
-	
-	public LogCommand parentRewriting(boolean parentRewriting) {
-		this.parentRewriting = parentRewriting;
-		return this;
-	}
-	
 	public void run(final CommitConsumer consumer) {
         Commandline cmd = cmd();
         cmd.addArgs("log",
@@ -198,9 +187,6 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         for (String message: messages)
         	cmd.addArgs("--grep=" + message);
-        
-        if (parentRewriting)
-        	cmd.addArgs("--parents");
         
         if (listChangedFiles)
         	cmd.addArgs("--name-only");
