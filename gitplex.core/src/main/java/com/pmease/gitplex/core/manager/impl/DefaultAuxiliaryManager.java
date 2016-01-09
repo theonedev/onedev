@@ -160,7 +160,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 											commitId.copyRawTo(keyBytes, 0);
 											ByteIterable key = new ArrayByteIterable(keyBytes);
 											byte[] valueBytes = getBytes(commitsStore.get(txn, key));
-											if (valueBytes == null || valueBytes.length%2 == 1) {
+											if (valueBytes == null || valueBytes.length%2 == 0) {
 												byte[] newValueBytes;
 												if (valueBytes == null) {
 													newValueBytes = new byte[1];

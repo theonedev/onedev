@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.test;
 
 import org.apache.wicket.markup.html.link.Link;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
@@ -48,7 +49,7 @@ public class TestPage extends BasePage {
 				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, 1L);
 //				GitPlex.getInstance(AuxiliaryManager.class).check(repo, "master");
 				long time = System.currentTimeMillis();
-				System.out.println(GitPlex.getInstance(AuxiliaryManager.class).getDescendants(repo, repo.getObjectId("master~1000")).size());
+				System.out.println(GitPlex.getInstance(AuxiliaryManager.class).getDescendants(repo, ObjectId.fromString("1da177e4c3f41524e886b7f1b8a0c1fc7321cac2")).size());
 				System.out.println(System.currentTimeMillis()-time);
 			}
 			
