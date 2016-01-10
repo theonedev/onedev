@@ -31,10 +31,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -121,9 +123,10 @@ public class NewRequestPage extends PullRequestPage {
 			if (getRepository().getForkedFrom() != null) {
 				source = new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			} else {
-				for (String each: getRepository().getBranches()) {
-					if (!each.equals(target.getBranch())) {
-						source = new RepoAndBranch(getRepository(), each);
+				for (Ref ref: getRepository().getBranches()) {
+					String branch = GitUtils.ref2branch(ref.getName());
+					if (!branch.equals(target.getBranch())) {
+						source = new RepoAndBranch(getRepository(), branch);
 						break;
 					}
 				}

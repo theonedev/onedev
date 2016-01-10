@@ -16,8 +16,11 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
+import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.util.SystemReader;
@@ -66,6 +69,25 @@ public class GitUtils {
 	public static String getDetailMessage(RevCommit commit) {
 		String body = StringUtils.substringAfter(commit.getFullMessage(), "\n").trim();
 		return body.length()!=0?body:null;
+	}
+
+	@Nullable
+	public static ObjectId getCommitId(Repository repository, Ref tagRef) {
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			RevObject revObject = revWalk.parseAny(tagRef.getObjectId());
+			if (revObject instanceof RevTag) {
+				RevTag revTag = (RevTag) revObject;
+				if (revTag.getObject() instanceof RevCommit) {
+					return revTag.getObject().getId();
+				} else {
+					return null;
+				}
+			} else {
+				return tagRef.getObjectId();
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public static RevCommit getMergeBase(Repository repository, ObjectId ancestorId, ObjectId descendantId) {

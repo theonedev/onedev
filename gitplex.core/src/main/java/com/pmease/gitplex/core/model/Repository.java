@@ -45,7 +45,6 @@ import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.OrTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
@@ -147,10 +146,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
     private transient Map<String, Optional<ObjectId>> objectIdCache;
     
     private transient Map<String, Map<String, Ref>> refsCache;
-    
-    private transient Collection<String> branches;
-    
-    private transient Collection<String> tags;
     
     private transient String defaultBranch;
     
@@ -256,30 +251,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.forks = forks;
 	}
 
-	public Collection<String> getBranches() {
-		if (branches == null) {
-			branches = new ArrayList<>();
-			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Constants.R_HEADS).values())
-					branches.add(GitUtils.ref2branch(ref.getName()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-        return branches;
+	public Collection<Ref> getBranches() {
+		return getRefs(Constants.R_HEADS).values();
     }
 
-	public Collection<String> getTags() {
-		if (tags == null) {
-			tags = new ArrayList<>();
-			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				for (Ref ref: jgitRepo.getRefDatabase().getRefs(Constants.R_TAGS).values())
-					tags.add(GitUtils.ref2tag(ref.getName()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-        return tags;
+	public Collection<Ref> getTags() {
+		return getRefs(Constants.R_TAGS).values();
     }
 	
     @Override
@@ -426,16 +403,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public boolean isAncestor(String ancestor, String descendant) {
-		try (	FileRepository jgitRepo = openAsJGitRepo();
-				RevWalk walk = new RevWalk(jgitRepo);) {
-			walk.setRevFilter(RevFilter.MERGE_BASE);
+		try (FileRepository jgitRepo = openAsJGitRepo()) {
 			ObjectId ancestorId = getObjectId(ancestor);
-			walk.markStart(walk.lookupCommit(ancestorId));
 			ObjectId descendantId = getObjectId(descendant);
-			walk.markStart(walk.lookupCommit(descendantId));
-			return walk.next().name().equals(ancestorId.name());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			return GitUtils.isAncestor(jgitRepo, ancestorId, descendantId); 
 		} 			
 	}
 

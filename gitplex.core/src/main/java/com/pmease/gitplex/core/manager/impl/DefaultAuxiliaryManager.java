@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,7 +99,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 	
 	@Override
-	public void check(final Repository repository, final String refName) {
+	public void collect(final Repository repository, final String refName) {
 		sequentialWorkManager.execute(getSequentialExecutorKey(repository), new PrioritizedRunnable(PRIORITY) {
 
 			@Override
@@ -160,7 +161,15 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 											commitId.copyRawTo(keyBytes, 0);
 											ByteIterable key = new ArrayByteIterable(keyBytes);
 											byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+											
 											if (valueBytes == null || valueBytes.length%2 == 0) {
+												/*
+												 * Length of stored bytes of a commit is either 20*nChild
+												 * (20 is length of ObjectId), or 1+20*nChild, as we need 
+												 * an extra leading byte to differentiate commits being 
+												 * processed and commits with child information attached 
+												 * but not processed. 
+												 */
 												byte[] newValueBytes;
 												if (valueBytes == null) {
 													newValueBytes = new byte[1];
@@ -169,15 +178,18 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 													System.arraycopy(valueBytes, 0, newValueBytes, 1, valueBytes.length);
 												}
 												commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
+												
 												for (String parentHash: commit.getParentHashes()) {
 													keyBytes = new byte[20];
 													ObjectId.fromString(parentHash).copyRawTo(keyBytes, 0);
 													key = new ArrayByteIterable(keyBytes);
 													valueBytes = getBytes(commitsStore.get(txn, key));
-													if (valueBytes != null) 
+													if (valueBytes != null) {
 														newValueBytes = new byte[valueBytes.length+20];
-													else
+														System.arraycopy(valueBytes, 0, newValueBytes, 0, valueBytes.length);
+													} else {
 														newValueBytes = new byte[20];
+													}
 													commitId.copyRawTo(newValueBytes, newValueBytes.length-20);
 													commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
 												}
@@ -413,34 +425,77 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 			@Override
 			public Set<ObjectId> compute(Transaction txn) {
 				Set<ObjectId> descendants = new HashSet<>();
+				
+				// use stack instead of recursion to avoid StackOverflowException
+				Stack<ObjectId> stack = new Stack<>();
 				descendants.add(ancestor);
-				fillDescendants(txn, descendants, ancestor);
-				return descendants;
-			}
-			
-			private void fillDescendants(Transaction txn, Set<ObjectId> descendants, ObjectId current) {
-				byte[] keyBytes = new byte[20];
-				current.copyRawTo(keyBytes, 0);
-				byte[] valueBytes = getBytes(store.get(txn, new ArrayByteIterable(keyBytes)));
-				if (valueBytes != null) {
-					if (valueBytes.length % 2 == 0) {
-						for (int i=0; i<valueBytes.length/20; i++) {
-							ObjectId child = ObjectId.fromRaw(valueBytes, i*20);
-							if (!descendants.contains(child)) {
-								descendants.add(child);
-								fillDescendants(txn, descendants, child);
+				stack.add(ancestor);
+				while (!stack.isEmpty()) {
+					ObjectId current = stack.pop();
+					byte[] keyBytes = new byte[20];
+					current.copyRawTo(keyBytes, 0);
+					byte[] valueBytes = getBytes(store.get(txn, new ArrayByteIterable(keyBytes)));
+					if (valueBytes != null) {
+						if (valueBytes.length % 2 == 0) {
+							for (int i=0; i<valueBytes.length/20; i++) {
+								ObjectId child = ObjectId.fromRaw(valueBytes, i*20);
+								if (!descendants.contains(child)) {
+									descendants.add(child);
+									stack.push(child);
+								}
 							}
-						}
-					} else {
-						for (int i=0; i<(valueBytes.length-1)/20; i++) {
-							ObjectId child = ObjectId.fromRaw(valueBytes, i*20+1);
-							if (!descendants.contains(child)) {
-								descendants.add(child);
-								fillDescendants(txn, descendants, child);
+						} else { 
+							/*
+							 * skip the leading byte, which tells whether or not the commit 
+							 * has been processed
+							 */
+							for (int i=0; i<(valueBytes.length-1)/20; i++) {
+								ObjectId child = ObjectId.fromRaw(valueBytes, i*20+1);
+								if (!descendants.contains(child)) {
+									descendants.add(child);
+									stack.push(child);
+								}
 							}
 						}
 					}
 				}
+				
+				return descendants;
+			}
+			
+		});
+	}
+
+	@Override
+	public Set<ObjectId> getChildren(Repository repository, final ObjectId parent) {
+		Environment env = getEnv(repository);
+		final Store store = getStore(env, COMMITS_STORE);
+
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
+
+			@Override
+			public Set<ObjectId> compute(Transaction txn) {
+				Set<ObjectId> children = new HashSet<>();
+				
+				byte[] keyBytes = new byte[20];
+				parent.copyRawTo(keyBytes, 0);
+				byte[] valueBytes = getBytes(store.get(txn, new ArrayByteIterable(keyBytes)));
+				if (valueBytes != null) {
+					if (valueBytes.length % 2 == 0) {
+						for (int i=0; i<valueBytes.length/20; i++) {
+							children.add(ObjectId.fromRaw(valueBytes, i*20));
+						}
+					} else { 
+						/*
+						 * skip the leading byte, which tells whether or not the commit 
+						 * has been processed
+						 */
+						for (int i=0; i<(valueBytes.length-1)/20; i++) {
+							children.add(ObjectId.fromRaw(valueBytes, i*20+1));
+						}
+					}
+				}
+				return children;
 			}
 			
 		});
@@ -494,7 +549,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	@Override
 	public void onRefUpdate(Repository repository, String refName, String newCommitHash) {
 		if (refName.startsWith(Constants.R_HEADS))
-			check(repository, refName);
+			collect(repository, refName);
 	}
 
 }

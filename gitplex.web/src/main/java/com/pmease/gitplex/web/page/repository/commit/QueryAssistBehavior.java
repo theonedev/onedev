@@ -9,12 +9,14 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
+import org.eclipse.jgit.lib.Ref;
 
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.Range;
@@ -66,20 +68,22 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							for (String value: repoModel.getObject().getBranches()) {
-								int index = value.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
+							for (Ref ref: repoModel.getObject().getBranches()) {
+								String branch = GitUtils.ref2branch(ref.getName()); 
+								int index = branch.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
 									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
-									suggestions.add(new InputSuggestion(value, matchRange));
+									suggestions.add(new InputSuggestion(branch, matchRange));
 								}
 							}
 							break;
 						case CommitQueryParser.TAG:
-							for (String value: repoModel.getObject().getTags()) {
-								int index = value.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
+							for (Ref ref: repoModel.getObject().getTags()) {
+								String tag = GitUtils.ref2tag(ref.getName()); 
+								int index = GitUtils.ref2tag(ref.getName()).toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
 									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
-									suggestions.add(new InputSuggestion(value, matchRange));
+									suggestions.add(new InputSuggestion(tag, matchRange));
 								}
 							}
 							break;

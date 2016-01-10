@@ -34,10 +34,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.AheadBehind;
 import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ConfirmOnClick;
@@ -247,7 +249,9 @@ public class RepoBranchesPage extends RepositoryPage {
 
 			@Override
 			public List<String> getObject() {
-				List<String> branches = new ArrayList<>(getRepository().getBranches());
+				List<String> branches = new ArrayList<>();
+				for (Ref ref: getRepository().getBranches())
+					branches.add(GitUtils.ref2branch(ref.getName()));
 				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
