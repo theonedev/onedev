@@ -7,12 +7,8 @@
 				<a wicket:id="code" title="Browse code at this point" class="btn btn-xs btn-default"><span class="fa fa-code"></span></a>
 			</div>
 		</div>
-		<div wicket:id="detail" class="detail"></div>
-		<div class="refs">
-			<wicket:container wicket:id="refs">
-				<a wicket:id="link"><span wicket:id="label"></span></a>
-			</wicket:container>
-		</div>
+		<div wicket:id="detailMessage" class="detail"></div>
+		<div wicket:id="refs" class="refs"></div>
 		<div class="origin-and-parents clearfix">
 			<div class="origin pull-left">
 				<span wicket:id="author" class="author"></span>
@@ -36,4 +32,9 @@
 		</div>
 		<div wicket:id="compareResult"></div>
 	</div>
+	<wicket:fragment wicket:id="refsFrag">
+		<wicket:container wicket:id="refs">
+			<a wicket:id="link"><span wicket:id="label"></span></a>
+		</wicket:container>
+	</wicket:fragment>
 </wicket:extend>

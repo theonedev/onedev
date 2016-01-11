@@ -3,16 +3,21 @@ package com.pmease.gitplex.web.page.repository.commit;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -21,21 +26,26 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
@@ -118,44 +128,78 @@ public class RepoCommitPage extends RepositoryPage {
 
 		String detailMessage = GitUtils.getDetailMessage(getCommit());
 		if (detailMessage != null)
-			add(new Label("detail", detailMessage));
+			add(new Label("detailMessage", detailMessage));
 		else
-			add(new WebMarkupContainer("detail").setVisible(false));
+			add(new WebMarkupContainer("detailMessage").setVisible(false));
 		
-		add(new ListView<String>("refs", new LoadableDetachableModel<List<String>>() {
+		add(new AjaxLazyLoadPanel("refs") {
 
 			@Override
-			protected List<String> load() {
-				return new ArrayList<>();
-			}
-			
-		}) {
+			public Component getLazyLoadComponent(String markupId) {
+				Fragment fragment = new Fragment(markupId, "refsFrag", RepoCommitPage.this);
+				fragment.add(new ListView<Ref>("refs", new LoadableDetachableModel<List<Ref>>() {
 
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				String ref = item.getModelObject();
-				String branch = GitUtils.ref2branch(ref); 
-				if (branch != null) {
-					RepoFileState state = new RepoFileState();
-					state.blobIdent.revision = branch;
-					Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
-							RepoFilePage.paramsOf(repoModel.getObject(), state));
-					link.add(new Label("label", branch));
-					link.add(AttributeAppender.append("class", "branch"));
-					item.add(link);
-				} else {
-					String tag = Preconditions.checkNotNull(GitUtils.ref2tag(ref));
-					RepoFileState state = new RepoFileState();
-					state.blobIdent.revision = tag;
-					Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
-							RepoFilePage.paramsOf(repoModel.getObject(), state));
-					link.add(new Label("label", tag));
-					link.add(AttributeAppender.append("class", "tag"));
-					item.add(link);
-				}
+					@Override
+					protected List<Ref> load() {
+						Set<ObjectId> descendants = GitPlex.getInstance(AuxiliaryManager.class)
+								.getDescendants(getRepository(), getCommit().getId());
+						descendants.add(getCommit().getId());
+						
+						List<Ref> branchRefs = new ArrayList<>();
+						for (Ref ref: getRepository().getBranchRefs()) {
+							if (descendants.contains(ref.getObjectId())) {
+								branchRefs.add(ref);
+							}
+						}
+						Collections.sort(branchRefs, getRepository().newBranchDateComparator());
+
+						List<Ref> tagRefs = new ArrayList<>();
+						for (Ref ref: getRepository().getTagRefs()) {
+							RevCommit taggedCommit = getRepository().getCommit(ref.getObjectId());
+							if (taggedCommit != null && descendants.contains(taggedCommit.getId()))
+								tagRefs.add(ref);
+						}
+						Collections.sort(tagRefs, getRepository().newTagDateComparator());
+
+						List<Ref> refs = new ArrayList<>();
+						refs.addAll(branchRefs);
+						refs.addAll(tagRefs);
+						
+						return refs;
+					}
+					
+				}) {
+
+					@Override
+					protected void populateItem(ListItem<Ref> item) {
+						String ref = item.getModelObject().getName();
+						String branch = GitUtils.ref2branch(ref); 
+						if (branch != null) {
+							RepoFileState state = new RepoFileState();
+							state.blobIdent.revision = branch;
+							Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
+									RepoFilePage.paramsOf(repoModel.getObject(), state));
+							link.add(new Label("label", branch));
+							link.add(AttributeAppender.append("class", "branch"));
+							item.add(link);
+						} else {
+							String tag = Preconditions.checkNotNull(GitUtils.ref2tag(ref));
+							RepoFileState state = new RepoFileState();
+							state.blobIdent.revision = tag;
+							Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
+									RepoFilePage.paramsOf(repoModel.getObject(), state));
+							link.add(new Label("label", tag));
+							link.add(AttributeAppender.append("class", "tag"));
+							item.add(link);
+						}
+					}
+					
+				});
+				return fragment;
 			}
 			
 		});
+		
 		add(new PersonLink("author", Model.of(getCommit().getAuthorIdent())));
 		add(new Label("age", DateUtils.formatAge(getCommit().getAuthorIdent().getWhen())));
 		
@@ -291,6 +335,8 @@ public class RepoCommitPage extends RepositoryPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				RepoCommitPage.class, "repo-commit.js")));
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
 				RepoCommitPage.class, "repo-commit.css")));
 	}

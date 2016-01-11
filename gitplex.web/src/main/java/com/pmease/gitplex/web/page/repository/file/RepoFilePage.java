@@ -206,7 +206,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		if (blobIdent.path != null) {
 			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo)) {
-				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
+				RevTree revTree = getRepository().getCommit(getCommitId(), true).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 				if (treeWalk == null) {
 					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path
@@ -578,7 +578,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 					repository.cacheObjectId(branch, newCommitId);
 					try (	FileRepository jgitRepo = repository.openAsJGitRepo();
 							RevWalk revWalk = new RevWalk(jgitRepo)) {
-						RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
+						RevTree revTree = getRepository().getCommit(newCommitId, true).getTree();
 						String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
 						while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
 							if (parentPath.contains("/")) {
@@ -662,7 +662,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				if (state.blobIdent.path != null) {
 					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 							RevWalk revWalk = new RevWalk(jgitRepo)) {
-						RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
+						RevTree revTree = getRepository().getCommit(getCommitId(), true).getTree();
 						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 						if (treeWalk != null) {
 							state.blobIdent.mode = treeWalk.getRawMode(0);

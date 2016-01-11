@@ -250,7 +250,7 @@ public class RepoBranchesPage extends RepositoryPage {
 			@Override
 			public List<String> getObject() {
 				List<String> branches = new ArrayList<>();
-				for (Ref ref: getRepository().getBranches())
+				for (Ref ref: getRepository().getBranchRefs())
 					branches.add(GitUtils.ref2branch(ref.getName()));
 				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {

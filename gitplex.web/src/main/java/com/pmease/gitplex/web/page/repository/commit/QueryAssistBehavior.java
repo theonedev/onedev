@@ -11,15 +11,15 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Ref;
 
+import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.NameAndEmail;
-import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.Range;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.pattern.WildcardApplied;
 import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
@@ -68,8 +68,8 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							for (Ref ref: repoModel.getObject().getBranches()) {
-								String branch = GitUtils.ref2branch(ref.getName()); 
+							for (Ref ref: repoModel.getObject().getBranchRefs()) {
+								String branch = GitUtils.ref2branch(ref.getName());
 								int index = branch.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
 									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
@@ -78,9 +78,9 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							}
 							break;
 						case CommitQueryParser.TAG:
-							for (Ref ref: repoModel.getObject().getTags()) {
+							for (Ref ref: repoModel.getObject().getTagRefs()) {
 								String tag = GitUtils.ref2tag(ref.getName()); 
-								int index = GitUtils.ref2tag(ref.getName()).toLowerCase().indexOf(unfencedLowerCaseMatchWith);
+								int index = tag.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
 								if (index != -1 && numSuggestions++<count) {
 									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
 									suggestions.add(new InputSuggestion(tag, matchRange));

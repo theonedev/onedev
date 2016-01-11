@@ -37,6 +37,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
@@ -74,7 +75,10 @@ public abstract class RevisionSelector extends Panel {
 		super(id);
 		
 		this.repoModel = repoModel;
-		this.revision = revision;
+		this.revision = revision;		
+		Ref ref = repoModel.getObject().getRef(revision);
+		if (ref != null && GitUtils.ref2tag(ref.getName()) != null)
+			branchesActive = false;
 	}
 
 	@Override
@@ -94,14 +98,28 @@ public abstract class RevisionSelector extends Panel {
 			private List<String> filteredRefs = new ArrayList<>(refs);
 			
 			private List<String> findRefs() {
-				List<String> refs = new ArrayList<>();
+				List<String> names = new ArrayList<>();
 				
-				if (branchesActive)
-					refs.addAll(repoModel.getObject().getRefs(Constants.R_HEADS).keySet());
-				else
-					refs.addAll(repoModel.getObject().getRefs(Constants.R_TAGS).keySet());
-				Collections.sort(refs);
-				return refs;
+				List<Ref> refs = new ArrayList<>();
+				
+				Repository repo = repoModel.getObject();
+				if (branchesActive) {
+					refs.addAll(repo.getRefs(Constants.R_HEADS).values());
+					Collections.sort(refs, repo.newBranchDateComparator());
+					for (Ref ref: refs)
+						names.add(GitUtils.ref2branch(ref.getName()));
+				} else {
+					long time = System.currentTimeMillis();
+					for (Ref ref: repo.getTagRefs()) {
+						if (repo.getCommit(ref.getObjectId()) != null) 
+							refs.add(ref);
+					}
+					Collections.sort(refs, repo.newTagDateComparator());
+					for (Ref ref: refs)
+						names.add(GitUtils.ref2tag(ref.getName()));
+					System.out.println(System.currentTimeMillis()-time);
+				}
+				return names;
 			}
 			
 			private void onSelectTab(AjaxRequestTarget target) {
@@ -216,7 +234,8 @@ public abstract class RevisionSelector extends Panel {
 				});
 				
 				List<Tab> tabs = new ArrayList<>();
-				tabs.add(new AjaxActionTab(Model.of("branches")) {
+				AjaxActionTab branchesTab;
+				tabs.add(branchesTab = new AjaxActionTab(Model.of("branches")) {
 					
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -225,7 +244,8 @@ public abstract class RevisionSelector extends Panel {
 					}
 					
 				});
-				tabs.add(new AjaxActionTab(Model.of("tags")) {
+				AjaxActionTab tagsTab;
+				tabs.add(tagsTab = new AjaxActionTab(Model.of("tags")) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -234,6 +254,10 @@ public abstract class RevisionSelector extends Panel {
 					}
 					
 				});
+				if (branchesActive)
+					branchesTab.setSelected(true);
+				else
+					tagsTab.setSelected(true);
 				
 				fragment.add(new Tabbable("tabs", tabs));
 				fragment.add(newRefList(filteredRefs));

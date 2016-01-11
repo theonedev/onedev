@@ -31,7 +31,7 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 		term = term.toLowerCase();
 		List<String> branches = new ArrayList<>();
 		Repository repository = repoModel.getObject();
-		for (Ref ref: repository.getBranches()) {
+		for (Ref ref: repository.getBranchRefs()) {
 			String branch = GitUtils.ref2branch(ref.getName());
 			if (branch.toLowerCase().startsWith(term))
 				branches.add(branch);

@@ -1,6 +1,3 @@
-/*
- * 2014, Robin Shen
- */
 (function ( $ ) {
  
 	var pageMargin = 8;

@@ -123,7 +123,7 @@ public class NewRequestPage extends PullRequestPage {
 			if (getRepository().getForkedFrom() != null) {
 				source = new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			} else {
-				for (Ref ref: getRepository().getBranches()) {
+				for (Ref ref: getRepository().getBranchRefs()) {
 					String branch = GitUtils.ref2branch(ref.getName());
 					if (!branch.equals(target.getBranch())) {
 						source = new RepoAndBranch(getRepository(), branch);

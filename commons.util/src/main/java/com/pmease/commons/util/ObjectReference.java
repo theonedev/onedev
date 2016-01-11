@@ -1,8 +1,10 @@
 package com.pmease.commons.util;
 
+import java.io.Closeable;
+
 import com.google.common.base.Preconditions;
 
-public abstract class ObjectReference<T> {
+public abstract class ObjectReference<T> implements Closeable {
 	
 	private int count;
 	
@@ -19,6 +21,7 @@ public abstract class ObjectReference<T> {
 		return object;
 	}
 
+	@Override
 	public synchronized void close() {
 		if (count == 1) {
 			closeObject(object);
