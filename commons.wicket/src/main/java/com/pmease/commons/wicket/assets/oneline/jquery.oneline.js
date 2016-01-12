@@ -1,9 +1,6 @@
 (function ( $ ) {
  
-	var ellipsisWidth = 64;
-	var topTolerance = 10;
-	
-    $.fn.oneline = function(alignment) {
+    $.fn.oneline = function(expanderSelector, topMargin, rightMargin) {
     	this.css("white-space", "normal");
     	var children = this.children();
     	var thisRight = this.offset().left + this.width();
@@ -13,19 +10,22 @@
     		var $child = $(children[i]);
     		if (hide) {
     			$child.hide();
-    		} else if ($child.offset().left + $child.outerWidth() + ellipsisWidth > thisRight
-	    				|| $child.offset().top - thisTop > topTolerance) {
+    		} else if ($child.offset().left + $child.outerWidth() + rightMargin > thisRight
+	    				|| $child.offset().top - thisTop > topMargin) {
 	    		hide = true;
 	    	}
     	}
+		var $expander = jQuery(expanderSelector);
     	if (hide) {
-        	var $ellipsis = jQuery("<a class='ellipis'>...</a>");
-        	this.append($ellipsis);
+    		$expander.show();
+        	this.append($expander);
         	var $container = this;
-        	$ellipsis.click(function() {
+        	$expander.click(function() {
         		$container.children().show();
-        		$ellipsis.remove();
+        		$expander.hide();
         	});
+    	} else {
+    		$expander.hide();
     	}
     	return this;
     };

@@ -98,3 +98,18 @@ img.avatar {
 	height: 24px;
 	width: 24px;
 }
+
+.ellipsis-expander {
+	display: inline-block;
+	background: #DDD; 
+	padding: 0px 6px;
+	border-radius: 2px; 
+	color: #777;
+	line-height: 16px;
+}
+.ellipsis-expander:hover {
+	background: #888;
+}
+.ellipsis-expander:hover .fa {
+	color: white;
+}

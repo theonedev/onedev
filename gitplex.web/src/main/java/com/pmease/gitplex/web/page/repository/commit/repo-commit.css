@@ -1,14 +1,57 @@
 #repo-commit {
 	padding: 20px;
 }
-#repo-commit>.refs .branch:before {
+#repo-commit>div {
+	margin-bottom: 16px;
+}
+#repo-commit>.head {
+	border: 1px solid #BBB;
+	border-radius: 4px;
+}
+#repo-commit>.head>.summary {
+	background: #F0F0F0;
+	border-radius: 4px 4px 0 0;
+	padding: 6px 12px;
+	border-bottom: 1px solid #CCC;
+}
+#repo-commit>.head>.summary>.title {
+	font-size: 16px;
+	margin-right: 16px;
+}
+#repo-commit>.head>.detail {
+	color: #666;
+	padding: 12px;
+}
+#repo-commit>.head>.detail>div {
+	margin-bottom: 12px;
+}
+#repo-commit>.head>.detail>div:last-child {
+	margin-bottom: 0;
+}
+#repo-commit>.head>.detail>.origin-and-parents a {
+	color: #444;
+}
+#repo-commit>.head>.detail .btn-group.parent {
+	margin-right: 4px;
+}
+
+#repo-commit>.head>.detail>.refs {
+	border-top: 1px dotted #BBB;
+	padding-top: 12px;
+}
+#repo-commit>.head>.detail>.refs .branch:before {
 	font-family: FontExt;
 	content: "\f221";
+	color: #444;
 }
-#repo-commit>.refs .tag:before {
+#repo-commit>.head>.detail>.refs .tag:before {
 	font-family: Fontawesome;
 	content: "\f02b";
+	color: #444;
 }
-#repo-commit>.refs>div>span {
+#repo-commit>.head>.detail>.refs>div>span {
 	margin-right: 6px;
+}
+#repo-commit>.head>.detail>.refs a {
+	color: #444;
 }

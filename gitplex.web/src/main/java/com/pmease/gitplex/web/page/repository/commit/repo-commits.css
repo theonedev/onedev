@@ -23,7 +23,7 @@
 #repo-commits>.body .label {
 	margin: 2px 0 0 4px;
 }
-#repo-commits>.body .info {
+#repo-commits>.body .hash-and-code {
 	text-align: right;
 	margin-top: 10px;
 	white-space: nowrap;

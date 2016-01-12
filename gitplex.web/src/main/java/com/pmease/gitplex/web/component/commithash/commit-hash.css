@@ -1,6 +1,7 @@
 .commit-hash {
 	font-size: 13px;
-	width: 62px;
+	width: 65px;
+	color: #666;
 	border: none;
 	border-radius: 3px;
 	padding-left: 3px;

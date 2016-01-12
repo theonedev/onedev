@@ -109,7 +109,6 @@ public abstract class RevisionSelector extends Panel {
 					for (Ref ref: refs)
 						names.add(GitUtils.ref2branch(ref.getName()));
 				} else {
-					long time = System.currentTimeMillis();
 					for (Ref ref: repo.getTagRefs()) {
 						if (repo.getCommit(ref.getObjectId()) != null) 
 							refs.add(ref);
@@ -117,7 +116,6 @@ public abstract class RevisionSelector extends Panel {
 					Collections.sort(refs, repo.newTagDateComparator());
 					for (Ref ref: refs)
 						names.add(GitUtils.ref2tag(ref.getName()));
-					System.out.println(System.currentTimeMillis()-time);
 				}
 				return names;
 			}

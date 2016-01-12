@@ -11,8 +11,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -21,8 +20,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -41,19 +38,20 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
+import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -121,18 +119,17 @@ public class RepoCommitPage extends RepositoryPage {
 		super.onInitialize();
 		
 		add(new Label("title", GitUtils.getShortMessage(getCommit())));
-		add(new CommitHashPanel("hash", Model.of(getCommit().name())));
 		
-		RepoFileState state = new RepoFileState();
-		state.blobIdent.revision = getCommit().name();
-		add(new BookmarkablePageLink<Void>("code", RepoFilePage.class, 
-				RepoFilePage.paramsOf(repoModel.getObject(), state)));
-
-		String detailMessage = GitUtils.getDetailMessage(getCommit());
-		if (detailMessage != null)
-			add(new Label("detailMessage", detailMessage));
-		else
-			add(new WebMarkupContainer("detailMessage").setVisible(false));
+		add(new HashAndCodePanel("hashAndCode", repoModel, getCommit().getId().name()));
+		
+		String message = GitUtils.getDetailMessage(getCommit());
+		if (message != null) {
+			message = HtmlEscape.escapeHtml5(message);
+			message = StringUtils.replace(StringUtils.replace(message, "\r\n", "<br>"), "\n", "<br>");
+			add(new Label("message", message).setEscapeModelStrings(false));
+		} else {
+			add(new WebMarkupContainer("message").setVisible(false));
+		}
 		
 		add(new AjaxLazyLoadPanel("refs") {
 
@@ -143,7 +140,7 @@ public class RepoCommitPage extends RepositoryPage {
 					@Override
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
-						String script = String.format("$('#%s').oneline();", getMarkupId());
+						String script = String.format("gitplex.repocommit.initRefs('%s');", getMarkupId());
 						response.render(OnDomReadyHeaderItem.forScript(script));
 					}
 					
@@ -213,77 +210,60 @@ public class RepoCommitPage extends RepositoryPage {
 		
 		add(new PersonLink("author", Model.of(getCommit().getAuthorIdent())));
 		add(new Label("age", DateUtils.formatAge(getCommit().getAuthorIdent().getWhen())));
-		
-		add(new ListView<String>("parents", new LoadableDetachableModel<List<String>>() {
 
-			@Override
-			protected List<String> load() {
-				return getParents();
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				String parent = item.getModelObject();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", RepoCommitPage.class, 
-						paramsOf(repoModel.getObject(), parent));
-				link.add(new Label("label", GitUtils.abbreviateSHA(parent)));
-				item.add(link);
-			}
-			
-		});
-		
-		if (getCommit().getParentCount() > 1) {
-			add(new DropDownChoice<String>("parentChoice", new IModel<String>() {
-
-				@Override
-				public void detach() {
-				}
-
-				@Override
-				public String getObject() {
-					return getCompareWith();
-				}
-
-				@Override
-				public void setObject(String object) {
-					setCompareWith(object);
-				}
-				
-			}, getParents(), new IChoiceRenderer<String>() {
-
-				@Override
-				public Object getDisplayValue(String object) {
-					return GitUtils.abbreviateSHA(object);
-				}
-
-				@Override
-				public String getIdValue(String object, int index) {
-					return object;
-				}
-				
-			}).add(new OnChangeAjaxBehavior() {
-	
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-				}
-	
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					newCompareResult(target);
-					pushState(target);
-				}
-	
-			}));
+		final WebMarkupContainer parentsContainer = new WebMarkupContainer("parents");
+		parentsContainer.setOutputMarkupId(true);
+		add(parentsContainer);
+		if (getParents().size() == 1) {
+			String parent = getParents().get(0);
+			Link<Void> link = new BookmarkablePageLink<Void>("parent", RepoCommitPage.class, 
+					paramsOf(repoModel.getObject(), parent));
+			link.add(new Label("label", GitUtils.abbreviateSHA(parent)));
+			parentsContainer.add(link);
+			parentsContainer.add(new WebMarkupContainer("parents").setVisible(false));
 		} else {
-			add(new WebMarkupContainer("parentChoice").setVisible(false));
+			parentsContainer.add(new WebMarkupContainer("parent").setVisible(false));
+			parentsContainer.add(new ListView<String>("parents", new LoadableDetachableModel<List<String>>() {
+
+				@Override
+				protected List<String> load() {
+					return getParents();
+				}
+				
+			}) {
+
+				@Override
+				protected void populateItem(ListItem<String> item) {
+					final String parent = item.getModelObject();
+					Link<Void> link = new BookmarkablePageLink<Void>("link", RepoCommitPage.class, 
+							paramsOf(repoModel.getObject(), parent));
+					link.add(new Label("label", GitUtils.abbreviateSHA(parent)));
+					item.add(link);
+					
+					item.add(new AjaxLink<Void>("diff") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							setCompareWith(parent); 
+							target.add(parentsContainer);
+							newCompareResult(target);
+						}
+
+						@Override
+						protected void onInitialize() {
+							super.onInitialize();
+							if (parent.equals(getCompareWith())) 
+								add(AttributeAppender.append("class", "active"));
+						}	
+						
+					});
+				}
+				
+			});
 		}
-		
+
 		if (getCommit().getParentCount() != 0) {
-			add(diffOption = new DiffOptionPanel("diffOption", repoModel, getCommit().name()) {
+			add(diffOption = new DiffOptionPanel("compareOption", repoModel, getCommit().name()) {
 	
 				@Override
 				protected void onSelectPath(AjaxRequestTarget target, String path) {
@@ -305,7 +285,7 @@ public class RepoCommitPage extends RepositoryPage {
 			});
 			newCompareResult(null);
 		} else {
-			add(new WebMarkupContainer("diffOption").setVisible(false));
+			add(new WebMarkupContainer("compareOption").setVisible(false));
 			add(new WebMarkupContainer("compareResult").setVisible(false));
 		}
 	}

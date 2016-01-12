@@ -30,7 +30,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -62,14 +61,12 @@ import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CriteriaContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -485,12 +482,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
 			item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 			
-			item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
-			
-			RepoFileState state = new RepoFileState();
-			state.blobIdent.revision = commit.getHash();
-			item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-					RepoFilePage.paramsOf(repoModel.getObject(), state)));
+			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {
