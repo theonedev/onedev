@@ -1,4 +1,14 @@
 #repo-commit {
 	padding: 20px;
 }
-
+#repo-commit>.refs .branch:before {
+	font-family: FontExt;
+	content: "\f221";
+}
+#repo-commit>.refs .tag:before {
+	font-family: Fontawesome;
+	content: "\f02b";
+}
+#repo-commit>.refs>div>span {
+	margin-right: 6px;
+}

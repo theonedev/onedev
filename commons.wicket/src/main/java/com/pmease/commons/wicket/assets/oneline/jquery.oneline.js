@@ -18,13 +18,15 @@
 	    		hide = true;
 	    	}
     	}
-    	var $ellipsis = jQuery("<a class='ellipis'>...</a>");
-    	this.append($ellipsis);
-    	var $container = this;
-    	$ellipsis.click(function() {
-    		$container.children().show();
-    		$ellipsis.remove();
-    	});
+    	if (hide) {
+        	var $ellipsis = jQuery("<a class='ellipis'>...</a>");
+        	this.append($ellipsis);
+        	var $container = this;
+        	$ellipsis.click(function() {
+        		$container.children().show();
+        		$ellipsis.remove();
+        	});
+    	}
     	return this;
     };
  

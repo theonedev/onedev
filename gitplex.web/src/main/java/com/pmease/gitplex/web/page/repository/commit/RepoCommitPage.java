@@ -18,6 +18,7 @@ import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -44,6 +45,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Comment;
@@ -136,7 +138,16 @@ public class RepoCommitPage extends RepositoryPage {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Fragment fragment = new Fragment(markupId, "refsFrag", RepoCommitPage.this);
+				Fragment fragment = new Fragment(markupId, "refsFrag", RepoCommitPage.this) {
+
+					@Override
+					public void renderHead(IHeaderResponse response) {
+						super.renderHead(response);
+						String script = String.format("$('#%s').oneline();", getMarkupId());
+						response.render(OnDomReadyHeaderItem.forScript(script));
+					}
+					
+				};
 				fragment.add(new ListView<Ref>("refs", new LoadableDetachableModel<List<Ref>>() {
 
 					@Override
@@ -180,8 +191,8 @@ public class RepoCommitPage extends RepositoryPage {
 							Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
 									RepoFilePage.paramsOf(repoModel.getObject(), state));
 							link.add(new Label("label", branch));
-							link.add(AttributeAppender.append("class", "branch"));
 							item.add(link);
+							item.add(AttributeAppender.append("class", "branch"));
 						} else {
 							String tag = Preconditions.checkNotNull(GitUtils.ref2tag(ref));
 							RepoFileState state = new RepoFileState();
@@ -189,8 +200,8 @@ public class RepoCommitPage extends RepositoryPage {
 							Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
 									RepoFilePage.paramsOf(repoModel.getObject(), state));
 							link.add(new Label("label", tag));
-							link.add(AttributeAppender.append("class", "tag"));
 							item.add(link);
+							item.add(AttributeAppender.append("class", "tag"));
 						}
 					}
 					
@@ -335,6 +346,7 @@ public class RepoCommitPage extends RepositoryPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(OnelineResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
 				RepoCommitPage.class, "repo-commit.js")));
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
