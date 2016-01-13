@@ -23,13 +23,12 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -88,8 +87,7 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 			protected void populateItem(final ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				
-				item.add(new PersonLink("author", Model.of(commit.getAuthor()), AvatarMode.AVATAR)
-						.withTooltipConfig(new TooltipConfig()));
+				item.add(new AvatarLink("author", commit.getAuthor(), new TooltipConfig()));
 
 				IModel<Repository> repoModel = new AbstractReadOnlyModel<Repository>() {
 

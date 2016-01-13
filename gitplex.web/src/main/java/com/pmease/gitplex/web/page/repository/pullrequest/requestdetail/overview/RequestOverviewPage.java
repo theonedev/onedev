@@ -57,18 +57,16 @@ import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
-import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.ReviewersModel;
-import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
@@ -134,7 +132,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		row.setOutputMarkupId(true);
 		
 		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
-		avatarColumn.add(new UserLink("avatar", new UserModel(activity.getUser()), AvatarMode.AVATAR));
+		avatarColumn.add(new AvatarLink("avatar", activity.getUser(), null));
 		row.add(avatarColumn);
 		
 		if (row.get(DETAIL_ID) == null) 
@@ -629,7 +627,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			} else {
 				assigneeContainer = new Fragment("assignee", "assigneeViewFrag", this);
 				assigneeContainer.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(ASSIGNEE_HELP))));
-				assigneeContainer.add(new AvatarByUser("assignee", new UserModel(assignee), true));
+				assigneeContainer.add(new Avatar("assignee", assignee, new TooltipConfig()));
 			}
 		} else {
 			assigneeContainer = new Fragment("assignee", "noAssigneeFrag", this);

@@ -49,10 +49,10 @@ import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
@@ -208,7 +208,7 @@ public class RepoCommitPage extends RepositoryPage {
 			
 		});
 		
-		add(new PersonLink("author", Model.of(getCommit().getAuthorIdent())));
+		add(new UserLink("author", getCommit().getAuthorIdent()));
 		add(new Label("age", DateUtils.formatAge(getCommit().getAuthorIdent().getWhen())));
 
 		final WebMarkupContainer parentsContainer = new WebMarkupContainer("parents");

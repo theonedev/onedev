@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.avatar.AvatarByUser;
+import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
@@ -38,7 +38,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AvatarByUser("accountAvatar", accountModel, false));
+		add(new Avatar("accountAvatar", accountModel.getObject(), null));
 		
 		final IModel<User> accountModel = Model.of(getAccount());
 		UserSingleChoice accountChoice = new UserSingleChoice("accountChoice", accountModel, false);

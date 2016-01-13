@@ -42,10 +42,9 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.component.pullrequest.requeststatus.RequestStatusPanel;
-import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
@@ -208,25 +207,12 @@ public class RequestListPage extends PullRequestPage {
 				fragment.add(new Label("id", "#" + request.getId()));
 				fragment.add(new RequestLink("title", rowModel));
 				fragment.add(new RequestStatusPanel("status", rowModel, false));
-				fragment.add(new UserLink("submitter", new LoadableDetachableModel<User>() {
-
-					@Override
-					protected User load() {
-						return rowModel.getObject().getSubmitter();
-					}
-					
-				}, AvatarMode.NAME));
+				fragment.add(new UserLink("submitter", rowModel.getObject().getSubmitter()));
 				fragment.add(new BranchLink("targetBranch", request.getTarget()));
 				fragment.add(new BranchLink("source", request.getSource()));
 				fragment.add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
-				fragment.add(new UserLink("assignee", new LoadableDetachableModel<User>() {
-
-					@Override
-					protected User load() {
-						return rowModel.getObject().getSubmitter();
-					}
-					
-				}, AvatarMode.NAME).setVisible(request.getAssignee() != null));
+				fragment.add(new UserLink("assignee", rowModel.getObject().getSubmitter())
+						.setVisible(request.getAssignee() != null));
 				
 				cellItem.add(fragment);
 				

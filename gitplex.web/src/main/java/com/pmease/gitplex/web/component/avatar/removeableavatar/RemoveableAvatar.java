@@ -12,7 +12,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.component.avatar.AvatarByUser;
+import com.pmease.gitplex.web.component.avatar.Avatar;
 
 @SuppressWarnings("serial")
 public abstract class RemoveableAvatar extends Panel {
@@ -41,7 +41,7 @@ public abstract class RemoveableAvatar extends Panel {
 
 		};
 
-		link.add(new AvatarByUser("avatar", userModel, false));
+		link.add(new Avatar("avatar", userModel.getObject(), null));
 		link.add(new TooltipBehavior(new LoadableDetachableModel<String>() {
 
 			@Override

@@ -18,12 +18,12 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -71,7 +71,7 @@ public class CommitListPanel extends Panel {
 			protected void populateItem(final ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				
-				item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
+				item.add(new AvatarLink("avatar", commit.getAuthor(), null));
 
 				item.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
 
@@ -82,7 +82,7 @@ public class CommitListPanel extends Panel {
 					
 				}));
 
-				item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
+				item.add(new UserLink("name", commit.getAuthor()));
 				item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 				
 				item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));

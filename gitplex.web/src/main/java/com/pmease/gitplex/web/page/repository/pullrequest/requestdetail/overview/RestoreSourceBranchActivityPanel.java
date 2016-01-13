@@ -4,7 +4,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.web.component.userlink.UserLink;
+import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -18,7 +19,8 @@ class RestoreSourceBranchActivityPanel extends AbstractActivityPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserLink("user", userModel));
+		add(new AvatarLink("avatar", userModel.getObject(), null));
+		add(new UserLink("name", userModel.getObject()));
 		add(new Label("age", DateUtils.formatAge(activity.getDate())));
 		
 		add(new Label("branch", new LoadableDetachableModel<String>() {

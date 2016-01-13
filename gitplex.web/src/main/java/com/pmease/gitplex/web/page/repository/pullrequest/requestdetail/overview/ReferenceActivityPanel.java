@@ -5,8 +5,9 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.pullrequest.requeststatus.RequestStatusPanel;
-import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -24,7 +25,8 @@ class ReferenceActivityPanel extends AbstractActivityPanel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new UserLink("user", userModel));
+		add(new AvatarLink("avatar", userModel.getObject(), null));
+		add(new UserLink("name", userModel.getObject()));
 		add(new Label("age", DateUtils.formatAge(activity.getDate())));
 		
 		BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("link", 

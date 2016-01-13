@@ -42,9 +42,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public abstract class RepositorySelector extends Panel {
@@ -205,7 +205,7 @@ public abstract class RepositorySelector extends Panel {
 
 			@Override
 			protected void populateItem(final ListItem<User> userItem) {
-				userItem.add(new AvatarByUser("avatar", userItem.getModel(), false));
+				userItem.add(new Avatar("avatar", userItem.getModelObject(), null));
 				userItem.add(new Label("name", userItem.getModelObject().getName()));
 				
 				userItem.add(new ListView<Repository>("repositories", new LoadableDetachableModel<List<Repository>>() {

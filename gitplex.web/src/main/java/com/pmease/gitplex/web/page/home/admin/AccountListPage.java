@@ -28,7 +28,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.avatar.AvatarByUser;
+import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
@@ -123,7 +123,7 @@ public class AccountListPage extends AdministrationPage {
 			protected void populateItem(final ListItem<User> item) {
 				User user = item.getModelObject();
 
-				item.add(new AvatarByUser("avatar", item.getModel(), false));
+				item.add(new Avatar("avatar", item.getModelObject(), null));
 				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, AccountPage.paramsOf(user)); 
 				link.add(new Label("accountName", user.getName()));
 				item.add(link);

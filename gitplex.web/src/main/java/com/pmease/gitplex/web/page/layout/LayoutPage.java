@@ -24,10 +24,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.avatar.AvatarByUser;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
-import com.pmease.gitplex.web.component.userlink.UserLink;
-import com.pmease.gitplex.web.model.UserModel;
+import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.base.BasePage;
@@ -93,7 +91,7 @@ public abstract class LayoutPage extends BasePage {
 					}
 					
 				};
-				prevLink.add(new AvatarByUser("avatar", new UserModel(prevUser), false));
+				prevLink.add(new Avatar("avatar", prevUser, null));
 				mainHead.add(prevLink);
 
 				// Use dropdown panel to mimic tooltip as the bootstrap tooltip has the issue 
@@ -121,7 +119,7 @@ public abstract class LayoutPage extends BasePage {
 				mainHead.add(prevLink);
 				mainHead.add(new WebMarkupContainer("tooltip").setVisible(false));
 			}
-			mainHead.add(new UserLink("user", new UserModel(user), AvatarMode.AVATAR));
+			mainHead.add(new AvatarLink("user", user, null));
 			mainHead.add(new MenuLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
 
 				@Override

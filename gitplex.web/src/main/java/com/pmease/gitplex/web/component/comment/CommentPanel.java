@@ -47,11 +47,10 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
-import com.pmease.gitplex.web.component.userlink.UserLink;
-import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.utils.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
@@ -196,7 +195,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		head.setOutputMarkupId(true);
 		add(head);
 		
-		head.add(new UserLink("user", new UserModel(getComment().getUser()), AvatarMode.NAME));
+		head.add(new UserLink("user", getComment().getUser()));
 		head.add(newActionComponent("action"));
 		head.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 
@@ -489,14 +488,14 @@ public class CommentPanel extends GenericPanel<Comment> {
 		row.add(new WebMarkupContainer("anchor").add(AttributeModifier.append("name", anchorName)));		
 		
 		WebMarkupContainer avatarColumn = new WebMarkupContainer("avatar");
-		avatarColumn.add(new UserLink("avatar", new UserModel(reply.getUser()), AvatarMode.AVATAR));
+		avatarColumn.add(new AvatarLink("avatar", reply.getUser(), null));
 		row.add(avatarColumn);
 		
 		final WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);
 		row.add(head);
 		
-		head.add(new UserLink("user", new UserModel(reply.getUser()), AvatarMode.NAME));
+		head.add(new UserLink("user", reply.getUser()));
 		head.add(new Label("age", DateUtils.formatAge(reply.getDate())));
 
 		head.add(new AjaxLink<Void>("edit") {

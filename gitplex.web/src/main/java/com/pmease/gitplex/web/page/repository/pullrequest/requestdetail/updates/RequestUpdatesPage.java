@@ -36,16 +36,16 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
@@ -178,7 +178,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					protected void populateItem(final ListItem<Commit> commitItem) {
 						Commit commit = commitItem.getModelObject();
 						
-						commitItem.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
+						commitItem.add(new AvatarLink("avatar", commit.getAuthor(), null));
 
 						IModel<Repository> repoModel = new AbstractReadOnlyModel<Repository>() {
 
@@ -197,7 +197,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							
 						}));
 
-						commitItem.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
+						commitItem.add(new UserLink("name", commit.getAuthor()));
 						commitItem.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 						
 						commitItem.add(new CommitHashPanel("hash", Model.of(commit.getHash())));

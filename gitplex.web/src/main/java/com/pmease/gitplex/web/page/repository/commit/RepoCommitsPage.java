@@ -34,7 +34,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -60,10 +59,10 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CriteriaContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
@@ -439,7 +438,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		Fragment item;
 		if (commit != null) {
 			item = new Fragment(itemId, "commitFrag", this);
-			item.add(new PersonLink("avatar", Model.of(commit.getAuthor()), AvatarMode.AVATAR));
+			item.add(new AvatarLink("avatar", commit.getAuthor(), null));
 
 			item.add(new CommitMessagePanel("message", repoModel, new LoadableDetachableModel<Commit>() {
 
@@ -479,7 +478,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				labelsView.add(new Label(labelsView.newChildId(), label));
 			item.add(labelsView);
 			
-			item.add(new PersonLink("name", Model.of(commit.getAuthor()), AvatarMode.NAME));
+			item.add(new UserLink("name", commit.getAuthor()));
 			item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
 			
 			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));

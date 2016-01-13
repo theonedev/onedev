@@ -59,10 +59,9 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.compare.BranchComparePage;
@@ -299,7 +298,7 @@ public class RepoBranchesPage extends RepositoryPage {
 				BriefCommit lastCommit = Preconditions.checkNotNull(lastCommitsModel.getObject().get(branch));
 
 				item.add(new Label("lastUpdateTime", DateUtils.formatAge(lastCommit.getAuthor().getWhen())));
-				item.add(new PersonLink("lastAuthor", Model.of(lastCommit.getAuthor()), AvatarMode.NAME));
+				item.add(new UserLink("lastAuthor", lastCommit.getAuthor()));
 				
 				item.add(new WebMarkupContainer("default") {
 

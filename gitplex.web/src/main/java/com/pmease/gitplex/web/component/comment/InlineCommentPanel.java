@@ -13,10 +13,8 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
-import com.pmease.gitplex.web.component.userlink.UserLink;
-import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
@@ -53,7 +51,7 @@ public class InlineCommentPanel extends GenericPanel<Comment> {
 		alert.setVisible(false);
 		add(alert);
 		
-		add(new UserLink("avatar", new UserModel(getModelObject().getUser()), AvatarMode.AVATAR));
+		add(new AvatarLink("avatar", getModelObject().getUser(), null));
 		add(new CommentPanel("detail", getModel()));
 		
 	}

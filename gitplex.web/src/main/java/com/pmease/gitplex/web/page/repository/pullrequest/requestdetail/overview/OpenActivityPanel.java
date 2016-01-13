@@ -23,9 +23,8 @@ import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.avatar.AvatarMode;
+import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.userlink.UserLink;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -97,7 +96,7 @@ class OpenActivityPanel extends AbstractActivityPanel {
 		head.setOutputMarkupId(true);
 		add(head);
 		
-		head.add(new UserLink("user", userModel, AvatarMode.NAME));
+		head.add(new UserLink("user", userModel.getObject()));
 		head.add(new Label("age", DateUtils.formatAge(activity.getDate())));
 		
 		head.add(new AjaxLink<Void>("edit") {

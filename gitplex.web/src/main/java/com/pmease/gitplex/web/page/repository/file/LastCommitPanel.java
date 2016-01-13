@@ -8,9 +8,10 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.personlink.PersonLink;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -33,7 +34,8 @@ class LastCommitPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new PersonLink("author", Model.of(commit.getAuthor())));
+		add(new AvatarLink("avatar", commit.getAuthor(), null));
+		add(new UserLink("name", commit.getAuthor()));
 		
 		add(new Label("date", Model.of(DateUtils.formatAge(commit.getAuthor().getWhen()))));
 		
