@@ -59,9 +59,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.UserLink;
-import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.contributorlinks.ContributorLinks;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CriteriaContext;
@@ -438,7 +438,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		Fragment item;
 		if (commit != null) {
 			item = new Fragment(itemId, "commitFrag", this);
-			item.add(new AvatarLink("avatar", commit.getAuthor(), null));
+			item.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
 
 			item.add(new CommitMessagePanel("message", repoModel, new LoadableDetachableModel<Commit>() {
 
@@ -478,8 +478,8 @@ public class RepoCommitsPage extends RepositoryPage {
 				labelsView.add(new Label(labelsView.newChildId(), label));
 			item.add(labelsView);
 			
-			item.add(new UserLink("name", commit.getAuthor()));
-			item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
+			item.add(new ContributorLinks("name", commit.getAuthor(), commit.getCommitter()));
+			item.add(new Label("age", DateUtils.formatAge(commit.getCommitter().getWhen())));
 			
 			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));
 

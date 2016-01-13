@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.setting;
+package com.pmease.gitplex.web.component.avatar;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 

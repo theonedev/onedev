@@ -16,7 +16,6 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
-import com.pmease.gitplex.web.page.account.setting.AvatarChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -33,16 +32,29 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	
 	private final TooltipConfig tooltipConfig;
 	
-	public AvatarLink(String id, User user, @Nullable TooltipConfig tooltipConfig) {
+	public AvatarLink(String id, @Nullable User user) {
+		this(id, user, null);
+	}
+	
+	public AvatarLink(String id, @Nullable User user, @Nullable TooltipConfig tooltipConfig) {
 		super(id, AccountReposPage.class);
 
-		userId = user.getId();
-		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		params = AccountPage.paramsOf(user);
+		if (user != null) {
+			userId = user.getId();
+			params = AccountPage.paramsOf(user);
+			name = user.getDisplayName();
+		} else {
+			userId = null;
+			params = new PageParameters();
+			name = "Unknown";
+		}
 		url = avatarManager.getAvatarUrl(user);
-		name = user.getDisplayName();
 		this.tooltipConfig = tooltipConfig;
+	}
+	
+	public AvatarLink(String id, PersonIdent person) {
+		this(id, person, null);
 	}
 	
 	public AvatarLink(String id, PersonIdent person, @Nullable TooltipConfig tooltipConfig) {
@@ -93,7 +105,11 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		setEnabled(!params.isEmpty());
+		if (params.isEmpty()) {
+			setEnabled(false);
+			setBeforeDisabledLink("");
+			setAfterDisabledLink("");
+		}
 		setEscapeModelStrings(false);
 		
 		if (tooltipConfig != null)

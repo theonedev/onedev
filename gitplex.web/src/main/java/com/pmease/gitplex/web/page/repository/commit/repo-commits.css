@@ -13,12 +13,8 @@
 #repo-commits>.body li {
 	padding: 4px 0;
 }
-#repo-commits>.body .avatar {
-	width: 40px;
-}
-#repo-commits>.body .avatar img {
-	width: 40px; 
-	height: 40px;
+#repo-commits>.body li.commit>.avatar {
+	margin-top: 4px;
 }
 #repo-commits>.body .label {
 	margin: 2px 0 0 4px;

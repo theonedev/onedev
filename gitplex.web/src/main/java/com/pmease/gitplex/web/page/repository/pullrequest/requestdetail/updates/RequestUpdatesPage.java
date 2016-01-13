@@ -16,7 +16,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -36,16 +35,14 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.UserLink;
-import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
-import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.contributorlinks.ContributorLinks;
+import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.UserModel;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.UpdateChangesLink;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestlist.RequestListPage;
@@ -178,7 +175,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 					protected void populateItem(final ListItem<Commit> commitItem) {
 						Commit commit = commitItem.getModelObject();
 						
-						commitItem.add(new AvatarLink("avatar", commit.getAuthor(), null));
+						commitItem.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
 
 						IModel<Repository> repoModel = new AbstractReadOnlyModel<Repository>() {
 
@@ -197,17 +194,18 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							
 						}));
 
-						commitItem.add(new UserLink("name", commit.getAuthor()));
-						commitItem.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
+						commitItem.add(new ContributorLinks("name", commit.getAuthor(), commit.getCommitter()));
+						commitItem.add(new Label("age", DateUtils.formatAge(commit.getCommitter().getWhen())));
 						
-						commitItem.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+						commitItem.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Repository>() {
 
-						RepoFileState state = new RepoFileState();
-						state.requestId = getPullRequest().getId();
-						state.blobIdent.revision = commit.getHash();
-						commitItem.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-								RepoFilePage.paramsOf(getPullRequest().getTargetRepo(), state)));
-						
+							@Override
+							public Repository getObject() {
+								return getPullRequest().getTargetRepo();
+							}
+							
+						}, commit.getHash(), getPullRequest().getId()));
+
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 
 							@Override

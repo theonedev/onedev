@@ -13,7 +13,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.page.account.setting.AvatarChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -28,15 +27,28 @@ public class Avatar extends WebComponent {
 	
 	private final TooltipConfig tooltipConfig;
 	
-	public Avatar(String id, User user, @Nullable TooltipConfig tooltipConfig) {
+	public Avatar(String id, @Nullable User user) {
+		this(id, user, null);
+	}
+	
+	public Avatar(String id, @Nullable User user, @Nullable TooltipConfig tooltipConfig) {
 		super(id);
 
-		userId = user.getId();
-		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		url = avatarManager.getAvatarUrl(user);
-		name = user.getDisplayName();
+		if (user != null) {
+			userId = user.getId();
+			url = avatarManager.getAvatarUrl(user);
+			name = user.getDisplayName();
+		} else {
+			userId = null;
+			url = avatarManager.getAvatarUrl(user);
+			name = "Unknown";
+		}
 		this.tooltipConfig = tooltipConfig;
+	}
+	
+	public Avatar(String id, PersonIdent person) {
+		this(id, person, null);
 	}
 	
 	public Avatar(String id, PersonIdent person, @Nullable TooltipConfig tooltipConfig) {

@@ -34,7 +34,7 @@
 }
 #request-detail>.updates>.update>.commits td {
 	padding: 8px; 
-	color: #999; 
+	color: #888; 
 	border-top: 1px dashed #CCC;
 }
 #request-detail>.updates>.update>.commits tr:first-child td {
@@ -48,10 +48,8 @@
 }
 #request-detail>.updates>.update>.commits td.avatar {
 	width: 1px;
-}
-#request-detail>.updates>.update>.commits td.avatar img {
-	width: 36px; 
-	height: 36px;
+	padding-top: 12px;
+	padding-right: 0;
 }
 #request-detail>.updates>.update>.commits a {
 	color: #666;
@@ -75,6 +73,6 @@
 #request-detail>.updates>.update>.commits tr:hover td {
 	background: #F7ECB9;
 }
-#request-detail>.updates>.update>.commits .commit-message>.full {
+#request-detail>.updates>.update>.commits .commit-message>.detail {
 	margin-bottom: 4px;
 }

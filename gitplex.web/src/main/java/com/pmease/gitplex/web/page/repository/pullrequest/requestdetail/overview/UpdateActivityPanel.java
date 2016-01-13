@@ -8,14 +8,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -24,11 +22,9 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
+import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -162,7 +158,15 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 
 				});
 				
-				item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+				item.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Repository>() {
+
+					@Override
+					public Repository getObject() {
+						return updateModel.getObject().getRequest().getTargetRepo();
+					}
+					
+				}, commit.getHash(), updateModel.getObject().getRequest().getId()));
+				
 				if (mergedCommitsModel.getObject().contains(commit.getHash())) {
 					item.add(AttributeAppender.append("class", " integrated"));
 					item.add(AttributeAppender.append("title", "This commit has been integrated"));
@@ -171,12 +175,6 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 					item.add(AttributeAppender.append("title", "This commit has been rebased"));
 				}
 				
-				PullRequest request = updateModel.getObject().getRequest();
-				RepoFileState state = new RepoFileState();
-				state.requestId = request.getId();
-				state.blobIdent.revision = commit.getHash();
-				PageParameters params = RepoFilePage.paramsOf(request.getTargetRepo(), state);
-				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, params));
 			}
 			
 		});
