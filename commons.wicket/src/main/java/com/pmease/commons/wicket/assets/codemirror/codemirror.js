@@ -88,16 +88,18 @@ pmease.commons.codemirror = {
 		    	var scroll = {left: scrollInfo.left, top: scrollInfo.top};
 		    	pmease.commons.history.setScroll(scroll);
 		    	$("a.preserve-cm-state").each(function() {
-		    		var clientState = $(this).data("client_state");
-		    		if (!clientState)
-		    			clientState = {};
-		    		clientState.scroll = scroll;
-		    		$(this).data("client_state", clientState);
-		    		
-		    		var uri = new URI(this);
-		    		uri.removeSearch("client_state");
-		    		uri.addSearch("client_state", JSON.stringify(clientState));
-		    		$(this).attr("href", uri.href());
+		    		if (!$(this).is('[disabled=disabled]')) {
+			    		var clientState = $(this).data("client_state");
+			    		if (!clientState)
+			    			clientState = {};
+			    		clientState.scroll = scroll;
+			    		$(this).data("client_state", clientState);
+			    		
+			    		var uri = new URI(this);
+			    		uri.removeSearch("client_state");
+			    		uri.addSearch("client_state", JSON.stringify(clientState));
+			    		$(this).attr("href", uri.href());
+		    		}		    		
 		    	});
 	    	}, 500);
 	    });
