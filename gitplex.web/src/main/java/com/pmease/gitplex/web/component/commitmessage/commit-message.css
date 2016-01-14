@@ -3,7 +3,9 @@
 }
 .commit-message>.detail {
 	display: none; 
-	margin-top: 8px; 
 	color: #666; 
 	font-size: 12px;
+	border: none;
+	background: none;
+	margin-bottom: 0;
 }

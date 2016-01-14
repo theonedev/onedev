@@ -38,11 +38,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
@@ -50,17 +48,16 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
-import com.pmease.gitplex.web.component.contributorlinks.ContributorLinks;
+import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
-import com.pmease.gitplex.web.utils.DateUtils;
 
 @SuppressWarnings("serial")
-public class RepoCommitPage extends RepositoryPage {
+public class CommitDetailPage extends RepositoryPage {
 
 	private static final String PARAM_REVISION = "revision";
 	
@@ -97,7 +94,7 @@ public class RepoCommitPage extends RepositoryPage {
 	
 	private RevisionDiffPanel compareResult;
 	
-	public RepoCommitPage(PageParameters params) {
+	public CommitDetailPage(PageParameters params) {
 		super(params);
 		
 		revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
@@ -119,29 +116,27 @@ public class RepoCommitPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("title", GitUtils.getShortMessage(getCommit())));
+		add(new Label("text", GitUtils.getShortMessage(getCommit())));
 		
 		add(new HashAndCodePanel("hashAndCode", repoModel, getCommit().getId().name()));
 		
 		String message = GitUtils.getDetailMessage(getCommit());
 		if (message != null) {
-			message = HtmlEscape.escapeHtml5(message);
-			message = StringUtils.replace(StringUtils.replace(message, "\r\n", "<br>"), "\n", "<br>");
-			add(new Label("message", message).setEscapeModelStrings(false));
+			add(new Label("detail", message));
 		} else {
-			add(new WebMarkupContainer("message").setVisible(false));
+			add(new WebMarkupContainer("detail").setVisible(false));
 		}
 		
 		add(new AjaxLazyLoadPanel("refs") {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Fragment fragment = new Fragment(markupId, "refsFrag", RepoCommitPage.this) {
+				Fragment fragment = new Fragment(markupId, "refsFrag", CommitDetailPage.this) {
 
 					@Override
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
-						String script = String.format("gitplex.repocommit.initRefs('%s');", getMarkupId());
+						String script = String.format("gitplex.commitdetail.initRefs('%s');", getMarkupId());
 						response.render(OnDomReadyHeaderItem.forScript(script));
 					}
 					
@@ -210,21 +205,21 @@ public class RepoCommitPage extends RepositoryPage {
 		});
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
-		add(new ContributorLinks("contributorLinks", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
-		add(new Label("age", DateUtils.formatAge(getCommit().getCommitterIdent().getWhen())));
+		add(new ContributionPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 
 		final WebMarkupContainer parentsContainer = new WebMarkupContainer("parents");
 		parentsContainer.setOutputMarkupId(true);
 		add(parentsContainer);
 		if (getParents().size() == 1) {
 			String parent = getParents().get(0);
-			Link<Void> link = new BookmarkablePageLink<Void>("parent", RepoCommitPage.class, 
+			Link<Void> link = new BookmarkablePageLink<Void>("parent", CommitDetailPage.class, 
 					paramsOf(repoModel.getObject(), parent));
 			link.add(new Label("label", GitUtils.abbreviateSHA(parent)));
 			parentsContainer.add(link);
 			parentsContainer.add(new WebMarkupContainer("parents").setVisible(false));
 		} else {
 			parentsContainer.add(new WebMarkupContainer("parent").setVisible(false));
+			parentsContainer.add(new Label("count", getParents().size() + " parents"));
 			parentsContainer.add(new ListView<String>("parents", new LoadableDetachableModel<List<String>>() {
 
 				@Override
@@ -237,7 +232,7 @@ public class RepoCommitPage extends RepositoryPage {
 				@Override
 				protected void populateItem(ListItem<String> item) {
 					final String parent = item.getModelObject();
-					Link<Void> link = new BookmarkablePageLink<Void>("link", RepoCommitPage.class, 
+					Link<Void> link = new BookmarkablePageLink<Void>("link", CommitDetailPage.class, 
 							paramsOf(repoModel.getObject(), parent));
 					link.add(new Label("label", GitUtils.abbreviateSHA(parent)));
 					item.add(link);
@@ -249,6 +244,7 @@ public class RepoCommitPage extends RepositoryPage {
 							setCompareWith(parent); 
 							target.add(parentsContainer);
 							newCompareResult(target);
+							pushState(target);
 						}
 
 						@Override
@@ -269,7 +265,7 @@ public class RepoCommitPage extends RepositoryPage {
 	
 				@Override
 				protected void onSelectPath(AjaxRequestTarget target, String path) {
-					RepoCommitPage.this.state.path = path;
+					CommitDetailPage.this.state.path = path;
 					newCompareResult(target);
 					pushState(target);
 				}
@@ -330,9 +326,9 @@ public class RepoCommitPage extends RepositoryPage {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(OnelineResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				RepoCommitPage.class, "repo-commit.js")));
+				CommitDetailPage.class, "commit-detail.js")));
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				RepoCommitPage.class, "repo-commit.css")));
+				CommitDetailPage.class, "commit-detail.css")));
 	}
 
 	public static PageParameters paramsOf(Repository repository, String revision) {
@@ -363,7 +359,7 @@ public class RepoCommitPage extends RepositoryPage {
 	
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getRepository(), getCommit().name(), state);
-		CharSequence url = RequestCycle.get().urlFor(RepoCommitPage.class, params);
+		CharSequence url = RequestCycle.get().urlFor(CommitDetailPage.class, params);
 		pushState(target, url.toString(), state);
 	}
 	

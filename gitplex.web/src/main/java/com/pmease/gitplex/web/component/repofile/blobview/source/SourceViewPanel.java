@@ -71,7 +71,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
-import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.Mark;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -365,8 +365,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				commit.authorName = StringEscapeUtils.escapeHtml4(blame.getCommit().getAuthor().getName());
 				commit.hash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
 				commit.message = blame.getCommit().getSubject();
-				PageParameters params = RepoCommitPage.paramsOf(context.getRepository(), blame.getCommit().getHash());
-				commit.url = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
+				PageParameters params = CommitDetailPage.paramsOf(context.getRepository(), blame.getCommit().getHash());
+				commit.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 				commit.ranges = blame.getRanges();
 				commits.add(commit);
 			}

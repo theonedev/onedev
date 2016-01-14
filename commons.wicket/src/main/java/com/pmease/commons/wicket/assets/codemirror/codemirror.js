@@ -41,16 +41,18 @@ pmease.commons.codemirror = {
     			var cursor = cm.getCursor();
 		    	pmease.commons.history.setCursor(cursor);
 		    	$("a.preserve-cm-state").each(function() {
-		    		var clientState = $(this).data("client_state");
-		    		if (!clientState)
-		    			clientState = {};
-		    		clientState.cursor = cursor;
-		    		$(this).data("client_state", clientState);
-		    		
-		    		var uri = new URI(this);
-		    		uri.removeSearch("client_state");
-		    		uri.addSearch("client_state", JSON.stringify(clientState));
-		    		$(this).attr("href", uri.href());
+		    		if (!$(this).is('[disabled=disabled]')) {
+			    		var clientState = $(this).data("client_state");
+			    		if (!clientState)
+			    			clientState = {};
+			    		clientState.cursor = cursor;
+			    		$(this).data("client_state", clientState);
+			    		
+			    		var uri = new URI(this);
+			    		uri.removeSearch("client_state");
+			    		uri.addSearch("client_state", JSON.stringify(clientState));
+			    		$(this).attr("href", uri.href());
+		    		}
 		    	});
 		    	
 		    	var $selectionPermalink = $(".selection-permalink");

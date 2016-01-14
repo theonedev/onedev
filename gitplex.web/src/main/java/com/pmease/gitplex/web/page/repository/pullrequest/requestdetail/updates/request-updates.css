@@ -51,28 +51,27 @@
 	padding-top: 12px;
 	padding-right: 0;
 }
-#request-detail>.updates>.update>.commits a {
-	color: #666;
-}
 #request-detail>.updates>.update>.commits a.summary {
 	font-weight: bold;
+	font-size: 15px;
+	color: #666;
 }
 #request-detail>.updates>.update>.commits td.detail {
 	padding-left: 8px; 
 	padding-right: 8px;
 }
+#request-detail>.updates>.update>.commits td.detail>.message {
+	margin-bottom: 6px;
+}
+#request-detail>.updates>.update>.commits td.detail>.contribution {
+	font-size: 12px;
+}
 #request-detail>.updates>.update>.commits td.status {
 	text-align: right;
-}
-#request-detail>.updates>.update>.commits td.status a.commit-hash {
-	font-family: monospace;
 }
 #request-detail>.updates>.update>.commits td.status>div:first-child {
 	white-space: nowrap;
 }
 #request-detail>.updates>.update>.commits tr:hover td {
 	background: #F7ECB9;
-}
-#request-detail>.updates>.update>.commits .commit-message>.detail {
-	margin-bottom: 4px;
 }

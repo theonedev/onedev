@@ -13,6 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
+import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
-import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 /**
@@ -72,20 +73,20 @@ class LastCommitsResource extends AbstractResource {
 					LastCommitInfo info = new LastCommitInfo();
 
 					LastCommitsOfChildren.Value value = entry.getValue();
-					PageParameters params = RepoCommitPage.paramsOf(repo, value.getId().name());
-					info.url = RequestCycle.get().urlFor(RepoCommitPage.class, params).toString();
+					PageParameters params = CommitDetailPage.paramsOf(repo, value.getId().name());
+					info.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 					info.summary = StringEscapeUtils.escapeHtml4(value.getSummary());
-					info.when = DateUtils.formatAge(value.getAuthor().getWhen());
+					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
 					User user = userManager.findByPerson(author);
 					if (user != null) {
-						info.authorName = StringEscapeUtils.escapeHtml4(user.getDisplayName());
+						info.authorName = HtmlEscape.escapeHtml5(user.getDisplayName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(user);
 						params = AccountReposPage.paramsOf(user);
 						info.authorUrl = RequestCycle.get().urlFor(AccountReposPage.class, params).toString();
 					} else {
-						info.authorName = StringEscapeUtils.escapeHtml4(author.getName());
+						info.authorName = HtmlEscape.escapeHtml5(author.getName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(author);
 					}
 					

@@ -5,11 +5,8 @@
 	color: infotext; 
 	font-family: monospace; 
 	font-size: 10pt; 
-	overflow: auto; 
 	padding: 4px 8px; 
 	z-index: 100; 
-	max-width: 900px; 
-	max-height: 600px;
 	font-weight: bold;
 }
 .symbol-tooltip ul.declarations li {

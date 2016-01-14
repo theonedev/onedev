@@ -1,0 +1,38 @@
+img.avatar {
+	border-radius: 3px;
+	height: 24px;
+	width: 24px;
+}
+.contributor-avatars {
+	position: relative;
+}
+.contributor-avatars .author .avatar {
+	height: 36px;
+	width: 36px;
+}
+.contributor-avatars .committer .avatar {
+	position: absolute;
+	height: 16px;
+	width: 16px;
+	left: 22px;
+	top: 13px;
+}
+
+.removeable-avatar {
+	position: relative;
+}
+.removeable-avatar img {
+	width: 32px !important;
+	height: 32px !important;
+}
+.removeable-avatar i {
+	display: none; 
+	color: red; 
+	font-size: 30px; 
+	position: absolute; 
+	left: 4px; 
+	top: -6px;
+}
+a.removeable-avatar:hover i {
+	display: inline;
+}

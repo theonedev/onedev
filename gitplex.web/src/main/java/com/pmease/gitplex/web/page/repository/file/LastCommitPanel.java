@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.page.repository.file;
 
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -8,11 +7,10 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 
 @SuppressWarnings("serial")
 class LastCommitPanel extends Panel {
@@ -34,10 +32,8 @@ class LastCommitPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AvatarLink("avatar", commit.getAuthor(), null));
-		add(new UserLink("name", commit.getAuthor()));
-		
-		add(new Label("date", Model.of(DateUtils.formatAge(commit.getAuthor().getWhen()))));
+		add(new AvatarLink("avatar", commit.getAuthor()));
+		add(new ContributionPanel("name", commit.getAuthor(), commit.getCommitter()));
 		
 		add(new CommitMessagePanel("message", repoModel, Model.of(commit)));
 		

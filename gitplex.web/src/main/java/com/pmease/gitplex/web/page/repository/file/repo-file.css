@@ -95,20 +95,13 @@
 #repo-file>.last-commit .pull-left {
 	margin-right: 12px;
 }
-#repo-file>.last-commit .author {
-	font-weight: bold;
-}
-#repo-file>.last-commit .date {
-	color: #666;
-	font-size: 13px;
-	margin-top: 3px;
-}
-#repo-file>.last-commit span.message {
-	margin-top: 2px;
-}
 #repo-file>.last-commit div.message {
 	display: none;
 	margin-top: 6px;
+}
+#repo-file>.last-commit .summary {
+	font-weight: bold;
+	color: #555;
 }
 #repo-file>.search-result {
 	height: 200px;

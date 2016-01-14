@@ -2,6 +2,7 @@ package org.eclipse.jgit.revwalk;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -353,11 +354,14 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 		
 		private final PersonIdent author;
 		
+		private final Date commitDate;
+		
 		private final String summary;
 		
 		public Value(RevCommit commit) {
 			this.id = commit.copy();
 			this.author = commit.getAuthorIdent();
+			this.commitDate = commit.getCommitterIdent().getWhen();
 			this.summary = StringUtils.substringBefore(commit.getFullMessage(), "\n").trim();
 		}
 
@@ -371,6 +375,10 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 
 		public PersonIdent getAuthor() {
 			return author;
+		}
+
+		public Date getCommitDate() {
+			return commitDate;
 		}
 
 		@Override

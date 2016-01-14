@@ -1,0 +1,74 @@
+#commit-detail {
+	padding: 20px;
+}
+#commit-detail>div {
+	margin-bottom: 16px;
+}
+#commit-detail>.info {
+	border: 1px solid #BBB;
+	border-radius: 4px;
+}
+
+#commit-detail>.info>.message {
+	background: #F9F9F9;
+	border-bottom: 1px dashed #BBB;
+	padding: 12px;
+	border-radius: 4px 4px 0 0;
+}
+#commit-detail>.info>.message>.subject>.pull-left {
+	font-size: 17px;
+	font-weight: bold;
+	color: #555;
+}
+#commit-detail>.info>.message>.detail {
+	color: #666;
+	padding: 12px;
+	font-size: 13px;
+	border: none;
+	background: none;
+	margin-bottom: 0;
+}
+#commit-detail>.info>.refs {
+	padding: 12px;
+	background: #F9F9F9;
+	border-bottom: 1px solid #DDD;
+}
+#commit-detail>.info>.refs .branch:before {
+	font-family: FontExt;
+	content: "\f221";
+	color: #444;
+}
+#commit-detail>.info>.refs .tag:before {
+	font-family: Fontawesome;
+	content: "\f02b";
+	color: #444;
+}
+#commit-detail>.info>.refs>div>span {
+	margin-right: 6px;
+}
+#commit-detail>.info>.refs a {
+	color: #444;
+}
+#commit-detail>.info>.contribution-and-parents {
+	padding: 12px;
+}
+#commit-detail>.info>.contribution-and-parents a {
+	color: #444;
+}
+#commit-detail>.info>.contribution-and-parents .contributor-avatars {
+	margin-right: 4px;
+}
+#commit-detail>.info>.contribution-and-parents>.parents label {
+	color: #666;
+	font-weight: normal;
+	margin-right: 8px;
+}
+#commit-detail>.info>.contribution-and-parents>.parents .single {
+	margin-top: 7px;
+}
+#commit-detail>.info>.contribution-and-parents>.parents .multiple {
+	margin-top: 3px;
+}
+#commit-detail>.info>.contribution-and-parents .btn-group.parent {
+	margin-right: 8px;
+}

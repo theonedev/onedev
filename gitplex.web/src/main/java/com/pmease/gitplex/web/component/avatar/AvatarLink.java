@@ -3,10 +3,13 @@ package com.pmease.gitplex.web.component.avatar;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -99,6 +102,13 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 				avatarChanged.getTarget().add(this);
 			}
 		}
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(Avatar.class, "avatar.css")));
 	}
 	
 	@Override

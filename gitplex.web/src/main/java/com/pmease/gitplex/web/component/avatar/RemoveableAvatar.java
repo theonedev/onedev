@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.avatar.removeableavatar;
+package com.pmease.gitplex.web.component.avatar;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -12,7 +12,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.web.component.avatar.Avatar;
 
 @SuppressWarnings("serial")
 public abstract class RemoveableAvatar extends Panel {
@@ -82,7 +81,7 @@ public abstract class RemoveableAvatar extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RemoveableAvatar.class, "removeable-avatar.css")));
+				new CssResourceReference(RemoveableAvatar.class, "avatar.css")));
 	}
 	
 }

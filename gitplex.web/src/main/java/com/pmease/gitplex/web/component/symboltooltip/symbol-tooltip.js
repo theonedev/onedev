@@ -69,7 +69,7 @@ gitplex.symboltooltip = {
 					}
 				});
 
-				$tooltip.data("alignment", {position: {x: 0, y:0, offset:2, targetX: 0, targetY: 100}, target: {element: symbolEl}});
+				$tooltip.data("alignment", {placement: {x: 0, y:0, offset:2, targetX: 0, targetY: 100}, target: {element: symbolEl}});
 				$tooltip.align($tooltip.data("alignment"));
 
 				queryCallback(revision, $symbol.text());

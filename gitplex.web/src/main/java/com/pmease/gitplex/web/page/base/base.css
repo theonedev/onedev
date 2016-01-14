@@ -93,12 +93,6 @@ li.selectable.active a, a.selectable.active {
 	font-style: normal;
 }
 
-img.avatar {
-	border-radius: 3px;
-	height: 24px;
-	width: 24px;
-}
-
 .ellipsis-expander {
 	display: inline-block;
 	background: #DDD; 
@@ -106,6 +100,9 @@ img.avatar {
 	border-radius: 2px; 
 	color: #777;
 	line-height: 16px;
+}
+.ellipsis-expander .fa {
+	color: #666;
 }
 .ellipsis-expander:hover {
 	background: #888;

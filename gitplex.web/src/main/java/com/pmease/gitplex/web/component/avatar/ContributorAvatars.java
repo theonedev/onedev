@@ -49,7 +49,7 @@ public class ContributorAvatars extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new JavaScriptResourceReference(
-				ContributorAvatars.class, "contributor-avatars.css")));
+				ContributorAvatars.class, "avatar.css")));
 	}
 
 }

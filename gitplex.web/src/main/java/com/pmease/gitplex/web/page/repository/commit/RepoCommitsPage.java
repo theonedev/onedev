@@ -61,12 +61,11 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.contributorlinks.ContributorLinks;
+import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CriteriaContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
-import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -478,8 +477,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				labelsView.add(new Label(labelsView.newChildId(), label));
 			item.add(labelsView);
 			
-			item.add(new ContributorLinks("name", commit.getAuthor(), commit.getCommitter()));
-			item.add(new Label("age", DateUtils.formatAge(commit.getCommitter().getWhen())));
+			item.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 			
 			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));
 

@@ -1,4 +1,4 @@
-gitplex.repocommit = {
+gitplex.commitdetail = {
 	initRefs: function(refsId) {
 		var $refs = $("#" + refsId);
 		if ($refs.children().length != 0)

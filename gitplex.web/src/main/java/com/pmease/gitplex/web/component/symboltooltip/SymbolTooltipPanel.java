@@ -31,6 +31,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
+import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
@@ -42,8 +43,8 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
@@ -134,6 +135,17 @@ public abstract class SymbolTooltipPanel extends Panel {
 				add(runTaskBehavior = new RunTaskBehavior() {
 					
 					@Override
+					public void requestRun(AjaxRequestTarget target) {
+						super.requestRun(target);
+						
+						String script = String.format(""
+								+ "var $tooltip=$(document.getElementById('%s').tooltip);"
+								+ "$tooltip.align($tooltip.data('alignment'));", 
+								SymbolTooltipPanel.this.getMarkupId());
+						target.appendJavaScript(script);
+					}
+
+					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						String script = String.format("gitplex.symboltooltip.removeTooltip(document.getElementById('%s'));", 
 								SymbolTooltipPanel.this.getMarkupId());
@@ -199,6 +211,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
+				response.render(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
 				response.render(JavaScriptHeaderItem.forReference(
 						new JavaScriptResourceReference(SymbolTooltipPanel.class, "symbol-tooltip.js")));
 				response.render(CssHeaderItem.forReference(

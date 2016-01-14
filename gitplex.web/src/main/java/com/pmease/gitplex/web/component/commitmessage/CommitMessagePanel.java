@@ -19,10 +19,9 @@ import org.unbescape.html.HtmlEscape;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.Highlighter;
-import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.Transformer;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.commit.RepoCommitPage;
+import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
 
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {
@@ -76,8 +75,8 @@ public class CommitMessagePanel extends Panel {
 		super.onInitialize();
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("link",
-				RepoCommitPage.class,
-				RepoCommitPage.paramsOf(repoModel.getObject(), commitModel.getObject().getHash()));
+				CommitDetailPage.class,
+				CommitDetailPage.paramsOf(repoModel.getObject(), commitModel.getObject().getHash()));
 		
 		add(link);
 		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
@@ -93,8 +92,7 @@ public class CommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				String highlighted = highlight(commitModel.getObject().getBody());
-				return StringUtils.replace(StringUtils.replace(highlighted, "\r\n", "<br>"), "\n", "<br>");
+				return highlight(commitModel.getObject().getBody());
 			}
 			
 		}) {

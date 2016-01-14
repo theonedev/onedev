@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.avatar.removeableavatar.RemoveableAvatar;
+import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.model.UserModel;
 
