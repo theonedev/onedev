@@ -852,9 +852,10 @@ public class Repository extends AbstractEntity implements UserBelonging {
     }
 
     public void deleteBranch(String branch) {
-		git().deleteBranch(branch);
+    	String refName = GitUtils.branch2ref(branch);
+		git().deleteRef(refName);
 		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			listener.onRefUpdate(this, GitUtils.branch2ref(branch), null);
+			listener.onRefUpdate(this, refName, null);
     }
     
     public Comparator<Ref> newBranchDateComparator() {

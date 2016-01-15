@@ -86,15 +86,15 @@ public class Git implements Serializable {
 	}
 
 	/**
-	 * delete branch even in a bare repository.
+	 * delete ref even in a bare repository.
 	 * 
-	 * @param branchName
-	 * 			name of the branch to delete
+	 * @param refName
+	 * 			name of the ref to delete
 	 * @return
 	 * 			this git object
 	 */
-	public Git deleteBranch(String branchName) {
-		new DeleteRefCommand(repoDir).refName(Constants.R_HEADS + branchName).call();
+	public Git deleteRef(String refName) {
+		new DeleteRefCommand(repoDir).refName(refName).call();
 		return this;
 	}
 
@@ -103,11 +103,6 @@ public class Git implements Serializable {
 			throw new GeneralException(String.format("Tag %s already exists.", tagName));
 
 		new UpdateRefCommand(repoDir).refName(Constants.R_TAGS + tagName).revision(commitHash).call();
-		return this;
-	}
-
-	public Git deleteTag(String tagName) {
-		new DeleteRefCommand(repoDir).refName(Constants.R_TAGS + tagName).call();
 		return this;
 	}
 

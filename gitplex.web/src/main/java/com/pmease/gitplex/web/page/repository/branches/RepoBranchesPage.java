@@ -64,7 +64,7 @@ import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
-import com.pmease.gitplex.web.page.repository.branches.compare.BranchComparePage;
+import com.pmease.gitplex.web.page.repository.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -346,11 +346,11 @@ public class RepoBranchesPage extends RepositoryPage {
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							PageParameters params = BranchComparePage.paramsOf(
+							PageParameters params = RevisionComparePage.paramsOf(
 									getRepository(),
 									new RepoAndBranch(getRepository(), getBaseBranch()), 
 									new RepoAndBranch(getRepository(), branch)); 
-							setResponsePage(BranchComparePage.class, params);
+							setResponsePage(RevisionComparePage.class, params);
 						}
 					}
 					
@@ -406,11 +406,11 @@ public class RepoBranchesPage extends RepositoryPage {
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							PageParameters params = BranchComparePage.paramsOf(
+							PageParameters params = RevisionComparePage.paramsOf(
 									getRepository(), 
 									new RepoAndBranch(getRepository(), branch), 
 									new RepoAndBranch(getRepository(), getBaseBranch()));
-							setResponsePage(BranchComparePage.class, params);
+							setResponsePage(RevisionComparePage.class, params);
 						}
 					}
 					

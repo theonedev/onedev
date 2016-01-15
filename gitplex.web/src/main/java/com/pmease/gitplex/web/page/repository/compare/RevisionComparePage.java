@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.repository.branches.compare;
+package com.pmease.gitplex.web.page.repository.compare;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestD
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 
 @SuppressWarnings("serial")
-public class BranchComparePage extends RepositoryPage {
+public class RevisionComparePage extends RepositoryPage {
 
 	private final IModel<RepoAndBranch> targetModel;
 	
@@ -63,7 +63,7 @@ public class BranchComparePage extends RepositoryPage {
 		return params;
 	}
 
-	public BranchComparePage(final PageParameters params) {
+	public RevisionComparePage(final PageParameters params) {
 		super(params);
 		
 		if (!getRepository().git().hasCommits()) 
@@ -191,7 +191,7 @@ public class BranchComparePage extends RepositoryPage {
 				
 				PageParameters params = paramsOf(getRepository(), 
 						sourceModel.getObject(), targetModel.getObject());
-				setResponsePage(BranchComparePage.class, params);
+				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		}.setRequired(true));
@@ -220,7 +220,7 @@ public class BranchComparePage extends RepositoryPage {
 
 				PageParameters params = paramsOf(getRepository(), 
 						sourceModel.getObject(), targetModel.getObject());
-				setResponsePage(BranchComparePage.class, params);
+				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		}.setRequired(true));
@@ -230,7 +230,7 @@ public class BranchComparePage extends RepositoryPage {
 			@Override
 			public void onClick() {
 				setResponsePage(
-						BranchComparePage.class, 
+						RevisionComparePage.class, 
 						paramsOf(getRepository(), targetModel.getObject(), sourceModel.getObject()));
 			}
 			
@@ -376,7 +376,7 @@ public class BranchComparePage extends RepositoryPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(BranchComparePage.class, "branch-compare.css")));
+				new CssResourceReference(RevisionComparePage.class, "revision-compare.css")));
 	}
 
 	private Component newChangedFilesPanel() {

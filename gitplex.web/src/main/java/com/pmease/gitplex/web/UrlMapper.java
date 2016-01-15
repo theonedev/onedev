@@ -27,9 +27,9 @@ import com.pmease.gitplex.web.page.home.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
-import com.pmease.gitplex.web.page.repository.branches.compare.BranchComparePage;
 import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
+import com.pmease.gitplex.web.page.repository.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.attachments.RequestAttachmentsPage;
@@ -153,7 +153,7 @@ public class UrlMapper extends CompoundRequestMapper {
 //		add(new ParameterAwareMountedMapper("${user}/${repo}/browse", RepoFilePage.class));
 		add(new MountedMapper("${user}/${repo}/commit", CommitDetailPage.class));
 		add(new MountedMapper("${user}/${repo}/commits", RepoCommitsPage.class));
-		add(new MountedMapper("${user}/${repo}/compare", BranchComparePage.class));
+		add(new MountedMapper("${user}/${repo}/compare", RevisionComparePage.class));
 
 		add(new MountedMapper("${user}/${repo}/branches", RepoBranchesPage.class));
 		add(new MountedMapper("${user}/${repo}/tags", RepoTagsPage.class));
