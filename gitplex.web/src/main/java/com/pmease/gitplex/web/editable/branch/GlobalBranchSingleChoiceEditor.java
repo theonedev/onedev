@@ -7,7 +7,7 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.web.component.branchchoice.globalchoice.GlobalBranchSingleChoice;
+import com.pmease.gitplex.web.component.branchchoice.GlobalBranchSingleChoice;
 
 @SuppressWarnings("serial")
 public class GlobalBranchSingleChoiceEditor extends PropertyEditor<String> {

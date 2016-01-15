@@ -1,80 +1,38 @@
 package com.pmease.gitplex.core.model;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
-
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
 
-public class RepoAndBranch implements Serializable {
+public class RepoAndBranch extends RepoAndRevision {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String SEPARATOR = "-";
-
-	private final Long repoId;
-	
-	private final String branch;
-	
-	private transient Repository repository;
-	
 	public RepoAndBranch(Long repoId, String branch) {
-		this.repoId = repoId;
-		this.branch = branch;
+		super(repoId, branch);
 	}
 
 	public RepoAndBranch(Repository repository, String branch) {
-		this.repoId = repository.getId();
-		this.branch = branch;
-		
-		this.repository = repository;
-	}
-	
-	public RepoAndBranch(String branchId) {
-		this(Long.valueOf(StringUtils.substringBefore(branchId, SEPARATOR)), 
-				StringUtils.substringAfter(branchId, SEPARATOR));
-	}
-	
-	public Long getRepoId() {
-		return repoId;
+		super(repository, branch);
 	}
 
+	public RepoAndBranch(String id) {
+		super(id);
+	}
+	
 	public String getBranch() {
-		return branch;
-	}
-	
-	public static void trim(Collection<RepoAndBranch> repoAndBranches) {
-		Dao dao = GitPlex.getInstance(Dao.class);
-		for (Iterator<RepoAndBranch> it = repoAndBranches.iterator(); it.hasNext();) {
-			if (dao.get(Repository.class, it.next().getRepoId()) == null)
-				it.remove();
-		}
-	}
-	
-	public Repository getRepository() {
-		if (repository == null)
-			repository = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
-		return repository;
+		return getRevision();
 	}
 	
 	public String getFQN() {
-		return getRepository().getBranchFQN(branch);		
-	}
-
-	public String getId() {
-		return repoId + SEPARATOR + branch;
+		return getRepository().getBranchFQN(getBranch());		
 	}
 	
 	@Nullable
 	public String getHead(boolean mustExist) {
-		ObjectId commitId = getRepository().getObjectId(GitUtils.branch2ref(getBranch()), mustExist);
+		ObjectId commitId = getRepository().getObjectId(GitUtils.branch2ref(getRevision()), mustExist);
 		return commitId!=null?commitId.name():null;
 	}
 	
@@ -83,10 +41,10 @@ public class RepoAndBranch implements Serializable {
 	}
 	
 	public boolean isDefault() {
-		return getRepository().getDefaultBranch().equals(getBranch());
+		return getRepository().getDefaultBranch().equals(getRevision());
 	}
 
 	public void delete() {
-		getRepository().deleteBranch(getBranch());
+		getRepository().deleteBranch(getRevision());
 	}
 }

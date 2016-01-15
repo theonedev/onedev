@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.branchchoice.affinalchoice;
+package com.pmease.gitplex.web.component.branchchoice;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -7,38 +7,29 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
-import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
-import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
+import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
 
 @SuppressWarnings("serial")
-public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
+public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
-	private final IModel<Repository> currentRepoModel;
-	
-	private final IModel<Repository> selectedRepoModel;
+	private final IModel<Repository> repoModel;
 	
 	private final boolean allowEmpty;
 	
 	private BranchSingleChoice branchChoice;
 	
 	/**
-	 * Construct with current repository model and selected branch model.
+	 * Construct with selected branch model.
 	 * 
 	 * @param id
 	 * 			id of the component
-	 * @param currentRepoModel
-	 * 			model of current repository. Note that the model object should never be null
-	 * @param selectedBranchModel
+	 * @param branchModel
 	 * 			model of selected branch
 	 */
-	public AffinalBranchSingleChoice(String id, IModel<Repository> currentRepoModel, 
-			IModel<String> selectedBranchModel, boolean allowEmpty) {
-		super(id, selectedBranchModel);
+	public GlobalBranchSingleChoice(String id, IModel<String> branchModel, boolean allowEmpty) {
+		super(id, branchModel);
 		
-		this.currentRepoModel = currentRepoModel;
-		
-		selectedRepoModel = new IModel<Repository>() {
+		repoModel = new IModel<Repository>() {
 
 			@Override
 			public void detach() {
@@ -47,10 +38,10 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 			@Override
 			public Repository getObject() {
 				String branchId = getBranchId();
-				if (branchId == null)
-					return AffinalBranchSingleChoice.this.currentRepoModel.getObject();
-				else 
+				if (branchId != null) 
 					return new RepoAndBranch(branchId).getRepository();
+				else 
+					return null;
 			}
 
 			@Override
@@ -72,7 +63,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 		
 		setOutputMarkupId(true);
 		
-		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoModel, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new RepositoryChoice("repositoryChoice", repoModel, null, false).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -82,7 +73,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 		}));
 		
-		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(selectedRepoModel);
+		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(repoModel);
 		add(branchChoice = new BranchSingleChoice("branchChoice", new IModel<String>() {
 
 			@Override
@@ -91,12 +82,12 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public String getObject() {
-				return new RepoAndBranch(AffinalBranchSingleChoice.this.getModelObject()).getBranch();
+				return new RepoAndBranch(GlobalBranchSingleChoice.this.getModelObject()).getBranch();
 			}
 
 			@Override
 			public void setObject(String object) {
-				AffinalBranchSingleChoice.this.setModelObject(new RepoAndBranch(selectedRepoModel.getObject(), object).getId());
+				GlobalBranchSingleChoice.this.setModelObject(new RepoAndBranch(repoModel.getObject(), object).getId());
 			}
 			
 		}, choiceProvider, allowEmpty));
@@ -125,8 +116,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 	@Override
 	protected void onDetach() {
-		currentRepoModel.detach();
-		selectedRepoModel.detach();
+		repoModel.detach();
 		
 		super.onDetach();
 	}

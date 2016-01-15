@@ -59,7 +59,7 @@ import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
+import com.pmease.gitplex.web.component.branchchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;

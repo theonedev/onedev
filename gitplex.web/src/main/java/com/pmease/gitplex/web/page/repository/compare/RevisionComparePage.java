@@ -31,7 +31,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.branchchoice.affinalchoice.AffinalBranchSingleChoice;
+import com.pmease.gitplex.web.component.branchchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;

@@ -14,8 +14,6 @@
 #repo-file>.head>.revision-selector>a {
 	display: block;
 	border-right: 1px solid #BBB;
-	color: #333;
-	text-decoration: none;
 }
 #repo-file>.head>.revision-selector>a:hover {
 	background: #EEE;
