@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
@@ -28,12 +29,18 @@ public abstract class AffinalRevisionSelector extends Panel {
 		RevisionSelector revisionSelector = new RevisionSelector("revisionSelector", repoModel, revision) {
 
 			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				dropdownLink.add(AttributeAppender.append("class", "btn btn-default"));
+			}
+
+			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
 				AffinalRevisionSelector.this.revision = revision;
 				newRevisionSelector(target);
 				AffinalRevisionSelector.this.onSelect(target, revision);
 			}
-			
+
 		};
 		if (target != null) {
 			replace(revisionSelector);

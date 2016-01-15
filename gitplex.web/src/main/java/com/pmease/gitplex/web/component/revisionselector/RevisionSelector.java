@@ -63,7 +63,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private int activeRefIndex;
 	
-	private DropdownLink dropdownLink;
+	protected DropdownLink dropdownLink;
 	
 	private String revInput;
 	
@@ -192,13 +192,6 @@ public abstract class RevisionSelector extends Panel {
 					@Override
 					public void renderHead(Component component, IHeaderResponse response) {
 						super.renderHead(component, response);
-						response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
-
-						response.render(JavaScriptHeaderItem.forReference(
-								new JavaScriptResourceReference(RevisionSelector.class, "revision-selector.js")));
-						response.render(CssHeaderItem.forReference(
-								new CssResourceReference(RevisionSelector.class, "revision-selector.css")));
-						
 						String script = String.format("gitplex.revisionSelector.init('%s', %s);", 
 								fragment.getMarkupId(true), getCallbackFunction(CallbackParameter.explicit("key")));
 						response.render(OnDomReadyHeaderItem.forScript(script));
@@ -357,6 +350,17 @@ public abstract class RevisionSelector extends Panel {
 		}
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
+
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(RevisionSelector.class, "revision-selector.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(RevisionSelector.class, "revision-selector.css")));
+	}
+
 	protected abstract void onSelect(AjaxRequestTarget target, String revision);
 
 	@Override

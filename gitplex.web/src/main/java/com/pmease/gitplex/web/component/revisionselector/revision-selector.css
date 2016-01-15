@@ -64,7 +64,6 @@ div.revision-selector a.current:before {
 	padding-right: 0; 
 	font-size: 16px; 
 	width: 1%; 
-	padding-top: 16px;
 }
 .repository-and-revision .select2-choice {
 	width: 100%;
