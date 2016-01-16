@@ -3,33 +3,42 @@ package com.pmease.gitplex.web.component.revisionpicker;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
+import com.pmease.gitplex.web.component.repopicker.RepositoryPicker;
+import com.pmease.gitplex.web.model.AffinalRepositoriesModel;
 
 @SuppressWarnings("serial")
 public abstract class AffinalRevisionPicker extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private Long repoId;
 	
 	private String revision;
 	
-	public AffinalRevisionPicker(String id, IModel<Repository> repoModel, String revision) {
+	public AffinalRevisionPicker(String id, Long repoId, String revision) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.repoId = repoId;
 		this.revision = revision;
 	}
 	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
-		RevisionPicker revisionPicker = new RevisionPicker("revisionPicker", repoModel, revision) {
+		RevisionPicker revisionPicker = new RevisionPicker("revisionPicker", new LoadableDetachableModel<Repository>() {
+
+			@Override
+			protected Repository load() {
+				return getRepository();
+			}
+			
+		}, revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				AffinalRevisionPicker.this.onSelect(target, revision);
+				AffinalRevisionPicker.this.onSelect(target, getRepository(), revision);
 			}
 
 		};
@@ -41,33 +50,30 @@ public abstract class AffinalRevisionPicker extends Panel {
 		}
 	}
 	
+	private Repository getRepository() {
+		return GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		setOutputMarkupId(true);
-		
-		add(new AffinalRepositoryChoice("repositoryChoice", repoModel, repoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				revision = repoModel.getObject().getDefaultBranch();
-				newRevisionPicker(target);
-				onSelect(target, revision);
-			}
+		add(new RepositoryPicker("repositoryPicker", new AffinalRepositoriesModel(repoId), repoId) {
 
-		}));
-		
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Repository repository) {
+				repoId = repository.getId();
+				revision = repository.getDefaultBranch();
+				newRevisionPicker(target);
+				AffinalRevisionPicker.this.onSelect(target, repository, revision);
+			}
+			
+		});
 		newRevisionPicker(null);
-	}
-	
-	protected abstract void onSelect(AjaxRequestTarget target, String revision);
-	
-	@Override
-	protected void onDetach() {
-		repoModel.detach();
 		
-		super.onDetach();
+		setOutputMarkupId(true);
 	}
+	
+	protected abstract void onSelect(AjaxRequestTarget target, Repository repository, String revision);
 	
 }

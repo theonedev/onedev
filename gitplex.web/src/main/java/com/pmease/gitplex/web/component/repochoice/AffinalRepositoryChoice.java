@@ -15,14 +15,13 @@ public class AffinalRepositoryChoice extends Select2Choice<Repository> {
 	 * 
 	 * @param id
 	 * 			component id of the choice
-	 * @param currentRepositoryModel
-	 * 			model of current repository from which to calculate comparable repositories. Note that 
-	 * 			model.getObject() should never return null
-	 * @param selectedRepositoryModel
+	 * @param currentRepoId
+	 * 			id of current repository from which to calculate comparable repositories.
+	 * @param selectedRepoModel
 	 * 			model of selected repository
 	 */
-	public AffinalRepositoryChoice(String id, IModel<Repository> currentRepositoryModel, IModel<Repository> selectedRepositoryModel) {
-		super(id, selectedRepositoryModel, new AffinalRepoChoiceProvider(currentRepositoryModel));
+	public AffinalRepositoryChoice(String id, Long currentRepoId, IModel<Repository> selectedRepoModel) {
+		super(id, selectedRepoModel, new AffinalRepositoryChoiceProvider(currentRepoId));
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.editable.branch;
 
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -8,7 +7,6 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.branchchoice.AffinalBranchSingleChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
@@ -25,15 +23,9 @@ public class AffinalBranchSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-		input = new AffinalBranchSingleChoice("input", new AbstractReadOnlyModel<Repository>() {
-
-			@Override
-			public Repository getObject() {
-				RepositoryPage page = (RepositoryPage) getPage();
-				return page.getRepository();
-			}
-    		
-    	}, getModel(), !getPropertyDescriptor().isPropertyRequired());
+		Long repoId = ((RepositoryPage)getPage()).getRepository().getId();
+		input = new AffinalBranchSingleChoice("input", repoId, getModel(), 
+				!getPropertyDescriptor().isPropertyRequired());
         
         add(input);
 	}

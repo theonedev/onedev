@@ -5,6 +5,8 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
@@ -12,7 +14,7 @@ import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
 @SuppressWarnings("serial")
 public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
-	private final IModel<Repository> currentRepoModel;
+	private final Long currentRepoId;
 	
 	private final IModel<Repository> selectedRepoModel;
 	
@@ -25,16 +27,16 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 	 * 
 	 * @param id
 	 * 			id of the component
-	 * @param currentRepoModel
-	 * 			model of current repository. Note that the model object should never be null
+	 * @param currentRepoId
+	 * 			id of current repository
 	 * @param selectedBranchModel
 	 * 			model of selected branch
 	 */
-	public AffinalBranchSingleChoice(String id, IModel<Repository> currentRepoModel, 
+	public AffinalBranchSingleChoice(String id, final Long currentRepoId, 
 			IModel<String> selectedBranchModel, boolean allowEmpty) {
 		super(id, selectedBranchModel);
 		
-		this.currentRepoModel = currentRepoModel;
+		this.currentRepoId = currentRepoId;
 		
 		selectedRepoModel = new IModel<Repository>() {
 
@@ -46,7 +48,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 			public Repository getObject() {
 				String branchId = getBranchId();
 				if (branchId == null)
-					return AffinalBranchSingleChoice.this.currentRepoModel.getObject();
+					return GitPlex.getInstance(Dao.class).load(Repository.class, currentRepoId);
 				else 
 					return new RepoAndBranch(branchId).getRepository();
 			}
@@ -70,7 +72,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 		
 		setOutputMarkupId(true);
 		
-		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoModel, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoId, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -123,7 +125,6 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 	@Override
 	protected void onDetach() {
-		currentRepoModel.detach();
 		selectedRepoModel.detach();
 		
 		super.onDetach();

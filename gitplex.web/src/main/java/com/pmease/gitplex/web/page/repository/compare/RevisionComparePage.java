@@ -148,55 +148,22 @@ public class RevisionComparePage extends RepositoryPage {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalRevisionPicker("target", new IModel<Repository>() {
+		add(new AffinalRevisionPicker("target", target.getRepoId(), target.getRevision()) { 
 
 			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Repository getObject() {
-				return target.getRepository();
-			}
-
-			@Override
-			public void setObject(Repository object) {
-				target = new RepoAndRevision(object, target.getRevision());
-			}
-			
-		}, target.getRevision()) { 
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, String revision) {
-				RevisionComparePage.this.target = new RepoAndRevision(
-						RevisionComparePage.this.target.getRepository(), revision);
+			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
+				RevisionComparePage.this.target = new RepoAndRevision(repository, revision);
 				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		});
 
-		add(new AffinalRevisionPicker("source", new IModel<Repository>() {
+		add(new AffinalRevisionPicker("source", source.getRepoId(), source.getRevision()) { 
 
 			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Repository getObject() {
-				return source.getRepository();
-			}
-
-			@Override
-			public void setObject(Repository object) {
-				source = new RepoAndRevision(object, source.getRevision());
-			}
-			
-		}, source.getRevision()) { 
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, String revision) {
-				source = new RepoAndRevision(source.getRepository(), revision);
+			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
+				source = new RepoAndRevision(repository, revision);
 				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source);
 				setResponsePage(RevisionComparePage.class, params);
 			}

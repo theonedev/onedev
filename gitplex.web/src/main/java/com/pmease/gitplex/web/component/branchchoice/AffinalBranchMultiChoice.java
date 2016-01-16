@@ -18,11 +18,11 @@ import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
 @SuppressWarnings("serial")
 public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<String>> {
 
-	private IModel<Repository> currentRepoModel;
+	private final Long currentRepoId;
 	
 	private IModel<Repository> selectedRepoModel;
 	
-	private Long repoId;
+	private Long selectedRepoId;
 	
 	private BranchMultiChoice branchChoice;
 	
@@ -31,16 +31,15 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 	 * 
 	 * @param id
 	 * 			id of the component
-	 * @param currentRepoModel
-	 * 			model of current repository. Note that the model object should never be null
+	 * @param currentRepoId
+	 * 			id of current repository. Note that the model object should never be null
 	 * @param selectedBranchesModel
 	 * 			model of selected branch
 	 */
-	public AffinalBranchMultiChoice(String id, IModel<Repository> currentRepoModel, 
-			IModel<Collection<String>> selectedBranchesModel) {
+	public AffinalBranchMultiChoice(String id, final Long currentRepoId, IModel<Collection<String>> selectedBranchesModel) {
 		super(id, selectedBranchesModel);
 		
-		this.currentRepoModel = currentRepoModel;
+		this.currentRepoId = currentRepoId;
 		
 		selectedRepoModel = new IModel<Repository>() {
 
@@ -50,12 +49,13 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 
 			@Override
 			public Repository getObject() {
-				if (repoId != null) {
-					return GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
+				Dao dao = GitPlex.getInstance(Dao.class);
+				if (selectedRepoId != null) {
+					return dao.load(Repository.class, selectedRepoId);
 				} else {
 					Collection<String> repoAndBranches = getRepoAndBranches();
 					if (repoAndBranches == null || repoAndBranches.isEmpty())
-						return AffinalBranchMultiChoice.this.currentRepoModel.getObject();
+						return dao.load(Repository.class, currentRepoId);
 					else 
 						return new RepoAndBranch(repoAndBranches.iterator().next()).getRepository();
 				}
@@ -63,7 +63,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 
 			@Override
 			public void setObject(Repository object) {
-				repoId = object.getId();
+				selectedRepoId = object.getId();
 				setRepoAndBranches(new HashSet<String>());
 			}
 			
@@ -80,7 +80,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 		
 		setOutputMarkupId(true);
 		
-		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoModel, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoId, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -141,7 +141,6 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 
 	@Override
 	protected void onDetach() {
-		currentRepoModel.detach();
 		selectedRepoModel.detach();
 		
 		super.onDetach();

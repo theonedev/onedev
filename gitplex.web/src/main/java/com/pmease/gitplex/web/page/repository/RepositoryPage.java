@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -29,6 +30,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -40,7 +42,7 @@ import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.reposelector.RepositorySelector;
+import com.pmease.gitplex.web.component.repopicker.RepositorySelector;
 import com.pmease.gitplex.web.model.RepositoryModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
@@ -174,7 +176,20 @@ public abstract class RepositoryPage extends AccountPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RepositorySelector(id, null, repoModel) {
+				return new RepositorySelector(id, new LoadableDetachableModel<List<Repository>>() {
+
+					@Override
+					protected List<Repository> load() {
+						List<Repository> repositories = new ArrayList<>(); 
+						for (Repository repo: GitPlex.getInstance(Dao.class).allOf(Repository.class)) {
+							if (SecurityUtils.canPull(repo))
+								repositories.add(repo);
+						}
+						return repositories;
+					}
+					
+				}, repoModel.getObject().getId()) {
+					
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Repository repository) {

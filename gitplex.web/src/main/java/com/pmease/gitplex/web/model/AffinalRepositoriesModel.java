@@ -6,24 +6,25 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
 public class AffinalRepositoriesModel extends LoadableDetachableModel<List<Repository>> {
 
-	private IModel<Repository> repoModel;
+	private final Long repoId;
 	
-	public AffinalRepositoriesModel(IModel<Repository> repoModel) {
-		this.repoModel = repoModel;
+	public AffinalRepositoriesModel(Long repoId) {
+		this.repoId = repoId;
 	}
 	
 	@Override
 	protected List<Repository> load() {
-		Repository repository = repoModel.getObject();
+		Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);;
 		List<Repository> affinals = repository.findAffinals();
 		affinals.remove(repository);
 		if (repository.getForkedFrom() != null)
@@ -47,13 +48,6 @@ public class AffinalRepositoriesModel extends LoadableDetachableModel<List<Repos
 				it.remove();
 		}
 		return affinals;
-	}
-
-	@Override
-	protected void onDetach() {
-		repoModel.detach();
-		
-		super.onDetach();
 	}
 
 }

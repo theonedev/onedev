@@ -69,7 +69,6 @@ import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvat
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -229,17 +228,7 @@ public class NewRequestPage extends PullRequestPage {
 
 		setOutputMarkupId(true);
 		
-		IModel<Repository> currentRepositoryModel = new LoadableDetachableModel<Repository>() {
-
-			@Override
-			protected Repository load() {
-				RepositoryPage page = (RepositoryPage) getPage();
-				return page.getRepository();
-			}
-			
-		};
-		
-		targetChoice = new AffinalBranchSingleChoice("target", currentRepositoryModel, 
+		targetChoice = new AffinalBranchSingleChoice("target", getRepository().getId(), 
 				Model.of(getPullRequest().getTarget().toString()), false) {
 
 			@Override
@@ -256,7 +245,7 @@ public class NewRequestPage extends PullRequestPage {
 		targetChoice.setRequired(true);
 		add(targetChoice);
 		
-		sourceChoice = new AffinalBranchSingleChoice("source", currentRepositoryModel, 
+		sourceChoice = new AffinalBranchSingleChoice("source", getRepository().getId(), 
 				Model.of(getPullRequest().getSource().toString()), false) {
 
 			@Override
