@@ -11,6 +11,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -21,17 +22,22 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestManager;
+import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.RepoAndBranch;
+import com.pmease.gitplex.core.model.RepoAndRevision;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.branchchoice.AffinalBranchSingleChoice;
+import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
+import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
+import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
+import com.pmease.gitplex.web.component.revisionselector.AffinalRevisionSelector;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
@@ -42,24 +48,30 @@ import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview
 @SuppressWarnings("serial")
 public class RevisionComparePage extends RepositoryPage {
 
-	private final IModel<RepoAndBranch> targetModel;
+	private static final String PARAM_TARGET = "target";
 	
-	private final IModel<RepoAndBranch> sourceModel;
+	private static final String PARAM_SOURCE = "source";
+	
+	private static final String TAB_PANEL_ID = "tabPanel";
 	
 	private IModel<List<Commit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
 	
 	private IModel<String> mergeBaseModel;
+
+	private RepoAndRevision target;
 	
-	private String targetId;
+	private RepoAndRevision source;
 	
-	private String sourceId;
+	private DiffOptionPanel diffOption;
 	
-	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
+	private String path;
+	
+	public static PageParameters paramsOf(Repository repository, RepoAndRevision target, RepoAndRevision source) {
 		PageParameters params = paramsOf(repository);
-		params.set("source", source.getId());
-		params.set("target", target.getId());
+		params.set(PARAM_TARGET, target.toString());
+		params.set(PARAM_SOURCE, source.toString());
 		return params;
 	}
 
@@ -69,58 +81,27 @@ public class RevisionComparePage extends RepositoryPage {
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 
-		targetModel = new IModel<RepoAndBranch>() {
-
-			@Override
-			public RepoAndBranch getObject() {
-				if (targetId != null) 
-					return new RepoAndBranch(targetId);
-				else if (params.get("target").toString() != null) 
-					return new RepoAndBranch(params.get("target").toString());
-				else 
-					return new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
-			}
-
-			@Override
-			public void setObject(RepoAndBranch object) {
-				targetId = object.getId();
-			}
-
-			@Override
-			public void detach() {
-			}
-			
-		};
+		String str = params.get(PARAM_SOURCE).toString();
+		if (str != null) {
+			source = new RepoAndRevision(str);
+		} else {
+			source = new RepoAndRevision(getRepository(), getRepository().getDefaultBranch());
+		}
 		
-		sourceModel = new IModel<RepoAndBranch>() {
-
-			@Override
-			public RepoAndBranch getObject() {
-				if (sourceId != null) 
-					return new RepoAndBranch(sourceId);
-				else if (params.get("source").toString() != null) 
-					return new RepoAndBranch(params.get("source").toString());
-				else 
-					return new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
-			}
-
-			@Override
-			public void setObject(RepoAndBranch object) {
-				sourceId = object.getId();
-			}
-
-			@Override
-			public void detach() {
-			}
-			
-		};
-
+		str = params.get(PARAM_TARGET).toString();
+		if (str != null) {
+			target = new RepoAndRevision(str);
+		} else {
+			target = new RepoAndRevision(getRepository(), getRepository().getDefaultBranch());
+		}
+		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
 			@Override
 			protected PullRequest load() {
-				return GitPlex.getInstance(PullRequestManager.class).findOpen(
-						targetModel.getObject(), sourceModel.getObject());
+				RepoAndBranch target = new RepoAndBranch(RevisionComparePage.this.target.toString());
+				RepoAndBranch source = new RepoAndBranch(RevisionComparePage.this.source.toString());
+				return GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
 			}
 			
 		};
@@ -129,21 +110,20 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected String load() {
-				RepoAndBranch target = targetModel.getObject();
-				RepoAndBranch source = sourceModel.getObject();
-				if (!target.getRepository().equals(source.getRepository())) {
+				Repository targetRepo = target.getRepository();
+				Repository sourceRepo = source.getRepository();
+				if (!targetRepo.equals(sourceRepo)) {
 					Git sandbox = new Git(FileUtils.createTempDir());
 					try {
-						sandbox.clone(target.getRepository().git(), false, true, true, target.getBranch());
+						sandbox.clone(targetRepo.git(), false, true, true, target.getRevision());
 						sandbox.reset(null, null);
-						sandbox.fetch(source.getRepository().git(), source.getBranch());
-						return sandbox.calcMergeBase(target.getHead(), source.getHead());
+						sandbox.fetch(sourceRepo.git(), source.getRevision());
+						return sandbox.calcMergeBase(target.getCommit().name(), source.getCommit().name());
 					} finally {
 						FileUtils.deleteDir(sandbox.repoDir());
 					}
 				} else {
-					return target.getRepository().git().calcMergeBase(
-							target.getHead(), source.getHead());					
+					return targetRepo.getMergeBase(target.getRevision(), source.getRevision()).name();
 				}
 			}
 			
@@ -153,8 +133,9 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected List<Commit> load() {
-				RepoAndBranch source = sourceModel.getObject();
-				return source.getRepository().git().log(mergeBaseModel.getObject(), source.getHead(), null, 0, 0, false);
+				Repository sourceRepo = source.getRepository();
+				return sourceRepo.git().log(mergeBaseModel.getObject(), 
+						source.getCommit().name(), null, 0, 0, false);
 			}
 			
 		};
@@ -167,99 +148,99 @@ public class RevisionComparePage extends RepositoryPage {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalBranchSingleChoice("target", repoModel, new IModel<String>() {
+		add(new AffinalRevisionSelector("target", new IModel<Repository>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public String getObject() {
-				return targetModel.getObject().getId();
+			public Repository getObject() {
+				return target.getRepository();
 			}
 
 			@Override
-			public void setObject(String object) {
-				targetModel.setObject(new RepoAndBranch(object));
+			public void setObject(Repository object) {
+				target = new RepoAndRevision(object, target.getRevision());
 			}
 			
-		}, false) {
+		}, target.getRevision()) { 
 
 			@Override
-			protected void onChange(AjaxRequestTarget target) {
-				super.onChange(target);
-				
-				PageParameters params = paramsOf(getRepository(), 
-						sourceModel.getObject(), targetModel.getObject());
+			protected void onSelect(AjaxRequestTarget target, String revision) {
+				RevisionComparePage.this.target = new RepoAndRevision(
+						RevisionComparePage.this.target.getRepository(), revision);
+				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
-		}.setRequired(true));
-		
-		add(new AffinalBranchSingleChoice("source", repoModel, new IModel<String>() {
+		});
+
+		add(new AffinalRevisionSelector("source", new IModel<Repository>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public String getObject() {
-				return sourceModel.getObject().getId();
+			public Repository getObject() {
+				return source.getRepository();
 			}
 
 			@Override
-			public void setObject(String object) {
-				sourceModel.setObject(new RepoAndBranch(object));
+			public void setObject(Repository object) {
+				source = new RepoAndRevision(object, source.getRevision());
 			}
 			
-		}, false) { 
+		}, source.getRevision()) { 
 
 			@Override
-			protected void onChange(AjaxRequestTarget target) {
-				super.onChange(target);
-
-				PageParameters params = paramsOf(getRepository(), 
-						sourceModel.getObject(), targetModel.getObject());
+			protected void onSelect(AjaxRequestTarget target, String revision) {
+				source = new RepoAndRevision(source.getRepository(), revision);
+				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
-		}.setRequired(true));
+		});
 		
 		add(new Link<Void>("swap") {
 
 			@Override
 			public void onClick() {
-				setResponsePage(
-						RevisionComparePage.class, 
-						paramsOf(getRepository(), targetModel.getObject(), sourceModel.getObject()));
+				setResponsePage(RevisionComparePage.class,paramsOf(getRepository(), source, target));
 			}
-			
+
 		});
 		
 		add(new Link<Void>("createRequest") {
 
 			@Override
 			public void onClick() {
-				RepoAndBranch target = targetModel.getObject();
-				RepoAndBranch source = sourceModel.getObject();
-				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(target.getRepository(), source, target));
+				RepoAndBranch target = new RepoAndBranch(RevisionComparePage.this.target.toString());
+				RepoAndBranch source = new RepoAndBranch(RevisionComparePage.this.source.toString());
+				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(target.getRepository(), target, source));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				PullRequest request = requestModel.getObject();
-				setVisible(request == null && !commitsModel.getObject().isEmpty());
+				
+				if (target.isBranch() && source.isBranch()) {
+					PullRequest request = requestModel.getObject();
+					setVisible(request == null && !commitsModel.getObject().isEmpty());
+				} else {
+					setVisible(false);
+				}
 			}
 			
 		});
 		
-		add(new WebMarkupContainer("sameBranch") {
+		add(new WebMarkupContainer("sameRevision") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(targetModel.getObject().equals(sourceModel.getObject()));
+				setVisible(source.equals(target));
 			}
 			
 		});
@@ -315,16 +296,7 @@ public class RevisionComparePage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(!targetModel.getObject().equals(sourceModel.getObject()) 
-						&& mergeBaseModel.getObject().equals(sourceModel.getObject().getHead()));
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(new BranchLink("sourceBranch", sourceModel.getObject()));
-				add(new BranchLink("targetBranch", targetModel.getObject()));
+				setVisible(!source.equals(target) && mergeBaseModel.getObject().equals(source.getCommit().name()));
 			}
 
 		});
@@ -346,7 +318,7 @@ public class RevisionComparePage extends RepositoryPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newChangedFilesPanel();
+				Component panel = newComparePanel();
 				getPage().replace(panel);
 				target.add(panel);
 			}
@@ -363,13 +335,13 @@ public class RevisionComparePage extends RepositoryPage {
 
 		});
 
-		add(new WebMarkupContainer("tabPanel").setOutputMarkupId(true));
+		add(newCommitsPanel());
 		
 		add(new BackToTop("backToTop"));
 	}
 	
 	private Component newCommitsPanel() {
-		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
+		return new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel).setOutputMarkupId(true);
 	}
 	
 	@Override
@@ -379,14 +351,69 @@ public class RevisionComparePage extends RepositoryPage {
 				new CssResourceReference(RevisionComparePage.class, "revision-compare.css")));
 	}
 
-	private Component newChangedFilesPanel() {
-		return new WebMarkupContainer("tabPanel").setOutputMarkupId(true);
+	private Component newComparePanel() {
+		final Fragment fragment = new Fragment(TAB_PANEL_ID, "compareFrag", this);
+		
+		diffOption = new DiffOptionPanel("diffOption", new AbstractReadOnlyModel<Repository>() {
+
+			@Override
+			public Repository getObject() {
+				return target.getRepository();
+			}
+			
+		}, target.getRevision()) {
+
+			@Override
+			protected void onSelectPath(AjaxRequestTarget target, String path) {
+				RevisionComparePage.this.path = path;
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				fragment.replace(diffPanel);
+				target.add(diffPanel);
+			}
+
+			@Override
+			protected void onLineProcessorChange(AjaxRequestTarget target) {
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				fragment.replace(diffPanel);
+				target.add(diffPanel);
+			}
+
+			@Override
+			protected void onDiffModeChange(AjaxRequestTarget target) {
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				fragment.replace(diffPanel);
+				target.add(diffPanel);
+			}
+			
+		};
+		diffOption.add(new StickyBehavior());
+		fragment.add(diffOption);
+		fragment.add(newRevDiffPanel());
+		
+		return fragment;
+	}
+	
+	protected RevisionDiffPanel newRevDiffPanel() {
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
+				new Model<PullRequest>(null), new Model<Comment>(null), 
+				target.getRevision(), source.getRevision(), path, null, diffOption.getLineProcessor(), 
+				diffOption.getDiffMode()) {
+
+			@Override
+			protected void onClearPath(AjaxRequestTarget target) {
+				path = null;
+				RevisionDiffPanel diffPanel = newRevDiffPanel();
+				replaceWith(diffPanel);
+				target.add(diffPanel);
+			}
+			
+		};
+		diffPanel.setOutputMarkupId(true);
+		return diffPanel;
 	}
 
 	@Override
 	protected void onDetach() {
-		targetModel.detach();
-		sourceModel.detach();
 		requestModel.detach();
 		mergeBaseModel.detach();
 		commitsModel.detach();

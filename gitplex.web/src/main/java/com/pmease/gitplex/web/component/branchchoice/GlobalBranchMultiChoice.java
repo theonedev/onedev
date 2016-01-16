@@ -103,7 +103,7 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 			public void setObject(Collection<String> object) {
 				Collection<String> branchIds = new ArrayList<>();
 				for (String branch: object)
-					branchIds.add(new RepoAndBranch(repoModel.getObject(), branch).getId());
+					branchIds.add(new RepoAndBranch(repoModel.getObject(), branch).toString());
 				GlobalBranchMultiChoice.this.setModelObject(branchIds);
 			}
 			

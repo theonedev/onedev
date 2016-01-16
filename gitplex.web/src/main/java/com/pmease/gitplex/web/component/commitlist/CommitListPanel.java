@@ -5,26 +5,21 @@ import java.util.List;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.UserLink;
-import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
+import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
+import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
@@ -71,7 +66,7 @@ public class CommitListPanel extends Panel {
 			protected void populateItem(final ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				
-				item.add(new AvatarLink("avatar", commit.getAuthor(), null));
+				item.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
 
 				item.add(new CommitMessagePanel("message", repoModel, new AbstractReadOnlyModel<Commit>() {
 
@@ -82,15 +77,9 @@ public class CommitListPanel extends Panel {
 					
 				}));
 
-				item.add(new UserLink("name", commit.getAuthor()));
-				item.add(new Label("age", DateUtils.formatAge(commit.getAuthor().getWhen())));
+				item.add(new ContributionPanel("author", commit.getAuthor(), commit.getCommitter()));
 				
-				item.add(new CommitHashPanel("hash", Model.of(commit.getHash())));
-				
-				RepoFileState state = new RepoFileState();
-				state.blobIdent.revision = commit.getHash();
-				item.add(new BookmarkablePageLink<Void>("codeLink", RepoFilePage.class, 
-						RepoFilePage.paramsOf(repoModel.getObject(), state)));
+				item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));
 			}
 			
 		});

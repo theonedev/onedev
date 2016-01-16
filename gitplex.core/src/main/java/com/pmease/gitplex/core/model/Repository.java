@@ -49,6 +49,7 @@ import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.OrTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
@@ -149,11 +150,13 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
     
-    private transient Map<String, Map<String, Ref>> refsCache;
+    private transient Map<String, Map<String, Ref>> prefixRefsCache;
     
-    private transient Map<AnyObjectId, RevObject> revObjects;
+    private transient Map<AnyObjectId, RevObject> revObjectCache;
     
-    private transient Map<RevObject, Optional<RevCommit>> revCommits;
+    private transient Map<RevObject, Optional<RevCommit>> revCommitCache;
+    
+    private transient Map<String, Optional<Ref>> refCache;
     
     private transient String defaultBranch;
     
@@ -418,11 +421,31 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return affinals;
 	}
 	
-	public boolean isAncestor(String ancestor, String descendant) {
-		try (FileRepository jgitRepo = openAsJGitRepo()) {
+	public RevCommit getMergeBase(String ancestor, String descendant) {
+		try (	FileRepository jgitRepo = openAsJGitRepo();
+				RevWalk revWalk = new RevWalk(jgitRepo)) {
 			ObjectId ancestorId = getObjectId(ancestor);
 			ObjectId descendantId = getObjectId(descendant);
-			return GitUtils.isAncestor(jgitRepo, ancestorId, descendantId); 
+			revWalk.setRevFilter(RevFilter.MERGE_BASE);
+			revWalk.markStart(revWalk.lookupCommit(ancestorId));
+			revWalk.markStart(revWalk.lookupCommit(descendantId));
+			return revWalk.next();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} 			
+	}
+	
+	public boolean isAncestor(String ancestor, String descendant) {
+		try (	FileRepository jgitRepo = openAsJGitRepo();
+				RevWalk revWalk = new RevWalk(jgitRepo)) {
+			ObjectId ancestorId = getObjectId(ancestor);
+			ObjectId descendantId = getObjectId(descendant);
+			revWalk.setRevFilter(RevFilter.MERGE_BASE);
+			revWalk.markStart(revWalk.lookupCommit(ancestorId));
+			revWalk.markStart(revWalk.lookupCommit(descendantId));
+			return revWalk.next().getId().equals(ancestorId);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		} 			
 	}
 
@@ -742,22 +765,29 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	@Nullable
 	public Ref getRef(String revision) {
-		try (FileRepository jgitRepo = openAsJGitRepo()) {
-			return jgitRepo.getRef(revision);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		if (refCache == null)
+			refCache = new HashMap<>();
+		Optional<Ref> optional = refCache.get(revision);
+		if (optional == null) {
+			try (FileRepository jgitRepo = openAsJGitRepo()) {
+				optional = Optional.fromNullable(jgitRepo.getRef(revision));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			refCache.put(revision, optional);
 		}
+		return optional.orNull();
 	}
 	
 	public RevObject getRevObject(AnyObjectId revId) {
-		if (revObjects == null)
-			revObjects = new HashMap<>();
-		RevObject revObject = revObjects.get(revId);
+		if (revObjectCache == null)
+			revObjectCache = new HashMap<>();
+		RevObject revObject = revObjectCache.get(revId);
 		if (revObject == null) {
 			try (	FileRepository jgitRepo = openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo);) {
 				revObject = revWalk.parseAny(revId);
-				revObjects.put(revId, revObject);
+				revObjectCache.put(revId, revObject);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -766,15 +796,15 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	@Nullable
-	public RevCommit getCommit(RevObject revObject) {
-		return getCommit(revObject, false);
+	public RevCommit getRevCommit(RevObject revObject) {
+		return getRevCommit(revObject, false);
 	}
 	
 	@Nullable
-	public RevCommit getCommit(RevObject revObject, boolean mustBeCommit) {
-		if (revCommits == null)
-			revCommits = new HashMap<>();
-		Optional<RevCommit> optional = revCommits.get(revObject);
+	public RevCommit getRevCommit(RevObject revObject, boolean mustBeCommit) {
+		if (revCommitCache == null)
+			revCommitCache = new HashMap<>();
+		Optional<RevCommit> optional = revCommitCache.get(revObject);
 		if (optional == null) {
 			try (	FileRepository jgitRepo = openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo);) {
@@ -786,7 +816,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			revCommits.put(revObject, optional);
+			revCommitCache.put(revObject, optional);
 		}
 		if (mustBeCommit)
 			return optional.get();
@@ -795,24 +825,24 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	@Nullable
-	public RevCommit getCommit(AnyObjectId revId, boolean mustBeCommit) {
-		return getCommit(getRevObject(revId), mustBeCommit);
+	public RevCommit getRevCommit(AnyObjectId revId, boolean mustBeCommit) {
+		return getRevCommit(getRevObject(revId), mustBeCommit);
 	}
 	
 	@Nullable
-	public RevCommit getCommit(AnyObjectId revId) {
-		return getCommit(getRevObject(revId), false);
+	public RevCommit getRevCommit(AnyObjectId revId) {
+		return getRevCommit(getRevObject(revId), false);
 	}
 	
 	public Map<String, Ref> getRefs(String prefix) {
-		if (refsCache == null)
-			refsCache = new HashMap<>();
+		if (prefixRefsCache == null)
+			prefixRefsCache = new HashMap<>();
 		
-		Map<String, Ref> cached = refsCache.get(prefix);
+		Map<String, Ref> cached = prefixRefsCache.get(prefix);
 		if (cached == null) {
 			try (FileRepository jgitRepo = openAsJGitRepo()) {
 				cached = jgitRepo.getRefDatabase().getRefs(prefix); 
-				refsCache.put(prefix, cached);
+				prefixRefsCache.put(prefix, cached);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -866,8 +896,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     			if (o1.getObjectId().equals(o2.getObjectId())) {
     				return o1.getName().compareTo(o2.getName());
     			} else {
-    				RevCommit commit1 = getCommit(o1.getObjectId());
-    				RevCommit commit2 = getCommit(o2.getObjectId());
+    				RevCommit commit1 = getRevCommit(o1.getObjectId());
+    				RevCommit commit2 = getRevCommit(o2.getObjectId());
     				return commit2.getCommitTime() - commit1.getCommitTime();
     			}
     		}
@@ -888,8 +918,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     				if (tag1.getTaggerIdent() != null && tag2.getTaggerIdent() != null)
     					return tag2.getTaggerIdent().getWhen().compareTo(tag1.getTaggerIdent().getWhen());
     			}  
-    			RevCommit commit1 = getCommit(o1.getObjectId());
-    			RevCommit commit2 = getCommit(o2.getObjectId());
+    			RevCommit commit1 = getRevCommit(o1.getObjectId());
+    			RevCommit commit2 = getRevCommit(o2.getObjectId());
     			if (commit1.getId().equals(commit2.getId()))
     				return o1.getName().compareTo(o2.getName());
     			else

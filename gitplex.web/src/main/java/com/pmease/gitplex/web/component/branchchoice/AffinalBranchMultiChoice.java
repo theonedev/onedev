@@ -110,7 +110,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 			public void setObject(Collection<String> object) {
 				Collection<String> branchIds = new ArrayList<>();
 				for (String branch: object)
-					branchIds.add(new RepoAndBranch(selectedRepoModel.getObject(), branch).getId());
+					branchIds.add(new RepoAndBranch(selectedRepoModel.getObject(), branch).toString());
 				AffinalBranchMultiChoice.this.setModelObject(branchIds);
 			}
 			

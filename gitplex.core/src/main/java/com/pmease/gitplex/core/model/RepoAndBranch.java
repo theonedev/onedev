@@ -18,8 +18,8 @@ public class RepoAndBranch extends RepoAndRevision {
 		super(repository, branch);
 	}
 
-	public RepoAndBranch(String id) {
-		super(id);
+	public RepoAndBranch(String repoAndBranch) {
+		super(repoAndBranch);
 	}
 	
 	public String getBranch() {
@@ -40,11 +40,4 @@ public class RepoAndBranch extends RepoAndRevision {
 		return getHead(true);
 	}
 	
-	public boolean isDefault() {
-		return getRepository().getDefaultBranch().equals(getRevision());
-	}
-
-	public void delete() {
-		getRepository().deleteBranch(getRevision());
-	}
 }

@@ -93,10 +93,10 @@ public class NewRequestPage extends PullRequestPage {
 	
 	private String path;
 	
-	public static PageParameters paramsOf(Repository repository, RepoAndBranch source, RepoAndBranch target) {
+	public static PageParameters paramsOf(Repository repository, RepoAndBranch target, RepoAndBranch source) {
 		PageParameters params = paramsOf(repository);
-		params.set("source", source.getId());
-		params.set("target", target.getId());
+		params.set("target", target.toString());
+		params.set("source", source.toString());
 		return params;
 	}
 
@@ -240,15 +240,15 @@ public class NewRequestPage extends PullRequestPage {
 		};
 		
 		targetChoice = new AffinalBranchSingleChoice("target", currentRepositoryModel, 
-				Model.of(getPullRequest().getTarget().getId()), false) {
+				Model.of(getPullRequest().getTarget().toString()), false) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
 				
 				PageParameters params = paramsOf(getRepository(), 
-						new RepoAndBranch(sourceChoice.getModelObject()), 
-						new RepoAndBranch(targetChoice.getModelObject()));
+						new RepoAndBranch(targetChoice.getModelObject()),
+						new RepoAndBranch(sourceChoice.getModelObject())); 
 				setResponsePage(NewRequestPage.class, params);
 			}
 			
@@ -257,15 +257,15 @@ public class NewRequestPage extends PullRequestPage {
 		add(targetChoice);
 		
 		sourceChoice = new AffinalBranchSingleChoice("source", currentRepositoryModel, 
-				Model.of(getPullRequest().getSource().getId()), false) {
+				Model.of(getPullRequest().getSource().toString()), false) {
 
 			@Override
 			protected void onChange(AjaxRequestTarget target) {
 				super.onChange(target);
 
 				PageParameters params = paramsOf(getRepository(), 
-						new RepoAndBranch(sourceChoice.getModelObject()), 
-						new RepoAndBranch(targetChoice.getModelObject()));
+						new RepoAndBranch(targetChoice.getModelObject()),
+						new RepoAndBranch(sourceChoice.getModelObject())); 
 				setResponsePage(NewRequestPage.class, params);
 			}
 			
@@ -279,7 +279,7 @@ public class NewRequestPage extends PullRequestPage {
 			public void onClick() {
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), getPullRequest().getTarget(), getPullRequest().getSource()));
+						paramsOf(getRepository(), getPullRequest().getSource(), getPullRequest().getTarget()));
 			}
 			
 		});
@@ -448,7 +448,7 @@ public class NewRequestPage extends PullRequestPage {
 			public void onClick() {
 				setResponsePage(
 						NewRequestPage.class, 
-						paramsOf(getRepository(), getPullRequest().getTarget(), getPullRequest().getSource()));
+						paramsOf(getRepository(), getPullRequest().getSource(), getPullRequest().getTarget()));
 			}
 			
 		});
@@ -493,7 +493,7 @@ public class NewRequestPage extends PullRequestPage {
 				if (!target.getHead().equals(getPullRequest().getTarget().getHead()) 
 						|| !source.getHead().equals(getPullRequest().getSource().getHead())) {
 					getSession().warn("Either target branch or source branch has new commits just now, please re-check.");
-					setResponsePage(NewRequestPage.class, paramsOf(getRepository(), source, target));
+					setResponsePage(NewRequestPage.class, paramsOf(getRepository(), target, source));
 				} else {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);

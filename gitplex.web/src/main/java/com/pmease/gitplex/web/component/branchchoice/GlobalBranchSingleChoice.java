@@ -46,7 +46,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public void setObject(Repository object) {
-				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).getId());
+				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).toString());
 			}
 			
 		};
@@ -87,7 +87,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public void setObject(String object) {
-				GlobalBranchSingleChoice.this.setModelObject(new RepoAndBranch(repoModel.getObject(), object).getId());
+				GlobalBranchSingleChoice.this.setModelObject(new RepoAndBranch(repoModel.getObject(), object).toString());
 			}
 			
 		}, choiceProvider, allowEmpty));

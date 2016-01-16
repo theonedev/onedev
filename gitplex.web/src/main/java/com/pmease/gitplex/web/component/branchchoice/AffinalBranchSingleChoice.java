@@ -53,7 +53,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public void setObject(Repository object) {
-				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).getId());
+				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).toString());
 			}
 			
 		};
@@ -94,7 +94,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public void setObject(String object) {
-				AffinalBranchSingleChoice.this.setModelObject(new RepoAndBranch(selectedRepoModel.getObject(), object).getId());
+				AffinalBranchSingleChoice.this.setModelObject(new RepoAndBranch(selectedRepoModel.getObject(), object).toString());
 			}
 			
 		}, choiceProvider, allowEmpty));

@@ -1,27 +1,37 @@
-#branch-compare {
+#revision-compare {
 	padding: 20px 20px 0 20px;
 }
-#branch-compare>.head {
+#revision-compare>.head {
 	font-size: 18px;
 	margin-bottom: 20px;
 }
-#branch-compare>.body>div {
+#revision-compare>.body>div {
 	margin-bottom: 20px;
 }
-#branch-compare>.body>.branches {
+#revision-compare>.body>.revisions {
 	margin-bottom: 20px;
 }
-#branch-compare>.body>.branches td>div.title {
+#revision-compare>.body>.revisions td>div.title {
 	font-size: 18px; 
 	margin-bottom: 8px;
 }
-#branch-compare>.body>.branches td>div.branch {
+#revision-compare>.body>.revisions td>div.revision {
 	background: #F2F2F2; 
 	border-radius: 4px; 
 	vertical-align: top;
 }
-#branch-compare>.body>.branches .actions {
+#revision-compare>.body>.revisions .actions {
 	width: 1%; 
 	background: none; 
 	padding: 77px 10px 0 10px;
+}
+#revision-compare>.body>.nav-tabs {
+	margin-bottom: 20px;
+}
+#revision-compare>.body>.tab-panel>.diff-option {
+	padding: 8px;
+	background: #F2F2F2;
+	border: 1px solid #DDD;
+	z-index: 200;
+	margin-bottom: 16px;
 }

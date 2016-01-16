@@ -1,26 +1,26 @@
 <wicket:extend>
-	<div id="branch-compare">
-		<div class="head">Compare Branches</div>
+	<div id="revision-compare">
+		<div class="head">Compare Revisions</div>
 		<div class="body">
-			<table class="branches">
+			<table class="revisions">
 				<tr>
 					<td class="target">
 						<div class="title">Base</div>
-						<div wicket:id="target" class="branch"></div>
+						<div wicket:id="target" class="revision"></div>
 					</td>
 					<td class="actions">
 						<a wicket:id="swap" class="swap btn btn-sm btn-default"><i class="fa fa-arrows-h"></i> swap</a>
 					</td>
 					<td class="source">
 						<div class="title">Compare</div>
-						<div wicket:id="source" class="branch"></div>
+						<div wicket:id="source" class="revision"></div>
 					</td>
 				</tr>
 			</table>
-			<div wicket:id="sameBranch" class="alert alert-warning status">
+			<div wicket:id="sameRevision" class="alert alert-warning status">
 				<div class="summary">
 					<span class="fa fa-lg fa-warning"></span>
-					<span>Please select different branches to compare.</span>
+					<span>Please select different revisions to compare.</span>
 				</div>
 			</div>		
 			<div wicket:id="openedRequest" class="alert alert-info status">
@@ -32,15 +32,19 @@
 			<div wicket:id="upToDate" class="alert alert-success status">
 				<div class="summary">
 					<span class="fa fa-lg fa-check-circle"></span>
-					<a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
+					Target revision is up to date with all commits from source revision.
 				</div>
 			</div>		
 			<div>
 				<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>
 			</div>
 			<ul wicket:id="tabs" class="nav nav-tabs"></ul>
-			<div wicket:id="tabPanel"></div>
+			<div wicket:id="tabPanel" class="tab-panel"></div>
 		</div>
 	</div>
 	<div wicket:id="backToTop"></div>
+	<wicket:fragment wicket:id="compareFrag">
+		<div wicket:id="diffOption" class="diff-option"></div>
+		<div wicket:id="revisionDiff"></div>
+	</wicket:fragment>
 </wicket:extend>

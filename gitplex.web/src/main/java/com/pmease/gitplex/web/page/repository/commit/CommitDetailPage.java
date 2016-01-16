@@ -159,7 +159,7 @@ public class CommitDetailPage extends RepositoryPage {
 
 						List<Ref> tagRefs = new ArrayList<>();
 						for (Ref ref: getRepository().getTagRefs()) {
-							RevCommit taggedCommit = getRepository().getCommit(ref.getObjectId());
+							RevCommit taggedCommit = getRepository().getRevCommit(ref.getObjectId());
 							if (taggedCommit != null && descendants.contains(taggedCommit.getId()))
 								tagRefs.add(ref);
 						}

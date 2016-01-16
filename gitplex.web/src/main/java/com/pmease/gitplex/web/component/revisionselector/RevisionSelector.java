@@ -110,7 +110,7 @@ public abstract class RevisionSelector extends Panel {
 						names.add(GitUtils.ref2branch(ref.getName()));
 				} else {
 					for (Ref ref: repo.getTagRefs()) {
-						if (repo.getCommit(ref.getObjectId()) != null) 
+						if (repo.getRevCommit(ref.getObjectId()) != null) 
 							refs.add(ref);
 					}
 					Collections.sort(refs, repo.newTagDateComparator());
