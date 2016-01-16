@@ -37,7 +37,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
-import com.pmease.gitplex.web.component.revisionselector.AffinalRevisionSelector;
+import com.pmease.gitplex.web.component.revisionpicker.AffinalRevisionPicker;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
@@ -148,7 +148,7 @@ public class RevisionComparePage extends RepositoryPage {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalRevisionSelector("target", new IModel<Repository>() {
+		add(new AffinalRevisionPicker("target", new IModel<Repository>() {
 
 			@Override
 			public void detach() {
@@ -176,7 +176,7 @@ public class RevisionComparePage extends RepositoryPage {
 			
 		});
 
-		add(new AffinalRevisionSelector("source", new IModel<Repository>() {
+		add(new AffinalRevisionPicker("source", new IModel<Repository>() {
 
 			@Override
 			public void detach() {

@@ -1,7 +1,3 @@
-a.revision-selector {
-	color: #333;
-	text-decoration: none;
-}
 div.revision-selector ul.refs {
 	width: 400px; 
 	max-height: 300px; 
@@ -52,19 +48,3 @@ div.revision-selector a.current:before {
 	position: absolute;
 	left: 4px;
 }   
-.repository-and-revision {
-	width: 100%;
-}
-.repository-and-revision td {
-	padding: 12px; 
-	white-space: nowrap;
-}
-.repository-and-revision td.name {
-	text-align: right; 
-	padding-right: 0; 
-	font-size: 16px; 
-	width: 1%; 
-}
-.repository-and-revision .select2-choice {
-	width: 100%;
-}

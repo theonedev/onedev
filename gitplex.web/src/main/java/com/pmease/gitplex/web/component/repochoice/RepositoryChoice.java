@@ -45,7 +45,7 @@ public class RepositoryChoice extends Select2Choice<Repository> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(RepoChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(RepositoryChoiceResourceReference.INSTANCE));
 	}
 	
 }

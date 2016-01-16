@@ -25,7 +25,7 @@ $(window).load(function() {
 		e.stopPropagation();
 		
 		var $head = $("#repo-file>.head");
-		var $revisionSelector = $head.find(">.revision-selector");
+		var $revisionPicker = $head.find(">.revision-picker");
 				
 		// we should simply call $head.width() here, but the value is incorrect after maximize and restore
 		// window in IE and Chrome (maybe due to use of table in sidebar?), so we go with the complicate 
@@ -33,7 +33,7 @@ $(window).load(function() {
 		var headWidth = $("#repository").width() - $("#repository>.sidebar>table>tbody>tr>td.nav").outerWidth();
 		
 		// below code moves file navigator to bottom if it is too wide
-		var maxWidth = headWidth - $revisionSelector.outerWidth() - 60;
+		var maxWidth = headWidth - $revisionPicker.outerWidth() - 60;
 		var maxHeight = $head.height();
 
 		var $fileNavigator = $head.find(">.file-navigator");
@@ -43,7 +43,7 @@ $(window).load(function() {
 		} else {
 			$fileNavigator = $("#repo-file>.file-navigator>div");
 			if ($fileNavigator.outerWidth() <= maxWidth && $fileNavigator.outerHeight() <= maxHeight) {
-				$fileNavigator.insertAfter($revisionSelector);
+				$fileNavigator.insertAfter($revisionPicker);
 				$("#repo-file>.file-navigator").hide();
 			}
 		}

@@ -22,7 +22,7 @@ public class AffinalRepositoryChoice extends Select2Choice<Repository> {
 	 * 			model of selected repository
 	 */
 	public AffinalRepositoryChoice(String id, IModel<Repository> currentRepositoryModel, IModel<Repository> selectedRepositoryModel) {
-		super(id, selectedRepositoryModel, new AffinalRepositoryChoiceProvider(currentRepositoryModel));
+		super(id, selectedRepositoryModel, new AffinalRepoChoiceProvider(currentRepositoryModel));
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class AffinalRepositoryChoice extends Select2Choice<Repository> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(RepoChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(RepositoryChoiceResourceReference.INSTANCE));
 	}
 
 }

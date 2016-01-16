@@ -79,7 +79,7 @@ import com.pmease.gitplex.web.component.repofile.editsave.EditSavePanel;
 import com.pmease.gitplex.web.component.repofile.fileedit.FileEditPanel;
 import com.pmease.gitplex.web.component.repofile.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.repofile.filenavigator.FileNavigator;
-import com.pmease.gitplex.web.component.revisionselector.RevisionSelector;
+import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
@@ -112,7 +112,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private static final String PARAM_MARK = "mark";
 	
-	private static final String REVISION_SELECTOR_ID = "revisionSelector";
+	private static final String REVISION_PICKER_ID = "revisionPicker";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
 	
@@ -314,7 +314,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 		});
 		
-		newRevisionSelector(null);
+		newRevisionPicker(null);
 		
 		add(commentContext = new WebMarkupContainer("commentContext") {
 
@@ -647,8 +647,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		requestId = state.requestId;
 	}
 	
-	private void newRevisionSelector(@Nullable AjaxRequestTarget target) {
-		Component revisionSelector = new RevisionSelector(REVISION_SELECTOR_ID, repoModel, blobIdent.revision) {
+	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
+		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, repoModel, blobIdent.revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
@@ -679,13 +679,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				pushState(target);
 				resizeWindow(target);
 			}
-
-		};
+			
+		}; 
 		if (target != null) {
-			replace(revisionSelector);
-			target.add(revisionSelector);
+			replace(revisionPicker);
+			target.add(revisionPicker);
 		} else {
-			add(revisionSelector);
+			add(revisionPicker);
 		}
 	}
 
@@ -696,7 +696,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		setState(state);
 		trait.revision = blobIdent.revision;
 
-		newRevisionSelector(target);
+		newRevisionPicker(target);
 		
 		target.add(commentContext);
 		

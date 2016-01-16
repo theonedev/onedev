@@ -2,7 +2,7 @@
 	border-bottom: 1px solid #BBB;
 	height: 31px;
 }
-#repo-file>.head>.revision-selector {
+#repo-file>.head>.revision-picker {
 	padding: 0;
 }
 #repo-file>.head>.comment-context {
@@ -11,15 +11,17 @@
 	height: 31px;
 	cursor: pointer;
 }
-#repo-file>.head>.revision-selector>a {
+#repo-file>.head>a.revision-picker {
 	display: block;
 	border-right: 1px solid #BBB;
+	color: #333;
+	text-decoration: none;
 }
-#repo-file>.head>.revision-selector>a:hover {
+#repo-file>.head>a.revision-picker:hover {
 	background: #EEE;
 	clear: both;
 }
-#repo-file>.head>.revision-selector>a, #repo-file>.head>.file-navigator, #repo-file>.file-navigator>div {
+#repo-file>.head>a.revision-picker, #repo-file>.head>.file-navigator, #repo-file>.file-navigator>div {
 	padding: 5px 8px;
 }
 #repo-file .file-navigator .last-segment {
