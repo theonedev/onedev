@@ -1,19 +1,21 @@
 <wicket:panel>
 	<div class="commit-list">
 		<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
-		<table>
-			<tr wicket:id="commits">
-				<td class="avatar">
-					<span wicket:id="avatar"></span>
-				</td>
-				<td class="detail">
-					<div wicket:id="message"></div> 
-					<div wicket:id="author" class="author"></div>
-				</td>
-				<td class="info">
-					<span wicket:id="hashAndCode"></span>
-				</td>
-			</tr>
-		</table>
+		<ul class="list-unstyled">
+			<li wicket:id="commits"><div wicket:id="commit"></div></li>
+		</ul>
 	</div>
+	<wicket:fragment wicket:id="commitFrag">
+		<div class="avatar pull-left">
+			<span wicket:id="avatar"></span>
+		</div>
+		<div class="detail pull-left">
+			<div wicket:id="message" class="message"></div>
+			<div wicket:id="contribution"></div>
+		</div>
+		<div wicket:id="hashAndCode" class="pull-right"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="dateFrag">
+		<i class="fa fa-calendar"></i> <span wicket:id="date"></span>
+	</wicket:fragment>
 </wicket:panel>

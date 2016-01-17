@@ -23,7 +23,8 @@
 }
 #revision-compare>.body>.revisions>.revision>label {
 	font-size: 16px;
-	color: #555;
+	color: #333;
+	font-weight: normal;
 }
 #revision-compare>.body>.nav-tabs {
 	margin-bottom: 20px;

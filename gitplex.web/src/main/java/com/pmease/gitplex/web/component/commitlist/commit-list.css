@@ -1,48 +1,46 @@
-.commit-list {
-	border: 1px solid #CCC;
-	border-radius: 4px;
+.commit-list>ul {
+	margin-bottom: 0;
 }
-.commit-list td {
-	padding: 8px; 
-	color: #999; 
-	border-top: 1px solid #E8E8E8;
+.commit-list>ul li {
+	padding: 4px 0;
 }
-.commit-list tr:first-child td {
-	border-top: none;
+.commit-list>ul .commit>.avatar {
+	margin-top: 4px;
 }
-.commit-list td.avatar {
-	width: 1px;
-}
-.commit-list td.info {
+.commit-list>ul .hash-and-code {
 	text-align: right;
+	margin-top: 10px;
 	white-space: nowrap;
 }
-.commit-list td.avatar img {
-	width: 37px; 
-	height: 37px;
+.commit-list>ul a {
+	color: #555;
 }
-.commit-list a {
-	color: #666;
-}
-.commit-list a.summary {
+.commit-list>ul a.summary {
 	font-weight: bold;
+	font-size: 15px;
 }
-.commit-list td.detail {
+.commit-list>ul .detail {
 	padding-left: 8px; 
 	padding-right: 8px;
 }
-.commit-list td.detail .name {
-	color: #666;
-}
-.commit-list a.commit-hash {
-	font-family: monospace;
-}
-.commit-list tr:hover td {
+.commit-list>ul .commit:hover {
 	background: #F7ECB9;
 }
-.commit-list .commit-message>.full {
+.commit-list>ul .commit .contribution {
+	font-size: 12px;
+}
+.commit-list>ul .message {
 	margin-bottom: 4px;
 }
+.commit-list .date {
+	font-size: 18px;
+	margin-top: 12px;
+	text-align: left;
+	border-bottom: 1px solid #EEE;
+}
+.commit-list .date.first {
+	margin-top: 0;
+}
 .commit-list .alert {
-	margin: 8px;
+	margin-bottom: 0;
 }
