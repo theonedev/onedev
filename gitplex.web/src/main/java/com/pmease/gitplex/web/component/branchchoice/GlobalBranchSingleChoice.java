@@ -111,7 +111,15 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
 	@Override
 	protected void convertInput() {
-		setConvertedInput(branchChoice.getConvertedInput());
+		String branchId;
+		String branch = branchChoice.getConvertedInput();
+		if (branch != null) {
+			branchId = new RepoAndBranch(repoModel.getObject(), branch).toString();
+		} else {
+			branchId = null;
+		}
+		
+		setConvertedInput(branchId);
 	}
 
 	@Override

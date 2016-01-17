@@ -651,6 +651,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, repoModel, blobIdent.revision) {
 
 			@Override
+			protected String getRevisionUrl(String revision) {
+				RepoFileState state = new RepoFileState();
+				state.blobIdent.revision = revision;
+				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
+				return urlFor(RepoFilePage.class, params).toString();
+			}
+
+			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
 				RepoFileState state = getState();
 				state.blobIdent.revision = revision;

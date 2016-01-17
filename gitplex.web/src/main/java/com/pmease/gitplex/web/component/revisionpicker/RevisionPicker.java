@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.revisionpicker;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
@@ -37,6 +39,11 @@ public abstract class RevisionPicker extends DropdownLink {
 				
 				RevisionPicker.this.onSelect(target, revision);
 			}
+
+			@Override
+			protected String getRevisionUrl(String revision) {
+				return RevisionPicker.this.getRevisionUrl(revision);
+			}
 			
 		};
 	}
@@ -73,4 +80,10 @@ public abstract class RevisionPicker extends DropdownLink {
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, String revision);
+	
+	@Nullable
+	protected String getRevisionUrl(String revision) {
+		return null;
+	}
+	
 }

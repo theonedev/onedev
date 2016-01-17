@@ -152,8 +152,7 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
-				RevisionComparePage.this.target = new RepoAndRevision(repository, revision);
-				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source);
+				PageParameters params = paramsOf(getRepository(), new RepoAndRevision(repository, revision), source);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
@@ -163,8 +162,8 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
-				source = new RepoAndRevision(repository, revision);
-				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source);
+				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, 
+						new RepoAndRevision(repository, revision));
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			

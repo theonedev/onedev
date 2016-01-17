@@ -31,12 +31,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -59,7 +57,7 @@ import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.branchchoice.AffinalBranchSingleChoice;
+import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
@@ -82,7 +80,9 @@ public class NewRequestPage extends PullRequestPage {
 
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
-	private AffinalBranchSingleChoice targetChoice, sourceChoice;
+	private RepoAndBranch target;
+	
+	private RepoAndBranch source;
 	
 	private IModel<List<Commit>> commitsModel;
 	
@@ -105,7 +105,6 @@ public class NewRequestPage extends PullRequestPage {
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
 
-		RepoAndBranch target, source = null;
 		if (params.get("target").toString() != null) {
 			target = new RepoAndBranch(params.get("target").toString());
 		} else {
@@ -116,21 +115,14 @@ public class NewRequestPage extends PullRequestPage {
 				target = new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			}
 		}
+		
 		if (params.get("source").toString() != null) {
 			source = new RepoAndBranch(params.get("source").toString());
 		} else {
 			if (getRepository().getForkedFrom() != null) {
 				source = new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			} else {
-				for (Ref ref: getRepository().getBranchRefs()) {
-					String branch = GitUtils.ref2branch(ref.getName());
-					if (!branch.equals(target.getBranch())) {
-						source = new RepoAndBranch(getRepository(), branch);
-						break;
-					}
-				}
-				if (source == null)
-					source = target;
+				source = new RepoAndBranch(getRepository(), getRepository().getDefaultBranch());
 			}
 		}
 
@@ -228,39 +220,27 @@ public class NewRequestPage extends PullRequestPage {
 
 		setOutputMarkupId(true);
 		
-		targetChoice = new AffinalBranchSingleChoice("target", getRepository().getId(), 
-				Model.of(getPullRequest().getTarget().toString()), false) {
+		add(new AffinalBranchPicker("target", getRepository().getId(), target.getBranch()) {
 
 			@Override
-			protected void onChange(AjaxRequestTarget target) {
-				super.onChange(target);
-				
+			protected void onSelect(AjaxRequestTarget target, Repository repository, String branch) {
 				PageParameters params = paramsOf(getRepository(), 
-						new RepoAndBranch(targetChoice.getModelObject()),
-						new RepoAndBranch(sourceChoice.getModelObject())); 
+						new RepoAndBranch(repository, branch), source); 
 				setResponsePage(NewRequestPage.class, params);
 			}
 			
-		};
-		targetChoice.setRequired(true);
-		add(targetChoice);
+		});
 		
-		sourceChoice = new AffinalBranchSingleChoice("source", getRepository().getId(), 
-				Model.of(getPullRequest().getSource().toString()), false) {
+		add(new AffinalBranchPicker("source", getRepository().getId(), source.getBranch()) {
 
 			@Override
-			protected void onChange(AjaxRequestTarget target) {
-				super.onChange(target);
-
-				PageParameters params = paramsOf(getRepository(), 
-						new RepoAndBranch(targetChoice.getModelObject()),
-						new RepoAndBranch(sourceChoice.getModelObject())); 
+			protected void onSelect(AjaxRequestTarget target, Repository repository, String branch) {
+				PageParameters params = paramsOf(getRepository(), NewRequestPage.this.target,
+						new RepoAndBranch(repository, branch)); 
 				setResponsePage(NewRequestPage.class, params);
 			}
 			
-		};
-		sourceChoice.setRequired(true);
-		add(sourceChoice);
+		});
 		
 		add(new Link<Void>("swap") {
 

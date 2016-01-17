@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -30,7 +32,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
@@ -45,8 +46,6 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
@@ -244,6 +243,11 @@ public abstract class RevisionSelector extends Panel {
 		setOutputMarkupId(true);
 	}
 	
+	@Nullable
+	protected String getRevisionUrl(String revision) {
+		return null;
+	}
+	
 	private Component newRefList(List<String> refs) {
 		WebMarkupContainer refsContainer = new WebMarkupContainer("refs");
 		refsContainer.add(new ListView<String>("refs", refs) {
@@ -267,10 +271,9 @@ public abstract class RevisionSelector extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						RepoFileState state = new RepoFileState();
-						state.blobIdent.revision = item.getModelObject();
-						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
-						tag.put("href", urlFor(RepoFilePage.class, params));
+						String url = getRevisionUrl(item.getModelObject());
+						if (url != null)
+							tag.put("href", url);
 					}
 					
 				};

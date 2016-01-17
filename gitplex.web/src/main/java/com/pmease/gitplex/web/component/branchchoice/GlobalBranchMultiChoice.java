@@ -129,7 +129,14 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 
 	@Override
 	protected void convertInput() {
-		setConvertedInput(branchChoice.getConvertedInput());
+		Collection<String> branchIds = new ArrayList<>();
+		Collection<String> branches = branchChoice.getConvertedInput();
+		if (branches != null) {
+			for (String branch: branches)
+				branchIds.add(new RepoAndBranch(repoModel.getObject(), branch).toString());
+		}
+		
+		setConvertedInput(branchIds);
 	}
 
 	@Override

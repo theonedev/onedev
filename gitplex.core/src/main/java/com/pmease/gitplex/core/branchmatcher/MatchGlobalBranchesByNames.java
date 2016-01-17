@@ -17,25 +17,26 @@ import com.pmease.gitplex.core.model.Repository;
 @Editable(name="Specify Branch Names", order=100)
 public class MatchGlobalBranchesByNames implements GlobalBranchMatcher {
 
-	private List<RepoAndBranch> repoAndBranches = new ArrayList<>();
+	private List<String> repoAndBranches = new ArrayList<>();
 	
 	@Editable(name="Branch Names")
 	@BranchChoice(Scope.GLOBAL)
 	@OmitName
 	@NotNull
 	@Size(min=1, message="At least one branch has to be selected.")
-	public List<RepoAndBranch> getRepoAndBranches() {
+	public List<String> getRepoAndBranches() {
 		return repoAndBranches;
 	}
 
-	public void setRepoAndBranches(List<RepoAndBranch> repoAndBranches) {
+	public void setRepoAndBranches(List<String> repoAndBranches) {
 		this.repoAndBranches = repoAndBranches;
 	}
 
 	@Override
 	public boolean matches(Repository repository, String branch) {
-		for (RepoAndBranch each: getRepoAndBranches()) {
-			if (each.getRepoId().equals(repository.getId()) && each.getBranch().equals(branch))
+		for (String each: getRepoAndBranches()) {
+			RepoAndBranch repoAndBranch = new RepoAndBranch(each);
+			if (repoAndBranch.getRepoId().equals(repository.getId()) && repoAndBranch.getBranch().equals(branch))
 				return true;
 		}
 		return false;

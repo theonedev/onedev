@@ -11,21 +11,21 @@
 #new-request>.body>.branches {
 	margin-bottom: 20px;
 }
-#new-request>.body>.branches td>div.title {
-	font-size: 18px; 
-	margin-bottom: 8px;
-}
-#new-request>.body>.branches td>div.branch {
+#new-request>.body>.branches>.branch {
 	background: #F2F2F2; 
+	border: 1px solid #DDD;
 	border-radius: 4px; 
-	vertical-align: top;
+	padding: 12px;
 }
-#new-request>.body>.branches .actions {
-	width: 1%; 
-	background: none; 
-	padding: 77px 10px 0 10px;
+#new-request>.body>.branches>.action {
+	margin-right: 0;
+	padding: 18px;
 }
-
+#new-request>.body>.branches>.branch>label {
+	font-size: 16px;
+	color: #333;
+	font-weight: normal;
+}
 #new-request>.body>.status .summary {
 	font-size: 16px; 
 	padding: 0; 

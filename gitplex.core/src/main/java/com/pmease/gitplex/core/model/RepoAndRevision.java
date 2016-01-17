@@ -77,10 +77,11 @@ public class RepoAndRevision implements Serializable {
 		return getRepository().getRevCommit(getObjectId());
 	}
 	
-	public static void trim(Collection<? extends RepoAndRevision> repoAndBranches) {
+	public static void trim(Collection<String> repoAndBranches) {
 		Dao dao = GitPlex.getInstance(Dao.class);
-		for (Iterator<? extends RepoAndRevision> it = repoAndBranches.iterator(); it.hasNext();) {
-			if (dao.get(Repository.class, it.next().getRepoId()) == null)
+		for (Iterator<String> it = repoAndBranches.iterator(); it.hasNext();) {
+			RepoAndRevision repoAndRevision = new RepoAndRevision(it.next());
+			if (dao.get(Repository.class, repoAndRevision.getRepoId()) == null)
 				it.remove();
 		}
 	}

@@ -136,7 +136,14 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 
 	@Override
 	protected void convertInput() {
-		setConvertedInput(branchChoice.getConvertedInput());
+		Collection<String> branchIds = new ArrayList<>();
+		Collection<String> branches = branchChoice.getConvertedInput();
+		if (branches != null) {
+			for (String branch: branches)
+				branchIds.add(new RepoAndBranch(selectedRepoModel.getObject(), branch).toString());
+		}
+		
+		setConvertedInput(branchIds);
 	}
 
 	@Override
