@@ -26,11 +26,7 @@
 	position: relative;
 }
 #request-detail>.updates>.update>.alert {
-	margin-bottom: 0;
-	border-radius: 0;
-	border-top: 0;
-	border-left: 0;
-	border-right: 0;
+	margin: 8px;
 }
 #request-detail>.updates>.update>.commits td {
 	padding: 8px; 

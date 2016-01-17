@@ -11,19 +11,19 @@
 #revision-compare>.body>.revisions {
 	margin-bottom: 20px;
 }
-#revision-compare>.body>.revisions td>div.title {
-	font-size: 18px; 
-	margin-bottom: 8px;
-}
-#revision-compare>.body>.revisions td>div.revision {
+#revision-compare>.body>.revisions>.revision {
 	background: #F2F2F2; 
+	border: 1px solid #DDD;
 	border-radius: 4px; 
-	vertical-align: top;
+	padding: 12px;
 }
-#revision-compare>.body>.revisions .actions {
-	width: 1%; 
-	background: none; 
-	padding: 77px 10px 0 10px;
+#revision-compare>.body>.revisions>.action {
+	margin-right: 0;
+	padding: 18px;
+}
+#revision-compare>.body>.revisions>.revision>label {
+	font-size: 16px;
+	color: #555;
 }
 #revision-compare>.body>.nav-tabs {
 	margin-bottom: 20px;

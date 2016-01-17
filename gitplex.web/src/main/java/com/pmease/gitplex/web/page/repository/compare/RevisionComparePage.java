@@ -308,7 +308,15 @@ public class RevisionComparePage extends RepositoryPage {
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel).setOutputMarkupId(true);
+		return new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel){
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!commitsModel.getObject().isEmpty());
+			}
+			
+		}.setOutputMarkupId(true);
 	}
 	
 	@Override

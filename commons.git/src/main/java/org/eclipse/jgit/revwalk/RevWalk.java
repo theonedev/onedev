@@ -1406,6 +1406,8 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 
 	/**
 	 * Assume additional commits are shallow (have no parents).
+	 * <p>
+	 * This method is a No-op if the collection is empty.
 	 *
 	 * @param ids
 	 *            commits that should be treated as shallow commits, in addition

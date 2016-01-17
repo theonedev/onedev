@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit.http.server</artifactId>
-			<version>4.0.1.201506240215-r</version>
+			<version>4.1.1.201511131810-r</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>

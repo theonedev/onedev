@@ -2,21 +2,19 @@
 	<div id="revision-compare">
 		<div class="head">Compare Revisions</div>
 		<div class="body">
-			<table class="revisions">
-				<tr>
-					<td class="target">
-						<div class="title">Base</div>
-						<div wicket:id="target" class="revision"></div>
-					</td>
-					<td class="actions">
-						<a wicket:id="swap" class="swap btn btn-sm btn-default"><i class="fa fa-arrows-h"></i> swap</a>
-					</td>
-					<td class="source">
-						<div class="title">Compare</div>
-						<div wicket:id="source" class="revision"></div>
-					</td>
-				</tr>
-			</table>
+			<div class="revisions clearfix">
+				<div class="revision pull-left">
+					<label>Base</label>
+					<div wicket:id="target"></div>
+				</div>
+				<div class="action pull-left">
+					<a wicket:id="swap" class="swap btn btn-default"><i class="fa fa-arrows-h"></i> swap</a>
+				</div>
+				<div class="revision pull-left">
+					<label>Compare</label>
+					<div wicket:id="source"></div>
+				</div>
+			</div>
 			<div wicket:id="sameRevision" class="alert alert-warning status">
 				<div class="summary">
 					<span class="fa fa-lg fa-warning"></span>

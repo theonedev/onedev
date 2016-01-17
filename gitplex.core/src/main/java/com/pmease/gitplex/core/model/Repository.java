@@ -427,9 +427,15 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			ObjectId ancestorId = getObjectId(ancestor);
 			ObjectId descendantId = getObjectId(descendant);
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
-			revWalk.markStart(revWalk.lookupCommit(ancestorId));
-			revWalk.markStart(revWalk.lookupCommit(descendantId));
-			return revWalk.next();
+			RevCommit ancestorCommit = getRevCommit(ancestorId);
+			RevCommit descendantCommit = getRevCommit(descendantId);
+			
+			// we should look up commit again as markStart requires that the commit
+			// should be resolved in the same revWalk. Also we should not look up
+			// against ancestorId directly as it might be id of an annotated tag
+			revWalk.markStart(revWalk.lookupCommit(ancestorCommit.getId()));
+			revWalk.markStart(revWalk.lookupCommit(descendantCommit.getId()));
+			return Preconditions.checkNotNull(revWalk.next());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} 			
@@ -441,9 +447,15 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			ObjectId ancestorId = getObjectId(ancestor);
 			ObjectId descendantId = getObjectId(descendant);
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
-			revWalk.markStart(revWalk.lookupCommit(ancestorId));
-			revWalk.markStart(revWalk.lookupCommit(descendantId));
-			return revWalk.next().getId().equals(ancestorId);
+			RevCommit ancestorCommit = getRevCommit(ancestorId);
+			RevCommit descendantCommit = getRevCommit(descendantId);
+
+			// we should look up commit again as markStart requires that the commit
+			// should be resolved in the same revWalk. Also we should not look up
+			// against ancestorId directly as it might be id of an annotated tag
+			revWalk.markStart(revWalk.lookupCommit(ancestorCommit.getId()));
+			revWalk.markStart(revWalk.lookupCommit(descendantCommit.getId()));
+			return ancestorId.equals(Preconditions.checkNotNull(revWalk.next().getId()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} 			
