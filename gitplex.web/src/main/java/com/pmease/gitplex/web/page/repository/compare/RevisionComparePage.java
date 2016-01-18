@@ -3,6 +3,8 @@ package com.pmease.gitplex.web.page.repository.compare;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -52,6 +54,8 @@ public class RevisionComparePage extends RepositoryPage {
 	
 	private static final String PARAM_SOURCE = "source";
 	
+	private static final String PARAM_PATH = "path";
+	
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
 	private IModel<List<Commit>> commitsModel;
@@ -68,10 +72,13 @@ public class RevisionComparePage extends RepositoryPage {
 	
 	private String path;
 	
-	public static PageParameters paramsOf(Repository repository, RepoAndRevision target, RepoAndRevision source) {
+	public static PageParameters paramsOf(Repository repository, RepoAndRevision target, 
+			RepoAndRevision source, @Nullable String path) {
 		PageParameters params = paramsOf(repository);
 		params.set(PARAM_TARGET, target.toString());
 		params.set(PARAM_SOURCE, source.toString());
+		if (path != null)
+			params.set(PARAM_PATH, path);
 		return params;
 	}
 
@@ -152,7 +159,7 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
-				PageParameters params = paramsOf(getRepository(), new RepoAndRevision(repository, revision), source);
+				PageParameters params = paramsOf(getRepository(), new RepoAndRevision(repository, revision), source, path);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
@@ -163,7 +170,7 @@ public class RevisionComparePage extends RepositoryPage {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
 				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, 
-						new RepoAndRevision(repository, revision));
+						new RepoAndRevision(repository, revision), path);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
@@ -173,7 +180,7 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(RevisionComparePage.class,paramsOf(getRepository(), source, target));
+				setResponsePage(RevisionComparePage.class,paramsOf(getRepository(), source, target, path));
 			}
 
 		});

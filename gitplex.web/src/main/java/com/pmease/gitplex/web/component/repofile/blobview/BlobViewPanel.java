@@ -148,7 +148,9 @@ public abstract class BlobViewPanel extends Panel {
 			@Override
 			public void onClick() {
 				RepoCommitsPage.HistoryState state = new RepoCommitsPage.HistoryState();
-				state.setQuery(String.format("id(%s) path(%s)", context.getBlobIdent().revision, context.getBlobIdent().path));
+				String commitHash = context.getRepository().getObjectId(context.getBlobIdent().revision).name();
+				state.setCompareWith(commitHash);
+				state.setQuery(String.format("id(%s) path(%s)", commitHash, context.getBlobIdent().path));
 				setResponsePage(RepoCommitsPage.class, RepoCommitsPage.paramsOf(context.getRepository(), state));
 			}
 			

@@ -30,6 +30,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -57,6 +58,7 @@ import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.WorkManager;
+import com.pmease.gitplex.core.model.RepoAndRevision;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
@@ -66,6 +68,7 @@ import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CriteriaContext;
 import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
+import com.pmease.gitplex.web.page.repository.compare.RevisionComparePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -81,6 +84,8 @@ public class RepoCommitsPage extends RepositoryPage {
 	private static final int COUNT = 50;
 	
 	private static final int MAX_STEPS = 50;
+	
+	private static final String PARAM_COMPARE_WITH = "compareWith";
 	
 	private static final String PARAM_QUERY = "query";
 	
@@ -479,6 +484,35 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 			item.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 			
+			if (state.getCompareWith() != null) {
+				String comparePath = null;
+				
+				/*
+				 * Set comparePath if there is only one definitive path specified 
+				 */
+				QueryContext parseTree = state.getParseTree();
+				if (parseTree != null) {
+					for (CriteriaContext criteria: parseTree.criteria()) {
+						if (criteria.path() != null) {
+							String path = criteria.path().Value().getText();
+							path = path.substring(1);
+							path = path.substring(0, path.length()-1);
+							if (path.contains("*") || comparePath != null) {
+								comparePath = null;
+								break;
+							} else {
+								comparePath = path;
+							}
+						}
+					}
+				}
+				PageParameters params = RevisionComparePage.paramsOf(getRepository(), 
+						new RepoAndRevision(getRepository(), commit.getHash()), 
+						new RepoAndRevision(getRepository(), state.getCompareWith()), comparePath);
+				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
+			} else {
+				item.add(new WebMarkupContainer("compare").setVisible(false));
+			}
 			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
@@ -495,6 +529,8 @@ public class RepoCommitsPage extends RepositoryPage {
 	
 	public static PageParameters paramsOf(Repository repository, HistoryState state) {
 		PageParameters params = paramsOf(repository);
+		if (state.getCompareWith() != null)
+			params.set(PARAM_COMPARE_WITH, state.getCompareWith());
 		if (state.getQuery() != null)
 			params.set(PARAM_QUERY, state.getQuery());
 		if (state.getStep() != 1)
@@ -614,6 +650,8 @@ public class RepoCommitsPage extends RepositoryPage {
 
 		private static final long serialVersionUID = 1L;
 
+		private String compareWith;
+		
 		private String query;
 		
 		private int step = 1;
@@ -623,16 +661,21 @@ public class RepoCommitsPage extends RepositoryPage {
 		public HistoryState() {
 		}
 		
-		public HistoryState(String query) {
-			this.query = query;
-		}
-		
 		public HistoryState(PageParameters params) {
+			compareWith = params.get(PARAM_COMPARE_WITH).toString();
 			query = params.get(PARAM_QUERY).toString();
 			
 			Integer step = params.get(PARAM_STEP).toOptionalInteger();
 			if (step != null)
 				this.step = step.intValue();		
+		}
+
+		public String getCompareWith() {
+			return compareWith;
+		}
+
+		public void setCompareWith(String compareWith) {
+			this.compareWith = compareWith;
 		}
 
 		public String getQuery() {

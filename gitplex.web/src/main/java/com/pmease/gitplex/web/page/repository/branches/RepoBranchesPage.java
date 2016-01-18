@@ -349,7 +349,8 @@ public class RepoBranchesPage extends RepositoryPage {
 							PageParameters params = RevisionComparePage.paramsOf(
 									getRepository(),
 									new RepoAndBranch(getRepository(), getBaseBranch()), 
-									new RepoAndBranch(getRepository(), branch)); 
+									new RepoAndBranch(getRepository(), branch),
+									null); 
 							setResponsePage(RevisionComparePage.class, params);
 						}
 					}
@@ -409,7 +410,8 @@ public class RepoBranchesPage extends RepositoryPage {
 							PageParameters params = RevisionComparePage.paramsOf(
 									getRepository(), 
 									new RepoAndBranch(getRepository(), branch), 
-									new RepoAndBranch(getRepository(), getBaseBranch()));
+									new RepoAndBranch(getRepository(), getBaseBranch()),
+									null);
 							setResponsePage(RevisionComparePage.class, params);
 						}
 					}

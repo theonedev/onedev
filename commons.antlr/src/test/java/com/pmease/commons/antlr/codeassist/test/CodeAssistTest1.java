@@ -42,6 +42,7 @@ public class CodeAssistTest1 {
 
 		suggestions = suggest(new InputStatus("ab "), "selfReference");
 		assertEquals(1, suggestions.size());
+		
 		assertEquals("ab cd:5", suggestions.get(0).toString());
 
 		suggestions = suggest(new InputStatus(""), "selfReference");
