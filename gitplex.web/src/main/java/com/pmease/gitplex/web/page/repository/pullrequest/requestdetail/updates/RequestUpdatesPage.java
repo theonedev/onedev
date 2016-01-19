@@ -203,7 +203,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 								return getPullRequest().getTargetRepo();
 							}
 							
-						}, commit.getHash(), getPullRequest().getId()));
+						}, commit.getHash(), null, getPullRequest().getId()));
 
 						commitItem.add(new VerificationStatusPanel("verification", requestModel, Model.of(commit.getHash())) {
 

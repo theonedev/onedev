@@ -24,16 +24,25 @@ public class HashAndCodePanel extends Panel {
 	
 	private final String hash;
 	
+	private final String path;
+	
 	public HashAndCodePanel(String id, IModel<Repository> repoModel, String hash) {
 		this(id, repoModel, hash, null);
 	}
+	
+	public HashAndCodePanel(String id, IModel<Repository> repoModel, String hash, 
+			@Nullable String path) {
+		this(id, repoModel, hash, path, null);
+	}
 
-	public HashAndCodePanel(String id, IModel<Repository> repoModel, String hash, @Nullable Long requestId) {
+	public HashAndCodePanel(String id, IModel<Repository> repoModel, String hash, 
+			@Nullable String path, @Nullable Long requestId) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.requestId = requestId;
 		this.hash = hash;
+		this.path = path;
 	}
 	
 	@Override
@@ -45,6 +54,7 @@ public class HashAndCodePanel extends Panel {
 		RepoFileState state = new RepoFileState();
 		state.requestId = requestId;
 		state.blobIdent.revision = hash;
+		state.blobIdent.path = path;
 		add(new BookmarkablePageLink<Void>("code", RepoFilePage.class, 
 				RepoFilePage.paramsOf(repoModel.getObject(), state)));
 	}

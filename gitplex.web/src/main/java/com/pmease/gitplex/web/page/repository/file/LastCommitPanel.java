@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page.repository.file;
 
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -11,21 +12,26 @@ import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
+import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 
 @SuppressWarnings("serial")
 class LastCommitPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
+	private final BlobIdent blobIdent;
+	
 	private final Commit commit;
 	
-	public LastCommitPanel(String id, IModel<Repository> repoModel, BlobIdent blob) {
+	public LastCommitPanel(String id, IModel<Repository> repoModel, BlobIdent blobIdent) {
 		super(id);
 		
 		this.repoModel = repoModel;
 
+		this.blobIdent = blobIdent;
+		
 		// call git command line for performance reason
-		commit = repoModel.getObject().git().log(null, blob.revision, blob.path, 1, 0, false).iterator().next();
+		commit = repoModel.getObject().git().log(null, blobIdent.revision, blobIdent.path, 1, 0, false).iterator().next();
 	}
 
 	@Override
@@ -38,6 +44,18 @@ class LastCommitPanel extends Panel {
 		add(new CommitMessagePanel("message", repoModel, Model.of(commit)));
 		
 		add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+		add(new Link<Void>("history") {
+
+			@Override
+			public void onClick() {
+				RepoCommitsPage.HistoryState state = new RepoCommitsPage.HistoryState();
+				String commitHash = repoModel.getObject().getObjectId(blobIdent.revision).name();
+				state.setCompareWith(commitHash);
+				state.setQuery(String.format("id(%s) path(%s)", commitHash, blobIdent.path));
+				setResponsePage(RepoCommitsPage.class, RepoCommitsPage.paramsOf(repoModel.getObject(), state));
+			}
+			
+		});
 		
 		setOutputMarkupId(true);
 	}

@@ -44,6 +44,9 @@
 #repo-commits>.body li.commit .contribution {
 	font-size: 12px;
 }
+#repo-commits>.body li.commit .compare {
+	color: #888;
+}
 #repo-commits>.body .message-and-labels {
 	margin-bottom: 4px;
 }

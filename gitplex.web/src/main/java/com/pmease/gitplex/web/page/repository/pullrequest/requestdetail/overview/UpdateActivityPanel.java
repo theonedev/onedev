@@ -165,7 +165,7 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 						return updateModel.getObject().getRequest().getTargetRepo();
 					}
 					
-				}, commit.getHash(), updateModel.getObject().getRequest().getId()));
+				}, commit.getHash(), null, updateModel.getObject().getRequest().getId()));
 				
 				if (mergedCommitsModel.getObject().contains(commit.getHash())) {
 					item.add(AttributeAppender.append("class", " integrated"));

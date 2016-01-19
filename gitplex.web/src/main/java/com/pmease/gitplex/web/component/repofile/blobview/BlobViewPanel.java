@@ -14,7 +14,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -29,9 +28,8 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
-import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -140,18 +138,6 @@ public abstract class BlobViewPanel extends Panel {
 				super.onConfigure();
 				
 				setVisible(getBlob().getText() != null);
-			}
-			
-		});
-		add(new Link<Void>("history") {
-
-			@Override
-			public void onClick() {
-				RepoCommitsPage.HistoryState state = new RepoCommitsPage.HistoryState();
-				String commitHash = context.getRepository().getObjectId(context.getBlobIdent().revision).name();
-				state.setCompareWith(commitHash);
-				state.setQuery(String.format("id(%s) path(%s)", commitHash, context.getBlobIdent().path));
-				setResponsePage(RepoCommitsPage.class, RepoCommitsPage.paramsOf(context.getRepository(), state));
 			}
 			
 		});

@@ -484,36 +484,37 @@ public class RepoCommitsPage extends RepositoryPage {
 			
 			item.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 			
-			if (state.getCompareWith() != null) {
-				String comparePath = null;
-				
-				/*
-				 * Set comparePath if there is only one definitive path specified 
-				 */
-				QueryContext parseTree = state.getParseTree();
-				if (parseTree != null) {
-					for (CriteriaContext criteria: parseTree.criteria()) {
-						if (criteria.path() != null) {
-							String path = criteria.path().Value().getText();
-							path = path.substring(1);
-							path = path.substring(0, path.length()-1);
-							if (path.contains("*") || comparePath != null) {
-								comparePath = null;
-								break;
-							} else {
-								comparePath = path;
-							}
+			/*
+			 * If we query a single definitive path, let's record it to be used for 
+			 * diff comparison and code browsing  
+			 */
+			String path = null;
+			
+			QueryContext parseTree = state.getParseTree();
+			if (parseTree != null) {
+				for (CriteriaContext criteria: parseTree.criteria()) {
+					if (criteria.path() != null) {
+						String value = criteria.path().Value().getText();
+						value = value.substring(1);
+						value = value.substring(0, value.length()-1);
+						if (value.contains("*") || path != null) {
+							path = null;
+							break;
+						} else {
+							path = value;
 						}
 					}
 				}
+			}
+			if (state.getCompareWith() != null) {
 				PageParameters params = RevisionComparePage.paramsOf(getRepository(), 
 						new RepoAndRevision(getRepository(), commit.getHash()), 
-						new RepoAndRevision(getRepository(), state.getCompareWith()), comparePath);
+						new RepoAndRevision(getRepository(), state.getCompareWith()), path);
 				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}
-			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));
+			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash(), path));
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {
