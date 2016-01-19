@@ -52,6 +52,8 @@ public abstract class RevisionSelector extends Panel {
 	
 	private final IModel<Repository> repoModel;
 	
+	private static final String COMMIT_FLAG = "*";
+	
 	private final String revision;
 	
 	private boolean branchesActive;
@@ -163,10 +165,15 @@ public abstract class RevisionSelector extends Panel {
 				String key = params.getParameterValue("key").toString();
 				
 				if (key.equals("return")) {
-					if (!filteredRefs.isEmpty()) 
-						selectRevision(target, filteredRefs.get(activeRefIndex));
-					else if (revInput != null) 
+					if (!filteredRefs.isEmpty()) {
+						String activeRef = filteredRefs.get(activeRefIndex);
+						if (activeRef.startsWith(COMMIT_FLAG))
+							selectRevision(target, activeRef.substring(COMMIT_FLAG.length()));
+						else
+							selectRevision(target, activeRef);
+					} else if (revInput != null) { 
 						selectRevision(target, revInput);
+					}
 				} else if (key.equals("up")) {
 					activeRefIndex--;
 				} else if (key.equals("down")) {
@@ -194,10 +201,16 @@ public abstract class RevisionSelector extends Panel {
 				revInput = revField.getInput();
 				filteredRefs.clear();
 				if (StringUtils.isNotBlank(revInput)) {
-					revInput = revInput.trim();
+					revInput = revInput.trim().toLowerCase();
+					boolean found = false;
 					for (String ref: refs) {
-						if (ref.contains(revInput))
+						if (ref.equalsIgnoreCase(revInput))
+							found = true;
+						if (ref.toLowerCase().contains(revInput))
 							filteredRefs.add(ref);
+					}
+					if (!found && repoModel.getObject().getRevCommit(revInput, false) != null) {
+						filteredRefs.add(COMMIT_FLAG + revInput);
 					}
 				} else {
 					revInput = null;
@@ -254,6 +267,12 @@ public abstract class RevisionSelector extends Panel {
 
 			@Override
 			protected void populateItem(final ListItem<String> item) {
+				final String ref;
+				if (item.getModelObject().startsWith(COMMIT_FLAG))
+					ref = item.getModelObject().substring(COMMIT_FLAG.length());
+				else
+					ref = item.getModelObject();
+				
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
@@ -264,22 +283,24 @@ public abstract class RevisionSelector extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						selectRevision(target, item.getModelObject());
+						selectRevision(target, ref);
 					}
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						String url = getRevisionUrl(item.getModelObject());
+						String url = getRevisionUrl(ref);
 						if (url != null)
 							tag.put("href", url);
 					}
 					
 				};
-				link.add(new Label("label", item.getModelObject()));
-				if (item.getModelObject().equals(revision))
-					link.add(AttributeAppender.append("class", " current"));
+				link.add(new Label("label", ref));
+				if (item.getModelObject().startsWith(COMMIT_FLAG))
+					link.add(AttributeAppender.append("class", "icon commit"));
+				else if (ref.equals(revision))
+					link.add(AttributeAppender.append("class", "icon current"));
 				item.add(link);
 				
 				if (activeRefIndex == item.getIndex())
@@ -293,10 +314,10 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
-			if (repoModel.getObject().getObjectId(revision, false) != null) {
+			if (repoModel.getObject().getRevCommit(revision, false) != null) {
 				onSelect(target, revision);
 			} else {
-				feedbackMessage = "Can not find revision " + revision + "";
+				feedbackMessage = "Can not find commit of revision " + revision + "";
 				target.add(feedback);
 			}
 		} catch (Exception e) {

@@ -610,12 +610,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
 			ObjectId objectId;
-			if (GitUtils.isHash(revision)) {
-				objectId = ObjectId.fromString(revision);
-			} else {
-				try (FileRepository jgitRepo = openAsJGitRepo()) {
-					objectId = jgitRepo.resolve(revision);
-				} catch (RevisionSyntaxException | IOException e) {
+			try (FileRepository jgitRepo = openAsJGitRepo()) {
+				objectId = jgitRepo.resolve(revision);
+			} catch (RevisionSyntaxException | IOException e) {
+				if (!mustExist) {
+					objectId = null;
+				} else {
 					throw new RuntimeException(e);
 				}
 			}
@@ -837,8 +837,17 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	@Nullable
-	public RevCommit getRevCommit(AnyObjectId revId, boolean mustBeCommit) {
-		return getRevCommit(getRevObject(revId), mustBeCommit);
+	public RevCommit getRevCommit(AnyObjectId revId, boolean mustExist) {
+		return getRevCommit(getRevObject(revId), mustExist);
+	}
+
+	@Nullable
+	public RevCommit getRevCommit(String revision, boolean mustExist) {
+		ObjectId id = getObjectId(revision, mustExist);
+		if (id != null)
+			return getRevCommit(id, mustExist);
+		else
+			return null;
 	}
 	
 	@Nullable

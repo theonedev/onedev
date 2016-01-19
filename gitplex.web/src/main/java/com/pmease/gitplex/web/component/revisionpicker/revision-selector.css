@@ -36,10 +36,15 @@ div.revision-selector .feedback:before {
 	content: "\f071"; 
 	margin-right: 4px;
 }
-div.revision-selector a.current:before {
+div.revision-selector a.icon:before {
 	font-family: "FontAwesome"; 
-	content: "\f00c"; 
 	margin-right: 4px;	
 	position: absolute;
 	left: 4px;
+}   
+div.revision-selector a.current:before {
+	content: "\f00c"; 
+}   
+div.revision-selector a.commit:before {
+	content: "\f1da"; 
 }   

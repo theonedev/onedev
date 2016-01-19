@@ -12,8 +12,8 @@
 	margin-bottom: 20px;
 }
 #revision-compare>.body>.revisions>.revision {
-	background: #F2F2F2; 
-	border: 1px solid #DDD;
+	background: #F0F0F0; 
+	border: 1px dashed #BBB;
 	border-radius: 4px; 
 	padding: 12px;
 }
@@ -23,7 +23,7 @@
 }
 #revision-compare>.body>.revisions>.revision>label {
 	font-size: 16px;
-	color: #333;
+	color: #888;
 	font-weight: normal;
 }
 #revision-compare>.body>.nav-tabs {

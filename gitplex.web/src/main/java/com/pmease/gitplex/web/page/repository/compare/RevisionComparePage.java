@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page.repository.compare;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +19,14 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -70,6 +73,10 @@ public class RevisionComparePage extends RepositoryPage {
 	
 	private DiffOptionPanel diffOption;
 	
+	private AjaxActionTab commitsTab;
+	
+	private AjaxActionTab filesTab;
+	
 	private String path;
 	
 	public static PageParameters paramsOf(Repository repository, RepoAndRevision target, 
@@ -101,6 +108,8 @@ public class RevisionComparePage extends RepositoryPage {
 		} else {
 			target = new RepoAndRevision(getRepository(), getRepository().getDefaultBranch());
 		}
+		
+		path = params.get(PARAM_PATH).toString();
 		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -276,24 +285,24 @@ public class RevisionComparePage extends RepositoryPage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new AjaxActionTab(Model.of("Commits")) {
+		tabs.add(commitsTab = new AjaxActionTab(Model.of("Commits")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newCommitsPanel();
-				getPage().replace(panel);
-				target.add(panel);
+				path = null;
+				newTabPanel(target);
+				pushState(target);
 			}
 			
 		});
 
-		tabs.add(new AjaxActionTab(Model.of("Changed Files")) {
+		tabs.add(filesTab = new AjaxActionTab(Model.of("Changed Files")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newComparePanel();
-				getPage().replace(panel);
-				target.add(panel);
+				path = "";
+				newTabPanel(target);
+				pushState(target);
 			}
 			
 		});
@@ -308,21 +317,9 @@ public class RevisionComparePage extends RepositoryPage {
 
 		});
 
-		add(newCommitsPanel());
+		newTabPanel(null);
 		
 		add(new BackToTop("backToTop"));
-	}
-	
-	private Component newCommitsPanel() {
-		return new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel){
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!commitsModel.getObject().isEmpty());
-			}
-			
-		}.setOutputMarkupId(true);
 	}
 	
 	@Override
@@ -332,67 +329,103 @@ public class RevisionComparePage extends RepositoryPage {
 				new CssResourceReference(RevisionComparePage.class, "revision-compare.css")));
 	}
 
-	private Component newComparePanel() {
-		final Fragment fragment = new Fragment(TAB_PANEL_ID, "compareFrag", this);
-		
-		diffOption = new DiffOptionPanel("diffOption", new AbstractReadOnlyModel<Repository>() {
-
-			@Override
-			public Repository getObject() {
-				return target.getRepository();
-			}
+	private void newTabPanel(@Nullable AjaxRequestTarget target) {
+		final WebMarkupContainer tabPanel;
+		if (path != null) {
+			tabPanel = new Fragment(TAB_PANEL_ID, "compareFrag", this);
 			
-		}, target.getRevision()) {
+			diffOption = new DiffOptionPanel("diffOption", new AbstractReadOnlyModel<Repository>() {
 
-			@Override
-			protected void onSelectPath(AjaxRequestTarget target, String path) {
-				RevisionComparePage.this.path = path;
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				fragment.replace(diffPanel);
-				target.add(diffPanel);
-			}
+				@Override
+				public Repository getObject() {
+					return RevisionComparePage.this.getRepository();
+				}
+				
+			}, RevisionComparePage.this.target.getRevision()) {
 
-			@Override
-			protected void onLineProcessorChange(AjaxRequestTarget target) {
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				fragment.replace(diffPanel);
-				target.add(diffPanel);
-			}
+				@Override
+				protected void onSelectPath(AjaxRequestTarget target, String path) {
+					RevisionComparePage.this.path = path;
+					newRevDiffPanel(tabPanel, target);
+					pushState(target);
+				}
 
-			@Override
-			protected void onDiffModeChange(AjaxRequestTarget target) {
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				fragment.replace(diffPanel);
-				target.add(diffPanel);
-			}
-			
-		};
-		diffOption.add(new StickyBehavior());
-		fragment.add(diffOption);
-		fragment.add(newRevDiffPanel());
-		
-		return fragment;
+				@Override
+				protected void onLineProcessorChange(AjaxRequestTarget target) {
+					newRevDiffPanel(tabPanel, target);
+				}
+
+				@Override
+				protected void onDiffModeChange(AjaxRequestTarget target) {
+					newRevDiffPanel(tabPanel, target);
+				}
+				
+			};
+			diffOption.add(new StickyBehavior());
+			tabPanel.add(diffOption);
+			newRevDiffPanel(tabPanel, null);
+			commitsTab.setSelected(false);
+			filesTab.setSelected(true);
+		} else {
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel){
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!commitsModel.getObject().isEmpty());
+				}
+				
+			};
+			commitsTab.setSelected(true);
+			filesTab.setSelected(false);
+		}
+		tabPanel.setOutputMarkupId(true);
+		if (target != null) {
+			replace(tabPanel);
+			target.add(tabPanel);
+		} else {
+			add(tabPanel);
+		}
 	}
 	
-	protected RevisionDiffPanel newRevDiffPanel() {
+	private void newRevDiffPanel(final WebMarkupContainer tabPanel, @Nullable AjaxRequestTarget target) {
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
 				new Model<PullRequest>(null), new Model<Comment>(null), 
-				target.getRevision(), source.getRevision(), path, null, diffOption.getLineProcessor(), 
+				RevisionComparePage.this.target.getRevision(), source.getRevision(), 
+				StringUtils.isBlank(path)?null:path, null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
 			@Override
 			protected void onClearPath(AjaxRequestTarget target) {
-				path = null;
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				replaceWith(diffPanel);
-				target.add(diffPanel);
+				path = "";
+				newRevDiffPanel(tabPanel, target);
+				pushState(target);
 			}
 			
 		};
 		diffPanel.setOutputMarkupId(true);
-		return diffPanel;
+		if (target != null) {
+			tabPanel.replace(diffPanel);
+			target.add(diffPanel);
+		} else {
+			tabPanel.add(diffPanel);
+		}
 	}
 
+	private void pushState(AjaxRequestTarget target) {
+		PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source, path);
+		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
+		pushState(target, url.toString(), path);
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+		
+		path = (String) data;
+		newTabPanel(target);
+	}
+	
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
