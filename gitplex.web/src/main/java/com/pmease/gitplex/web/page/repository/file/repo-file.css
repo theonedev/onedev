@@ -103,6 +103,9 @@
 	font-weight: bold;
 	color: #555;
 }
+#repo-file>.last-commit .commit-hash {
+	margin-right: 4px;
+}
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;
