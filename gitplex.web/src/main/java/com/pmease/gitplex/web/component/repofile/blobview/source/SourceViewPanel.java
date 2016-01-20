@@ -38,6 +38,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -361,11 +362,14 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 			for (Blame blame: context.getRepository().git().blame(commitHash, context.getBlobIdent().path).values()) {
 				BlameCommit commit = new BlameCommit();
-				commit.authorDate = DateUtils.formatDate(blame.getCommit().getAuthor().getWhen());
-				commit.authorName = StringEscapeUtils.escapeHtml4(blame.getCommit().getAuthor().getName());
+				commit.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
+				commit.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());
 				commit.hash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
 				commit.message = blame.getCommit().getSubject();
-				PageParameters params = CommitDetailPage.paramsOf(context.getRepository(), blame.getCommit().getHash());
+				CommitDetailPage.HistoryState state = new CommitDetailPage.HistoryState();
+				state.path = context.getBlobIdent().path;
+				PageParameters params = CommitDetailPage.paramsOf(context.getRepository(), 
+						blame.getCommit().getHash(), state);
 				commit.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 				commit.ranges = blame.getRanges();
 				commits.add(commit);
@@ -455,7 +459,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		String authorName;
 		
-		String authorDate;
+		String commitDate;
 		
 		List<Range> ranges;
 	}

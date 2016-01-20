@@ -51,7 +51,10 @@ class LastCommitPanel extends Panel {
 				RepoCommitsPage.HistoryState state = new RepoCommitsPage.HistoryState();
 				String commitHash = repoModel.getObject().getObjectId(blobIdent.revision).name();
 				state.setCompareWith(commitHash);
-				state.setQuery(String.format("id(%s) path(%s)", commitHash, blobIdent.path));
+				if (blobIdent.path != null) 
+					state.setQuery(String.format("id(%s) path(%s)", commitHash, blobIdent.path));
+				else
+					state.setQuery(String.format("id(%s)", commitHash));
 				setResponsePage(RepoCommitsPage.class, RepoCommitsPage.paramsOf(repoModel.getObject(), state));
 			}
 			

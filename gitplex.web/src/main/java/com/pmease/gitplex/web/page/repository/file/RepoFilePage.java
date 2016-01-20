@@ -670,7 +670,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				if (state.blobIdent.path != null) {
 					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 							RevWalk revWalk = new RevWalk(jgitRepo)) {
-						RevTree revTree = getRepository().getRevCommit(getCommitId(), true).getTree();
+						RevTree revTree = getRepository().getRevCommit(revision, true).getTree();
 						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 						if (treeWalk != null) {
 							state.blobIdent.mode = treeWalk.getRawMode(0);

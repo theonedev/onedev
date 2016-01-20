@@ -179,18 +179,18 @@ gitplex.sourceview = {
         			var $ele = $(document.createElement("div"));
         			$ele.addClass("CodeMirror-annotation");
             		$("<a class='hash'>" + commit.hash + "</a>").appendTo($ele).attr("href", commit.url).attr("title", commit.message);
-            		$ele.append("<span class='date'>" + commit.authorDate + "</span>");
+            		$ele.append("<span class='date'>" + commit.commitDate + "</span>");
             		$ele.append("<span class='author'>" + commit.authorName + "</span>");
-            		cm.setGutterMarker(range.beginLine, "CodeMirror-annotations", $ele[0]);
+            		cm.setGutterMarker(range.from, "CodeMirror-annotations", $ele[0]);
             		
-            		for (var line = range.beginLine+1; line<range.endLine; line++) {
+            		for (var line = range.from+1; line<range.to; line++) {
             			var $ele = $(document.createElement("div"));
             			$ele.addClass("CodeMirror-annotation");
                 		$ele.append("<span class='same-as-above fa fa-arrow-up' title='same as above'></span>");
                 		cm.setGutterMarker(line, "CodeMirror-annotations", $ele[0]);
             		}
         		}
-    		}    		
+    		} 
 		} else {
 			cm.clearGutter("CodeMirror-annotations");
 			var gutters = cm.getOption("gutters").slice();

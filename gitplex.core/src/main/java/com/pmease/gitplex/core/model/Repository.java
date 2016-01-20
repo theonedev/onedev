@@ -545,7 +545,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			} else {
 				try (	FileRepository jgitRepo = openAsJGitRepo(); 
 						RevWalk revWalk = new RevWalk(jgitRepo)) {
-					ObjectId commitId = getObjectId(blobIdent.revision);
+					ObjectId commitId = getObjectId(blobIdent.revision);		
 					RevTree revTree = revWalk.parseCommit(commitId).getTree();
 					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
 					if (treeWalk != null) {

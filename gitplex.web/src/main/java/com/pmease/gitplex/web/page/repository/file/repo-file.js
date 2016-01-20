@@ -54,7 +54,8 @@ $(window).load(function() {
 			// why calculate width this way, see above comment when handling file navigator 
 			maxWidth = headWidth - ($lastCommit.outerWidth()-$lastCommit.width()) 
 					- $lastCommit.find(".author").outerWidth(true) 
-					- $lastCommit.find(".hash").outerWidth(true);
+					- $lastCommit.find(".hash").outerWidth(true)
+					- $lastCommit.find(".history").outerWidth(true);
 			maxHeight = $lastCommit.find(".author").outerHeight();
 			var $message = $lastCommit.find(".last-commit>span.message");
 			if ($message.length != 0) {
