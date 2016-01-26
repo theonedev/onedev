@@ -81,6 +81,10 @@ public abstract class RevisionDiffPanel extends Panel {
 			List<DiffEntry> diffEntries = repoModel.getObject().getDiffs(oldCommitHash, newCommitHash,
 					true, paths.toArray(new String[paths.size()]));
 			
+			/*
+			 * If a single path is specified, JGit will not detect renames, hence we add logic below
+			 * to make rename detection possible 
+			 */
 			boolean renamePossible = false;
 			if (path != null && comparePath == null) {
 				for (DiffEntry entry: diffEntries) {
