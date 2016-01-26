@@ -95,7 +95,17 @@ public abstract class RevisionDiffPanel extends Panel {
 				diffEntries = repoModel.getObject().getDiffs(oldCommitHash, newCommitHash, true);
 				for (Iterator<DiffEntry> it = diffEntries.iterator(); it.hasNext();) {
 					DiffEntry entry = it.next();
-		    		if (!path.equals(entry.getOldPath()) && !path.equals(entry.getNewPath()))
+					boolean oldPathMatches = false;
+					if (entry.getOldPath() != null && entry.getOldPath().startsWith(path)) {
+						String subpath = entry.getOldPath().substring(path.length());
+						oldPathMatches = subpath.length() == 0 || subpath.charAt(0) == '/';
+					} 
+					boolean newPathMatches = false;
+					if (entry.getNewPath() != null && entry.getNewPath().startsWith(path)) {
+						String subpath = entry.getNewPath().substring(path.length());
+						newPathMatches = subpath.length() == 0 || subpath.charAt(0) == '/';
+					} 
+		    		if (!oldPathMatches && !newPathMatches)
 		    			it.remove();
 				}
 			}

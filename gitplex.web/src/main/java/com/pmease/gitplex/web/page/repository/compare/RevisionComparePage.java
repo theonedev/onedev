@@ -341,7 +341,7 @@ public class RevisionComparePage extends RepositoryPage {
 					return RevisionComparePage.this.getRepository();
 				}
 				
-			}, RevisionComparePage.this.target.getRevision()) {
+			}, RevisionComparePage.this.source.getRevision()) {
 
 				@Override
 				protected void onSelectPath(AjaxRequestTarget target, String path) {
