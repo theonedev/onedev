@@ -61,7 +61,7 @@ public abstract class BlobChange implements Serializable {
 	public List<DiffBlock<List<CmToken>>> getDiffBlocks() {
 		if (diffBlocks == null) {
 			try {
-				if (type == ChangeType.ADD) {
+				if (type == ChangeType.ADD || type == ChangeType.COPY) {
 					if (getNewText() != null) {
 						List<String> newLines = getNewText().getLines(getLineProcessor());
 						if (newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {

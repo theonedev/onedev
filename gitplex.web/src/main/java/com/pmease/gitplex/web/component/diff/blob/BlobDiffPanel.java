@@ -68,10 +68,10 @@ public class BlobDiffPanel extends Panel {
 			} else if (change.getAdditions()+change.getDeletions() > Constants.MAX_SINGLE_FILE_DIFF_LINES) {
 				add(newFragment("Diff is too large to be displayed.", true));
 			} else if (change.getDiffBlocks().isEmpty()) {
-				if (change.getOldBlobIdent().path != null)
-					add(newFragment("Empty file removed.", false));
-				else
+				if (change.getNewBlobIdent().path != null)
 					add(newFragment("Empty file added.", false));
+				else
+					add(newFragment("Empty file removed.", false));
 			} else {
 				add(new TextDiffPanel(CONTENT_ID, repoModel, requestModel, commentModel, change, diffMode));
 			}
@@ -95,7 +95,7 @@ public class BlobDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (change.getType() == ChangeType.ADD) {
+		if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY) {
 			showBlob(change.getNewBlob());
 		} else if (change.getType() == ChangeType.DELETE) {
 			showBlob(change.getOldBlob());

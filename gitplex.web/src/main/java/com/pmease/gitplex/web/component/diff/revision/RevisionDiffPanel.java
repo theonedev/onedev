@@ -80,6 +80,26 @@ public abstract class RevisionDiffPanel extends Panel {
 				paths.add(comparePath);
 			List<DiffEntry> diffEntries = repoModel.getObject().getDiffs(oldCommitHash, newCommitHash,
 					true, paths.toArray(new String[paths.size()]));
+			
+			boolean renamePossible = false;
+			if (path != null && comparePath == null) {
+				for (DiffEntry entry: diffEntries) {
+					if ((entry.getChangeType() == ChangeType.ADD || entry.getChangeType() == ChangeType.DELETE)
+							&& (path.equals(entry.getOldPath()) || path.equals(entry.getNewPath()))) {
+						renamePossible = true;
+						break;
+					}
+				}
+			}
+			if (renamePossible) {
+				diffEntries = repoModel.getObject().getDiffs(oldCommitHash, newCommitHash, true);
+				for (Iterator<DiffEntry> it = diffEntries.iterator(); it.hasNext();) {
+					DiffEntry entry = it.next();
+		    		if (!path.equals(entry.getOldPath()) && !path.equals(entry.getNewPath()))
+		    			it.remove();
+				}
+			}
+			
 			List<BlobChange> diffableChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
 	    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
@@ -242,7 +262,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				String iconClass;
-				if (change.getType() == ChangeType.ADD)
+				if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
 					iconClass = " fa-ext fa-diff-added";
 				else if (change.getType() == ChangeType.DELETE)
 					iconClass = " fa-ext fa-diff-removed";
@@ -263,7 +283,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				item.add(new Label("deletions", "-" + change.getDeletions()));
 				
 				boolean barVisible;
-				if (change.getType() == ChangeType.ADD) {
+				if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY) {
 					Blob.Text text = change.getNewText();
 					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_SIZE);
 				} else if (change.getType() == ChangeType.DELETE) {
