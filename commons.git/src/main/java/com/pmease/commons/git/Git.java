@@ -34,7 +34,6 @@ import com.pmease.commons.git.command.IsTreeLinkCommand;
 import com.pmease.commons.git.command.ListBranchCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
 import com.pmease.commons.git.command.ListCherriesCommand;
-import com.pmease.commons.git.command.ListHeadCommitCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
 import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.LogCommand;
@@ -314,16 +313,6 @@ public class Git implements Serializable {
 		return cmd.baseCommit(baseRev).compareRevs(compareRevs).call();
 	}
 	
-	/**
-	 * List head commits of all local branches.
-
-	 * @return
-	 * 			a map from branch name to brief head commit
-	 */
-	public Map<String, BriefCommit> listHeadCommits() {
-		return new ListHeadCommitCommand(repoDir).call();
-	}
-
 	public Collection<String> listTags() {
 		return new ListTagsCommand(repoDir).call();
 	}

@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.repository.commit;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -155,15 +154,13 @@ public class CommitDetailPage extends RepositoryPage {
 								branchRefs.add(ref);
 							}
 						}
-						Collections.sort(branchRefs, getRepository().newBranchDateComparator());
-
+						
 						List<Ref> tagRefs = new ArrayList<>();
 						for (Ref ref: getRepository().getTagRefs()) {
 							RevCommit taggedCommit = getRepository().getRevCommit(ref.getObjectId());
-							if (taggedCommit != null && descendants.contains(taggedCommit.getId()))
+							if (descendants.contains(taggedCommit.getId()))
 								tagRefs.add(ref);
 						}
-						Collections.sort(tagRefs, getRepository().newTagDateComparator());
 
 						List<Ref> refs = new ArrayList<>();
 						refs.addAll(branchRefs);

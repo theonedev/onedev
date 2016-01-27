@@ -39,7 +39,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,16 +166,16 @@ public class RepoCommitsPage extends RepositoryPage {
 		@Override
 		protected Map<String, List<String>> load() {
 			Map<String, List<String>> labels = new HashMap<>();
-			Map<String, Ref> refs = new HashMap<>();
-			refs.putAll(getRepository().getRefs(org.eclipse.jgit.lib.Constants.R_HEADS));
-			for (Map.Entry<String, Ref> entry: refs.entrySet()) {
-				String commitHash = entry.getValue().getObjectId().name();
-				List<String> commitLabels = labels.get(commitHash);
+			List<Ref> refs = getRepository().getBranchRefs();
+			refs.addAll(getRepository().getTagRefs());
+			for (Ref ref: refs) {
+				RevCommit commit = getRepository().getRevCommit(ref.getObjectId());
+				List<String> commitLabels = labels.get(commit.name());
 				if (commitLabels == null) {
 					commitLabels = new ArrayList<>();
-					labels.put(commitHash, commitLabels);
+					labels.put(commit.name(), commitLabels);
 				}
-				commitLabels.add(entry.getKey());
+				commitLabels.add(FileRepository.shortenRefName(ref.getName()));
 			}
 			return labels;
 		}

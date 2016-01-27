@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web.component.revisionpicker;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -34,7 +33,6 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Throwables;
@@ -77,21 +75,11 @@ public abstract class RevisionSelector extends Panel {
 	private List<String> findRefs() {
 		List<String> names = new ArrayList<>();
 		
-		List<Ref> refs = new ArrayList<>();
-		
-		Repository repo = repoModel.getObject();
 		if (branchesActive) {
-			refs.addAll(repo.getRefs(Constants.R_HEADS).values());
-			Collections.sort(refs, repo.newBranchDateComparator());
-			for (Ref ref: refs)
+			for (Ref ref: repoModel.getObject().getBranchRefs())
 				names.add(GitUtils.ref2branch(ref.getName()));
 		} else {
-			for (Ref ref: repo.getTagRefs()) {
-				if (repo.getRevCommit(ref.getObjectId()) != null) 
-					refs.add(ref);
-			}
-			Collections.sort(refs, repo.newTagDateComparator());
-			for (Ref ref: refs)
+			for (Ref ref: repoModel.getObject().getTagRefs())
 				names.add(GitUtils.ref2tag(ref.getName()));
 		}
 		return names;

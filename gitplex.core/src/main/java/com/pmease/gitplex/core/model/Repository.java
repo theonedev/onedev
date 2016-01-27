@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -270,14 +271,55 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		}
 	}
 
-	public Collection<Ref> getBranchRefs() {
-		return getRefs(Constants.R_HEADS).values();
-    }
+	public List<Ref> getBranchRefs() {
+		List<Ref> refs = new ArrayList<Ref>(getRefs(Constants.R_HEADS).values());
+		Collections.sort(refs, new Comparator<Ref>() {
 
-	public Collection<Ref> getTagRefs() {
-		return getRefs(Constants.R_TAGS).values();
+    		@Override
+    		public int compare(Ref o1, Ref o2) {
+    			if (o1.getObjectId().equals(o2.getObjectId())) {
+    				return o1.getName().compareTo(o2.getName());
+    			} else {
+    				RevCommit commit1 = getRevCommit(o1.getObjectId());
+    				RevCommit commit2 = getRevCommit(o2.getObjectId());
+    				return commit2.getCommitTime() - commit1.getCommitTime();
+    			}
+    		}
+    		
+    	});
+		return refs;
     }
 	
+	public List<Ref> getTagRefs() {
+		List<Ref> refs = new ArrayList<>();
+		for (Ref ref: getRefs(Constants.R_TAGS).values()) {
+			if (getRevCommit(ref.getObjectId(), false) != null) 
+				refs.add(ref);
+		}
+		Collections.sort(refs, new Comparator<Ref>() {
+
+    		@Override
+    		public int compare(Ref o1, Ref o2) {
+    			RevObject obj1 = getRevObject(o1.getObjectId());
+    			RevObject obj2 = getRevObject(o2.getObjectId());
+    			if (obj1 instanceof RevTag && obj2 instanceof RevTag) {
+    				RevTag tag1 = (RevTag) obj1;
+    				RevTag tag2 = (RevTag) obj2;
+    				if (tag1.getTaggerIdent() != null && tag2.getTaggerIdent() != null)
+    					return tag2.getTaggerIdent().getWhen().compareTo(tag1.getTaggerIdent().getWhen());
+    			}  
+    			RevCommit commit1 = getRevCommit(o1.getObjectId());
+    			RevCommit commit2 = getRevCommit(o2.getObjectId());
+    			if (commit1.getId().equals(commit2.getId()))
+    				return o1.getName().compareTo(o2.getName());
+    			else
+    				return commit2.getCommitTime() - commit1.getCommitTime();
+    		}
+    		
+    	});
+		return refs;
+    }
+
     @Override
 	public boolean has(ProtectedObject object) {
 		if (object instanceof Repository) {
@@ -807,9 +849,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return revObject;
 	}
 	
-	@Nullable
 	public RevCommit getRevCommit(RevObject revObject) {
-		return getRevCommit(revObject, false);
+		return getRevCommit(revObject, true);
 	}
 	
 	@Nullable
@@ -850,9 +891,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			return null;
 	}
 	
-	@Nullable
+	public RevCommit getRevCommit(String revision) {
+		return getRevCommit(revision, true);
+	}
+	
 	public RevCommit getRevCommit(AnyObjectId revId) {
-		return getRevCommit(getRevObject(revId), false);
+		return getRevCommit(getRevObject(revId), true);
 	}
 	
 	public Map<String, Ref> getRefs(String prefix) {
@@ -907,47 +951,6 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		git().deleteRef(refName);
 		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 			listener.onRefUpdate(this, refName, null);
-    }
-    
-    public Comparator<Ref> newBranchDateComparator() {
-    	return new Comparator<Ref>() {
-
-    		@Override
-    		public int compare(Ref o1, Ref o2) {
-    			if (o1.getObjectId().equals(o2.getObjectId())) {
-    				return o1.getName().compareTo(o2.getName());
-    			} else {
-    				RevCommit commit1 = getRevCommit(o1.getObjectId());
-    				RevCommit commit2 = getRevCommit(o2.getObjectId());
-    				return commit2.getCommitTime() - commit1.getCommitTime();
-    			}
-    		}
-    		
-    	};
-    }
-    
-    public Comparator<Ref> newTagDateComparator() {
-    	return new Comparator<Ref>() {
-
-    		@Override
-    		public int compare(Ref o1, Ref o2) {
-    			RevObject obj1 = getRevObject(o1.getObjectId());
-    			RevObject obj2 = getRevObject(o2.getObjectId());
-    			if (obj1 instanceof RevTag && obj2 instanceof RevTag) {
-    				RevTag tag1 = (RevTag) obj1;
-    				RevTag tag2 = (RevTag) obj2;
-    				if (tag1.getTaggerIdent() != null && tag2.getTaggerIdent() != null)
-    					return tag2.getTaggerIdent().getWhen().compareTo(tag1.getTaggerIdent().getWhen());
-    			}  
-    			RevCommit commit1 = getRevCommit(o1.getObjectId());
-    			RevCommit commit2 = getRevCommit(o2.getObjectId());
-    			if (commit1.getId().equals(commit2.getId()))
-    				return o1.getName().compareTo(o2.getName());
-    			else
-    				return commit2.getCommitTime() - commit1.getCommitTime();
-    		}
-    		
-    	};
     }
     
 	private static class DiffKey implements Serializable {

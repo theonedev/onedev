@@ -1,7 +1,6 @@
 package com.pmease.gitplex.web.component.branchpicker;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -61,12 +60,7 @@ public abstract class BranchSelector extends Panel {
 		this.repoModel = repoModel;
 		this.branch = branch;		
 		
-		List<Ref> refs = new ArrayList<>();
-		
-		Repository repo = repoModel.getObject();
-		refs.addAll(repo.getBranchRefs());
-		Collections.sort(refs, repo.newBranchDateComparator());
-		for (Ref ref: refs)
+		for (Ref ref: repoModel.getObject().getBranchRefs())
 			branches.add(GitUtils.ref2branch(ref.getName()));
 		
 		filteredBranches.addAll(branches);
