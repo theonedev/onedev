@@ -942,8 +942,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		return submodules;
 	}
 
-    public String getBranchFQN(String branch) {
-    	return getFQN() + ":" + branch;
+    public String getRevisionFQN(String revision) {
+    	return getFQN() + ":" + revision;
     }
 
     public void deleteBranch(String branch) {

@@ -29,7 +29,7 @@ public class MatchAffinalBranchesByPatterns implements AffinalBranchMatcher {
 
 	@Override
 	public boolean matches(Repository repository, String branch) {
-		return WildcardUtils.matchPath(getBranchPatterns(), repository.getBranchFQN(branch));
+		return WildcardUtils.matchPath(getBranchPatterns(), repository.getRevisionFQN(branch));
 	}
 
 	@Override

@@ -26,10 +26,6 @@ public class RepoAndBranch extends RepoAndRevision {
 		return getRevision();
 	}
 	
-	public String getFQN() {
-		return getRepository().getBranchFQN(getBranch());		
-	}
-	
 	@Nullable
 	public String getHead(boolean mustExist) {
 		ObjectId commitId = getRepository().getObjectId(GitUtils.branch2ref(getRevision()), mustExist);

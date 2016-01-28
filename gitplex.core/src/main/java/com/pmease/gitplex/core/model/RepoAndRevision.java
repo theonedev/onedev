@@ -73,6 +73,10 @@ public class RepoAndRevision implements Serializable {
 		return getRepository().getObjectId(revision);
 	}
 	
+	public String getFQN() {
+		return getRepository().getRevisionFQN(revision);		
+	}
+	
 	public RevCommit getCommit() {
 		return getRepository().getRevCommit(getObjectId());
 	}
