@@ -35,7 +35,6 @@ import com.pmease.commons.git.command.ListBranchCommand;
 import com.pmease.commons.git.command.ListChangedFilesCommand;
 import com.pmease.commons.git.command.ListCherriesCommand;
 import com.pmease.commons.git.command.ListSubModulesCommand;
-import com.pmease.commons.git.command.ListTagsCommand;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.git.command.MergeCommand;
 import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
@@ -94,14 +93,6 @@ public class Git implements Serializable {
 	 */
 	public Git deleteRef(String refName) {
 		new DeleteRefCommand(repoDir).refName(refName).call();
-		return this;
-	}
-
-	public Git createTag(String tagName, String commitHash) {
-		if (new ListTagsCommand(repoDir).call().contains(tagName))
-			throw new GeneralException(String.format("Tag %s already exists.", tagName));
-
-		new UpdateRefCommand(repoDir).refName(Constants.R_TAGS + tagName).revision(commitHash).call();
 		return this;
 	}
 
@@ -298,23 +289,9 @@ public class Git implements Serializable {
 			return new IsAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
 	}
 	
-	/**
-	 * List all local branches in git repository.
-
-	 * @return
-	 * 			a collection of branch names
-	 */
-	public Collection<String> listBranches() {
-		return new ListBranchCommand(repoDir).call();
-	}
-	
 	public Map<String, AheadBehind> getAheadBehinds(String baseRev, String... compareRevs) {
 		AheadBehindCommand cmd = new AheadBehindCommand(repoDir);
 		return cmd.baseCommit(baseRev).compareRevs(compareRevs).call();
-	}
-	
-	public Collection<String> listTags() {
-		return new ListTagsCommand(repoDir).call();
 	}
 	
 	/**

@@ -389,11 +389,14 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	@Transactional
 	@Override
 	public void onTargetBranchUpdate(PullRequest request) {
-		closeIfMerged(request);
-		if (request.isOpen()) {
-			IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
-			workManager.remove(task);
-			workManager.execute(task);
+		String targetHead = request.getTarget().getHead();
+		if (request.getLastIntegrationPreview() == null || !request.getLastIntegrationPreview().getTargetHead().equals(targetHead)) {
+			closeIfMerged(request);
+			if (request.isOpen()) {
+				IntegrationPreviewTask task = new IntegrationPreviewTask(request.getId());
+				workManager.remove(task);
+				workManager.execute(task);
+			}
 		}
 	}
 
@@ -425,35 +428,34 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	@Transactional
 	@Override
 	public void onSourceBranchUpdate(PullRequest request, boolean notify) {
-		if (request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getHead()))
-			return;
-		
-		PullRequestUpdate update = new PullRequestUpdate();
-		update.setRequest(request);
-		update.setDate(new Date());
-		update.setHeadCommitHash(request.getSource().getHead());
-		
-		request.addUpdate(update);
-		pullRequestUpdateManager.save(update, notify);
-		closeIfMerged(request);
+		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getHead())) {
+			PullRequestUpdate update = new PullRequestUpdate();
+			update.setRequest(request);
+			update.setDate(new Date());
+			update.setHeadCommitHash(request.getSource().getHead());
+			
+			request.addUpdate(update);
+			pullRequestUpdateManager.save(update, notify);
+			closeIfMerged(request);
 
-		if (request.isOpen()) {
-			final Long requestId = request.getId();
-			dao.afterCommit(new Runnable() {
+			if (request.isOpen()) {
+				final Long requestId = request.getId();
+				dao.afterCommit(new Runnable() {
 
-				@Override
-				public void run() {
-					unitOfWork.asyncCall(new Runnable() {
+					@Override
+					public void run() {
+						unitOfWork.asyncCall(new Runnable() {
 
-						@Override
-						public void run() {
-							check(dao.load(PullRequest.class, requestId));
-						}
-						
-					});
-				}
-				
-			});
+							@Override
+							public void run() {
+								check(dao.load(PullRequest.class, requestId));
+							}
+							
+						});
+					}
+					
+				});
+			}
 		}
 	}
 
@@ -699,8 +701,12 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 				 * in a executor service like target branch update below
 				 */
 				Criterion criterion = Restrictions.and(ofOpen(), ofSource(repoAndBranch));
-				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion)))
-					onSourceBranchUpdate(request, true);
+				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) {
+					if (repository.getObjectId(request.getBaseCommitHash(), false) != null)
+						onSourceBranchUpdate(request, true);
+					else
+						logger.error("Unable to update pull request #{} due to unexpected source repository.", request.getId());
+				}
 				
 				final Long repoId = repository.getId();
 				dao.afterCommit(new Runnable() {
@@ -713,8 +719,13 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 							public void run() {
 								RepoAndBranch repoAndBranch = new RepoAndBranch(repoId, branch);								
 								Criterion criterion = Restrictions.and(ofOpen(), ofTarget(repoAndBranch));
-								for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) 
-									onTargetBranchUpdate(request);
+								for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
+									if (request.getSourceRepo().getObjectId(request.getBaseCommitHash(), false) != null)
+										onTargetBranchUpdate(request);
+									else
+										logger.error("Unable to update pull request #{} due to unexpected target repository.", request.getId());
+									
+								}
 							}
 							
 						});
@@ -785,33 +796,39 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 			if (sourceRepo == null) {
 				discard(request, "Source repository is deleted.");
 			} else if (sourceRepo.isValid()) {
-				String latestUpdateHead = request.getLatestUpdate().getHeadCommitHash();
+				String baseCommitHash = request.getBaseCommitHash();
 				
 				// only modifies pull request status if source repository is the repository we
 				// previously worked with. This avoids disaster of closing all pull requests
 				// if repository storage points to a different location by mistake
-				if (sourceRepo.getObjectId(latestUpdateHead, false) != null) { 
+				if (sourceRepo.getObjectId(baseCommitHash, false) != null) { 
 					String sourceHead = request.getSource().getHead(false);
 					if (sourceHead == null) 
 						discard(request, "Source branch is deleted.");
-					else if (!sourceHead.equals(latestUpdateHead))
+					else 
 						onSourceBranchUpdate(request, true);
+				} else {
+					logger.error("Unable to update pull request #{} due to unexpected source repository", request.getId());
 				}
 			}
 
-			Repository targetRepo = request.getTargetRepo();
-			if (targetRepo.isValid()) {
-				String latestUpdateHead = request.getLatestUpdate().getHeadCommitHash();
-				
-				// only modifies pull request status if target repository is the repository we
-				// previously worked with. This avoids disaster of closing all pull requests
-				// if repository storage points to a different location by mistake
-				if (targetRepo.getObjectId(latestUpdateHead, false) != null) {
-					String targetHead = request.getTarget().getHead(false);
-					if (targetHead == null)
-						discard(request, "Target branch is deleted.");
-					else 
-						onTargetBranchUpdate(request);
+			if (request.isOpen()) {
+				Repository targetRepo = request.getTargetRepo();
+				if (targetRepo.isValid()) {
+					String baseCommitHash = request.getBaseCommitHash();
+					
+					// only modifies pull request status if target repository is the repository we
+					// previously worked with. This avoids disaster of closing all pull requests
+					// if repository storage points to a different location by mistake
+					if (targetRepo.getObjectId(baseCommitHash, false) != null) {
+						String targetHead = request.getTarget().getHead(false);
+						if (targetHead == null)
+							discard(request, "Target branch is deleted.");
+						else 
+							onTargetBranchUpdate(request);
+					} else {
+						logger.error("Unable to update pull request #{} due to unexpected target repository", request.getId());
+					}
 				}
 			}
 		}

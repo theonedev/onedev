@@ -333,7 +333,7 @@ public class DefaultIndexManager implements IndexManager {
 								public IndexResult call() throws Exception {
 									Repository repository = dao.load(Repository.class, repoId);
 									AnyObjectId commitId = repository.getObjectId(revision);
-									logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository);
+									logger.info("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository.getFQN());
 									IndexResult indexResult;
 									File indexDir = storageManager.getIndexDir(repository);
 									try (Directory directory = FSDirectory.open(indexDir)) {
@@ -362,8 +362,8 @@ public class DefaultIndexManager implements IndexManager {
 											}
 										}
 									}
-									logger.info("Commit {} indexed (checked blobs: {}, indexed blobs: {})", 
-											commitId.getName(), indexResult.getChecked(), indexResult.getIndexed());
+									logger.info("Commit {} indexed for repository {} (checked blobs: {}, indexed blobs: {})", 
+											commitId.getName(), repository.getFQN(), indexResult.getChecked(), indexResult.getIndexed());
 									
 									for (IndexListener listener: listeners)
 										listener.commitIndexed(repository, revision);

@@ -23,10 +23,23 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import jetbrains.exodus.ArrayByteIterable;
+import jetbrains.exodus.ByteIterable;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
+import jetbrains.exodus.env.Environments;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.TransactionalComputable;
+import jetbrains.exodus.env.TransactionalExecutable;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
@@ -44,20 +57,11 @@ import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.model.Repository;
 
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.EnvironmentConfig;
-import jetbrains.exodus.env.Environments;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
-import jetbrains.exodus.env.TransactionalExecutable;
-
 @Singleton
 public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryListener, RefListener, LifecycleListener {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultAuxiliaryManager.class);
+	
 	private static final String AUXILIARY_DIR = "auxiliary";
 	
 	private static final String DEFAULT_STORE = "default";
@@ -100,6 +104,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	
 	@Override
 	public void collect(final Repository repository, final String refName) {
+		final String repoFQN = repository.getFQN(); // load here to avoid LazyInitializationException
 		sequentialWorkManager.execute(getSequentialExecutorKey(repository), new PrioritizedRunnable(PRIORITY) {
 
 			@Override
@@ -109,6 +114,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 						@Override
 						public void run() {
+							logger.info("Collecting auxiliary information of repository {}...", repoFQN);
 							Environment env = getEnv(repository);
 							final Store defaultStore = getStore(env, DEFAULT_STORE);
 							final Store commitsStore = getStore(env, COMMITS_STORE);
@@ -283,11 +289,13 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 									}
 								}
 							});
+							
+							logger.info("Auxiliary information collected for repository {}.", repoFQN);
 						}
 
 					}).get();
 				} catch (InterruptedException | ExecutionException e) {
-					throw new RuntimeException(e);
+					logger.error("Error collecting auxiliary information", e);
 				}
 			}
 
@@ -300,6 +308,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setLogCacheShared(false);
 			config.setMemoryUsage(1024*1024*64);
+			config.setLogFileSize(64*1024);
 			env = Environments.newInstance(getAuxiliaryDir(repository), config);
 			envs.put(repository.getId(), env);
 		}
