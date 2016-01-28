@@ -615,7 +615,7 @@ public class PullRequest extends AbstractEntity {
 
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = getSortedUpdates().get(i);
-				if (!getTargetRepo().isAncestor(update.getHeadCommitHash(), getTarget().getHead()))
+				if (!getTargetRepo().isAncestor(update.getHeadCommitHash(), getTarget().getObjectName()))
 					effectiveUpdates.add(update);
 				else 
 					break;
@@ -641,7 +641,7 @@ public class PullRequest extends AbstractEntity {
 	
 	public Collection<String> findTouchedFiles() {
 		Git git = getTargetRepo().git();
-		return git.listChangedFiles(getTarget().getHead(), getLatestUpdate().getHeadCommitHash(), null);
+		return git.listChangedFiles(getTarget().getObjectName(), getLatestUpdate().getHeadCommitHash(), null);
 	}
 
 	@JsonView(ExternalView.class)
@@ -820,7 +820,7 @@ public class PullRequest extends AbstractEntity {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
 			Repository repo = getTargetRepo();
-			for (Commit commit: repo.git().log(getTarget().getHead(), getLatestUpdate().getHeadCommitHash(), null, 0, 0, false))
+			for (Commit commit: repo.git().log(getTarget().getObjectName(), getLatestUpdate().getHeadCommitHash(), null, 0, 0, false))
 				pendingCommits.add(commit.getHash());
 		}
 		return pendingCommits;
@@ -847,7 +847,7 @@ public class PullRequest extends AbstractEntity {
 			mergedCommits = new HashSet<>();
 
 			Repository repo = getTargetRepo();
-			for (Commit commit: repo.git().log(getBaseCommitHash(), getTarget().getHead(), null, 0, 0, false))
+			for (Commit commit: repo.git().log(getBaseCommitHash(), getTarget().getObjectName(), null, 0, 0, false))
 				mergedCommits.add(commit);
 		}
 		return mergedCommits;

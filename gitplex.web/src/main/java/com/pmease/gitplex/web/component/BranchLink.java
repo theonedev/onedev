@@ -31,7 +31,7 @@ public class BranchLink extends BookmarkablePageLink<Void> {
 	protected void onConfigure() {
 		super.onConfigure();
 		setEnabled(SecurityUtils.canPull(repoAndBranch.getRepository()) 
-				&& repoAndBranch.getHead(false) != null);
+				&& repoAndBranch.getObjectName(false) != null);
 	}
 
 	@Override

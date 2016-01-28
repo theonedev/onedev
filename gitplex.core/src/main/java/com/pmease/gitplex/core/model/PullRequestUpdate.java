@@ -160,7 +160,7 @@ public class PullRequestUpdate extends AbstractEntity {
 						log = Lists.newArrayList(targetRepo.getCommit(getHeadCommitHash()));
 					cachedInfo.setLogCommits(log);
 					
-					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getHead());
+					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getObjectName());
 
 					if (targetRepo.isAncestor(getBaseCommitHash(), mergeBase)) { 
 						cachedInfo.setChangedFiles(git.listChangedFiles(mergeBase, getHeadCommitHash(), null));					
@@ -258,7 +258,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				mergedCommits.put(commit.getHash(), scoredCommit);
 			}
 
-			headCommit = mergedCommits.get(getRequest().getTarget().getHead());
+			headCommit = mergedCommits.get(getRequest().getTarget().getObjectName());
 			if (headCommit != null) {
 				headCommit.setScore(0);
 				updateAffinityScores(mergedCommits, headCommit);

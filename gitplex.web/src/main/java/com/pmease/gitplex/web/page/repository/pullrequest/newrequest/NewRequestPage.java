@@ -141,7 +141,7 @@ public class NewRequestPage extends PullRequestPage {
 			PullRequestUpdate update = new PullRequestUpdate();
 			pullRequest.addUpdate(update);
 			update.setRequest(pullRequest);
-			update.setHeadCommitHash(source.getHead());
+			update.setHeadCommitHash(source.getObjectName());
 			pullRequest.setLastEventDate(new Date());
 			
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
@@ -157,8 +157,8 @@ public class NewRequestPage extends PullRequestPage {
 
 			if (target.getRepository().equals(source.getRepository())) {
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(
-						target.getHead(), source.getHead()));			
-				if (target.getRepository().isAncestor(source.getHead(), target.getHead())) {
+						target.getObjectName(), source.getObjectName()));			
+				if (target.getRepository().isAncestor(source.getObjectName(), target.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
 					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
@@ -172,9 +172,9 @@ public class NewRequestPage extends PullRequestPage {
 
 				sandbox.fetch(source.getRepository().git(), source.getBranch());
 				
-				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getHead(), source.getHead()));			
+				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getObjectName(), source.getObjectName()));			
 
-				if (sandbox.isAncestor(source.getHead(), target.getHead())) {
+				if (sandbox.isAncestor(source.getObjectName(), target.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
 					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
@@ -459,8 +459,8 @@ public class NewRequestPage extends PullRequestPage {
 				Dao dao = GitPlex.getInstance(Dao.class);
 				RepoAndBranch target = getPullRequest().getTarget();
 				RepoAndBranch source = getPullRequest().getSource();
-				if (!target.getHead().equals(getPullRequest().getTarget().getHead()) 
-						|| !source.getHead().equals(getPullRequest().getSource().getHead())) {
+				if (!target.getObjectName().equals(getPullRequest().getTarget().getObjectName()) 
+						|| !source.getObjectName().equals(getPullRequest().getSource().getObjectName())) {
 					getSession().warn("Either target branch or source branch has new commits just now, please re-check.");
 					setResponsePage(NewRequestPage.class, paramsOf(getRepository(), target, source));
 				} else {

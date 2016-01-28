@@ -140,7 +140,7 @@ public class RequestComparePage extends RequestDetailPage {
 			}
 
 			if (request.isOpen()) {
-				String targetHead = request.getTarget().getHead();
+				String targetHead = request.getTarget().getObjectName();
 				if (!choices.containsKey(targetHead)) {
 					description = new CommitDescription("Target Branch Head", 
 							getRepository().getCommit(targetHead).getSubject());
@@ -197,7 +197,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (updates.get(i).getHeadCommitHash().equals(commitHash))
 					return REV_UPDATE_PREFIX + (i+1);
 			}
-			if (commitHash.equals(request.getTarget().getHead(false))) {
+			if (commitHash.equals(request.getTarget().getObjectName(false))) {
 				return REV_TARGET_BRANCH;
 			} else {
 				IntegrationPreview preview = request.getIntegrationPreview();
@@ -222,7 +222,7 @@ public class RequestComparePage extends RequestDetailPage {
 			else
 				return preview.getIntegrated();
 		} else if (revision.equals(REV_TARGET_BRANCH)) {
-			return request.getTarget().getHead();
+			return request.getTarget().getObjectName();
 		} else if (revision.startsWith(REV_UPDATE_PREFIX)) {
 			int updateNo = Integer.parseInt(revision.substring(REV_UPDATE_PREFIX.length()));
 			if (updateNo == 0)

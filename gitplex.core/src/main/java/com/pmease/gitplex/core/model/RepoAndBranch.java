@@ -1,9 +1,5 @@
 package com.pmease.gitplex.core.model;
 
-import javax.annotation.Nullable;
-
-import org.eclipse.jgit.lib.ObjectId;
-
 import com.pmease.commons.git.GitUtils;
 
 public class RepoAndBranch extends RepoAndRevision {
@@ -25,15 +21,10 @@ public class RepoAndBranch extends RepoAndRevision {
 	public String getBranch() {
 		return getRevision();
 	}
-	
-	@Nullable
-	public String getHead(boolean mustExist) {
-		ObjectId commitId = getRepository().getObjectId(GitUtils.branch2ref(getRevision()), mustExist);
-		return commitId!=null?commitId.name():null;
-	}
-	
-	public String getHead() {
-		return getHead(true);
+
+	@Override
+	protected String normalizeRevision() {
+		return GitUtils.branch2ref(getBranch());
 	}
 	
 }

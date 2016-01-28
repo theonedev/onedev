@@ -88,18 +88,18 @@ public enum PullRequestOperation {
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			if (request.isOpen() 
 					|| !SecurityUtils.canModify(request)
-					|| request.getTarget().getHead(false) == null
+					|| request.getTarget().getObjectName(false) == null
 					|| request.getSourceRepo() == null 
-					|| request.getSource().getHead(false) == null
+					|| request.getSource().getObjectName(false) == null
 					|| pullRequestManager.findOpen(request.getTarget(), request.getSource()) != null) {
 				return false;
 			}
 			
 			// now check if source branch is integrated into target branch
 			Git git = request.getTargetRepo().git();
-			String sourceHead = request.getSource().getHead();
+			String sourceHead = request.getSource().getObjectName();
 			return git.parseRevision(sourceHead, false) == null 
-					|| !request.getTargetRepo().isAncestor(sourceHead, request.getTarget().getHead());
+					|| !request.getTargetRepo().isAncestor(sourceHead, request.getTarget().getObjectName());
 		}
 
 		@Override
@@ -121,11 +121,11 @@ public enum PullRequestOperation {
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			return request.getStatus() == Status.INTEGRATED 
 					&& request.getSourceRepo() != null		
-					&& request.getSource().getHead(false) != null
+					&& request.getSource().getObjectName(false) != null
 					&& !request.getSource().isDefault()
 					&& preview != null
-					&& (request.getSource().getHead().equals(preview.getRequestHead()) 
-							|| request.getSource().getHead().equals(preview.getIntegrated()))
+					&& (request.getSource().getObjectName().equals(preview.getRequestHead()) 
+							|| request.getSource().getObjectName().equals(preview.getIntegrated()))
 					&& SecurityUtils.canModify(request)
 					&& SecurityUtils.canModify(request.getSource())
 					&& pullRequestManager.queryOpenTo(request.getSource(), null).isEmpty();
@@ -141,7 +141,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return request.getSourceRepo() != null && request.getSource().getHead(false) == null 
+			return request.getSourceRepo() != null && request.getSource().getObjectName(false) == null 
 					&& SecurityUtils.canModify(request) && SecurityUtils.canCreate(request.getSource());
 		}
 		

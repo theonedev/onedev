@@ -932,7 +932,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	public boolean isAtSourceBranchHead() {
 		PullRequest request = getPullRequest();
 		return request != null && request.getSourceRepo() != null 
-				&& blobIdent.revision.equals(request.getSource().getHead(false)); 
+				&& blobIdent.revision.equals(request.getSource().getObjectName(false)); 
 	}
 	
 }

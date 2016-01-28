@@ -66,19 +66,32 @@ public class RepoAndRevision implements Serializable {
 	
 	@Nullable
 	public ObjectId getObjectId(boolean mustExist) {
-		return getRepository().getObjectId(revision, mustExist);
+		return getRepository().getObjectId(normalizeRevision(), mustExist);
 	}
 	
 	public ObjectId getObjectId() {
-		return getRepository().getObjectId(revision);
+		return getObjectId(true);
 	}
 	
-	public String getFQN() {
-		return getRepository().getRevisionFQN(revision);		
+	public RevCommit getCommit(boolean mustExist) {
+		return getRepository().getRevCommit(getObjectId(mustExist), mustExist);
 	}
 	
 	public RevCommit getCommit() {
-		return getRepository().getRevCommit(getObjectId());
+		return getCommit(true);
+	}
+
+	public String getObjectName(boolean mustExist) {
+		ObjectId objectId = getObjectId(mustExist);
+		return objectId!=null?objectId.name():null;
+	}
+	
+	public String getObjectName() {
+		return getObjectName(true);
+	}
+
+	public String getFQN() {
+		return getRepository().getRevisionFQN(revision);		
 	}
 	
 	public static void trim(Collection<String> repoAndBranches) {
@@ -102,6 +115,10 @@ public class RepoAndRevision implements Serializable {
 		if (repository == null)
 			repository = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
 		return repository;
+	}
+	
+	protected String normalizeRevision() {
+		return revision;
 	}
 	
 	@Override

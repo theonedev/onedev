@@ -176,7 +176,7 @@ public class TextDiffPanel extends Panel {
 					super.onConfigure();
 					PullRequest request = requestModel.getObject();
 					setVisible(request.getSourceRepo() != null 
-							&& change.getBlobIdent().revision.equals(request.getSource().getHead(false)));
+							&& change.getBlobIdent().revision.equals(request.getSource().getObjectName(false)));
 				}
 				
 			};

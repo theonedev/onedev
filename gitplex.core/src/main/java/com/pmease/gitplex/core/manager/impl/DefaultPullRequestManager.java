@@ -143,7 +143,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	public void restoreSourceBranch(PullRequest request) {
 		Preconditions.checkState(!request.isOpen() && request.getSourceRepo() != null);
 
-		if (request.getSource().getHead(false) == null) {
+		if (request.getSource().getObjectName(false) == null) {
 			String latestCommitHash = request.getLatestUpdate().getHeadCommitHash();
 			request.getSourceRepo().git().createBranch(
 					request.getSourceBranch(), latestCommitHash);
@@ -162,7 +162,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	public void deleteSourceBranch(PullRequest request) {
 		Preconditions.checkState(!request.isOpen() && request.getSourceRepo() != null); 
 		
-		if (request.getSource().getHead(false) != null) {
+		if (request.getSource().getObjectName(false) != null) {
 			request.getSource().delete();
 			
 			PullRequestActivity activity = new PullRequestActivity();
@@ -389,7 +389,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	@Transactional
 	@Override
 	public void onTargetBranchUpdate(PullRequest request) {
-		String targetHead = request.getTarget().getHead();
+		String targetHead = request.getTarget().getObjectName();
 		if (request.getLastIntegrationPreview() == null || !request.getLastIntegrationPreview().getTargetHead().equals(targetHead)) {
 			closeIfMerged(request);
 			if (request.isOpen()) {
@@ -402,7 +402,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 	@Transactional
 	private void closeIfMerged(PullRequest request) {
-		if (request.getTargetRepo().isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getHead())) {
+		if (request.getTargetRepo().isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getObjectName())) {
 			PullRequestActivity activity = new PullRequestActivity();
 			activity.setRequest(request);
 			activity.setUser(GitPlex.getInstance(UserManager.class).getRoot());
@@ -428,11 +428,11 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	@Transactional
 	@Override
 	public void onSourceBranchUpdate(PullRequest request, boolean notify) {
-		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getHead())) {
+		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			PullRequestUpdate update = new PullRequestUpdate();
 			update.setRequest(request);
 			update.setDate(new Date());
-			update.setHeadCommitHash(request.getSource().getHead());
+			update.setHeadCommitHash(request.getSource().getObjectName());
 			
 			request.addUpdate(update);
 			pullRequestUpdateManager.save(update, notify);
@@ -541,7 +541,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 						IntegrationPreview preview = request.getLastIntegrationPreview();
 						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
-							String targetHead = request.getTarget().getHead();
+							String targetHead = request.getTarget().getObjectName();
 							Repository targetRepo = request.getTargetRepo();
 							Git git = request.getTargetRepo().git();
 							preview = new IntegrationPreview(targetHead, 
@@ -802,7 +802,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 				// previously worked with. This avoids disaster of closing all pull requests
 				// if repository storage points to a different location by mistake
 				if (sourceRepo.getObjectId(baseCommitHash, false) != null) { 
-					String sourceHead = request.getSource().getHead(false);
+					String sourceHead = request.getSource().getObjectName(false);
 					if (sourceHead == null) 
 						discard(request, "Source branch is deleted.");
 					else 
@@ -821,7 +821,7 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 					// previously worked with. This avoids disaster of closing all pull requests
 					// if repository storage points to a different location by mistake
 					if (targetRepo.getObjectId(baseCommitHash, false) != null) {
-						String targetHead = request.getTarget().getHead(false);
+						String targetHead = request.getTarget().getObjectName(false);
 						if (targetHead == null)
 							discard(request, "Target branch is deleted.");
 						else 
