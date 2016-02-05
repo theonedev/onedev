@@ -100,13 +100,15 @@ public class RepoBranchesPage extends RepositoryPage {
 					break;
 				Ref ref = branchesInView.get((int)i); 
 				if (!GitUtils.ref2branch(ref.getName()).equals(getBaseBranch()))
-					compareHashes.add(getRepository().getRevCommit(ref.getObjectId()).name());
+					compareHashes.add(ref.getObjectId().name());
 			}
 			
-			String baseHash = getRepository().getRevCommit(GitUtils.branch2ref(getBaseBranch())).name();
+			String baseHash = getRepository().getObjectId(GitUtils.branch2ref(getBaseBranch())).name();
 			Map<String, AheadBehind> aheadBehinds = getRepository().git().getAheadBehinds(
 					baseHash, 
 					compareHashes.toArray(new String[compareHashes.size()]));
+			for (String compareHash: compareHashes)
+				aheadBehinds.put(compareHash, new AheadBehind());
 			aheadBehinds.put(baseHash, new AheadBehind());
 			
 			return aheadBehinds;
