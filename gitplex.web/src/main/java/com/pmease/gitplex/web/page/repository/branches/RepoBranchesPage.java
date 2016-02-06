@@ -35,6 +35,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -60,7 +61,6 @@ import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
@@ -79,7 +79,31 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public class RepoBranchesPage extends RepositoryPage {
 
+	// use a small page size to load page quickly
+	private static final int PAGE_SIZE = 10;
+	
 	private String baseBranch;
+	
+	private IModel<List<Ref>> branchesModel = new AbstractReadOnlyModel<List<Ref>>() {
+
+		@Override
+		public List<Ref> getObject() {
+			List<Ref> refs = getRepository().getBranchRefs();
+			searchFor = searchInput.getInput();
+			if (StringUtils.isNotBlank(searchFor)) {
+				searchFor = searchFor.trim().toLowerCase();
+				for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
+					String branch = GitUtils.ref2branch(it.next().getName());
+					if (!branch.toLowerCase().contains(searchFor))
+						it.remove();
+				}
+			} else {
+				searchFor = null;
+			}
+			return refs;
+		}
+		
+	};
 	
 	private PageableListView<Ref> branchesView;
 	
@@ -91,28 +115,28 @@ public class RepoBranchesPage extends RepositoryPage {
 	
 	private String searchFor;
 	
-	private final IModel<Map<String, AheadBehind>> aheadBehindsModel = 
-			new LoadableDetachableModel<Map<String, AheadBehind>>() {
+	private final IModel<Map<ObjectId, AheadBehind>> aheadBehindsModel = 
+			new LoadableDetachableModel<Map<ObjectId, AheadBehind>>() {
 
 		@SuppressWarnings("unused")
 		@Override
-		protected Map<String, AheadBehind> load() {
+		protected Map<ObjectId, AheadBehind> load() {
 			List<ObjectId> compareIds = new ArrayList<>(); 
-			List<Ref> branchesInView = branchesView.getModelObject();
-			for (long i=branchesView.getFirstItemOffset(); i<branchesInView.size(); i++) {
+			List<Ref> branches = branchesModel.getObject();
+			for (long i=branchesView.getFirstItemOffset(); i<branches.size(); i++) {
 				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
 					break;
-				Ref ref = branchesInView.get((int)i); 
+				Ref ref = branches.get((int)i); 
 				compareIds.add(ref.getObjectId());
 			}
 
-			ObjectId baseId = getRepository().getObjectId(GitUtils.branch2ref(getBaseBranch()));
-			
-			Map<String, AheadBehind> aheadBehinds = new HashMap<>();
+			Ref baseRef = getRepository().getRefs(Constants.R_HEADS).get(getBaseBranch());
+			Preconditions.checkNotNull(baseRef);
+			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
 			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo);) {
 
-				RevCommit baseCommit = revWalk.lookupCommit(baseId);
+				RevCommit baseCommit = revWalk.lookupCommit(baseRef.getObjectId());
 				for (ObjectId compareId: compareIds) {
 					RevCommit compareCommit = revWalk.lookupCommit(compareId);
 					revWalk.markUninteresting(baseCommit);
@@ -129,7 +153,7 @@ public class RepoBranchesPage extends RepositoryPage {
 						behind++;
 					revWalk.reset();
 					
-					aheadBehinds.put(compareId.name(), new AheadBehind(ahead, behind));
+					aheadBehinds.put(compareId, new AheadBehind(ahead, behind));
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -258,26 +282,7 @@ public class RepoBranchesPage extends RepositoryPage {
 		branchesContainer.setOutputMarkupId(true);
 		add(branchesContainer);
 		
-		branchesContainer.add(branchesView = new PageableListView<Ref>("branches", new AbstractReadOnlyModel<List<Ref>>() {
-
-			@Override
-			public List<Ref> getObject() {
-				List<Ref> refs = getRepository().getBranchRefs();
-				searchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(searchFor)) {
-					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
-						String branch = GitUtils.ref2branch(it.next().getName());
-						if (!branch.toLowerCase().contains(searchFor))
-							it.remove();
-					}
-				} else {
-					searchFor = null;
-				}
-				return refs;
-			}
-			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		branchesContainer.add(branchesView = new PageableListView<Ref>("branches", branchesModel, PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(final ListItem<Ref> item) {
@@ -306,8 +311,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					
 				});
 				
-				String branchHash = lastCommit.name();
-				final AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(branchHash));
+				final AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
 				
 				item.add(new Link<Void>("behindLink") {
 
@@ -546,6 +550,7 @@ public class RepoBranchesPage extends RepositoryPage {
 
 	@Override
 	public void onDetach() {
+		branchesModel.detach();
 		aheadOpenRequestsModel.detach();
 		behindOpenRequestsModel.detach();
 		branchWatchesModel.detach();
