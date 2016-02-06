@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.page.repository.branches;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,11 +34,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.AheadBehind;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
@@ -91,26 +94,46 @@ public class RepoBranchesPage extends RepositoryPage {
 	private final IModel<Map<String, AheadBehind>> aheadBehindsModel = 
 			new LoadableDetachableModel<Map<String, AheadBehind>>() {
 
+		@SuppressWarnings("unused")
 		@Override
 		protected Map<String, AheadBehind> load() {
-			List<String> compareHashes = new ArrayList<>(); 
+			List<ObjectId> compareIds = new ArrayList<>(); 
 			List<Ref> branchesInView = branchesView.getModelObject();
 			for (long i=branchesView.getFirstItemOffset(); i<branchesInView.size(); i++) {
 				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
 					break;
 				Ref ref = branchesInView.get((int)i); 
-				if (!GitUtils.ref2branch(ref.getName()).equals(getBaseBranch()))
-					compareHashes.add(ref.getObjectId().name());
+				compareIds.add(ref.getObjectId());
 			}
+
+			ObjectId baseId = getRepository().getObjectId(GitUtils.branch2ref(getBaseBranch()));
 			
-			String baseHash = getRepository().getObjectId(GitUtils.branch2ref(getBaseBranch())).name();
-			Map<String, AheadBehind> aheadBehinds = getRepository().git().getAheadBehinds(
-					baseHash, 
-					compareHashes.toArray(new String[compareHashes.size()]));
-			for (String compareHash: compareHashes)
-				aheadBehinds.put(compareHash, new AheadBehind());
-			aheadBehinds.put(baseHash, new AheadBehind());
-			
+			Map<String, AheadBehind> aheadBehinds = new HashMap<>();
+			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+					RevWalk revWalk = new RevWalk(jgitRepo);) {
+
+				RevCommit baseCommit = revWalk.lookupCommit(baseId);
+				for (ObjectId compareId: compareIds) {
+					RevCommit compareCommit = revWalk.lookupCommit(compareId);
+					revWalk.markUninteresting(baseCommit);
+					revWalk.markStart(compareCommit);
+					int ahead = 0;
+					for (RevCommit commit: revWalk)
+						ahead++;
+					revWalk.reset();
+					
+					revWalk.markUninteresting(compareCommit);
+					revWalk.markStart(baseCommit);
+					int behind = 0;
+					for (RevCommit commit: revWalk)
+						behind++;
+					revWalk.reset();
+					
+					aheadBehinds.put(compareId.name(), new AheadBehind(ahead, behind));
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 			return aheadBehinds;
 		}
 	};

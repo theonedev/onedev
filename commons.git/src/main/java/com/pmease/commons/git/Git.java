@@ -17,7 +17,6 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.git.command.AddCommand;
 import com.pmease.commons.git.command.AddNoteCommand;
 import com.pmease.commons.git.command.AddSubModuleCommand;
-import com.pmease.commons.git.command.AheadBehindCommand;
 import com.pmease.commons.git.command.BlameCommand;
 import com.pmease.commons.git.command.CalcMergeBaseCommand;
 import com.pmease.commons.git.command.CheckoutCommand;
@@ -287,11 +286,6 @@ public class Git implements Serializable {
 			return true;
 		else
 			return new IsAncestorCommand(repoDir).ancestor(ancestor).descendant(descendant).call();
-	}
-	
-	public Map<String, AheadBehind> getAheadBehinds(String baseRev, String... compareRevs) {
-		AheadBehindCommand cmd = new AheadBehindCommand(repoDir);
-		return cmd.baseCommit(baseRev).compareRevs(compareRevs).call();
 	}
 	
 	/**

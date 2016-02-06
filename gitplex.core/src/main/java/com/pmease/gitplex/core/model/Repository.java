@@ -854,7 +854,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	@Nullable
-	public RevCommit getRevCommit(RevObject revObject, boolean mustBeCommit) {
+	public RevCommit getRevCommit(RevObject revObject, boolean mustExist) {
 		if (revCommitCache == null)
 			revCommitCache = new HashMap<>();
 		Optional<RevCommit> optional = revCommitCache.get(revObject);
@@ -871,7 +871,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			}
 			revCommitCache.put(revObject, optional);
 		}
-		if (mustBeCommit)
+		if (mustExist)
 			return optional.get();
 		else
 			return optional.orNull();
