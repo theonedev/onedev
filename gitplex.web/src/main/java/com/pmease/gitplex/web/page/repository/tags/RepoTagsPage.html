@@ -14,11 +14,13 @@
 			<table wicket:id="tagsContainer" class="table table-hover table-condensed">
 				<tr wicket:id="tags">
 					<td class="detail">
-						<a wicket:id="tagLink"><span wicket:id="name"></span></a>
-						<span wicket:id="annotated" class="annotated"></span>
+						<div class="tag">
+							<a wicket:id="tagLink" class="name"><span wicket:id="name"></span></a>
+							<span wicket:id="annotated" class="annotated"></span>
+						</div>
 						<div class="commit">
 							<i class="fa fa-ext fa-commit"></i>
-							<span wicket:id="hashAndCode"></span>
+							<span wicket:id="hash"></span>
 							<a wicket:id="commitLink"><span wicket:id="shortMessage"></span></a>
 						</div>
 					</td>
@@ -31,8 +33,8 @@
 		</div>
 	</section>
 	<wicket:fragment wicket:id="annotatedFrag">
+		<span wicket:id="date"></span>,
 		<a wicket:id="author"></a> 
-		<span wicket:id="age"></span> 
 		<a wicket:id="messageToggle" class="ellipsis-expander"><i class="fa fa-ellipsis-h"></i></a>
 		<pre wicket:id="message" class="message"></pre>
 	</wicket:fragment>

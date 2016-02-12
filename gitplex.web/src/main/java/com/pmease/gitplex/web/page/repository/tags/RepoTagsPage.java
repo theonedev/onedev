@@ -45,7 +45,7 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
-import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
+import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
@@ -124,9 +124,9 @@ public class RepoTagsPage extends RepositoryPage {
 				RevObject revObject = getRepository().getRevObject(ref.getObjectId());
 				if (revObject instanceof RevTag) {
 					RevTag revTag = (RevTag) revObject;
-					Fragment fragment = new Fragment("annotated", "annotatedFrag", this);
+					Fragment fragment = new Fragment("annotated", "annotatedFrag", RepoTagsPage.this);
 					fragment.add(new UserLink("author", revTag.getTaggerIdent()));
-					fragment.add(new Label("age", DateUtils.formatAge(revTag.getTaggerIdent().getWhen())));
+					fragment.add(new Label("date", DateUtils.formatDate(revTag.getTaggerIdent().getWhen())));
 					Label message = new Label("message", revTag.getFullMessage());
 					message.setOutputMarkupId(true);
 					fragment.add(message);
@@ -138,7 +138,7 @@ public class RepoTagsPage extends RepositoryPage {
 				}
 
 				RevCommit commit = getRepository().getRevCommit(ref.getObjectId());
-				item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.name()));
+				item.add(new CommitHashPanel("hash", Model.of(commit.name())));
 				PageParameters params = CommitDetailPage.paramsOf(getRepository(), commit.name());
 				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
 				link.add(new Label("shortMessage", commit.getShortMessage()));
@@ -169,11 +169,14 @@ public class RepoTagsPage extends RepositoryPage {
 							}
 							RepoAndRevision target;
 							if (prevAncestorRef != null) {
-								target = new RepoAndRevision(getRepository(), prevAncestorRef.getName());
+								target = new RepoAndRevision(getRepository(), 
+										GitUtils.ref2tag(prevAncestorRef.getName()));
 							} else {
-								target = new RepoAndRevision(getRepository(), item.getModelObject().getName());
+								target = new RepoAndRevision(getRepository(), 
+										GitUtils.ref2tag(item.getModelObject().getName()));
 							}
-							RepoAndRevision source = new RepoAndRevision(getRepository(), item.getModelObject().getName());
+							RepoAndRevision source = new RepoAndRevision(getRepository(), 
+									GitUtils.ref2tag(item.getModelObject().getName()));
 							PageParameters params = RevisionComparePage.paramsOf(getRepository(), target, source, null);
 							setResponsePage(RevisionComparePage.class, params);
 						} catch (IOException e) {
@@ -182,7 +185,7 @@ public class RepoTagsPage extends RepositoryPage {
 					}
 					
 				};
-				link.setVisible(item.getIndex()<size()-1);
+				link.setVisible(item.getIndex()<tagsModel.getObject().size()-1);
 				
 				item.add(link);
 				

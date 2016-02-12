@@ -17,8 +17,28 @@
 #repo-tags>.body>table td {
 	white-space: nowrap;
 }
-#repo-tags>.body>table td.summary, #repo-tags>.body>table td.actions {
+#repo-tags .tag a.name {
+	font-weight: bold;
+	font-size: 16px;
+}
+#repo-tags .annotated {
+	color: #666;
+	margin-left: 4px;
+}
+#repo-tags .annotated .message {
+	display: none;
+	border: none;
+	font-size: 12px;
+	background: none;
+	margin-bottom: 0;
+}
+#repo-tags .commit input {
+	border: 1px dotted #999;	
+	margin-right: 4px;
+}
+#repo-tags>.body>table td.actions {
 	width: 1%;
+	text-align: right;
 }
 #repo-tags>.body>table td.actions .fa.fa-times {
 	color: red; margin-left: 8px;
@@ -26,11 +46,11 @@
 #repo-tags>.body>table td.actions span.fa.fa-times {
 	color: #888;
 }
-#repo-tags>.body>table td.summary>div, 
-#repo-tags>.body>table td.summary>div .name a {
+#repo-tags>.body>table td.detail>div, 
+#repo-tags>.body>table td.detail>div .name a {
 	font-size: 13px; 
 	color: #666;
 }
-#repo-tags>.body>table td.summary>div {
+#repo-tags>.body>table td.detail>div {
 	margin-top: 4px;
 }
