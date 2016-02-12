@@ -1,0 +1,36 @@
+#repo-tags {
+	padding: 20px;
+}
+#repo-tags>.body>.options {
+	margin-bottom: 16px;
+}
+#repo-tags>.body>.options>div {
+	margin-right: 24px;
+}
+
+#repo-tags>.body>.options>div.search .input-group {
+	width: 240px;
+}
+#repo-tags>.body>.options .pagination {
+	margin: 0;
+}
+#repo-tags>.body>table td {
+	white-space: nowrap;
+}
+#repo-tags>.body>table td.summary, #repo-tags>.body>table td.actions {
+	width: 1%;
+}
+#repo-tags>.body>table td.actions .fa.fa-times {
+	color: red; margin-left: 8px;
+}
+#repo-tags>.body>table td.actions span.fa.fa-times {
+	color: #888;
+}
+#repo-tags>.body>table td.summary>div, 
+#repo-tags>.body>table td.summary>div .name a {
+	font-size: 13px; 
+	color: #666;
+}
+#repo-tags>.body>table td.summary>div {
+	margin-top: 4px;
+}

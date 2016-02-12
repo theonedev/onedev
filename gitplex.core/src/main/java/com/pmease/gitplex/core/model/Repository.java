@@ -953,6 +953,13 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			listener.onRefUpdate(this, refName, null);
     }
     
+    public void deleteTag(String tag) {
+    	String refName = GitUtils.branch2ref(tag);
+		git().deleteRef(refName);
+		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
+			listener.onRefUpdate(this, refName, null);
+    }
+    
 	private static class DiffKey implements Serializable {
 		String oldRev;
 		

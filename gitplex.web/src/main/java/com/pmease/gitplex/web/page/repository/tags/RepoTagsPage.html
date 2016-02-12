@@ -1,2 +1,40 @@
+<html xmlns:wicket>
 <wicket:extend>
+	<section id="repo-tags">
+		<div class="body">
+			<div class="options clearfix">
+				<div class="pull-left search">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="fa fa-search"></i></span>
+						<input wicket:id="searchTags" class="form-control" placeholder="Search tags"></input>
+					</div>
+				</div>
+				<ul wicket:id="tagsPageNav" class="pull-right"></ul>
+			</div>
+			<table wicket:id="tagsContainer" class="table table-hover table-condensed">
+				<tr wicket:id="tags">
+					<td class="detail">
+						<a wicket:id="tagLink"><span wicket:id="name"></span></a>
+						<span wicket:id="annotated" class="annotated"></span>
+						<div class="commit">
+							<i class="fa fa-ext fa-commit"></i>
+							<span wicket:id="hashAndCode"></span>
+							<a wicket:id="commitLink"><span wicket:id="shortMessage"></span></a>
+						</div>
+					</td>
+					<td class="actions">
+						<a wicket:id="compare" title="Compare with previous tag in same branch"><i class="fa fa-ext fa-file-diff"></i></a>
+						<a wicket:id="delete" class="fa fa-times fa-lg" title="Delete this tag"></a>
+					</td>
+				</tr>
+			</table>		
+		</div>
+	</section>
+	<wicket:fragment wicket:id="annotatedFrag">
+		<a wicket:id="author"></a> 
+		<span wicket:id="age"></span> 
+		<a wicket:id="messageToggle" class="ellipsis-expander"><i class="fa fa-ellipsis-h"></i></a>
+		<pre wicket:id="message" class="message"></pre>
+	</wicket:fragment>
 </wicket:extend>
+</html>

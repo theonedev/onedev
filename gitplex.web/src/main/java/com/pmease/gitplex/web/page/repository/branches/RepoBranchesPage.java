@@ -489,7 +489,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (!getRepository().getDefaultBranch().equals(branch) && SecurityUtils.canModify(getRepository(), branch)) {
+						if (!getRepository().getDefaultBranch().equals(branch) && SecurityUtils.canModify(new RepoAndBranch(getRepository(), branch))) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getRepository().getGateKeeper();

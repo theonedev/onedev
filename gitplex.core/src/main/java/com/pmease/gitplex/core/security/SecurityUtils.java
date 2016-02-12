@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.eclipse.jgit.lib.Constants;
 
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
@@ -77,16 +78,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canModify(RepoAndBranch repoAndBranch) {
-		return canModify(repoAndBranch.getRepository(), repoAndBranch.getBranch());
+		return canModify(repoAndBranch.getRepository(), GitUtils.branch2ref(repoAndBranch.getBranch()));
 	}
 	
-	public static boolean canModify(Repository repository, String branch) {
+	public static boolean canModify(Repository repository, String refName) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
-				&& repository.getGateKeeper().checkRef(currentUser, repository, Constants.R_HEADS + branch).isPassed();
+				&& repository.getGateKeeper().checkRef(currentUser, repository, refName).isPassed();
 	}
-
+	
 	public static boolean canManage(User account) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		if (currentUser != null) {
