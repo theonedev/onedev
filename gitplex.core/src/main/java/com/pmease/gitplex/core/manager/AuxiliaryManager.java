@@ -11,7 +11,9 @@ import com.pmease.gitplex.core.model.Repository;
 
 public interface AuxiliaryManager {
 	
-	void collect(Repository repository, String refName);
+	void collect(Repository repository);
+	
+	void collect(Repository repository, String revision);
 	
 	List<String> getFiles(Repository repository);
 	

@@ -1,11 +1,13 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,7 +28,13 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +43,8 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.git.command.CommitConsumer;
 import com.pmease.commons.git.command.LogCommand;
+import com.pmease.commons.hibernate.UnitOfWork;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
@@ -83,6 +94,10 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	
 	private final SequentialWorkManager sequentialWorkManager;
 	
+	private final UnitOfWork unitOfWork;
+	
+	private final Dao dao;
+	
 	private final Map<Long, Environment> envs = new HashMap<>();
 	
 	private final Map<Long, List<String>> files = new ConcurrentHashMap<>();
@@ -91,19 +106,201 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	
 	@Inject
 	public DefaultAuxiliaryManager(StorageManager storageManager, WorkManager workManager, 
-			SequentialWorkManager sequentialWorkManager) {
+			SequentialWorkManager sequentialWorkManager, Dao dao, UnitOfWork unitOfWork) {
 		this.storageManager = storageManager;
 		this.workManager = workManager;
 		this.sequentialWorkManager = sequentialWorkManager;
+		this.dao = dao;
+		this.unitOfWork = unitOfWork;
 	}
 	
 	private String getSequentialExecutorKey(Repository repository) {
 		return "repository-" + repository.getId() + "-checkAuxiliary";
 	}
 	
+	private void doCollect(final Repository repository, final String revision) {
+		logger.debug("Collecting auxiliary information of repository {}...", repository.getFQN());
+		Environment env = getEnv(repository);
+		final Store defaultStore = getStore(env, DEFAULT_STORE);
+		final Store commitsStore = getStore(env, COMMITS_STORE);
+		final Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE);
+
+		final AtomicReference<String> lastCommit = new AtomicReference<>();
+		env.executeInTransaction(new TransactionalExecutable() {
+			
+			@Override
+			public void execute(final Transaction txn) {
+				byte[] value = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
+				lastCommit.set(value!=null?new String(value):null);									
+			}
+		});
+		
+		env.executeInTransaction(new TransactionalExecutable() {
+			
+			@Override
+			public void execute(final Transaction txn) {
+				byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
+				final AtomicReference<String> lastCommit;
+				if (bytes != null)
+					lastCommit = new AtomicReference<>(new String(bytes));
+				else
+					lastCommit = new AtomicReference<>(null);
+				Git git = repository.git();
+
+				LogCommand log = new LogCommand(git.repoDir());
+				List<String> revisions = new ArrayList<>();
+				if (lastCommit.get() != null) {
+					revisions.add(lastCommit.get() + ".." + revision);
+					lastCommit.set(null);
+				} else { 
+					revisions.add(revision);
+				}
+				
+				final AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
+				final AtomicBoolean contributorsChanged = new AtomicBoolean(false);
+				
+				final AtomicReference<Set<String>> files = new AtomicReference<>(null);
+				final AtomicBoolean filesChanged = new AtomicBoolean(false);
+				
+				log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public void consume(Commit commit) {
+						byte[] keyBytes = new byte[20];
+						ObjectId commitId = ObjectId.fromString(commit.getHash());
+						commitId.copyRawTo(keyBytes, 0);
+						ByteIterable key = new ArrayByteIterable(keyBytes);
+						byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+						
+						if (valueBytes == null || valueBytes.length%2 == 0) {
+							/*
+							 * Length of stored bytes of a commit is either 20*nChild
+							 * (20 is length of ObjectId), or 1+20*nChild, as we need 
+							 * an extra leading byte to differentiate commits being 
+							 * processed and commits with child information attached 
+							 * but not processed. 
+							 */
+							byte[] newValueBytes;
+							if (valueBytes == null) {
+								newValueBytes = new byte[1];
+							} else {
+								newValueBytes = new byte[valueBytes.length+1];
+								System.arraycopy(valueBytes, 0, newValueBytes, 1, valueBytes.length);
+							}
+							commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
+							
+							for (String parentHash: commit.getParentHashes()) {
+								keyBytes = new byte[20];
+								ObjectId.fromString(parentHash).copyRawTo(keyBytes, 0);
+								key = new ArrayByteIterable(keyBytes);
+								valueBytes = getBytes(commitsStore.get(txn, key));
+								if (valueBytes != null) {
+									newValueBytes = new byte[valueBytes.length+20];
+									System.arraycopy(valueBytes, 0, newValueBytes, 0, valueBytes.length);
+								} else {
+									newValueBytes = new byte[20];
+								}
+								commitId.copyRawTo(newValueBytes, newValueBytes.length-20);
+								commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
+							}
+							if (contributors.get() == null) {
+								byte[] bytes = getBytes(defaultStore.get(txn, CONTRIBUTORS_KEY));
+								if (bytes != null)
+									contributors.set((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
+								else
+									contributors.set(new HashSet<NameAndEmail>());
+							}
+							if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
+									|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
+								NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
+								if (!contributors.get().contains(contributor)) {
+									contributors.get().add(contributor);
+									contributorsChanged.set(true);
+								}
+							}
+							if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
+									|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
+								NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
+								if (!contributors.get().contains(contributor)) {
+									contributors.get().add(contributor);
+									contributorsChanged.set(true);
+								}
+							}
+							
+							if (files.get() == null) {
+								byte[] bytes = getBytes(defaultStore.get(txn, FILES_KEY));
+								if (bytes != null)
+									files.set((Set<String>) SerializationUtils.deserialize(bytes));
+								else
+									files.set(new HashSet<String>());
+							}
+							
+							for (String file: commit.getChangedFiles()) {
+								ByteIterable fileKey = new StringByteIterable(file);
+								byte[] bytes = getBytes(contributionsStore.get(txn, fileKey));
+								Map<NameAndEmail, Long> fileContributions;
+								if (bytes != null)
+									fileContributions = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(bytes);
+								else
+									fileContributions = new HashMap<>();
+								if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
+										|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
+									NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
+									long contributionTime = commit.getAuthor().getWhen().getTime();
+									Long lastContributionTime = fileContributions.get(contributor);
+									if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
+										fileContributions.put(contributor, contributionTime);
+								}													
+
+								if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
+										|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
+									NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
+									long contributionTime = commit.getCommitter().getWhen().getTime();
+									Long lastContributionTime = fileContributions.get(contributor);
+									if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
+										fileContributions.put(contributor, contributionTime);
+								}
+								
+								bytes = SerializationUtils.serialize((Serializable) fileContributions);
+								contributionsStore.put(txn, fileKey, new ArrayByteIterable(bytes));
+								
+								if (!files.get().contains(file)) {
+									files.get().add(file);
+									filesChanged.set(true);
+								}
+							}
+							
+							if (lastCommit.get() == null)
+								lastCommit.set(commit.getHash());
+						}
+					}
+					
+				});
+				
+				if (contributorsChanged.get()) {
+					bytes = SerializationUtils.serialize((Serializable) contributors.get());
+					defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
+					DefaultAuxiliaryManager.this.contributors.remove(repository.getId());
+				}
+				if (filesChanged.get()) {
+					bytes = SerializationUtils.serialize((Serializable) files.get());
+					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
+					DefaultAuxiliaryManager.this.files.remove(repository.getId());
+				}
+				if (lastCommit.get() != null) {
+					bytes = lastCommit.get().getBytes();
+					defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(bytes));
+				}
+			}
+		});
+		
+		logger.debug("Auxiliary information collected for repository {}.", repository.getFQN());		
+	}
+	
 	@Override
-	public void collect(final Repository repository, final String refName) {
-		final String repoFQN = repository.getFQN(); // load here to avoid LazyInitializationException
+	public void collect(Repository repository, final String revision) {
+		final Long repoId = repository.getId();
 		sequentialWorkManager.execute(getSequentialExecutorKey(repository), new PrioritizedRunnable(PRIORITY) {
 
 			@Override
@@ -113,183 +310,15 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 						@Override
 						public void run() {
-							logger.info("Collecting auxiliary information of repository {}...", repoFQN);
-							Environment env = getEnv(repository);
-							final Store defaultStore = getStore(env, DEFAULT_STORE);
-							final Store commitsStore = getStore(env, COMMITS_STORE);
-							final Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE);
+							unitOfWork.call(new Callable<Void>() {
 
-							final AtomicReference<String> lastCommit = new AtomicReference<>();
-							env.executeInTransaction(new TransactionalExecutable() {
-								
 								@Override
-								public void execute(final Transaction txn) {
-									byte[] value = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
-									lastCommit.set(value!=null?new String(value):null);									
+								public Void call() throws Exception {
+									doCollect(dao.load(Repository.class, repoId), revision);
+									return null;
 								}
-							});
-							
-							env.executeInTransaction(new TransactionalExecutable() {
 								
-								@Override
-								public void execute(final Transaction txn) {
-									byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
-									final AtomicReference<String> lastCommit;
-									if (bytes != null)
-										lastCommit = new AtomicReference<>(new String(bytes));
-									else
-										lastCommit = new AtomicReference<>(null);
-									Git git = repository.git();
-
-									LogCommand log = new LogCommand(git.repoDir());
-									List<String> revisions = new ArrayList<>();
-									if (lastCommit.get() != null) {
-										revisions.add(lastCommit.get() + ".." + refName);
-										lastCommit.set(null);
-									} else { 
-										revisions.add(refName);
-									}
-									
-									final AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
-									final AtomicBoolean contributorsChanged = new AtomicBoolean(false);
-									
-									final AtomicReference<Set<String>> files = new AtomicReference<>(null);
-									final AtomicBoolean filesChanged = new AtomicBoolean(false);
-									
-									log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
-
-										@SuppressWarnings("unchecked")
-										@Override
-										public void consume(Commit commit) {
-											byte[] keyBytes = new byte[20];
-											ObjectId commitId = ObjectId.fromString(commit.getHash());
-											commitId.copyRawTo(keyBytes, 0);
-											ByteIterable key = new ArrayByteIterable(keyBytes);
-											byte[] valueBytes = getBytes(commitsStore.get(txn, key));
-											
-											if (valueBytes == null || valueBytes.length%2 == 0) {
-												/*
-												 * Length of stored bytes of a commit is either 20*nChild
-												 * (20 is length of ObjectId), or 1+20*nChild, as we need 
-												 * an extra leading byte to differentiate commits being 
-												 * processed and commits with child information attached 
-												 * but not processed. 
-												 */
-												byte[] newValueBytes;
-												if (valueBytes == null) {
-													newValueBytes = new byte[1];
-												} else {
-													newValueBytes = new byte[valueBytes.length+1];
-													System.arraycopy(valueBytes, 0, newValueBytes, 1, valueBytes.length);
-												}
-												commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
-												
-												for (String parentHash: commit.getParentHashes()) {
-													keyBytes = new byte[20];
-													ObjectId.fromString(parentHash).copyRawTo(keyBytes, 0);
-													key = new ArrayByteIterable(keyBytes);
-													valueBytes = getBytes(commitsStore.get(txn, key));
-													if (valueBytes != null) {
-														newValueBytes = new byte[valueBytes.length+20];
-														System.arraycopy(valueBytes, 0, newValueBytes, 0, valueBytes.length);
-													} else {
-														newValueBytes = new byte[20];
-													}
-													commitId.copyRawTo(newValueBytes, newValueBytes.length-20);
-													commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
-												}
-												if (contributors.get() == null) {
-													byte[] bytes = getBytes(defaultStore.get(txn, CONTRIBUTORS_KEY));
-													if (bytes != null)
-														contributors.set((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
-													else
-														contributors.set(new HashSet<NameAndEmail>());
-												}
-												if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
-														|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
-													NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
-													if (!contributors.get().contains(contributor)) {
-														contributors.get().add(contributor);
-														contributorsChanged.set(true);
-													}
-												}
-												if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
-														|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
-													NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
-													if (!contributors.get().contains(contributor)) {
-														contributors.get().add(contributor);
-														contributorsChanged.set(true);
-													}
-												}
-												
-												if (files.get() == null) {
-													byte[] bytes = getBytes(defaultStore.get(txn, FILES_KEY));
-													if (bytes != null)
-														files.set((Set<String>) SerializationUtils.deserialize(bytes));
-													else
-														files.set(new HashSet<String>());
-												}
-												
-												for (String file: commit.getChangedFiles()) {
-													ByteIterable fileKey = new StringByteIterable(file);
-													byte[] bytes = getBytes(contributionsStore.get(txn, fileKey));
-													Map<NameAndEmail, Long> fileContributions;
-													if (bytes != null)
-														fileContributions = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(bytes);
-													else
-														fileContributions = new HashMap<>();
-													if (StringUtils.isNotBlank(commit.getAuthor().getName()) 
-															|| StringUtils.isNotBlank(commit.getAuthor().getEmailAddress())) {
-														NameAndEmail contributor = new NameAndEmail(commit.getAuthor());
-														long contributionTime = commit.getAuthor().getWhen().getTime();
-														Long lastContributionTime = fileContributions.get(contributor);
-														if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
-															fileContributions.put(contributor, contributionTime);
-													}													
-
-													if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
-															|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
-														NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
-														long contributionTime = commit.getCommitter().getWhen().getTime();
-														Long lastContributionTime = fileContributions.get(contributor);
-														if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
-															fileContributions.put(contributor, contributionTime);
-													}
-													
-													bytes = SerializationUtils.serialize((Serializable) fileContributions);
-													contributionsStore.put(txn, fileKey, new ArrayByteIterable(bytes));
-													
-													if (!files.get().contains(file)) {
-														files.get().add(file);
-														filesChanged.set(true);
-													}
-												}
-												
-												if (lastCommit.get() == null)
-													lastCommit.set(commit.getHash());
-											}
-										}
-										
-									});
-									
-									if (contributorsChanged.get()) {
-										bytes = SerializationUtils.serialize((Serializable) contributors.get());
-										defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
-										DefaultAuxiliaryManager.this.contributors.remove(repository.getId());
-									}
-									if (filesChanged.get()) {
-										bytes = SerializationUtils.serialize((Serializable) files.get());
-										defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
-										DefaultAuxiliaryManager.this.files.remove(repository.getId());
-									}
-									if (lastCommit.get() != null) {
-										bytes = lastCommit.get().getBytes();
-										defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(bytes));
-									}
-								}
 							});
-							
-							logger.info("Auxiliary information collected for repository {}.", repoFQN);
 						}
 
 					}).get();
@@ -543,6 +572,43 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	@Override
 	public void systemStarted() {
 	}
+	
+	@Override
+	public void collect(Repository repository) {
+		try (	FileRepository jgitRepo = repository.openAsJGitRepo();
+				RevWalk revWalk = new RevWalk(jgitRepo);) {
+			Collection<Ref> refs = new ArrayList<>();
+			refs.addAll(jgitRepo.getRefDatabase().getRefs(Constants.R_HEADS).values());
+			refs.addAll(jgitRepo.getRefDatabase().getRefs(Constants.R_TAGS).values());
+			
+			for (Ref ref: refs) {
+				RevObject revObj = revWalk.parseAny(ref.getObjectId());
+				revObj = revWalk.peel(revObj);
+				if (revObj instanceof RevCommit) {
+					final String commitHash = revObj.name();
+					Environment env = getEnv(repository);
+					final Store commitsStore = getStore(env, COMMITS_STORE);
+					boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
+						
+						@Override
+						public Boolean compute(Transaction txn) {
+							byte[] keyBytes = new byte[20];
+							ObjectId commitId = ObjectId.fromString(commitHash);
+							commitId.copyRawTo(keyBytes, 0);
+							ByteIterable key = new ArrayByteIterable(keyBytes);
+							byte[] valueBytes = getBytes(commitsStore.get(txn, key));
+							return valueBytes != null && valueBytes.length%2 != 0;
+						}
+						
+					});
+					if (!collected) 
+						collect(repository, commitHash);
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Override
 	public synchronized void systemStopping() {
@@ -556,7 +622,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 	@Override
 	public void onRefUpdate(Repository repository, String refName, String newCommitHash) {
-		collect(repository, refName);
+		collect(repository, newCommitHash);
 	}
 
 }

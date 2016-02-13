@@ -26,9 +26,9 @@ public interface RepositoryManager {
 	 */
 	Repository fork(Repository repository, User user);
 	
-	void checkSanity();
-	
 	void checkSanity(Repository repository);
+	
+	void checkSanity();
 	
 	void save(Repository repository);
 	

@@ -30,6 +30,8 @@ import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.RepositoryListener;
+import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.RepositoryManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -49,6 +51,10 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
     
     private final UserManager userManager;
     
+    private final AuxiliaryManager auxiliaryManager;
+   
+    private final PullRequestManager pullRequestManager;
+    
     private final String gitUpdateHook;
     
     private final String gitPostReceiveHook;
@@ -58,11 +64,14 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     
     @Inject
-    public DefaultRepositoryManager(Dao dao, UserManager userManager, StorageManager storageManager, 
+    public DefaultRepositoryManager(Dao dao, UserManager userManager, StorageManager storageManager,
+    		AuxiliaryManager auxiliaryManager, PullRequestManager pullRequestManager, 
     		Provider<Set<RepositoryListener>> listenersProvider) {
     	this.dao = dao;
         this.storageManager = storageManager;
         this.userManager = userManager;
+        this.auxiliaryManager = auxiliaryManager;
+        this.pullRequestManager = pullRequestManager;
         this.listenersProvider = listenersProvider;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-update-hook")) {
@@ -212,13 +221,6 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
 
 	@Transactional
 	@Override
-	public void checkSanity() {
-		for (Repository repository: dao.query(EntityCriteria.of(Repository.class), 0, 0))
-			checkSanity(repository);
-	}
-	
-	@Transactional
-	@Override
 	public void checkSanity(Repository repository) {
 		logger.debug("Checking sanity of repository '{}'...", repository);
 
@@ -246,6 +248,8 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
             FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
             gitPostReceiveHookFile.setExecutable(true);
         }
+        
+        auxiliaryManager.collect(repository);
 	}
 
 	@Sessional
@@ -254,12 +258,20 @@ public class DefaultRepositoryManager implements RepositoryManager, LifecycleLis
         for (Repository repository: dao.allOf(Repository.class)) 
         	nameToId.inverse().put(repository.getId(), new Pair<>(repository.getUser().getId(), repository.getName()));
 	}
+	
+	@Transactional
+	@Override
+	public void checkSanity() {
+		logger.info("Checking sanity of repositories...");
+		for (Repository repository: dao.query(EntityCriteria.of(Repository.class), 0, 0))
+			checkSanity(repository);
+	}
 
+	@Transactional
 	@Override
 	public void systemStarted() {
-		logger.info("Checking repositories...");
-
 		checkSanity();
+		pullRequestManager.checkSanity();
 	}
 
 	@Override

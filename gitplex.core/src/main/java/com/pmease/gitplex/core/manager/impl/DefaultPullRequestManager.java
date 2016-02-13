@@ -657,9 +657,6 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 
 	@Override
 	public void systemStarted() {
-		logger.info("Checking pull requests...");
-		
-		checkSanity();
 	}
 
 	@Override
@@ -789,6 +786,8 @@ public class DefaultPullRequestManager implements PullRequestManager, Repository
 	@Transactional
 	@Override
 	public void checkSanity() {
+		logger.info("Checking sanity of pull requests...");
+		
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		for (PullRequest request: dao.query(criteria)) {
