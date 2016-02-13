@@ -207,7 +207,7 @@ public class RevisionComparePage extends RepositoryPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (target.isBranch() && source.isBranch()) {
+				if (target.getBranch()!=null && source.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
 					setVisible(request == null && !commitsModel.getObject().isEmpty());
 				} else {

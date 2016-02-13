@@ -59,9 +59,22 @@ public class RepoAndRevision implements Serializable {
 		return getRepository().getRef(getRevision());
 	}
 	
-	public boolean isBranch() {
+	@Nullable
+	public String getBranch() {
 		Ref ref = getRef();
-		return ref != null && ref.getName().startsWith(Constants.R_HEADS);
+		if (ref != null && ref.getName().startsWith(Constants.R_HEADS))
+			return ref.getName().substring(Constants.R_HEADS.length());
+		else
+			return null;
+	}
+	
+	@Nullable
+	public String getTag() {
+		Ref ref = getRef();
+		if (ref != null && ref.getName().startsWith(Constants.R_TAGS))
+			return ref.getName().substring(Constants.R_TAGS.length());
+		else
+			return null;
 	}
 	
 	@Nullable

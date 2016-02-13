@@ -6,11 +6,10 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.eclipse.jgit.lib.Constants;
-import org.unbescape.html.HtmlEscape;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.gitplex.core.model.RepoAndRevision;
 import com.pmease.gitplex.core.model.Repository;
 
 @SuppressWarnings("serial")
@@ -58,17 +57,21 @@ public abstract class RevisionPicker extends DropdownLink {
 	@Override
 	public IModel<?> getBody() {
 		String iconClass;
-		if (repoModel.getObject().getRef(Constants.R_HEADS + revision) != null)
+		RepoAndRevision repoAndRevision = new RepoAndRevision(repoModel.getObject(), revision);
+		String label = repoAndRevision.getBranch();
+		if (label != null) {
 			iconClass = "fa fa-ext fa-branch";
-		else if (repoModel.getObject().getRef(Constants.R_TAGS + revision) != null)
-			iconClass = "fa fa-tag";
-		else
-			iconClass = "fa fa-ext fa-commit";
-		String label;
-		if (GitUtils.isHash(revision)) 				
-			label = GitUtils.abbreviateSHA(revision);
-		else
-			label = HtmlEscape.escapeHtml5(revision);
+		} else {
+			label = repoAndRevision.getTag();
+			if (label != null) {
+				iconClass = "fa fa-tag";
+			} else {
+				label = revision;
+				if (GitUtils.isHash(label))
+					label = GitUtils.abbreviateSHA(label);
+				iconClass = "fa fa-ext fa-commit";
+			}
+		} 
 		
 		return Model.of(String.format("<i class='%s'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", iconClass, label));
 	}

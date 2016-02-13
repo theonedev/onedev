@@ -18,6 +18,7 @@ public class RepoAndBranch extends RepoAndRevision {
 		super(repoAndBranch);
 	}
 	
+	@Override
 	public String getBranch() {
 		return getRevision();
 	}
