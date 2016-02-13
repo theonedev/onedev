@@ -4,6 +4,10 @@
 			<div class="message">
 				<div class="subject clearfix">
 					<div wicket:id="text" class="pull-left"></div>
+					<div class="btn-group pull-right">
+						<a wicket:id="createBranch" title="Branch from this commit" class="btn btn-default btn-xs"><i class="fa fa-ext fa-branch"></i></a>
+						<a wicket:id="createTag" title="Tag this commit" class="btn btn-default btn-xs"><i class="fa fa-tag"></i></a>
+					</div>
 					<div wicket:id="hashAndCode" class="pull-right"></div>
 				</div>
 				<pre wicket:id="detail" class="detail"></pre>
@@ -40,5 +44,46 @@
 		<span wicket:id="refs">
 			<a wicket:id="link"><span wicket:id="label"></span></a>
 		</span>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="createBranchFrag">
+		<form wicket:id="form" class="create-branch">
+			<div class="modal-header">
+				<h4 class="modal-title">Specify Branch Name</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="feedback"></div>
+				<input wicket:id="name" class="form-control focusable">
+			</div>
+			<div class="modal-footer">
+				<div class="form-group">
+					<button wicket:id="create" class="btn btn-primary">Create</button>
+					<button wicket:id="cancel" class="btn btn-default">Cancel</button>
+				</div>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="createTagFrag">
+		<form wicket:id="form" class="create-tag">
+			<div class="modal-header">
+				<h4 class="modal-title">Create Tag</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="feedback"></div>
+				<div class="form-group">
+					<label>Tag Name</label>
+					<input wicket:id="name" class="form-control focusable">
+				</div>
+				<div class="form-group">
+					<label>Tag Message</label>
+					<textarea wicket:id="message" rows="10" class="form-control"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<div class="form-group">
+					<button wicket:id="create" class="btn btn-primary">Create</button>
+					<button wicket:id="cancel" class="btn btn-default">Cancel</button>
+				</div>
+			</div>
+		</form>
 	</wicket:fragment>
 </wicket:extend>

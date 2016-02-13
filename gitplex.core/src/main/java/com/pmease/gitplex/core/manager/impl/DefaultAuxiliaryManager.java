@@ -622,7 +622,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 	@Override
 	public void onRefUpdate(Repository repository, String refName, String newCommitHash) {
-		collect(repository, newCommitHash);
+		if (newCommitHash != null)
+			collect(repository, newCommitHash);
 	}
 
 }

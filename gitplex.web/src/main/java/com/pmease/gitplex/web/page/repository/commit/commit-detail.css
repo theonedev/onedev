@@ -20,6 +20,9 @@
 	font-weight: bold;
 	color: #555;
 }
+#commit-detail>.info>.message>.subject>.pull-right {
+	margin-left: 8px;
+}
 #commit-detail>.info>.message>.detail {
 	color: #666;
 	padding: 12px;
