@@ -210,7 +210,7 @@ public class GitUtils {
     }
     
     public static String tag2ref(String tag) {
-    	return Constants.R_HEADS + tag; 
+    	return Constants.R_TAGS + tag; 
     }    
     
     public static BlobIdent getOldBlobIdent(DiffEntry diffEntry, String oldRev) {

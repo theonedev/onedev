@@ -954,7 +954,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
     }
     
     public void deleteTag(String tag) {
-    	String refName = GitUtils.branch2ref(tag);
+    	String refName = GitUtils.tag2ref(tag);
 		git().deleteRef(refName);
 		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 			listener.onRefUpdate(this, refName, null);
