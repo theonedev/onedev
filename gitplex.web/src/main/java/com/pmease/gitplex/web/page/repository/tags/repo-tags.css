@@ -30,7 +30,7 @@
 	border: none;
 	font-size: 12px;
 	background: none;
-	margin-bottom: 0;
+	margin-bottom: -16px;
 }
 #repo-tags .commit input {
 	border: 1px dotted #999;	

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
@@ -16,18 +17,21 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -49,6 +53,7 @@ import com.pmease.commons.wicket.ConfirmOnClick;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
+import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -64,6 +69,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
+import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.compare.RevisionComparePage;
@@ -72,6 +78,7 @@ import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -277,6 +284,97 @@ public class RepoBranchesPage extends RepositoryPage {
 		
 		add(searchInput = new ClearableTextField<String>("searchBranches", Model.of("")));
 		searchInput.add(new OnSearchingBehavior());
+
+		add(new ModalLink("createBranch") {
+
+			private String branchName;
+			
+			private String branchRevision;
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canCreate(getRepository(), UUID.randomUUID().toString()));
+			}
+
+			private RevisionPicker newRevisionPicker() {
+				return new RevisionPicker("revision", repoModel, branchRevision) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String revision) {
+						branchRevision = revision; 
+						RevisionPicker revisionPicker = newRevisionPicker();
+						getParent().replace(revisionPicker);
+						target.add(revisionPicker);
+					}
+					
+				};
+			}
+			
+			@Override
+			protected Component newContent(String id) {
+				Fragment fragment = new Fragment(id, "createBranchFrag", RepoBranchesPage.this);
+				Form<?> form = new Form<Void>("form");
+				form.setOutputMarkupId(true);
+				form.add(new NotificationPanel("feedback", form));
+				branchName = null;
+				form.add(new TextField<String>("name", new IModel<String>() {
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public String getObject() {
+						return branchName;
+					}
+
+					@Override
+					public void setObject(String object) {
+						branchName = object;
+					}
+					
+				}).setOutputMarkupId(true));
+				branchRevision = getRepository().getDefaultBranch();
+				form.add(newRevisionPicker());
+				form.add(new AjaxButton("create") {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						
+						if (branchName == null) {
+							form.error("Branch name is required.");
+							target.focusComponent(form.get("name"));
+							target.add(form);
+						} else {
+							String branchRef = GitUtils.branch2ref(branchName);
+							if (getRepository().getObjectId(branchRef, false) != null) {
+								form.error("Branch '" + branchName + "' already exists, please choose a different name.");
+								target.add(form);
+							} else {
+								getRepository().git().createBranch(branchName, branchRevision);
+								close(target);
+								target.add(branchesContainer);
+								target.add(pagingNavigator);
+							}
+						}
+					}
+
+				});
+				form.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						close(target);
+					}
+					
+				});
+				fragment.add(form);
+				return fragment;
+			}
+			
+		});
 		
 		branchesContainer = new WebMarkupContainer("branchesContainer");
 		branchesContainer.setOutputMarkupId(true);

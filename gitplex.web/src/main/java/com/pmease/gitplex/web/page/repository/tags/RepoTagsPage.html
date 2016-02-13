@@ -9,6 +9,7 @@
 						<input wicket:id="searchTags" class="form-control" placeholder="Search tags"></input>
 					</div>
 				</div>
+				<a wicket:id="createTag" class="btn btn-default"><i class="fa fa-plus"></i> Create Tag</a>
 				<ul wicket:id="tagsPageNav" class="pull-right"></ul>
 			</div>
 			<table wicket:id="tagsContainer" class="table table-hover table-condensed">
@@ -37,6 +38,36 @@
 		<a wicket:id="author"></a> 
 		<a wicket:id="messageToggle" class="ellipsis-expander"><i class="fa fa-ellipsis-h"></i></a>
 		<pre wicket:id="message" class="message"></pre>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="createTagFrag">
+		<form wicket:id="form" class="create-tag">
+			<div class="modal-header">
+				<h4 class="modal-title">Create Tag</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="feedback"></div>
+				<div class="form-group">
+					<label>Tag Name</label>
+					<input wicket:id="name" class="form-control focusable">
+				</div>
+				<div class="form-group">
+					<label>Tag Message</label>
+					<textarea wicket:id="message" rows="10" class="form-control"></textarea>
+				</div>
+				<div class="form-group">
+					<label>Create From</label>
+					<div>
+						<a wicket:id="revision" class="btn btn-default"></a>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<div class="form-group">
+					<button wicket:id="create" class="btn btn-primary">Create</button>
+					<button wicket:id="cancel" class="btn btn-default">Cancel</button>
+				</div>
+			</div>
+		</form>
 	</wicket:fragment>
 </wicket:extend>
 </html>

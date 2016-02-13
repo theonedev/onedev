@@ -51,7 +51,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return review.getReviewer().equals(GitPlex.getInstance(UserManager.class).getCurrent());
 		}
 	}
-
+	
 	public static boolean canModify(Comment comment) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		if (currentUser == null) {
