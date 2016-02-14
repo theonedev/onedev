@@ -48,3 +48,6 @@ div.revision-selector a.current:before {
 div.revision-selector a.commit:before {
 	content: "\f1da"; 
 }   
+div.revision-selector a.add:before {
+	content: "\f067"; 
+}   

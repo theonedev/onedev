@@ -5,14 +5,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -21,9 +19,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -36,12 +31,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TagCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -50,13 +41,13 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
-import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.component.addbranch.AddBranchLink;
+import com.pmease.gitplex.web.component.addtag.AddTagLink;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
@@ -67,8 +58,6 @@ import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.tags.RepoTagsPage;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public class CommitDetailPage extends RepositoryPage {
@@ -134,177 +123,20 @@ public class CommitDetailPage extends RepositoryPage {
 		
 		add(new HashAndCodePanel("hashAndCode", repoModel, getCommit().getId().name()));
 		
-		add(new ModalLink("createBranch") {
-
-			private String branchName;
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canCreate(getRepository(), UUID.randomUUID().toString()));
-			}
+		add(new AddBranchLink("createBranch", repoModel, revision) {
 
 			@Override
-			protected Component newContent(String id) {
-				Fragment fragment = new Fragment(id, "createBranchFrag", CommitDetailPage.this);
-				Form<?> form = new Form<Void>("form");
-				form.setOutputMarkupId(true);
-				form.add(new NotificationPanel("feedback", form));
-				branchName = null;
-				form.add(new TextField<String>("name", new IModel<String>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public String getObject() {
-						return branchName;
-					}
-
-					@Override
-					public void setObject(String object) {
-						branchName = object;
-					}
-					
-				}).setOutputMarkupId(true));
-
-				form.add(new AjaxButton("create") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						
-						if (branchName == null) {
-							form.error("Branch name is required.");
-							target.focusComponent(form.get("name"));
-							target.add(form);
-						} else {
-							String branchRef = GitUtils.branch2ref(branchName);
-							if (getRepository().getObjectId(branchRef, false) != null) {
-								form.error("Branch '" + branchName + "' already exists, please choose a different name.");
-								target.add(form);
-							} else {
-								getRepository().git().createBranch(branchName, revision);
-								setResponsePage(RepoBranchesPage.class, RepoBranchesPage.paramsOf(getRepository()));
-							}
-						}
-					}
-
-				});
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						close(target);
-					}
-					
-				});
-				fragment.add(form);
-				return fragment;
+			protected void onCreate(AjaxRequestTarget target) {
+				setResponsePage(RepoBranchesPage.class, RepoBranchesPage.paramsOf(getRepository()));
 			}
 			
 		});
 		
-		add(new ModalLink("createTag") {
-
-			private String tagName;
-			
-			private String tagMessage;
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getRepository(), Constants.R_TAGS + UUID.randomUUID().toString()));
-			}
+		add(new AddTagLink("createTag", repoModel, revision) {
 
 			@Override
-			protected Component newContent(String id) {
-				Fragment fragment = new Fragment(id, "createTagFrag", CommitDetailPage.this);
-				Form<?> form = new Form<Void>("form");
-				form.setOutputMarkupId(true);
-				form.add(new NotificationPanel("feedback", form));
-				tagName = null;
-				form.add(new TextField<String>("name", new IModel<String>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public String getObject() {
-						return tagName;
-					}
-
-					@Override
-					public void setObject(String object) {
-						tagName = object;
-					}
-					
-				}).setOutputMarkupId(true));
-				
-				tagMessage = null;
-				form.add(new TextArea<String>("message", new IModel<String>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public String getObject() {
-						return tagMessage;
-					}
-
-					@Override
-					public void setObject(String object) {
-						tagMessage = object;
-					}
-					
-				}));
-				form.add(new AjaxButton("create") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						
-						if (tagName == null) {
-							form.error("Tag name is required.");
-							target.focusComponent(form.get("name"));
-							target.add(form);
-						} else {
-							String tagRef = GitUtils.tag2ref(tagName);
-							if (getRepository().getObjectId(tagRef, false) != null) {
-								form.error("Tag '" + tagName + "' already exists, please choose a different name.");
-								target.add(form);
-							} else {
-								try (FileRepository jgitRepo = getRepository().openAsJGitRepo();) {
-									Git git = Git.wrap(jgitRepo);
-									TagCommand tag = git.tag();
-									tag.setName(tagName);
-									if (tagMessage != null)
-										tag.setMessage(tagMessage);
-									tag.setTagger(getCurrentUser().asPerson());
-									tag.setObjectId(getRepository().getRevCommit(revision));
-									tag.call();
-								} catch (GitAPIException e) {
-									throw new RuntimeException(e);
-								}
-								setResponsePage(RepoTagsPage.class, RepoTagsPage.paramsOf(getRepository()));
-							}
-						}
-					}
-
-				});
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						close(target);
-					}
-					
-				});
-				fragment.add(form);
-				return fragment;
+			protected void onCreate(AjaxRequestTarget target) {
+				setResponsePage(RepoTagsPage.class, RepoTagsPage.paramsOf(getRepository()));
 			}
 			
 		});

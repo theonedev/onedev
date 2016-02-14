@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -21,9 +22,12 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -33,6 +37,10 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.TagCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Throwables;
@@ -40,10 +48,14 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
+import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
@@ -52,7 +64,11 @@ public abstract class RevisionSelector extends Panel {
 	
 	private static final String COMMIT_FLAG = "*";
 	
+	private static final String ADD_FLAG = "~";
+	
 	private final String revision;
+	
+	private final boolean canCreateRef;
 	
 	private boolean branchesActive;
 	
@@ -102,16 +118,21 @@ public abstract class RevisionSelector extends Panel {
 		target.focusComponent(revField);
 	}
 
-	public RevisionSelector(String id, IModel<Repository> repoModel, String revision) {
+	public RevisionSelector(String id, IModel<Repository> repoModel, String revision, boolean canCreateRef) {
 		super(id);
 		
 		this.repoModel = repoModel;
 		this.revision = revision;		
+		this.canCreateRef = canCreateRef;
 		Ref ref = repoModel.getObject().getRef(revision);
 		branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
 		
 		refs = findRefs();
 		filteredRefs = new ArrayList<>(refs);
+	}
+	
+	public RevisionSelector(String id, IModel<Repository> repoModel, String revision) {
+		this(id, repoModel, revision, false);
 	}
 
 	@Override
@@ -155,10 +176,14 @@ public abstract class RevisionSelector extends Panel {
 				if (key.equals("return")) {
 					if (!filteredRefs.isEmpty()) {
 						String activeRef = filteredRefs.get(activeRefIndex);
-						if (activeRef.startsWith(COMMIT_FLAG))
+						if (activeRef.startsWith(COMMIT_FLAG)) {
 							selectRevision(target, activeRef.substring(COMMIT_FLAG.length()));
-						else
+						} else if (activeRef.startsWith(ADD_FLAG)) {
+							activeRef = activeRef.substring(ADD_FLAG.length());
+							onCreateRef(target, activeRef);
+						} else {
 							selectRevision(target, activeRef);
+						}
 					} else if (revInput != null) { 
 						selectRevision(target, revInput);
 					}
@@ -197,8 +222,12 @@ public abstract class RevisionSelector extends Panel {
 						if (ref.toLowerCase().contains(revInput))
 							filteredRefs.add(ref);
 					}
-					if (!found && repoModel.getObject().getRevCommit(revInput, false) != null) {
-						filteredRefs.add(COMMIT_FLAG + revInput);
+					if (!found) {
+						if (repoModel.getObject().getRevCommit(revInput, false) != null) {
+							filteredRefs.add(COMMIT_FLAG + revInput);
+						} else if (canCreateRef) {
+							filteredRefs.add(ADD_FLAG + revInput);
+						}
 					}
 				} else {
 					revInput = null;
@@ -249,6 +278,77 @@ public abstract class RevisionSelector extends Panel {
 		return null;
 	}
 	
+	private void onCreateRef(AjaxRequestTarget target, final String refName) {
+		if (branchesActive) {
+			repoModel.getObject().git().createBranch(refName, revision);
+			selectRevision(target, refName);
+		} else {
+			new ModalPanel(target) {
+
+				private String message;
+				
+				@Override
+				protected Component newContent(String id) {
+					Fragment fragment = new Fragment(id, "addTagFrag", RevisionSelector.this);
+					Form<?> form = new Form<Void>("form");
+					form.add(new TextArea<String>("message", new IModel<String>() {
+
+						@Override
+						public void detach() {
+						}
+
+						@Override
+						public String getObject() {
+							return message;
+						}
+
+						@Override
+						public void setObject(String obj) {
+							message = obj;
+						}
+						
+					}));
+					form.add(new AjaxButton("create") {
+
+						@Override
+						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+							super.onSubmit(target, form);
+							
+							try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();) {
+								Git git = Git.wrap(jgitRepo);
+								TagCommand tag = git.tag();
+								tag.setName(refName);
+								if (message != null)
+									tag.setMessage(message);
+								User user = GitPlex.getInstance(UserManager.class).getCurrent();
+								tag.setTagger(user.asPerson());
+								tag.setObjectId(repoModel.getObject().getRevCommit(revision));
+								tag.call();
+							} catch (GitAPIException e) {
+								throw new RuntimeException(e);
+							}
+							
+							close(target);
+							selectRevision(target, refName);
+						}
+						
+					});
+					form.add(new AjaxLink<Void>("cancel") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							close(target);
+						}
+						
+					});
+					fragment.add(form);
+					return fragment;
+				}
+				
+			};
+		}		
+	}
+	
 	private Component newRefList(List<String> refs) {
 		WebMarkupContainer refsContainer = new WebMarkupContainer("refs");
 		refsContainer.add(new ListView<String>("refs", refs) {
@@ -258,6 +358,8 @@ public abstract class RevisionSelector extends Panel {
 				final String ref;
 				if (item.getModelObject().startsWith(COMMIT_FLAG))
 					ref = item.getModelObject().substring(COMMIT_FLAG.length());
+				else if (item.getModelObject().startsWith(ADD_FLAG))
+					ref = item.getModelObject().substring(ADD_FLAG.length());
 				else
 					ref = item.getModelObject();
 				
@@ -271,22 +373,30 @@ public abstract class RevisionSelector extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						selectRevision(target, ref);
+						if (item.getModelObject().startsWith(ADD_FLAG)) {
+							onCreateRef(target, ref);
+						} else {
+							selectRevision(target, ref);
+						}
 					}
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						String url = getRevisionUrl(ref);
-						if (url != null)
-							tag.put("href", url);
+						if (!item.getModelObject().startsWith(ADD_FLAG)) {
+							String url = getRevisionUrl(ref);
+							if (url != null)
+								tag.put("href", url);
+						}
 					}
 					
 				};
 				link.add(new Label("label", ref));
 				if (item.getModelObject().startsWith(COMMIT_FLAG))
 					link.add(AttributeAppender.append("class", "icon commit"));
+				else if (item.getModelObject().startsWith(ADD_FLAG))
+					link.add(AttributeAppender.append("class", "icon add"));
 				else if (ref.equals(revision))
 					link.add(AttributeAppender.append("class", "icon current"));
 				item.add(link);

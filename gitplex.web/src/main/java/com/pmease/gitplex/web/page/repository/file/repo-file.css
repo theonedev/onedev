@@ -95,6 +95,9 @@
 #repo-file>.last-commit .pull-left {
 	margin-right: 12px;
 }
+#repo-file>.last-commit span.message {
+	margin-top: 2px;
+}
 #repo-file>.last-commit div.message {
 	display: none;
 	margin-top: 6px;

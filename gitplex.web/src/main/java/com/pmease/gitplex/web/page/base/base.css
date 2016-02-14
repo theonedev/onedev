@@ -99,6 +99,7 @@ li.selectable.active a, a.selectable.active {
 	padding: 0px 6px;
 	border-radius: 2px; 
 	color: #777;
+	vertical-align: middle;
 	line-height: 16px;
 }
 .ellipsis-expander .fa {

@@ -648,7 +648,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
-		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, repoModel, blobIdent.revision) {
+		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, repoModel, blobIdent.revision, true) {
 
 			@Override
 			protected String getRevisionUrl(String revision) {
