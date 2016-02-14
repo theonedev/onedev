@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.model.Repository;
@@ -49,7 +48,7 @@ public class HashAndCodePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new CommitHashPanel("hash", Model.of(hash)));
+		add(new CommitHashPanel("hash", hash));
 		
 		RepoFileState state = new RepoFileState();
 		state.requestId = requestId;

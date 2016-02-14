@@ -4,25 +4,25 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 @SuppressWarnings("serial")
 public class CommitHashPanel extends Panel {
 
-	private final IModel<String> commitHashModel;
+	private final String commitHash;
 	
-	public CommitHashPanel(String id, IModel<String> commitHashModel) {
+	public CommitHashPanel(String id, String commitHash) {
 		super(id);
 		
-		this.commitHashModel = commitHashModel;
+		this.commitHash = commitHash;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new TextField<String>("hash", commitHashModel));
+		add(new TextField<String>("hash", Model.of(commitHash)));
 	}
 
 	@Override
@@ -30,13 +30,6 @@ public class CommitHashPanel extends Panel {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(CommitHashPanel.class, "commit-hash.css")));
-	}
-
-	@Override
-	protected void onDetach() {
-		commitHashModel.detach();
-		
-		super.onDetach();
 	}
 
 }

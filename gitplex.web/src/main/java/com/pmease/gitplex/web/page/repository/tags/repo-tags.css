@@ -17,12 +17,20 @@
 #repo-tags>.body>table td {
 	white-space: nowrap;
 }
+#repo-tags .tag .separator {
+	font-size: 20px;
+	vertical-align: middle;
+	line-height: 10px;
+}
 #repo-tags .tag a.name {
 	font-weight: bold;
 	font-size: 16px;
 }
 #repo-tags .annotated {
 	color: #666;
+	font-size: 12px;
+}
+#repo-tags .annotated .ellipsis-expander {
 	margin-left: 4px;
 }
 #repo-tags .annotated .message {
@@ -34,14 +42,17 @@
 }
 #repo-tags .commit input {
 	border: 1px dotted #999;	
-	margin-right: 4px;
+}
+#repo-tags .commit .separator {
+	font-size: 20px;
+	vertical-align: middle;
 }
 #repo-tags>.body>table td.actions {
 	width: 1%;
 	text-align: right;
 }
 #repo-tags>.body>table td.actions .fa.fa-times {
-	color: red; margin-left: 8px;
+	color: red;
 }
 #repo-tags>.body>table td.actions span.fa.fa-times {
 	color: #888;

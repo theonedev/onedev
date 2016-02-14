@@ -40,6 +40,7 @@ div.revision-selector a.icon:before {
 	font-family: "FontAwesome"; 
 	margin-right: 4px;	
 	position: absolute;
+	color: #333;
 	left: 4px;
 }   
 div.revision-selector a.current:before {

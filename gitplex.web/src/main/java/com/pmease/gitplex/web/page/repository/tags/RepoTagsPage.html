@@ -22,6 +22,7 @@
 						<div class="commit">
 							<i class="fa fa-ext fa-commit"></i>
 							<span wicket:id="hash"></span>
+							<span class="separator">&middot;</span>
 							<a wicket:id="commitLink"><span wicket:id="shortMessage"></span></a>
 						</div>
 					</td>
@@ -34,7 +35,9 @@
 		</div>
 	</section>
 	<wicket:fragment wicket:id="annotatedFrag">
-		<span wicket:id="date"></span>,
+		<span class="separator">&middot;</span>
+		<span wicket:id="date"></span>
+		<span class="separator">&middot;</span>
 		<a wicket:id="author"></a> 
 		<a wicket:id="messageToggle" class="ellipsis-expander"><i class="fa fa-ellipsis-h"></i></a>
 		<pre wicket:id="message" class="message"></pre>

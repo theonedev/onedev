@@ -66,12 +66,13 @@ import com.pmease.gitplex.core.model.RepoAndBranch;
 import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
+import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.repository.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
@@ -396,8 +397,13 @@ public class RepoBranchesPage extends RepositoryPage {
 				
 				RevCommit lastCommit = getRepository().getRevCommit(ref.getObjectId());
 
-				item.add(new Label("lastUpdateTime", DateUtils.formatAge(lastCommit.getCommitterIdent().getWhen())));
-				item.add(new UserLink("lastAuthor", lastCommit.getAuthorIdent()));
+				PageParameters params = CommitDetailPage.paramsOf(getRepository(), lastCommit.name());
+				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
+				link.add(new Label("shortMessage", lastCommit.getShortMessage()));
+				item.add(link);
+				
+				item.add(new CommitHashPanel("commitHash", lastCommit.name()));
+				item.add(new Label("age", DateUtils.formatAge(lastCommit.getCommitterIdent().getWhen())));
 				
 				item.add(new WebMarkupContainer("default") {
 
@@ -458,7 +464,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						if (behindOpenRequestsModel.getObject().get(item.getModelObject()) != null)
+						if (behindOpenRequestsModel.getObject().get(branch) != null)
 							add(AttributeAppender.append("class", " request"));
 					}
 
@@ -489,7 +495,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						if (aheadOpenRequestsModel.getObject().get(item.getModelObject()) != null) { 
+						if (aheadOpenRequestsModel.getObject().get(branch) != null) { 
 							tag.put("title", "" + ab.getAhead() + " commits ahead of base branch, and there is an "
 									+ "open pull request sending these commits to base branch");
 						} else {

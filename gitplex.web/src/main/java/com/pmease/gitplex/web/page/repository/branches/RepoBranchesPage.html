@@ -19,9 +19,16 @@
 			</div>
 			<table wicket:id="branchesContainer" class="table table-hover table-condensed">
 				<tr wicket:id="branches">
-					<td class="summary">
-						<a wicket:id="branchLink"><span wicket:id="name"></span></a> <span class="label label-default" wicket:id="default">default</span>
-						<div>Last updated <span wicket:id="lastUpdateTime"></span> by <span wicket:id="lastAuthor"></span></div>
+					<td class="detail">
+						<a wicket:id="branchLink" class="name"><span wicket:id="name"></span></a> <span class="label label-default" wicket:id="default">default</span>
+						<div class="commit">
+							<i class="fa fa-ext fa-commit"></i> 
+							<span wicket:id="commitHash"></span> 
+							<span class="separator">&middot;</span>
+							<a wicket:id="commitLink"><span wicket:id="shortMessage"></span></a>
+							<span class="separator">&middot;</span>
+							<span wicket:id="age"></span>						
+						</div>
 					</td>
 					<td class="behind behind-ahead">
 						<div align="right">

@@ -154,7 +154,7 @@ public class RepoTagsPage extends RepositoryPage {
 				}
 
 				RevCommit commit = getRepository().getRevCommit(ref.getObjectId());
-				item.add(new CommitHashPanel("hash", Model.of(commit.name())));
+				item.add(new CommitHashPanel("hash", commit.name()));
 				PageParameters params = CommitDetailPage.paramsOf(getRepository(), commit.name());
 				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
 				link.add(new Label("shortMessage", commit.getShortMessage()));

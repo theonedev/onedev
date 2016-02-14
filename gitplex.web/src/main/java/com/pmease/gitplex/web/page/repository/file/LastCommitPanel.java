@@ -43,7 +43,7 @@ class LastCommitPanel extends Panel {
 		
 		add(new CommitMessagePanel("message", repoModel, Model.of(commit)));
 		
-		add(new CommitHashPanel("hash", Model.of(commit.getHash())));
+		add(new CommitHashPanel("hash", commit.getHash()));
 		add(new Link<Void>("history") {
 
 			@Override
