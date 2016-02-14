@@ -51,3 +51,8 @@ div.revision-selector a.commit:before {
 div.revision-selector a.add:before {
 	content: "\f067"; 
 }   
+div.revision-selector ul.refs>li>a .revision {
+	font-size: 13px;
+	margin-top: 2px;
+	color: #666;
+}

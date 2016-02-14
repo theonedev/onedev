@@ -13,7 +13,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -22,12 +21,9 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -37,11 +33,8 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TagCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
@@ -52,10 +45,7 @@ import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
@@ -283,70 +273,33 @@ public abstract class RevisionSelector extends Panel {
 			repoModel.getObject().git().createBranch(refName, repoModel.getObject().getRevCommit(revision).name());
 			selectRevision(target, refName);
 		} else {
-			new ModalPanel(target) {
+			ModalPanel modal = new ModalPanel(target) {
 
-				private String message;
-				
 				@Override
 				protected Component newContent(String id) {
-					Fragment fragment = new Fragment(id, "addTagFrag", RevisionSelector.this);
-					Form<?> form = new Form<Void>("form");
-					form.add(new TextArea<String>("message", new IModel<String>() {
+					return new CreateTagPanel(id, repoModel, refName, revision) {
 
 						@Override
-						public void detach() {
-						}
-
-						@Override
-						public String getObject() {
-							return message;
-						}
-
-						@Override
-						public void setObject(String obj) {
-							message = obj;
-						}
-						
-					}));
-					form.add(new AjaxButton("create") {
-
-						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
-							
-							try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();) {
-								Git git = Git.wrap(jgitRepo);
-								TagCommand tag = git.tag();
-								tag.setName(refName);
-								if (message != null)
-									tag.setMessage(message);
-								User user = GitPlex.getInstance(UserManager.class).getCurrent();
-								tag.setTagger(user.asPerson());
-								tag.setObjectId(repoModel.getObject().getRevCommit(revision));
-								tag.call();
-							} catch (GitAPIException e) {
-								throw new RuntimeException(e);
-							}
-							
+						protected void onCreate(AjaxRequestTarget target, String tagName) {
 							close(target);
-							selectRevision(target, refName);
+							onSelect(target, tagName);
 						}
-						
-					});
-					form.add(new AjaxLink<Void>("cancel") {
 
 						@Override
-						public void onClick(AjaxRequestTarget target) {
+						protected void onCancel(AjaxRequestTarget target) {
 							close(target);
 						}
 						
-					});
-					fragment.add(form);
-					return fragment;
+					};
 				}
 				
 			};
+			onModalOpened(target, modal);
 		}		
+	}
+
+	protected void onModalOpened(AjaxRequestTarget target, ModalPanel modal) {
+		
 	}
 	
 	private Component newRefList(List<String> refs) {
@@ -392,13 +345,24 @@ public abstract class RevisionSelector extends Panel {
 					}
 					
 				};
-				link.add(new Label("label", ref));
-				if (item.getModelObject().startsWith(COMMIT_FLAG))
+				if (item.getModelObject().startsWith(COMMIT_FLAG)) {
+					link.add(new Label("label", ref));
 					link.add(AttributeAppender.append("class", "icon commit"));
-				else if (item.getModelObject().startsWith(ADD_FLAG))
+				} else if (item.getModelObject().startsWith(ADD_FLAG)) {
+					String label;
+					if (branchesActive)
+						label = "<div class='name'>Create branch <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
+					else
+						label = "<div class='name'>Create tag <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
+					label += "<div class='revision'>from " + HtmlEscape.escapeHtml5(revision) + "</div>";
+					link.add(new Label("label", label).setEscapeModelStrings(false));
 					link.add(AttributeAppender.append("class", "icon add"));
-				else if (ref.equals(revision))
+				} else if (ref.equals(revision)) {
+					link.add(new Label("label", ref));
 					link.add(AttributeAppender.append("class", "icon current"));
+				} else {
+					link.add(new Label("label", ref));
+				}
 				item.add(link);
 				
 				if (activeRefIndex == item.getIndex())

@@ -9,6 +9,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.gitplex.core.model.RepoAndRevision;
 import com.pmease.gitplex.core.model.Repository;
 
@@ -44,6 +45,12 @@ public abstract class RevisionPicker extends DropdownLink {
 				target.add(RevisionPicker.this);
 				
 				RevisionPicker.this.onSelect(target, revision);
+			}
+
+			@Override
+			protected void onModalOpened(AjaxRequestTarget target, ModalPanel modal) {
+				super.onModalOpened(target, modal);
+				close(target);
 			}
 
 			@Override
