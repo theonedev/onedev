@@ -70,8 +70,8 @@ abstract class AddBranchPanel extends Panel {
 						form.error("Branch '" + branchName + "' already exists, please choose a different name.");
 						target.add(form);
 					} else {
-						repo.git().createBranch(branchName, revision);
-						onCreate(target);
+						repo.git().createBranch(branchName, repoModel.getObject().getRevCommit(revision).name());
+						onCreate(target, branchName);
 					}
 				}
 			}
@@ -88,7 +88,7 @@ abstract class AddBranchPanel extends Panel {
 		add(form);
 	}
 	
-	protected abstract void onCreate(AjaxRequestTarget target);
+	protected abstract void onCreate(AjaxRequestTarget target, String branch);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 

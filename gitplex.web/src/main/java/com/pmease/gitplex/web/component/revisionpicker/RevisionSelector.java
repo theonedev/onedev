@@ -280,7 +280,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void onCreateRef(AjaxRequestTarget target, final String refName) {
 		if (branchesActive) {
-			repoModel.getObject().git().createBranch(refName, revision);
+			repoModel.getObject().git().createBranch(refName, repoModel.getObject().getRevCommit(revision).name());
 			selectRevision(target, refName);
 		} else {
 			new ModalPanel(target) {

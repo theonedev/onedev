@@ -33,7 +33,7 @@ $(window).load(function() {
 		var headWidth = $("#repository").width() - $("#repository>.sidebar>table>tbody>tr>td.nav").outerWidth();
 		
 		// below code moves file navigator to bottom if it is too wide
-		var maxWidth = headWidth - $revisionPicker.outerWidth() - 60;
+		var maxWidth = headWidth - $revisionPicker.outerWidth() - 80;
 		var maxHeight = $head.height();
 
 		var $fileNavigator = $head.find(">.file-navigator");

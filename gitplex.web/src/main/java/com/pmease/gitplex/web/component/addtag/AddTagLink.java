@@ -36,8 +36,9 @@ public abstract class AddTagLink extends ModalLink {
 		return new AddTagPanel(id, repoModel, revision) {
 
 			@Override
-			protected void onCreate(AjaxRequestTarget target) {
-				AddTagLink.this.onCreate(target);
+			protected void onCreate(AjaxRequestTarget target, String tag) {
+				close(target);
+				AddTagLink.this.onCreate(target, tag);
 			}
 
 			@Override
@@ -55,5 +56,5 @@ public abstract class AddTagLink extends ModalLink {
 		super.onDetach();
 	}
 
-	protected abstract void onCreate(AjaxRequestTarget target);
+	protected abstract void onCreate(AjaxRequestTarget target, String tag);
 }

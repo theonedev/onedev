@@ -126,7 +126,7 @@ public class CommitDetailPage extends RepositoryPage {
 		add(new AddBranchLink("createBranch", repoModel, revision) {
 
 			@Override
-			protected void onCreate(AjaxRequestTarget target) {
+			protected void onCreate(AjaxRequestTarget target, String branch) {
 				setResponsePage(RepoBranchesPage.class, RepoBranchesPage.paramsOf(getRepository()));
 			}
 			
@@ -135,7 +135,7 @@ public class CommitDetailPage extends RepositoryPage {
 		add(new AddTagLink("createTag", repoModel, revision) {
 
 			@Override
-			protected void onCreate(AjaxRequestTarget target) {
+			protected void onCreate(AjaxRequestTarget target, String tag) {
 				setResponsePage(RepoTagsPage.class, RepoTagsPage.paramsOf(getRepository()));
 			}
 			

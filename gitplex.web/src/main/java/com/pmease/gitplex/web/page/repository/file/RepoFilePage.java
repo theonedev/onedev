@@ -314,6 +314,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 		});
 		
+		add(new WebMarkupContainer("download"));
+		
 		newRevisionPicker(null);
 		
 		add(commentContext = new WebMarkupContainer("commentContext") {
@@ -647,6 +649,35 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		requestId = state.requestId;
 	}
 	
+	private void onSelect(AjaxRequestTarget target, String revision) {
+		RepoFileState state = getState();
+		state.blobIdent.revision = revision;
+		state.requestId = null;
+		state.commentId = null;
+		state.mode = null;
+		state.mark = null;
+		
+		if (state.blobIdent.path != null) {
+			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+					RevWalk revWalk = new RevWalk(jgitRepo)) {
+				RevTree revTree = getRepository().getRevCommit(revision, true).getTree();
+				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
+				if (treeWalk != null) {
+					state.blobIdent.mode = treeWalk.getRawMode(0);
+				} else {
+					state.blobIdent.path = null;
+					state.blobIdent.mode = FileMode.TREE.getBits();
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		applyState(target, state);
+		pushState(target);
+		resizeWindow(target);
+	}
+	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
 		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, repoModel, blobIdent.revision, true) {
 
@@ -660,32 +691,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				RepoFileState state = getState();
-				state.blobIdent.revision = revision;
-				state.requestId = null;
-				state.commentId = null;
-				state.mode = null;
-				state.mark = null;
-				
-				if (state.blobIdent.path != null) {
-					try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-							RevWalk revWalk = new RevWalk(jgitRepo)) {
-						RevTree revTree = getRepository().getRevCommit(revision, true).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
-						if (treeWalk != null) {
-							state.blobIdent.mode = treeWalk.getRawMode(0);
-						} else {
-							state.blobIdent.path = null;
-							state.blobIdent.mode = FileMode.TREE.getBits();
-						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-				applyState(target, state);
-				pushState(target);
-				resizeWindow(target);
+				RepoFilePage.this.onSelect(target, revision);
 			}
 			
 		}; 

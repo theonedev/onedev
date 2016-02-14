@@ -110,7 +110,7 @@ abstract class AddTagPanel extends Panel {
 						} catch (GitAPIException e) {
 							throw new RuntimeException(e);
 						}
-						onCreate(target);
+						onCreate(target, tagName);
 					}
 				}
 			}
@@ -127,7 +127,7 @@ abstract class AddTagPanel extends Panel {
 		add(form);
 	}
 	
-	protected abstract void onCreate(AjaxRequestTarget target);
+	protected abstract void onCreate(AjaxRequestTarget target, String tag);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 

@@ -35,8 +35,9 @@ public abstract class AddBranchLink extends ModalLink {
 		return new AddBranchPanel(id, repoModel, revision) {
 
 			@Override
-			protected void onCreate(AjaxRequestTarget target) {
-				AddBranchLink.this.onCreate(target);
+			protected void onCreate(AjaxRequestTarget target, String branch) {
+				close(target);
+				AddBranchLink.this.onCreate(target, branch);
 			}
 
 			@Override
@@ -54,5 +55,5 @@ public abstract class AddBranchLink extends ModalLink {
 		super.onDetach();
 	}
 
-	protected abstract void onCreate(AjaxRequestTarget target);
+	protected abstract void onCreate(AjaxRequestTarget target, String branch);
 }
