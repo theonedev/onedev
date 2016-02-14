@@ -33,6 +33,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
@@ -153,7 +154,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
     
     private transient Map<String, Map<String, Ref>> prefixRefsCache;
     
-    private transient Map<AnyObjectId, RevObject> revObjectCache;
+    private transient Map<AnyObjectId, Optional<RevObject>> revObjectCache;
     
     private transient Map<RevObject, Optional<RevCommit>> revCommitCache;
     
@@ -834,19 +835,33 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public RevObject getRevObject(AnyObjectId revId) {
+		return getRevObject(revId, true);
+	}
+	
+	@Nullable
+	public RevObject getRevObject(AnyObjectId revId, boolean mustExist) {
+		if (revId == null && !mustExist)
+			return null;
+		
 		if (revObjectCache == null)
 			revObjectCache = new HashMap<>();
-		RevObject revObject = revObjectCache.get(revId);
-		if (revObject == null) {
+		Optional<RevObject> optional = revObjectCache.get(revId);
+		if (optional == null) {
 			try (	FileRepository jgitRepo = openAsJGitRepo();
 					RevWalk revWalk = new RevWalk(jgitRepo);) {
-				revObject = revWalk.parseAny(revId);
-				revObjectCache.put(revId, revObject);
+				optional = Optional.of(revWalk.parseAny(revId));
+			} catch (MissingObjectException e) {
+				if (!mustExist)
+					optional = Optional.absent();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			revObjectCache.put(revId, optional);
 		}
-		return revObject;
+		if (mustExist)
+			return optional.get();
+		else
+			return optional.orNull();
 	}
 	
 	public RevCommit getRevCommit(RevObject revObject) {
@@ -855,6 +870,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	@Nullable
 	public RevCommit getRevCommit(RevObject revObject, boolean mustExist) {
+		if (revObject == null && !mustExist)
+			return null;
+		
 		if (revCommitCache == null)
 			revCommitCache = new HashMap<>();
 		Optional<RevCommit> optional = revCommitCache.get(revObject);
@@ -879,16 +897,12 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	
 	@Nullable
 	public RevCommit getRevCommit(AnyObjectId revId, boolean mustExist) {
-		return getRevCommit(getRevObject(revId), mustExist);
+		return getRevCommit(getRevObject(revId, mustExist), mustExist);
 	}
 
 	@Nullable
 	public RevCommit getRevCommit(String revision, boolean mustExist) {
-		ObjectId id = getObjectId(revision, mustExist);
-		if (id != null)
-			return getRevCommit(id, mustExist);
-		else
-			return null;
+		return getRevCommit(getObjectId(revision, mustExist), mustExist);
 	}
 	
 	public RevCommit getRevCommit(String revision) {

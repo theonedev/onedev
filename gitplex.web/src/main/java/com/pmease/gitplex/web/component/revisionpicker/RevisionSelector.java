@@ -145,9 +145,9 @@ public abstract class RevisionSelector extends Panel {
 			@Override
 			protected String load() {
 				if (branchesActive)
-					return "Input branches or commit hash";
+					return canCreateRef?"Find or create branch":"Find branch";
 				else
-					return "Input tags or commit hash";
+					return canCreateRef?"Find or create tag":"Find tag";
 			}
 			
 		}));
