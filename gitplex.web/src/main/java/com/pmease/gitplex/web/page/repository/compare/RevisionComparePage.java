@@ -332,7 +332,15 @@ public class RevisionComparePage extends RepositoryPage {
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {
 		final WebMarkupContainer tabPanel;
 		if (path != null) {
-			tabPanel = new Fragment(TAB_PANEL_ID, "compareFrag", this);
+			tabPanel = new Fragment(TAB_PANEL_ID, "compareFrag", this) {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!commitsModel.getObject().isEmpty());
+				}
+				
+			};
 			
 			diffOption = new DiffOptionPanel("diffOption", new AbstractReadOnlyModel<Repository>() {
 
@@ -391,7 +399,7 @@ public class RevisionComparePage extends RepositoryPage {
 	private void newRevDiffPanel(final WebMarkupContainer tabPanel, @Nullable AjaxRequestTarget target) {
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
 				new Model<PullRequest>(null), new Model<Comment>(null), 
-				RevisionComparePage.this.target.getRevision(), source.getRevision(), 
+				mergeBaseModel.getObject(), source.getRevision(), 
 				StringUtils.isBlank(path)?null:path, null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
