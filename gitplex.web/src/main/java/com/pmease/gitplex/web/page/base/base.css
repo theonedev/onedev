@@ -50,6 +50,14 @@ form>.actions>:last-child {
 	color: #777;
 }
 
+.middot:before {
+	content: ".";
+	font-size: 20px;
+	line-height: 12px;
+	vertical-align: top;
+	color: #666;
+}
+
 .input-group>.form-control+.btn.input-group-addon {
 	border-radius: 0 4px 4px 0;
 	border-left: none;

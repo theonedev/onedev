@@ -78,16 +78,12 @@
 	font-size: 16px;
 }
 #repo-branches>.body>table td.detail .commit {
-	margin-top: 4px;
+	margin: 8px 0;
 	font-size: 12px;
 	color: #666;
 }
 #repo-branches>.body>table td.detail .commit .fa {
 	color: #666;
-}
-#repo-branches>.body>table td.detail .commit .separator {
-	font-size: 20px;
-	vertical-align: middle;
 }
 #repo-branches>.body>table td.detail input.commit-hash {
 	border: 1px dotted #999;
