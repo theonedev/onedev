@@ -9,7 +9,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
+import com.pmease.gitplex.web.component.repochoice.AffinalDepotChoice;
 
 @SuppressWarnings("serial")
 public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
@@ -72,7 +72,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 		
 		setOutputMarkupId(true);
 		
-		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoId, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new AffinalDepotChoice("repositoryChoice", currentRepoId, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {

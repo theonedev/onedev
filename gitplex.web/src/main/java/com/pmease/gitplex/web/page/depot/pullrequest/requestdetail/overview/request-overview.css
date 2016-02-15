@@ -1,0 +1,291 @@
+#request-detail>.overview>tbody>tr>td.activities {
+	width: 75%; 
+	padding-right: 16px;
+}
+#request-detail .activities>table {
+	margin-bottom: 20px; 
+	table-layout: fixed;
+	border-bottom: 1px solid #CCC;
+}
+#request-detail .activities>table>tbody>tr.activity>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+#request-detail .activities>table>tbody>tr.activity.discussion>td.spacer {
+	border-right: none;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.avatar {
+	width: 40px; 
+}
+#request-detail .activities>table>tbody>tr.discussion>td.spacer {
+	width: 35px; 
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div {
+	position: relative;
+	border: 1px solid #CCC;
+	border-radius: 4px;
+	background: white;
+	margin-left: -15px;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>div:before {
+	display: inline-block;
+	position: absolute;
+	top: 10px;
+	left: -8px;
+	border-top: 8px solid transparent;
+	border-bottom: 8px solid transparent;
+	border-right: 8px solid #CBCBCB;
+	content: "";
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>div:after {
+	display: inline-block;
+	position: absolute;
+	top: 11px;
+	left: -7px;
+	border-top: 7px solid transparent;
+	border-bottom: 7px solid transparent;
+	border-right: 7px solid #F5F5F5;
+	content: "";
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail .add-reply a:hover {
+	border-radius: 0 0 4px 4px;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.head,
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.head  {
+	padding: 10px;
+	border-radius: 4px 4px 0 0;
+	background: #F5F5F5;
+}
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.body,
+#request-detail .activities>table>tbody>tr.discussion>td.detail>div>.comment>.body {
+	padding: 10px 24px;
+}
+#request-detail .activities .comment .replies {
+	padding: 0 10px 10px 10px;
+}
+
+#request-detail .activities>table>tbody>tr.discussion+tr.discussion>td {
+	padding-top: 30px;
+}
+#request-detail .activities>table>tbody>tr.discussion+tr.discussion>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+#request-detail .activities>table>tbody>tr.discussion:last-child>td {
+	padding-bottom: 20px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion:last-child>td.detail {
+	padding-bottom: 20px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion>td.detail {
+	border-top: 1px solid #EEE;
+}
+#request-detail .activities>table>tbody>tr.discussion+tr.non-discussion>td.detail,
+#request-detail .activities>table>tbody>tr.update+tr.update>td.detail {
+	border-top: none;
+}
+#request-detail .activities>table>tbody>tr.discussion:last-child>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+#request-detail .activities>table>tbody>tr.discussion>.avatar img {
+	width: 40px; 
+	height: 40px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion>td.detail {
+	font-size: 13px;
+	padding: 10px 0;
+}
+#request-detail .activities>table>tbody>tr.non-discussion .activity-summary {
+	margin-left: -14px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion .activity-summary .icon {
+	border-radius: 13px;
+	background: #5CA7F8;
+	width: 26px;
+	height: 26px;
+	color: white;
+	padding: 6px;
+	margin-right: 4px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion>td.avatar img {
+	display: none;
+}
+#request-detail .activities>table>tbody>tr.non-discussion .activity-summary .user a {
+	font-weight: normal;
+}
+#request-detail .activities .activity>.detail>.update {
+	color: #777; 
+	margin-left: -7px;
+}
+#request-detail .activities .activity>.detail>.update>.alert {
+	margin: 0 0 8px 28px;
+}
+#request-detail .activities .activity>.detail>.update a {
+	color: #555;
+}
+#request-detail .activities .activity>.detail>.update td {
+	padding: 4px 0;
+}
+#request-detail .activities>table>tbody>tr.update+tr.update>td.detail>div {
+	margin-top: -16px;
+}
+#request-detail .activities>table>tbody>tr.update+tr.update>td.detail>div>.alert {
+	margin-top: 16px;
+}
+#request-detail .activities>table>tbody>tr.discussion+tr.non-discussion>td.detail {
+	padding-top: 16px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion+tr.discussion>td {
+	padding-top: 8px;
+}
+#request-detail .activities>table>tbody>tr.non-discussion+tr.discussion>td.spacer {
+	border-right: 1px solid #E8E8E8;
+}
+
+#request-detail .activities .activity>.detail>.update td.detail {
+	padding-left: 13px;
+	padding-right: 8px;
+}
+#request-detail .activities .activity>.detail>.update td.detail .commit-message {
+	padding-left: 4px;
+}
+#request-detail .activities .activity>.detail>.update td.icon {
+	width: 1px; 
+	padding-top: 7px;
+}
+#request-detail .activities .activity>.detail>.update td.status {
+	text-align: right;
+	white-space: nowrap;
+}
+#request-detail .activities .activity>.detail>.update tr:hover td {
+	background: #F5F5F5;
+}
+#request-detail .activities .activity>.detail>.update tr.integrated td.icon .fa {
+	color: #35A612;
+}
+#request-detail .activities .activity>.detail>.update tr.rebased td a {
+	color: #AAA;
+}
+#request-detail .activities .activity>.detail>.update tr.rebased td.icon .fa {
+	color: #CCC;
+}
+#request-detail .activities .activity>.detail>.update tr.rebased img.avatar {
+	opacity: 0.5;
+}
+#request-detail .activities .activity>.detail>.update td.status .successful {
+	color: #35A612;
+}
+#request-detail .activities .activity>.detail>.update td.status .failed {
+	color: #F93333;
+}
+#request-detail .activities .activity>.detail>.update td.status .running {
+	color: #AFAD1F;
+}
+#request-detail .activities .activity-summary a.file {
+	color: #666;
+	font-weight: bold;
+}
+#request-detail .activities .activity.new>.avatar {
+	background: #FCF6D6;
+}
+
+#request-detail .activities .activity>.detail>.discard>.icon {
+	background: #F93333;
+	padding-left: 7px;
+}
+#request-detail .activities .activity>.detail>.integrate>.icon {
+	background: #35A612; 
+}
+#request-detail .activities .activity>.detail>.approve>.icon {
+	background: #35A612; 
+}
+#request-detail .activities .activity>.detail>.disapprove>.icon {
+	background: #F93333; 
+}
+#request-detail .activities .activity>.detail>.undo-review>.icon {
+	padding-left: 8px;
+	padding-top: 7px;
+}
+#request-detail .activities .activity>.detail>.delete-source-branch>.icon,
+#request-detail .activities .activity>.detail>.restore-source-branch>.icon {
+	padding-top: 7px;
+	padding-left: 8px;
+}
+#request-detail .activities .activity>.detail>.delete-source-branch .branch,
+#request-detail .activities .activity>.detail>.restore-source-branch .branch {
+	color: #666;
+}
+#request-detail .activities .activity>.detail>.reopen>.icon {
+	padding-left: 7px;
+}
+#request-detail .activities .activity>.detail>.reference>.head>.icon {
+	padding-left: 8px;
+}
+#request-detail .activities .activity>.detail>.reference>.head {
+	margin-bottom: 10px;
+}
+#request-detail .activities .activity>.detail>.reference>.body {
+	margin-left: 20px;
+	font-size: 15px;
+}
+#request-detail .activities .activity>.detail>.reference>.body a {
+	color: #333;
+}
+#request-detail .activities .activity>.detail>.reference>.body a .id {
+	color: #999;
+}
+#request-detail .activities .activity>.detail>.reference>.body .status .help {
+	display: none;
+}
+#request-detail .activities .activity>.detail>.open .feedback .alert {
+	margin-bottom: 8px;
+}
+
+#request-detail .info>div>div {
+	border-bottom: 1px dotted #BBB; 
+	margin-bottom: 16px; 
+	padding-bottom: 16px; 
+	color: #666;
+}
+#request-detail .info>div>div:last-child {
+	border-bottom: none; 
+	margin-bottom: 0; 
+	padding-bottom: 0;
+}
+#request-detail .info .help-block {
+	margin-bottom: 0; 
+	color: #888;
+}
+#request-detail .info .fa.small {
+	font-size: 14px; 
+	vertical-align: middle;
+}
+#request-detail .info label {
+	margin-right: 4px; 
+	font-weight: normal;
+}
+#request-detail .info .select2-container {
+	width: 100%;
+}
+#request-detail .info .avatar {
+	width: 24px; 
+	height: 24px;
+}
+#request-detail .info .select2-container .avatar {
+	width: 20px; 
+	height: 20px;
+}
+
+#request-detail .info .reviewers ul {
+	margin-bottom: 0;
+}
+#request-detail .info .reviewers li {
+	margin-right: 20px; 
+	margin-bottom: 10px; 
+	position: relative;
+}
+#request-detail .info .reviewers li a:hover {
+	text-decoration: none;
+}
+
+#request-detail .info .reviewers .review-result {
+	top: -4px;
+}

@@ -49,7 +49,7 @@ import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 @SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
 
@@ -71,14 +71,14 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected ChangesAndCount load() {
-			String oldCommitHash = repoModel.getObject().getObjectId(oldRev).name();
-			String newCommitHash = repoModel.getObject().getObjectId(newRev).name();
+			String oldCommitHash = depotModel.getObject().getObjectId(oldRev).name();
+			String newCommitHash = depotModel.getObject().getObjectId(newRev).name();
 			List<String> paths = new ArrayList<>();
 			if (path != null)
 				paths.add(path);
 			if (comparePath != null)
 				paths.add(comparePath);
-			List<DiffEntry> diffEntries = repoModel.getObject().getDiffs(oldCommitHash, newCommitHash,
+			List<DiffEntry> diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash,
 					true, paths.toArray(new String[paths.size()]));
 			
 			/*
@@ -96,7 +96,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				}
 			}
 			if (renamePossible) {
-				diffEntries = repoModel.getObject().getDiffs(oldCommitHash, newCommitHash, true);
+				diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash, true);
 				for (Iterator<DiffEntry> it = diffEntries.iterator(); it.hasNext();) {
 					DiffEntry entry = it.next();
 					boolean oldPathMatches = false;
@@ -121,7 +121,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 						@Override
 						public Blob getBlob(BlobIdent blobIdent) {
-							return repoModel.getObject().getBlob(blobIdent);
+							return depotModel.getObject().getBlob(blobIdent);
 						}
 
 						@Override
@@ -203,12 +203,12 @@ public abstract class RevisionDiffPanel extends Panel {
 		}
 	};
 	
-	public RevisionDiffPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, 
+	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			IModel<Comment> commentModel, String oldRev, String newRev, @Nullable String path, 
 			@Nullable String comparePath, LineProcessor lineProcessor, DiffMode diffMode) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.commentModel = commentModel;
 		this.oldRev = oldRev;
@@ -328,7 +328,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				item.setOutputMarkupId(true);
-				item.add(new BlobDiffPanel("change", repoModel, requestModel, commentModel, change, diffMode));
+				item.add(new BlobDiffPanel("change", depotModel, requestModel, commentModel, change, diffMode));
 			}
 			
 		});
@@ -345,7 +345,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		changesAndCountModel.detach();
-		repoModel.detach();
+		depotModel.detach();
 		requestModel.detach();
 		commentModel.detach();
 		

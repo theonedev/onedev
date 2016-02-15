@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
+import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 
 @SuppressWarnings("serial")
 public class UserLink extends BookmarkablePageLink<Void> {
@@ -20,14 +20,14 @@ public class UserLink extends BookmarkablePageLink<Void> {
 	private final String name;
 	
 	public UserLink(String id, User user) {
-		super(id, AccountReposPage.class);
+		super(id, AccountDepotsPage.class);
 
 		params = AccountPage.paramsOf(user);
 		name = user.getDisplayName();
 	}
 	
 	public UserLink(String id, PersonIdent person) {
-		super(id, AccountReposPage.class);
+		super(id, AccountDepotsPage.class);
 		
 		User user = GitPlex.getInstance(UserManager.class).findByPerson(person);
 		if (user != null) { 

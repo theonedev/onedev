@@ -16,7 +16,7 @@ import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchMultiChoice;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
 public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
@@ -36,7 +36,7 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			protected Depot load() {
-				RepositoryPage page = (RepositoryPage) getPage();
+				DepotPage page = (DepotPage) getPage();
 				return page.getDepot();
 			}
     		

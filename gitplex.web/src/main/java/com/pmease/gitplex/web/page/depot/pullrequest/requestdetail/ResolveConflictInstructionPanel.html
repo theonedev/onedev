@@ -1,0 +1,91 @@
+<wicket:panel>
+	<div wicket:id="content"></div>
+	
+	<wicket:fragment wicket:id="mergeInTargetFrag">
+		<div class="conflict-resolve-instruction">
+			<p>Step 1: From working directory of repository <em wicket:id="destRepoName"></em>,
+			check out target branch and merge with source branch.</p>
+			<div class="terminal">
+				<div>git checkout <span wicket:id="destBranchNameForCheckout"></span></div>	
+				<div wicket:id="sameRepo">
+					<div>git fetch origin</div>
+					<div>git merge <span wicket:id="ffOption"></span> origin/<span wicket:id="srcBranchName"></span></div>
+				</div>
+				<div wicket:id="differentRepo">
+					git pull <span wicket:id="ffOption"></span> <span wicket:id="srcRepoUrl"></span> <span wicket:id="srcBranchName"></span> 
+				</div>
+			</div>
+			<p>
+			<p>Step 2: Resolve merge conflicts, test changes and push result commit to GitPlex.</p>
+			<div class="terminal">  
+				git push origin <span wicket:id="destBranchNameForPush"></span>
+			</div>
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="mergeInSourceFrag">
+		<div class="conflict-resolve-instruction">
+			<p>Step 1: From working directory of repository <em wicket:id="srcRepoName"></em>,
+			check out source branch and merge with target branch.</p>
+			<div class="terminal">
+				<div>git checkout <span wicket:id="srcBranchNameForCheckout"></span></div>	
+				<div wicket:id="sameRepo">
+					<div>git fetch origin</div>
+					<div>git merge <span wicket:id="ffOption"></span> origin/<span wicket:id="destBranchName"></span></div>
+				</div>
+				<div wicket:id="differentRepo">
+					<div>git pull <span wicket:id="ffOption"></span> <span wicket:id="destRepoUrl"></span> <span wicket:id="destBranchName"></span></div> 
+				</div>
+			</div>
+			<p>
+			<p>Step 2: Resolve merge conflicts, test changes and push result commit to GitPlex.</p>
+			<div class="terminal">  
+				git push origin <span wicket:id="srcBranchNameForPush"></span>
+			</div>
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="rebaseInTargetFrag">
+		<div class="conflict-resolve-instruction">
+			<p>Step 1: From working directory of repository <em wicket:id="destRepoName"></em>,
+			check out target branch and rebase to source branch.</p>
+			<div class="terminal">
+				<div>git checkout <span wicket:id="destBranchNameForCheckout"></span></div>	
+				<div wicket:id="sameRepo">
+					<div>git fetch origin</div>
+					<div>git rebase origin/<span wicket:id="srcBranchName"></span></div>
+				</div>
+				<div wicket:id="differentRepo">
+					<div>git pull --rebase <span wicket:id="srcRepoUrl"></span> <span wicket:id="srcBranchName"></span></div> 
+				</div>
+			</div>
+			<p>				
+			<p>Step 2: Resolve rebase conflicts, test changes and force push result commit to GitPlex.</p>
+			<div class="terminal">  
+				git push -f origin <span wicket:id="destBranchNameForPush"></span>
+			</div>
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="rebaseInSourceFrag">
+		<div class="conflict-resolve-instruction">
+			<p>Step 1: From working directory of repository <em wicket:id="srcRepoName"></em>, 
+			check out source branch and rebase to destination branch.</p>
+			<div class="terminal">
+				<div>git checkout <span wicket:id="srcBranchNameForCheckout"></span></div>
+				<div wicket:id="sameRepo">
+					<div>git fetch origin</div>
+					<div>git rebase origin/<span wicket:id="destBranchName"></span></div>
+				</div>
+				<div wicket:id="differentRepo">
+					git pull --rebase <span wicket:id="destRepoUrl"></span> <span wicket:id="destBranchName"></span> 
+				</div>
+			</div>
+			<p>
+			<p>Step 2: Resolve rebase conflicts, test changes and force push result commit to GitPlex.</p>
+			<div class="terminal">  
+				git push -f origin <span wicket:id="srcBranchNameForPush"></span>
+			</div>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

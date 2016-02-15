@@ -44,10 +44,10 @@ public abstract class PathSelector extends Panel {
 	
 	private final Set<Integer> pathTypes;
 	
-	public PathSelector(String id, IModel<Depot> repoModel, String revision, int... pathTypes) {
+	public PathSelector(String id, IModel<Depot> depotModel, String revision, int... pathTypes) {
 		super(id);
 		
-		this.depotModel = repoModel;
+		this.depotModel = depotModel;
 		this.revision = revision;
 		this.pathTypes = new HashSet<>();
 		for (int i=0; i<pathTypes.length; i++)

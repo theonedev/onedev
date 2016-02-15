@@ -38,8 +38,8 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public abstract class FileListPanel extends Panel {
@@ -112,10 +112,10 @@ public abstract class FileListPanel extends Panel {
 		
 	};
 	
-	public FileListPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, BlobIdent directory) {
+	public FileListPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, BlobIdent directory) {
 		super(id);
 
-		this.depotModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.directory = directory;
 	}
@@ -156,11 +156,11 @@ public abstract class FileListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				RepoFileState state = new RepoFileState();
+				HistoryState state = new HistoryState();
 				state.blobIdent = parentIdent;
 				state.requestId = PullRequest.idOf(requestModel.getObject());
-				PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state); 
-				tag.put("href", urlFor(RepoFilePage.class, params));
+				PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state); 
+				tag.put("href", urlFor(DepotFilePage.class, params));
 			}
 			
 		});
@@ -192,11 +192,11 @@ public abstract class FileListPanel extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						RepoFileState state = new RepoFileState();
+						HistoryState state = new HistoryState();
 						state.blobIdent = blobIdent;
 						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state); 
-						tag.put("href", urlFor(RepoFilePage.class, params));
+						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state); 
+						tag.put("href", urlFor(DepotFilePage.class, params));
 					}
 
 					@Override

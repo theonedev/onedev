@@ -12,20 +12,20 @@ import com.pmease.gitplex.core.model.Depot;
 @SuppressWarnings("serial")
 public abstract class BranchPicker extends DropdownLink {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private String branch;
 	
-	public BranchPicker(String id, IModel<Depot> repoModel, String branch) {
+	public BranchPicker(String id, IModel<Depot> depotModel, String branch) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.branch = branch;
 	}
 
 	@Override
 	protected Component newContent(String id) {
-		return new BranchSelector(id, repoModel, branch) {
+		return new BranchSelector(id, depotModel, branch) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String branch) {
@@ -54,7 +54,7 @@ public abstract class BranchPicker extends DropdownLink {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		super.onDetach();
 	}
 

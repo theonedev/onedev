@@ -14,26 +14,26 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 @SuppressWarnings("serial")
 public abstract class CreateTagLink extends ModalLink {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String revision;
 	
-	public CreateTagLink(String id, IModel<Depot> repoModel, String revision) {
+	public CreateTagLink(String id, IModel<Depot> depotModel, String revision) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.revision = revision;
 	}
 	
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canModify(repoModel.getObject(), Constants.R_TAGS + UUID.randomUUID().toString()));
+		setVisible(SecurityUtils.canModify(depotModel.getObject(), Constants.R_TAGS + UUID.randomUUID().toString()));
 	}
 	
 	@Override
 	protected Component newContent(String id) {
-		return new CreateTagPanel(id, repoModel, revision) {
+		return new CreateTagPanel(id, depotModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {
@@ -51,7 +51,7 @@ public abstract class CreateTagLink extends ModalLink {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

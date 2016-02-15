@@ -22,8 +22,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public class SymbolLinkPanel extends BlobViewPanel {
@@ -67,12 +67,12 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			};
 			link.setEnabled(false);
 		} else {
-			RepoFileState state = new RepoFileState();
+			HistoryState state = new HistoryState();
 			state.blobIdent.revision = context.getBlobIdent().revision;
 			state.blobIdent.path = targetPath;
 			state.requestId = PullRequest.idOf(context.getPullRequest());
-			link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
-					RepoFilePage.paramsOf(context.getDepot(), state));
+			link = new BookmarkablePageLink<Void>("link", DepotFilePage.class, 
+					DepotFilePage.paramsOf(context.getDepot(), state));
 		} 
 		link.add(new Label("label", blob.getText().getContent()));
 		add(link);

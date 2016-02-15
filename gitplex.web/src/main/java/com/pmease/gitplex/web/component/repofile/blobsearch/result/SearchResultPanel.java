@@ -38,9 +38,9 @@ import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
-import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
+import com.pmease.gitplex.web.page.depot.file.Mark;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
@@ -410,12 +410,12 @@ public abstract class SearchResultPanel extends Panel {
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
 						
-						RepoFileState state = new RepoFileState();
+						HistoryState state = new HistoryState();
 						state.blobIdent.revision = context.getBlobIdent().revision;
 						state.blobIdent.path = blobPath;
 						state.requestId = PullRequest.idOf(context.getPullRequest());
-						PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
-						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+						PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 						add(AttributeAppender.replace("href", url.toString()));
 						
 						setMarkupId(SearchResultPanel.this.getMarkupId() + "-" + blobItem.getIndex());
@@ -469,13 +469,13 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
-								RepoFileState state = new RepoFileState();
+								HistoryState state = new HistoryState();
 								state.requestId = PullRequest.idOf(context.getPullRequest());
 								state.mark = Mark.of(hit.getTokenPos());
 								state.blobIdent.revision = context.getBlobIdent().revision;
 								state.blobIdent.path = hit.getBlobPath();
-								PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
-								CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+								PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+								CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));
 								
 								setMarkupId(SearchResultPanel.this.getMarkupId() 

@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.web.page.repository.file.Mark;
+import com.pmease.gitplex.web.page.depot.file.Mark;
 
 public interface BlobViewContext extends Serializable {
 

@@ -52,7 +52,7 @@ import com.pmease.gitplex.core.model.Depot;
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
 	
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private static final String COMMIT_FLAG = "*";
 	
@@ -84,10 +84,10 @@ public abstract class RevisionSelector extends Panel {
 		List<String> names = new ArrayList<>();
 		
 		if (branchesActive) {
-			for (Ref ref: repoModel.getObject().getBranchRefs())
+			for (Ref ref: depotModel.getObject().getBranchRefs())
 				names.add(GitUtils.ref2branch(ref.getName()));
 		} else {
-			for (Ref ref: repoModel.getObject().getTagRefs())
+			for (Ref ref: depotModel.getObject().getTagRefs())
 				names.add(GitUtils.ref2tag(ref.getName()));
 		}
 		return names;
@@ -110,21 +110,21 @@ public abstract class RevisionSelector extends Panel {
 		target.focusComponent(revField);
 	}
 
-	public RevisionSelector(String id, IModel<Depot> repoModel, String revision, boolean canCreateRef) {
+	public RevisionSelector(String id, IModel<Depot> depotModel, String revision, boolean canCreateRef) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.revision = revision;		
 		this.canCreateRef = canCreateRef;
-		Ref ref = repoModel.getObject().getRef(revision);
+		Ref ref = depotModel.getObject().getRef(revision);
 		branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
 		
 		refs = findRefs();
 		filteredRefs = new ArrayList<>(refs);
 	}
 	
-	public RevisionSelector(String id, IModel<Depot> repoModel, String revision) {
-		this(id, repoModel, revision, false);
+	public RevisionSelector(String id, IModel<Depot> depotModel, String revision) {
+		this(id, depotModel, revision, false);
 	}
 
 	@Override
@@ -215,7 +215,7 @@ public abstract class RevisionSelector extends Panel {
 							filteredRefs.add(ref);
 					}
 					if (!found) {
-						if (repoModel.getObject().getRevCommit(revInput, false) != null) {
+						if (depotModel.getObject().getRevCommit(revInput, false) != null) {
 							filteredRefs.add(COMMIT_FLAG + revInput);
 						} else if (canCreateRef && Repository.isValidRefName(Constants.R_HEADS + revInput)) { 
 							filteredRefs.add(ADD_FLAG + revInput);
@@ -272,14 +272,14 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void onCreateRef(AjaxRequestTarget target, final String refName) {
 		if (branchesActive) {
-			repoModel.getObject().createBranch(refName, revision);
+			depotModel.getObject().createBranch(refName, revision);
 			selectRevision(target, refName);
 		} else {
 			ModalPanel modal = new ModalPanel(target) {
 
 				@Override
 				protected Component newContent(String id) {
-					return new CreateTagPanel(id, repoModel, refName, revision) {
+					return new CreateTagPanel(id, depotModel, refName, revision) {
 
 						@Override
 						protected void onCreate(AjaxRequestTarget target, String tagName) {
@@ -378,7 +378,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
 		try {
-			if (repoModel.getObject().getRevCommit(revision, false) != null) {
+			if (depotModel.getObject().getRevCommit(revision, false) != null) {
 				onSelect(target, revision);
 			} else {
 				feedbackMessage = "Can not find commit of revision " + revision + "";
@@ -405,7 +405,7 @@ public abstract class RevisionSelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

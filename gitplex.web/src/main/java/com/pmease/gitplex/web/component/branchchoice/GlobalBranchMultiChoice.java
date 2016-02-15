@@ -13,14 +13,14 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
+import com.pmease.gitplex.web.component.repochoice.DepotChoice;
 
 @SuppressWarnings("serial")
 public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<String>> {
 
 	private Long repoId;
 	
-	private IModel<Depot> repoModel;
+	private IModel<Depot> depotModel;
 	
 	private BranchMultiChoice branchChoice;
 	
@@ -35,7 +35,7 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 	public GlobalBranchMultiChoice(String id, IModel<Collection<String>> branchIdsModel) {
 		super(id, branchIdsModel);
 		
-		repoModel = new IModel<Depot>() {
+		depotModel = new IModel<Depot>() {
 
 			@Override
 			public void detach() {
@@ -73,7 +73,7 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 		
 		setOutputMarkupId(true);
 		
-		add(new RepositoryChoice("repositoryChoice", repoModel, null, false).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new DepotChoice("repositoryChoice", depotModel, null, false).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -83,7 +83,7 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 
 		}));
 		
-		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(repoModel);
+		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(depotModel);
 		
 		add(branchChoice = new BranchMultiChoice("branchChoice", new IModel<Collection<String>>() {
 
@@ -103,7 +103,7 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 			public void setObject(Collection<String> object) {
 				Collection<String> branchIds = new ArrayList<>();
 				for (String branch: object)
-					branchIds.add(new DepotAndBranch(repoModel.getObject(), branch).toString());
+					branchIds.add(new DepotAndBranch(depotModel.getObject(), branch).toString());
 				GlobalBranchMultiChoice.this.setModelObject(branchIds);
 			}
 			
@@ -133,7 +133,7 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 		Collection<String> branches = branchChoice.getConvertedInput();
 		if (branches != null) {
 			for (String branch: branches)
-				branchIds.add(new DepotAndBranch(repoModel.getObject(), branch).toString());
+				branchIds.add(new DepotAndBranch(depotModel.getObject(), branch).toString());
 		}
 		
 		setConvertedInput(branchIds);
@@ -141,7 +141,7 @@ public class GlobalBranchMultiChoice extends FormComponentPanel<Collection<Strin
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

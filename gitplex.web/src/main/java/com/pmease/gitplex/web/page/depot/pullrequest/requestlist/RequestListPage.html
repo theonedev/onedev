@@ -1,0 +1,41 @@
+<wicket:extend>
+	<div id="request-list">
+		<div class="head">
+			<a wicket:id="filters" class="btn btn-default btn-sm"><i class="fa fa-filter"></i> Filters <span class="caret"></span></a>
+			<a wicket:id="sortBy" class="btn btn-default btn-sm"> <i class="fa fa-sort"></i> Sort by <span class="caret"></span></a>
+			<a wicket:id="newRequest" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> Open New</a>
+		</div>
+		<table class="body">
+			<tr>
+				<td class="filter">
+					<form wicket:id="form">
+						<button type="submit" class="btn btn-primary btn-block top"><i class="fa fa-search"></i> Search</button>
+						<div wicket:id="editor"></div>
+						<button type="submit" class="btn btn-primary btn-block bottom"><i class="fa fa-search"></i> Search</button>
+					</form>
+				</td>
+				<td class="requests">
+					<table wicket:id="pullRequests" class="table table-hover"></table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<wicket:fragment wicket:id="requestFrag">
+		<div class="first-line clearfix">
+			<span wicket:id="title" class="title pull-left"></span> 
+			<span wicket:id="id" class="id pull-left"></span>
+			<span wicket:id="status" class="status pull-right"></span>
+		</div>
+		<div class="second-line">
+			<a wicket:id="targetBranch" class="branch"></a>
+			<span class="fa fa-long-arrow-left"></span>
+			<a wicket:id="source" class="branch"></a>
+			<span class="auxiliary">, submitted by</span> 
+			<span wicket:id="submitter" class="submitter"></span>
+			<span wicket:id="age" class="age"></span>
+			<wicket:enclosure child="assignee">
+			<span class="auxiliary">, assigned to</span> <span wicket:id="assignee"></span>
+			</wicket:enclosure>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

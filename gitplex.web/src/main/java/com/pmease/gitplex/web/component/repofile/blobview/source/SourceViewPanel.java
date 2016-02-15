@@ -61,8 +61,8 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.InlineCommentPanel;
@@ -72,10 +72,10 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
-import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
-import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
+import com.pmease.gitplex.web.page.depot.file.Mark;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -154,11 +154,11 @@ public class SourceViewPanel extends BlobViewPanel {
 	protected WebMarkupContainer newLeftActions(String id) {
 		Fragment fragment = new Fragment(id, "leftActionsFrag", this);
 		
-		RepoFileState state = new RepoFileState();
+		HistoryState state = new HistoryState();
 		state.blobIdent = context.getBlobIdent();
 		state.requestId = PullRequest.idOf(context.getPullRequest());
-		PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
-		String url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
+		PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+		String url = RequestCycle.get().urlFor(DepotFilePage.class, params).toString();
 		fragment.add(new WebMarkupContainer("selectionPermalink")
 				.add(AttributeAppender.replace("href", url)));
 		return fragment;

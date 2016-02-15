@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
 public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
@@ -42,7 +42,7 @@ public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
 			@Override
 			protected EntityCriteria<Team> load() {
 				EntityCriteria<Team> criteria = EntityCriteria.of(Team.class);
-				RepositoryPage page = (RepositoryPage) getPage();
+				DepotPage page = (DepotPage) getPage();
 				criteria.add(Restrictions.eq("owner", page.getDepot().getOwner()));
 				return criteria;
 			}

@@ -15,7 +15,7 @@ public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
 
 	@Override
 	protected void doDelete(AjaxRequestTarget target) {
-		Depot depot = getRepository();
+		Depot depot = getDepot();
 		
 		GitPlex.getInstance(DepotManager.class).delete(depot);
 		getSession().success("Repository has been deleted");
@@ -33,9 +33,9 @@ public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
 
 	@Override
 	protected String getConfirmInput() {
-		return getRepository().getName();
+		return getDepot().getName();
 	}
 
-	protected abstract Depot getRepository();
+	protected abstract Depot getDepot();
 	
 }

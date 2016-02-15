@@ -1,0 +1,97 @@
+#request-detail {
+	padding: 20px;
+}
+#request-detail>div, #request-detail>ul {
+	margin-bottom: 20px;
+}
+#request-detail>div:last-child {
+	margin-bottom: 0;
+}
+#request-detail>.summary .md-editor {
+	margin-bottom: 20px;
+}
+
+#request-detail>.head {
+	font-size: 24px; 
+	font-weight: bold; 
+	padding: 0;
+}
+#request-detail>.head input[type="text"] {
+	width: 600px;
+	font-weight: normal;
+}
+#request-detail>.head a i {
+	color: #999; 
+	font-size: 19px;
+}
+#request-detail>.head>div {
+	margin-right: 8px;
+}
+#request-detail>.head>.id {
+	color: #999;
+}
+
+#request-detail>.summary>div {
+	border-bottom: 1px dotted #BBB; 
+	margin-bottom: 12px; 
+	padding-bottom: 8px;
+}
+#request-detail>.summary>div:last-child {
+	border-bottom: none; 
+	margin-bottom: 0; 
+	padding-bottom: 0;
+}
+#request-detail>.status-and-branches {
+	font-size: 18px;
+}
+#request-detail>.status-and-branches>.status {
+	font-size: 18px;
+	margin: -2px 12px 0 0;
+}
+#request-detail>.status-and-branches .branch {
+	background: #EEE;
+	padding: 2px 4px;
+	border-radius: 2px;
+}
+#request-detail>.summary>.status-reasons ul {
+	margin-bottom: 0; 
+	padding-left: 16px;
+} 
+
+#request-detail>.summary kbd {
+	white-space: nowrap;
+}
+#request-detail>.summary img {
+	width: 24px; 
+	height: 24px; 
+	vertical-align: middle;
+}
+#request-detail>.summary .conflict {
+	color: #DD4B4B; 
+	font-size: 16px;
+} 
+#request-detail>.summary .no-conflict {
+	color: #399529; 
+	font-size: 16px;
+}
+
+#request-detail>.summary>.operations>.buttons>a, 
+#request-detail>.summary>.operations>.confirm>form>input {
+	margin-right: 12px;
+} 
+#request-detail>.summary>.operations>.confirm>form>textarea, 
+#request-detail>.summary>.operations>.confirm>form>.delete-source {
+	margin-bottom: 16px;
+} 
+
+.conflict-resolve-instruction {
+	padding: 8px; 
+	width: 400px;
+}
+.conflict-resolve-instruction .terminal {
+	background: #333;
+	color: #EEE;
+	border-radius: 4px;
+	font-family: monospace;
+	margin: 4px 0 16px 0;
+}

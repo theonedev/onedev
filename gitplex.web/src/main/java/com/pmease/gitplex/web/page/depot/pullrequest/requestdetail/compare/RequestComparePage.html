@@ -1,0 +1,51 @@
+<wicket:extend>
+	<div class="compare">
+		<div wicket:id="compareHead" class="head">
+			<div class="options clearfix">
+				<div class="pull-left btn-group">
+					<span class="btn btn-sm btn-default old" wicket:id="oldSelector">
+						<i class="fa fa-ext fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
+					</span>
+					<span wicket:id="comparisonSelector" class="btn btn-sm btn-default" title="Commonly used comparisons">
+						<i class="fa fa-arrow-left"></i> <i class="caret"></i> <i class="fa fa-arrow-right"></i>				
+					</span>
+					<span class="btn btn-sm btn-default new" wicket:id="newSelector">
+						<i class="fa fa-ext fa-commit"></i> <span wicket:id="label"></span> <i class="caret"></i>
+					</span>
+				</div>
+				<div wicket:id="diffOption" class="pull-right"></div>
+			</div>
+			<div class="alerts">
+				<div wicket:id="outdatedAlert" class="outdated alert alert-warning">
+					<a onclick="location.reload();">
+						<i class="fa fa-warning"></i> Page is outdated, click to refresh.
+					</a>
+				</div>
+				<div wicket:id="noCommentContextAlert" class="no-comment-context alert alert-warning">
+					<i class="fa fa-warning"></i> <a wicket:id="link"></a>
+				</div>
+				<div wicket:id="noIntegrationPreviewAlert" class="no-integration-preview alert alert-warning"></div>
+			</div>
+		</div>
+		<div wicket:id="compareResult" class="body"></div>
+	</div>
+	<wicket:fragment wicket:id="commitChoiceFrag">
+		<ul class="commit-choice list-unstyled">
+			<li wicket:id="commits">
+				<a wicket:id="commit">
+					<div>
+						<i class="fa fa-ext fa-commit"></i>
+						<span wicket:id="commit" class="commit"></span> 
+						<wicket:enclosure child="name">
+						- <span wicket:id="name" class="name"></span>
+						</wicket:enclosure>
+					</div>
+					<div wicket:id="subject" class="subject"></div>
+				</a>
+			</li>
+		</ul>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="comparisonChoiceFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+</wicket:extend>

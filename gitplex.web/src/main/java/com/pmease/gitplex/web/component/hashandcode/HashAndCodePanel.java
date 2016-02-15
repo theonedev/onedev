@@ -11,13 +11,13 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public class HashAndCodePanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final Long requestId;
 	
@@ -25,20 +25,20 @@ public class HashAndCodePanel extends Panel {
 	
 	private final String path;
 	
-	public HashAndCodePanel(String id, IModel<Depot> repoModel, String hash) {
-		this(id, repoModel, hash, null);
+	public HashAndCodePanel(String id, IModel<Depot> depotModel, String hash) {
+		this(id, depotModel, hash, null);
 	}
 	
-	public HashAndCodePanel(String id, IModel<Depot> repoModel, String hash, 
+	public HashAndCodePanel(String id, IModel<Depot> depotModel, String hash, 
 			@Nullable String path) {
-		this(id, repoModel, hash, path, null);
+		this(id, depotModel, hash, path, null);
 	}
 
-	public HashAndCodePanel(String id, IModel<Depot> repoModel, String hash, 
+	public HashAndCodePanel(String id, IModel<Depot> depotModel, String hash, 
 			@Nullable String path, @Nullable Long requestId) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestId = requestId;
 		this.hash = hash;
 		this.path = path;
@@ -50,12 +50,12 @@ public class HashAndCodePanel extends Panel {
 		
 		add(new CommitHashPanel("hash", hash));
 		
-		RepoFileState state = new RepoFileState();
+		HistoryState state = new HistoryState();
 		state.requestId = requestId;
 		state.blobIdent.revision = hash;
 		state.blobIdent.path = path;
-		add(new BookmarkablePageLink<Void>("code", RepoFilePage.class, 
-				RepoFilePage.paramsOf(repoModel.getObject(), state)));
+		add(new BookmarkablePageLink<Void>("code", DepotFilePage.class, 
+				DepotFilePage.paramsOf(depotModel.getObject(), state)));
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class HashAndCodePanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

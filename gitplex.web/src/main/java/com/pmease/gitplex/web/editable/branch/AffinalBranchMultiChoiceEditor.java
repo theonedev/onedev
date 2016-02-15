@@ -13,7 +13,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.web.component.branchchoice.AffinalBranchMultiChoice;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
 public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<String>> {
@@ -29,7 +29,7 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<String>>
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new AffinalBranchMultiChoice("input", ((RepositoryPage)getPage()).getDepot().getId(), new LoadableDetachableModel() {
+		input = new AffinalBranchMultiChoice("input", ((DepotPage)getPage()).getDepot().getId(), new LoadableDetachableModel() {
 
 			@Override
 			protected Object load() {

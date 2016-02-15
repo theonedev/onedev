@@ -8,7 +8,7 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.web.component.branchchoice.AffinalBranchSingleChoice;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
 public class AffinalBranchSingleChoiceEditor extends PropertyEditor<String> {
@@ -23,7 +23,7 @@ public class AffinalBranchSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-		Long repoId = ((RepositoryPage)getPage()).getDepot().getId();
+		Long repoId = ((DepotPage)getPage()).getDepot().getId();
 		input = new AffinalBranchSingleChoice("input", repoId, getModel(), 
 				!getPropertyDescriptor().isPropertyRequired());
         

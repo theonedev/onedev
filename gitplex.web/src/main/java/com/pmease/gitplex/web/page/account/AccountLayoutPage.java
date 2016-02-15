@@ -21,8 +21,8 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
+import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
-import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
@@ -72,7 +72,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 		});
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", AccountReposPage.class));
+		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", AccountDepotsPage.class));
 		
 		if (SecurityUtils.canManage(getAccount())) {
 			tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", AccountNotificationsPage.class));

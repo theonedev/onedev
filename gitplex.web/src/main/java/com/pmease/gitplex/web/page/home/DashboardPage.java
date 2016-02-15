@@ -32,7 +32,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
+import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -110,7 +110,7 @@ public class DashboardPage extends LayoutPage {
 				User user = item.getModelObject();
 
 				item.add(new Avatar("avatar", item.getModelObject(), null));
-				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, AccountPage.paramsOf(user)); 
+				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountDepotsPage.class, AccountPage.paramsOf(user)); 
 				link.add(new Label("accountName", user.getName()));
 				item.add(link);
 						

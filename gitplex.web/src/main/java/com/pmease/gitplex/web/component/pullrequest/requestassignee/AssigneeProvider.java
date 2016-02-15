@@ -30,16 +30,16 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
-	public AssigneeProvider(IModel<Depot> repoModel) {
-		this.repoModel = repoModel;
+	public AssigneeProvider(IModel<Depot> depotModel) {
+		this.depotModel = depotModel;
 	}
 	
 	@Override
 	public void query(String term, int page, Response<Assignee> response) {
 		List<Assignee> assignees = new ArrayList<>();
-		for (User user: SecurityUtils.findUsersCan(repoModel.getObject(), DepotOperation.PUSH)) {
+		for (User user: SecurityUtils.findUsersCan(depotModel.getObject(), DepotOperation.PUSH)) {
 			if (StringUtils.isBlank(term) 
 					|| user.getName().startsWith(term) 
 					|| user.getDisplayName().startsWith(term)) {
@@ -55,8 +55,8 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 			
 		});
 		if (StringUtils.isBlank(term)) {
-			assignees.add(0, new Assignee(repoModel.getObject().getOwner(), "Repository Owner"));
-			ObjectPermission writePermission = ObjectPermission.ofDepotPush(repoModel.getObject());
+			assignees.add(0, new Assignee(depotModel.getObject().getOwner(), "Repository Owner"));
+			ObjectPermission writePermission = ObjectPermission.ofDepotPush(depotModel.getObject());
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))
 				assignees.add(0, new Assignee(currentUser, "Me"));
@@ -99,7 +99,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 
 	@Override
 	public void detach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.detach();
 	}

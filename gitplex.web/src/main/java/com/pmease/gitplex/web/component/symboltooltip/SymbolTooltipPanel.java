@@ -34,24 +34,24 @@ import org.apache.wicket.request.resource.ResourceReference;
 import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
-import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
+import com.pmease.gitplex.web.page.depot.file.Mark;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
 
 	private static final int QUERY_ENTRIES = 20;
 	
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -61,10 +61,10 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	public SymbolTooltipPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel) {
+	public SymbolTooltipPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 	}
 
@@ -108,7 +108,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 				};
 
-				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, getQueryHitParams(hit));
+				CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, getQueryHitParams(hit));
 				link.add(AttributeAppender.replace("href", url.toString()));
 				link.add(hit.render("label"));
 				link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
@@ -155,7 +155,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							List<QueryHit> hits = searchManager.search(repoModel.getObject(), revision, query);
+							List<QueryHit> hits = searchManager.search(depotModel.getObject(), revision, query);
 							onOccurrencesQueried(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
@@ -171,7 +171,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 				super.onComponentTag(tag);
 
 				// set href in onComponentTag in order to keep it up to date with symbol value
-				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, getFindOccurrencesParams());
+				CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, getFindOccurrencesParams());
 				tag.put("href", url.toString());
 			}
 
@@ -194,10 +194,10 @@ public abstract class SymbolTooltipPanel extends Panel {
 				try {
 					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(repoModel.getObject(), revision, query);
+					symbolHits = searchManager.search(depotModel.getObject(), revision, query);
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
-						symbolHits.addAll(searchManager.search(repoModel.getObject(), revision, query));
+						symbolHits.addAll(searchManager.search(depotModel.getObject(), revision, query));
 					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
@@ -233,21 +233,21 @@ public abstract class SymbolTooltipPanel extends Panel {
 	}
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
-		RepoFileState state = new RepoFileState();
+		HistoryState state = new HistoryState();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = hit.getBlobPath();
 		state.mark = Mark.of(hit.getTokenPos());
 		state.requestId = PullRequest.idOf(requestModel.getObject());
-		return RepoFilePage.paramsOf(repoModel.getObject(), state);
+		return DepotFilePage.paramsOf(depotModel.getObject(), state);
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
-		RepoFileState state = new RepoFileState();
+		HistoryState state = new HistoryState();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = getBlobPath();
 		state.requestId = PullRequest.idOf(requestModel.getObject());
 		state.query = symbol;
-		return RepoFilePage.paramsOf(repoModel.getObject(), state);
+		return DepotFilePage.paramsOf(depotModel.getObject(), state);
 	}
 	
 	public String getSymbol() {
@@ -260,7 +260,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		requestModel.detach();
 		super.onDetach();
 	}

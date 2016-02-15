@@ -43,14 +43,14 @@ import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
 import com.pmease.gitplex.web.component.repofile.editsave.EditSavePanel;
-import com.pmease.gitplex.web.page.repository.file.Mark;
+import com.pmease.gitplex.web.page.depot.file.Mark;
 
 @SuppressWarnings("serial")
 public abstract class FileEditPanel extends Panel {
 
 	private static final String PREVIEW_ID = "preview";
 	
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String refName;
 
@@ -72,11 +72,11 @@ public abstract class FileEditPanel extends Panel {
 	
 	private EditSavePanel editSavePanel;
 	
-	public FileEditPanel(String id, IModel<Depot> repoModel, String refName, 
+	public FileEditPanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
 			@Nullable Mark mark, @Nullable String clientState) {
 		super(id);
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.refName = refName;
 		this.oldPath = GitUtils.normalizePath(oldPath);
 		this.content = content;
@@ -130,7 +130,7 @@ public abstract class FileEditPanel extends Panel {
 						if (blobIdent.revision.equals(GitUtils.NULL_SHA1))
 							return new Blob(blobIdent, content.getBytes(Charsets.UTF_8));
 						else
-							return repoModel.getObject().getBlob(blobIdent);
+							return depotModel.getObject().getBlob(blobIdent);
 					}
 
 					@Override
@@ -139,7 +139,7 @@ public abstract class FileEditPanel extends Panel {
 					}
 					
 				};
-				BlobDiffPanel preview = new BlobDiffPanel("preview", repoModel, new Model<PullRequest>(null), 
+				BlobDiffPanel preview = new BlobDiffPanel("preview", depotModel, new Model<PullRequest>(null), 
 						new Model<Comment>(null), change, DiffMode.UNIFIED);
 				replace(preview);
 				target.add(preview);
@@ -198,7 +198,7 @@ public abstract class FileEditPanel extends Panel {
 			}
 
 		};
-		add(editSavePanel = new EditSavePanel("save", repoModel, refName, oldPath, newFile, prevCommitId, null) {
+		add(editSavePanel = new EditSavePanel("save", depotModel, refName, oldPath, newFile, prevCommitId, null) {
 
 			@Override
 			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
@@ -241,7 +241,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

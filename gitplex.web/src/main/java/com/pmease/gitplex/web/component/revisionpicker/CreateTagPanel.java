@@ -16,7 +16,7 @@ import com.pmease.gitplex.core.model.User;
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String tagName;
 	
@@ -24,9 +24,9 @@ abstract class CreateTagPanel extends Panel {
 	
 	private String message;
 	
-	public CreateTagPanel(String id, IModel<Depot> repoModel, String tagName, String revision) {
+	public CreateTagPanel(String id, IModel<Depot> depotModel, String tagName, String revision) {
 		super(id);
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.tagName = tagName;
 		this.revision = revision;
 	}
@@ -60,7 +60,7 @@ abstract class CreateTagPanel extends Panel {
 				super.onSubmit(target, form);
 
 				User user = GitPlex.getInstance(UserManager.class).getCurrent();
-				repoModel.getObject().tag(tagName, revision, user.asPerson(), message);
+				depotModel.getObject().tag(tagName, revision, user.asPerson(), message);
 				onCreate(target, tagName);
 			}
 			
@@ -82,7 +82,7 @@ abstract class CreateTagPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		super.onDetach();
 	}
 

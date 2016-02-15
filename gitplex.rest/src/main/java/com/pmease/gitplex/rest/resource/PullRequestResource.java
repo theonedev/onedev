@@ -55,21 +55,21 @@ public class PullRequestResource {
     @ValidQueryParams
     @GET
     public Collection<PullRequest> query(
-    		@QueryParam("targetRepoId") Long targetRepoId, @QueryParam("targetBranch") String targetBranch,
-    		@QueryParam("sourceRepoId") Long sourceRepoId, @QueryParam("sourceBranch") String sourceBranch, 
+    		@QueryParam("targetDepotId") Long targetDepotId, @QueryParam("targetBranch") String targetBranch,
+    		@QueryParam("sourceDepotId") Long sourceDepotId, @QueryParam("sourceBranch") String sourceBranch, 
     		@QueryParam("submitterId") Long submitterId, @QueryParam("status") String status, 
     		@QueryParam("assigneeId") Long assigneeId, @QueryParam("beginDate") Date beginDate, 
     		@QueryParam("endDate") Date endDate) {
     	
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 
-    	if (targetRepoId != null)
-    		criteria.add(Restrictions.eq("targetDepot.id", targetRepoId));
+    	if (targetDepotId != null)
+    		criteria.add(Restrictions.eq("targetDepot.id", targetDepotId));
     	if (targetBranch != null)
     		criteria.add(Restrictions.eq("targetBranch", targetBranch));
     		
-    	if (sourceRepoId != null)
-    		criteria.add(Restrictions.eq("sourceDepot.id", targetRepoId));
+    	if (sourceDepotId != null)
+    		criteria.add(Restrictions.eq("sourceDepot.id", targetDepotId));
     	if (sourceBranch != null)
     		criteria.add(Restrictions.eq("sourceBranch", sourceBranch));
 		

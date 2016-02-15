@@ -1,0 +1,35 @@
+.integration-policy-setting .handle {
+	cursor: move; 
+	margin-right: 8px;
+}
+.integration-policy-setting .panel-heading a {
+	color: #444; 
+	margin-right: 8px;
+}
+.integration-policy-setting .add-new {
+	display: block; 
+	padding: 16px; 
+	background: #F2F2F2; 
+	border: 1px solid #DDD; 
+	border-radius: 4px; 
+	font-size: 16px; 
+	color: #444; 
+	margin-bottom: 16px;
+}
+.integration-policy-setting a.add-new:hover {
+	text-decoration: none; 
+	background-color: #EBEBEB; 
+	border-color: #ADADAD;
+}
+.integration-policy-setting a.add-new .fa {
+	margin-left: 8px;
+}
+.integration-policy-setting>.body>.help-block .fa {
+	position: absolute; 
+	font-size: 20px; 
+	color: #E6AF42; 
+	margin-top: 2px;
+}
+.integration-policy-setting>.body>.help-block p {
+	margin-left: 18px;
+}

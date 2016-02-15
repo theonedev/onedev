@@ -55,8 +55,8 @@ import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.comment.CommentInput;
@@ -67,8 +67,8 @@ import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -76,7 +76,7 @@ import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReferenc
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -139,11 +139,11 @@ public class TextDiffPanel extends Panel {
 	
 	private RepeatingView commentRows;
 	
-	public TextDiffPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, 
+	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			IModel<Comment> commentModel, BlobChange change, DiffMode diffMode) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.commentModel = commentModel;
 		this.change = change;
@@ -159,17 +159,17 @@ public class TextDiffPanel extends Panel {
 
 		PullRequest request = requestModel.getObject();
 		if (request != null) {
-			RepoFileState state = new RepoFileState();
+			HistoryState state = new HistoryState();
 			state.requestId = request.getId();
 			state.blobIdent = change.getBlobIdent();
-			PageParameters params = RepoFilePage.paramsOf(request.getTargetDepot(), state);
-			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
-			state = new RepoFileState();
+			PageParameters params = DepotFilePage.paramsOf(request.getTargetDepot(), state);
+			add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
+			state = new HistoryState();
 			state.blobIdent.revision = request.getSourceBranch();
 			state.blobIdent.path = change.getPath();
 			state.mode = Mode.EDIT;
-			params = RepoFilePage.paramsOf(request.getSourceDepot(), state);
-			Link<Void> editFileLink = new BookmarkablePageLink<Void>("editFile", RepoFilePage.class, params) {
+			params = DepotFilePage.paramsOf(request.getSourceDepot(), state);
+			Link<Void> editFileLink = new BookmarkablePageLink<Void>("editFile", DepotFilePage.class, params) {
 	
 				@Override
 				protected void onConfigure() {
@@ -183,10 +183,10 @@ public class TextDiffPanel extends Panel {
 			editFileLink.add(AttributeAppender.append("target", "_blank"));
 			add(editFileLink);
 		} else {
-			RepoFileState state = new RepoFileState();
+			HistoryState state = new HistoryState();
 			state.blobIdent = change.getBlobIdent();
-			PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
-			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
+			PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
+			add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
 			add(new WebMarkupContainer("editFile").setVisible(false));
 		}
 		
@@ -345,17 +345,17 @@ public class TextDiffPanel extends Panel {
 		
 		add(commentRows);
 		
-		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbols", repoModel, requestModel) {
+		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbols", depotModel, requestModel) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				setResponsePage(RepoFilePage.class, getQueryHitParams(hit));
+				setResponsePage(DepotFilePage.class, getQueryHitParams(hit));
 			}
 
 			@Override
 			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
-				WebSession.get().setMetaData(RepoFilePage.SEARCH_RESULT_KEY, (Serializable)hits);
-				setResponsePage(RepoFilePage.class, getFindOccurrencesParams());
+				WebSession.get().setMetaData(DepotFilePage.SEARCH_RESULT_KEY, (Serializable)hits);
+				setResponsePage(DepotFilePage.class, getFindOccurrencesParams());
 			}
 
 			@Override
@@ -750,7 +750,7 @@ public class TextDiffPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		requestModel.detach();
 		commentModel.detach();
 		commentableModel.detach();

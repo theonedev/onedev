@@ -28,7 +28,7 @@ public class BlobDiffPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -38,12 +38,12 @@ public class BlobDiffPanel extends Panel {
 	
 	private final DiffMode diffMode;
 	
-	public BlobDiffPanel(String id, IModel<Depot> repoModel, 
+	public BlobDiffPanel(String id, IModel<Depot> depotModel, 
 			IModel<PullRequest> requestModel, IModel<Comment> commentModel, 
 			BlobChange change, DiffMode diffMode) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.commentModel = commentModel;
 		this.change = change;
@@ -73,7 +73,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, repoModel, requestModel, commentModel, change, diffMode));
+				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, commentModel, change, diffMode));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -108,7 +108,7 @@ public class BlobDiffPanel extends Panel {
 				} else if (change.getAdditions() + change.getDeletions() == 0) {
 					add(newFragment("Content is identical", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, repoModel, requestModel, commentModel, change, diffMode));
+					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, commentModel, change, diffMode));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));
@@ -136,7 +136,7 @@ public class BlobDiffPanel extends Panel {
 	}
 
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		requestModel.detach();
 		commentModel.detach();
 		

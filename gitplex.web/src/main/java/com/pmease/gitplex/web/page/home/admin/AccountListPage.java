@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
+import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -124,7 +124,7 @@ public class AccountListPage extends AdministrationPage {
 				User user = item.getModelObject();
 
 				item.add(new Avatar("avatar", item.getModelObject(), null));
-				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountReposPage.class, AccountPage.paramsOf(user)); 
+				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountDepotsPage.class, AccountPage.paramsOf(user)); 
 				link.add(new Label("accountName", user.getName()));
 				item.add(link);
 						
@@ -146,7 +146,7 @@ public class AccountListPage extends AdministrationPage {
 					public void onClick() {
 						User account = item.getModelObject();
 						SecurityUtils.getSubject().runAs(account.getPrincipals());
-						setResponsePage(AccountReposPage.class, AccountReposPage.paramsOf(account));
+						setResponsePage(AccountDepotsPage.class, AccountDepotsPage.paramsOf(account));
 					}
 					
 					@Override

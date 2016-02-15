@@ -13,26 +13,26 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 @SuppressWarnings("serial")
 public abstract class CreateBranchLink extends ModalLink {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String revision;
 	
-	public CreateBranchLink(String id, IModel<Depot> repoModel, String revision) {
+	public CreateBranchLink(String id, IModel<Depot> depotModel, String revision) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.revision = revision;
 	}
 	
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canCreate(repoModel.getObject(), UUID.randomUUID().toString()));
+		setVisible(SecurityUtils.canCreate(depotModel.getObject(), UUID.randomUUID().toString()));
 	}
 	
 	@Override
 	protected Component newContent(String id) {
-		return new CreateBranchPanel(id, repoModel, revision) {
+		return new CreateBranchPanel(id, depotModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
@@ -50,7 +50,7 @@ public abstract class CreateBranchLink extends ModalLink {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

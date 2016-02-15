@@ -18,14 +18,14 @@ import com.pmease.gitplex.web.model.AffinalRepositoriesModel;
 @SuppressWarnings("serial")
 public abstract class AffinalBranchPicker extends Panel {
 
-	private Long repoId;
+	private Long depotId;
 	
 	private String branch;
 	
 	public AffinalBranchPicker(String id, Long repoId, String branch) {
 		super(id);
 		
-		this.repoId = repoId;
+		this.depotId = repoId;
 		this.branch = branch;
 	}
 	
@@ -34,14 +34,14 @@ public abstract class AffinalBranchPicker extends Panel {
 
 			@Override
 			protected Depot load() {
-				return getRepository();
+				return getDepot();
 			}
 			
 		}, branch) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String branch) {
-				AffinalBranchPicker.this.onSelect(target, getRepository(), branch);
+				AffinalBranchPicker.this.onSelect(target, getDepot(), branch);
 			}
 
 		};
@@ -53,19 +53,19 @@ public abstract class AffinalBranchPicker extends Panel {
 		}
 	}
 	
-	private Depot getRepository() {
-		return GitPlex.getInstance(Dao.class).load(Depot.class, repoId);
+	private Depot getDepot() {
+		return GitPlex.getInstance(Dao.class).load(Depot.class, depotId);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RepositoryPicker("repositoryPicker", new AffinalRepositoriesModel(repoId), repoId) {
+		add(new RepositoryPicker("repositoryPicker", new AffinalRepositoriesModel(depotId), depotId) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot) {
-				repoId = depot.getId();
+				depotId = depot.getId();
 				branch = depot.getDefaultBranch();
 				newBranchPicker(target);
 				AffinalBranchPicker.this.onSelect(target, depot, branch);

@@ -24,8 +24,8 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
-import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
+import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 /**
@@ -83,8 +83,8 @@ class LastCommitsResource extends AbstractResource {
 					if (user != null) {
 						info.authorName = HtmlEscape.escapeHtml5(user.getDisplayName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(user);
-						params = AccountReposPage.paramsOf(user);
-						info.authorUrl = RequestCycle.get().urlFor(AccountReposPage.class, params).toString();
+						params = AccountDepotsPage.paramsOf(user);
+						info.authorUrl = RequestCycle.get().urlFor(AccountDepotsPage.class, params).toString();
 					} else {
 						info.authorName = HtmlEscape.escapeHtml5(author.getName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(author);

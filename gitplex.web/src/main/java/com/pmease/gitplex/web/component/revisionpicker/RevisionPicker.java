@@ -16,27 +16,27 @@ import com.pmease.gitplex.core.model.Depot;
 @SuppressWarnings("serial")
 public abstract class RevisionPicker extends DropdownLink {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private String revision;
 	
 	private final boolean canCreateRef;
 	
-	public RevisionPicker(String id, IModel<Depot> repoModel, String revision, boolean canCreateRef) {
+	public RevisionPicker(String id, IModel<Depot> depotModel, String revision, boolean canCreateRef) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.revision = revision;
 		this.canCreateRef = canCreateRef;
 	}
 	
-	public RevisionPicker(String id, IModel<Depot> repoModel, String revision) {
-		this(id, repoModel, revision, false);
+	public RevisionPicker(String id, IModel<Depot> depotModel, String revision) {
+		this(id, depotModel, revision, false);
 	}
 
 	@Override
 	protected Component newContent(String id) {
-		return new RevisionSelector(id, repoModel, revision, canCreateRef) {
+		return new RevisionSelector(id, depotModel, revision, canCreateRef) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
@@ -71,7 +71,7 @@ public abstract class RevisionPicker extends DropdownLink {
 	@Override
 	public IModel<?> getBody() {
 		String iconClass;
-		DepotAndRevision repoAndRevision = new DepotAndRevision(repoModel.getObject(), revision);
+		DepotAndRevision repoAndRevision = new DepotAndRevision(depotModel.getObject(), revision);
 		String label = repoAndRevision.getBranch();
 		if (label != null) {
 			iconClass = "fa fa-ext fa-branch";
@@ -92,7 +92,7 @@ public abstract class RevisionPicker extends DropdownLink {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		super.onDetach();
 	}
 

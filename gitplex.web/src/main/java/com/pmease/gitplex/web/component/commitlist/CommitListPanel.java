@@ -27,13 +27,13 @@ import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<List<Commit>> commitsModel;
 	
-	public CommitListPanel(String id, IModel<Depot> repoModel, IModel<List<Commit>> commitsModel) {
+	public CommitListPanel(String id, IModel<Depot> depotModel, IModel<List<Commit>> commitsModel) {
 		super(id);
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.commitsModel = commitsModel;
 	}
 
@@ -71,9 +71,9 @@ public class CommitListPanel extends Panel {
 				if (commit != null) {
 					Fragment fragment = new Fragment("commit", "commitFrag", CommitListPanel.this);
 					fragment.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
-					fragment.add(new CommitMessagePanel("message", repoModel, item.getModel()));
+					fragment.add(new CommitMessagePanel("message", depotModel, item.getModel()));
 					fragment.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
-					fragment.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash()));
+					fragment.add(new HashAndCodePanel("hashAndCode", depotModel, commit.getHash()));
 					fragment.add(AttributeAppender.append("class", "commit clearfix"));
 					
 					item.add(fragment);
@@ -118,7 +118,7 @@ public class CommitListPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		commitsModel.detach();
 		
 		super.onDetach();

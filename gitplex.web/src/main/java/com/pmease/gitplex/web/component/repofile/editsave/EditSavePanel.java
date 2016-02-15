@@ -74,12 +74,12 @@ public abstract class EditSavePanel extends Panel {
 	
 	private BlobChange change;
 	
-	public EditSavePanel(String id, IModel<Depot> repoModel, String refName, 
+	public EditSavePanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, @Nullable PathAndContent newFile, 
 			ObjectId prevCommitId, @Nullable CancelListener cancelListener) {
 		super(id);
 	
-		this.depotModel = repoModel;
+		this.depotModel = depotModel;
 		this.refName = refName;
 		this.fileEdit = new FileEdit(oldPath, newFile);
 		this.cancelListener = cancelListener;

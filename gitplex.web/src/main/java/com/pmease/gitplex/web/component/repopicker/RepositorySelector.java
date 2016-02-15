@@ -39,8 +39,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.avatar.Avatar;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public abstract class RepositorySelector extends Panel {
@@ -224,9 +224,9 @@ public abstract class RepositorySelector extends Panel {
 							protected void onComponentTag(ComponentTag tag) {
 								super.onComponentTag(tag);
 								
-								RepoFileState state = new RepoFileState();
-								PageParameters params = RepoFilePage.paramsOf(depotItem.getModelObject(), state);
-								tag.put("href", urlFor(RepoFilePage.class, params));
+								HistoryState state = new HistoryState();
+								PageParameters params = DepotFilePage.paramsOf(depotItem.getModelObject(), state);
+								tag.put("href", urlFor(DepotFilePage.class, params));
 							}
 							
 						};

@@ -22,7 +22,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String revision;
 	
@@ -30,9 +30,9 @@ abstract class CreateTagPanel extends Panel {
 	
 	private String tagMessage;
 	
-	public CreateTagPanel(String id, IModel<Depot> repoModel, String revision) {
+	public CreateTagPanel(String id, IModel<Depot> depotModel, String revision) {
 		super(id);
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.revision = revision;
 	}
 
@@ -95,12 +95,12 @@ abstract class CreateTagPanel extends Panel {
 					form.error("Tag name is not valid.");
 					target.focusComponent(nameInput);
 					target.add(form);
-				} else if (repoModel.getObject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
+				} else if (depotModel.getObject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 					form.error("Tag '" + tagName + "' already exists, please choose a different name.");
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					Depot repo = repoModel.getObject();
+					Depot repo = depotModel.getObject();
 					User user = GitPlex.getInstance(UserManager.class).getCurrent();
 					repo.tag(tagName, revision, user.asPerson(), tagMessage);
 					onCreate(target, tagName);
@@ -125,7 +125,7 @@ abstract class CreateTagPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

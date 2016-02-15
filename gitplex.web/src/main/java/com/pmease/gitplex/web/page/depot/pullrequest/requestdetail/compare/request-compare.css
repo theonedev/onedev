@@ -1,0 +1,41 @@
+#request-detail>.compare>.head {
+	background: white; 
+	z-index: 200; 
+	margin-bottom: 16px;
+}
+#request-detail>.compare>.head>.options {
+	padding: 8px; 
+	background: #F2F2F2;
+	border: 1px solid #DDD;
+}
+#request-detail>.compare>.head .alert {
+	margin-bottom: 0;
+	border-color: #F4D494;
+	border-radius: 0;
+	padding: 8px;
+}
+#request-detail>.compare>.head .alert>a {
+	color: #8a6d3b;
+}
+.content>.commit-choice {
+	padding: 8px 0; 
+}
+.content>.commit-choice a {
+	text-decoration: none; 
+	color: #333; 
+	display: block; 
+	padding: 8px;
+}
+.content>.commit-choice li {
+	border-bottom: 1px dotted #BBB;
+}
+.content>.commit-choice li:hover {
+	background: #FDF2C3;
+}
+.content>.commit-choice a .commit {
+	font-family: Consolas, 'Liberation Mono', Courier, monospace;
+}
+.content>.commit-choice a .subject {
+	font-size: 12px; 
+	color: #999;
+} 

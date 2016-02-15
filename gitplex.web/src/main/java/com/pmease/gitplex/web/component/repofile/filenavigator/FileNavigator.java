@@ -53,8 +53,8 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public abstract class FileNavigator extends Panel {
@@ -69,11 +69,11 @@ public abstract class FileNavigator extends Panel {
 	
 	private final BlobNameChangeCallback callback;
 	
-	public FileNavigator(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, 
+	public FileNavigator(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			BlobIdent file, @Nullable BlobNameChangeCallback callback) {
 		super(id);
 
-		this.depotModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.file = file;
 		this.callback = callback;
@@ -129,11 +129,11 @@ public abstract class FileNavigator extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						RepoFileState state = new RepoFileState();
+						HistoryState state = new HistoryState();
 						state.blobIdent = blobIdent;
 						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state);
-						tag.put("href", urlFor(RepoFilePage.class, params));
+						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
+						tag.put("href", urlFor(DepotFilePage.class, params));
 					}
 					
 				};
@@ -248,11 +248,11 @@ public abstract class FileNavigator extends Panel {
 									protected void onComponentTag(ComponentTag tag) {
 										super.onComponentTag(tag);
 										
-										RepoFileState state = new RepoFileState();
+										HistoryState state = new HistoryState();
 										state.blobIdent = model.getObject();
 										state.requestId = PullRequest.idOf(requestModel.getObject());
-										PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state);
-										tag.put("href", urlFor(RepoFilePage.class, params));
+										PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
+										tag.put("href", urlFor(DepotFilePage.class, params));
 									}
 									
 								};

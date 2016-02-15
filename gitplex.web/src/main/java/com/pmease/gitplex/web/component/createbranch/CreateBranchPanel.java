@@ -18,15 +18,15 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 abstract class CreateBranchPanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String revision;
 	
 	private String branchName;
 	
-	public CreateBranchPanel(String id, IModel<Depot> repoModel, String revision) {
+	public CreateBranchPanel(String id, IModel<Depot> depotModel, String revision) {
 		super(id);
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.revision = revision;
 	}
 
@@ -72,12 +72,12 @@ abstract class CreateBranchPanel extends Panel {
 					form.error("Invalid branch name.");
 					target.focusComponent(nameInput);
 					target.add(form);
-				} else if (repoModel.getObject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
+				} else if (depotModel.getObject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 					form.error("Branch '" + branchName + "' already exists, please choose a different name.");
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					repoModel.getObject().createBranch(branchName, revision);
+					depotModel.getObject().createBranch(branchName, revision);
 					onCreate(target, branchName);
 				}
 			}
@@ -100,7 +100,7 @@ abstract class CreateBranchPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

@@ -7,12 +7,12 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
+import com.pmease.gitplex.web.component.repochoice.DepotChoice;
 
 @SuppressWarnings("serial")
 public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final boolean allowEmpty;
 	
@@ -29,7 +29,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 	public GlobalBranchSingleChoice(String id, IModel<String> branchModel, boolean allowEmpty) {
 		super(id, branchModel);
 		
-		repoModel = new IModel<Depot>() {
+		depotModel = new IModel<Depot>() {
 
 			@Override
 			public void detach() {
@@ -63,7 +63,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 		
 		setOutputMarkupId(true);
 		
-		add(new RepositoryChoice("repositoryChoice", repoModel, null, false).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new DepotChoice("repositoryChoice", depotModel, null, false).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -73,7 +73,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
 		}));
 		
-		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(repoModel);
+		BranchChoiceProvider choiceProvider = new BranchChoiceProvider(depotModel);
 		add(branchChoice = new BranchSingleChoice("branchChoice", new IModel<String>() {
 
 			@Override
@@ -87,7 +87,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public void setObject(String object) {
-				GlobalBranchSingleChoice.this.setModelObject(new DepotAndBranch(repoModel.getObject(), object).toString());
+				GlobalBranchSingleChoice.this.setModelObject(new DepotAndBranch(depotModel.getObject(), object).toString());
 			}
 			
 		}, choiceProvider, allowEmpty));
@@ -114,7 +114,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 		String branchId;
 		String branch = branchChoice.getConvertedInput();
 		if (branch != null) {
-			branchId = new DepotAndBranch(repoModel.getObject(), branch).toString();
+			branchId = new DepotAndBranch(depotModel.getObject(), branch).toString();
 		} else {
 			branchId = null;
 		}
@@ -124,7 +124,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

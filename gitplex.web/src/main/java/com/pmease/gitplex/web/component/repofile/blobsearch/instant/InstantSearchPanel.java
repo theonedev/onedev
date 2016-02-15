@@ -44,8 +44,8 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
@@ -54,16 +54,16 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
-import com.pmease.gitplex.web.page.repository.file.Mark;
-import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
+import com.pmease.gitplex.web.page.depot.file.Mark;
 
 @SuppressWarnings("serial")
 public abstract class InstantSearchPanel extends Panel {
 
 	private static final int MAX_QUERY_ENTRIES = 15;
 	
-	final IModel<Depot> repoModel;
+	final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -85,11 +85,11 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	private int activeHitIndex;
 	
-	public InstantSearchPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, 
+	public InstantSearchPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			IModel<String> revisionModel) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.revisionModel = revisionModel;
 	}
@@ -120,18 +120,18 @@ public abstract class InstantSearchPanel extends Panel {
 						try {
 							BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
 									null, null, MAX_QUERY_ENTRIES);
-							symbolHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+							symbolHits = searchManager.search(depotModel.getObject(), revisionModel.getObject(), query);
 							
 							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
 								query = new FileQuery(searchInput+"*", false, null, 
 										MAX_QUERY_ENTRIES-symbolHits.size());
-								symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+								symbolHits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
 							}
 							
 							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
 								query = new SymbolQuery(searchInput+"*", false, false, 
 										null, null, MAX_QUERY_ENTRIES-symbolHits.size());
-								symbolHits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+								symbolHits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
 							}
 						} catch (TooGeneralQueryException e) {
 							symbolHits = new ArrayList<>();
@@ -142,7 +142,7 @@ public abstract class InstantSearchPanel extends Panel {
 						try {
 							BlobQuery query = new TextQuery(searchInput, false, false, false, 
 									null, null, MAX_QUERY_ENTRIES);
-							textHits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+							textHits = searchManager.search(depotModel.getObject(), revisionModel.getObject(), query);
 						} catch (TooGeneralQueryException e) {
 							textHits = new ArrayList<>();
 						} catch (InterruptedException e) {
@@ -264,13 +264,13 @@ public abstract class InstantSearchPanel extends Panel {
 						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
 						item.add(link);
 
-						RepoFileState state = new RepoFileState();
+						HistoryState state = new HistoryState();
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
 						state.mark = Mark.of(hit.getTokenPos());
 						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
-						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
+						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 						link.add(AttributeAppender.replace("href", url.toString()));
 
 						if (item.getIndex() == activeHitIndex)
@@ -295,18 +295,18 @@ public abstract class InstantSearchPanel extends Panel {
 
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 									
-									hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+									hits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
 									
 									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 										query = new FileQuery(searchInput+"*", false, null, 
 												SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
-										hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+										hits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
 									}
 									
 									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 										query = new SymbolQuery(searchInput+"*", false, false, 
 												null, null, SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
-										hits.addAll(searchManager.search(repoModel.getObject(), revisionModel.getObject(), query));
+										hits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
 									}
 									onMoreQueried(target, hits);
 								} catch (TooGeneralQueryException e) {
@@ -390,13 +390,13 @@ public abstract class InstantSearchPanel extends Panel {
 						if (item.getIndex() + symbolHits.size() == activeHitIndex)
 							item.add(AttributeModifier.append("class", " active"));
 						
-						RepoFileState state = new RepoFileState();
+						HistoryState state = new HistoryState();
 						state.blobIdent.revision = revisionModel.getObject();
 						state.blobIdent.path = hit.getBlobPath();
 						state.mark = Mark.of(hit.getTokenPos());
 						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
-						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
+						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
+						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 						link.add(AttributeAppender.replace("href", url.toString()));
 					}
 					
@@ -414,7 +414,7 @@ public abstract class InstantSearchPanel extends Panel {
 										null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									List<QueryHit> hits = searchManager.search(repoModel.getObject(), revisionModel.getObject(), query);
+									List<QueryHit> hits = searchManager.search(depotModel.getObject(), revisionModel.getObject(), query);
 									onMoreQueried(target, hits);
 								} catch (TooGeneralQueryException e) {
 									// this is impossible as we already queried part of the result
@@ -494,7 +494,7 @@ public abstract class InstantSearchPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		requestModel.detach();
 		revisionModel.detach();
 		

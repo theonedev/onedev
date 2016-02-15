@@ -18,7 +18,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;
-import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
 public class PathSingleChoice extends FormComponentPanel<String> {
@@ -55,7 +55,7 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			protected Component newContent(String id) {
-				RepositoryPage page = (RepositoryPage) getPage();
+				DepotPage page = (DepotPage) getPage();
 				String defaultBranch = page.getDepot().getDefaultBranch();
 				
 				if (defaultBranch != null) {
@@ -63,7 +63,7 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 
 						@Override
 						public Depot getObject() {
-							return ((RepositoryPage) getPage()).getDepot();
+							return ((DepotPage) getPage()).getDepot();
 						}
 						
 					}, GitUtils.branch2ref(defaultBranch), pathTypes) {

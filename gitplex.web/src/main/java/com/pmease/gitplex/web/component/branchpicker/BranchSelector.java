@@ -38,7 +38,7 @@ import com.pmease.gitplex.core.model.Depot;
 @SuppressWarnings("serial")
 public abstract class BranchSelector extends Panel {
 	
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String branch;
 	
@@ -54,13 +54,13 @@ public abstract class BranchSelector extends Panel {
 	
 	private final List<String> filteredBranches = new ArrayList<>();
 	
-	public BranchSelector(String id, IModel<Depot> repoModel, String branch) {
+	public BranchSelector(String id, IModel<Depot> depotModel, String branch) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.branch = branch;		
 		
-		for (Ref ref: repoModel.getObject().getBranchRefs())
+		for (Ref ref: depotModel.getObject().getBranchRefs())
 			branches.add(GitUtils.ref2branch(ref.getName()));
 		
 		filteredBranches.addAll(branches);
@@ -178,7 +178,7 @@ public abstract class BranchSelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

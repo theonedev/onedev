@@ -63,7 +63,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AdvancedSearchPanel.class);
 	
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<String> revisionModel;
 	
@@ -71,10 +71,10 @@ public abstract class AdvancedSearchPanel extends Panel {
 	
 	private SearchOption option = new TextSearchOption();
 	
-	public AdvancedSearchPanel(String id, IModel<Depot> repoModel, IModel<String> revisionModel) {
+	public AdvancedSearchPanel(String id, IModel<Depot> depotModel, IModel<String> revisionModel) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.revisionModel = revisionModel;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
@@ -445,7 +445,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		revisionModel.detach();
 		
 		super.onDetach();
@@ -520,13 +520,13 @@ public abstract class AdvancedSearchPanel extends Panel {
 			BlobQuery query = new SymbolQuery(term, true, caseSensitive, 
 					context.getDirectory(insideCurrentDir), fileNames, 
 					SearchResultPanel.MAX_QUERY_ENTRIES);
-			hits = searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query);
+			hits = searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query);
 			
 			if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 				query = new SymbolQuery(term, false, caseSensitive, 
 						context.getDirectory(insideCurrentDir), fileNames, 
 						SearchResultPanel.MAX_QUERY_ENTRIES - hits.size());
-				hits.addAll(searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query));
+				hits.addAll(searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query));
 			}
 			
 			return hits;
@@ -547,7 +547,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			BlobQuery query = new FileQuery(term, caseSensitive, 
 					context.getDirectory(insideCurrentDir), SearchResultPanel.MAX_QUERY_ENTRIES);
-			return searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query);
+			return searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query);
 		}
 		
 	}
@@ -570,7 +570,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			BlobQuery query = new TextQuery(term, regex, caseSensitive, wholeWord, 
 					context.getDirectory(insideCurrentDir), fileNames, SearchResultPanel.MAX_QUERY_ENTRIES);
-			return searchManager.search(context.repoModel.getObject(), context.revisionModel.getObject(), query);
+			return searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query);
 		}
 		
 	}

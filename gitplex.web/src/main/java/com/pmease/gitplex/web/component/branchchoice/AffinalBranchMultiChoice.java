@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
+import com.pmease.gitplex.web.component.repochoice.AffinalDepotChoice;
 
 @SuppressWarnings("serial")
 public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<String>> {
@@ -53,18 +53,18 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 				if (selectedRepoId != null) {
 					return dao.load(Depot.class, selectedRepoId);
 				} else {
-					Collection<String> repoAndBranches = getRepoAndBranches();
-					if (repoAndBranches == null || repoAndBranches.isEmpty())
+					Collection<String> depotAndBranches = getDepotAndBranches();
+					if (depotAndBranches == null || depotAndBranches.isEmpty())
 						return dao.load(Depot.class, currentRepoId);
 					else 
-						return new DepotAndBranch(repoAndBranches.iterator().next()).getDepot();
+						return new DepotAndBranch(depotAndBranches.iterator().next()).getDepot();
 				}
 			}
 
 			@Override
 			public void setObject(Depot object) {
 				selectedRepoId = object.getId();
-				setRepoAndBranches(new HashSet<String>());
+				setDepotAndBranches(new HashSet<String>());
 			}
 			
 		};
@@ -80,7 +80,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 		
 		setOutputMarkupId(true);
 		
-		add(new AffinalRepositoryChoice("repositoryChoice", currentRepoId, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
+		add(new AffinalDepotChoice("repositoryChoice", currentRepoId, selectedRepoModel).add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -126,11 +126,11 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 		});
 	}
 	
-	private Collection<String> getRepoAndBranches() {
+	private Collection<String> getDepotAndBranches() {
 		return getModelObject();
 	}
 
-	private void setRepoAndBranches(Collection<String> repoAndBranches) {
+	private void setDepotAndBranches(Collection<String> repoAndBranches) {
 		getModel().setObject(repoAndBranches);
 	}
 

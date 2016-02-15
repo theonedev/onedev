@@ -34,14 +34,14 @@ public abstract class AffinalRevisionPicker extends Panel {
 
 			@Override
 			protected Depot load() {
-				return getRepository();
+				return getDepot();
 			}
 			
 		}, revision) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, String revision) {
-				AffinalRevisionPicker.this.onSelect(target, getRepository(), revision);
+				AffinalRevisionPicker.this.onSelect(target, getDepot(), revision);
 			}
 
 		};
@@ -53,7 +53,7 @@ public abstract class AffinalRevisionPicker extends Panel {
 		}
 	}
 	
-	private Depot getRepository() {
+	private Depot getDepot() {
 		return GitPlex.getInstance(Dao.class).load(Depot.class, depotId);
 	}
 	

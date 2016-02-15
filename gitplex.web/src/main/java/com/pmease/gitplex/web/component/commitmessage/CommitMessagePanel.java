@@ -21,28 +21,28 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.Highlighter;
 import com.pmease.commons.util.Transformer;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {
 
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<Commit> commitModel;
 	
 	private final IModel<List<Pattern>> patternsModel;
 	
-	public CommitMessagePanel(String id, IModel<Depot> repoModel, 
+	public CommitMessagePanel(String id, IModel<Depot> depotModel, 
 			IModel<Commit> commitModel, IModel<List<Pattern>> patternsModel) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.commitModel = commitModel;
 		this.patternsModel = patternsModel;
 	}
 
-	public CommitMessagePanel(String id, IModel<Depot> repoModel, IModel<Commit> commitModel) {
-		this(id, repoModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
+	public CommitMessagePanel(String id, IModel<Depot> depotModel, IModel<Commit> commitModel) {
+		this(id, depotModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
 
 			@Override
 			protected List<Pattern> load() {
@@ -76,7 +76,7 @@ public class CommitMessagePanel extends Panel {
 		
 		AbstractLink link = new BookmarkablePageLink<Void>("link",
 				CommitDetailPage.class,
-				CommitDetailPage.paramsOf(repoModel.getObject(), commitModel.getObject().getHash()));
+				CommitDetailPage.paramsOf(depotModel.getObject(), commitModel.getObject().getHash()));
 		
 		add(link);
 		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
@@ -125,7 +125,7 @@ public class CommitMessagePanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		commitModel.detach();
 		patternsModel.detach();
 		

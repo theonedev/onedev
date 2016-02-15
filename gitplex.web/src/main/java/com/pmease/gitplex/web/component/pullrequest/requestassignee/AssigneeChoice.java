@@ -12,7 +12,7 @@ import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
 @SuppressWarnings("serial")
 public class AssigneeChoice extends Select2Choice<Assignee> {
 
-	public AssigneeChoice(String id, IModel<Depot> repoModel, final IModel<User> assigneeModel) {
+	public AssigneeChoice(String id, IModel<Depot> depotModel, final IModel<User> assigneeModel) {
 		super(id, new IModel<Assignee>() {
 
 			@Override
@@ -36,7 +36,7 @@ public class AssigneeChoice extends Select2Choice<Assignee> {
 					assigneeModel.setObject(null);
 			}
 			
-		}, new AssigneeProvider(repoModel));
+		}, new AssigneeProvider(depotModel));
 	}
 
 	@Override

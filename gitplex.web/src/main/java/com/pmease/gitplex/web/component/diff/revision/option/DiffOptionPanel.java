@@ -39,7 +39,7 @@ public abstract class DiffOptionPanel extends Panel {
 
 	private static final String COOKIE_DIFF_MODE = "gitplex.diff.mode";
 	
-	private final IModel<Depot> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String newRev;
 	
@@ -47,10 +47,10 @@ public abstract class DiffOptionPanel extends Panel {
 	
 	private DiffMode diffMode;
 	
-	public DiffOptionPanel(String id, IModel<Depot> repoModel, String newRev) {
+	public DiffOptionPanel(String id, IModel<Depot> depotModel, String newRev) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = depotModel;
 		this.newRev = newRev;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
@@ -144,7 +144,7 @@ public abstract class DiffOptionPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new PathSelector(id, repoModel, newRev, FileMode.TYPE_TREE, 
+				return new PathSelector(id, depotModel, newRev, FileMode.TYPE_TREE, 
 						FileMode.TYPE_FILE, FileMode.TYPE_GITLINK, FileMode.TYPE_SYMLINK) {
 					
 					@Override
@@ -171,7 +171,7 @@ public abstract class DiffOptionPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

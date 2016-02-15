@@ -1,0 +1,22 @@
+<wicket:extend>
+	<section id="no-commits">
+		<div class="head">Repository does not have any commits yet</div>
+		<div class="body">
+			<div><i class="fa fa-hand-o-right"></i> You may initialize the repository from command line:</div>
+			<ul class="list-unstyled">
+				<li>touch README.md</li>
+				<li>git init</li>
+				<li>git add README.md</li>
+				<li>git commit -m "first commit"</li>
+				<li>git remote add origin <span wicket:id="url1"></span></li>
+				<li>git push -u origin master</li>
+			</ul>
+			<div><i class="fa fa-hand-o-right"></i> Or push an existing repository from command line:</div>
+			<ul class="list-unstyled">
+				<li>git remote add origin <span wicket:id="url2"></span></li>
+				<li>git push -u origin master</li>
+			</ul>
+			<div class="help-block"><i class="fa fa-info-circle"></i> In case remote <em>origin</em> already exists, use another name other than <em>origin</em>, or run command <em>git remote set-url origin <span wicket:id="url3"></span></em> instead</div>		
+		</div>
+	</section>
+</wicket:extend>

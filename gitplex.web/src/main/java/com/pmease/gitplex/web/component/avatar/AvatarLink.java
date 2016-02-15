@@ -18,7 +18,7 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
+import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 
@@ -40,7 +40,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	}
 	
 	public AvatarLink(String id, @Nullable User user, @Nullable TooltipConfig tooltipConfig) {
-		super(id, AccountReposPage.class);
+		super(id, AccountDepotsPage.class);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		if (user != null) {
@@ -61,7 +61,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	}
 	
 	public AvatarLink(String id, PersonIdent person, @Nullable TooltipConfig tooltipConfig) {
-		super(id, AccountReposPage.class);
+		super(id, AccountDepotsPage.class);
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		
