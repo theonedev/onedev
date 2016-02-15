@@ -126,20 +126,20 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected String load() {
-				Depot targetRepo = target.getDepot();
-				Depot sourceRepo = source.getDepot();
-				if (!targetRepo.equals(sourceRepo)) {
+				Depot targetDepot = target.getDepot();
+				Depot sourceDepot = source.getDepot();
+				if (!targetDepot.equals(sourceDepot)) {
 					Git sandbox = new Git(FileUtils.createTempDir());
 					try {
-						sandbox.clone(targetRepo.git(), false, true, true, target.getRevision());
+						sandbox.clone(targetDepot.git(), false, true, true, target.getRevision());
 						sandbox.reset(null, null);
-						sandbox.fetch(sourceRepo.git(), source.getRevision());
+						sandbox.fetch(sourceDepot.git(), source.getRevision());
 						return sandbox.calcMergeBase(target.getCommit().name(), source.getCommit().name());
 					} finally {
 						FileUtils.deleteDir(sandbox.depotDir());
 					}
 				} else {
-					return targetRepo.getMergeBase(target.getRevision(), source.getRevision()).name();
+					return targetDepot.getMergeBase(target.getRevision(), source.getRevision()).name();
 				}
 			}
 			
@@ -149,8 +149,8 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected List<Commit> load() {
-				Depot sourceRepo = source.getDepot();
-				List<Commit> commits = sourceRepo.git().log(mergeBaseModel.getObject(), 
+				Depot sourceDepot = source.getDepot();
+				List<Commit> commits = sourceDepot.git().log(mergeBaseModel.getObject(), 
 						source.getCommit().name(), null, 0, 0, false);
 				return commits;
 			}

@@ -34,7 +34,7 @@ class ResolveConflictInstructionPanel extends Panel {
 		
 		PullRequest request = (PullRequest) getDefaultModelObject();
 		Fragment fragment;
-		Depot targetRepo = request.getTarget().getDepot();
+		Depot targetDepot = request.getTarget().getDepot();
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		IntegrationPreview preview = request.getIntegrationPreview();
 		String sourceHead = preview.getRequestHead();
@@ -69,8 +69,8 @@ class ResolveConflictInstructionPanel extends Panel {
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		} else if (user != null 
-						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPush(targetRepo))
-						&& targetRepo.getGateKeeper().checkCommit(user, request.getTargetDepot(), request.getTargetBranch(), sourceHead).allowIntegration()) {
+						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPush(targetDepot))
+						&& targetDepot.getGateKeeper().checkCommit(user, request.getTargetDepot(), request.getTargetBranch(), sourceHead).allowIntegration()) {
 			fragment = new Fragment("content", "mergeInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getDepot()));
 			fragment.add(new Label("destBranchNameForCheckout", request.getTargetBranch()));

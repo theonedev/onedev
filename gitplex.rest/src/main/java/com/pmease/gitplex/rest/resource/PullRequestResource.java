@@ -64,12 +64,12 @@ public class PullRequestResource {
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 
     	if (targetRepoId != null)
-    		criteria.add(Restrictions.eq("targetRepo.id", targetRepoId));
+    		criteria.add(Restrictions.eq("targetDepot.id", targetRepoId));
     	if (targetBranch != null)
     		criteria.add(Restrictions.eq("targetBranch", targetBranch));
     		
     	if (sourceRepoId != null)
-    		criteria.add(Restrictions.eq("sourceRepo.id", targetRepoId));
+    		criteria.add(Restrictions.eq("sourceDepot.id", targetRepoId));
     	if (sourceBranch != null)
     		criteria.add(Restrictions.eq("sourceBranch", sourceBranch));
 		

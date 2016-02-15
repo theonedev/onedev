@@ -259,8 +259,8 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		
 		User user = userManager.getCurrent();
 
-		Depot targetRepo = request.getTargetDepot();
-		Git git = targetRepo.git();
+		Depot targetDepot = request.getTargetDepot();
+		Git git = targetDepot.git();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		if ((strategy == MERGE_ALWAYS || strategy == MERGE_IF_NECESSARY || strategy == MERGE_WITH_SQUASH) 
 				&& !preview.getIntegrated().equals(preview.getRequestHead()) && comment != null) {
@@ -280,19 +280,19 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 			}
 		}
 		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
-			Depot sourceRepo = request.getSourceDepot();
-			Git sourceGit = sourceRepo.git();
+			Depot sourceDepot = request.getSourceDepot();
+			Git sourceGit = sourceDepot.git();
 			String sourceRef = request.getSourceRef();
 			sourceGit.updateRef(sourceRef, integrated, preview.getRequestHead(), 
 					"Pull request #" + request.getId());
-			sourceRepo.cacheObjectId(request.getSourceRef(), ObjectId.fromString(integrated));
-			onRefUpdate(sourceRepo, sourceRef, integrated);
+			sourceDepot.cacheObjectId(request.getSourceRef(), ObjectId.fromString(integrated));
+			onRefUpdate(sourceDepot, sourceRef, integrated);
 		}
 		
 		String targetRef = request.getTargetRef();
 		git.updateRef(targetRef, integrated, preview.getTargetHead(), "Pull request #" + request.getId());
-		targetRepo.cacheObjectId(request.getTargetRef(), ObjectId.fromString(integrated));
-		onRefUpdate(targetRepo, targetRef, integrated);
+		targetDepot.cacheObjectId(request.getTargetRef(), ObjectId.fromString(integrated));
+		onRefUpdate(targetDepot, targetRef, integrated);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
@@ -542,14 +542,14 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
 							String targetHead = request.getTarget().getObjectName();
-							Depot targetRepo = request.getTargetDepot();
+							Depot targetDepot = request.getTargetDepot();
 							Git git = request.getTargetDepot().git();
 							preview = new IntegrationPreview(targetHead, 
 									request.getLatestUpdate().getHeadCommitHash(), request.getIntegrationStrategy(), null);
 							request.setLastIntegrationPreview(preview);
 							String integrateRef = request.getIntegrateRef();
-							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetRepo.isAncestor(targetHead, requestHead)
-									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && targetRepo.isAncestor(targetHead, requestHead)
+							if (preview.getIntegrationStrategy() == MERGE_IF_NECESSARY && targetDepot.isAncestor(targetHead, requestHead)
+									|| preview.getIntegrationStrategy() == MERGE_WITH_SQUASH && targetDepot.isAncestor(targetHead, requestHead)
 											&& git.log(targetHead, requestHead, null, 0, 0, false).size() == 1) {
 								preview.setIntegrated(requestHead);
 								git.updateRef(integrateRef, requestHead, null, null);
@@ -675,9 +675,9 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
         		discard(request, "Source repository is deleted.");
     	}
     	
-    	Query query = dao.getSession().createQuery("update PullRequest set sourceRepo=null where "
-    			+ "sourceRepo = :repo and targetRepo != :repo");
-    	query.setParameter("repo", depot);
+    	Query query = dao.getSession().createQuery("update PullRequest set sourceDepot=null where "
+    			+ "sourceDepot = :depot and targetDepot != :depot");
+    	query.setParameter("depot", depot);
     	query.executeUpdate();
 	}
 
@@ -752,24 +752,24 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 
 	@Sessional
 	@Override
-	public Collection<PullRequest> queryOpenTo(DepotAndBranch target, @Nullable Depot sourceRepo) {
+	public Collection<PullRequest> queryOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofTarget(target));
 
-		if (sourceRepo != null)
-			criteria.add(Restrictions.eq("sourceRepo", sourceRepo));
+		if (sourceDepot != null)
+			criteria.add(Restrictions.eq("sourceDepot", sourceDepot));
 		criteria.add(ofOpen());
 		return dao.query(criteria);
 	}
 
 	@Sessional
 	@Override
-	public Collection<PullRequest> queryOpenFrom(DepotAndBranch source, @Nullable Depot targetRepo) {
+	public Collection<PullRequest> queryOpenFrom(DepotAndBranch source, @Nullable Depot targetDepot) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofSource(source));
 		
-		if (targetRepo != null)
-			criteria.add(Restrictions.eq("targetRepo", targetRepo));
+		if (targetDepot != null)
+			criteria.add(Restrictions.eq("targetDepot", targetDepot));
 		criteria.add(ofOpen());
 		return dao.query(criteria);
 	}
@@ -791,16 +791,16 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		for (PullRequest request: dao.query(criteria)) {
-			Depot sourceRepo = request.getSourceDepot();
-			if (sourceRepo == null) {
+			Depot sourceDepot = request.getSourceDepot();
+			if (sourceDepot == null) {
 				discard(request, "Source repository is deleted.");
-			} else if (sourceRepo.isValid()) {
+			} else if (sourceDepot.isValid()) {
 				String baseCommitHash = request.getBaseCommitHash();
 				
 				// only modifies pull request status if source repository is the repository we
 				// previously worked with. This avoids disaster of closing all pull requests
 				// if repository storage points to a different location by mistake
-				if (sourceRepo.getObjectId(baseCommitHash, false) != null) { 
+				if (sourceDepot.getObjectId(baseCommitHash, false) != null) { 
 					String sourceHead = request.getSource().getObjectName(false);
 					if (sourceHead == null) 
 						discard(request, "Source branch is deleted.");
@@ -812,14 +812,14 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 			}
 
 			if (request.isOpen()) {
-				Depot targetRepo = request.getTargetDepot();
-				if (targetRepo.isValid()) {
+				Depot targetDepot = request.getTargetDepot();
+				if (targetDepot.isValid()) {
 					String baseCommitHash = request.getBaseCommitHash();
 					
 					// only modifies pull request status if target repository is the repository we
 					// previously worked with. This avoids disaster of closing all pull requests
 					// if repository storage points to a different location by mistake
-					if (targetRepo.getObjectId(baseCommitHash, false) != null) {
+					if (targetDepot.getObjectId(baseCommitHash, false) != null) {
 						String targetHead = request.getTarget().getObjectName(false);
 						if (targetHead == null)
 							discard(request, "Target branch is deleted.");

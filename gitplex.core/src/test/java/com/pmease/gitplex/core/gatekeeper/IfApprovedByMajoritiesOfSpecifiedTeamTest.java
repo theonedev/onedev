@@ -79,7 +79,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		IfApprovedByMajoritiesOfSpecifiedTeam gateKeeper = new IfApprovedByMajoritiesOfSpecifiedTeam();
 		gateKeeper.setTeamId(1L);
 
-		Depot targetRepo = new Depot() {
+		Depot targetDepot = new Depot() {
 
 			@Override
 			public Git git() {
@@ -87,17 +87,17 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			}
 			
 		};
-		targetRepo.setId(1L);
-		targetRepo.setOwner(new User());
-		targetRepo.getOwner().setId(1L);
-		targetRepo.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
+		targetDepot.setId(1L);
+		targetDepot.setOwner(new User());
+		targetDepot.getOwner().setId(1L);
+		targetDepot.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
 		
 		PullRequest request = new PullRequest();
 		request.setId(1L);
-		request.setTargetDepot(targetRepo);
+		request.setTargetDepot(targetDepot);
 		request.setTargetBranch("master");
 		
-		Depot sourceRepo = new Depot() {
+		Depot sourceDepot = new Depot() {
 			
 			@Override
 			public Git git() {
@@ -105,8 +105,8 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			}
 			
 		};
-		sourceRepo.cacheObjectId("dev", ObjectId.fromString(git.parseRevision("dev", true)));
-		request.setSourceDepot(sourceRepo);
+		sourceDepot.cacheObjectId("dev", ObjectId.fromString(git.parseRevision("dev", true)));
+		request.setSourceDepot(sourceDepot);
 		request.setSourceBranch("dev");
 		
 		request.setSubmitter(new User());

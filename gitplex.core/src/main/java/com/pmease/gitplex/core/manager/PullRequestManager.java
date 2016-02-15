@@ -17,9 +17,9 @@ public interface PullRequestManager {
     @Nullable 
     PullRequest findOpen(DepotAndBranch target, DepotAndBranch source);
     
-    Collection<PullRequest> queryOpenTo(DepotAndBranch target, @Nullable Depot sourceRepo);
+    Collection<PullRequest> queryOpenTo(DepotAndBranch target, @Nullable Depot sourceDepot);
 
-    Collection<PullRequest> queryOpenFrom(DepotAndBranch source, @Nullable Depot targetRepo);
+    Collection<PullRequest> queryOpenFrom(DepotAndBranch source, @Nullable Depot targetDepot);
    
     Collection<PullRequest> queryOpen(DepotAndBranch sourceOrTarget);
     
