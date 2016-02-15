@@ -60,20 +60,20 @@ import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 @SuppressWarnings("serial")
 public abstract class DepotPage extends AccountPage {
 
-	private static final String PARAM_REPO = "repo";
+	private static final String PARAM_DEPOT = "depot";
 
 	protected final IModel<Depot> depotModel;
 	
 	public static PageParameters paramsOf(Depot depot) {
 		PageParameters params = paramsOf(depot.getUser());
-		params.set(PARAM_REPO, depot.getName());
+		params.set(PARAM_DEPOT, depot.getName());
 		return params;
 	}
 	
 	public DepotPage(PageParameters params) {
 		super(params);
 		
-		String repoName = params.get(PARAM_REPO).toString();
+		String repoName = params.get(PARAM_DEPOT).toString();
 		Preconditions.checkNotNull(repoName);
 		
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
