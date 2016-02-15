@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.repository.branches;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,11 +11,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -36,6 +40,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
@@ -49,7 +54,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.ConfirmOnClick;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
@@ -82,11 +87,13 @@ import com.pmease.gitplex.web.utils.DateUtils;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class RepoBranchesPage extends RepositoryPage {
 
+	private static final String PARAM_BASE = "base";
+	
 	// use a small page size to load page quickly
 	private static final int PAGE_SIZE = 10;
 	
@@ -97,7 +104,7 @@ public class RepoBranchesPage extends RepositoryPage {
 		@Override
 		public List<Ref> getObject() {
 			List<Ref> refs = getRepository().getBranchRefs();
-			searchFor = searchInput.getInput();
+			String searchFor = searchInput.getModelObject();
 			if (StringUtils.isNotBlank(searchFor)) {
 				searchFor = searchFor.trim().toLowerCase();
 				for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
@@ -105,13 +112,13 @@ public class RepoBranchesPage extends RepositoryPage {
 					if (!branch.toLowerCase().contains(searchFor))
 						it.remove();
 				}
-			} else {
-				searchFor = null;
 			}
 			return refs;
 		}
 		
 	};
+	
+	private BranchSingleChoice baseChoice;
 	
 	private PageableListView<Ref> branchesView;
 	
@@ -120,8 +127,6 @@ public class RepoBranchesPage extends RepositoryPage {
 	private WebMarkupContainer branchesContainer; 
 	
 	private TextField<String> searchInput;
-	
-	private String searchFor;
 	
 	private final IModel<Map<ObjectId, AheadBehind>> aheadBehindsModel = 
 			new LoadableDetachableModel<Map<ObjectId, AheadBehind>>() {
@@ -242,8 +247,17 @@ public class RepoBranchesPage extends RepositoryPage {
 		
 	};
 
+	public static PageParameters paramsOf(Repository repository, @Nullable String baseBranch) {
+		PageParameters params = paramsOf(repository);
+		if (baseBranch != null)
+			params.add(PARAM_BASE, baseBranch);
+		return params;
+	}
+	
 	public RepoBranchesPage(PageParameters params) {
 		super(params);
+		
+		baseBranch = params.get(PARAM_BASE).toString();
 		
 		if (!getRepository().git().hasCommits()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
@@ -258,7 +272,7 @@ public class RepoBranchesPage extends RepositoryPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BranchSingleChoice("baseBranch", new IModel<String>() {
+		add(baseChoice = new BranchSingleChoice("baseBranch", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -274,14 +288,21 @@ public class RepoBranchesPage extends RepositoryPage {
 				baseBranch = object;
 			}
 			
-		}, new BranchChoiceProvider(repoModel), false).add(new AjaxFormComponentUpdatingBehavior("change") {
+		}, new BranchChoiceProvider(repoModel), false));
+		
+		baseChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				setResponsePage(RepoBranchesPage.this);
+				target.add(branchesContainer);
+				target.add(pagingNavigator);
+				searchInput.setModelObject(null);
+				target.add(searchInput);
+				
+				pushState(target);
 			}
 			
-		}));
+		});
 		
 		add(searchInput = new ClearableTextField<String>("searchBranches", Model.of("")));
 		searchInput.add(new OnSearchingBehavior());
@@ -365,6 +386,8 @@ public class RepoBranchesPage extends RepositoryPage {
 							close(target);
 							target.add(branchesContainer);
 							target.add(pagingNavigator);
+							searchInput.setModelObject(null);
+							target.add(searchInput);
 						}
 					}
 
@@ -587,12 +610,25 @@ public class RepoBranchesPage extends RepositoryPage {
 
 				});
 
-				Link<Void> deleteLink;
-				actionsContainer.add(deleteLink = new Link<Void>("delete") {
+				AjaxLink<Void> deleteLink;
+				actionsContainer.add(deleteLink = new AjaxLink<Void>("delete") {
+
+					
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this branch?"));
+					}
 
 					@Override
-					public void onClick() {
+					public void onClick(AjaxRequestTarget target) {
 						getRepository().deleteBranch(branch);
+						if (branch.equals(baseBranch)) {
+							baseBranch = getRepository().getDefaultBranch();
+							target.add(baseChoice);
+						}
+						target.add(pagingNavigator);
+						target.add(branchesContainer);
 					}
 
 					@Override
@@ -621,7 +657,6 @@ public class RepoBranchesPage extends RepositoryPage {
 					}
 					
 				});
-				deleteLink.add(new ConfirmOnClick("Do you really want to delete this branch?"));				
 				PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
 				PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
 				if (aheadOpen != null || behindOpen != null) {
@@ -633,7 +668,7 @@ public class RepoBranchesPage extends RepositoryPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("branchesPageNav", branchesView) {
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("branchesPageNav", branchesView) {
 
 			@Override
 			protected void onConfigure() {
@@ -673,7 +708,7 @@ public class RepoBranchesPage extends RepositoryPage {
 	private class OnSearchingBehavior extends OnTypingDoneBehavior implements IAjaxIndicatorAware {
 
 		public OnSearchingBehavior() {
-			super(1000);
+			super(500);
 		}
 
 		@Override
@@ -687,6 +722,21 @@ public class RepoBranchesPage extends RepositoryPage {
 			return "searching-branches";
 		}
 		
+	}
+
+	private void pushState(AjaxRequestTarget target) {
+		PageParameters params = paramsOf(getRepository(), baseBranch);
+		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
+		pushState(target, url.toString(), baseBranch);
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+		baseBranch = (String) data;
+		target.add(baseChoice);
+		target.add(branchesContainer);
+		target.add(pagingNavigator);
 	}
 
 	@Override

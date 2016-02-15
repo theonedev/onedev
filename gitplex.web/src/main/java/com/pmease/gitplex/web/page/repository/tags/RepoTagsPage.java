@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -41,7 +42,7 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.ConfirmOnClick;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
@@ -64,14 +65,16 @@ import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class RepoTagsPage extends RepositoryPage {
 
 	private TextField<String> searchInput;
 	
-	private String searchFor;
+	private WebMarkupContainer tagsContainer;
+	
+	private PagingNavigator pagingNavigator;
 	
 	public RepoTagsPage(PageParameters params) {
 		super(params);
@@ -90,160 +93,6 @@ public class RepoTagsPage extends RepositoryPage {
 		super.onInitialize();
 		
 		add(searchInput = new ClearableTextField<String>("searchTags", Model.of("")));
-		
-		final WebMarkupContainer tagsContainer = new WebMarkupContainer("tagsContainer");
-		tagsContainer.setOutputMarkupId(true);
-		add(tagsContainer);
-		
-		final PageableListView<Ref> tagsView;
-		final IModel<List<Ref>> tagsModel = new AbstractReadOnlyModel<List<Ref>>() {
-
-			@Override
-			public List<Ref> getObject() {
-				List<Ref> refs = getRepository().getTagRefs();
-				searchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(searchFor)) {
-					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
-						String tag = GitUtils.ref2tag(it.next().getName());
-						if (!tag.toLowerCase().contains(searchFor))
-							it.remove();
-					}
-				} else {
-					searchFor = null;
-				}
-				return refs;
-			}
-			
-		}; 
-		tagsContainer.add(tagsView = new PageableListView<Ref>("tags", tagsModel, 
-				com.pmease.gitplex.web.Constants.DEFAULT_PAGE_SIZE) {
-
-			@Override
-			protected void populateItem(final ListItem<Ref> item) {
-				Ref ref = item.getModelObject();
-				final String tag = GitUtils.ref2tag(ref.getName());
-				
-				RepoFileState state = new RepoFileState();
-				state.blobIdent.revision = tag;
-				AbstractLink link = new BookmarkablePageLink<Void>("tagLink", 
-						RepoFilePage.class, RepoFilePage.paramsOf(getRepository(), state));
-				link.add(new Label("name", tag));
-				item.add(link);
-
-				RevObject revObject = getRepository().getRevObject(ref.getObjectId());
-				if (revObject instanceof RevTag) {
-					RevTag revTag = (RevTag) revObject;
-					Fragment fragment = new Fragment("annotated", "annotatedFrag", RepoTagsPage.this);
-					fragment.add(new UserLink("author", revTag.getTaggerIdent()));
-					fragment.add(new Label("date", DateUtils.formatDate(revTag.getTaggerIdent().getWhen())));
-					Label message = new Label("message", revTag.getFullMessage());
-					message.setOutputMarkupId(true);
-					fragment.add(message);
-					String toggleScript = String.format("$('#%s').toggle();", message.getMarkupId());
-					WebMarkupContainer messageToggle = new WebMarkupContainer("messageToggle"); 
-					messageToggle.add(AttributeAppender.append("onclick", toggleScript));
-					messageToggle.setVisible(StringUtils.isNotBlank(revTag.getFullMessage()));
-					fragment.add(messageToggle);
-					item.add(fragment);
-				} else {
-					item.add(new WebMarkupContainer("annotated").setVisible(false));
-				}
-
-				RevCommit commit = getRepository().getRevCommit(ref.getObjectId());
-				item.add(new CommitHashPanel("hash", commit.name()));
-				PageParameters params = CommitDetailPage.paramsOf(getRepository(), commit.name());
-				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
-				link.add(new Label("shortMessage", commit.getShortMessage()));
-				item.add(link);
-				
-				link = new Link<Void>("compare") {
-
-					@Override
-					public void onClick() {
-						try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-								RevWalk revWalk = new RevWalk(jgitRepo);) {
-							RevCommit currentCommit = revWalk.lookupCommit(
-									getRepository().getRevCommit(item.getModelObject().getObjectId()).getId());
-							Ref prevAncestorRef = null;
-							for (int i=item.getIndex()+1; i<tagsModel.getObject().size(); i++) {
-								Ref prevRef = tagsModel.getObject().get(i);
-								revWalk.setRevFilter(RevFilter.MERGE_BASE);
-								revWalk.markStart(currentCommit);
-								
-								RevCommit prevCommit = revWalk.lookupCommit(
-										getRepository().getRevCommit(prevRef.getObjectId()).getId());
-								revWalk.markStart(prevCommit);
-								if (prevCommit.equals(revWalk.next())) {
-									prevAncestorRef = prevRef;
-									break;
-								}
-								revWalk.reset();
-							}
-							RepoAndRevision target;
-							if (prevAncestorRef != null) {
-								target = new RepoAndRevision(getRepository(), 
-										GitUtils.ref2tag(prevAncestorRef.getName()));
-							} else {
-								target = new RepoAndRevision(getRepository(), 
-										GitUtils.ref2tag(item.getModelObject().getName()));
-							}
-							RepoAndRevision source = new RepoAndRevision(getRepository(), 
-									GitUtils.ref2tag(item.getModelObject().getName()));
-							PageParameters params = RevisionComparePage.paramsOf(getRepository(), target, source, null);
-							setResponsePage(RevisionComparePage.class, params);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-					
-				};
-				link.setVisible(item.getIndex()<tagsModel.getObject().size()-1);
-				
-				item.add(link);
-				
-				item.add(new Link<Void>("delete") {
-
-					@Override
-					public void onClick() {
-						getRepository().deleteTag(tag);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						if (SecurityUtils.canModify(getRepository(), GitUtils.tag2ref(tag))) {
-							User currentUser = getCurrentUser();
-							if (currentUser != null) {
-								GateKeeper gateKeeper = getRepository().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkFile(currentUser, getRepository(), tag, null);
-								setVisible(checkResult instanceof Passed);
-							} else {
-								setVisible(false);
-							}
-						} else {
-							setVisible(false);
-						}
-					}
-					
-				}.add(new ConfirmOnClick("Do you really want to delete this tag?")));
-			}
-			
-		});
-
-		final PagingNavigator pagingNavigator;
-		add(pagingNavigator = new BootstrapPagingNavigator("tagsPageNav", tagsView) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(tagsView.getPageCount() > 1);
-			}
-			
-		});
-		pagingNavigator.setOutputMarkupPlaceholderTag(true);
-		
 		searchInput.add(new OnTypingDoneBehavior(200) {
 
 			@Override
@@ -352,6 +201,8 @@ public class RepoTagsPage extends RepositoryPage {
 							close(target);
 							target.add(tagsContainer);
 							target.add(pagingNavigator);
+							searchInput.setModelObject(null);
+							target.add(searchInput);
 						}
 					}
 
@@ -369,7 +220,165 @@ public class RepoTagsPage extends RepositoryPage {
 			}
 			
 		});
+		
+		tagsContainer = new WebMarkupContainer("tagsContainer");
+		tagsContainer.setOutputMarkupId(true);
+		add(tagsContainer);
+		
+		final PageableListView<Ref> tagsView;
+		final IModel<List<Ref>> tagsModel = new AbstractReadOnlyModel<List<Ref>>() {
+
+			@Override
+			public List<Ref> getObject() {
+				List<Ref> refs = getRepository().getTagRefs();
+				String searchFor = searchInput.getModelObject();
+				if (StringUtils.isNotBlank(searchFor)) {
+					searchFor = searchFor.trim().toLowerCase();
+					for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
+						String tag = GitUtils.ref2tag(it.next().getName());
+						if (!tag.toLowerCase().contains(searchFor))
+							it.remove();
+					}
+				}
+				return refs;
+			}
+			
+		}; 
+		
+		tagsContainer.add(tagsView = new PageableListView<Ref>("tags", tagsModel, 
+				com.pmease.gitplex.web.Constants.DEFAULT_PAGE_SIZE) {
+
+			@Override
+			protected void populateItem(final ListItem<Ref> item) {
+				Ref ref = item.getModelObject();
+				final String tag = GitUtils.ref2tag(ref.getName());
 				
+				RepoFileState state = new RepoFileState();
+				state.blobIdent.revision = tag;
+				AbstractLink link = new BookmarkablePageLink<Void>("tagLink", 
+						RepoFilePage.class, RepoFilePage.paramsOf(getRepository(), state));
+				link.add(new Label("name", tag));
+				item.add(link);
+
+				RevObject revObject = getRepository().getRevObject(ref.getObjectId());
+				if (revObject instanceof RevTag) {
+					RevTag revTag = (RevTag) revObject;
+					Fragment fragment = new Fragment("annotated", "annotatedFrag", RepoTagsPage.this);
+					fragment.add(new UserLink("author", revTag.getTaggerIdent()));
+					fragment.add(new Label("date", DateUtils.formatDate(revTag.getTaggerIdent().getWhen())));
+					Label message = new Label("message", revTag.getFullMessage());
+					message.setOutputMarkupId(true);
+					fragment.add(message);
+					String toggleScript = String.format("$('#%s').toggle();", message.getMarkupId());
+					WebMarkupContainer messageToggle = new WebMarkupContainer("messageToggle"); 
+					messageToggle.add(AttributeAppender.append("onclick", toggleScript));
+					messageToggle.setVisible(StringUtils.isNotBlank(revTag.getFullMessage()));
+					fragment.add(messageToggle);
+					item.add(fragment);
+				} else {
+					item.add(new WebMarkupContainer("annotated").setVisible(false));
+				}
+
+				RevCommit commit = getRepository().getRevCommit(ref.getObjectId());
+				item.add(new CommitHashPanel("hash", commit.name()));
+				PageParameters params = CommitDetailPage.paramsOf(getRepository(), commit.name());
+				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
+				link.add(new Label("shortMessage", commit.getShortMessage()));
+				item.add(link);
+				
+				link = new Link<Void>("compare") {
+
+					@Override
+					public void onClick() {
+						try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
+								RevWalk revWalk = new RevWalk(jgitRepo);) {
+							RevCommit currentCommit = revWalk.lookupCommit(
+									getRepository().getRevCommit(item.getModelObject().getObjectId()).getId());
+							Ref prevAncestorRef = null;
+							for (int i=item.getIndex()+1; i<tagsModel.getObject().size(); i++) {
+								Ref prevRef = tagsModel.getObject().get(i);
+								revWalk.setRevFilter(RevFilter.MERGE_BASE);
+								revWalk.markStart(currentCommit);
+								
+								RevCommit prevCommit = revWalk.lookupCommit(
+										getRepository().getRevCommit(prevRef.getObjectId()).getId());
+								revWalk.markStart(prevCommit);
+								if (prevCommit.equals(revWalk.next())) {
+									prevAncestorRef = prevRef;
+									break;
+								}
+								revWalk.reset();
+							}
+							RepoAndRevision target;
+							if (prevAncestorRef != null) {
+								target = new RepoAndRevision(getRepository(), 
+										GitUtils.ref2tag(prevAncestorRef.getName()));
+							} else {
+								target = new RepoAndRevision(getRepository(), 
+										GitUtils.ref2tag(item.getModelObject().getName()));
+							}
+							RepoAndRevision source = new RepoAndRevision(getRepository(), 
+									GitUtils.ref2tag(item.getModelObject().getName()));
+							PageParameters params = RevisionComparePage.paramsOf(getRepository(), target, source, null);
+							setResponsePage(RevisionComparePage.class, params);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+					
+				};
+				link.setVisible(item.getIndex()<tagsModel.getObject().size()-1);
+				
+				item.add(link);
+				
+				item.add(new AjaxLink<Void>("delete") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this tag?"));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getRepository().deleteTag(tag);
+						target.add(tagsContainer);
+						target.add(pagingNavigator);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+
+						if (SecurityUtils.canModify(getRepository(), GitUtils.tag2ref(tag))) {
+							User currentUser = getCurrentUser();
+							if (currentUser != null) {
+								GateKeeper gateKeeper = getRepository().getGateKeeper();
+								CheckResult checkResult = gateKeeper.checkFile(currentUser, getRepository(), tag, null);
+								setVisible(checkResult instanceof Passed);
+							} else {
+								setVisible(false);
+							}
+						} else {
+							setVisible(false);
+						}
+					}
+					
+				});
+			}
+			
+		});
+
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("tagsPageNav", tagsView) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(tagsView.getPageCount() > 1);
+			}
+			
+		});
+		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
 	
 	@Override

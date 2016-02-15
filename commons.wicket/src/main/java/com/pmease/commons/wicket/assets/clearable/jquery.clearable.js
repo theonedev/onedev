@@ -5,6 +5,8 @@
  
     $.fn.clearable = function() {
     	var $input = this;
+    	if ($input.next().hasClass("input-clear")) 
+    		$input.next().remove();
 		$input.addClass("clearable");
 		$input.after("<span class='input-clear'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
 		$input.next().click(function() {
