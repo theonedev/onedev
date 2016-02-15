@@ -47,6 +47,7 @@ import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
 import com.pmease.gitplex.web.page.test.RunModePage;
 import com.pmease.gitplex.web.page.test.TestPage;
+import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.resource.AttachmentResourceReference;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -66,6 +67,14 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addResources() {
+		add(new ResourceMapper("${user}/${repo}/archive", new ArchiveResourceReference()) {
+
+			@Override
+			public int getCompatibilityScore(Request request) {
+				return 3;
+			}
+			
+		});
 		add(new ResourceMapper("${user}/${repo}/raw", new BlobResourceReference()) {
 
 			@Override

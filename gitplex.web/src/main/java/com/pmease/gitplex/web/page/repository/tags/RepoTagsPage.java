@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
@@ -62,6 +63,8 @@ import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.repository.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
+import com.pmease.gitplex.web.resource.ArchiveResource;
+import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -251,13 +254,13 @@ public class RepoTagsPage extends RepositoryPage {
 			@Override
 			protected void populateItem(final ListItem<Ref> item) {
 				Ref ref = item.getModelObject();
-				final String tag = GitUtils.ref2tag(ref.getName());
+				final String tagName = GitUtils.ref2tag(ref.getName());
 				
 				RepoFileState state = new RepoFileState();
-				state.blobIdent.revision = tag;
+				state.blobIdent.revision = tagName;
 				AbstractLink link = new BookmarkablePageLink<Void>("tagLink", 
 						RepoFilePage.class, RepoFilePage.paramsOf(getRepository(), state));
-				link.add(new Label("name", tag));
+				link.add(new Label("name", tagName));
 				item.add(link);
 
 				RevObject revObject = getRepository().getRevObject(ref.getObjectId());
@@ -285,6 +288,9 @@ public class RepoTagsPage extends RepositoryPage {
 				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
 				link.add(new Label("shortMessage", commit.getShortMessage()));
 				item.add(link);
+				
+				item.add(new ResourceLink<Void>("download", new ArchiveResourceReference(), 
+						ArchiveResource.paramsOf(getRepository(), tagName)));
 				
 				link = new Link<Void>("compare") {
 
@@ -341,7 +347,7 @@ public class RepoTagsPage extends RepositoryPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getRepository().deleteTag(tag);
+						getRepository().deleteTag(tagName);
 						target.add(tagsContainer);
 						target.add(pagingNavigator);
 					}
@@ -350,11 +356,11 @@ public class RepoTagsPage extends RepositoryPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (SecurityUtils.canModify(getRepository(), GitUtils.tag2ref(tag))) {
+						if (SecurityUtils.canModify(getRepository(), GitUtils.tag2ref(tagName))) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getRepository().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkFile(currentUser, getRepository(), tag, null);
+								CheckResult checkResult = gateKeeper.checkFile(currentUser, getRepository(), tagName, null);
 								setVisible(checkResult instanceof Passed);
 							} else {
 								setVisible(false);

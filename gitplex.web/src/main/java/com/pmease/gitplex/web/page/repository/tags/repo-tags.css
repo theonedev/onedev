@@ -45,6 +45,10 @@
 #repo-tags>.body>table td.actions .fa.fa-times {
 	color: red;
 }
+#repo-tags>.body>table td.actions .fa.fa-download {
+	font-size: 15px;
+	vertical-align: middle;
+}
 #repo-tags>.body>table td.actions span.fa.fa-times {
 	color: #888;
 }

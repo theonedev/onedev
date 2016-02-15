@@ -22,6 +22,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -82,6 +83,8 @@ import com.pmease.gitplex.web.component.repofile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.repository.NoCommitsPage;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
+import com.pmease.gitplex.web.resource.ArchiveResource;
+import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -314,7 +317,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 		});
 		
-		add(new WebMarkupContainer("download"));
+		newDownloadLink(null);
 		
 		newRevisionPicker(null);
 		
@@ -702,7 +705,19 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			add(revisionPicker);
 		}
 	}
-
+	
+	private void newDownloadLink(AjaxRequestTarget target) {
+		ResourceLink<Void> link = new ResourceLink<Void>("download", new ArchiveResourceReference(), 
+				ArchiveResource.paramsOf(getRepository(), blobIdent.revision));
+		link.setOutputMarkupId(true);
+		if (target != null) { 
+			replace(link);
+			target.add(link);
+		} else {
+			add(link);
+		}
+	}
+	
 	private void applyState(AjaxRequestTarget target, RepoFileState state) {
 		if (!state.blobIdent.revision.equals(blobIdent.revision))
 			newSearchResult(target, null);
@@ -711,6 +726,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		trait.revision = blobIdent.revision;
 
 		newRevisionPicker(target);
+		
+		newDownloadLink(target);
 		
 		target.add(commentContext);
 		
