@@ -46,10 +46,10 @@ import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.component.addbranch.AddBranchLink;
-import com.pmease.gitplex.web.component.addtag.AddTagLink;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
+import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
+import com.pmease.gitplex.web.component.createtag.CreateTagLink;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
@@ -123,7 +123,7 @@ public class CommitDetailPage extends RepositoryPage {
 		
 		add(new HashAndCodePanel("hashAndCode", repoModel, getCommit().getId().name()));
 		
-		add(new AddBranchLink("createBranch", repoModel, revision) {
+		add(new CreateBranchLink("createBranch", repoModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
@@ -132,7 +132,7 @@ public class CommitDetailPage extends RepositoryPage {
 			
 		});
 		
-		add(new AddTagLink("createTag", repoModel, revision) {
+		add(new CreateTagLink("createTag", repoModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {

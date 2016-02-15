@@ -30,9 +30,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TagCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
@@ -292,7 +289,8 @@ public class RepoTagsPage extends RepositoryPage {
 				form.setOutputMarkupId(true);
 				form.add(new NotificationPanel("feedback", form));
 				tagName = null;
-				form.add(new TextField<String>("name", new IModel<String>() {
+				final TextField<String> nameInput;
+				form.add(nameInput = new TextField<String>("name", new IModel<String>() {
 
 					@Override
 					public void detach() {
@@ -308,7 +306,8 @@ public class RepoTagsPage extends RepositoryPage {
 						tagName = object;
 					}
 					
-				}).setOutputMarkupId(true));
+				}));
+				nameInput.setOutputMarkupId(true);
 				
 				tagMessage = null;
 				form.add(new TextArea<String>("message", new IModel<String>() {
@@ -338,30 +337,21 @@ public class RepoTagsPage extends RepositoryPage {
 						
 						if (tagName == null) {
 							form.error("Tag name is required.");
-							target.focusComponent(form.get("name"));
+							target.focusComponent(nameInput);
+							target.add(form);
+						} else if (!GitUtils.isValidRefName(Constants.R_HEADS + tagName)) {
+							form.error("Invalid tag name.");
+							target.focusComponent(nameInput);
+							target.add(form);
+						} else if (getRepository().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
+							form.error("Tag '" + tagName + "' already exists, please choose a different name.");
+							target.focusComponent(nameInput);
 							target.add(form);
 						} else {
-							String tagRef = GitUtils.tag2ref(tagName);
-							if (getRepository().getObjectId(tagRef, false) != null) {
-								form.error("Tag '" + tagName + "' already exists, please choose a different name.");
-								target.add(form);
-							} else {
-								close(target);
-								try (FileRepository jgitRepo = getRepository().openAsJGitRepo();) {
-									Git git = Git.wrap(jgitRepo);
-									TagCommand tag = git.tag();
-									tag.setName(tagName);
-									if (tagMessage != null)
-										tag.setMessage(tagMessage);
-									tag.setTagger(getCurrentUser().asPerson());
-									tag.setObjectId(getRepository().getRevCommit(tagRevision));
-									tag.call();
-								} catch (GitAPIException e) {
-									throw new RuntimeException(e);
-								}
-								target.add(tagsContainer);
-								target.add(pagingNavigator);
-							}
+							getRepository().tag(tagName, tagRevision, getCurrentUser().asPerson(), tagMessage);
+							close(target);
+							target.add(tagsContainer);
+							target.add(pagingNavigator);
 						}
 					}
 

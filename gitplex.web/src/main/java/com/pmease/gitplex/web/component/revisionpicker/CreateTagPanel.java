@@ -7,10 +7,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TagCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
@@ -62,21 +58,9 @@ abstract class CreateTagPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				
-				try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();) {
-					Git git = Git.wrap(jgitRepo);
-					TagCommand tag = git.tag();
-					tag.setName(tagName);
-					if (message != null)
-						tag.setMessage(message);
-					User user = GitPlex.getInstance(UserManager.class).getCurrent();
-					tag.setTagger(user.asPerson());
-					tag.setObjectId(repoModel.getObject().getRevCommit(revision));
-					tag.call();
-				} catch (GitAPIException e) {
-					throw new RuntimeException(e);
-				}
 
+				User user = GitPlex.getInstance(UserManager.class).getCurrent();
+				repoModel.getObject().tag(tagName, revision, user.asPerson(), message);
 				onCreate(target, tagName);
 			}
 			

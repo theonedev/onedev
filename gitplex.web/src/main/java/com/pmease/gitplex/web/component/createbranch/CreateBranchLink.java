@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.addbranch;
+package com.pmease.gitplex.web.component.createbranch;
 
 import java.util.UUID;
 
@@ -11,13 +11,13 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
-public abstract class AddBranchLink extends ModalLink {
+public abstract class CreateBranchLink extends ModalLink {
 
 	private final IModel<Repository> repoModel;
 	
 	private final String revision;
 	
-	public AddBranchLink(String id, IModel<Repository> repoModel, String revision) {
+	public CreateBranchLink(String id, IModel<Repository> repoModel, String revision) {
 		super(id);
 		
 		this.repoModel = repoModel;
@@ -32,12 +32,12 @@ public abstract class AddBranchLink extends ModalLink {
 	
 	@Override
 	protected Component newContent(String id) {
-		return new AddBranchPanel(id, repoModel, revision) {
+		return new CreateBranchPanel(id, repoModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
 				close(target);
-				AddBranchLink.this.onCreate(target, branch);
+				CreateBranchLink.this.onCreate(target, branch);
 			}
 
 			@Override

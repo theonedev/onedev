@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.addtag;
+package com.pmease.gitplex.web.component.createtag;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -8,10 +8,7 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TagCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Constants;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
@@ -22,7 +19,7 @@ import com.pmease.gitplex.core.model.User;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-abstract class AddTagPanel extends Panel {
+abstract class CreateTagPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
@@ -32,7 +29,7 @@ abstract class AddTagPanel extends Panel {
 	
 	private String tagMessage;
 	
-	public AddTagPanel(String id, IModel<Repository> repoModel, String revision) {
+	public CreateTagPanel(String id, IModel<Repository> repoModel, String revision) {
 		super(id);
 		this.repoModel = repoModel;
 		this.revision = revision;
@@ -45,7 +42,9 @@ abstract class AddTagPanel extends Panel {
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		form.add(new NotificationPanel("feedback", form));
-		form.add(new TextField<String>("name", new IModel<String>() {
+		
+		final TextField<String> nameInput;
+		form.add(nameInput = new TextField<String>("name", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -61,7 +60,8 @@ abstract class AddTagPanel extends Panel {
 				tagName = object;
 			}
 			
-		}).setOutputMarkupId(true));
+		}));
+		nameInput.setOutputMarkupId(true);
 		
 		form.add(new TextArea<String>("message", new IModel<String>() {
 
@@ -88,30 +88,21 @@ abstract class AddTagPanel extends Panel {
 				
 				if (tagName == null) {
 					form.error("Tag name is required.");
-					target.focusComponent(form.get("name"));
+					target.focusComponent(nameInput);
+					target.add(form);
+				} else if (!GitUtils.isValidRefName(Constants.R_HEADS + tagName)) {
+					form.error("Tag name is not valid.");
+					target.focusComponent(nameInput);
+					target.add(form);
+				} else if (repoModel.getObject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
+					form.error("Tag '" + tagName + "' already exists, please choose a different name.");
+					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					String tagRef = GitUtils.tag2ref(tagName);
 					Repository repo = repoModel.getObject();
-					if (repo.getObjectId(tagRef, false) != null) {
-						form.error("Tag '" + tagName + "' already exists, please choose a different name.");
-						target.add(form);
-					} else {
-						try (FileRepository jgitRepo = repo.openAsJGitRepo();) {
-							Git git = Git.wrap(jgitRepo);
-							TagCommand tag = git.tag();
-							tag.setName(tagName);
-							if (tagMessage != null)
-								tag.setMessage(tagMessage);
-							User user = GitPlex.getInstance(UserManager.class).getCurrent();
-							tag.setTagger(user.asPerson());
-							tag.setObjectId(repo.getRevCommit(revision));
-							tag.call();
-						} catch (GitAPIException e) {
-							throw new RuntimeException(e);
-						}
-						onCreate(target, tagName);
-					}
+					User user = GitPlex.getInstance(UserManager.class).getCurrent();
+					repo.tag(tagName, revision, user.asPerson(), tagMessage);
+					onCreate(target, tagName);
 				}
 			}
 

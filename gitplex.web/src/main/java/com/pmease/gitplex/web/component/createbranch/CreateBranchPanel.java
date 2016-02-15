@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.addbranch;
+package com.pmease.gitplex.web.component.createbranch;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.eclipse.jgit.lib.Constants;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.model.Repository;
@@ -14,7 +15,7 @@ import com.pmease.gitplex.core.model.Repository;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-abstract class AddBranchPanel extends Panel {
+abstract class CreateBranchPanel extends Panel {
 
 	private final IModel<Repository> repoModel;
 	
@@ -22,7 +23,7 @@ abstract class AddBranchPanel extends Panel {
 	
 	private String branchName;
 	
-	public AddBranchPanel(String id, IModel<Repository> repoModel, String revision) {
+	public CreateBranchPanel(String id, IModel<Repository> repoModel, String revision) {
 		super(id);
 		this.repoModel = repoModel;
 		this.revision = revision;
@@ -35,7 +36,9 @@ abstract class AddBranchPanel extends Panel {
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		form.add(new NotificationPanel("feedback", form));
-		form.add(new TextField<String>("name", new IModel<String>() {
+		
+		final TextField<String> nameInput;
+		form.add(nameInput = new TextField<String>("name", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -51,8 +54,9 @@ abstract class AddBranchPanel extends Panel {
 				branchName = object;
 			}
 			
-		}).setOutputMarkupId(true));
-
+		}));
+		nameInput.setOutputMarkupId(true);
+		
 		form.add(new AjaxButton("create") {
 
 			@Override
@@ -61,18 +65,19 @@ abstract class AddBranchPanel extends Panel {
 				
 				if (branchName == null) {
 					form.error("Branch name is required.");
-					target.focusComponent(form.get("name"));
+					target.focusComponent(nameInput);
+					target.add(form);
+				} else if (!GitUtils.isValidRefName(Constants.R_HEADS + branchName)) {
+					form.error("Invalid branch name.");
+					target.focusComponent(nameInput);
+					target.add(form);
+				} else if (repoModel.getObject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
+					form.error("Branch '" + branchName + "' already exists, please choose a different name.");
+					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					String branchRef = GitUtils.branch2ref(branchName);
-					Repository repo = repoModel.getObject();
-					if (repo.getObjectId(branchRef, false) != null) {
-						form.error("Branch '" + branchName + "' already exists, please choose a different name.");
-						target.add(form);
-					} else {
-						repo.git().createBranch(branchName, repoModel.getObject().getRevCommit(revision).name());
-						onCreate(target, branchName);
-					}
+					repoModel.getObject().createBranch(branchName, revision);
+					onCreate(target, branchName);
 				}
 			}
 

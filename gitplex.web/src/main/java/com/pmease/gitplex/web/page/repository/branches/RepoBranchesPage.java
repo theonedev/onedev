@@ -319,7 +319,9 @@ public class RepoBranchesPage extends RepositoryPage {
 				form.setOutputMarkupId(true);
 				form.add(new NotificationPanel("feedback", form));
 				branchName = null;
-				form.add(new TextField<String>("name", new IModel<String>() {
+				
+				final TextField<String> nameInput;
+				form.add(nameInput = new TextField<String>("name", new IModel<String>() {
 
 					@Override
 					public void detach() {
@@ -335,7 +337,9 @@ public class RepoBranchesPage extends RepositoryPage {
 						branchName = object;
 					}
 					
-				}).setOutputMarkupId(true));
+				}));
+				nameInput.setOutputMarkupId(true);
+				
 				branchRevision = getRepository().getDefaultBranch();
 				form.add(newRevisionPicker());
 				form.add(new AjaxButton("create") {
@@ -346,19 +350,21 @@ public class RepoBranchesPage extends RepositoryPage {
 						
 						if (branchName == null) {
 							form.error("Branch name is required.");
-							target.focusComponent(form.get("name"));
+							target.focusComponent(nameInput);
+							target.add(form);
+						} else if (!GitUtils.isValidRefName(Constants.R_HEADS + branchName)) {
+							form.error("Invalid branch name.");
+							target.focusComponent(nameInput);
+							target.add(form);
+						} else if (getRepository().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
+							form.error("Branch '" + branchName + "' already exists, please choose a different name.");
+							target.focusComponent(nameInput);
 							target.add(form);
 						} else {
-							String branchRef = GitUtils.branch2ref(branchName);
-							if (getRepository().getObjectId(branchRef, false) != null) {
-								form.error("Branch '" + branchName + "' already exists, please choose a different name.");
-								target.add(form);
-							} else {
-								getRepository().git().createBranch(branchName, branchRevision);
-								close(target);
-								target.add(branchesContainer);
-								target.add(pagingNavigator);
-							}
+							repoModel.getObject().createBranch(branchName, branchRevision);
+							close(target);
+							target.add(branchesContainer);
+							target.add(pagingNavigator);
 						}
 					}
 

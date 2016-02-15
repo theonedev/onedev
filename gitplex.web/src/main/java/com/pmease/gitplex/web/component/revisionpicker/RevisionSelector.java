@@ -33,6 +33,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.unbescape.html.HtmlEscape;
 
@@ -215,7 +216,7 @@ public abstract class RevisionSelector extends Panel {
 					if (!found) {
 						if (repoModel.getObject().getRevCommit(revInput, false) != null) {
 							filteredRefs.add(COMMIT_FLAG + revInput);
-						} else if (canCreateRef) {
+						} else if (canCreateRef && GitUtils.isValidRefName(Constants.R_HEADS + revInput)) { 
 							filteredRefs.add(ADD_FLAG + revInput);
 						}
 					}
@@ -270,7 +271,7 @@ public abstract class RevisionSelector extends Panel {
 	
 	private void onCreateRef(AjaxRequestTarget target, final String refName) {
 		if (branchesActive) {
-			repoModel.getObject().git().createBranch(refName, repoModel.getObject().getRevCommit(revision).name());
+			repoModel.getObject().createBranch(refName, revision);
 			selectRevision(target, refName);
 		} else {
 			ModalPanel modal = new ModalPanel(target) {

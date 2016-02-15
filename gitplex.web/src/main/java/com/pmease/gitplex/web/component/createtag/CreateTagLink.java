@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.addtag;
+package com.pmease.gitplex.web.component.createtag;
 
 import java.util.UUID;
 
@@ -12,13 +12,13 @@ import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
-public abstract class AddTagLink extends ModalLink {
+public abstract class CreateTagLink extends ModalLink {
 
 	private final IModel<Repository> repoModel;
 	
 	private final String revision;
 	
-	public AddTagLink(String id, IModel<Repository> repoModel, String revision) {
+	public CreateTagLink(String id, IModel<Repository> repoModel, String revision) {
 		super(id);
 		
 		this.repoModel = repoModel;
@@ -33,12 +33,12 @@ public abstract class AddTagLink extends ModalLink {
 	
 	@Override
 	protected Component newContent(String id) {
-		return new AddTagPanel(id, repoModel, revision) {
+		return new CreateTagPanel(id, repoModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {
 				close(target);
-				AddTagLink.this.onCreate(target, tag);
+				CreateTagLink.this.onCreate(target, tag);
 			}
 
 			@Override

@@ -31,6 +31,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jgit.api.CreateBranchCommand;
+import org.eclipse.jgit.api.TagCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -41,6 +44,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
@@ -965,6 +969,31 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		git().deleteRef(refName);
 		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 			listener.onRefUpdate(this, refName, null);
+    }
+    
+    public void createBranch(String branchName, String branchRevision) {
+		try (FileRepository jgitRepo = openAsJGitRepo()) {
+			CreateBranchCommand command = org.eclipse.jgit.api.Git.wrap(jgitRepo).branchCreate();
+			command.setName(branchName);
+			command.setStartPoint(getRevCommit(branchRevision));
+			command.call();
+		} catch (GitAPIException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    public void tag(String tagName, String tagRevision, PersonIdent taggerIdent, @Nullable String tagMessage) {
+		try (FileRepository jgitRepo = openAsJGitRepo();) {
+			TagCommand tag = org.eclipse.jgit.api.Git.wrap(jgitRepo).tag();
+			tag.setName(tagName);
+			if (tagMessage != null)
+				tag.setMessage(tagMessage);
+			tag.setTagger(taggerIdent);
+			tag.setObjectId(getRevCommit(tagRevision));
+			tag.call();
+		} catch (GitAPIException e) {
+			throw new RuntimeException(e);
+		}
     }
     
     public void deleteTag(String tag) {
