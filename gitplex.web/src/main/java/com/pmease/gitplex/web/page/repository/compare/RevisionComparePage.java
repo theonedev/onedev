@@ -150,8 +150,9 @@ public class RevisionComparePage extends RepositoryPage {
 			@Override
 			protected List<Commit> load() {
 				Repository sourceRepo = source.getRepository();
-				return sourceRepo.git().log(mergeBaseModel.getObject(), 
+				List<Commit> commits = sourceRepo.git().log(mergeBaseModel.getObject(), 
 						source.getCommit().name(), null, 0, 0, false);
+				return commits;
 			}
 			
 		};
@@ -209,7 +210,7 @@ public class RevisionComparePage extends RepositoryPage {
 				
 				if (target.getBranch()!=null && source.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
-					setVisible(request == null && !commitsModel.getObject().isEmpty());
+					setVisible(request == null && !isIntegrated());
 				} else {
 					setVisible(false);
 				}
@@ -312,7 +313,7 @@ public class RevisionComparePage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!commitsModel.getObject().isEmpty());
+				setVisible(!isIntegrated());
 			}
 
 		});
@@ -320,6 +321,10 @@ public class RevisionComparePage extends RepositoryPage {
 		newTabPanel(null);
 		
 		add(new BackToTop("backToTop"));
+	}
+	
+	private boolean isIntegrated() {
+		return mergeBaseModel.getObject().equals(source.getCommit().name());
 	}
 	
 	@Override
@@ -337,7 +342,7 @@ public class RevisionComparePage extends RepositoryPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!commitsModel.getObject().isEmpty());
+					setVisible(!isIntegrated());
 				}
 				
 			};
@@ -380,7 +385,8 @@ public class RevisionComparePage extends RepositoryPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!commitsModel.getObject().isEmpty());
+					
+					setVisible(!isIntegrated());
 				}
 				
 			};
