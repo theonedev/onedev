@@ -36,10 +36,14 @@
 		</div>
 	</section>
 	<wicket:fragment wicket:id="annotatedFrag">
+		<wicket:enclosure child="date">
 		<span class="middot"></span>
 		<span wicket:id="date"></span>
+		</wicket:enclosure>
+		<wicket:enclosure child="author">
 		<span class="middot"></span>
 		<a wicket:id="author"></a> 
+		</wicket:enclosure>
 		<a wicket:id="messageToggle" class="ellipsis-expander"><i class="fa fa-ellipsis-h"></i></a>
 		<pre wicket:id="message" class="message"></pre>
 	</wicket:fragment>

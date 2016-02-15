@@ -267,8 +267,13 @@ public class DepotTagsPage extends DepotPage {
 				if (revObject instanceof RevTag) {
 					RevTag revTag = (RevTag) revObject;
 					Fragment fragment = new Fragment("annotated", "annotatedFrag", DepotTagsPage.this);
-					fragment.add(new UserLink("author", revTag.getTaggerIdent()));
-					fragment.add(new Label("date", DateUtils.formatDate(revTag.getTaggerIdent().getWhen())));
+					if (revTag.getTaggerIdent() != null) {
+						fragment.add(new UserLink("author", revTag.getTaggerIdent()));
+						fragment.add(new Label("date", DateUtils.formatDate(revTag.getTaggerIdent().getWhen())));
+					} else {
+						fragment.add(new WebMarkupContainer("author").setVisible(false));
+						fragment.add(new WebMarkupContainer("date").setVisible(false));
+					}
 					Label message = new Label("message", revTag.getFullMessage());
 					message.setOutputMarkupId(true);
 					fragment.add(message);
