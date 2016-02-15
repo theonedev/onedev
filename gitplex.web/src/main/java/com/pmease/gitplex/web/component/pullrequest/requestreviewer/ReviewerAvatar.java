@@ -43,7 +43,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		if (!request.isNew())
 			reviewEffective = request.isReviewEffective(getUser());
 		setEnabled(request.isOpen() && !reviewEffective 
-				&& (currentUser!= null && currentUser.equals(request.getSubmitter()) || SecurityUtils.canManage(request.getTargetRepo())));
+				&& (currentUser!= null && currentUser.equals(request.getSubmitter()) || SecurityUtils.canManage(request.getTargetDepot())));
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 				each.setDate(new Date());
 			}
 		}
-		request.getTargetRepo().getGateKeeper().checkRequest(request);
+		request.getTargetDepot().getGateKeeper().checkRequest(request);
 
 		Set<User> nowInvited = new HashSet<>();
 		for (ReviewInvitation each: request.getReviewInvitations()) {

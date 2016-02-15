@@ -22,42 +22,42 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
-public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
+public class RepositoryChoiceProvider extends ListChoiceProvider<Depot> {
 
 	private final IModel<User> userModel;
 	
-	private final IModel<List<Repository>> repositoriesModel;
+	private final IModel<List<Depot>> repositoriesModel;
 	
 	public RepositoryChoiceProvider(final @Nullable IModel<User> userModel) {
 		super(Constants.DEFAULT_PAGE_SIZE);
 		
 		this.userModel = userModel;
 		
-		repositoriesModel = new LoadableDetachableModel<List<Repository>>() {
+		repositoriesModel = new LoadableDetachableModel<List<Depot>>() {
 
 			@Override
-			protected List<Repository> load() {
-				EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
+			protected List<Depot> load() {
+				EntityCriteria<Depot> criteria = EntityCriteria.of(Depot.class);
 				if (getUser() != null) 
 					criteria.add(Restrictions.eq("owner", getUser()));
 				
-				List<Repository> repositories = GitPlex.getInstance(Dao.class).query(criteria);
+				List<Depot> repositories = GitPlex.getInstance(Dao.class).query(criteria);
 
-				for (Iterator<Repository> it = repositories.iterator(); it.hasNext();) {
+				for (Iterator<Depot> it = repositories.iterator(); it.hasNext();) {
 					if (!SecurityUtils.canPull(it.next()))
 						it.remove();
 				}
 				
-				Collections.sort(repositories, new Comparator<Repository>() {
+				Collections.sort(repositories, new Comparator<Depot>() {
 
 					@Override
-					public int compare(Repository repo1, Repository repo2) {
+					public int compare(Depot repo1, Depot repo2) {
 						if (repo1.getOwner().getName().compareTo(repo2.getOwner().getName()) < 0)
 							return -1;
 						else if (repo1.getOwner().getName().compareTo(repo2.getOwner().getName()) > 0)
@@ -75,7 +75,7 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 	}
 	
 	@Override
-	public void toJson(Repository choice, JSONWriter writer) throws JSONException {
+	public void toJson(Depot choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId());
 		writer.key("name");
 		
@@ -94,12 +94,12 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 	}
 
 	@Override
-	public Collection<Repository> toChoices(Collection<String> ids) {
-		List<Repository> list = Lists.newArrayList();
+	public Collection<Depot> toChoices(Collection<String> ids) {
+		List<Depot> list = Lists.newArrayList();
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			list.add(dao.load(Repository.class, id));
+			list.add(dao.load(Depot.class, id));
 		}
 		
 		return list;
@@ -114,29 +114,29 @@ public class RepositoryChoiceProvider extends ListChoiceProvider<Repository> {
 	}
 
 	@Override
-	protected List<Repository> filterList(String term) {
+	protected List<Depot> filterList(String term) {
 		term = term.toLowerCase();
 		String userName;
-		String repoName;
+		String depotName;
 		if (term.indexOf('/') != -1) {
 			userName = StringUtils.substringBefore(term, "/");
-			repoName = StringUtils.substringAfter(term, "/");
+			depotName = StringUtils.substringAfter(term, "/");
 		} else {
 			userName = term;
-			repoName = null;
+			depotName = null;
 		}
-		List<Repository> repositories = new ArrayList<>();
-		for (Repository repository: repositoriesModel.getObject()) {
-			if (repoName != null) {
-				if (repository.getOwner().getName().toLowerCase().startsWith(userName) 
-						&& repository.getName().toLowerCase().startsWith(repoName)) {
-					repositories.add(repository);
+		List<Depot> depots = new ArrayList<>();
+		for (Depot depot: repositoriesModel.getObject()) {
+			if (depotName != null) {
+				if (depot.getOwner().getName().toLowerCase().startsWith(userName) 
+						&& depot.getName().toLowerCase().startsWith(depotName)) {
+					depots.add(depot);
 				}
-			} else if (repository.getOwner().getName().toLowerCase().startsWith(userName)) {
-				repositories.add(repository);
+			} else if (depot.getOwner().getName().toLowerCase().startsWith(userName)) {
+				depots.add(depot);
 			}
 		}
-		return repositories;
+		return depots;
 	}
 	
 }

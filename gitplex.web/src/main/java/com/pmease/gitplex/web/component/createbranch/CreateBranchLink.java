@@ -7,17 +7,17 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.modal.ModalLink;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 public abstract class CreateBranchLink extends ModalLink {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final String revision;
 	
-	public CreateBranchLink(String id, IModel<Repository> repoModel, String revision) {
+	public CreateBranchLink(String id, IModel<Depot> repoModel, String revision) {
 		super(id);
 		
 		this.repoModel = repoModel;

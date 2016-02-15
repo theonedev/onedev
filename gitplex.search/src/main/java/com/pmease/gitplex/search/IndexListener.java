@@ -1,11 +1,11 @@
 package com.pmease.gitplex.search;
 
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 public interface IndexListener {
 	
-	void commitIndexed(Repository repository, String revision);
+	void commitIndexed(Depot depot, String revision);
 	
-	void indexRemoving(Repository repository);
+	void indexRemoving(Depot depot);
 	
 }

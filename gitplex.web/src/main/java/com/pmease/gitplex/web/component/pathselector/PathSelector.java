@@ -24,30 +24,30 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.BlobIcon;
 
 @SuppressWarnings("serial")
 public abstract class PathSelector extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String revision;
 	
 	private final Set<Integer> pathTypes;
 	
-	public PathSelector(String id, IModel<Repository> repoModel, String revision, int... pathTypes) {
+	public PathSelector(String id, IModel<Depot> repoModel, String revision, int... pathTypes) {
 		super(id);
 		
-		this.repoModel = repoModel;
+		this.depotModel = repoModel;
 		this.revision = revision;
 		this.pathTypes = new HashSet<>();
 		for (int i=0; i<pathTypes.length; i++)
@@ -66,10 +66,10 @@ public abstract class PathSelector extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getRoots() {
-				try (	FileRepository repo = repoModel.getObject().openAsJGitRepo();
-						RevWalk revWalk = new RevWalk(repo);
-						TreeWalk treeWalk = new TreeWalk(repo)) {
-					RevCommit commit = revWalk.parseCommit(repoModel.getObject().getObjectId(revision));
+				try (	Repository repository = depotModel.getObject().openRepository();
+						RevWalk revWalk = new RevWalk(repository);
+						TreeWalk treeWalk = new TreeWalk(repository)) {
+					RevCommit commit = revWalk.parseCommit(depotModel.getObject().getObjectId(revision));
 					treeWalk.addTree(commit.getTree());
 					
 					List<BlobIdent> roots = new ArrayList<>();
@@ -93,10 +93,10 @@ public abstract class PathSelector extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getChildren(BlobIdent node) {
-				try (	FileRepository repo = repoModel.getObject().openAsJGitRepo();
-						RevWalk revWalk = new RevWalk(repo);) {
-					RevCommit commit = revWalk.parseCommit(repoModel.getObject().getObjectId(revision));
-					TreeWalk treeWalk = TreeWalk.forPath(repo, node.path, commit.getTree());
+				try (	Repository repository = depotModel.getObject().openRepository();
+						RevWalk revWalk = new RevWalk(repository);) {
+					RevCommit commit = revWalk.parseCommit(depotModel.getObject().getObjectId(revision));
+					TreeWalk treeWalk = TreeWalk.forPath(repository, node.path, commit.getTree());
 					treeWalk.enterSubtree();
 					List<BlobIdent> children = new ArrayList<>();
 					while (treeWalk.next()) {
@@ -166,7 +166,7 @@ public abstract class PathSelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

@@ -19,7 +19,7 @@ public class IsBinaryCommandTest extends AbstractGitTest {
 		addFileAndCommit("file", "hello world", "initial commit");
 
 		byte[] bytes = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-		OutputStream os = new FileOutputStream(new File(git.repoDir(), "file"));
+		OutputStream os = new FileOutputStream(new File(git.depotDir(), "file"));
 		os.write(bytes);
 		os.close();
 		

@@ -20,7 +20,7 @@ import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitplex.core.editable.BranchChoice;
-import com.pmease.gitplex.core.model.RepoAndBranch;
+import com.pmease.gitplex.core.model.DepotAndBranch;
 
 @SuppressWarnings("serial")
 public class BranchEditSupport implements EditSupport {
@@ -50,7 +50,7 @@ public class BranchEditSupport implements EditSupport {
 						        	List<String> branches = new ArrayList<>();
 						        	for (String each: repoAndBranches) {
 										if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
-											branches.add(new RepoAndBranch(each).getFQN());
+											branches.add(new DepotAndBranch(each).getFQN());
 						        		else
 						        			branches.add(each);
 						        	}
@@ -86,7 +86,7 @@ public class BranchEditSupport implements EditSupport {
 						        String repoAndBranch = model.getObject();
 						        if (repoAndBranch != null) {
 									if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
-						        		return new Label(id, new RepoAndBranch(repoAndBranch).getFQN());
+						        		return new Label(id, new DepotAndBranch(repoAndBranch).getFQN());
 						        	else
 						        		return new Label(id, repoAndBranch);
 						        } else {

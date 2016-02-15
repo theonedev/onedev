@@ -17,37 +17,37 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 
-public class RepoAndRevision implements Serializable {
+public class DepotAndRevision implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	public static final String SEPARATOR = ":";
 
-	private final Long repoId;
+	private final Long depotId;
 	
 	private final String revision;
 	
-	private transient Repository repository;
+	private transient Depot depot;
 	
-	public RepoAndRevision(Long repoId, String revision) {
-		this.repoId = repoId;
+	public DepotAndRevision(Long depotId, String revision) {
+		this.depotId = depotId;
 		this.revision = revision;
 	}
 
-	public RepoAndRevision(Repository repository, String revision) {
-		this.repoId = repository.getId();
+	public DepotAndRevision(Depot depot, String revision) {
+		this.depotId = depot.getId();
 		this.revision = revision;
 		
-		this.repository = repository;
+		this.depot = depot;
 	}
 	
-	public RepoAndRevision(String repoAndRevision) {
-		this(Long.valueOf(StringUtils.substringBefore(repoAndRevision, SEPARATOR)), 
-				StringUtils.substringAfter(repoAndRevision, SEPARATOR));
+	public DepotAndRevision(String depotAndRevision) {
+		this(Long.valueOf(StringUtils.substringBefore(depotAndRevision, SEPARATOR)), 
+				StringUtils.substringAfter(depotAndRevision, SEPARATOR));
 	}
 	
-	public Long getRepoId() {
-		return repoId;
+	public Long getDepotId() {
+		return depotId;
 	}
 
 	public String getRevision() {
@@ -56,7 +56,7 @@ public class RepoAndRevision implements Serializable {
 	
 	@Nullable
 	public Ref getRef() {
-		return getRepository().getRef(getRevision());
+		return getDepot().getRef(getRevision());
 	}
 	
 	@Nullable
@@ -79,7 +79,7 @@ public class RepoAndRevision implements Serializable {
 	
 	@Nullable
 	public ObjectId getObjectId(boolean mustExist) {
-		return getRepository().getObjectId(normalizeRevision(), mustExist);
+		return getDepot().getObjectId(normalizeRevision(), mustExist);
 	}
 	
 	public ObjectId getObjectId() {
@@ -87,7 +87,7 @@ public class RepoAndRevision implements Serializable {
 	}
 	
 	public RevCommit getCommit(boolean mustExist) {
-		return getRepository().getRevCommit(getObjectId(mustExist), mustExist);
+		return getDepot().getRevCommit(getObjectId(mustExist), mustExist);
 	}
 	
 	public RevCommit getCommit() {
@@ -104,30 +104,30 @@ public class RepoAndRevision implements Serializable {
 	}
 
 	public String getFQN() {
-		return getRepository().getRevisionFQN(revision);		
+		return getDepot().getRevisionFQN(revision);		
 	}
 	
-	public static void trim(Collection<String> repoAndBranches) {
+	public static void trim(Collection<String> depotAndBranches) {
 		Dao dao = GitPlex.getInstance(Dao.class);
-		for (Iterator<String> it = repoAndBranches.iterator(); it.hasNext();) {
-			RepoAndRevision repoAndRevision = new RepoAndRevision(it.next());
-			if (dao.get(Repository.class, repoAndRevision.getRepoId()) == null)
+		for (Iterator<String> it = depotAndBranches.iterator(); it.hasNext();) {
+			DepotAndRevision depotAndRevision = new DepotAndRevision(it.next());
+			if (dao.get(Depot.class, depotAndRevision.getDepotId()) == null)
 				it.remove();
 		}
 	}
 	
 	public boolean isDefault() {
-		return getRepository().getDefaultBranch().equals(getRevision());
+		return getDepot().getDefaultBranch().equals(getRevision());
 	}
 
 	public void delete() {
-		getRepository().deleteBranch(getRevision());
+		getDepot().deleteBranch(getRevision());
 	}
 	
-	public Repository getRepository() {
-		if (repository == null)
-			repository = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
-		return repository;
+	public Depot getDepot() {
+		if (depot == null)
+			depot = GitPlex.getInstance(Dao.class).load(Depot.class, depotId);
+		return depot;
 	}
 	
 	protected String normalizeRevision() {
@@ -136,25 +136,25 @@ public class RepoAndRevision implements Serializable {
 	
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof RepoAndRevision))
+		if (!(other instanceof DepotAndRevision))
 			return false;
 		if (this == other)
 			return true;
-		RepoAndRevision otherRepoAndRevision = (RepoAndRevision) other;
+		DepotAndRevision otherDepotAndRevision = (DepotAndRevision) other;
 		return new EqualsBuilder()
-				.append(repoId, otherRepoAndRevision.repoId)
-				.append(revision, otherRepoAndRevision.revision)
+				.append(depotId, otherDepotAndRevision.depotId)
+				.append(revision, otherDepotAndRevision.revision)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(repoId).append(revision).toHashCode();
+		return new HashCodeBuilder(17, 37).append(depotId).append(revision).toHashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return repoId + SEPARATOR + revision;
+		return depotId + SEPARATOR + revision;
 	}
 	
 }

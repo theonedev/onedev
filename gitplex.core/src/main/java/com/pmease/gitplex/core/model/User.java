@@ -58,7 +58,7 @@ public class User extends AbstractUser implements ProtectedObject {
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner")
-	private Collection<Repository> repositories = new ArrayList<>();
+	private Collection<Depot> depots = new ArrayList<>();
 
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -176,12 +176,12 @@ public class User extends AbstractUser implements ProtectedObject {
 		this.reviewEffort = reviewEffort;
 	}
 
-	public Collection<Repository> getRepositories() {
-		return repositories;
+	public Collection<Depot> getDepots() {
+		return depots;
 	}
 
-	public void setRepositories(Collection<Repository> repositories) {
-		this.repositories = repositories;
+	public void setDepots(Collection<Depot> depots) {
+		this.depots = depots;
 	}
 
 	public Collection<Team> getTeams() {

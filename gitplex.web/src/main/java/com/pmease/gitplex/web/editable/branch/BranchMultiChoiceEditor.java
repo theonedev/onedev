@@ -13,7 +13,7 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchMultiChoice;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
@@ -32,12 +32,12 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Repository>() {
+    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Depot>() {
 
 			@Override
-			protected Repository load() {
+			protected Depot load() {
 				RepositoryPage page = (RepositoryPage) getPage();
-				return page.getRepository();
+				return page.getDepot();
 			}
     		
     	});

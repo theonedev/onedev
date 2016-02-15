@@ -20,8 +20,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 public class BlobResource extends AbstractResource {
@@ -51,9 +51,9 @@ public class BlobResource extends AbstractResource {
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		final Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(userName, repoName);
+		final Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
 		
-		if (repository == null) 
+		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
 		
 		String revision = params.get(PARAM_REVISION).toString();
@@ -64,10 +64,10 @@ public class BlobResource extends AbstractResource {
 		if (StringUtils.isBlank(path))
 			throw new IllegalArgumentException("path parameter has to be specified");
 
-		if (!SecurityUtils.canPull(repository)) 
+		if (!SecurityUtils.canPull(depot)) 
 			throw new UnauthorizedException();
 
-		final Blob blob = repository.getBlob(new BlobIdent(revision, path, 0));
+		final Blob blob = depot.getBlob(new BlobIdent(revision, path, 0));
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(blob.getSize());
@@ -86,7 +86,7 @@ public class BlobResource extends AbstractResource {
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				if (blob.isPartial()) {
-					try (InputStream is = repository.getInputStream(blob.getIdent());) {
+					try (InputStream is = depot.getInputStream(blob.getIdent());) {
 						IOUtils.copy(is, attributes.getResponse().getOutputStream());
 					}
 				} else {
@@ -99,10 +99,10 @@ public class BlobResource extends AbstractResource {
 		return response;
 	}
 
-	public static PageParameters paramsOf(Repository repository, BlobIdent blobIdent) {
+	public static PageParameters paramsOf(Depot depot, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_USER, repository.getOwner().getName());
-		params.set(PARAM_REPO, repository.getName());
+		params.add(PARAM_USER, depot.getOwner().getName());
+		params.set(PARAM_REPO, depot.getName());
 		params.set(PARAM_REVISION, blobIdent.revision);
 		params.set(PARAM_PATH, blobIdent.path);
 		

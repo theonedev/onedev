@@ -18,7 +18,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.behavior.sortable.SortBehavior;
 import com.pmease.commons.wicket.behavior.sortable.SortPosition;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.model.IntegrationPolicy;
 import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
 
@@ -42,7 +42,7 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 
 			@Override
 			public List<IntegrationPolicy> getObject() {
-				return getRepository().getIntegrationPolicies();
+				return getDepot().getIntegrationPolicies();
 			}
 		}) {
 
@@ -52,15 +52,15 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
-						getRepository().getIntegrationPolicies().remove(item.getIndex());
-						GitPlex.getInstance(RepositoryManager.class).save(getRepository());
+						getDepot().getIntegrationPolicies().remove(item.getIndex());
+						GitPlex.getInstance(DepotManager.class).save(getDepot());
 						target.add(container);
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, IntegrationPolicy policy) {
-						getRepository().getIntegrationPolicies().set(item.getIndex(), policy);
-						GitPlex.getInstance(RepositoryManager.class).save(getRepository());
+						getDepot().getIntegrationPolicies().set(item.getIndex(), policy);
+						GitPlex.getInstance(DepotManager.class).save(getDepot());
 					}
 					
 				});
@@ -72,10 +72,10 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 			
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-				List<IntegrationPolicy> policies = getRepository().getIntegrationPolicies();
+				List<IntegrationPolicy> policies = getDepot().getIntegrationPolicies();
 				IntegrationPolicy policy = policies.get(from.getItemIndex());
 				policies.set(from.getItemIndex(), policies.set(to.getItemIndex(), policy));
-				GitPlex.getInstance(RepositoryManager.class).save(getRepository());
+				GitPlex.getInstance(DepotManager.class).save(getDepot());
 				
 				target.add(container);
 			}
@@ -97,8 +97,8 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, IntegrationPolicy policy) {
-						getRepository().getIntegrationPolicies().add(policy);
-						GitPlex.getInstance(RepositoryManager.class).save(getRepository());
+						getDepot().getIntegrationPolicies().add(policy);
+						GitPlex.getInstance(DepotManager.class).save(getDepot());
 						container.replace(newAddNewFrag());
 						target.add(container);
 					}
@@ -128,7 +128,7 @@ public class IntegrationPolicyPage extends RepoSettingPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Integration Policies - " + getRepository();
+		return "Integration Policies - " + getDepot();
 	}
 
 }

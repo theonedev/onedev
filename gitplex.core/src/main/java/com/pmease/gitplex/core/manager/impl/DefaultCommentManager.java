@@ -50,7 +50,7 @@ public class DefaultCommentManager implements CommentManager {
 		
 		String latestCommitHash = comment.getRequest().getLatestUpdate().getHeadCommitHash();
 		if (!latestCommitHash.equals(comment.getNewCommitHash())) {
-			List<DiffEntry> changes = comment.getRepository().getDiffs(comment.getNewCommitHash(), 
+			List<DiffEntry> changes = comment.getDepot().getDiffs(comment.getNewCommitHash(), 
 					latestCommitHash, true);
 			String oldCommitHash = comment.getOldCommitHash();
 			if (oldCommitHash.equals(comment.getBlobIdent().revision)) {
@@ -65,10 +65,10 @@ public class DefaultCommentManager implements CommentManager {
 				}
 				if (newBlobIdent != null) {
 					comment.setCompareWith(newBlobIdent);
-					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
+					Blob.Text oldText = comment.getDepot().getBlob(comment.getBlobIdent()).getText();
 					Blob.Text newText = null;
 					if (comment.getCompareWith().path != null)
-						newText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
+						newText = comment.getDepot().getBlob(comment.getCompareWith()).getText();
 					if (oldText != null && newText != null) {
 						List<DiffBlock<String>> diffs = DiffUtils.diff(oldText.getLines(), newText.getLines());
 						for (int i=0; i<diffs.size(); i++) {
@@ -125,10 +125,10 @@ public class DefaultCommentManager implements CommentManager {
 					}
 				}
 				if (newBlobIdent != null) {
-					Blob.Text oldText = comment.getRepository().getBlob(comment.getBlobIdent()).getText();
+					Blob.Text oldText = comment.getDepot().getBlob(comment.getBlobIdent()).getText();
 					Blob.Text newText = null;
 					if (newBlobIdent.path != null)
-						newText = comment.getRepository().getBlob(newBlobIdent).getText();
+						newText = comment.getDepot().getBlob(newBlobIdent).getText();
 					if (oldText != null && newText != null) {
 						List<DiffBlock<String>> diffs = DiffUtils.diff(oldText.getLines(), newText.getLines());
 						Integer newLineNo = DiffUtils.mapLines(diffs).get(comment.getLine());
@@ -138,7 +138,7 @@ public class DefaultCommentManager implements CommentManager {
 							
 							oldText = null;
 							if (comment.getCompareWith().path != null)
-								oldText = comment.getRepository().getBlob(comment.getCompareWith()).getText();
+								oldText = comment.getDepot().getBlob(comment.getCompareWith()).getText();
 							if (oldText != null) {
 								diffs = DiffUtils.diff(oldText.getLines(), newText.getLines());
 								for (int i=0; i<diffs.size(); i++) {

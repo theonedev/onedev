@@ -5,10 +5,10 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
-public class AffinalRepositoryChoice extends Select2Choice<Repository> {
+public class AffinalRepositoryChoice extends Select2Choice<Depot> {
 
 	/**
 	 * Constructor with model.
@@ -20,7 +20,7 @@ public class AffinalRepositoryChoice extends Select2Choice<Repository> {
 	 * @param selectedRepoModel
 	 * 			model of selected repository
 	 */
-	public AffinalRepositoryChoice(String id, Long currentRepoId, IModel<Repository> selectedRepoModel) {
+	public AffinalRepositoryChoice(String id, Long currentRepoId, IModel<Depot> selectedRepoModel) {
 		super(id, selectedRepoModel, new AffinalRepositoryChoiceProvider(currentRepoId));
 	}
 

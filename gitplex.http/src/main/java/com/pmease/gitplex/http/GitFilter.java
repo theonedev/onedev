@@ -33,10 +33,10 @@ import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.git.exception.GitException;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.setting.ServerConfig;
@@ -54,14 +54,14 @@ public class GitFilter implements Filter {
 	
 	private final StorageManager storageManager;
 	
-	private final RepositoryManager repositoryManager;
+	private final DepotManager repositoryManager;
 	
 	private final WorkManager workManager;
 	
 	private final ServerConfig serverConfig;
 	
 	@Inject
-	public GitFilter(GitPlex gitPlex, StorageManager storageManager, RepositoryManager repositoryManager, 
+	public GitFilter(GitPlex gitPlex, StorageManager storageManager, DepotManager repositoryManager, 
 			WorkManager workManager, ServerConfig serverConfig) {
 		this.gitPlex = gitPlex;
 		this.storageManager = storageManager;
@@ -75,12 +75,12 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Repository getRepository(HttpServletRequest request, HttpServletResponse response, String repoInfo) 
+	private Depot getDepot(HttpServletRequest request, HttpServletResponse response, String depotInfo) 
 			throws IOException {
-		repoInfo = StringUtils.stripStart(StringUtils.stripEnd(repoInfo, "/"), "/");
+		depotInfo = StringUtils.stripStart(StringUtils.stripEnd(depotInfo, "/"), "/");
 		
-		String ownerName = StringUtils.substringBefore(repoInfo, "/");
-		String repositoryName = StringUtils.substringAfter(repoInfo, "/");
+		String ownerName = StringUtils.substringBefore(depotInfo, "/");
+		String repositoryName = StringUtils.substringAfter(depotInfo, "/");
 
 		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
 			String url = request.getRequestURL().toString();
@@ -91,12 +91,12 @@ public class GitFilter implements Filter {
 		if (repositoryName.endsWith(".git"))
 			repositoryName = repositoryName.substring(0, repositoryName.length()-".git".length());
 		
-		Repository repository = repositoryManager.findBy(ownerName, repositoryName);
-		if (repository == null) {
+		Depot depot = repositoryManager.findBy(ownerName, repositoryName);
+		if (depot == null) {
 			throw new GitException(String.format("Unable to find repository %s owned by %s.", repositoryName, ownerName));
 		}
 		
-		return repository;
+		return depot;
 	}
 	
 	private void doNotCache(HttpServletResponse response) {
@@ -111,8 +111,8 @@ public class GitFilter implements Filter {
 		
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
-		String repoInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Repository repository = getRepository(request, response, repoInfo);
+		String depotInfo = StringUtils.substringBeforeLast(pathInfo, "/");
+		Depot depot = getDepot(request, response, depotInfo);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -126,11 +126,11 @@ public class GitFilter implements Filter {
 
 		environments.put("GITPLEX_URL", serverUrl);
 		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
-		environments.put("GITPLEX_REPOSITORY_ID", repository.getId().toString());
-		final File gitDir = storageManager.getRepoDir(repository);
+		environments.put("GITPLEX_REPOSITORY_ID", depot.getId().toString());
+		final File gitDir = storageManager.getDepotDir(depot);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depot))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			workManager.submit(new PrioritizedRunnable(PRIORITY) {
@@ -149,7 +149,7 @@ public class GitFilter implements Filter {
 				
 			}).get();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPush(depot))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			workManager.submit(new PrioritizedRunnable(PRIORITY) {
@@ -184,20 +184,20 @@ public class GitFilter implements Filter {
 		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
-		String repoInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Repository repository = getRepository(request, response, repoInfo);
+		String depotInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
+		Depot depot = getDepot(request, response, depotInfo);
 		String service = request.getParameter("service");
 		
-		File gitDir = storageManager.getRepoDir(repository);
+		File gitDir = storageManager.getDepotDir(depot);
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depot))) {
 				throw new UnauthorizedException("You do not have permission to pull from this repository.");
 			}
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPush(repository))) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPush(depot))) {
 				throw new UnauthorizedException("You do not have permission to push to this repository.");
 			}
 			writeInitial(response, service);

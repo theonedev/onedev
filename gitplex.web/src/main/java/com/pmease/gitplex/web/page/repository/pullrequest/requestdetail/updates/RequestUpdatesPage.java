@@ -30,7 +30,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -132,7 +132,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 								
 								setEnabled(getPullRequest().isOpen() 
 										&& (item.getModelObject().getReviewer().equals(getCurrentUser()) 
-												|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(getRepository()))));
+												|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(getDepot()))));
 							}
 
 						});
@@ -177,11 +177,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 						
 						commitItem.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
 
-						IModel<Repository> repoModel = new AbstractReadOnlyModel<Repository>() {
+						IModel<Depot> repoModel = new AbstractReadOnlyModel<Depot>() {
 
 							@Override
-							public Repository getObject() {
-								return updateItem.getModelObject().getRequest().getTarget().getRepository();
+							public Depot getObject() {
+								return updateItem.getModelObject().getRequest().getTarget().getDepot();
 							}
 							
 						};
@@ -196,11 +196,11 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 						commitItem.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 						
-						commitItem.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Repository>() {
+						commitItem.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Depot>() {
 
 							@Override
-							public Repository getObject() {
-								return getPullRequest().getTargetRepo();
+							public Depot getObject() {
+								return getPullRequest().getTargetDepot();
 							}
 							
 						}, commit.getHash(), null, getPullRequest().getId()));
@@ -270,8 +270,8 @@ public class RequestUpdatesPage extends RequestDetailPage {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RequestListPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RequestListPage.class, paramsOf(depot));
 	}
 
 	@Override

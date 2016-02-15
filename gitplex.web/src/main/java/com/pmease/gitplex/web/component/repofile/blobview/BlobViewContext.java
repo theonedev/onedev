@@ -11,7 +11,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.page.repository.file.Mark;
 
@@ -19,7 +19,7 @@ public interface BlobViewContext extends Serializable {
 
 	public enum Mode {BLAME, EDIT, DELETE}
 	
-	Repository getRepository();
+	Depot getDepot();
 
 	@Nullable
 	PullRequest getPullRequest();

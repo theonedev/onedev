@@ -32,9 +32,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
@@ -44,8 +44,8 @@ import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
@@ -78,13 +78,13 @@ public class CommitDetailPage extends RepositoryPage {
 
 		@Override
 		protected RevCommit load() {
-			try(	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-					RevWalk revWalk = new RevWalk(jgitRepo);) {
+			try(	Repository repository = getDepot().openRepository();
+					RevWalk revWalk = new RevWalk(repository);) {
 				ObjectId objectId;
 				if (GitUtils.isHash(revision))
 					objectId = ObjectId.fromString(revision);
 				else
-					objectId = jgitRepo.resolve(revision);
+					objectId = repository.resolve(revision);
 				return revWalk.parseCommit(objectId);
 			} catch (RevisionSyntaxException | IOException e) {
 				throw new RuntimeException(e);
@@ -121,22 +121,22 @@ public class CommitDetailPage extends RepositoryPage {
 		
 		add(new Label("text", GitUtils.getShortMessage(getCommit())));
 		
-		add(new HashAndCodePanel("hashAndCode", repoModel, getCommit().getId().name()));
+		add(new HashAndCodePanel("hashAndCode", depotModel, getCommit().getId().name()));
 		
-		add(new CreateBranchLink("createBranch", repoModel, revision) {
+		add(new CreateBranchLink("createBranch", depotModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
-				setResponsePage(RepoBranchesPage.class, RepoBranchesPage.paramsOf(getRepository()));
+				setResponsePage(RepoBranchesPage.class, RepoBranchesPage.paramsOf(getDepot()));
 			}
 			
 		});
 		
-		add(new CreateTagLink("createTag", repoModel, revision) {
+		add(new CreateTagLink("createTag", depotModel, revision) {
 
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String tag) {
-				setResponsePage(RepoTagsPage.class, RepoTagsPage.paramsOf(getRepository()));
+				setResponsePage(RepoTagsPage.class, RepoTagsPage.paramsOf(getDepot()));
 			}
 			
 		});
@@ -167,19 +167,19 @@ public class CommitDetailPage extends RepositoryPage {
 					@Override
 					protected List<Ref> load() {
 						Set<ObjectId> descendants = GitPlex.getInstance(AuxiliaryManager.class)
-								.getDescendants(getRepository(), getCommit().getId());
+								.getDescendants(getDepot(), getCommit().getId());
 						descendants.add(getCommit().getId());
 						
 						List<Ref> branchRefs = new ArrayList<>();
-						for (Ref ref: getRepository().getBranchRefs()) {
+						for (Ref ref: getDepot().getBranchRefs()) {
 							if (descendants.contains(ref.getObjectId())) {
 								branchRefs.add(ref);
 							}
 						}
 						
 						List<Ref> tagRefs = new ArrayList<>();
-						for (Ref ref: getRepository().getTagRefs()) {
-							RevCommit taggedCommit = getRepository().getRevCommit(ref.getObjectId());
+						for (Ref ref: getDepot().getTagRefs()) {
+							RevCommit taggedCommit = getDepot().getRevCommit(ref.getObjectId());
 							if (descendants.contains(taggedCommit.getId()))
 								tagRefs.add(ref);
 						}
@@ -201,7 +201,7 @@ public class CommitDetailPage extends RepositoryPage {
 							RepoFileState state = new RepoFileState();
 							state.blobIdent.revision = branch;
 							Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
-									RepoFilePage.paramsOf(repoModel.getObject(), state));
+									RepoFilePage.paramsOf(depotModel.getObject(), state));
 							link.add(new Label("label", branch));
 							item.add(link);
 							item.add(AttributeAppender.append("class", "branch"));
@@ -210,7 +210,7 @@ public class CommitDetailPage extends RepositoryPage {
 							RepoFileState state = new RepoFileState();
 							state.blobIdent.revision = tag;
 							Link<Void> link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
-									RepoFilePage.paramsOf(repoModel.getObject(), state));
+									RepoFilePage.paramsOf(depotModel.getObject(), state));
 							link.add(new Label("label", tag));
 							item.add(link);
 							item.add(AttributeAppender.append("class", "tag"));
@@ -232,7 +232,7 @@ public class CommitDetailPage extends RepositoryPage {
 		if (getParents().size() == 1) {
 			String parent = getParents().get(0);
 			Link<Void> link = new BookmarkablePageLink<Void>("parent", CommitDetailPage.class, 
-					paramsOf(repoModel.getObject(), parent));
+					paramsOf(depotModel.getObject(), parent));
 			link.add(new Label("label", GitUtils.abbreviateSHA(parent)));
 			parentsContainer.add(link);
 			parentsContainer.add(new WebMarkupContainer("parents").setVisible(false));
@@ -252,7 +252,7 @@ public class CommitDetailPage extends RepositoryPage {
 				protected void populateItem(ListItem<String> item) {
 					final String parent = item.getModelObject();
 					Link<Void> link = new BookmarkablePageLink<Void>("link", CommitDetailPage.class, 
-							paramsOf(repoModel.getObject(), parent));
+							paramsOf(depotModel.getObject(), parent));
 					link.add(new Label("label", GitUtils.abbreviateSHA(parent)));
 					item.add(link);
 					
@@ -280,7 +280,7 @@ public class CommitDetailPage extends RepositoryPage {
 		}
 
 		if (getCommit().getParentCount() != 0) {
-			add(diffOption = new DiffOptionPanel("compareOption", repoModel, getCommit().name()) {
+			add(diffOption = new DiffOptionPanel("compareOption", depotModel, getCommit().name()) {
 	
 				@Override
 				protected void onSelectPath(AjaxRequestTarget target, String path) {
@@ -318,7 +318,7 @@ public class CommitDetailPage extends RepositoryPage {
 	}
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
-		compareResult = new RevisionDiffPanel("compareResult", repoModel,  
+		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
 				Model.of((PullRequest)null), Model.of((Comment)null), getCompareWith(), 
 				getCommit().name(), state.path, state.path, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
@@ -350,11 +350,11 @@ public class CommitDetailPage extends RepositoryPage {
 				CommitDetailPage.class, "commit-detail.css")));
 	}
 
-	public static PageParameters paramsOf(Repository repository, String revision) {
+	public static PageParameters paramsOf(Depot repository, String revision) {
 		return paramsOf(repository, revision, new HistoryState());
 	}
 	
-	public static PageParameters paramsOf(Repository repository, String revision, HistoryState state) {
+	public static PageParameters paramsOf(Depot repository, String revision, HistoryState state) {
 		PageParameters params = paramsOf(repository);
 		params.set(PARAM_REVISION, revision);
 		if (state.compareWith != null)
@@ -365,8 +365,8 @@ public class CommitDetailPage extends RepositoryPage {
 	}
 	
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RepoCommitsPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RepoCommitsPage.class, paramsOf(depot));
 	}
 	
 	@Override
@@ -377,7 +377,7 @@ public class CommitDetailPage extends RepositoryPage {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), getCommit().name(), state);
+		PageParameters params = paramsOf(getDepot(), getCommit().name(), state);
 		CharSequence url = RequestCycle.get().urlFor(CommitDetailPage.class, params);
 		pushState(target, url.toString(), state);
 	}

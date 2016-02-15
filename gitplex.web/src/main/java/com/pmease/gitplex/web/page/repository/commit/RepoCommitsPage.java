@@ -60,8 +60,8 @@ import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.RepoAndRevision;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndRevision;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
@@ -113,7 +113,7 @@ public class RepoCommitsPage extends RepositoryPage {
 		protected Commits load() {
 			Commits commits = new Commits();
 			
-			final LogCommand logCommand = new LogCommand(getRepository().git().repoDir());
+			final LogCommand logCommand = new LogCommand(getDepot().git().depotDir());
 			logCommand.ignoreCase(true);
 			
 			List<Commit> logCommits;
@@ -166,10 +166,10 @@ public class RepoCommitsPage extends RepositoryPage {
 		@Override
 		protected Map<String, List<String>> load() {
 			Map<String, List<String>> labels = new HashMap<>();
-			List<Ref> refs = getRepository().getBranchRefs();
-			refs.addAll(getRepository().getTagRefs());
+			List<Ref> refs = getDepot().getBranchRefs();
+			refs.addAll(getDepot().getTagRefs());
 			for (Ref ref: refs) {
-				RevCommit commit = getRepository().getRevCommit(ref.getObjectId());
+				RevCommit commit = getDepot().getRevCommit(ref.getObjectId());
 				List<String> commitLabels = labels.get(commit.name());
 				if (commitLabels == null) {
 					commitLabels = new ArrayList<>();
@@ -294,7 +294,7 @@ public class RepoCommitsPage extends RepositoryPage {
 				state.setQuery(object);
 			}
 			
-		}).add(new QueryAssistBehavior(repoModel)));
+		}).add(new QueryAssistBehavior(depotModel)));
 		
 		queryForm.add(new AjaxButton("submit") {});
 		queryForm.setOutputMarkupId(true);
@@ -412,7 +412,7 @@ public class RepoCommitsPage extends RepositoryPage {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), state);
+		PageParameters params = paramsOf(getDepot(), state);
 		CharSequence url = RequestCycle.get().urlFor(RepoCommitsPage.class, params);
 		pushState(target, url.toString(), state);
 	}
@@ -446,7 +446,7 @@ public class RepoCommitsPage extends RepositoryPage {
 			item = new Fragment(itemId, "commitFrag", this);
 			item.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
 
-			item.add(new CommitMessagePanel("message", repoModel, new LoadableDetachableModel<Commit>() {
+			item.add(new CommitMessagePanel("message", depotModel, new LoadableDetachableModel<Commit>() {
 
 				@Override
 				protected Commit load() {
@@ -509,14 +509,14 @@ public class RepoCommitsPage extends RepositoryPage {
 				}
 			}
 			if (state.getCompareWith() != null) {
-				PageParameters params = RevisionComparePage.paramsOf(getRepository(), 
-						new RepoAndRevision(getRepository(), commit.getHash()), 
-						new RepoAndRevision(getRepository(), state.getCompareWith()), path);
+				PageParameters params = RevisionComparePage.paramsOf(getDepot(), 
+						new DepotAndRevision(getDepot(), commit.getHash()), 
+						new DepotAndRevision(getDepot(), state.getCompareWith()), path);
 				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}
-			item.add(new HashAndCodePanel("hashAndCode", repoModel, commit.getHash(), path));
+			item.add(new HashAndCodePanel("hashAndCode", depotModel, commit.getHash(), path));
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {
@@ -530,8 +530,8 @@ public class RepoCommitsPage extends RepositoryPage {
 		return item;
 	}
 	
-	public static PageParameters paramsOf(Repository repository, HistoryState state) {
-		PageParameters params = paramsOf(repository);
+	public static PageParameters paramsOf(Depot depot, HistoryState state) {
+		PageParameters params = paramsOf(depot);
 		if (state.getCompareWith() != null)
 			params.set(PARAM_COMPARE_WITH, state.getCompareWith());
 		if (state.getQuery() != null)
@@ -542,8 +542,8 @@ public class RepoCommitsPage extends RepositoryPage {
 	}
 	
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RepoCommitsPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RepoCommitsPage.class, paramsOf(depot));
 	}
 
 	@Override

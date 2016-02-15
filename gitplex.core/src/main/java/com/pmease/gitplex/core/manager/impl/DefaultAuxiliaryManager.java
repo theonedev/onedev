@@ -28,10 +28,10 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -49,12 +49,12 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.RefListener;
-import com.pmease.gitplex.core.listeners.RepositoryListener;
+import com.pmease.gitplex.core.listeners.DepotListener;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -68,7 +68,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryListener, RefListener, LifecycleListener {
+public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener, RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultAuxiliaryManager.class);
 	
@@ -114,13 +114,13 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 		this.unitOfWork = unitOfWork;
 	}
 	
-	private String getSequentialExecutorKey(Repository repository) {
-		return "repository-" + repository.getId() + "-checkAuxiliary";
+	private String getSequentialExecutorKey(Depot depot) {
+		return "repository-" + depot.getId() + "-checkAuxiliary";
 	}
 	
-	private void doCollect(final Repository repository, final String revision) {
-		logger.debug("Collecting auxiliary information of repository {}...", repository.getFQN());
-		Environment env = getEnv(repository);
+	private void doCollect(final Depot depot, final String revision) {
+		logger.debug("Collecting auxiliary information of repository {}...", depot.getFQN());
+		Environment env = getEnv(depot);
 		final Store defaultStore = getStore(env, DEFAULT_STORE);
 		final Store commitsStore = getStore(env, COMMITS_STORE);
 		final Store contributionsStore = getStore(env, CONTRIBUTIONS_STORE);
@@ -145,9 +145,9 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 					lastCommit = new AtomicReference<>(new String(bytes));
 				else
 					lastCommit = new AtomicReference<>(null);
-				Git git = repository.git();
+				Git git = depot.git();
 
-				LogCommand log = new LogCommand(git.repoDir());
+				LogCommand log = new LogCommand(git.depotDir());
 				List<String> revisions = new ArrayList<>();
 				if (lastCommit.get() != null) {
 					revisions.add(lastCommit.get() + ".." + revision);
@@ -281,12 +281,12 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 				if (contributorsChanged.get()) {
 					bytes = SerializationUtils.serialize((Serializable) contributors.get());
 					defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
-					DefaultAuxiliaryManager.this.contributors.remove(repository.getId());
+					DefaultAuxiliaryManager.this.contributors.remove(depot.getId());
 				}
 				if (filesChanged.get()) {
 					bytes = SerializationUtils.serialize((Serializable) files.get());
 					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
-					DefaultAuxiliaryManager.this.files.remove(repository.getId());
+					DefaultAuxiliaryManager.this.files.remove(depot.getId());
 				}
 				if (lastCommit.get() != null) {
 					bytes = lastCommit.get().getBytes();
@@ -295,13 +295,13 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 			}
 		});
 		
-		logger.debug("Auxiliary information collected for repository {}.", repository.getFQN());		
+		logger.debug("Auxiliary information collected for repository {}.", depot.getFQN());		
 	}
 	
 	@Override
-	public void collect(Repository repository, final String revision) {
-		final Long repoId = repository.getId();
-		sequentialWorkManager.execute(getSequentialExecutorKey(repository), new PrioritizedRunnable(PRIORITY) {
+	public void collect(Depot depot, final String revision) {
+		final Long repoId = depot.getId();
+		sequentialWorkManager.execute(getSequentialExecutorKey(depot), new PrioritizedRunnable(PRIORITY) {
 
 			@Override
 			public void run() {
@@ -314,7 +314,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 
 								@Override
 								public Void call() throws Exception {
-									doCollect(dao.load(Repository.class, repoId), revision);
+									doCollect(dao.load(Depot.class, repoId), revision);
 									return null;
 								}
 								
@@ -330,21 +330,21 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 		});
 	}
 	
-	private synchronized Environment getEnv(final Repository repository) {
-		Environment env = envs.get(repository.getId());
+	private synchronized Environment getEnv(final Depot depot) {
+		Environment env = envs.get(depot.getId());
 		if (env == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setLogCacheShared(false);
 			config.setMemoryUsage(1024*1024*64);
 			config.setLogFileSize(64*1024);
-			env = Environments.newInstance(getAuxiliaryDir(repository), config);
-			envs.put(repository.getId(), env);
+			env = Environments.newInstance(getAuxiliaryDir(depot), config);
+			envs.put(depot.getId(), env);
 		}
 		return env;
 	}
 	
-	private File getAuxiliaryDir(Repository repository) {
-		File auxiliaryDir = new File(storageManager.getCacheDir(repository), AUXILIARY_DIR);
+	private File getAuxiliaryDir(Depot depot) {
+		File auxiliaryDir = new File(storageManager.getCacheDir(depot), AUXILIARY_DIR);
 		if (!auxiliaryDir.exists()) 
 			FileUtils.createDir(auxiliaryDir);
 		return auxiliaryDir;
@@ -360,10 +360,10 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
-	public List<NameAndEmail> getContributors(Repository repository) {
-		List<NameAndEmail> repoContributors = contributors.get(repository.getId());
+	public List<NameAndEmail> getContributors(Depot depot) {
+		List<NameAndEmail> repoContributors = contributors.get(depot.getId());
 		if (repoContributors == null) {
-			Environment env = getEnv(repository);
+			Environment env = getEnv(depot);
 			final Store store = getStore(env, DEFAULT_STORE);
 
 			repoContributors = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
@@ -382,16 +382,16 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 					}
 				}
 			});
-			contributors.put(repository.getId(), repoContributors);
+			contributors.put(depot.getId(), repoContributors);
 		}
 		return repoContributors;	
 	}
 
 	@Override
-	public List<String> getFiles(Repository repository) {
-		List<String> repoFiles = files.get(repository.getId());
+	public List<String> getFiles(Depot depot) {
+		List<String> repoFiles = files.get(depot.getId());
 		if (repoFiles == null) {
-			Environment env = getEnv(repository);
+			Environment env = getEnv(depot);
 			final Store store = getStore(env, DEFAULT_STORE);
 
 			repoFiles = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
@@ -421,14 +421,14 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 					}
 				}
 			});
-			files.put(repository.getId(), repoFiles);
+			files.put(depot.getId(), repoFiles);
 		}
 		return repoFiles;
 	}
 	
 	@Override
-	public Map<String, Map<NameAndEmail, Long>> getContributions(Repository repository, final Set<String> files) {
-		Environment env = getEnv(repository);
+	public Map<String, Map<NameAndEmail, Long>> getContributions(Depot depot, final Set<String> files) {
+		Environment env = getEnv(depot);
 		final Store store = getStore(env, CONTRIBUTIONS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<String, Map<NameAndEmail, Long>>>() {
@@ -453,8 +453,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
-	public Set<ObjectId> getDescendants(Repository repository, final ObjectId ancestor) {
-		Environment env = getEnv(repository);
+	public Set<ObjectId> getDescendants(Depot depot, final ObjectId ancestor) {
+		Environment env = getEnv(depot);
 		final Store store = getStore(env, COMMITS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
@@ -504,8 +504,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
-	public Set<ObjectId> getChildren(Repository repository, final ObjectId parent) {
-		Environment env = getEnv(repository);
+	public Set<ObjectId> getChildren(Depot depot, final ObjectId parent) {
+		Environment env = getEnv(depot);
 		final Store store = getStore(env, COMMITS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
@@ -539,17 +539,17 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
-	public void beforeDelete(Repository repository) {
+	public void beforeDelete(Depot depot) {
 	}
 
 	@Override
-	public synchronized void afterDelete(Repository repository) {
-		sequentialWorkManager.removeExecutor(getSequentialExecutorKey(repository));
-		Environment env = envs.remove(repository.getId());
+	public synchronized void afterDelete(Depot depot) {
+		sequentialWorkManager.removeExecutor(getSequentialExecutorKey(depot));
+		Environment env = envs.remove(depot.getId());
 		if (env != null)
 			env.close();
-		files.remove(repository.getId());
-		FileUtils.deleteDir(getAuxiliaryDir(repository));
+		files.remove(depot.getId());
+		FileUtils.deleteDir(getAuxiliaryDir(depot));
 	}
 	
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
@@ -574,19 +574,19 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 	
 	@Override
-	public void collect(Repository repository) {
-		try (	FileRepository jgitRepo = repository.openAsJGitRepo();
-				RevWalk revWalk = new RevWalk(jgitRepo);) {
+	public void collect(Depot depot) {
+		try (	Repository repository = depot.openRepository();
+				RevWalk revWalk = new RevWalk(repository);) {
 			Collection<Ref> refs = new ArrayList<>();
-			refs.addAll(jgitRepo.getRefDatabase().getRefs(Constants.R_HEADS).values());
-			refs.addAll(jgitRepo.getRefDatabase().getRefs(Constants.R_TAGS).values());
+			refs.addAll(repository.getRefDatabase().getRefs(Constants.R_HEADS).values());
+			refs.addAll(repository.getRefDatabase().getRefs(Constants.R_TAGS).values());
 			
 			for (Ref ref: refs) {
 				RevObject revObj = revWalk.parseAny(ref.getObjectId());
 				revObj = revWalk.peel(revObj);
 				if (revObj instanceof RevCommit) {
 					final String commitHash = revObj.name();
-					Environment env = getEnv(repository);
+					Environment env = getEnv(depot);
 					final Store commitsStore = getStore(env, COMMITS_STORE);
 					boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
 						
@@ -602,7 +602,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 						
 					});
 					if (!collected) 
-						collect(repository, commitHash);
+						collect(depot, commitHash);
 				}
 			}
 		} catch (IOException e) {
@@ -621,9 +621,9 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, RepositoryList
 	}
 
 	@Override
-	public void onRefUpdate(Repository repository, String refName, String newCommitHash) {
+	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
 		if (newCommitHash != null)
-			collect(repository, newCommitHash);
+			collect(depot, newCommitHash);
 	}
 
 }

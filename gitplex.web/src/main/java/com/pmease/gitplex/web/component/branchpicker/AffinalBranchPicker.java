@@ -11,7 +11,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.repopicker.RepositoryPicker;
 import com.pmease.gitplex.web.model.AffinalRepositoriesModel;
 
@@ -30,10 +30,10 @@ public abstract class AffinalBranchPicker extends Panel {
 	}
 	
 	private void newBranchPicker(@Nullable AjaxRequestTarget target) {
-		BranchPicker branchPicker = new BranchPicker("branchPicker", new LoadableDetachableModel<Repository>() {
+		BranchPicker branchPicker = new BranchPicker("branchPicker", new LoadableDetachableModel<Depot>() {
 
 			@Override
-			protected Repository load() {
+			protected Depot load() {
 				return getRepository();
 			}
 			
@@ -53,8 +53,8 @@ public abstract class AffinalBranchPicker extends Panel {
 		}
 	}
 	
-	private Repository getRepository() {
-		return GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
+	private Depot getRepository() {
+		return GitPlex.getInstance(Dao.class).load(Depot.class, repoId);
 	}
 	
 	@Override
@@ -64,11 +64,11 @@ public abstract class AffinalBranchPicker extends Panel {
 		add(new RepositoryPicker("repositoryPicker", new AffinalRepositoriesModel(repoId), repoId) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Repository repository) {
-				repoId = repository.getId();
-				branch = repository.getDefaultBranch();
+			protected void onSelect(AjaxRequestTarget target, Depot depot) {
+				repoId = depot.getId();
+				branch = depot.getDefaultBranch();
 				newBranchPicker(target);
-				AffinalBranchPicker.this.onSelect(target, repository, branch);
+				AffinalBranchPicker.this.onSelect(target, depot, branch);
 			}
 			
 		});
@@ -84,6 +84,6 @@ public abstract class AffinalBranchPicker extends Panel {
 				AffinalBranchPicker.class, "branch-picker.css")));
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, Repository repository, String branch);
+	protected abstract void onSelect(AjaxRequestTarget target, Depot depot, String branch);
 	
 }

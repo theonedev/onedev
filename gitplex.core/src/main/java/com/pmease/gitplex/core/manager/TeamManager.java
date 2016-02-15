@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 public interface TeamManager {
 
@@ -28,5 +28,5 @@ public interface TeamManager {
 
 	void trim(Collection<Long> teamIds);
 
-	RepositoryOperation getActualAuthorizedOperation(Team team);
+	DepotOperation getActualAuthorizedOperation(Team team);
 }

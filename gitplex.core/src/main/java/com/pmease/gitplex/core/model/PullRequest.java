@@ -161,13 +161,13 @@ public class PullRequest extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Repository targetRepo;
+	private Depot targetDepot;
 	
 	@Column(nullable=false)
 	private String targetBranch;
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	private Repository sourceRepo;
+	private Depot sourceDepot;
 	
 	@Column(nullable=false)
 	private String sourceBranch;
@@ -322,26 +322,26 @@ public class PullRequest extends AbstractEntity {
 		this.assignee = assignee;
 	}
 
-	public Repository getTargetRepo() {
-		return targetRepo;
+	public Depot getTargetDepot() {
+		return targetDepot;
 	}
 	
-	public RepoAndBranch getTarget() {
-		return new RepoAndBranch(getTargetRepo(), getTargetBranch());
+	public DepotAndBranch getTarget() {
+		return new DepotAndBranch(getTargetDepot(), getTargetBranch());
 	}
 	
-	public void setTarget(RepoAndBranch target) {
-		setTargetRepo(target.getRepository());
+	public void setTarget(DepotAndBranch target) {
+		setTargetDepot(target.getDepot());
 		setTargetBranch(target.getBranch());
 	}
 	
-	public void setSource(RepoAndBranch source) {
-		setSourceRepo(source.getRepository());
+	public void setSource(DepotAndBranch source) {
+		setSourceDepot(source.getDepot());
 		setSourceBranch(source.getBranch());
 	}
 	
-	public void setTargetRepo(Repository targetRepo) {
-		this.targetRepo = targetRepo;
+	public void setTargetDepot(Depot targetDepot) {
+		this.targetDepot = targetDepot;
 	}
 
 	public String getTargetBranch() {
@@ -353,12 +353,12 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	@Nullable
-	public Repository getSourceRepo() {
-		return sourceRepo;
+	public Depot getSourceDepot() {
+		return sourceDepot;
 	}
 
-	public void setSourceRepo(Repository sourceRepo) {
-		this.sourceRepo = sourceRepo;
+	public void setSourceDepot(Depot sourceDepot) {
+		this.sourceDepot = sourceDepot;
 	}
 
 	public String getSourceBranch() {
@@ -369,8 +369,8 @@ public class PullRequest extends AbstractEntity {
 		this.sourceBranch = sourceBranch;
 	}
 
-	public RepoAndBranch getSource() {
-		return new RepoAndBranch(getSourceRepo(), getSourceBranch());
+	public DepotAndBranch getSource() {
+		return new DepotAndBranch(getSourceDepot(), getSourceBranch());
 	}
 	
 	public String getTargetRef() {
@@ -390,12 +390,12 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public Commit getBaseCommit() {
-		return getTargetRepo().getCommit(getBaseCommitHash());
+		return getTargetDepot().getCommit(getBaseCommitHash());
 	}
 	
 	public Git git() {
 		if (sandbox == null)
-			return getTargetRepo().git();
+			return getTargetDepot().git();
 		else
 			return sandbox;
 	}
@@ -549,7 +549,7 @@ public class PullRequest extends AbstractEntity {
 	 */
 	public CheckResult getCheckResult() {
 		if (checkResult == null) 
-			checkResult = getTargetRepo().getGateKeeper().checkRequest(this);
+			checkResult = getTargetDepot().getGateKeeper().checkRequest(this);
 		return checkResult;
 	}
 	
@@ -615,7 +615,7 @@ public class PullRequest extends AbstractEntity {
 
 			for (int i=getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = getSortedUpdates().get(i);
-				if (!getTargetRepo().isAncestor(update.getHeadCommitHash(), getTarget().getObjectName()))
+				if (!getTargetDepot().isAncestor(update.getHeadCommitHash(), getTarget().getObjectName()))
 					effectiveUpdates.add(update);
 				else 
 					break;
@@ -640,27 +640,27 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public Collection<String> findTouchedFiles() {
-		Git git = getTargetRepo().git();
+		Git git = getTargetDepot().git();
 		return git.listChangedFiles(getTarget().getObjectName(), getLatestUpdate().getHeadCommitHash(), null);
 	}
 
 	@JsonView(ExternalView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/base";
+		return Depot.REFS_GITPLEX + "pulls/" + getId() + "/base";
 	}
 
 	@JsonView(ExternalView.class)
 	public String getIntegrateRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITPLEX + "pulls/" + getId() + "/integrate";
+		return Depot.REFS_GITPLEX + "pulls/" + getId() + "/integrate";
 	}
 
 	/**
 	 * Delete refs of this pull request, without touching refs of its updates.
 	 */
 	public void deleteRefs() {
-		Git git = getTargetRepo().git();
+		Git git = getTargetDepot().git();
 		git.deleteRef(getBaseRef(), null, null);
 		git.deleteRef(getIntegrateRef(), null, null);
 	}
@@ -768,15 +768,15 @@ public class PullRequest extends AbstractEntity {
 			return Restrictions.isNotNull("closeInfo");
 		}
 		
-		public static Criterion ofTarget(RepoAndBranch target) {
+		public static Criterion ofTarget(DepotAndBranch target) {
 			return Restrictions.and(
-					Restrictions.eq("targetRepo", target.getRepository()),
+					Restrictions.eq("targetDepot", target.getDepot()),
 					Restrictions.eq("targetBranch", target.getBranch()));
 		}
 
-		public static Criterion ofSource(RepoAndBranch source) {
+		public static Criterion ofSource(DepotAndBranch source) {
 			return Restrictions.and(
-					Restrictions.eq("sourceRepo", source.getRepository()),
+					Restrictions.eq("sourceDepot", source.getDepot()),
 					Restrictions.eq("sourceBranch", source.getBranch()));
 		}
 		
@@ -819,7 +819,7 @@ public class PullRequest extends AbstractEntity {
 	public Set<String> getPendingCommits() {
 		if (pendingCommits == null) {
 			pendingCommits = new HashSet<>();
-			Repository repo = getTargetRepo();
+			Depot repo = getTargetDepot();
 			for (Commit commit: repo.git().log(getTarget().getObjectName(), getLatestUpdate().getHeadCommitHash(), null, 0, 0, false))
 				pendingCommits.add(commit.getHash());
 		}
@@ -846,7 +846,7 @@ public class PullRequest extends AbstractEntity {
 		if (mergedCommits == null) {
 			mergedCommits = new HashSet<>();
 
-			Repository repo = getTargetRepo();
+			Depot repo = getTargetDepot();
 			for (Commit commit: repo.git().log(getBaseCommitHash(), getTarget().getObjectName(), null, 0, 0, false))
 				mergedCommits.add(commit);
 		}
@@ -927,7 +927,7 @@ public class PullRequest extends AbstractEntity {
 			if (invitation.isPreferred())
 				alreadyInvited.add(invitation.getReviewer());
 		}
-		ObjectPermission readPerm = ObjectPermission.ofRepoPull(getTargetRepo());
+		ObjectPermission readPerm = ObjectPermission.ofDepotPull(getTargetDepot());
 		for (User user: GitPlex.getInstance(Dao.class).allOf(User.class)) {
 			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
 				reviewers.add(user);
@@ -954,7 +954,7 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public String getUrl() {
-		return GitPlex.getInstance().guessServerUrl() + "/" + getTargetRepo().getFQN() 
+		return GitPlex.getInstance().guessServerUrl() + "/" + getTargetDepot().getFQN() 
 				+ "/pull_requests/" + getId() + "/overview";
 	}
 

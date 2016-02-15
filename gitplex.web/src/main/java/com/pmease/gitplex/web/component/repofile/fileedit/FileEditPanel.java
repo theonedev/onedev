@@ -38,7 +38,7 @@ import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.diffmatchpatch.DiffMatchPatchResourceReference;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
@@ -50,7 +50,7 @@ public abstract class FileEditPanel extends Panel {
 
 	private static final String PREVIEW_ID = "preview";
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final String refName;
 
@@ -72,7 +72,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	private EditSavePanel editSavePanel;
 	
-	public FileEditPanel(String id, IModel<Repository> repoModel, String refName, 
+	public FileEditPanel(String id, IModel<Depot> repoModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
 			@Nullable Mark mark, @Nullable String clientState) {
 		super(id);

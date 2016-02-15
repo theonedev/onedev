@@ -32,9 +32,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
@@ -50,8 +50,8 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
-import com.pmease.gitplex.core.model.RepoAndRevision;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.DepotAndRevision;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
@@ -82,13 +82,13 @@ public class RepoTagsPage extends RepositoryPage {
 	public RepoTagsPage(PageParameters params) {
 		super(params);
 		
-		if (!getRepository().git().hasCommits()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+		if (!getDepot().git().hasCommits()) 
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return getRepository() + " - Tags";
+		return getDepot() + " - Tags";
 	}
 	
 	@Override
@@ -117,11 +117,11 @@ public class RepoTagsPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getRepository(), Constants.R_TAGS + UUID.randomUUID().toString()));
+				setVisible(SecurityUtils.canModify(getDepot(), Constants.R_TAGS + UUID.randomUUID().toString()));
 			}
 
 			private RevisionPicker newRevisionPicker() {
-				return new RevisionPicker("revision", repoModel, tagRevision) {
+				return new RevisionPicker("revision", depotModel, tagRevision) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, String revision) {
@@ -179,7 +179,7 @@ public class RepoTagsPage extends RepositoryPage {
 					}
 					
 				}));
-				tagRevision = getRepository().getDefaultBranch();
+				tagRevision = getDepot().getDefaultBranch();
 				form.add(newRevisionPicker());
 				form.add(new AjaxButton("create") {
 
@@ -191,16 +191,16 @@ public class RepoTagsPage extends RepositoryPage {
 							form.error("Tag name is required.");
 							target.focusComponent(nameInput);
 							target.add(form);
-						} else if (!GitUtils.isValidRefName(Constants.R_HEADS + tagName)) {
+						} else if (!Repository.isValidRefName(Constants.R_HEADS + tagName)) {
 							form.error("Invalid tag name.");
 							target.focusComponent(nameInput);
 							target.add(form);
-						} else if (getRepository().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
+						} else if (getDepot().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 							form.error("Tag '" + tagName + "' already exists, please choose a different name.");
 							target.focusComponent(nameInput);
 							target.add(form);
 						} else {
-							getRepository().tag(tagName, tagRevision, getCurrentUser().asPerson(), tagMessage);
+							getDepot().tag(tagName, tagRevision, getCurrentUser().asPerson(), tagMessage);
 							close(target);
 							target.add(tagsContainer);
 							target.add(pagingNavigator);
@@ -233,7 +233,7 @@ public class RepoTagsPage extends RepositoryPage {
 
 			@Override
 			public List<Ref> getObject() {
-				List<Ref> refs = getRepository().getTagRefs();
+				List<Ref> refs = getDepot().getTagRefs();
 				String searchFor = searchInput.getModelObject();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
@@ -259,11 +259,11 @@ public class RepoTagsPage extends RepositoryPage {
 				RepoFileState state = new RepoFileState();
 				state.blobIdent.revision = tagName;
 				AbstractLink link = new BookmarkablePageLink<Void>("tagLink", 
-						RepoFilePage.class, RepoFilePage.paramsOf(getRepository(), state));
+						RepoFilePage.class, RepoFilePage.paramsOf(getDepot(), state));
 				link.add(new Label("name", tagName));
 				item.add(link);
 
-				RevObject revObject = getRepository().getRevObject(ref.getObjectId());
+				RevObject revObject = getDepot().getRevObject(ref.getObjectId());
 				if (revObject instanceof RevTag) {
 					RevTag revTag = (RevTag) revObject;
 					Fragment fragment = new Fragment("annotated", "annotatedFrag", RepoTagsPage.this);
@@ -282,24 +282,24 @@ public class RepoTagsPage extends RepositoryPage {
 					item.add(new WebMarkupContainer("annotated").setVisible(false));
 				}
 
-				RevCommit commit = getRepository().getRevCommit(ref.getObjectId());
+				RevCommit commit = getDepot().getRevCommit(ref.getObjectId());
 				item.add(new CommitHashPanel("hash", commit.name()));
-				PageParameters params = CommitDetailPage.paramsOf(getRepository(), commit.name());
+				PageParameters params = CommitDetailPage.paramsOf(getDepot(), commit.name());
 				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
 				link.add(new Label("shortMessage", commit.getShortMessage()));
 				item.add(link);
 				
 				item.add(new ResourceLink<Void>("download", new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(getRepository(), tagName)));
+						ArchiveResource.paramsOf(getDepot(), tagName)));
 				
 				link = new Link<Void>("compare") {
 
 					@Override
 					public void onClick() {
-						try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-								RevWalk revWalk = new RevWalk(jgitRepo);) {
+						try (	Repository repository = getDepot().openRepository();
+								RevWalk revWalk = new RevWalk(repository);) {
 							RevCommit currentCommit = revWalk.lookupCommit(
-									getRepository().getRevCommit(item.getModelObject().getObjectId()).getId());
+									getDepot().getRevCommit(item.getModelObject().getObjectId()).getId());
 							Ref prevAncestorRef = null;
 							for (int i=item.getIndex()+1; i<tagsModel.getObject().size(); i++) {
 								Ref prevRef = tagsModel.getObject().get(i);
@@ -307,7 +307,7 @@ public class RepoTagsPage extends RepositoryPage {
 								revWalk.markStart(currentCommit);
 								
 								RevCommit prevCommit = revWalk.lookupCommit(
-										getRepository().getRevCommit(prevRef.getObjectId()).getId());
+										getDepot().getRevCommit(prevRef.getObjectId()).getId());
 								revWalk.markStart(prevCommit);
 								if (prevCommit.equals(revWalk.next())) {
 									prevAncestorRef = prevRef;
@@ -315,17 +315,17 @@ public class RepoTagsPage extends RepositoryPage {
 								}
 								revWalk.reset();
 							}
-							RepoAndRevision target;
+							DepotAndRevision target;
 							if (prevAncestorRef != null) {
-								target = new RepoAndRevision(getRepository(), 
+								target = new DepotAndRevision(getDepot(), 
 										GitUtils.ref2tag(prevAncestorRef.getName()));
 							} else {
-								target = new RepoAndRevision(getRepository(), 
+								target = new DepotAndRevision(getDepot(), 
 										GitUtils.ref2tag(item.getModelObject().getName()));
 							}
-							RepoAndRevision source = new RepoAndRevision(getRepository(), 
+							DepotAndRevision source = new DepotAndRevision(getDepot(), 
 									GitUtils.ref2tag(item.getModelObject().getName()));
-							PageParameters params = RevisionComparePage.paramsOf(getRepository(), target, source, null);
+							PageParameters params = RevisionComparePage.paramsOf(getDepot(), target, source, null);
 							setResponsePage(RevisionComparePage.class, params);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
@@ -347,7 +347,7 @@ public class RepoTagsPage extends RepositoryPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getRepository().deleteTag(tagName);
+						getDepot().deleteTag(tagName);
 						target.add(tagsContainer);
 						target.add(pagingNavigator);
 					}
@@ -356,11 +356,11 @@ public class RepoTagsPage extends RepositoryPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (SecurityUtils.canModify(getRepository(), GitUtils.tag2ref(tagName))) {
+						if (SecurityUtils.canModify(getDepot(), GitUtils.tag2ref(tagName))) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
-								GateKeeper gateKeeper = getRepository().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkFile(currentUser, getRepository(), tagName, null);
+								GateKeeper gateKeeper = getDepot().getGateKeeper();
+								CheckResult checkResult = gateKeeper.checkFile(currentUser, getDepot(), tagName, null);
 								setVisible(checkResult instanceof Passed);
 							} else {
 								setVisible(false);
@@ -394,7 +394,7 @@ public class RepoTagsPage extends RepositoryPage {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RepoTagsPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RepoTagsPage.class, paramsOf(depot));
 	}
 }

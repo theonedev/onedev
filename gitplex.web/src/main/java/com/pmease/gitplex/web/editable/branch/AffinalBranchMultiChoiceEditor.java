@@ -29,7 +29,7 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<String>>
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new AffinalBranchMultiChoice("input", ((RepositoryPage)getPage()).getRepository().getId(), new LoadableDetachableModel() {
+		input = new AffinalBranchMultiChoice("input", ((RepositoryPage)getPage()).getDepot().getId(), new LoadableDetachableModel() {
 
 			@Override
 			protected Object load() {

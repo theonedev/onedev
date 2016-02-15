@@ -18,7 +18,7 @@ import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @Singleton
 public class DefaultTeamManager implements TeamManager {
@@ -82,16 +82,16 @@ public class DefaultTeamManager implements TeamManager {
 	}
 
 	@Override
-	public RepositoryOperation getActualAuthorizedOperation(Team team) {
+	public DepotOperation getActualAuthorizedOperation(Team team) {
 		if (team.isOwners()) {
-			return RepositoryOperation.ADMIN;
+			return DepotOperation.ADMIN;
 		} else if (team.isAnonymous()) {
 			return team.getAuthorizedOperation();
 		} else if (team.isLoggedIn()) {
-			return RepositoryOperation.mostPermissive(team.getAuthorizedOperation(), 
+			return DepotOperation.mostPermissive(team.getAuthorizedOperation(), 
 					getAnonymous(team.getOwner()).getAuthorizedOperation());
 		} else {
-			return RepositoryOperation.mostPermissive(team.getAuthorizedOperation(), 
+			return DepotOperation.mostPermissive(team.getAuthorizedOperation(), 
 					getAnonymous(team.getOwner()).getAuthorizedOperation(), 
 					getLoggedIn(team.getOwner()).getAuthorizedOperation());
 		}

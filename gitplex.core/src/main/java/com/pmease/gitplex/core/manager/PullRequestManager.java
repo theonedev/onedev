@@ -9,19 +9,19 @@ import javax.annotation.Nullable;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.model.Depot;
 
 public interface PullRequestManager {
     
     @Nullable 
-    PullRequest findOpen(RepoAndBranch target, RepoAndBranch source);
+    PullRequest findOpen(DepotAndBranch target, DepotAndBranch source);
     
-    Collection<PullRequest> queryOpenTo(RepoAndBranch target, @Nullable Repository sourceRepo);
+    Collection<PullRequest> queryOpenTo(DepotAndBranch target, @Nullable Depot sourceRepo);
 
-    Collection<PullRequest> queryOpenFrom(RepoAndBranch source, @Nullable Repository targetRepo);
+    Collection<PullRequest> queryOpenFrom(DepotAndBranch source, @Nullable Depot targetRepo);
    
-    Collection<PullRequest> queryOpen(RepoAndBranch sourceOrTarget);
+    Collection<PullRequest> queryOpen(DepotAndBranch sourceOrTarget);
     
     boolean canIntegrate(PullRequest request);
     

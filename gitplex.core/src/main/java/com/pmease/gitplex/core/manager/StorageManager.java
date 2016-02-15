@@ -4,15 +4,15 @@ import java.io.File;
 
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 public interface StorageManager {
     
-    File getRepoDir(Repository repository);
+    File getDepotDir(Depot depot);
     
-    File getIndexDir(Repository repository);
+    File getIndexDir(Depot depot);
     
-    File getCacheDir(Repository repository);
+    File getCacheDir(Depot depot);
     
     File getCacheDir(PullRequest request);
     

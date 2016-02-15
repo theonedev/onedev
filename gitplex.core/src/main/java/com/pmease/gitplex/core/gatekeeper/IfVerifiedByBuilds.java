@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Verification;
 
@@ -115,7 +115,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
 		if (blockMode)
 			return blocking(Lists.newArrayList("Not verified by build."));
 		else
@@ -123,7 +123,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
 		if (blockMode) {
 			return blocking(Lists.newArrayList("Has to be verified by builds."));
 		} else {
@@ -132,7 +132,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
 		return ignored();
 	}
 

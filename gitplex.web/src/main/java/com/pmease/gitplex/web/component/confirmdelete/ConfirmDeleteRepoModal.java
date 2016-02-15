@@ -3,8 +3,8 @@ package com.pmease.gitplex.web.component.confirmdelete;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
@@ -15,9 +15,9 @@ public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
 
 	@Override
 	protected void doDelete(AjaxRequestTarget target) {
-		Repository repository = getRepository();
+		Depot depot = getRepository();
 		
-		GitPlex.getInstance(RepositoryManager.class).delete(repository);
+		GitPlex.getInstance(DepotManager.class).delete(depot);
 		getSession().success("Repository has been deleted");
 		
 		onDeleted(target);
@@ -36,6 +36,6 @@ public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
 		return getRepository().getName();
 	}
 
-	protected abstract Repository getRepository();
+	protected abstract Depot getRepository();
 	
 }

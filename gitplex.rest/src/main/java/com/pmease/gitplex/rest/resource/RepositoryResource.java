@@ -26,8 +26,8 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
-import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @Path("/repositories")
@@ -38,70 +38,70 @@ public class RepositoryResource {
 
 	private final Dao dao;
 	
-	private final RepositoryManager repositoryManager;
+	private final DepotManager depotManager;
 	
 	@Inject
-	public RepositoryResource(Dao dao, RepositoryManager repositoryManager) {
+	public RepositoryResource(Dao dao, DepotManager depotManager) {
 		this.dao = dao;
-		this.repositoryManager = repositoryManager;
+		this.depotManager = depotManager;
 	}
 	
 	@Path("/{id}")
     @GET
-    public Repository get(@PathParam("id") Long id) {
-    	Repository repository = dao.load(Repository.class, id);
+    public Depot get(@PathParam("id") Long id) {
+    	Depot depot = dao.load(Depot.class, id);
 
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository)))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depot)))
     		throw new UnauthenticatedException();
     	else
-    		return repository;
+    		return depot;
     }
     
 	@ValidQueryParams
 	@GET
-	public Collection<Repository> query(@QueryParam("userId") Long userId, @QueryParam("name") String name, 
+	public Collection<Depot> query(@QueryParam("userId") Long userId, @QueryParam("name") String name, 
 			@QueryParam("path") String path) {
 		
-		List<Repository> repositories = new ArrayList<>();
+		List<Depot> depots = new ArrayList<>();
 		
-		EntityCriteria<Repository> criteria = EntityCriteria.of(Repository.class);
+		EntityCriteria<Depot> criteria = EntityCriteria.of(Depot.class);
 		if (path != null) {
-			Repository repository = repositoryManager.findBy(path);
-			if (repository != null)
-				repositories.add(repository);
+			Depot depot = depotManager.findBy(path);
+			if (depot != null)
+				depots.add(depot);
 		} else {
 			if (userId != null)
 				criteria.add(Restrictions.eq("owner.id", userId));
 			if (name != null)
 				criteria.add(Restrictions.eq("name", name));
-			repositories.addAll(dao.query(criteria));
+			depots.addAll(dao.query(criteria));
 		}
 		
-		for (Repository repository: repositories) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repository))) 
-				throw new UnauthorizedException("Unauthorized access to repository " + repository.getFQN());
+		for (Depot depot: depots) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depot))) 
+				throw new UnauthorizedException("Unauthorized access to repository " + depot.getFQN());
 		}
-		return repositories;
+		return depots;
 	}
 
 	@POST
-    public Long save(@NotNull @Valid Repository repository) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository)))
+    public Long save(@NotNull @Valid Depot depot) {
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot)))
     		throw new UnauthorizedException();
     	
-    	dao.persist(repository);
-    	return repository.getId();
+    	dao.persist(depot);
+    	return depot.getId();
     }
 
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
-    	Repository repository = dao.load(Repository.class, id);
+    	Depot depot = dao.load(Depot.class, id);
 
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository)))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot)))
     		throw new UnauthorizedException();
     	
-    	dao.remove(repository);
+    	dao.remove(depot);
     }
     
 }

@@ -70,7 +70,7 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 	@Transactional
 	@Override
 	public void onOpened(PullRequest request) {
-		for (BranchWatch branchWatch: branchWatchManager.findBy(request.getTargetRepo(), request.getTargetBranch())) {
+		for (BranchWatch branchWatch: branchWatchManager.findBy(request.getTargetDepot(), request.getTargetBranch())) {
 			watch(request, branchWatch.getUser(), 
 					"You are set to watch this pull request as you are watching the target branch.");
 		}

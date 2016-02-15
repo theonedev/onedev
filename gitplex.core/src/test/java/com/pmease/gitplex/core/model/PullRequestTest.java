@@ -9,13 +9,13 @@ import com.pmease.commons.git.Git;
 
 public class PullRequestTest extends AbstractGitTest {
 
-    private Repository repository;
+    private Depot depot;
 
     @Override
     public void setup() {
     	super.setup();
     	
-        repository = new Repository() {
+        depot = new Depot() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -30,7 +30,7 @@ public class PullRequestTest extends AbstractGitTest {
     @Test
     public void shouldReturnAllUpdatesAsEffectiveIfTheyAreFastForward() {
         PullRequest request = new PullRequest();
-        request.setTargetRepo(repository);
+        request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "commit");
@@ -39,7 +39,7 @@ public class PullRequestTest extends AbstractGitTest {
 
         addFileAndCommit("b", "", "commit");
 
-        repository.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
+        depot.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
         
         request.setBaseCommitHash(git.parseRevision("master", true));
 
@@ -65,7 +65,7 @@ public class PullRequestTest extends AbstractGitTest {
     @Test
     public void shouldReturnLatestUpdateAsEffectiveIfAllOthersHaveBeenMerged() {
         PullRequest request = new PullRequest();
-        request.setTargetRepo(repository);
+        request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "master:1");
@@ -101,7 +101,7 @@ public class PullRequestTest extends AbstractGitTest {
         
         git.merge(secondRef, null, null, null, null);
 
-        repository.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
+        depot.cacheObjectId("master", ObjectId.fromString(git.parseRevision("master", true)));
 
         Assert.assertEquals(1, request.getEffectiveUpdates().size());
         Assert.assertEquals(2L, request.getEffectiveUpdates().get(0).getId().longValue());

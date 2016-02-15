@@ -24,8 +24,8 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -33,7 +33,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Throwables;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 
@@ -50,16 +50,16 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	}
 	
 	@Nullable
-	private SearcherManager getSearcherManager(Repository repository) throws InterruptedException {
+	private SearcherManager getSearcherManager(Depot depot) throws InterruptedException {
 		try {
-			SearcherManager searcherManager = searcherManagers.get(repository.getId());
+			SearcherManager searcherManager = searcherManagers.get(depot.getId());
 			if (searcherManager == null) synchronized (searcherManagers) {
-				searcherManager = searcherManagers.get(repository.getId());
+				searcherManager = searcherManagers.get(depot.getId());
 				if (searcherManager == null) {
-					Directory directory = FSDirectory.open(storageManager.getIndexDir(repository));
+					Directory directory = FSDirectory.open(storageManager.getIndexDir(depot));
 					if (DirectoryReader.indexExists(directory)) {
 						searcherManager = new SearcherManager(directory, null);
-						searcherManagers.put(repository.getId(), searcherManager);
+						searcherManagers.put(depot.getId(), searcherManager);
 					}
 				}
 			}
@@ -77,18 +77,19 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	}
 
 	@Override
-	public List<QueryHit> search(Repository repository, String revision, final BlobQuery query) 
+	public List<QueryHit> search(Depot depot, String revision, final BlobQuery query) 
 			throws InterruptedException {
-		AnyObjectId commitId = repository.getObjectId(revision);
+		AnyObjectId commitId = depot.getObjectId(revision);
 		
 		final List<QueryHit> hits = new ArrayList<>();
 
-		SearcherManager searcherManager = getSearcherManager(repository);
+		SearcherManager searcherManager = getSearcherManager(depot);
 		if (searcherManager != null) {
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
-					try (FileRepository jgitRepo = repository.openAsJGitRepo(); RevWalk revWalk = new RevWalk(jgitRepo)){
+					try (	Repository repository = depot.openRepository(); 
+							RevWalk revWalk = new RevWalk(repository)){
 						final RevTree revTree = revWalk.parseCommit(commitId).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
@@ -108,7 +109,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
 									
 									if (!checkedBlobPaths.contains(blobPath)) {
-										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobPath, revTree);									
+										TreeWalk treeWalk = TreeWalk.forPath(repository, blobPath, revTree);									
 										if (treeWalk != null) 
 											query.collect(treeWalk, hits);
 										checkedBlobPaths.add(blobPath);
@@ -144,25 +145,25 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	}
 
 	@Override
-	public void commitIndexed(Repository repository, String revision) {
+	public void commitIndexed(Depot depot, String revision) {
 		try {
-			getSearcherManager(repository).maybeRefresh();
+			getSearcherManager(depot).maybeRefresh();
 		} catch (InterruptedException | IOException e) {
 			Throwables.propagate(e);
 		}
 	}
 
 	@Override
-	public void indexRemoving(Repository repository) {
+	public void indexRemoving(Depot depot) {
 		synchronized (searcherManagers) {
-			SearcherManager searcherManager = searcherManagers.get(repository.getId());
+			SearcherManager searcherManager = searcherManagers.get(depot.getId());
 			if (searcherManager != null) {
 				try {
 					searcherManager.close();
 				} catch (IOException e) {
 					Throwables.propagate(e);
 				}
-				searcherManagers.remove(repository.getId());
+				searcherManagers.remove(depot.getId());
 			}
 		}
 	}

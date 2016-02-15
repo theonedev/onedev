@@ -14,7 +14,6 @@ import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.util.SystemReader;
 
@@ -50,10 +49,6 @@ public class GitUtils {
         return sha.substring(0, length);
     }
 
-    public static boolean isValidRefName(String refName) {
-    	return Repository.isValidRefName(refName);
-    }
-    
 	public static String abbreviateSHA(String sha) {
 		return abbreviateSHA(sha, SHORT_SHA_LENGTH);
 	}

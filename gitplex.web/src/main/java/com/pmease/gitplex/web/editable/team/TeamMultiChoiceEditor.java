@@ -43,7 +43,7 @@ public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
 			protected EntityCriteria<Team> load() {
 				EntityCriteria<Team> criteria = EntityCriteria.of(Team.class);
 				RepositoryPage page = (RepositoryPage) getPage();
-				criteria.add(Restrictions.eq("owner", page.getRepository().getOwner()));
+				criteria.add(Restrictions.eq("owner", page.getDepot().getOwner()));
 				return criteria;
 			}
     		

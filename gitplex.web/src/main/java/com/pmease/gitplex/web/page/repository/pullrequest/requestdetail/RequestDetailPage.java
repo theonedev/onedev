@@ -65,7 +65,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.model.PullRequest.Status;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.RepoAndBranch;
+import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.BranchLink;
@@ -96,8 +96,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 	public RequestDetailPage(final PageParameters params) {
 		super(params);
 		
-		if (!getRepository().git().hasCommits()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+		if (!getDepot().git().hasCommits()) 
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -351,7 +351,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		}
 		
 		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
-		if (request.getSourceRepo() != null) {
+		if (request.getSourceDepot() != null) {
 			statusAndBranchesContainer.add(new BranchLink("source", request.getSource()));
 		} else {
 			statusAndBranchesContainer.add(new Label("source", "unknown") {
@@ -663,7 +663,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		fragment.add(form);
 		final FormComponent<String> noteInput;
 
-		RepoAndBranch source = request.getSource();
+		DepotAndBranch source = request.getSource();
 		Preconditions.checkNotNull(source);
 		
 		if (operation != INTEGRATE) {
@@ -915,7 +915,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 	}
 
 	public static PageParameters paramsOf(PullRequest request) {
-		PageParameters params = RepositoryPage.paramsOf(request.getTarget().getRepository());
+		PageParameters params = RepositoryPage.paramsOf(request.getTarget().getDepot());
 		params.set("request", request.getId());
 		return params;
 	}

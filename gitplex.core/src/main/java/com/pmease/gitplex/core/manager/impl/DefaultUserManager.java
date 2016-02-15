@@ -24,20 +24,20 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
-import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @Singleton
 public class DefaultUserManager implements UserManager, LifecycleListener {
 
     private final Dao dao;
 
-    private final RepositoryManager repositoryManager;
+    private final DepotManager repositoryManager;
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     		
@@ -46,7 +46,7 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(Dao dao, RepositoryManager repositoryManager) {
+    public DefaultUserManager(Dao dao, DepotManager repositoryManager) {
         this.dao = dao;
         this.repositoryManager = repositoryManager;
     }
@@ -66,20 +66,20 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     	if (isNew) {
         	Team team = new Team();
         	team.setOwner(user);
-        	team.setAuthorizedOperation(RepositoryOperation.NO_ACCESS);
+        	team.setAuthorizedOperation(DepotOperation.NO_ACCESS);
         	team.setName(Team.ANONYMOUS);
         	dao.persist(team);
         	
         	team = new Team();
         	team.setOwner(user);
         	team.setName(Team.LOGGEDIN);
-        	team.setAuthorizedOperation(RepositoryOperation.NO_ACCESS);
+        	team.setAuthorizedOperation(DepotOperation.NO_ACCESS);
         	dao.persist(team);
         	
         	team = new Team();
         	team.setOwner(user);
         	team.setName(Team.OWNERS);
-        	team.setAuthorizedOperation(RepositoryOperation.ADMIN);
+        	team.setAuthorizedOperation(DepotOperation.ADMIN);
         	dao.persist(team);
         	
         	Membership membership = new Membership();
@@ -147,8 +147,8 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     	query.setParameter("user", user);
     	query.executeUpdate();
     	
-    	for (Repository repository: user.getRepositories())
-    		repositoryManager.delete(repository);
+    	for (Depot depot: user.getDepots())
+    		repositoryManager.delete(depot);
     	
 		dao.remove(user);
 		

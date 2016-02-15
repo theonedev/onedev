@@ -2,11 +2,11 @@ package com.pmease.gitplex.core.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.SystemObject;
 import com.pmease.gitplex.core.permission.operation.PrivilegedOperation;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.permission.operation.SystemOperation;
 
 /**
@@ -53,16 +53,16 @@ public class ObjectPermission implements Permission {
 		}
 	}
 
-	public static ObjectPermission ofRepoAdmin(Repository repository) {
-		return new ObjectPermission(repository, RepositoryOperation.ADMIN);
+	public static ObjectPermission ofDepotAdmin(Depot depot) {
+		return new ObjectPermission(depot, DepotOperation.ADMIN);
 	}
 
-	public static ObjectPermission ofRepoPull(Repository repository) {
-		return new ObjectPermission(repository, RepositoryOperation.PULL);
+	public static ObjectPermission ofDepotPull(Depot depot) {
+		return new ObjectPermission(depot, DepotOperation.PULL);
 	}
 
-	public static ObjectPermission ofRepoPush(Repository repository) {
-		return new ObjectPermission(repository, RepositoryOperation.PUSH);
+	public static ObjectPermission ofDepotPush(Depot depot) {
+		return new ObjectPermission(depot, DepotOperation.PUSH);
 	}
 
 	public static ObjectPermission ofSystemAdmin() {

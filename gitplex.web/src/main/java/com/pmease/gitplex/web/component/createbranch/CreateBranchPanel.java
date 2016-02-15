@@ -8,22 +8,23 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 
 import com.pmease.commons.git.GitUtils;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 abstract class CreateBranchPanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final String revision;
 	
 	private String branchName;
 	
-	public CreateBranchPanel(String id, IModel<Repository> repoModel, String revision) {
+	public CreateBranchPanel(String id, IModel<Depot> repoModel, String revision) {
 		super(id);
 		this.repoModel = repoModel;
 		this.revision = revision;
@@ -67,7 +68,7 @@ abstract class CreateBranchPanel extends Panel {
 					form.error("Branch name is required.");
 					target.focusComponent(nameInput);
 					target.add(form);
-				} else if (!GitUtils.isValidRefName(Constants.R_HEADS + branchName)) {
+				} else if (!Repository.isValidRefName(Constants.R_HEADS + branchName)) {
 					form.error("Invalid branch name.");
 					target.focusComponent(nameInput);
 					target.add(form);

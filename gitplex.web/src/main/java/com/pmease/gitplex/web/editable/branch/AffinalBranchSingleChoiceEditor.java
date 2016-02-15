@@ -23,7 +23,7 @@ public class AffinalBranchSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-		Long repoId = ((RepositoryPage)getPage()).getRepository().getId();
+		Long repoId = ((RepositoryPage)getPage()).getDepot().getId();
 		input = new AffinalBranchSingleChoice("input", repoId, getModel(), 
 				!getPropertyDescriptor().isPropertyRequired());
         

@@ -23,7 +23,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.RefListener;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -56,7 +56,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Repository repository = dao.load(Repository.class, Long.valueOf(fields.get(0)));
+        Depot depot = dao.load(Depot.class, Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         
@@ -83,14 +83,14 @@ public class GitPostReceiveCallback extends HttpServlet {
 //        	String oldCommitHash = StringUtils.reverse(field.substring(0, 40));
         	
         	if (!newCommitHash.equals(GitUtils.NULL_SHA1)) {
-        		repository.cacheObjectId(refName, ObjectId.fromString(newCommitHash));
+        		depot.cacheObjectId(refName, ObjectId.fromString(newCommitHash));
         	} else {
         		newCommitHash = null;
-        		repository.cacheObjectId(refName, null);
+        		depot.cacheObjectId(refName, null);
         	}
         	
     		for (RefListener listener: listenersProvider.get())
-    			listener.onRefUpdate(repository, refName, newCommitHash);
+    			listener.onRefUpdate(depot, refName, newCommitHash);
     		
         	field = field.substring(40);
         	if (field.length() == 0)

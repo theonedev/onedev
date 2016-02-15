@@ -13,28 +13,28 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
-	public static Collection<User> findUsersCan(Repository repository, RepositoryOperation operation) {
+	public static Collection<User> findUsersCan(Depot depot, DepotOperation operation) {
 		Set<User> authorizedUsers = new HashSet<User>();
 		for (User user: GitPlex.getInstance(Dao.class).query(EntityCriteria.of(User.class), 0, 0)) {
-			if (user.asSubject().isPermitted(new ObjectPermission(repository, operation)))
+			if (user.asSubject().isPermitted(new ObjectPermission(depot, operation)))
 				authorizedUsers.add(user);
 		}
 		return authorizedUsers;
 	}
 
 	public static boolean canModify(PullRequest request) {
-		Repository repository = request.getTargetRepo();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository))) {
+		Depot depot = request.getTargetDepot();
+		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
 		} else {
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
@@ -44,8 +44,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Review review) {
-		Repository repository = review.getUpdate().getRequest().getTargetRepo();
-		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository))) {
+		Depot depot = review.getUpdate().getRequest().getTargetDepot();
+		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
 		} else {
 			return review.getReviewer().equals(GitPlex.getInstance(UserManager.class).getCurrent());
@@ -60,32 +60,32 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			if (currentUser.equals(comment.getUser())) {
 				return true;
 			} else {
-				ObjectPermission adminPermission = ObjectPermission.ofRepoAdmin(comment.getRepository());
+				ObjectPermission adminPermission = ObjectPermission.ofDepotAdmin(comment.getDepot());
 				return SecurityUtils.getSubject().isPermitted(adminPermission);
 			}
 		}
 	}
 
-	public static boolean canCreate(RepoAndBranch repoAndBranch) {
-		return canCreate(repoAndBranch.getRepository(), repoAndBranch.getBranch());
+	public static boolean canCreate(DepotAndBranch depotAndBranch) {
+		return canCreate(depotAndBranch.getDepot(), depotAndBranch.getBranch());
 	}
 	
-	public static boolean canCreate(Repository repository, String branch) {
+	public static boolean canCreate(Depot depot, String branch) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
-				&& repository.getGateKeeper().checkRef(currentUser, repository, Constants.R_HEADS + branch).isPassed();
+				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot))	
+				&& depot.getGateKeeper().checkRef(currentUser, depot, Constants.R_HEADS + branch).isPassed();
 	}
 
-	public static boolean canModify(RepoAndBranch repoAndBranch) {
-		return canModify(repoAndBranch.getRepository(), GitUtils.branch2ref(repoAndBranch.getBranch()));
+	public static boolean canModify(DepotAndBranch depotAndBranch) {
+		return canModify(depotAndBranch.getDepot(), GitUtils.branch2ref(depotAndBranch.getBranch()));
 	}
 	
-	public static boolean canModify(Repository repository, String refName) {
+	public static boolean canModify(Depot depot, String refName) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository))	
-				&& repository.getGateKeeper().checkRef(currentUser, repository, refName).isPassed();
+				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot))	
+				&& depot.getGateKeeper().checkRef(currentUser, depot, refName).isPassed();
 	}
 	
 	public static boolean canManage(User account) {
@@ -102,16 +102,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return false;
 	}
 	
-	public static boolean canPull(Repository repository) {
-		return getSubject().isPermitted(ObjectPermission.ofRepoPull(repository));
+	public static boolean canPull(Depot depot) {
+		return getSubject().isPermitted(ObjectPermission.ofDepotPull(depot));
 	}
 	
-	public static boolean canPush(Repository repository) {
-		return getSubject().isPermitted(ObjectPermission.ofRepoPush(repository));
+	public static boolean canPush(Depot depot) {
+		return getSubject().isPermitted(ObjectPermission.ofDepotPush(depot));
 	}
 	
-	public static boolean canManage(Repository repository) {
-		return getSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository));
+	public static boolean canManage(Depot depot) {
+		return getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot));
 	}
 
 	public static boolean canManageSystem() {

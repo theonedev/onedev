@@ -43,10 +43,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
@@ -66,9 +66,9 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.BranchWatch;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
@@ -103,7 +103,7 @@ public class RepoBranchesPage extends RepositoryPage {
 
 		@Override
 		public List<Ref> getObject() {
-			List<Ref> refs = getRepository().getBranchRefs();
+			List<Ref> refs = getDepot().getBranchRefs();
 			String searchFor = searchInput.getModelObject();
 			if (StringUtils.isNotBlank(searchFor)) {
 				searchFor = searchFor.trim().toLowerCase();
@@ -143,11 +143,11 @@ public class RepoBranchesPage extends RepositoryPage {
 				compareIds.add(ref.getObjectId());
 			}
 
-			Ref baseRef = getRepository().getRefs(Constants.R_HEADS).get(getBaseBranch());
+			Ref baseRef = getDepot().getRefs(Constants.R_HEADS).get(getBaseBranch());
 			Preconditions.checkNotNull(baseRef);
 			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
-			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-					RevWalk revWalk = new RevWalk(jgitRepo);) {
+			try (	Repository repository = getDepot().openRepository();
+					RevWalk revWalk = new RevWalk(repository);) {
 
 				RevCommit baseCommit = revWalk.lookupCommit(baseRef.getObjectId());
 				for (ObjectId compareId: compareIds) {
@@ -210,8 +210,8 @@ public class RepoBranchesPage extends RepositoryPage {
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			RepoAndBranch repoAndBranch = new RepoAndBranch(getRepository(), getBaseBranch());
-			for (PullRequest request: pullRequestManager.queryOpenTo(repoAndBranch, getRepository())) 
+			DepotAndBranch repoAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
+			for (PullRequest request: pullRequestManager.queryOpenTo(repoAndBranch, getDepot())) 
 				requests.put(request.getSource().getBranch(), request);
 			return requests;
 		}
@@ -225,8 +225,8 @@ public class RepoBranchesPage extends RepositoryPage {
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			RepoAndBranch repoAndBranch = new RepoAndBranch(getRepository(), getBaseBranch());
-			for (PullRequest request: pullRequestManager.queryOpenFrom(repoAndBranch, getRepository())) 
+			DepotAndBranch repoAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
+			for (PullRequest request: pullRequestManager.queryOpenFrom(repoAndBranch, getDepot())) 
 				requests.put(request.getTarget().getBranch(), request);
 			return requests;
 		}
@@ -240,15 +240,15 @@ public class RepoBranchesPage extends RepositoryPage {
 		protected Map<String, BranchWatch> load() {
 			Map<String, BranchWatch> requestWatches = new HashMap<>();
 			for (BranchWatch watch: GitPlex.getInstance(BranchWatchManager.class).findBy(
-					Preconditions.checkNotNull(getCurrentUser()), getRepository()))
+					Preconditions.checkNotNull(getCurrentUser()), getDepot()))
 				requestWatches.put(watch.getBranch(), watch);
 			return requestWatches;
 		}
 		
 	};
 
-	public static PageParameters paramsOf(Repository repository, @Nullable String baseBranch) {
-		PageParameters params = paramsOf(repository);
+	public static PageParameters paramsOf(Depot depot, @Nullable String baseBranch) {
+		PageParameters params = paramsOf(depot);
 		if (baseBranch != null)
 			params.add(PARAM_BASE, baseBranch);
 		return params;
@@ -259,13 +259,13 @@ public class RepoBranchesPage extends RepositoryPage {
 		
 		baseBranch = params.get(PARAM_BASE).toString();
 		
-		if (!getRepository().git().hasCommits()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+		if (!getDepot().git().hasCommits()) 
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return getRepository() + " - Branches";
+		return getDepot() + " - Branches";
 	}
 	
 	@Override
@@ -288,7 +288,7 @@ public class RepoBranchesPage extends RepositoryPage {
 				baseBranch = object;
 			}
 			
-		}, new BranchChoiceProvider(repoModel), false));
+		}, new BranchChoiceProvider(depotModel), false));
 		
 		baseChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
@@ -316,11 +316,11 @@ public class RepoBranchesPage extends RepositoryPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canCreate(getRepository(), UUID.randomUUID().toString()));
+				setVisible(SecurityUtils.canCreate(getDepot(), UUID.randomUUID().toString()));
 			}
 
 			private RevisionPicker newRevisionPicker() {
-				return new RevisionPicker("revision", repoModel, branchRevision) {
+				return new RevisionPicker("revision", depotModel, branchRevision) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, String revision) {
@@ -361,7 +361,7 @@ public class RepoBranchesPage extends RepositoryPage {
 				}));
 				nameInput.setOutputMarkupId(true);
 				
-				branchRevision = getRepository().getDefaultBranch();
+				branchRevision = getDepot().getDefaultBranch();
 				form.add(newRevisionPicker());
 				form.add(new AjaxButton("create") {
 
@@ -373,16 +373,16 @@ public class RepoBranchesPage extends RepositoryPage {
 							form.error("Branch name is required.");
 							target.focusComponent(nameInput);
 							target.add(form);
-						} else if (!GitUtils.isValidRefName(Constants.R_HEADS + branchName)) {
+						} else if (!Repository.isValidRefName(Constants.R_HEADS + branchName)) {
 							form.error("Invalid branch name.");
 							target.focusComponent(nameInput);
 							target.add(form);
-						} else if (getRepository().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
+						} else if (getDepot().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 							form.error("Branch '" + branchName + "' already exists, please choose a different name.");
 							target.focusComponent(nameInput);
 							target.add(form);
 						} else {
-							repoModel.getObject().createBranch(branchName, branchRevision);
+							depotModel.getObject().createBranch(branchName, branchRevision);
 							close(target);
 							target.add(branchesContainer);
 							target.add(pagingNavigator);
@@ -420,13 +420,13 @@ public class RepoBranchesPage extends RepositoryPage {
 				RepoFileState state = new RepoFileState();
 				state.blobIdent.revision = branch;
 				AbstractLink link = new BookmarkablePageLink<Void>("branchLink", 
-						RepoFilePage.class, RepoFilePage.paramsOf(getRepository(), state));
+						RepoFilePage.class, RepoFilePage.paramsOf(getDepot(), state));
 				link.add(new Label("name", branch));
 				item.add(link);
 				
-				RevCommit lastCommit = getRepository().getRevCommit(ref.getObjectId());
+				RevCommit lastCommit = getDepot().getRevCommit(ref.getObjectId());
 
-				PageParameters params = CommitDetailPage.paramsOf(getRepository(), lastCommit.name());
+				PageParameters params = CommitDetailPage.paramsOf(getDepot(), lastCommit.name());
 				link = new BookmarkablePageLink<Void>("commitLink", CommitDetailPage.class, params);
 				link.add(new Label("shortMessage", lastCommit.getShortMessage()));
 				item.add(link);
@@ -439,7 +439,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getRepository().getDefaultBranch().equals(branch));
+						setVisible(getDepot().getDefaultBranch().equals(branch));
 					}
 					
 				});
@@ -479,9 +479,9 @@ public class RepoBranchesPage extends RepositoryPage {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
 							PageParameters params = RevisionComparePage.paramsOf(
-									getRepository(),
-									new RepoAndBranch(getRepository(), branch),
-									new RepoAndBranch(getRepository(), getBaseBranch()), 
+									getDepot(),
+									new DepotAndBranch(getDepot(), branch),
+									new DepotAndBranch(getDepot(), getBaseBranch()), 
 									null); 
 							setResponsePage(RevisionComparePage.class, params);
 						}
@@ -539,9 +539,9 @@ public class RepoBranchesPage extends RepositoryPage {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
 							PageParameters params = RevisionComparePage.paramsOf(
-									getRepository(), 
-									new RepoAndBranch(getRepository(), getBaseBranch()),
-									new RepoAndBranch(getRepository(), branch), 
+									getDepot(), 
+									new DepotAndBranch(getDepot(), getBaseBranch()),
+									new DepotAndBranch(getDepot(), branch), 
 									null);
 							setResponsePage(RevisionComparePage.class, params);
 						}
@@ -594,7 +594,7 @@ public class RepoBranchesPage extends RepositoryPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						BranchWatch watch = new BranchWatch();
-						watch.setRepository(getRepository());
+						watch.setDepot(getDepot());
 						watch.setBranch(branch);
 						watch.setUser(getCurrentUser());
 						GitPlex.getInstance(Dao.class).persist(watch);
@@ -622,9 +622,9 @@ public class RepoBranchesPage extends RepositoryPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getRepository().deleteBranch(branch);
+						getDepot().deleteBranch(branch);
 						if (branch.equals(baseBranch)) {
-							baseBranch = getRepository().getDefaultBranch();
+							baseBranch = getDepot().getDefaultBranch();
 							target.add(baseChoice);
 						}
 						target.add(pagingNavigator);
@@ -635,11 +635,11 @@ public class RepoBranchesPage extends RepositoryPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (!getRepository().getDefaultBranch().equals(branch) && SecurityUtils.canModify(new RepoAndBranch(getRepository(), branch))) {
+						if (!getDepot().getDefaultBranch().equals(branch) && SecurityUtils.canModify(new DepotAndBranch(getDepot(), branch))) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
-								GateKeeper gateKeeper = getRepository().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkFile(currentUser, getRepository(), branch, null);
+								GateKeeper gateKeeper = getDepot().getGateKeeper();
+								CheckResult checkResult = gateKeeper.checkFile(currentUser, getDepot(), branch, null);
 								if (checkResult instanceof Passed) {
 									setVisible(true);
 									PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
@@ -684,7 +684,7 @@ public class RepoBranchesPage extends RepositoryPage {
 		if (baseBranch != null)
 			return baseBranch;
 		else
-			return getRepository().getDefaultBranch();
+			return getDepot().getDefaultBranch();
 	}
 	
 	@Override
@@ -725,7 +725,7 @@ public class RepoBranchesPage extends RepositoryPage {
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), baseBranch);
+		PageParameters params = paramsOf(getDepot(), baseBranch);
 		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
 		pushState(target, url.toString(), baseBranch);
 	}
@@ -740,7 +740,7 @@ public class RepoBranchesPage extends RepositoryPage {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RepoBranchesPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RepoBranchesPage.class, paramsOf(depot));
 	}
 }

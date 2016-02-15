@@ -27,7 +27,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
@@ -61,9 +61,9 @@ public class GitUpdateCallback extends HttpServlet {
 		output.writeLine();
 	}
 	
-	private void checkRef(User user, Repository repository, String refName, Output output) {
-		GateKeeper gateKeeper = repository.getGateKeeper();
-		CheckResult checkResult = gateKeeper.checkRef(user, repository, refName);
+	private void checkRef(User user, Depot depot, String refName, Output output) {
+		GateKeeper gateKeeper = depot.getGateKeeper();
+		CheckResult checkResult = gateKeeper.checkRef(user, depot, refName);
 
 		if (!(checkResult instanceof Passed)) {
 			List<String> messages = new ArrayList<>();
@@ -87,7 +87,7 @@ public class GitUpdateCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Repository repository = dao.load(Repository.class, Long.valueOf(fields.get(0)));
+        Depot depot = dao.load(Depot.class, Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
         
@@ -106,18 +106,18 @@ public class GitUpdateCallback extends HttpServlet {
 		User user = userManager.getCurrent();
 		Preconditions.checkNotNull(user);
 
-		if (refName.startsWith(Repository.REFS_GITPLEX)) {
-			if (!user.asSubject().isPermitted(ObjectPermission.ofRepoAdmin(repository)))
+		if (refName.startsWith(Depot.REFS_GITPLEX)) {
+			if (!user.asSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot)))
 				error(output, "Only repository administrators can update gitplex refs.");
 		} else {
 			String branch = GitUtils.ref2branch(refName);
 			if (branch != null) { // push branch ref 
 				if (oldCommitHash.equals(GitUtils.NULL_SHA1)) { // create new branch
-					checkRef(user, repository, refName, output);
+					checkRef(user, depot, refName, output);
 				} else {
 					if (newCommitHash.equals(GitUtils.NULL_SHA1)) { // deleting a branch ref
-						GateKeeper gateKeeper = repository.getGateKeeper();
-						CheckResult checkResult = gateKeeper.checkFile(user, repository, branch, null);
+						GateKeeper gateKeeper = depot.getGateKeeper();
+						CheckResult checkResult = gateKeeper.checkFile(user, depot, branch, null);
 						
 						if (!(checkResult instanceof Passed)) {
 							List<String> messages = new ArrayList<>();
@@ -126,8 +126,8 @@ public class GitUpdateCallback extends HttpServlet {
 							error(output, messages.toArray(new String[messages.size()]));
 						}
 					} else {
-						GateKeeper gateKeeper = repository.getGateKeeper();
-						CheckResult checkResult = gateKeeper.checkCommit(user, repository, branch, newCommitHash);
+						GateKeeper gateKeeper = depot.getGateKeeper();
+						CheckResult checkResult = gateKeeper.checkCommit(user, depot, branch, newCommitHash);
 				
 						if (!(checkResult instanceof Passed)) {
 							List<String> messages = new ArrayList<>();
@@ -143,7 +143,7 @@ public class GitUpdateCallback extends HttpServlet {
 					}
 				}
 			} else { // push non-branch refs
-				checkRef(user, repository, refName, output);
+				checkRef(user, depot, refName, output);
 			}
 		}
 	}	

@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
@@ -16,7 +16,7 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-        User repoOwner = request.getTargetRepo().getOwner();
+        User repoOwner = request.getTargetDepot().getOwner();
 
         Review.Result result = repoOwner.checkReviewSince(request.getReferentialUpdate());
 
@@ -30,26 +30,26 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
         }
     }
 
-    private CheckResult check(User user, Repository repository) {
-		if (user.equals(repository.getOwner()))
+    private CheckResult check(User user, Depot depot) {
+		if (user.equals(depot.getOwner()))
 			return passed(Lists.newArrayList("Approved by repository owner."));
 		else
 			return pending(Lists.newArrayList("Not approved by repository owner."));
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
-		return check(user, repository);
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		return check(user, repository);
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		if (user.equals(repository.getOwner()))
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
+		if (user.equals(depot.getOwner()))
 			return passed(Lists.newArrayList("Approved by repository owner."));
 		else
 			return failed(Lists.newArrayList("Not approved by repository owner."));

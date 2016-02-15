@@ -10,33 +10,33 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.OmitName;
 import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.editable.BranchChoice.Scope;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 @Editable(name="Specify Branch Names", order=100)
 public class MatchGlobalBranchesByNames implements GlobalBranchMatcher {
 
-	private List<String> repoAndBranches = new ArrayList<>();
+	private List<String> depotAndBranches = new ArrayList<>();
 	
 	@Editable(name="Branch Names")
 	@BranchChoice(Scope.GLOBAL)
 	@OmitName
 	@NotNull
 	@Size(min=1, message="At least one branch has to be selected.")
-	public List<String> getRepoAndBranches() {
-		return repoAndBranches;
+	public List<String> getDepotAndBranches() {
+		return depotAndBranches;
 	}
 
-	public void setRepoAndBranches(List<String> repoAndBranches) {
-		this.repoAndBranches = repoAndBranches;
+	public void setDepotAndBranches(List<String> depotAndBranches) {
+		this.depotAndBranches = depotAndBranches;
 	}
 
 	@Override
-	public boolean matches(Repository repository, String branch) {
-		for (String each: getRepoAndBranches()) {
-			RepoAndBranch repoAndBranch = new RepoAndBranch(each);
-			if (repoAndBranch.getRepoId().equals(repository.getId()) && repoAndBranch.getBranch().equals(branch))
+	public boolean matches(Depot depot, String branch) {
+		for (String each: getDepotAndBranches()) {
+			DepotAndBranch depotAndBranch = new DepotAndBranch(each);
+			if (depotAndBranch.getDepotId().equals(depot.getId()) && depotAndBranch.getBranch().equals(branch))
 				return true;
 		}
 		return false;
@@ -44,8 +44,8 @@ public class MatchGlobalBranchesByNames implements GlobalBranchMatcher {
 
 	@Override
 	public Object trim(Object context) {
-		RepoAndBranch.trim(repoAndBranches);
-		if (!repoAndBranches.isEmpty())
+		DepotAndBranch.trim(depotAndBranches);
+		if (!depotAndBranches.isEmpty())
 			return this;
 		else
 			return null;

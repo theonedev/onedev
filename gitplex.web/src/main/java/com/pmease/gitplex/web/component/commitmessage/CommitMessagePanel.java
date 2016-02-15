@@ -20,19 +20,19 @@ import org.unbescape.html.HtmlEscape;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.Highlighter;
 import com.pmease.commons.util.Transformer;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.page.repository.commit.CommitDetailPage;
 
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final IModel<Commit> commitModel;
 	
 	private final IModel<List<Pattern>> patternsModel;
 	
-	public CommitMessagePanel(String id, IModel<Repository> repoModel, 
+	public CommitMessagePanel(String id, IModel<Depot> repoModel, 
 			IModel<Commit> commitModel, IModel<List<Pattern>> patternsModel) {
 		super(id);
 		
@@ -41,7 +41,7 @@ public class CommitMessagePanel extends Panel {
 		this.patternsModel = patternsModel;
 	}
 
-	public CommitMessagePanel(String id, IModel<Repository> repoModel, IModel<Commit> commitModel) {
+	public CommitMessagePanel(String id, IModel<Depot> repoModel, IModel<Commit> commitModel) {
 		this(id, repoModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
 
 			@Override

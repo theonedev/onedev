@@ -22,7 +22,7 @@ public class RepoSettingTabLink extends Panel {
 		
 		RepoSettingPage page = (RepoSettingPage) getPage();
 		Link<Void> link = new BookmarkablePageLink<Void>("link", 
-				tab.getMainPageClass(), RepoSettingPage.paramsOf(page.getRepository()));
+				tab.getMainPageClass(), RepoSettingPage.paramsOf(page.getDepot()));
 		link.add(new Label("label", tab.getTitleModel()));
 		add(link);
 	}

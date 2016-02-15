@@ -12,7 +12,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.model.BranchWatch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
@@ -27,17 +27,17 @@ public class DefaultBranchWatchManager implements BranchWatchManager {
 
 	@Sessional
 	@Override
-	public Collection<BranchWatch> findBy(User user, Repository repository) {
+	public Collection<BranchWatch> findBy(User user, Depot depot) {
 		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
 		criteria.add(Restrictions.eq("user", user));
-		criteria.add(Restrictions.eq("repository", repository));
+		criteria.add(Restrictions.eq("depot", depot));
 		return dao.query(criteria);
 	}
 
 	@Override
-	public Collection<BranchWatch> findBy(Repository repository, String branch) {
+	public Collection<BranchWatch> findBy(Depot depot, String branch) {
 		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
-		criteria.add(Restrictions.eq("repository", repository));
+		criteria.add(Restrictions.eq("depot", depot));
 		criteria.add(Restrictions.eq("branch", branch));
 		return dao.query(criteria);
 	}

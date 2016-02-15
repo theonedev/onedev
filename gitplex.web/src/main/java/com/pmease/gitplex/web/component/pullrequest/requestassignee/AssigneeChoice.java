@@ -5,14 +5,14 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
 public class AssigneeChoice extends Select2Choice<Assignee> {
 
-	public AssigneeChoice(String id, IModel<Repository> repoModel, final IModel<User> assigneeModel) {
+	public AssigneeChoice(String id, IModel<Depot> repoModel, final IModel<User> assigneeModel) {
 		super(id, new IModel<Assignee>() {
 
 			@Override

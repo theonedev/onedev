@@ -1,7 +1,7 @@
 package com.pmease.gitplex.core.branchmatcher;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 @Editable(name="All Branches from All Repositories", order=300)
@@ -13,7 +13,7 @@ public class MatchAllGlobalBranches implements GlobalBranchMatcher {
 	}
 
 	@Override
-	public boolean matches(Repository repository, String branch) {
+	public boolean matches(Depot depot, String branch) {
 		return true;
 	}
 

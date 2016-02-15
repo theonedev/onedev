@@ -58,7 +58,7 @@ public class Git implements Serializable {
 		this.repoDir = repoDir;
 	}
 
-	public File repoDir() {
+	public File depotDir() {
 		return repoDir;
 	}
 

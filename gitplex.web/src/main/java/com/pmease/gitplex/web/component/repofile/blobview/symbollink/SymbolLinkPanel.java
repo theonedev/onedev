@@ -12,8 +12,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -22,8 +22,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public class SymbolLinkPanel extends BlobViewPanel {
@@ -36,7 +36,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		String targetPath = FilenameUtils.normalize(
 				Paths.get(context.getBlobIdent().path).resolveSibling(
 						blob.getText().getContent()).toString(), true);
@@ -44,11 +44,11 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			targetPath = null;
 
 		if (targetPath != null) {
-			try (	FileRepository jgitRepo = context.getRepository().openAsJGitRepo(); 
-					RevWalk revWalk = new RevWalk(jgitRepo)) {
-				ObjectId commitId = context.getRepository().getObjectId(context.getBlobIdent().revision);
+			try (	Repository repository = context.getDepot().openRepository(); 
+					RevWalk revWalk = new RevWalk(repository)) {
+				ObjectId commitId = context.getDepot().getObjectId(context.getBlobIdent().revision);
 				RevTree revTree = revWalk.parseCommit(commitId).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, targetPath, revTree);
+				TreeWalk treeWalk = TreeWalk.forPath(repository, targetPath, revTree);
 				if (treeWalk == null)
 					targetPath = null;
 			} catch (IOException e) {
@@ -72,7 +72,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			state.blobIdent.path = targetPath;
 			state.requestId = PullRequest.idOf(context.getPullRequest());
 			link = new BookmarkablePageLink<Void>("link", RepoFilePage.class, 
-					RepoFilePage.paramsOf(context.getRepository(), state));
+					RepoFilePage.paramsOf(context.getDepot(), state));
 		} 
 		link.add(new Label("label", blob.getText().getContent()));
 		add(link);

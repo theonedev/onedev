@@ -8,7 +8,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByNames;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.TargetBranchSelection;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -30,7 +30,7 @@ public class HistoryProtection extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Repository repository) {
+	protected GateKeeper trim(Depot depot) {
 		return this;
 	}
 
@@ -48,18 +48,18 @@ public class HistoryProtection extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
-		return getGateKeeper().checkFile(user, repository, branch, file);
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+		return getGateKeeper().checkFile(user, depot, branch, file);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		return getGateKeeper().checkCommit(user, repository, branch, commit);
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+		return getGateKeeper().checkCommit(user, depot, branch, commit);
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return getGateKeeper().checkRef(user, repository, refName);
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
+		return getGateKeeper().checkRef(user, depot, refName);
 	}
 
 }

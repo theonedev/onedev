@@ -15,7 +15,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitplex.core.gatekeeper.helper.branchselection.SpecifyTargetBranchesByNames;
 import com.pmease.gitplex.core.gatekeeper.helper.pathselection.SpecifyTargetPathsByDirectories;
 import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 
@@ -66,7 +66,7 @@ public class DirectionProtectionTest extends AbstractGitTest {
 		User user2 = new User();
 		user2.setId(2L);
 		
-		Repository repo = new Repository();
+		Depot repo = new Depot();
 		assertTrue(pathProtection.checkFile(user1, repo, "branch1", "src/test.java").isPassed());
 		assertTrue(pathProtection.checkFile(user1, repo, "branch1", "doc/test.pdf").isPassed());
 		assertTrue(pathProtection.checkFile(user2, repo, "branch1", "src/test.java").isPending());
@@ -92,7 +92,7 @@ public class DirectionProtectionTest extends AbstractGitTest {
 		git.checkout("master", "branch1");
 		git.checkout("master", "branch2");
 
-		Repository repo = new Repository() {
+		Depot repo = new Depot() {
 
 			@Override
 			public Git git() {

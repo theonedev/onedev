@@ -15,14 +15,14 @@ import org.eclipse.jgit.api.ArchiveCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.archive.ZipFormat;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 public class ArchiveResource extends AbstractResource {
@@ -50,16 +50,16 @@ public class ArchiveResource extends AbstractResource {
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		final Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(userName, repoName);
+		final Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
 		
-		if (repository == null) 
+		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
 		
 		final String revision = params.get(PARAM_REVISION).toString();
 		if (StringUtils.isBlank(revision))
 			throw new IllegalArgumentException("revision parameter has to be specified");
 		
-		if (!SecurityUtils.canPull(repository)) 
+		if (!SecurityUtils.canPull(depot)) 
 			throw new UnauthorizedException();
 
 		ResourceResponse response = new ResourceResponse();
@@ -77,10 +77,10 @@ public class ArchiveResource extends AbstractResource {
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				ArchiveCommand.registerFormat("zip", new ZipFormat());
-				try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
-					ArchiveCommand archive = Git.wrap(jgitRepo).archive();
+				try (Repository repository = depot.openRepository()) {
+					ArchiveCommand archive = Git.wrap(repository).archive();
 					archive.setFormat("zip");
-					archive.setTree(repository.getRevCommit(revision).getId());
+					archive.setTree(depot.getRevCommit(revision).getId());
 					archive.setOutputStream(attributes.getResponse().getOutputStream());
 					archive.call();
 				} catch (GitAPIException e) {
@@ -94,10 +94,10 @@ public class ArchiveResource extends AbstractResource {
 		return response;
 	}
 
-	public static PageParameters paramsOf(Repository repository, String revision) {
+	public static PageParameters paramsOf(Depot depot, String revision) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_USER, repository.getOwner().getName());
-		params.set(PARAM_REPO, repository.getName());
+		params.add(PARAM_USER, depot.getOwner().getName());
+		params.set(PARAM_REPO, depot.getName());
 		params.set(PARAM_REVISION, revision);
 		
 		return params;

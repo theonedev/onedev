@@ -5,7 +5,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @Editable(order=100, icon="fa-ext fa-repo-lock", description="This gate keeper will be passed if the push "
@@ -21,20 +21,20 @@ public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
 		return ignored();
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		if (repository.isAncestor(GitUtils.branch2ref(branch), commit))
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+		if (depot.isAncestor(GitUtils.branch2ref(branch), commit))
 			return passed(Lists.newArrayList("Push operation does not rewrite history."));
 		else
 			return failed(Lists.newArrayList("Push operation rewrites history."));
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
 		return ignored();
 	}
 

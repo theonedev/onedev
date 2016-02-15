@@ -7,11 +7,11 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-public class RepositoryChoice extends Select2Choice<Repository> {
+public class RepositoryChoice extends Select2Choice<Depot> {
 
 	private final boolean allowEmpty;
 	
@@ -25,7 +25,7 @@ public class RepositoryChoice extends Select2Choice<Repository> {
 	 * @param userModel
 	 * 			model of user to choose repository under, <tt>null</tt> to choose all accessible repositories
 	 */
-	public RepositoryChoice(String id, IModel<Repository> repoModel, @Nullable IModel<User> userModel, boolean allowEmpty) {
+	public RepositoryChoice(String id, IModel<Depot> repoModel, @Nullable IModel<User> userModel, boolean allowEmpty) {
 		super(id, repoModel, new RepositoryChoiceProvider(userModel));
 		
 		this.allowEmpty = allowEmpty;

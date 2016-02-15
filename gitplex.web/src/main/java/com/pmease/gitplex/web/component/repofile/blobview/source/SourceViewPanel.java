@@ -62,7 +62,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.InlineCommentPanel;
@@ -135,7 +135,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	public SourceViewPanel(String id, BlobViewContext context, @Nullable String clientState) {
 		super(id, context);
 		
-		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		Preconditions.checkArgument(blob.getText() != null);
 		
 		Extractor extractor = GitPlex.getInstance(Extractors.class).getExtractor(context.getBlobIdent().path);
@@ -157,7 +157,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		RepoFileState state = new RepoFileState();
 		state.blobIdent = context.getBlobIdent();
 		state.requestId = PullRequest.idOf(context.getPullRequest());
-		PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+		PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
 		String url = RequestCycle.get().urlFor(RepoFilePage.class, params).toString();
 		fragment.add(new WebMarkupContainer("selectionPermalink")
 				.add(AttributeAppender.replace("href", url)));
@@ -194,11 +194,11 @@ public class SourceViewPanel extends BlobViewPanel {
 		});
 		outlinePanel.setVisible(!symbols.isEmpty());
 		
-		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip", new AbstractReadOnlyModel<Repository>() {
+		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip", new AbstractReadOnlyModel<Depot>() {
 
 			@Override
-			public Repository getObject() {
-				return context.getRepository();
+			public Depot getObject() {
+				return context.getDepot();
 			}
 			
 		}, new AbstractReadOnlyModel<PullRequest>() {
@@ -352,15 +352,15 @@ public class SourceViewPanel extends BlobViewPanel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
 		
-		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		
 		String blameCommitsJson;
 		if (context.getMode() == Mode.BLAME) {
 			List<BlameCommit> commits = new ArrayList<>();
 			
-			String commitHash = context.getRepository().getObjectId(context.getBlobIdent().revision).name();
+			String commitHash = context.getDepot().getObjectId(context.getBlobIdent().revision).name();
 			
-			for (Blame blame: context.getRepository().git().blame(commitHash, context.getBlobIdent().path).values()) {
+			for (Blame blame: context.getDepot().git().blame(commitHash, context.getBlobIdent().path).values()) {
 				BlameCommit commit = new BlameCommit();
 				commit.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
 				commit.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());
@@ -368,7 +368,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				commit.message = blame.getCommit().getSubject();
 				CommitDetailPage.HistoryState state = new CommitDetailPage.HistoryState();
 				state.path = context.getBlobIdent().path;
-				PageParameters params = CommitDetailPage.paramsOf(context.getRepository(), 
+				PageParameters params = CommitDetailPage.paramsOf(context.getDepot(), 
 						blame.getCommit().getHash(), state);
 				commit.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 				commit.ranges = blame.getRanges();

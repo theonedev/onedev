@@ -44,7 +44,7 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
@@ -63,7 +63,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AdvancedSearchPanel.class);
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final IModel<String> revisionModel;
 	
@@ -71,7 +71,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	
 	private SearchOption option = new TextSearchOption();
 	
-	public AdvancedSearchPanel(String id, IModel<Repository> repoModel, IModel<String> revisionModel) {
+	public AdvancedSearchPanel(String id, IModel<Depot> repoModel, IModel<String> revisionModel) {
 		super(id);
 		
 		this.repoModel = repoModel;

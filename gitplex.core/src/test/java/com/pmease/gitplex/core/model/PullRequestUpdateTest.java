@@ -17,7 +17,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
     private Git bareGit;
     
-    private Repository repository;
+    private Depot depot;
     
     @Override
     public void setup() {
@@ -26,7 +26,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit = new Git(new File(tempDir, "bare"));
         bareGit.clone(git, true, false, false, null);
         
-        repository = new Repository() {
+        depot = new Depot() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -40,7 +40,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(new StorageManager() {
 			
 			@Override
-			public File getRepoDir(Repository repository) {
+			public File getDepotDir(Depot depot) {
 				throw new UnsupportedOperationException();
 			}
 			
@@ -57,12 +57,12 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 			}
 			
 			@Override
-			public File getCacheDir(Repository repository) {
+			public File getCacheDir(Depot depot) {
 				throw new UnsupportedOperationException();
 			}
 
 			@Override
-			public File getIndexDir(Repository repository) {
+			public File getIndexDir(Depot depot) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -76,7 +76,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     @Test
     public void testResolveChangedFilesWhenThereIsNoMerge() {
         PullRequest request = new PullRequest();
-        request.setTargetRepo(repository);
+        request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("a", "", "master:1");
@@ -91,8 +91,8 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("d", "", "master:4");
 
-        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
         
         request.setBaseCommitHash(bareGit.showRevision("master~1").getHash());
 
@@ -110,7 +110,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         request.addUpdate(update2);
 
-        repository.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
+        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
         
         Assert.assertEquals(Sets.newHashSet("c"), update2.getChangedFiles());
         Assert.assertEquals(Sets.newHashSet("b"), update1.getChangedFiles());
@@ -119,7 +119,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     @Test
     public void testResolveChangedFilesWhenThereIsMerge() {
         PullRequest request = new PullRequest();
-        request.setTargetRepo(repository);
+        request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("1", "", "master:1");
@@ -134,8 +134,8 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("4", "", "dev:4");
 
-        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
 
         request.setBaseCommitHash(bareGit.calcMergeBase("dev~2", "master"));
 
@@ -153,7 +153,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         request.addUpdate(update2);
 
-        repository.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
+        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
         
         Assert.assertEquals(Sets.newHashSet("4"), update2.getChangedFiles());
     }
@@ -161,7 +161,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     @Test
     public void testGetCommitsWhenTargetBranchIsMergedToSourceBranch() {
         PullRequest request = new PullRequest();
-        request.setTargetRepo(repository);
+        request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("0", "", "0");
@@ -177,8 +177,8 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 
         addFileAndCommit("d2", "", "d2");
 
-        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
         
         request.setBaseCommitHash(bareGit.calcMergeBase("master", "dev"));
 
@@ -190,7 +190,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         request.addUpdate(update1);
 
         git.merge("master", null, null, null, "merge master to dev");
-        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
         
         PullRequestUpdate update2 = new PullRequestUpdate();
         update2.setId(2L);
@@ -199,7 +199,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         bareGit.updateRef(update2.getHeadRef(), update2.getHeadCommitHash(), null, null);
         request.addUpdate(update2);
         
-        repository.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
+        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
         
         Assert.assertEquals(2, update1.getCommits().size());
         Assert.assertEquals("d1", update1.getCommits().get(0).getMessage());
@@ -212,7 +212,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
     @Test
     public void testGetCommitsWhenSourceBranchIsMergedToTargetBranch() {
         PullRequest request = new PullRequest();
-        request.setTargetRepo(repository);
+        request.setTargetDepot(depot);
         request.setTargetBranch("master");
 
         addFileAndCommit("0", "", "0");
@@ -243,8 +243,8 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         
         addFileAndCommit("d3", "", "d3");
 
-        git.push(bareGit.repoDir().getAbsolutePath(), "master:master");
-        git.push(bareGit.repoDir().getAbsolutePath(), "dev:dev");
+        git.push(bareGit.depotDir().getAbsolutePath(), "master:master");
+        git.push(bareGit.depotDir().getAbsolutePath(), "dev:dev");
         
         bareGit.updateRef(update1.getHeadRef(), update1.getHeadCommitHash(), null, null);
 
@@ -256,7 +256,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         
         request.addUpdate(update2);
         
-        repository.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
+        depot.cacheObjectId("master", ObjectId.fromString(bareGit.parseRevision("master", true)));
         
         Assert.assertEquals(2, update2.getCommits().size());
         Assert.assertEquals("d2", update2.getCommits().get(0).getMessage());

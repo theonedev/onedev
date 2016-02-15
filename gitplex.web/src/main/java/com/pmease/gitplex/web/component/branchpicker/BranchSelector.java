@@ -33,12 +33,12 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 public abstract class BranchSelector extends Panel {
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final String branch;
 	
@@ -54,7 +54,7 @@ public abstract class BranchSelector extends Panel {
 	
 	private final List<String> filteredBranches = new ArrayList<>();
 	
-	public BranchSelector(String id, IModel<Repository> repoModel, String branch) {
+	public BranchSelector(String id, IModel<Depot> repoModel, String branch) {
 		super(id);
 		
 		this.repoModel = repoModel;

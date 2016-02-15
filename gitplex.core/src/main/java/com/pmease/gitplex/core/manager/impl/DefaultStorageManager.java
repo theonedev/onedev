@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @Singleton
 public class DefaultStorageManager implements StorageManager {
@@ -23,20 +23,20 @@ public class DefaultStorageManager implements StorageManager {
     }
 
     @Override
-    public File getRepoDir(Repository repository) {
+    public File getDepotDir(Depot depot) {
     	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-        return createIfNotExist(new File(storageDir, "repositories/" + repository.getId()));
+        return createIfNotExist(new File(storageDir, "repositories/" + depot.getId()));
     }
 
 	@Override
-	public File getCacheDir(Repository repository) {
+	public File getCacheDir(Depot depot) {
     	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-        return createIfNotExist(new File(storageDir, "caches/repositories/" + repository.getId()));
+        return createIfNotExist(new File(storageDir, "caches/repositories/" + depot.getId()));
 	}
 
 	@Override
 	public File getCacheDir(PullRequest request) {
-		File repoCacheDir = getCacheDir(request.getTargetRepo());
+		File repoCacheDir = getCacheDir(request.getTargetDepot());
         return createIfNotExist(new File(repoCacheDir, "requests/" + request.getId()));
 	}
 
@@ -53,15 +53,15 @@ public class DefaultStorageManager implements StorageManager {
 	}
 
 	@Override
-	public File getIndexDir(Repository repository) {
+	public File getIndexDir(Depot depot) {
     	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-        return createIfNotExist(new File(storageDir, "indexes/repositories/" + repository.getId()));
+        return createIfNotExist(new File(storageDir, "indexes/repositories/" + depot.getId()));
 	}
 
 	@Override
 	public File getAttachmentsDir(PullRequest request) {
     	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-    	File repoDir = new File(storageDir, "attachments/repositories/" + request.getTargetRepo().getId());
+    	File repoDir = new File(storageDir, "attachments/repositories/" + request.getTargetDepot().getId());
     	File requestDir = new File(repoDir, "requests/" + request.getId());
         return createIfNotExist(requestDir);
 	}

@@ -39,11 +39,11 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	}
 	
 	protected void createDir(String path) {
-		FileUtils.createDir(new File(git.repoDir(), path));
+		FileUtils.createDir(new File(git.depotDir(), path));
 	}
 	
 	protected void writeFile(String path, String content) {
-		File file = new File(git.repoDir(), path);
+		File file = new File(git.depotDir(), path);
 		FileUtils.writeFile(file, content);
 	}
 	

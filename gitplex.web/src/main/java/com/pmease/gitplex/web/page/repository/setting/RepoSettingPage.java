@@ -11,7 +11,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 import com.pmease.gitplex.web.page.repository.setting.gatekeeper.GateKeeperPage;
@@ -27,7 +27,7 @@ public class RepoSettingPage extends RepositoryPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canManage(getRepository());
+		return SecurityUtils.canManage(getDepot());
 	}
 	
 	@Override
@@ -50,8 +50,8 @@ public class RepoSettingPage extends RepositoryPage {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RepoSettingPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RepoSettingPage.class, paramsOf(depot));
 	}
 	
 }

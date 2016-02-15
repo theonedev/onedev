@@ -10,13 +10,13 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final String tagName;
 	
@@ -24,7 +24,7 @@ abstract class CreateTagPanel extends Panel {
 	
 	private String message;
 	
-	public CreateTagPanel(String id, IModel<Repository> repoModel, String tagName, String revision) {
+	public CreateTagPanel(String id, IModel<Depot> repoModel, String tagName, String revision) {
 		super(id);
 		this.repoModel = repoModel;
 		this.tagName = tagName;

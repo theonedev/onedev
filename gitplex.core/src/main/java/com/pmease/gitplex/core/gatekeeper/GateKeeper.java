@@ -6,7 +6,7 @@ import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @Editable(name="Misc")
@@ -49,7 +49,7 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * @return
 	 * 			result of the check. 
 	 */
-	CheckResult checkFile(User user, Repository repository, String branch, String file);
+	CheckResult checkFile(User user, Depot depot, String branch, String file);
 	
 	/**
 	 * Check if specified user can push specified commit to specified branch.
@@ -63,21 +63,21 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkCommit(User user, Repository repository, String branch, String commit);
+	CheckResult checkCommit(User user, Depot depot, String branch, String commit);
 	
 	/**
 	 * Check if specified user can push specified reference to specified repository. 
 	 * 
 	 * @param user
 	 * 			user to be checked
-	 * @param repository
+	 * @param depot
 	 * 			repository to be checked
 	 * @param refName
 	 * 			reference name to be checked
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkRef(User user, Repository repository, String refName);
+	CheckResult checkRef(User user, Depot depot, String refName);
 	
 	boolean isEnabled();
 }

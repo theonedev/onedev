@@ -16,10 +16,10 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
@@ -30,16 +30,16 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
-	public AssigneeProvider(IModel<Repository> repoModel) {
+	public AssigneeProvider(IModel<Depot> repoModel) {
 		this.repoModel = repoModel;
 	}
 	
 	@Override
 	public void query(String term, int page, Response<Assignee> response) {
 		List<Assignee> assignees = new ArrayList<>();
-		for (User user: SecurityUtils.findUsersCan(repoModel.getObject(), RepositoryOperation.PUSH)) {
+		for (User user: SecurityUtils.findUsersCan(repoModel.getObject(), DepotOperation.PUSH)) {
 			if (StringUtils.isBlank(term) 
 					|| user.getName().startsWith(term) 
 					|| user.getDisplayName().startsWith(term)) {
@@ -56,7 +56,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 		});
 		if (StringUtils.isBlank(term)) {
 			assignees.add(0, new Assignee(repoModel.getObject().getOwner(), "Repository Owner"));
-			ObjectPermission writePermission = ObjectPermission.ofRepoPush(repoModel.getObject());
+			ObjectPermission writePermission = ObjectPermission.ofDepotPush(repoModel.getObject());
 			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))
 				assignees.add(0, new Assignee(currentUser, "Me"));

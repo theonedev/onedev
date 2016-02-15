@@ -28,7 +28,7 @@ class RestoreSourceBranchActivityPanel extends AbstractActivityPanel {
 			@Override
 			protected String load() {
 				PullRequest request = requestModel.getObject();
-				if (request.getSourceRepo().equals(request.getTargetRepo()))
+				if (request.getSourceDepot().equals(request.getTargetDepot()))
 					return request.getSourceBranch();
 				else
 					return request.getSource().getFQN();
@@ -40,7 +40,7 @@ class RestoreSourceBranchActivityPanel extends AbstractActivityPanel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(requestModel.getObject().getSourceRepo() != null);
+				setVisible(requestModel.getObject().getSourceDepot() != null);
 			}
 			
 		});

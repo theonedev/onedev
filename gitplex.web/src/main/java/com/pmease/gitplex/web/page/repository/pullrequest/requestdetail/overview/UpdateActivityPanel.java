@@ -18,7 +18,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
@@ -85,11 +85,11 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 				
 				item.add(new AvatarLink("author", commit.getAuthor(), new TooltipConfig()));
 
-				IModel<Repository> repoModel = new AbstractReadOnlyModel<Repository>() {
+				IModel<Depot> repoModel = new AbstractReadOnlyModel<Depot>() {
 
 					@Override
-					public Repository getObject() {
-						return updateModel.getObject().getRequest().getTarget().getRepository();
+					public Depot getObject() {
+						return updateModel.getObject().getRequest().getTarget().getDepot();
 					}
 					
 				};
@@ -158,11 +158,11 @@ class UpdateActivityPanel extends AbstractActivityPanel {
 
 				});
 				
-				item.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Repository>() {
+				item.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Depot>() {
 
 					@Override
-					public Repository getObject() {
-						return updateModel.getObject().getRequest().getTargetRepo();
+					public Depot getObject() {
+						return updateModel.getObject().getRequest().getTargetDepot();
 					}
 					
 				}, commit.getHash(), null, updateModel.getObject().getRequest().getId()));

@@ -45,7 +45,7 @@ import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
@@ -63,7 +63,7 @@ public abstract class InstantSearchPanel extends Panel {
 
 	private static final int MAX_QUERY_ENTRIES = 15;
 	
-	final IModel<Repository> repoModel;
+	final IModel<Depot> repoModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -85,7 +85,7 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	private int activeHitIndex;
 	
-	public InstantSearchPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+	public InstantSearchPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, 
 			IModel<String> revisionModel) {
 		super(id);
 		

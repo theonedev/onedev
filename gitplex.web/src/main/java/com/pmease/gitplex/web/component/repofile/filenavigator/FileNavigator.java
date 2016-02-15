@@ -33,10 +33,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -49,8 +49,8 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -63,17 +63,17 @@ public abstract class FileNavigator extends Panel {
 	
 	private final IModel<PullRequest> requestModel;
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final BlobIdent file;
 	
 	private final BlobNameChangeCallback callback;
 	
-	public FileNavigator(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+	public FileNavigator(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, 
 			BlobIdent file, @Nullable BlobNameChangeCallback callback) {
 		super(id);
 
-		this.repoModel = repoModel;
+		this.depotModel = repoModel;
 		this.requestModel = requestModel;
 		this.file = file;
 		this.callback = callback;
@@ -132,7 +132,7 @@ public abstract class FileNavigator extends Panel {
 						RepoFileState state = new RepoFileState();
 						state.blobIdent = blobIdent;
 						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
+						PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state);
 						tag.put("href", urlFor(RepoFilePage.class, params));
 					}
 					
@@ -145,7 +145,7 @@ public abstract class FileNavigator extends Panel {
 					else
 						link.add(new Label("label", blobIdent.path));
 				} else {
-					link.add(new Label("label", repoModel.getObject().getName()));
+					link.add(new Label("label", depotModel.getObject().getName()));
 				}
 				
 				item.add(link);
@@ -168,15 +168,15 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
-								try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo();
-										RevWalk revWalk = new RevWalk(jgitRepo)) {
+								try (	Repository repository = depotModel.getObject().openRepository();
+										RevWalk revWalk = new RevWalk(repository)) {
 									RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
 									if (blobIdent.path != null) {
-										treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, blobIdent.path, revTree));
+										treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(repository, blobIdent.path, revTree));
 										treeWalk.enterSubtree();
 									} else {
-										treeWalk = new TreeWalk(jgitRepo);
+										treeWalk = new TreeWalk(repository);
 										treeWalk.addTree(revTree);
 									}
 									treeWalk.setRecursive(false);
@@ -251,7 +251,7 @@ public abstract class FileNavigator extends Panel {
 										RepoFileState state = new RepoFileState();
 										state.blobIdent = model.getObject();
 										state.requestId = PullRequest.idOf(requestModel.getObject());
-										PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
+										PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state);
 										tag.put("href", urlFor(RepoFilePage.class, params));
 									}
 									
@@ -303,14 +303,14 @@ public abstract class FileNavigator extends Panel {
 				protected void onConfigure() {
 					super.onConfigure();
 					
-					setEnabled(repoModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision));
+					setEnabled(depotModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision));
 				}
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
 					
-					if (!repoModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision))
+					if (!depotModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision))
 						tag.put("title", "Must on a branch to add or propose add of a file");
 					else
 						tag.put("title", "Create new file here");
@@ -350,7 +350,7 @@ public abstract class FileNavigator extends Panel {
 	}
 
 	private ObjectId getCommitId() {
-		return repoModel.getObject().getObjectId(file.revision);
+		return depotModel.getObject().getObjectId(file.revision);
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
@@ -358,10 +358,10 @@ public abstract class FileNavigator extends Panel {
 	protected abstract void onNewFile(AjaxRequestTarget target);
 	
 	private List<BlobIdent> getChildren(BlobIdent blobIdent) {
-		try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
-				RevWalk revWalk = new RevWalk(jgitRepo)) {
+		try (	Repository repository = depotModel.getObject().openRepository(); 
+				RevWalk revWalk = new RevWalk(repository)) {
 			RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
+			TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
 			treeWalk.setRecursive(false);
 			treeWalk.enterSubtree();
 			
@@ -377,7 +377,7 @@ public abstract class FileNavigator extends Panel {
 
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		requestModel.detach();
 		
 		super.onDetach();

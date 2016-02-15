@@ -6,7 +6,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.editable.TeamChoice;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Team;
 
 @SuppressWarnings("serial")
@@ -30,7 +30,7 @@ public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected GateKeeper trim(Repository repository) {
+	protected GateKeeper trim(Depot depot) {
 		if (GitPlex.getInstance(Dao.class).get(Team.class, getTeamId()) == null)
 			return null;
 		else

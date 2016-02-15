@@ -2,20 +2,20 @@ package com.pmease.gitplex.core.model;
 
 import com.pmease.commons.git.GitUtils;
 
-public class RepoAndBranch extends RepoAndRevision {
+public class DepotAndBranch extends DepotAndRevision {
 
 	private static final long serialVersionUID = 1L;
 	
-	public RepoAndBranch(Long repoId, String branch) {
-		super(repoId, branch);
+	public DepotAndBranch(Long depotId, String branch) {
+		super(depotId, branch);
 	}
 
-	public RepoAndBranch(Repository repository, String branch) {
-		super(repository, branch);
+	public DepotAndBranch(Depot depot, String branch) {
+		super(depot, branch);
 	}
 
-	public RepoAndBranch(String repoAndBranch) {
-		super(repoAndBranch);
+	public DepotAndBranch(String depotAndBranch) {
+		super(depotAndBranch);
 	}
 	
 	@Override

@@ -56,7 +56,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.comment.CommentInput;
@@ -76,7 +76,7 @@ import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReferenc
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -139,7 +139,7 @@ public class TextDiffPanel extends Panel {
 	
 	private RepeatingView commentRows;
 	
-	public TextDiffPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, 
+	public TextDiffPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, 
 			IModel<Comment> commentModel, BlobChange change, DiffMode diffMode) {
 		super(id);
 		
@@ -162,20 +162,20 @@ public class TextDiffPanel extends Panel {
 			RepoFileState state = new RepoFileState();
 			state.requestId = request.getId();
 			state.blobIdent = change.getBlobIdent();
-			PageParameters params = RepoFilePage.paramsOf(request.getTargetRepo(), state);
+			PageParameters params = RepoFilePage.paramsOf(request.getTargetDepot(), state);
 			add(new BookmarkablePageLink<Void>("viewFile", RepoFilePage.class, params));
 			state = new RepoFileState();
 			state.blobIdent.revision = request.getSourceBranch();
 			state.blobIdent.path = change.getPath();
 			state.mode = Mode.EDIT;
-			params = RepoFilePage.paramsOf(request.getSourceRepo(), state);
+			params = RepoFilePage.paramsOf(request.getSourceDepot(), state);
 			Link<Void> editFileLink = new BookmarkablePageLink<Void>("editFile", RepoFilePage.class, params) {
 	
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
 					PullRequest request = requestModel.getObject();
-					setVisible(request.getSourceRepo() != null 
+					setVisible(request.getSourceDepot() != null 
 							&& change.getBlobIdent().revision.equals(request.getSource().getObjectName(false)));
 				}
 				

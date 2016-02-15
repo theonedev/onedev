@@ -22,7 +22,7 @@ public enum PullRequestOperation {
 		@Override
 		public boolean canOperate(PullRequest request) {
 			if (!SecurityUtils.getSubject().isPermitted(
-					ObjectPermission.ofRepoPush(request.getTargetRepo()))) {
+					ObjectPermission.ofDepotPush(request.getTargetDepot()))) {
 				return false;
 			} else {
 				return GitPlex.getInstance(PullRequestManager.class).canIntegrate(request);
@@ -89,17 +89,17 @@ public enum PullRequestOperation {
 			if (request.isOpen() 
 					|| !SecurityUtils.canModify(request)
 					|| request.getTarget().getObjectName(false) == null
-					|| request.getSourceRepo() == null 
+					|| request.getSourceDepot() == null 
 					|| request.getSource().getObjectName(false) == null
 					|| pullRequestManager.findOpen(request.getTarget(), request.getSource()) != null) {
 				return false;
 			}
 			
 			// now check if source branch is integrated into target branch
-			Git git = request.getTargetRepo().git();
+			Git git = request.getTargetDepot().git();
 			String sourceHead = request.getSource().getObjectName();
 			return git.parseRevision(sourceHead, false) == null 
-					|| !request.getTargetRepo().isAncestor(sourceHead, request.getTarget().getObjectName());
+					|| !request.getTargetDepot().isAncestor(sourceHead, request.getTarget().getObjectName());
 		}
 
 		@Override
@@ -120,7 +120,7 @@ public enum PullRequestOperation {
 			IntegrationPreview preview = request.getLastIntegrationPreview();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
 			return request.getStatus() == Status.INTEGRATED 
-					&& request.getSourceRepo() != null		
+					&& request.getSourceDepot() != null		
 					&& request.getSource().getObjectName(false) != null
 					&& !request.getSource().isDefault()
 					&& preview != null
@@ -141,7 +141,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return request.getSourceRepo() != null && request.getSource().getObjectName(false) == null 
+			return request.getSourceDepot() != null && request.getSource().getObjectName(false) == null 
 					&& SecurityUtils.canModify(request) && SecurityUtils.canCreate(request.getSource());
 		}
 		

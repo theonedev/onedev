@@ -414,7 +414,7 @@ public abstract class SearchResultPanel extends Panel {
 						state.blobIdent.revision = context.getBlobIdent().revision;
 						state.blobIdent.path = blobPath;
 						state.requestId = PullRequest.idOf(context.getPullRequest());
-						PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+						PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
 						CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 						add(AttributeAppender.replace("href", url.toString()));
 						
@@ -474,7 +474,7 @@ public abstract class SearchResultPanel extends Panel {
 								state.mark = Mark.of(hit.getTokenPos());
 								state.blobIdent.revision = context.getBlobIdent().revision;
 								state.blobIdent.path = hit.getBlobPath();
-								PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+								PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
 								CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));
 								

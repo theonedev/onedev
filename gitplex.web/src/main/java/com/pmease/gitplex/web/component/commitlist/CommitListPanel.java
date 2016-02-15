@@ -17,7 +17,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.joda.time.DateTime;
 
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
@@ -27,11 +27,11 @@ import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final IModel<List<Commit>> commitsModel;
 	
-	public CommitListPanel(String id, IModel<Repository> repoModel, IModel<List<Commit>> commitsModel) {
+	public CommitListPanel(String id, IModel<Depot> repoModel, IModel<List<Commit>> commitsModel) {
 		super(id);
 		this.repoModel = repoModel;
 		this.commitsModel = commitsModel;

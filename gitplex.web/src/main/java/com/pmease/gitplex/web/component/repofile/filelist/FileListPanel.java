@@ -25,9 +25,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -36,17 +36,17 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
-import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
+import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 
 @SuppressWarnings("serial")
 public abstract class FileListPanel extends Panel {
 
 	private static final String README_NAME = "readme.md";
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -56,15 +56,15 @@ public abstract class FileListPanel extends Panel {
 
 		@Override
 		protected List<BlobIdent> load() {
-			try (	FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo(); 
-					RevWalk revWalk = new RevWalk(jgitRepo)) {
+			try (	Repository repository = depotModel.getObject().openRepository(); 
+					RevWalk revWalk = new RevWalk(repository)) {
 				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 				TreeWalk treeWalk;
 				if (directory.path != null) {
-					treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(jgitRepo, directory.path, revTree));
+					treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(repository, directory.path, revTree));
 					treeWalk.enterSubtree();
 				} else {
-					treeWalk = new TreeWalk(jgitRepo);
+					treeWalk = new TreeWalk(repository);
 					treeWalk.addTree(revTree);
 				}
 				List<BlobIdent> children = new ArrayList<>();
@@ -73,7 +73,7 @@ public abstract class FileListPanel extends Panel {
 				for (int i=0; i<children.size(); i++) {
 					BlobIdent child = children.get(i);
 					while (child.isTree()) {
-						treeWalk = TreeWalk.forPath(jgitRepo, child.path, revTree);
+						treeWalk = TreeWalk.forPath(repository, child.path, revTree);
 						Preconditions.checkNotNull(treeWalk);
 						treeWalk.enterSubtree();
 						if (treeWalk.next()) {
@@ -112,10 +112,10 @@ public abstract class FileListPanel extends Panel {
 		
 	};
 	
-	public FileListPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel, BlobIdent directory) {
+	public FileListPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel, BlobIdent directory) {
 		super(id);
 
-		this.repoModel = repoModel;
+		this.depotModel = repoModel;
 		this.requestModel = requestModel;
 		this.directory = directory;
 	}
@@ -159,7 +159,7 @@ public abstract class FileListPanel extends Panel {
 				RepoFileState state = new RepoFileState();
 				state.blobIdent = parentIdent;
 				state.requestId = PullRequest.idOf(requestModel.getObject());
-				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state); 
+				PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state); 
 				tag.put("href", urlFor(RepoFilePage.class, params));
 			}
 			
@@ -195,7 +195,7 @@ public abstract class FileListPanel extends Panel {
 						RepoFileState state = new RepoFileState();
 						state.blobIdent = blobIdent;
 						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state); 
+						PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state); 
 						tag.put("href", urlFor(RepoFilePage.class, params));
 					}
 
@@ -242,7 +242,7 @@ public abstract class FileListPanel extends Panel {
 
 			@Override
 			protected String load() {
-				Blob blob = repoModel.getObject().getBlob(readmeModel.getObject());
+				Blob blob = depotModel.getObject().getBlob(readmeModel.getObject());
 				Blob.Text text = blob.getText();
 				if (text != null)
 					return text.getContent();
@@ -265,7 +265,7 @@ public abstract class FileListPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(FileListPanel.class, "file-list.css")));
 		
-		PageParameters params = LastCommitsResource.paramsOf(repoModel.getObject(), directory.revision, directory.path); 
+		PageParameters params = LastCommitsResource.paramsOf(depotModel.getObject(), directory.revision, directory.path); 
 		String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
 		response.render(OnDomReadyHeaderItem.forScript(
 				String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl)));
@@ -274,14 +274,14 @@ public abstract class FileListPanel extends Panel {
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent file);
 	
 	private ObjectId getCommitId() {
-		return repoModel.getObject().getObjectId(directory.revision);
+		return depotModel.getObject().getObjectId(directory.revision);
 	}
 
 	@Override
 	protected void onDetach() {
 		childrenModel.detach();
 		readmeModel.detach();		
-		repoModel.detach();
+		depotModel.detach();
 		requestModel.detach();
 		
 		super.onDetach();

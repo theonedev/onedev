@@ -34,10 +34,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -58,8 +58,8 @@ import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.SearchManager;
@@ -179,10 +179,10 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	public RepoFilePage(final PageParameters params) {
 		super(params);
 		
-		if (!getRepository().git().hasCommits()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+		if (!getDepot().git().hasCommits()) 
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 		
-		trait.repoId = getRepository().getId();
+		trait.depotId = getDepot().getId();
 		
 		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		blobIdent.revision = params.get(PARAM_REVISION).toString();
@@ -198,7 +198,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			
 			blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
 			if (blobIdent.revision == null)
-				blobIdent.revision = getRepository().getDefaultBranch();
+				blobIdent.revision = getDepot().getDefaultBranch();
 
 			if (requestId != null && !GitUtils.isHash(blobIdent.revision))
 				throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
@@ -207,10 +207,10 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		trait.revision = blobIdent.revision;
 		
 		if (blobIdent.path != null) {
-			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-					RevWalk revWalk = new RevWalk(jgitRepo)) {
-				RevTree revTree = getRepository().getRevCommit(getCommitId(), true).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
+			try (	Repository repository = getDepot().openRepository();
+					RevWalk revWalk = new RevWalk(repository)) {
+				RevTree revTree = getDepot().getRevCommit(getCommitId(), true).getTree();
+				TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
 				if (treeWalk == null) {
 					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path
 							+ "' in revision '" + blobIdent.revision + "'");
@@ -240,7 +240,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 						null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 				try {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					queryHits = searchManager.search(repoModel.getObject(), blobIdent.revision, query);
+					queryHits = searchManager.search(depotModel.getObject(), blobIdent.revision, query);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}								
@@ -251,14 +251,14 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private ObjectId getCommitId() {
-		return getRepository().getObjectId(blobIdent.revision);
+		return getDepot().getObjectId(blobIdent.revision);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new InstantSearchPanel("instantSearch", repoModel, requestModel, new AbstractReadOnlyModel<String>() {
+		add(new InstantSearchPanel("instantSearch", depotModel, requestModel, new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -286,7 +286,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 			@Override
 			protected Component newContent(String id) {
-				return new AdvancedSearchPanel(id, repoModel, new AbstractReadOnlyModel<String>() {
+				return new AdvancedSearchPanel(id, depotModel, new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -368,8 +368,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				super.onConfigure();
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				if (!indexManager.isIndexed(getRepository(), blobIdent.revision)) {
-					GitPlex.getInstance(IndexManager.class).index(getRepository(), blobIdent.revision);
+				if (!indexManager.isIndexed(getDepot(), blobIdent.revision)) {
+					GitPlex.getInstance(IndexManager.class).index(getDepot(), blobIdent.revision);
 					setVisible(true);
 				} else {
 					setVisible(false);
@@ -450,7 +450,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			callback = null;
 		}
 		
-		Component fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, repoModel, requestModel, blobIdent, callback) {
+		Component fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, depotModel, requestModel, blobIdent, callback) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
@@ -495,7 +495,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				return new LastCommitPanel(markupId, repoModel, blobIdent);
+				return new LastCommitPanel(markupId, depotModel, blobIdent);
 			}
 
 		};
@@ -523,20 +523,20 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			final String refName = GitUtils.branch2ref(blobIdent.revision);
 			newPathRef = new AtomicReference<>(blobIdent.isTree()?null:blobIdent.path);			
 			fileViewer = new FileEditPanel(
-					FILE_VIEWER_ID, repoModel, refName, 
+					FILE_VIEWER_ID, depotModel, refName, 
 					blobIdent.isTree()?null:blobIdent.path, 
-					blobIdent.isTree()?"":getRepository().getBlob(blobIdent).getText().getContent(), 
-							getRepository().getObjectId(blobIdent.revision), mark, clientState) {
+					blobIdent.isTree()?"":getDepot().getBlob(blobIdent).getText().getContent(), 
+							getDepot().getObjectId(blobIdent.revision), mark, clientState) {
  
 				@Override
 				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-					Repository repository = getRepository();
+					Depot depot = getDepot();
 					String branch = blobIdent.revision;
-					repository.cacheObjectId(branch, newCommitId);
+					depot.cacheObjectId(branch, newCommitId);
 					BlobIdent committed = new BlobIdent(
 							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 		    		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-		    			listener.onRefUpdate(repository, refName, newCommitId.name());
+		    			listener.onRefUpdate(depot, refName, newCommitId.name());
 
 	    			RepoFileState state = getState();
 	    			state.blobIdent = committed;
@@ -573,19 +573,19 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				
 			};
 			
-			fileViewer = new EditSavePanel(FILE_VIEWER_ID, repoModel, refName, blobIdent.path, 
-					null, getRepository().getObjectId(blobIdent.revision), cancelListener) {
+			fileViewer = new EditSavePanel(FILE_VIEWER_ID, depotModel, refName, blobIdent.path, 
+					null, getDepot().getObjectId(blobIdent.revision), cancelListener) {
 
 				@Override
 				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-					Repository repository = getRepository();
+					Depot depot = getDepot();
 					String branch = blobIdent.revision;
-					repository.cacheObjectId(branch, newCommitId);
-					try (	FileRepository jgitRepo = repository.openAsJGitRepo();
-							RevWalk revWalk = new RevWalk(jgitRepo)) {
-						RevTree revTree = getRepository().getRevCommit(newCommitId, true).getTree();
+					depot.cacheObjectId(branch, newCommitId);
+					try (	Repository repository = depot.openRepository();
+							RevWalk revWalk = new RevWalk(repository)) {
+						RevTree revTree = getDepot().getRevCommit(newCommitId, true).getTree();
 						String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
-						while (TreeWalk.forPath(jgitRepo, parentPath, revTree) == null) {
+						while (TreeWalk.forPath(repository, parentPath, revTree) == null) {
 							if (parentPath.contains("/")) {
 								parentPath = StringUtils.substringBeforeLast(parentPath, "/");
 							} else {
@@ -594,7 +594,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 							}
 						}
 						for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			    			listener.onRefUpdate(repository, refName, newCommitId.name());
+			    			listener.onRefUpdate(depot, refName, newCommitId.name());
 						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 						RepoFileState state = getState();
 						state.blobIdent = parentBlobIdent;
@@ -609,7 +609,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				
 			};
 		} else if (blobIdent.path == null || blobIdent.isTree()) {
-			fileViewer = new FileListPanel(FILE_VIEWER_ID, repoModel, requestModel, blobIdent) {
+			fileViewer = new FileListPanel(FILE_VIEWER_ID, depotModel, requestModel, blobIdent) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
@@ -629,7 +629,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), getState());
+		PageParameters params = paramsOf(getDepot(), getState());
 		CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 		pushState(target, url.toString(), getState());
 	}
@@ -661,10 +661,10 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 		state.mark = null;
 		
 		if (state.blobIdent.path != null) {
-			try (	FileRepository jgitRepo = getRepository().openAsJGitRepo();
-					RevWalk revWalk = new RevWalk(jgitRepo)) {
-				RevTree revTree = getRepository().getRevCommit(revision, true).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
+			try (	Repository repository = getDepot().openRepository();
+					RevWalk revWalk = new RevWalk(repository)) {
+				RevTree revTree = getDepot().getRevCommit(revision, true).getTree();
+				TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
 				if (treeWalk != null) {
 					state.blobIdent.mode = treeWalk.getRawMode(0);
 				} else {
@@ -682,13 +682,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
-		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, repoModel, blobIdent.revision, true) {
+		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, depotModel, blobIdent.revision, true) {
 
 			@Override
 			protected String getRevisionUrl(String revision) {
 				RepoFileState state = new RepoFileState();
 				state.blobIdent.revision = revision;
-				PageParameters params = RepoFilePage.paramsOf(repoModel.getObject(), state);
+				PageParameters params = RepoFilePage.paramsOf(depotModel.getObject(), state);
 				return urlFor(RepoFilePage.class, params).toString();
 			}
 
@@ -708,7 +708,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	
 	private void newDownloadLink(AjaxRequestTarget target) {
 		ResourceLink<Void> link = new ResourceLink<Void>("download", new ArchiveResourceReference(), 
-				ArchiveResource.paramsOf(getRepository(), blobIdent.revision));
+				ArchiveResource.paramsOf(getDepot(), blobIdent.revision));
 		link.setOutputMarkupId(true);
 		if (target != null) { 
 			replace(link);
@@ -753,8 +753,8 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 				new CssResourceReference(RepoFilePage.class, "repo-file.css")));
 	}
 
-	public static PageParameters paramsOf(Repository repository, RepoFileState state) {
-		PageParameters params = paramsOf(repository);
+	public static PageParameters paramsOf(Depot depot, RepoFileState state) {
+		PageParameters params = paramsOf(depot);
 		if (state.blobIdent.revision != null)
 			params.set(PARAM_REVISION, state.blobIdent.revision);
 		if (state.blobIdent.path != null)
@@ -819,13 +819,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	}
 	
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RepoFilePage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RepoFilePage.class, paramsOf(depot));
 	}
 	
 	private static class RevisionIndexed implements WebSocketTrait {
 
-		Long repoId;
+		Long depotId;
 		
 		volatile String revision;
 		
@@ -834,7 +834,7 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 			if (trait == null || !(trait instanceof RevisionIndexed))  
 				return false;  
 			RevisionIndexed other = (RevisionIndexed) trait;  
-		    return Objects.equal(repoId, other.repoId) && Objects.equal(revision, other.revision);
+		    return Objects.equal(depotId, other.depotId) && Objects.equal(revision, other.revision);
 		}
 		
 	}
@@ -850,15 +850,15 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 	public static class IndexedListener implements IndexListener {
 
 		@Override
-		public void commitIndexed(Repository repository, String revision) {
+		public void commitIndexed(Depot depot, String revision) {
 			RevisionIndexed trait = new RevisionIndexed();
-			trait.repoId = repository.getId();
+			trait.depotId = depot.getId();
 			trait.revision = revision;
 			WebSocketRenderBehavior.requestToRender(trait);
 		}
 
 		@Override
-		public void indexRemoving(Repository repository) {
+		public void indexRemoving(Depot depot) {
 		}
 		
 	}
@@ -948,13 +948,13 @@ public class RepoFilePage extends RepositoryPage implements BlobViewContext {
 
 	@Override
 	public boolean isOnBranch() {
-		return getRepository().getRefs(Constants.R_HEADS).containsKey(blobIdent.revision);
+		return getDepot().getRefs(Constants.R_HEADS).containsKey(blobIdent.revision);
 	}
 
 	@Override
 	public boolean isAtSourceBranchHead() {
 		PullRequest request = getPullRequest();
-		return request != null && request.getSourceRepo() != null 
+		return request != null && request.getSourceDepot() != null 
 				&& blobIdent.revision.equals(request.getSource().getObjectName(false)); 
 	}
 	

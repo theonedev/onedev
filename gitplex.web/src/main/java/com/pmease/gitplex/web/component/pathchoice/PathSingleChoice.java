@@ -16,7 +16,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;
 import com.pmease.gitplex.web.page.repository.RepositoryPage;
 
@@ -56,14 +56,14 @@ public class PathSingleChoice extends FormComponentPanel<String> {
 			@Override
 			protected Component newContent(String id) {
 				RepositoryPage page = (RepositoryPage) getPage();
-				String defaultBranch = page.getRepository().getDefaultBranch();
+				String defaultBranch = page.getDepot().getDefaultBranch();
 				
 				if (defaultBranch != null) {
-					return new PathSelector(id, new AbstractReadOnlyModel<Repository>() {
+					return new PathSelector(id, new AbstractReadOnlyModel<Depot>() {
 
 						@Override
-						public Repository getObject() {
-							return ((RepositoryPage) getPage()).getRepository();
+						public Depot getObject() {
+							return ((RepositoryPage) getPage()).getDepot();
 						}
 						
 					}, GitUtils.branch2ref(defaultBranch), pathTypes) {

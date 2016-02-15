@@ -24,8 +24,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -43,8 +43,8 @@ import com.pmease.commons.git.exception.ObsoleteCommitException;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
@@ -56,7 +56,7 @@ import jersey.repackaged.com.google.common.base.Objects;
 @SuppressWarnings("serial")
 public abstract class EditSavePanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> depotModel;
 	
 	private final String refName;
 	
@@ -74,12 +74,12 @@ public abstract class EditSavePanel extends Panel {
 	
 	private BlobChange change;
 	
-	public EditSavePanel(String id, IModel<Repository> repoModel, String refName, 
+	public EditSavePanel(String id, IModel<Depot> repoModel, String refName, 
 			@Nullable String oldPath, @Nullable PathAndContent newFile, 
 			ObjectId prevCommitId, @Nullable CancelListener cancelListener) {
 		super(id);
 	
-		this.repoModel = repoModel;
+		this.depotModel = repoModel;
 		this.refName = refName;
 		this.fileEdit = new FileEdit(oldPath, newFile);
 		this.cancelListener = cancelListener;
@@ -125,7 +125,7 @@ public abstract class EditSavePanel extends Panel {
 		changedContainer.setVisible(change != null);
 		changedContainer.setOutputMarkupPlaceholderTag(true);
 		if (change != null) {
-			changedContainer.add(new BlobDiffPanel("changes", repoModel, 
+			changedContainer.add(new BlobDiffPanel("changes", depotModel, 
 					new Model<PullRequest>(null), new Model<Comment>(null), change, DiffMode.UNIFIED));
 		} else {
 			changedContainer.add(new WebMarkupContainer("changes"));
@@ -221,7 +221,7 @@ public abstract class EditSavePanel extends Panel {
 					EditSavePanel.this.error("Please specify file name.");
 					target.add(feedback);
 				} else {
-					try (FileRepository jgitRepo = repoModel.getObject().openAsJGitRepo()) {
+					try (Repository repository = depotModel.getObject().openRepository()) {
 						String commitMessage = summaryCommitMessage;
 						if (StringUtils.isBlank(commitMessage))
 							commitMessage = getDefaultCommitMessage();
@@ -232,18 +232,18 @@ public abstract class EditSavePanel extends Panel {
 						ObjectId newCommitId = null;
 						while(newCommitId == null) {
 							try {
-								newCommitId = fileEdit.commit(jgitRepo, refName, 
+								newCommitId = fileEdit.commit(repository, refName, 
 										prevCommitId, prevCommitId, user.asPerson(), commitMessage);
 							} catch (ObsoleteCommitException e) {
 								currentCommitId = e.getOldCommitId();
-								try (RevWalk revWalk = new RevWalk(jgitRepo)) {
+								try (RevWalk revWalk = new RevWalk(repository)) {
 									RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
 									RevCommit currentCommit = revWalk.parseCommit(currentCommitId);
 									prevCommitId = currentCommitId;
 
 									String oldPath = fileEdit.getOldPath();
 									if (oldPath != null) {
-										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, oldPath, 
+										TreeWalk treeWalk = TreeWalk.forPath(repository, oldPath, 
 												prevCommit.getTree().getId(), currentCommit.getTree().getId());
 										if (treeWalk != null) {
 											if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
@@ -267,7 +267,7 @@ public abstract class EditSavePanel extends Panel {
 										}
 									}
 									if (newFile != null && !newFile.getPath().equals(oldPath)) { 
-										TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, newFile.getPath(), 
+										TreeWalk treeWalk = TreeWalk.forPath(repository, newFile.getPath(), 
 												prevCommit.getTree().getId(), currentCommit.getTree().getId());
 										if (treeWalk != null) {
 											if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
@@ -346,7 +346,7 @@ public abstract class EditSavePanel extends Panel {
 
 			@Override
 			public Blob getBlob(BlobIdent blobIdent) {
-				return repoModel.getObject().getBlob(blobIdent);
+				return depotModel.getObject().getBlob(blobIdent);
 			}
 
 			@Override
@@ -381,7 +381,7 @@ public abstract class EditSavePanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}

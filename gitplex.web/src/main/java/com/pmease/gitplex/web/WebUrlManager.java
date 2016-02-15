@@ -8,7 +8,7 @@ import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.CommentReply;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @Singleton
@@ -23,7 +23,7 @@ public class WebUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getRepository()) + "/pulls/" + request.getId() + "/overview";
+		return urlFor(request.getTarget().getDepot()) + "/pulls/" + request.getId() + "/overview";
 	}
 
 	@Override
@@ -32,8 +32,8 @@ public class WebUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(Repository repository) {
-		return urlFor(repository.getOwner()) + "/" + repository.getName();
+	public String urlFor(Depot depot) {
+		return urlFor(depot.getOwner()) + "/" + depot.getName();
 	}
 	
 	@Override

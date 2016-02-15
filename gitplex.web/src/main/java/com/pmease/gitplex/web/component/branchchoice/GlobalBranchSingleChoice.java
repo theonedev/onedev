@@ -5,14 +5,14 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.repochoice.RepositoryChoice;
 
 @SuppressWarnings("serial")
 public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final boolean allowEmpty;
 	
@@ -29,24 +29,24 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 	public GlobalBranchSingleChoice(String id, IModel<String> branchModel, boolean allowEmpty) {
 		super(id, branchModel);
 		
-		repoModel = new IModel<Repository>() {
+		repoModel = new IModel<Depot>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Repository getObject() {
+			public Depot getObject() {
 				String branchId = getBranchId();
 				if (branchId != null) 
-					return new RepoAndBranch(branchId).getRepository();
+					return new DepotAndBranch(branchId).getDepot();
 				else 
 					return null;
 			}
 
 			@Override
-			public void setObject(Repository object) {
-				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).toString());
+			public void setObject(Depot object) {
+				setBranchId(new DepotAndBranch(object, object.getDefaultBranch()).toString());
 			}
 			
 		};
@@ -82,12 +82,12 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public String getObject() {
-				return new RepoAndBranch(GlobalBranchSingleChoice.this.getModelObject()).getBranch();
+				return new DepotAndBranch(GlobalBranchSingleChoice.this.getModelObject()).getBranch();
 			}
 
 			@Override
 			public void setObject(String object) {
-				GlobalBranchSingleChoice.this.setModelObject(new RepoAndBranch(repoModel.getObject(), object).toString());
+				GlobalBranchSingleChoice.this.setModelObject(new DepotAndBranch(repoModel.getObject(), object).toString());
 			}
 			
 		}, choiceProvider, allowEmpty));
@@ -114,7 +114,7 @@ public class GlobalBranchSingleChoice extends FormComponentPanel<String> {
 		String branchId;
 		String branch = branchChoice.getConvertedInput();
 		if (branch != null) {
-			branchId = new RepoAndBranch(repoModel.getObject(), branch).toString();
+			branchId = new DepotAndBranch(repoModel.getObject(), branch).toString();
 		} else {
 			branchId = null;
 		}

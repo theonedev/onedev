@@ -25,13 +25,13 @@ import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends ANTLRAssistBehavior {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private static final String VALUE_OPEN = "(";
 	
@@ -42,7 +42,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
 			"4 weeks ago", "1 month 2 days ago", "1 year ago"}; 
 	
-	public QueryAssistBehavior(IModel<Repository> repoModel) {
+	public QueryAssistBehavior(IModel<Depot> repoModel) {
 		super(CommitQueryParser.class, "query");
 		this.repoModel = repoModel;
 	}

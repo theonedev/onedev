@@ -21,7 +21,7 @@ public class MarkdownFilePanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), false));
 	}
 

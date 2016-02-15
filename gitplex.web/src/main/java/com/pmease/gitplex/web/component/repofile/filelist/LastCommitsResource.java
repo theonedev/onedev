@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.avatar.AvatarManager;
@@ -58,7 +58,7 @@ class LastCommitsResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				Repository repo = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
+				Depot repo = GitPlex.getInstance(Dao.class).load(Depot.class, repoId);
 				
 				if (!SecurityUtils.canPull(repo))
 					throw new UnauthorizedException();
@@ -106,9 +106,9 @@ class LastCommitsResource extends AbstractResource {
 		return response;
 	}
 
-	public static PageParameters paramsOf(Repository repository, String revision, @Nullable String path) {
+	public static PageParameters paramsOf(Depot depot, String revision, @Nullable String path) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_REPO, repository.getId());
+		params.set(PARAM_REPO, depot.getId());
 		params.set(PARAM_REVISION, revision);
 		if (path != null)
 			params.set(PARAM_PATH, path);

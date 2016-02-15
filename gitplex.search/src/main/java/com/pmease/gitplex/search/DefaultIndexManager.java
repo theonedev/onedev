@@ -49,12 +49,12 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -75,7 +75,7 @@ import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {
@@ -304,20 +304,20 @@ public class DefaultIndexManager implements IndexManager {
 		return config;
 	}
 	
-	private String getSequentialExecutorKey(Repository repository) {
-		return "repository-" + repository.getId() + "-indexBlob";
+	private String getSequentialExecutorKey(Depot depot) {
+		return "repository-" + depot.getId() + "-indexBlob";
 	}
 	
 	@Override
-	public Future<IndexResult> index(Repository repository, final String revision) {
-		final Long repoId = repository.getId();
+	public Future<IndexResult> index(Depot depot, final String revision) {
+		final Long depotId = depot.getId();
 		final int priority;
 		if (RequestCycle.get() != null)
 			priority = UI_INDEXING_PRIORITY;
 		else
 			priority = BACKEND_INDEXING_PRIORITY;
 		
-		return sequentialWorkManager.submit(getSequentialExecutorKey(repository), 
+		return sequentialWorkManager.submit(getSequentialExecutorKey(depot), 
 				new PrioritizedCallable<IndexResult>(priority) {
 
 			@Override
@@ -331,17 +331,17 @@ public class DefaultIndexManager implements IndexManager {
 
 								@Override
 								public IndexResult call() throws Exception {
-									Repository repository = dao.load(Repository.class, repoId);
-									AnyObjectId commitId = repository.getObjectId(revision);
-									logger.debug("Indexing commit '{}' of repository '{}'...", commitId.getName(), repository.getFQN());
+									Depot depot = dao.load(Depot.class, depotId);
+									AnyObjectId commitId = depot.getObjectId(revision);
+									logger.debug("Indexing commit '{}' of repository '{}'...", commitId.getName(), depot.getFQN());
 									IndexResult indexResult;
-									File indexDir = storageManager.getIndexDir(repository);
+									File indexDir = storageManager.getIndexDir(depot);
 									try (Directory directory = FSDirectory.open(indexDir)) {
 										if (DirectoryReader.indexExists(directory)) {
 											try (IndexReader reader = DirectoryReader.open(directory)) {
 												IndexSearcher searcher = new IndexSearcher(reader);
 												try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-													try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
+													try (Repository jgitRepo = depot.openRepository()) {
 														indexResult = index(jgitRepo, commitId, writer, searcher);
 														writer.commit();
 													} catch (Exception e) {
@@ -352,8 +352,8 @@ public class DefaultIndexManager implements IndexManager {
 											}
 										} else {
 											try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-												try (FileRepository jgitRepo = repository.openAsJGitRepo()) {
-													indexResult = index(jgitRepo, commitId, writer, null);
+												try (Repository repository = depot.openRepository()) {
+													indexResult = index(repository, commitId, writer, null);
 													writer.commit();
 												} catch (Exception e) {
 													writer.rollback();
@@ -363,10 +363,10 @@ public class DefaultIndexManager implements IndexManager {
 										}
 									}
 									logger.debug("Commit {} indexed for repository {} (checked blobs: {}, indexed blobs: {})", 
-											commitId.getName(), repository.getFQN(), indexResult.getChecked(), indexResult.getIndexed());
+											commitId.getName(), depot.getFQN(), indexResult.getChecked(), indexResult.getIndexed());
 									
 									for (IndexListener listener: listeners)
-										listener.commitIndexed(repository, revision);
+										listener.commitIndexed(depot, revision);
 									
 									return indexResult;
 								}
@@ -395,9 +395,9 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public boolean isIndexed(Repository repository, String revision) {
-		AnyObjectId commitId = repository.getObjectId(revision);
-		File indexDir = storageManager.getIndexDir(repository);
+	public boolean isIndexed(Depot depot, String revision) {
+		AnyObjectId commitId = depot.getObjectId(revision);
+		File indexDir = storageManager.getIndexDir(depot);
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
@@ -413,22 +413,22 @@ public class DefaultIndexManager implements IndexManager {
 	}
 	
 	@Override
-	public void beforeDelete(Repository repository) {
+	public void beforeDelete(Depot depot) {
 	}
 
 	@Override
-	public void afterDelete(Repository repository) {
+	public void afterDelete(Depot depot) {
 		for (IndexListener listener: listeners)
-			listener.indexRemoving(repository);
-		FileUtils.deleteDir(storageManager.getIndexDir(repository));
+			listener.indexRemoving(depot);
+		FileUtils.deleteDir(storageManager.getIndexDir(depot));
 	}
 
 	@Override
-	public void onRefUpdate(Repository repository, String refName, final String newCommitHash) {
+	public void onRefUpdate(Depot depot, String refName, final String newCommitHash) {
 		// only index branches at back end, tags will be indexed on demand from GUI 
 		// as many tags might be pushed all at once when the repository is imported 
 		if (refName.startsWith(Constants.R_HEADS) && newCommitHash != null)
-			index(repository, newCommitHash);
+			index(depot, newCommitHash);
 	}
 	
 }

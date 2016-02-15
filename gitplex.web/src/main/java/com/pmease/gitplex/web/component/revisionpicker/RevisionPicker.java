@@ -10,19 +10,19 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.modal.ModalPanel;
-import com.pmease.gitplex.core.model.RepoAndRevision;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndRevision;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 public abstract class RevisionPicker extends DropdownLink {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private String revision;
 	
 	private final boolean canCreateRef;
 	
-	public RevisionPicker(String id, IModel<Repository> repoModel, String revision, boolean canCreateRef) {
+	public RevisionPicker(String id, IModel<Depot> repoModel, String revision, boolean canCreateRef) {
 		super(id);
 		
 		this.repoModel = repoModel;
@@ -30,7 +30,7 @@ public abstract class RevisionPicker extends DropdownLink {
 		this.canCreateRef = canCreateRef;
 	}
 	
-	public RevisionPicker(String id, IModel<Repository> repoModel, String revision) {
+	public RevisionPicker(String id, IModel<Depot> repoModel, String revision) {
 		this(id, repoModel, revision, false);
 	}
 
@@ -71,7 +71,7 @@ public abstract class RevisionPicker extends DropdownLink {
 	@Override
 	public IModel<?> getBody() {
 		String iconClass;
-		RepoAndRevision repoAndRevision = new RepoAndRevision(repoModel.getObject(), revision);
+		DepotAndRevision repoAndRevision = new DepotAndRevision(repoModel.getObject(), revision);
 		String label = repoAndRevision.getBranch();
 		if (label != null) {
 			iconClass = "fa fa-ext fa-branch";

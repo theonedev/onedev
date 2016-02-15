@@ -29,7 +29,7 @@ import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.menu.CheckItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;
@@ -39,7 +39,7 @@ public abstract class DiffOptionPanel extends Panel {
 
 	private static final String COOKIE_DIFF_MODE = "gitplex.diff.mode";
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final String newRev;
 	
@@ -47,7 +47,7 @@ public abstract class DiffOptionPanel extends Panel {
 	
 	private DiffMode diffMode;
 	
-	public DiffOptionPanel(String id, IModel<Repository> repoModel, String newRev) {
+	public DiffOptionPanel(String id, IModel<Depot> repoModel, String newRev) {
 		super(id);
 		
 		this.repoModel = repoModel;

@@ -51,12 +51,12 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 		PullRequest request = update.getRequest();
 		String sourceHead = request.getSource().getObjectName();
 
-		if (!request.getTargetRepo().equals(request.getSourceRepo())) {
-			request.getTargetRepo().git().fetch(
-					request.getSourceRepo().git(), 
+		if (!request.getTargetDepot().equals(request.getSourceDepot())) {
+			request.getTargetDepot().git().fetch(
+					request.getSourceDepot().git(), 
 					"+" + request.getSourceRef() + ":" + update.getHeadRef()); 
 		} else {
-			request.getTargetRepo().git().updateRef(update.getHeadRef(), 
+			request.getTargetDepot().git().updateRef(update.getHeadRef(), 
 					sourceHead, null, null);
 		}
 		

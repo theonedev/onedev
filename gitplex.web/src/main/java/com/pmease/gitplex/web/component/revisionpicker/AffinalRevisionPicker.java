@@ -11,29 +11,29 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.repopicker.RepositoryPicker;
 import com.pmease.gitplex.web.model.AffinalRepositoriesModel;
 
 @SuppressWarnings("serial")
 public abstract class AffinalRevisionPicker extends Panel {
 
-	private Long repoId;
+	private Long depotId;
 	
 	private String revision;
 	
 	public AffinalRevisionPicker(String id, Long repoId, String revision) {
 		super(id);
 		
-		this.repoId = repoId;
+		this.depotId = repoId;
 		this.revision = revision;
 	}
 	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
-		RevisionPicker revisionPicker = new RevisionPicker("revisionPicker", new LoadableDetachableModel<Repository>() {
+		RevisionPicker revisionPicker = new RevisionPicker("revisionPicker", new LoadableDetachableModel<Depot>() {
 
 			@Override
-			protected Repository load() {
+			protected Depot load() {
 				return getRepository();
 			}
 			
@@ -53,22 +53,22 @@ public abstract class AffinalRevisionPicker extends Panel {
 		}
 	}
 	
-	private Repository getRepository() {
-		return GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
+	private Depot getRepository() {
+		return GitPlex.getInstance(Dao.class).load(Depot.class, depotId);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RepositoryPicker("repositoryPicker", new AffinalRepositoriesModel(repoId), repoId) {
+		add(new RepositoryPicker("repositoryPicker", new AffinalRepositoriesModel(depotId), depotId) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Repository repository) {
-				repoId = repository.getId();
-				revision = repository.getDefaultBranch();
+			protected void onSelect(AjaxRequestTarget target, Depot depot) {
+				depotId = depot.getId();
+				revision = depot.getDefaultBranch();
 				newRevisionPicker(target);
-				AffinalRevisionPicker.this.onSelect(target, repository, revision);
+				AffinalRevisionPicker.this.onSelect(target, depot, revision);
 			}
 			
 		});
@@ -84,6 +84,6 @@ public abstract class AffinalRevisionPicker extends Panel {
 				AffinalRevisionPicker.class, "revision-picker.css")));
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, Repository repository, String revision);
+	protected abstract void onSelect(AjaxRequestTarget target, Depot depot, String revision);
 	
 }

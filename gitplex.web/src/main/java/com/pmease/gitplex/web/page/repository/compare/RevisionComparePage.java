@@ -36,9 +36,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.RepoAndRevision;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.model.DepotAndRevision;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
@@ -67,9 +67,9 @@ public class RevisionComparePage extends RepositoryPage {
 	
 	private IModel<String> mergeBaseModel;
 
-	private RepoAndRevision target;
+	private DepotAndRevision target;
 	
-	private RepoAndRevision source;
+	private DepotAndRevision source;
 	
 	private DiffOptionPanel diffOption;
 	
@@ -79,9 +79,9 @@ public class RevisionComparePage extends RepositoryPage {
 	
 	private String path;
 	
-	public static PageParameters paramsOf(Repository repository, RepoAndRevision target, 
-			RepoAndRevision source, @Nullable String path) {
-		PageParameters params = paramsOf(repository);
+	public static PageParameters paramsOf(Depot depot, DepotAndRevision target, 
+			DepotAndRevision source, @Nullable String path) {
+		PageParameters params = paramsOf(depot);
 		params.set(PARAM_TARGET, target.toString());
 		params.set(PARAM_SOURCE, source.toString());
 		if (path != null)
@@ -92,21 +92,21 @@ public class RevisionComparePage extends RepositoryPage {
 	public RevisionComparePage(final PageParameters params) {
 		super(params);
 		
-		if (!getRepository().git().hasCommits()) 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+		if (!getDepot().git().hasCommits()) 
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 
 		String str = params.get(PARAM_SOURCE).toString();
 		if (str != null) {
-			source = new RepoAndRevision(str);
+			source = new DepotAndRevision(str);
 		} else {
-			source = new RepoAndRevision(getRepository(), getRepository().getDefaultBranch());
+			source = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
 		
 		str = params.get(PARAM_TARGET).toString();
 		if (str != null) {
-			target = new RepoAndRevision(str);
+			target = new DepotAndRevision(str);
 		} else {
-			target = new RepoAndRevision(getRepository(), getRepository().getDefaultBranch());
+			target = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
 		
 		path = params.get(PARAM_PATH).toString();
@@ -115,8 +115,8 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected PullRequest load() {
-				RepoAndBranch target = new RepoAndBranch(RevisionComparePage.this.target.toString());
-				RepoAndBranch source = new RepoAndBranch(RevisionComparePage.this.source.toString());
+				DepotAndBranch target = new DepotAndBranch(RevisionComparePage.this.target.toString());
+				DepotAndBranch source = new DepotAndBranch(RevisionComparePage.this.source.toString());
 				return GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
 			}
 			
@@ -126,8 +126,8 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected String load() {
-				Repository targetRepo = target.getRepository();
-				Repository sourceRepo = source.getRepository();
+				Depot targetRepo = target.getDepot();
+				Depot sourceRepo = source.getDepot();
 				if (!targetRepo.equals(sourceRepo)) {
 					Git sandbox = new Git(FileUtils.createTempDir());
 					try {
@@ -136,7 +136,7 @@ public class RevisionComparePage extends RepositoryPage {
 						sandbox.fetch(sourceRepo.git(), source.getRevision());
 						return sandbox.calcMergeBase(target.getCommit().name(), source.getCommit().name());
 					} finally {
-						FileUtils.deleteDir(sandbox.repoDir());
+						FileUtils.deleteDir(sandbox.depotDir());
 					}
 				} else {
 					return targetRepo.getMergeBase(target.getRevision(), source.getRevision()).name();
@@ -149,7 +149,7 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			protected List<Commit> load() {
-				Repository sourceRepo = source.getRepository();
+				Depot sourceRepo = source.getDepot();
 				List<Commit> commits = sourceRepo.git().log(mergeBaseModel.getObject(), 
 						source.getCommit().name(), null, 0, 0, false);
 				return commits;
@@ -165,22 +165,22 @@ public class RevisionComparePage extends RepositoryPage {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalRevisionPicker("target", target.getRepoId(), target.getRevision()) { 
+		add(new AffinalRevisionPicker("target", target.getDepotId(), target.getRevision()) { 
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
-				PageParameters params = paramsOf(getRepository(), new RepoAndRevision(repository, revision), source, path);
+			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
+				PageParameters params = paramsOf(getDepot(), new DepotAndRevision(depot, revision), source, path);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		});
 
-		add(new AffinalRevisionPicker("source", source.getRepoId(), source.getRevision()) { 
+		add(new AffinalRevisionPicker("source", source.getDepotId(), source.getRevision()) { 
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Repository repository, String revision) {
-				PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, 
-						new RepoAndRevision(repository, revision), path);
+			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
+				PageParameters params = paramsOf(getDepot(), RevisionComparePage.this.target, 
+						new DepotAndRevision(depot, revision), path);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
@@ -190,7 +190,7 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(RevisionComparePage.class,paramsOf(getRepository(), source, target, path));
+				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), source, target, path));
 			}
 
 		});
@@ -199,9 +199,9 @@ public class RevisionComparePage extends RepositoryPage {
 
 			@Override
 			public void onClick() {
-				RepoAndBranch target = new RepoAndBranch(RevisionComparePage.this.target.toString());
-				RepoAndBranch source = new RepoAndBranch(RevisionComparePage.this.source.toString());
-				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(target.getRepository(), target, source));
+				DepotAndBranch target = new DepotAndBranch(RevisionComparePage.this.target.toString());
+				DepotAndBranch source = new DepotAndBranch(RevisionComparePage.this.source.toString());
+				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(target.getDepot(), target, source));
 			}
 
 			@Override
@@ -347,11 +347,11 @@ public class RevisionComparePage extends RepositoryPage {
 				
 			};
 			
-			diffOption = new DiffOptionPanel("diffOption", new AbstractReadOnlyModel<Repository>() {
+			diffOption = new DiffOptionPanel("diffOption", new AbstractReadOnlyModel<Depot>() {
 
 				@Override
-				public Repository getObject() {
-					return RevisionComparePage.this.getRepository();
+				public Depot getObject() {
+					return RevisionComparePage.this.getDepot();
 				}
 				
 			}, RevisionComparePage.this.source.getRevision()) {
@@ -380,7 +380,7 @@ public class RevisionComparePage extends RepositoryPage {
 			commitsTab.setSelected(false);
 			filesTab.setSelected(true);
 		} else {
-			tabPanel = new CommitListPanel(TAB_PANEL_ID, repoModel, commitsModel){
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel){
 
 				@Override
 				protected void onConfigure() {
@@ -403,7 +403,7 @@ public class RevisionComparePage extends RepositoryPage {
 	}
 	
 	private void newRevDiffPanel(final WebMarkupContainer tabPanel, @Nullable AjaxRequestTarget target) {
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", repoModel, 
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
 				new Model<PullRequest>(null), new Model<Comment>(null), 
 				mergeBaseModel.getObject(), source.getRevision(), 
 				StringUtils.isBlank(path)?null:path, null, diffOption.getLineProcessor(), 
@@ -427,7 +427,7 @@ public class RevisionComparePage extends RepositoryPage {
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getRepository(), RevisionComparePage.this.target, source, path);
+		PageParameters params = paramsOf(getDepot(), RevisionComparePage.this.target, source, path);
 		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
 		pushState(target, url.toString(), path);
 	}
@@ -450,8 +450,8 @@ public class RevisionComparePage extends RepositoryPage {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RepoBranchesPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RepoBranchesPage.class, paramsOf(depot));
 	}
 
 }

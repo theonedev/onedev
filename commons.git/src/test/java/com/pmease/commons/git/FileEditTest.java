@@ -35,7 +35,7 @@ public class FileEditTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
@@ -64,7 +64,7 @@ public class FileEditTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
@@ -89,7 +89,7 @@ public class FileEditTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
@@ -119,7 +119,7 @@ public class FileEditTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
@@ -145,7 +145,7 @@ public class FileEditTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
@@ -171,7 +171,7 @@ public class FileEditTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
@@ -215,7 +215,7 @@ public class FileEditTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);
@@ -233,7 +233,7 @@ public class FileEditTest extends AbstractGitTest {
 	public void testObsoleteOldCommit() throws IOException {
 		addFileAndCommit("a.java", "a", "add a");
 		
-		try (Repository repo = new FileRepository(new File(git.repoDir(), ".git"))) {
+		try (Repository repo = new FileRepository(new File(git.depotDir(), ".git"))) {
 			String refName = "refs/heads/master";
 			ObjectId oldCommitId = repo.resolve(refName);
 			PersonIdent person = new PersonIdent(repo);

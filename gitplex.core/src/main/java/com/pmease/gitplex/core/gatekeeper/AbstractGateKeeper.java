@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -39,25 +39,25 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public CheckResult checkFile(User user, Repository repository, String branch, String file) {
+	public CheckResult checkFile(User user, Depot depot, String branch, String file) {
 		if (isEnabled())
-			return doCheckFile(user, repository, branch, file);
+			return doCheckFile(user, depot, branch, file);
 		else
 			return ignored();
 	}
 	
 	@Override
-	public CheckResult checkCommit(User user, Repository repository, String branch, String commit) {
+	public CheckResult checkCommit(User user, Depot depot, String branch, String commit) {
 		if (isEnabled())
-			return doCheckCommit(user, repository, branch, commit);
+			return doCheckCommit(user, depot, branch, commit);
 		else
 			return ignored();
 	}
 
 	@Override
-	public CheckResult checkRef(User user, Repository repository, String refName) {
+	public CheckResult checkRef(User user, Depot depot, String refName) {
 		if (isEnabled())
-			return doCheckRef(user, repository, refName);
+			return doCheckRef(user, depot, refName);
 		else
 			return ignored();
 	}
@@ -85,7 +85,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(User user, Repository repository, String branch, String file);
+	protected abstract CheckResult doCheckFile(User user, Depot depot, String branch, String file);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch, without considering enable flag.
@@ -99,7 +99,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckCommit(User user, Repository repository, String branch, String commit);
+	protected abstract CheckResult doCheckCommit(User user, Depot depot, String branch, String commit);
 
 	/**
 	 * Check if specified user can create/delete specified reference in specified repository, 
@@ -107,22 +107,22 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * 
 	 * @param user
 	 *			user to be checked 	
-	 * @param repository
+	 * @param depot
 	 * 			repository to be checked
 	 * @param refName
 	 * 			reference name to be checked
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckRef(User user, Repository repository, String refName);
+	protected abstract CheckResult doCheckRef(User user, Depot depot, String refName);
 	
 	@Override
 	public final Object trim(@Nullable Object context) {
-		Preconditions.checkArgument(context instanceof Repository);
-		return trim((Repository)context);
+		Preconditions.checkArgument(context instanceof Depot);
+		return trim((Depot)context);
 	}
 	
-	protected GateKeeper trim(Repository repository) {
+	protected GateKeeper trim(Depot depot) {
 		return this;
 	}
 

@@ -9,7 +9,7 @@ public class BinaryRenderer implements BlobRenderer {
 
 	@Override
 	public BlobViewPanel render(String panelId, BlobViewContext context, String clientState) {
-		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		
 		if (blob.getText() == null 
 				&& !blob.getMediaType().getType().equalsIgnoreCase("image")) {

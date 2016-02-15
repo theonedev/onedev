@@ -8,12 +8,12 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"team", "repository"})
+		@UniqueConstraint(columnNames={"team", "depot"})
 })
 public class Authorization extends AbstractEntity {
 
@@ -23,15 +23,15 @@ public class Authorization extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Repository repository;
+	private Depot depot;
 	
-	private RepositoryOperation operation = RepositoryOperation.PULL;
+	private DepotOperation operation = DepotOperation.PULL;
 	
-	public RepositoryOperation getOperation() {
+	public DepotOperation getOperation() {
 		return operation;
 	}
 
-	public void setOperation(RepositoryOperation operation) {
+	public void setOperation(DepotOperation operation) {
 		this.operation = operation;
 	}
 
@@ -43,12 +43,12 @@ public class Authorization extends AbstractEntity {
 		this.team = team;
 	}
 	
-	public Repository getRepository() {
-		return repository;
+	public Depot getDepot() {
+		return depot;
 	}
 
-	public void setRepository(Repository repository) {
-		this.repository = repository;
+	public void setDepot(Depot depot) {
+		this.depot = depot;
 	}
 
 }

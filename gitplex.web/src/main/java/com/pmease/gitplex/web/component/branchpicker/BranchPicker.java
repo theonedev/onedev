@@ -7,16 +7,16 @@ import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 public abstract class BranchPicker extends DropdownLink {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private String branch;
 	
-	public BranchPicker(String id, IModel<Repository> repoModel, String branch) {
+	public BranchPicker(String id, IModel<Depot> repoModel, String branch) {
 		super(id);
 		
 		this.repoModel = repoModel;

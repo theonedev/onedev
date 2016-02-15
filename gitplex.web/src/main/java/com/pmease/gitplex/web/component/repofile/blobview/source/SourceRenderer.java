@@ -9,7 +9,7 @@ public class SourceRenderer implements BlobRenderer {
 
 	@Override
 	public BlobViewPanel render(String panelId, BlobViewContext context, String clientState) {
-		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		if (context.getBlobIdent().isFile() 
 				&& blob.getText() != null 
 				&& !context.getBlobIdent().path.endsWith(".md")) {

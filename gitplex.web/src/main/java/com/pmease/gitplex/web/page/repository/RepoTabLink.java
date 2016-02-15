@@ -24,7 +24,7 @@ public class RepoTabLink extends Panel {
 		
 		RepositoryPage page = (RepositoryPage) getPage();
 		Link<Void> link = new BookmarkablePageLink<Void>("link", 
-				tab.getMainPageClass(), RepositoryPage.paramsOf(page.getRepository()));
+				tab.getMainPageClass(), RepositoryPage.paramsOf(page.getDepot()));
 		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
 		
 		link.add(new Label("text", tab.getTitleModel()));

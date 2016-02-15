@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -38,10 +38,10 @@ public class IfSubmitToSpecifiedBranches extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		return checkBranch(request.getTargetRepo(), request.getTargetBranch());
+		return checkBranch(request.getTargetDepot(), request.getTargetBranch());
 	}
 
-	private CheckResult checkBranch(Repository repository, String branch) {
+	private CheckResult checkBranch(Depot depot, String branch) {
 		if (branches.size() > 1) {
 			if (branches.contains(branch))
 				return passed(Lists.newArrayList("Target branch is one of '" + StringUtils.join(branches, ", ") + "'."));
@@ -56,20 +56,20 @@ public class IfSubmitToSpecifiedBranches extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
-		return checkBranch(repository, branch);
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+		return checkBranch(depot, branch);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		return checkBranch(repository, branch);
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+		return checkBranch(depot, branch);
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
 		String branch = GitUtils.ref2branch(refName);
 		if (branch != null)
-			return checkBranch(repository, branch);
+			return checkBranch(depot, branch);
 		else 
 			return ignored();
 	}

@@ -13,16 +13,16 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.model.AffinalRepositoriesModel;
 
 @SuppressWarnings("serial")
-public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Repository> {
+public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Depot> {
 
 	private final Long repoId;
 	
-	private IModel<List<Repository>> affinalReposModel;
+	private IModel<List<Depot>> affinalReposModel;
 
 	public AffinalRepositoryChoiceProvider(Long repoId) {
 		super(Constants.DEFAULT_PAGE_SIZE);
@@ -32,7 +32,7 @@ public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Reposito
 	}
 	
 	@Override
-	public void toJson(Repository choice, JSONWriter writer) throws JSONException {
+	public void toJson(Depot choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId());
 		writer.key("name");
 		String value;
@@ -46,22 +46,22 @@ public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Reposito
 	}
 
 	@Override
-	public Collection<Repository> toChoices(Collection<String> ids) {
-		List<Repository> repositories = Lists.newArrayList();
+	public Collection<Depot> toChoices(Collection<String> ids) {
+		List<Depot> repositories = Lists.newArrayList();
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			repositories.add(dao.load(Repository.class, id));
+			repositories.add(dao.load(Depot.class, id));
 		}
 
 		return repositories;
 	}
 
-	private Repository getRepository() {
-		return GitPlex.getInstance(Dao.class).load(Repository.class, repoId);
+	private Depot getRepository() {
+		return GitPlex.getInstance(Dao.class).load(Depot.class, repoId);
 	}
 	
-	private List<Repository> getAffinalRepositories() {
+	private List<Depot> getAffinalRepositories() {
 		return affinalReposModel.getObject();
 	}
 
@@ -73,14 +73,14 @@ public class AffinalRepositoryChoiceProvider extends ListChoiceProvider<Reposito
 	}
 
 	@Override
-	protected List<Repository> filterList(String term) {
+	protected List<Depot> filterList(String term) {
 		term = term.toLowerCase();
-		List<Repository> repositories = new ArrayList<>();
-		for (Repository repository: getAffinalRepositories()) {
-			if (repository.getOwner().getName().toLowerCase().startsWith(term))
-				repositories.add(repository);
+		List<Depot> depots = new ArrayList<>();
+		for (Depot depot: getAffinalRepositories()) {
+			if (depot.getOwner().getName().toLowerCase().startsWith(term))
+				depots.add(depot);
 		}
-		return repositories;
+		return depots;
 	}
 	
 }

@@ -8,7 +8,7 @@ import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 @Editable(name="Not Composition", order=400, icon="fa-sitemap", category=GateKeeper.CATEGROY_COMPOSITION,
@@ -29,8 +29,8 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 	
 	@Override
-	protected GateKeeper trim(Repository repository) {
-		return (GateKeeper) getGateKeeper().trim(repository);
+	protected GateKeeper trim(Depot depot) {
+		return (GateKeeper) getGateKeeper().trim(depot);
 	}
 
 	@Override

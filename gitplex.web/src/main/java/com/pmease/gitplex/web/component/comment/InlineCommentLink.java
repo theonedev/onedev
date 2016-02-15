@@ -24,7 +24,7 @@ public class InlineCommentLink extends LabelLink<Comment> {
 		if (comment.getBlobIdent().equals(comment.getCompareWith())) {
 			RepoFileState state = new RepoFileState();
 			state.commentId = comment.getId();
-			setResponsePage(RepoFilePage.class, RepoFilePage.paramsOf(comment.getRepository(), state));
+			setResponsePage(RepoFilePage.class, RepoFilePage.paramsOf(comment.getDepot(), state));
 		} else { 
 			setResponsePage(RequestComparePage.class, RequestComparePage.paramsOf(comment));
 		}

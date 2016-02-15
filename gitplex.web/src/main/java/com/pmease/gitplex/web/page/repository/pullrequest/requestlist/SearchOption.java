@@ -13,7 +13,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.editable.UserChoice;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 @Editable
@@ -144,9 +144,9 @@ public class SearchOption implements Serializable {
 			endDate = new Date(Long.valueOf(value));
 	}
 
-	public EntityCriteria<PullRequest> getCriteria(Repository repository) {
+	public EntityCriteria<PullRequest> getCriteria(Depot depot) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(Restrictions.eq("targetRepo", repository));
+		criteria.add(Restrictions.eq("targetDepot", depot));
 		
 		if (status == Status.OPEN) 
 			criteria.add(PullRequest.CriterionHelper.ofOpen());

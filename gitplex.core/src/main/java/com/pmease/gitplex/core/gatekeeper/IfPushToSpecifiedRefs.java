@@ -8,7 +8,7 @@ import com.pmease.commons.util.pattern.WildcardUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @Editable(order=200, icon="fa-ext fa-branch-pattern", description="This gate keeper will be passed if push to specified references.")
@@ -36,21 +36,21 @@ public class IfPushToSpecifiedRefs extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
-		return doCheckRef(request.getSubmitter(), request.getTargetRepo(), request.getTargetRef());
+		return doCheckRef(request.getSubmitter(), request.getTargetDepot(), request.getTargetRef());
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
-		return doCheckRef(user, repository, GitUtils.branch2ref(branch));
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+		return doCheckRef(user, depot, GitUtils.branch2ref(branch));
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		return doCheckRef(user, repository, GitUtils.branch2ref(branch));
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+		return doCheckRef(user, depot, GitUtils.branch2ref(branch));
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
 		if (WildcardUtils.matchPath(getRefPatterns(), refName))
 			return passed(Lists.newArrayList("Target ref matches pattern '" + refPatterns + "'."));
 		else

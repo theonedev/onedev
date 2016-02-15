@@ -51,7 +51,7 @@ import com.pmease.gitplex.core.model.PullRequestReference;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.PullRequestVisit;
 import com.pmease.gitplex.core.model.PullRequestWatch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
@@ -419,7 +419,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofRepoPush(getRepository());
+				ObjectPermission writePermission = ObjectPermission.ofDepotPush(getDepot());
 				setVisible(SecurityUtils.getSubject().isPermitted(writePermission) && strategies.size() > 1);						
 			}
 			
@@ -442,13 +442,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofRepoPush(getRepository());
+				ObjectPermission writePermission = ObjectPermission.ofDepotPush(getDepot());
 				setVisible(!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1);						
 			}
 			
 		});
 
-		ObjectPermission writePermission = ObjectPermission.ofRepoPush(getRepository());
+		ObjectPermission writePermission = ObjectPermission.ofDepotPush(getDepot());
 
 		if (!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1) {
 			integrationStrategyContainer.add(new WebMarkupContainer("help").add(
@@ -589,14 +589,14 @@ public class RequestOverviewPage extends RequestDetailPage {
 		User currentUser = getCurrentUser();
 		boolean canChangeAssignee = request.isOpen() 
 				&& (currentUser != null && currentUser.equals(request.getSubmitter()) 
-					|| SecurityUtils.canManage(getRepository()));
+					|| SecurityUtils.canManage(getDepot()));
 		if (assignee != null) {
 			
 			if (canChangeAssignee) {
 				assigneeContainer = new Fragment("assignee", "assigneeEditFrag", this);			
 				assigneeContainer.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(ASSIGNEE_HELP))));
 				
-				AssigneeChoice choice = new AssigneeChoice("assignee", repoModel, new IModel<User>() {
+				AssigneeChoice choice = new AssigneeChoice("assignee", depotModel, new IModel<User>() {
 
 					@Override
 					public void detach() {
@@ -648,7 +648,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 					setVisible(request.isOpen() 
 							&& !request.getPotentialReviewers().isEmpty()
-							&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoAdmin(request.getTarget().getRepository()))));
+							&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(request.getTarget().getDepot()))));
 				} else {
 					setVisible(true);
 				}
@@ -706,8 +706,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RequestListPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RequestListPage.class, paramsOf(depot));
 	}
 
 	@Override

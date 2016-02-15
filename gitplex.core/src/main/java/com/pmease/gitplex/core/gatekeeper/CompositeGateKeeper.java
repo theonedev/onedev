@@ -2,7 +2,7 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -27,36 +27,36 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(final User user, final Repository repository, final String branch, final String file) {
+	protected CheckResult doCheckFile(final User user, final Depot depot, final String branch, final String file) {
 		return aggregate(new Checker() {
 
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkFile(user, repository, branch, file);
+				return gateKeeper.checkFile(user, depot, branch, file);
 			}
 			
 		});
 	}
 	
 	@Override
-	protected CheckResult doCheckCommit(final User user, final Repository repository, final String branch, final String commit) {
+	protected CheckResult doCheckCommit(final User user, final Depot depot, final String branch, final String commit) {
 		return aggregate(new Checker() {
 
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkCommit(user, repository, branch, commit);
+				return gateKeeper.checkCommit(user, depot, branch, commit);
 			}
 			
 		});
 	}
 
 	@Override
-	protected CheckResult doCheckRef(final User user, final Repository repository, final String refName) {
+	protected CheckResult doCheckRef(final User user, final Depot depot, final String refName) {
 		return aggregate(new Checker() {
 
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkRef(user, repository, refName);
+				return gateKeeper.checkRef(user, depot, refName);
 			}
 			
 		});

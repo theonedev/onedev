@@ -11,8 +11,8 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
 
 @SuppressWarnings("serial")
@@ -20,7 +20,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 
 	private final Long currentRepoId;
 	
-	private IModel<Repository> selectedRepoModel;
+	private IModel<Depot> selectedRepoModel;
 	
 	private Long selectedRepoId;
 	
@@ -41,28 +41,28 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 		
 		this.currentRepoId = currentRepoId;
 		
-		selectedRepoModel = new IModel<Repository>() {
+		selectedRepoModel = new IModel<Depot>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Repository getObject() {
+			public Depot getObject() {
 				Dao dao = GitPlex.getInstance(Dao.class);
 				if (selectedRepoId != null) {
-					return dao.load(Repository.class, selectedRepoId);
+					return dao.load(Depot.class, selectedRepoId);
 				} else {
 					Collection<String> repoAndBranches = getRepoAndBranches();
 					if (repoAndBranches == null || repoAndBranches.isEmpty())
-						return dao.load(Repository.class, currentRepoId);
+						return dao.load(Depot.class, currentRepoId);
 					else 
-						return new RepoAndBranch(repoAndBranches.iterator().next()).getRepository();
+						return new DepotAndBranch(repoAndBranches.iterator().next()).getDepot();
 				}
 			}
 
 			@Override
-			public void setObject(Repository object) {
+			public void setObject(Depot object) {
 				selectedRepoId = object.getId();
 				setRepoAndBranches(new HashSet<String>());
 			}
@@ -102,7 +102,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 			public Collection<String> getObject() {
 				Collection<String> branches = new ArrayList<>();
 				for (String branchId: AffinalBranchMultiChoice.this.getModelObject())
-					branches.add(new RepoAndBranch(branchId).getBranch());
+					branches.add(new DepotAndBranch(branchId).getBranch());
 				return branches;
 			}
 
@@ -110,7 +110,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 			public void setObject(Collection<String> object) {
 				Collection<String> branchIds = new ArrayList<>();
 				for (String branch: object)
-					branchIds.add(new RepoAndBranch(selectedRepoModel.getObject(), branch).toString());
+					branchIds.add(new DepotAndBranch(selectedRepoModel.getObject(), branch).toString());
 				AffinalBranchMultiChoice.this.setModelObject(branchIds);
 			}
 			
@@ -140,7 +140,7 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 		Collection<String> branches = branchChoice.getConvertedInput();
 		if (branches != null) {
 			for (String branch: branches)
-				branchIds.add(new RepoAndBranch(selectedRepoModel.getObject(), branch).toString());
+				branchIds.add(new DepotAndBranch(selectedRepoModel.getObject(), branch).toString());
 		}
 		
 		setConvertedInput(branchIds);

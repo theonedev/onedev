@@ -103,8 +103,8 @@ public class Comment extends AbstractEntity {
 		return date;
 	}
 
-	public Repository getRepository() {
-		return request.getTargetRepo();
+	public Depot getDepot() {
+		return request.getTargetDepot();
 	}
 
 	public void delete() {

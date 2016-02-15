@@ -49,7 +49,7 @@ import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.comment.InlineCommentLink;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
@@ -143,14 +143,14 @@ public class RequestComparePage extends RequestDetailPage {
 				String targetHead = request.getTarget().getObjectName();
 				if (!choices.containsKey(targetHead)) {
 					description = new CommitDescription("Target Branch Head", 
-							getRepository().getCommit(targetHead).getSubject());
+							getDepot().getCommit(targetHead).getSubject());
 					choices.put(targetHead, description);
 				}
 
 				IntegrationPreview preview = request.getIntegrationPreview();
 				if (preview != null && preview.getIntegrated() != null && 
 						!preview.getIntegrated().equals(preview.getRequestHead())) {
-					Commit commit = getRepository().getCommit(preview.getIntegrated());
+					Commit commit = getDepot().getCommit(preview.getIntegrated());
 					choices.put(commit.getHash(), new CommitDescription("Integration Preview", commit.getSubject()));
 				}
 			}
@@ -261,7 +261,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (description != null) 
 					tag.put("title", description.getSubject());
 				else 
-					tag.put("title", getRepository().getCommit(oldCommitHash).getSubject());
+					tag.put("title", getDepot().getCommit(oldCommitHash).getSubject());
 			}
 
 			@Override
@@ -306,7 +306,7 @@ public class RequestComparePage extends RequestDetailPage {
 				if (description != null)
 					tag.put("title", description.getSubject());
 				else
-					tag.put("title", getRepository().getCommit(newCommitHash).getSubject());
+					tag.put("title", getDepot().getCommit(newCommitHash).getSubject());
 			}
 
 			@Override
@@ -419,7 +419,7 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		});
 		
-		compareHead.add(diffOption = new DiffOptionPanel("diffOption", repoModel, newCommitHash) {
+		compareHead.add(diffOption = new DiffOptionPanel("diffOption", depotModel, newCommitHash) {
 
 			@Override
 			protected void onSelectPath(AjaxRequestTarget target, String path) {
@@ -724,8 +724,8 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RequestListPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RequestListPage.class, paramsOf(depot));
 	}
 
 	private void pushState(AjaxRequestTarget target) {
@@ -743,7 +743,7 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
-		compareResult = new RevisionDiffPanel("compareResult", repoModel,  
+		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
 				requestModel, commentModel, oldCommitHash, newCommitHash, path, comparePath, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 

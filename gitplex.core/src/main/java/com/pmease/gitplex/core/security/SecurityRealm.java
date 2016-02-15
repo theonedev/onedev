@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Authorization;
 import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -81,7 +81,7 @@ public class SecurityRealm extends AbstractRealm {
                     for (Team team: teams) {
                     	PrivilegedOperation operation = null;
                     	for (Authorization authorization: team.getAuthorizations()) {
-                    		if (authorization.getRepository().has(objectPermission.getObject())) {
+                    		if (authorization.getDepot().has(objectPermission.getObject())) {
                     			operation = authorization.getOperation();
                     			break;
                     		}
@@ -103,9 +103,9 @@ public class SecurityRealm extends AbstractRealm {
     }
     
     private User getUser(ObjectPermission permission) {
-        if (permission.getObject() instanceof Repository) {
-        	Repository repository = (Repository) permission.getObject();
-        	return repository.getOwner();
+        if (permission.getObject() instanceof Depot) {
+        	Depot depot = (Depot) permission.getObject();
+        	return depot.getOwner();
         } else if (permission.getObject() instanceof User) {
         	return (User) permission.getObject();
         } else {

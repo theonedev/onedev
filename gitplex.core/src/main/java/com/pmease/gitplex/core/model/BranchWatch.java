@@ -19,17 +19,17 @@ public class BranchWatch extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Repository repository;
+	private Depot depot;
 	
 	@Column(nullable=false)
 	private String branch;
 
-	public Repository getRepository() {
-		return repository;
+	public Depot getDepot() {
+		return depot;
 	}
 
-	public void setRepository(Repository repository) {
-		this.repository = repository;
+	public void setDepot(Depot depot) {
+		this.depot = depot;
 	}
 
 	public String getBranch() {

@@ -7,8 +7,8 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.RepoAndBranch;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.repochoice.AffinalRepositoryChoice;
 
 @SuppressWarnings("serial")
@@ -16,7 +16,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 	private final Long currentRepoId;
 	
-	private final IModel<Repository> selectedRepoModel;
+	private final IModel<Depot> selectedRepoModel;
 	
 	private final boolean allowEmpty;
 	
@@ -38,24 +38,24 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 		
 		this.currentRepoId = currentRepoId;
 		
-		selectedRepoModel = new IModel<Repository>() {
+		selectedRepoModel = new IModel<Depot>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Repository getObject() {
+			public Depot getObject() {
 				String branchId = getBranchId();
 				if (branchId == null)
-					return GitPlex.getInstance(Dao.class).load(Repository.class, currentRepoId);
+					return GitPlex.getInstance(Dao.class).load(Depot.class, currentRepoId);
 				else 
-					return new RepoAndBranch(branchId).getRepository();
+					return new DepotAndBranch(branchId).getDepot();
 			}
 
 			@Override
-			public void setObject(Repository object) {
-				setBranchId(new RepoAndBranch(object, object.getDefaultBranch()).toString());
+			public void setObject(Depot object) {
+				setBranchId(new DepotAndBranch(object, object.getDefaultBranch()).toString());
 			}
 			
 		};
@@ -91,12 +91,12 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 
 			@Override
 			public String getObject() {
-				return new RepoAndBranch(AffinalBranchSingleChoice.this.getModelObject()).getBranch();
+				return new DepotAndBranch(AffinalBranchSingleChoice.this.getModelObject()).getBranch();
 			}
 
 			@Override
 			public void setObject(String object) {
-				AffinalBranchSingleChoice.this.setModelObject(new RepoAndBranch(selectedRepoModel.getObject(), object).toString());
+				AffinalBranchSingleChoice.this.setModelObject(new DepotAndBranch(selectedRepoModel.getObject(), object).toString());
 			}
 			
 		}, choiceProvider, allowEmpty));
@@ -123,7 +123,7 @@ public class AffinalBranchSingleChoice extends FormComponentPanel<String> {
 		String branchId;
 		String branch = branchChoice.getConvertedInput();
 		if (branch != null) {
-			branchId = new RepoAndBranch(selectedRepoModel.getObject(), branch).toString();
+			branchId = new DepotAndBranch(selectedRepoModel.getObject(), branch).toString();
 		} else {
 			branchId = null;
 		}

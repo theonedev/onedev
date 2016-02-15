@@ -26,7 +26,7 @@ import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
@@ -39,7 +39,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public class AccountReposPage extends AccountLayoutPage {
 
-	private PageableListView<Repository> reposView;
+	private PageableListView<Depot> reposView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
@@ -83,9 +83,9 @@ public class AccountReposPage extends AccountLayoutPage {
 
 			@Override
 			public void onClick() {
-				Repository repository = new Repository();
-				repository.setOwner(getAccount());
-				setResponsePage(new NewAccountRepoPage(repository));
+				Depot depot = new Depot();
+				depot.setOwner(getAccount());
+				setResponsePage(new NewAccountRepoPage(depot));
 			}
 			
 		});
@@ -94,11 +94,11 @@ public class AccountReposPage extends AccountLayoutPage {
 		reposContainer.setOutputMarkupId(true);
 		add(reposContainer);
 		
-		reposContainer.add(reposView = new PageableListView<Repository>("repositories", new LoadableDetachableModel<List<Repository>>() {
+		reposContainer.add(reposView = new PageableListView<Depot>("repositories", new LoadableDetachableModel<List<Depot>>() {
 
 			@Override
-			protected List<Repository> load() {
-				List<Repository> repositories = new ArrayList<>();
+			protected List<Depot> load() {
+				List<Depot> repositories = new ArrayList<>();
 				
 				searchInput = searchField.getInput();
 				if (searchInput != null)
@@ -106,15 +106,15 @@ public class AccountReposPage extends AccountLayoutPage {
 				else
 					searchInput = "";
 				
-				for (Repository repo: getAccount().getRepositories()) {
+				for (Depot repo: getAccount().getDepots()) {
 					if (repo.getName().toLowerCase().contains(searchInput) && SecurityUtils.canPull(repo))
 						repositories.add(repo);
 				}
 				
-				Collections.sort(repositories, new Comparator<Repository>() {
+				Collections.sort(repositories, new Comparator<Depot>() {
 
 					@Override
-					public int compare(Repository repository1, Repository repository2) {
+					public int compare(Depot repository1, Depot repository2) {
 						return repository1.getName().compareTo(repository2.getName());
 					}
 					
@@ -125,14 +125,14 @@ public class AccountReposPage extends AccountLayoutPage {
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(final ListItem<Repository> item) {
-				Repository repository = item.getModelObject();
+			protected void populateItem(final ListItem<Depot> item) {
+				Depot depot = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, RepoFilePage.paramsOf(repository)); 
-				link.add(new Label("repoName", repository.getName()));
+				Link<Void> link = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, RepoFilePage.paramsOf(depot)); 
+				link.add(new Label("repoName", depot.getName()));
 				item.add(link);
 						
-				item.add(new MultilineLabel("description", repository.getDescription()));
+				item.add(new MultilineLabel("description", depot.getDescription()));
 				
 				item.add(new Link<Void>("setting") {
 
@@ -150,7 +150,7 @@ public class AccountReposPage extends AccountLayoutPage {
 					
 				});
 				
-				final Long repositoryId = repository.getId();
+				final Long repositoryId = depot.getId();
 				item.add(new AjaxLink<Void>("deleteRepo") {
 
 					@Override
@@ -170,8 +170,8 @@ public class AccountReposPage extends AccountLayoutPage {
 							}
 
 							@Override
-							protected Repository getRepository() {
-								return GitPlex.getInstance(Dao.class).load(Repository.class, repositoryId);
+							protected Depot getRepository() {
+								return GitPlex.getInstance(Dao.class).load(Depot.class, repositoryId);
 							}
 							
 						};

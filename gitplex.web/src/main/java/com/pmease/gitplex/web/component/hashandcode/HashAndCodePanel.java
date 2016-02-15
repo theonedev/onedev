@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
 import com.pmease.gitplex.web.page.repository.file.RepoFileState;
@@ -17,7 +17,7 @@ import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 @SuppressWarnings("serial")
 public class HashAndCodePanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final Long requestId;
 	
@@ -25,16 +25,16 @@ public class HashAndCodePanel extends Panel {
 	
 	private final String path;
 	
-	public HashAndCodePanel(String id, IModel<Repository> repoModel, String hash) {
+	public HashAndCodePanel(String id, IModel<Depot> repoModel, String hash) {
 		this(id, repoModel, hash, null);
 	}
 	
-	public HashAndCodePanel(String id, IModel<Repository> repoModel, String hash, 
+	public HashAndCodePanel(String id, IModel<Depot> repoModel, String hash, 
 			@Nullable String path) {
 		this(id, repoModel, hash, path, null);
 	}
 
-	public HashAndCodePanel(String id, IModel<Repository> repoModel, String hash, 
+	public HashAndCodePanel(String id, IModel<Depot> repoModel, String hash, 
 			@Nullable String path, @Nullable Long requestId) {
 		super(id);
 		

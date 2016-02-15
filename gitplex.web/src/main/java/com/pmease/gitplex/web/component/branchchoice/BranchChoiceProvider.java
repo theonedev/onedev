@@ -12,7 +12,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.pmease.commons.git.GitUtils;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
@@ -20,18 +20,18 @@ import com.vaynberg.wicket.select2.Response;
 @SuppressWarnings("serial")
 public class BranchChoiceProvider extends ChoiceProvider<String> {
 
-	private IModel<Repository> repoModel;
+	private IModel<Depot> depotModel;
 
-	public BranchChoiceProvider(IModel<Repository> repoModel) {
-		this.repoModel = repoModel;
+	public BranchChoiceProvider(IModel<Depot> depotModel) {
+		this.depotModel = depotModel;
 	}
 
 	@Override
 	public void query(String term, int page, Response<String> response) {
 		term = term.toLowerCase();
 		List<String> branches = new ArrayList<>();
-		Repository repository = repoModel.getObject();
-		for (Ref ref: repository.getBranchRefs()) {
+		Depot depot = depotModel.getObject();
+		for (Ref ref: depot.getBranchRefs()) {
 			String branch = GitUtils.ref2branch(ref.getName());
 			if (branch.toLowerCase().startsWith(term))
 				branches.add(branch);
@@ -64,7 +64,7 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 
 	@Override
 	public void detach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.detach();
 	}

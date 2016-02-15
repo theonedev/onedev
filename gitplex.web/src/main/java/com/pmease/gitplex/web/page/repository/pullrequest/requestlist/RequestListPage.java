@@ -38,7 +38,7 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.BranchLink;
@@ -95,7 +95,7 @@ public class RequestListPage extends PullRequestPage {
 							searchOption.setStatus(Status.OPEN);
 							searchOption.setAssigneeId(userId);
 							
-							setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 						}
 						
 					});
@@ -107,7 +107,7 @@ public class RequestListPage extends PullRequestPage {
 							searchOption.setStatus(Status.OPEN);
 							searchOption.setSubmitterId(userId);
 
-							setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 						}
 						
 					});
@@ -119,7 +119,7 @@ public class RequestListPage extends PullRequestPage {
 						searchOption = new SearchOption();
 						searchOption.setStatus(Status.OPEN);
 						
-						setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+						setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 					}
 					
 				});
@@ -130,7 +130,7 @@ public class RequestListPage extends PullRequestPage {
 						searchOption = new SearchOption();
 						searchOption.setStatus(Status.CLOSED);
 						
-						setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+						setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 					}
 					
 				});
@@ -152,7 +152,7 @@ public class RequestListPage extends PullRequestPage {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 						}
 
 						@Override
@@ -178,7 +178,7 @@ public class RequestListPage extends PullRequestPage {
 			@Override
 			public void onClick() {
 				RepositoryPage page = (RepositoryPage) getPage();
-				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(page.getRepository()));
+				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(page.getDepot()));
 			}
 			
 		});
@@ -189,7 +189,7 @@ public class RequestListPage extends PullRequestPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				setResponsePage(RequestListPage.class, paramsOf(getRepository(), searchOption, sortOption));
+				setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 			}
 			
 		};
@@ -231,7 +231,7 @@ public class RequestListPage extends PullRequestPage {
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				RepositoryPage page = (RepositoryPage) getPage();
 				
-				EntityCriteria<PullRequest> criteria = searchOption.getCriteria(page.getRepository());
+				EntityCriteria<PullRequest> criteria = searchOption.getCriteria(page.getDepot());
 				criteria.addOrder(sortOption.getOrder());
 				return GitPlex.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
 			}
@@ -239,7 +239,7 @@ public class RequestListPage extends PullRequestPage {
 			@Override
 			public long size() {
 				RepositoryPage page = (RepositoryPage) getPage();
-				return GitPlex.getInstance(Dao.class).count(searchOption.getCriteria(page.getRepository()));
+				return GitPlex.getInstance(Dao.class).count(searchOption.getCriteria(page.getDepot()));
 			}
 
 			@Override
@@ -272,16 +272,16 @@ public class RequestListPage extends PullRequestPage {
 				new CssResourceReference(RequestListPage.class, "request-list.css")));
 	}
 
-	public static PageParameters paramsOf(Repository repository, SearchOption searchOption, SortOption sortOption) {
-		PageParameters params = paramsOf(repository);
+	public static PageParameters paramsOf(Depot depot, SearchOption searchOption, SortOption sortOption) {
+		PageParameters params = paramsOf(depot);
 		searchOption.fillPageParams(params);
 		sortOption.fillPageParams(params);
 		return params;
 	}
 	
 	@Override
-	protected void onSelect(AjaxRequestTarget target, Repository repository) {
-		setResponsePage(RequestListPage.class, paramsOf(repository));
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(RequestListPage.class, paramsOf(depot));
 	}
 	
 }

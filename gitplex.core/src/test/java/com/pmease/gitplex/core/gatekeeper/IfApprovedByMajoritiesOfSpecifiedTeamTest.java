@@ -16,7 +16,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
@@ -64,7 +64,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		
 		User user1 = new User();
 		user1.setId(1L);
-		Assert.assertTrue(gateKeeper.checkFile(user1, new Repository(), "branch1", "src/file").isPending());
+		Assert.assertTrue(gateKeeper.checkFile(user1, new Depot(), "branch1", "src/file").isPending());
 	}
 
 	@SuppressWarnings("serial")
@@ -79,7 +79,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		IfApprovedByMajoritiesOfSpecifiedTeam gateKeeper = new IfApprovedByMajoritiesOfSpecifiedTeam();
 		gateKeeper.setTeamId(1L);
 
-		Repository targetRepo = new Repository() {
+		Depot targetRepo = new Depot() {
 
 			@Override
 			public Git git() {
@@ -94,10 +94,10 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 		
 		PullRequest request = new PullRequest();
 		request.setId(1L);
-		request.setTargetRepo(targetRepo);
+		request.setTargetDepot(targetRepo);
 		request.setTargetBranch("master");
 		
-		Repository sourceRepo = new Repository() {
+		Depot sourceRepo = new Depot() {
 			
 			@Override
 			public Git git() {
@@ -106,7 +106,7 @@ public class IfApprovedByMajoritiesOfSpecifiedTeamTest extends AbstractGitTest {
 			
 		};
 		sourceRepo.cacheObjectId("dev", ObjectId.fromString(git.parseRevision("dev", true)));
-		request.setSourceRepo(sourceRepo);
+		request.setSourceDepot(sourceRepo);
 		request.setSourceBranch("dev");
 		
 		request.setSubmitter(new User());

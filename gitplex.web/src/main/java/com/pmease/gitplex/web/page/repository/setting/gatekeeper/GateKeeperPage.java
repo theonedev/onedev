@@ -15,7 +15,7 @@ import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.web.page.repository.setting.RepoSettingPage;
 
 @SuppressWarnings("serial")
@@ -31,7 +31,7 @@ public class GateKeeperPage extends RepoSettingPage {
 		WebMarkupContainer content = new WebMarkupContainer(CONTAINER_ID);
 		content.setOutputMarkupId(true);
 		
-		content.add(new ListView<GateKeeper>("gateKeepers", getRepository().getGateKeepers()) {
+		content.add(new ListView<GateKeeper>("gateKeepers", getDepot().getGateKeepers()) {
 
 			@Override
 			protected void populateItem(final ListItem<GateKeeper> item) {
@@ -39,13 +39,13 @@ public class GateKeeperPage extends RepoSettingPage {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
-						getRepository().getGateKeepers().remove(item.getIndex());
+						getDepot().getGateKeepers().remove(item.getIndex());
 						onGateKeeperChanged(target);
 					}
 
 					@Override
 					protected void onChange(AjaxRequestTarget target, GateKeeper gateKeeper) {
-						getRepository().getGateKeepers().set(item.getIndex(), gateKeeper);
+						getDepot().getGateKeepers().set(item.getIndex(), gateKeeper);
 						onGateKeeperChanged(target);
 					}
 					
@@ -59,7 +59,7 @@ public class GateKeeperPage extends RepoSettingPage {
 			protected void onSelect(AjaxRequestTarget target, Class<? extends GateKeeper> gateKeeperClass) {
 				final GateKeeper gateKeeper = ReflectionUtils.instantiateClass(gateKeeperClass);
 				if (EditableUtils.isDefaultInstanceValid(gateKeeperClass)) {
-					getRepository().getGateKeepers().add(gateKeeper);
+					getDepot().getGateKeepers().add(gateKeeper);
 					onGateKeeperChanged(target);
 				} else {
 					new ModalPanel(target) {
@@ -76,7 +76,7 @@ public class GateKeeperPage extends RepoSettingPage {
 								@Override
 								protected void onSave(AjaxRequestTarget target, GateKeeper gateKeeper) {
 									close(target);
-									getRepository().getGateKeepers().add(gateKeeper);
+									getDepot().getGateKeepers().add(gateKeeper);
 									onGateKeeperChanged(target);
 								}
 								
@@ -101,14 +101,14 @@ public class GateKeeperPage extends RepoSettingPage {
 	}
 	
 	private void onGateKeeperChanged(AjaxRequestTarget target) {
-		GitPlex.getInstance(RepositoryManager.class).save(getRepository());
+		GitPlex.getInstance(DepotManager.class).save(getDepot());
 		replace(newContent());
 		target.add(get(CONTAINER_ID));
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return "Gate Keepers - " + getRepository();
+		return "Gate Keepers - " + getDepot();
 	}
 
 	@Override

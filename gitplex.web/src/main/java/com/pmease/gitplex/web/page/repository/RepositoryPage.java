@@ -37,13 +37,13 @@ import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.repopicker.RepositorySelector;
-import com.pmease.gitplex.web.model.RepositoryModel;
+import com.pmease.gitplex.web.model.DepotModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.repositories.AccountReposPage;
 import com.pmease.gitplex.web.page.repository.branches.RepoBranchesPage;
@@ -62,11 +62,11 @@ public abstract class RepositoryPage extends AccountPage {
 
 	private static final String PARAM_REPO = "repo";
 
-	protected final IModel<Repository> repoModel;
+	protected final IModel<Depot> depotModel;
 	
-	public static PageParameters paramsOf(Repository repository) {
-		PageParameters params = paramsOf(repository.getUser());
-		params.set(PARAM_REPO, repository.getName());
+	public static PageParameters paramsOf(Depot depot) {
+		PageParameters params = paramsOf(depot.getUser());
+		params.set(PARAM_REPO, depot.getName());
 		return params;
 	}
 	
@@ -79,17 +79,17 @@ public abstract class RepositoryPage extends AccountPage {
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(getAccount(), repoName);
+		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(getAccount(), repoName);
 		
-		if (repository == null) 
+		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + getAccount() + "/" + repoName);
 		
-		repoModel = new RepositoryModel(repository);
+		depotModel = new DepotModel(depot);
 		
 		if (!(this instanceof NoCommitsPage) 
 				&& !(this instanceof RepoSettingPage) 
-				&& !getRepository().git().hasCommits()) { 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getRepository()));
+				&& !getDepot().git().hasCommits()) { 
+			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 		}
 	}
 	
@@ -106,7 +106,7 @@ public abstract class RepositoryPage extends AccountPage {
 				RequestListPage.class, PullRequestPage.class));
 		tabs.add(new RepoTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", RevisionComparePage.class));
 		
-		if (SecurityUtils.canManage(getRepository()))
+		if (SecurityUtils.canManage(getDepot()))
 			tabs.add(new RepoTab(Model.of("Setting"), "fa fa-fw fa-cog", GeneralSettingPage.class, RepoSettingPage.class));
 		
 		WebMarkupContainer sidebar = new WebMarkupContainer("sidebar");
@@ -137,21 +137,21 @@ public abstract class RepositoryPage extends AccountPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(repoModel.getObject()));
+		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depotModel.getObject()));
 	}
 	
-	public Repository getRepository() {
-		return repoModel.getObject();
+	public Depot getDepot() {
+		return depotModel.getObject();
 	}
 	
 	@Override
 	protected void onDetach() {
-		repoModel.detach();
+		depotModel.detach();
 		
 		super.onDetach();
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, Repository repository);
+	protected abstract void onSelect(AjaxRequestTarget target, Depot depot);
 
 	@Override
 	protected Component newContextHead(String componentId) {
@@ -162,8 +162,8 @@ public abstract class RepositoryPage extends AccountPage {
 		accountLink.add(new Label("accountName", getAccount().getName()));
 		accountAndRepo.add(accountLink);
 		
-		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, paramsOf(getRepository()));
-		repoLink.add(new Label("repoName", getRepository().getName()));
+		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", RepoFilePage.class, paramsOf(getDepot()));
+		repoLink.add(new Label("repoName", getDepot().getName()));
 		accountAndRepo.add(repoLink);
 		
 		fragment.add(new DropdownLink("repoChoiceTrigger") {
@@ -176,24 +176,24 @@ public abstract class RepositoryPage extends AccountPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RepositorySelector(id, new LoadableDetachableModel<List<Repository>>() {
+				return new RepositorySelector(id, new LoadableDetachableModel<List<Depot>>() {
 
 					@Override
-					protected List<Repository> load() {
-						List<Repository> repositories = new ArrayList<>(); 
-						for (Repository repo: GitPlex.getInstance(Dao.class).allOf(Repository.class)) {
+					protected List<Depot> load() {
+						List<Depot> repositories = new ArrayList<>(); 
+						for (Depot repo: GitPlex.getInstance(Dao.class).allOf(Depot.class)) {
 							if (SecurityUtils.canPull(repo))
 								repositories.add(repo);
 						}
 						return repositories;
 					}
 					
-				}, repoModel.getObject().getId()) {
+				}, depotModel.getObject().getId()) {
 					
 
 					@Override
-					protected void onSelect(AjaxRequestTarget target, Repository repository) {
-						RepositoryPage.this.onSelect(target, repository);
+					protected void onSelect(AjaxRequestTarget target, Depot depot) {
+						RepositoryPage.this.onSelect(target, depot);
 					}
 					
 				};
@@ -202,7 +202,7 @@ public abstract class RepositoryPage extends AccountPage {
 		});
 
 		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
-		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getRepository()));
+		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getDepot()));
 		fragment.add(new TextField<String>("cloneUrl", cloneUrlModel));
 		
 		return fragment;

@@ -17,7 +17,7 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
@@ -28,7 +28,7 @@ public class BlobDiffPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -38,7 +38,7 @@ public class BlobDiffPanel extends Panel {
 	
 	private final DiffMode diffMode;
 	
-	public BlobDiffPanel(String id, IModel<Repository> repoModel, 
+	public BlobDiffPanel(String id, IModel<Depot> repoModel, 
 			IModel<PullRequest> requestModel, IModel<Comment> commentModel, 
 			BlobChange change, DiffMode diffMode) {
 		super(id);

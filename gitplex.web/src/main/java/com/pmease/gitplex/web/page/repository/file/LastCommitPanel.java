@@ -7,7 +7,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
@@ -17,13 +17,13 @@ import com.pmease.gitplex.web.page.repository.commit.RepoCommitsPage;
 @SuppressWarnings("serial")
 class LastCommitPanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final BlobIdent blobIdent;
 	
 	private final Commit commit;
 	
-	public LastCommitPanel(String id, IModel<Repository> repoModel, BlobIdent blobIdent) {
+	public LastCommitPanel(String id, IModel<Depot> repoModel, BlobIdent blobIdent) {
 		super(id);
 		
 		this.repoModel = repoModel;

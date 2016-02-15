@@ -26,7 +26,7 @@ public class GitLinkPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Blob blob = context.getRepository().getBlob(context.getBlobIdent());
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		Submodule submodule = Submodule.fromString(blob.getText().getContent()); 
 		WebMarkupContainer link;
 		ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);

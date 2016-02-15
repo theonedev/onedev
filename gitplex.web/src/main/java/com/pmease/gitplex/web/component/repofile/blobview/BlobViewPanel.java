@@ -49,7 +49,7 @@ public abstract class BlobViewPanel extends Panel {
 	}
 	
 	private Blob getBlob() {
-		return context.getRepository().getBlob(context.getBlobIdent());
+		return context.getDepot().getBlob(context.getBlobIdent());
 	}
 	
 	@Override
@@ -97,7 +97,7 @@ public abstract class BlobViewPanel extends Panel {
 		add(newLeftActions("leftActions"));
 
 		add(new ResourceLink<Void>("raw", new BlobResourceReference(), 
-				BlobResource.paramsOf(context.getRepository(), context.getBlobIdent())));
+				BlobResource.paramsOf(context.getDepot(), context.getBlobIdent())));
 		
 		add(new ClientStateAwareAjaxLink<Void>("blame") {
 
@@ -121,7 +121,7 @@ public abstract class BlobViewPanel extends Panel {
 				state.blobIdent = context.getBlobIdent();
 				state.mode = context.getMode()==null?Mode.BLAME:null;
 				state.mark = context.getMark();
-				PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+				PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
 				CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 				add(AttributeAppender.replace("href", url.toString()));
 				
@@ -164,7 +164,7 @@ public abstract class BlobViewPanel extends Panel {
 			state.blobIdent.path = context.getBlobIdent().path;
 			state.mode = Mode.EDIT;
 			state.mark = context.getMark();
-			PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
+			PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceDepot(), state);
 			
 			editLink = new BookmarkablePageLink<Void>("edit", RepoFilePage.class, params);
 			editLink.add(new Label("label", "Edit on source branch"));
@@ -187,7 +187,7 @@ public abstract class BlobViewPanel extends Panel {
 			state.blobIdent = context.getBlobIdent();
 			state.mode = Mode.EDIT;
 			state.mark = context.getMark();
-			params = RepoFilePage.paramsOf(context.getRepository(), state);
+			params = RepoFilePage.paramsOf(context.getDepot(), state);
 			CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 			editLink.add(AttributeAppender.replace("href", url.toString()));
 		} else {
@@ -204,7 +204,7 @@ public abstract class BlobViewPanel extends Panel {
 			state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 			state.blobIdent.path = context.getBlobIdent().path;
 			state.mode = Mode.DELETE;
-			PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+			PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
 			deleteLink = new BookmarkablePageLink<Void>("delete", RepoFilePage.class, params);
 			deleteLink.add(new Label("label", "Delete from source branch"));
 			deleteLink.add(AttributeAppender.append("target", "_blank"));
@@ -228,7 +228,7 @@ public abstract class BlobViewPanel extends Panel {
 						state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 						state.blobIdent.path = context.getBlobIdent().path;
 						state.mode = Mode.DELETE;
-						PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceRepo(), state);
+						PageParameters params = RepoFilePage.paramsOf(context.getPullRequest().getSourceDepot(), state);
 						setResponsePage(RepoFilePage.class, params);
 					}
 				}
@@ -239,7 +239,7 @@ public abstract class BlobViewPanel extends Panel {
 			RepoFileState state = new RepoFileState();
 			state.blobIdent = context.getBlobIdent();
 			state.mode = Mode.EDIT;
-			PageParameters params = RepoFilePage.paramsOf(context.getRepository(), state);
+			PageParameters params = RepoFilePage.paramsOf(context.getDepot(), state);
 			CharSequence url = RequestCycle.get().urlFor(RepoFilePage.class, params);
 			deleteLink.add(AttributeAppender.replace("href", url.toString()));
 		} else {

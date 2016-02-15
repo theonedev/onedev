@@ -24,26 +24,26 @@ public class ListSubModulesCommandTest extends AbstractGitTest {
 		
 		addFileAndCommit("readme", "readme", "initial commit");
 		
-		FileUtils.writeFile(new File(module1.repoDir(), "readme"), "readme");
+		FileUtils.writeFile(new File(module1.depotDir(), "readme"), "readme");
 		module1.add("readme").commit("initial commit", false, false);
-		FileUtils.writeFile(new File(module2.repoDir(), "readme"), "readme");
+		FileUtils.writeFile(new File(module2.depotDir(), "readme"), "readme");
 		module2.add("readme").commit("initial commit", false, false);
 		
-		git.addSubModule(module1.repoDir().getAbsolutePath(), "module1");
+		git.addSubModule(module1.depotDir().getAbsolutePath(), "module1");
 		git.commit("add submodule1", false, false);
 		
 		Map<String, String> subModules = git.listSubModules("master");
-		assertEquals(module1.repoDir().getCanonicalPath(), 
+		assertEquals(module1.depotDir().getCanonicalPath(), 
 				new File(subModules.get("module1")).getCanonicalPath());
 
 		createDir("dir");
 		
-		git.addSubModule(module2.repoDir().getAbsolutePath(), "dir/module2");
+		git.addSubModule(module2.depotDir().getAbsolutePath(), "dir/module2");
 		commit("add submodule2");
 		subModules = git.listSubModules("master");
-		assertEquals(module1.repoDir().getCanonicalPath(), 
+		assertEquals(module1.depotDir().getCanonicalPath(), 
 				new File(subModules.get("module1")).getCanonicalPath());
-		assertEquals(module2.repoDir().getCanonicalPath(), 
+		assertEquals(module2.depotDir().getCanonicalPath(), 
 				new File(subModules.get("dir/module2")).getCanonicalPath());
 	}
 

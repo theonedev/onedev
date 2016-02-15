@@ -8,10 +8,10 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.operation.RepositoryOperation;
+import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
@@ -35,7 +35,7 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
 		Collection<User> authorizedUsers = SecurityUtils.findUsersCan(
-				request.getTargetRepo(), RepositoryOperation.PUSH);
+				request.getTargetDepot(), DepotOperation.PUSH);
 
         int approvals = 0;
         int pendings = 0;
@@ -62,8 +62,8 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
         }
 	}
 	
-	private CheckResult check(User user, Repository repository) {
-		Collection<User> writers = SecurityUtils.findUsersCan(repository, RepositoryOperation.PUSH);
+	private CheckResult check(User user, Depot depot) {
+		Collection<User> writers = SecurityUtils.findUsersCan(depot, DepotOperation.PUSH);
 
         int approvals = 0;
         int pendings = writers.size();
@@ -84,18 +84,18 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
-		return check(user, repository);
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		return check(user, repository);
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return check(user, repository);
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
+		return check(user, depot);
 	}
 
 }

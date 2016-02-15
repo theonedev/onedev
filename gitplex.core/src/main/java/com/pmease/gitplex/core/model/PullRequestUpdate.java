@@ -87,7 +87,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	@JsonProperty
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return Repository.REFS_GITPLEX + "updates/" + getId();
+		return Depot.REFS_GITPLEX + "updates/" + getId();
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 
 	public void deleteRefs() {
-		Git git = getRequest().getTargetRepo().git();
+		Git git = getRequest().getTargetDepot().git();
 		git.deleteRef(getHeadRef(), null, null);
 	}	
 	
@@ -153,18 +153,18 @@ public class PullRequestUpdate extends AbstractEntity {
 				public CachedInfo call() throws Exception {
 					CachedInfo cachedInfo = new CachedInfo();
 
-					Repository targetRepo = getRequest().getTargetRepo();
-					Git git = targetRepo.git();
+					Depot targetDepot = getRequest().getTargetDepot();
+					Git git = targetDepot.git();
 					List<Commit> log = git.log(getBaseCommitHash(), getHeadCommitHash(), null, 0, 0, false);
 					if (log.isEmpty())
-						log = Lists.newArrayList(targetRepo.getCommit(getHeadCommitHash()));
+						log = Lists.newArrayList(targetDepot.getCommit(getHeadCommitHash()));
 					cachedInfo.setLogCommits(log);
 					
 					String mergeBase = git.calcMergeBase(getHeadCommitHash(), getRequest().getTarget().getObjectName());
 
-					if (targetRepo.isAncestor(getBaseCommitHash(), mergeBase)) { 
+					if (targetDepot.isAncestor(getBaseCommitHash(), mergeBase)) { 
 						cachedInfo.setChangedFiles(git.listChangedFiles(mergeBase, getHeadCommitHash(), null));					
-					} else if (targetRepo.isAncestor(mergeBase, getBaseCommitHash())) {
+					} else if (targetDepot.isAncestor(mergeBase, getBaseCommitHash())) {
 						cachedInfo.setChangedFiles(git.listChangedFiles(getBaseCommitHash(), getHeadCommitHash(), null));					
 					} else {
 						File tempDir = FileUtils.createTempDir();
@@ -181,7 +181,7 @@ public class PullRequestUpdate extends AbstractEntity {
 							 * from target branch if there is any.  
 							 */
 							String branchName = getRequest().getTargetBranch();
-							tempGit.clone(git.repoDir().getAbsolutePath(), false, true, true, branchName);
+							tempGit.clone(git.depotDir().getAbsolutePath(), false, true, true, branchName);
 							tempGit.updateRef("HEAD", mergeBase, null, null);
 							tempGit.reset(null, null);
 							Preconditions.checkNotNull(tempGit.merge(getBaseCommitHash(), null, null, "ours", null));
@@ -270,7 +270,7 @@ public class PullRequestUpdate extends AbstractEntity {
 					commits.add(commit.getCommit());
 			}
 			
-			getRequest().getTargetRepo().cacheCommits(commits);
+			getRequest().getTargetDepot().cacheCommits(commits);
 			
 			Collections.reverse(commits);
 		}

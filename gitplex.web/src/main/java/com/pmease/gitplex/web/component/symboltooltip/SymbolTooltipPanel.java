@@ -35,7 +35,7 @@ import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.SearchManager;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
@@ -51,7 +51,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 	private static final int QUERY_ENTRIES = 20;
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -61,7 +61,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	public SymbolTooltipPanel(String id, IModel<Repository> repoModel, IModel<PullRequest> requestModel) {
+	public SymbolTooltipPanel(String id, IModel<Depot> repoModel, IModel<PullRequest> requestModel) {
 		super(id);
 		
 		this.repoModel = repoModel;

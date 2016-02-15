@@ -10,11 +10,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
-public class AffinalRepositoriesModel extends LoadableDetachableModel<List<Repository>> {
+public class AffinalRepositoriesModel extends LoadableDetachableModel<List<Depot>> {
 
 	private final Long repoId;
 	
@@ -23,16 +23,16 @@ public class AffinalRepositoriesModel extends LoadableDetachableModel<List<Repos
 	}
 	
 	@Override
-	protected List<Repository> load() {
-		Repository repository = GitPlex.getInstance(Dao.class).load(Repository.class, repoId);;
-		List<Repository> affinals = repository.findAffinals();
-		affinals.remove(repository);
-		if (repository.getForkedFrom() != null)
-			affinals.remove(repository.getForkedFrom());
-		Collections.sort(affinals, new Comparator<Repository>() {
+	protected List<Depot> load() {
+		Depot depot = GitPlex.getInstance(Dao.class).load(Depot.class, repoId);;
+		List<Depot> affinals = depot.findAffinals();
+		affinals.remove(depot);
+		if (depot.getForkedFrom() != null)
+			affinals.remove(depot.getForkedFrom());
+		Collections.sort(affinals, new Comparator<Depot>() {
 
 			@Override
-			public int compare(Repository repo1, Repository repo2) {
+			public int compare(Depot repo1, Depot repo2) {
 				if (repo1.getUser().equals(repo2.getUser()))
 					return repo1.getName().compareTo(repo2.getName());
 				else
@@ -40,11 +40,11 @@ public class AffinalRepositoriesModel extends LoadableDetachableModel<List<Repos
 			}
 			
 		});
-		if (repository.getForkedFrom() != null)
-			affinals.add(0, repository.getForkedFrom());
-		affinals.add(0, repository);
-		for (Iterator<Repository> it = affinals.iterator(); it.hasNext();) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofRepoPull(it.next())))
+		if (depot.getForkedFrom() != null)
+			affinals.add(0, depot.getForkedFrom());
+		affinals.add(0, depot);
+		for (Iterator<Depot> it = affinals.iterator(); it.hasNext();) {
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(it.next())))
 				it.remove();
 		}
 		return affinals;

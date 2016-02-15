@@ -21,10 +21,10 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 public class AttachmentResource extends AbstractResource {
@@ -54,9 +54,9 @@ public class AttachmentResource extends AbstractResource {
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		final Repository repository = GitPlex.getInstance(RepositoryManager.class).findBy(userName, repoName);
+		final Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
 		
-		if (repository == null) 
+		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
 		
 		Long requestId = params.get(PARAM_REQUEST).toOptionalLong();
@@ -69,7 +69,7 @@ public class AttachmentResource extends AbstractResource {
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
-		if (!SecurityUtils.canPull(repository)) 
+		if (!SecurityUtils.canPull(depot)) 
 			throw new UnauthorizedException();
 
 		final File attachmentFile = new File(getAttachmentsDir(request), attachment);
@@ -107,8 +107,8 @@ public class AttachmentResource extends AbstractResource {
 	
 	public static PageParameters paramsOf(PullRequest request, String attachment) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_USER, request.getTargetRepo().getOwner().getName());
-		params.set(PARAM_REPO, request.getTargetRepo().getName());
+		params.add(PARAM_USER, request.getTargetDepot().getOwner().getName());
+		params.set(PARAM_REPO, request.getTargetDepot().getName());
 		params.set(PARAM_REQUEST, request.getId());
 		params.set(PARAM_ATTACHMENT, attachment);
 		final File attachmentFile = new File(getAttachmentsDir(request), attachment);

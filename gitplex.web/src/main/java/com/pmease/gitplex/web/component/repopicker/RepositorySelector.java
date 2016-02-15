@@ -36,7 +36,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.repository.file.RepoFilePage;
@@ -45,7 +45,7 @@ import com.pmease.gitplex.web.page.repository.file.RepoFileState;
 @SuppressWarnings("serial")
 public abstract class RepositorySelector extends Panel {
 
-	private final IModel<List<Repository>> reposModel;
+	private final IModel<List<Depot>> reposModel;
 	
 	private final Long currentRepoId;
 	
@@ -53,7 +53,7 @@ public abstract class RepositorySelector extends Panel {
 	
 	private String repoSearch = "";
 	
-	public RepositorySelector(String id, IModel<List<Repository>> reposModel, Long currentRepoId) {
+	public RepositorySelector(String id, IModel<List<Depot>> reposModel, Long currentRepoId) {
 		super(id);
 		
 		this.reposModel = reposModel;
@@ -98,7 +98,7 @@ public abstract class RepositorySelector extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				Long id = params.getParameterValue("id").toLong();
-				onSelect(target, GitPlex.getInstance(Dao.class).load(Repository.class, id));
+				onSelect(target, GitPlex.getInstance(Dao.class).load(Depot.class, id));
 			}
 
 			@Override
@@ -134,7 +134,7 @@ public abstract class RepositorySelector extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				Long id = params.getParameterValue("id").toLong();
-				onSelect(target, GitPlex.getInstance(Dao.class).load(Repository.class, id));
+				onSelect(target, GitPlex.getInstance(Dao.class).load(Depot.class, id));
 			}
 
 			@Override
@@ -161,7 +161,7 @@ public abstract class RepositorySelector extends Panel {
 						it.remove();
 					} else {
 						int repoCount = 0;
-						for (Repository repo: reposModel.getObject()) {
+						for (Depot repo: reposModel.getObject()) {
 							if (repo.getName().contains(repoSearch) && repo.getOwner().equals(account))
 								repoCount++;
 						}
@@ -187,19 +187,19 @@ public abstract class RepositorySelector extends Panel {
 				userItem.add(new Avatar("avatar", userItem.getModelObject(), null));
 				userItem.add(new Label("name", userItem.getModelObject().getName()));
 				
-				userItem.add(new ListView<Repository>("repositories", new LoadableDetachableModel<List<Repository>>() {
+				userItem.add(new ListView<Depot>("repositories", new LoadableDetachableModel<List<Depot>>() {
 
 					@Override
-					protected List<Repository> load() {
-						List<Repository> repositories = new ArrayList<>();
-						for (Repository repo: reposModel.getObject()) {
+					protected List<Depot> load() {
+						List<Depot> repositories = new ArrayList<>();
+						for (Depot repo: reposModel.getObject()) {
 							if (repo.getName().contains(repoSearch) && repo.getOwner().equals(userItem.getModelObject()))
 								repositories.add(repo);
 						}
-						Collections.sort(repositories, new Comparator<Repository>() {
+						Collections.sort(repositories, new Comparator<Depot>() {
 
 							@Override
-							public int compare(Repository repo1, Repository repo2) {
+							public int compare(Depot repo1, Depot repo2) {
 								return repo1.getName().compareTo(repo2.getName());
 							}
 							
@@ -210,14 +210,14 @@ public abstract class RepositorySelector extends Panel {
 				}) {
 
 					@Override
-					protected void populateItem(final ListItem<Repository> repoItem) {
-						Repository repository = repoItem.getModelObject();
-						repoItem.add(new TextField<Long>("id", Model.of(repository.getId())));
+					protected void populateItem(final ListItem<Depot> depotItem) {
+						Depot depot = depotItem.getModelObject();
+						depotItem.add(new TextField<Long>("id", Model.of(depot.getId())));
 						AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								onSelect(target, repoItem.getModelObject());
+								onSelect(target, depotItem.getModelObject());
 							}
 							
 							@Override
@@ -225,18 +225,18 @@ public abstract class RepositorySelector extends Panel {
 								super.onComponentTag(tag);
 								
 								RepoFileState state = new RepoFileState();
-								PageParameters params = RepoFilePage.paramsOf(repoItem.getModelObject(), state);
+								PageParameters params = RepoFilePage.paramsOf(depotItem.getModelObject(), state);
 								tag.put("href", urlFor(RepoFilePage.class, params));
 							}
 							
 						};
-						link.add(new Label("label", repository.getName()));
-						if (repository.getId().equals(currentRepoId)) 
+						link.add(new Label("label", depot.getName()));
+						if (depot.getId().equals(currentRepoId)) 
 							link.add(AttributeAppender.append("class", " current"));
-						repoItem.add(link);
+						depotItem.add(link);
 						
-						if (repoItem.getIndex() == 0 && userItem.getIndex() == 0)
-							repoItem.add(AttributeAppender.append("class", " active"));
+						if (depotItem.getIndex() == 0 && userItem.getIndex() == 0)
+							depotItem.add(AttributeAppender.append("class", " active"));
 					}
 					
 				});
@@ -264,5 +264,5 @@ public abstract class RepositorySelector extends Panel {
 				new CssResourceReference(RepositorySelector.class, "repository-selector.css")));
 	}
 	
-	protected abstract void onSelect(AjaxRequestTarget target, Repository repository);
+	protected abstract void onSelect(AjaxRequestTarget target, Depot depot);
 }

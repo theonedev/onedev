@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
@@ -16,29 +16,29 @@ public class IfSubmittedByRepositoryWriter extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		return check(request.getSubmitter(), request.getTargetRepo());
+		return check(request.getSubmitter(), request.getTargetDepot());
 	}
 	
-	private CheckResult check(User user, Repository repository) {
-		if (user != null && user.asSubject().isPermitted(ObjectPermission.ofRepoPush(repository)))
+	private CheckResult check(User user, Depot depot) {
+		if (user != null && user.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot)))
 			return passed(Lists.newArrayList("Submitted by repository writer"));
 		else
 			return failed(Lists.newArrayList("Not submitted by repository writer"));
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Repository repository, String branch, String file) {
-		return check(user, repository);
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Repository repository, String branch, String commit) {
-		return check(user, repository);
+	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckRef(User user, Repository repository, String refName) {
-		return check(user, repository);
+	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
+		return check(user, depot);
 	}
 
 }

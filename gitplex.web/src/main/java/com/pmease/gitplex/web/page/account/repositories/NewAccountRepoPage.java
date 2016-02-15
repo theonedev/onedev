@@ -11,20 +11,20 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.RepositoryManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 
 @SuppressWarnings("serial")
 public class NewAccountRepoPage extends AccountLayoutPage {
 
-	private final Repository repository;
+	private final Depot depot;
 	
-	public NewAccountRepoPage(Repository repository) {
-		super(paramsOf(repository.getOwner()));
+	public NewAccountRepoPage(Depot depot) {
+		super(paramsOf(depot.getOwner()));
 		
-		this.repository = repository;
+		this.depot = depot;
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class NewAccountRepoPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final BeanEditor<?> editor = BeanContext.editBean("editor", repository);
+		final BeanEditor<?> editor = BeanContext.editBean("editor", depot);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -44,13 +44,13 @@ public class NewAccountRepoPage extends AccountLayoutPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				RepositoryManager repositoryManager = GitPlex.getInstance(RepositoryManager.class);
-				Repository repoWithSameName = repositoryManager.findBy(repository.getOwner(), repository.getName());
+				DepotManager repositoryManager = GitPlex.getInstance(DepotManager.class);
+				Depot repoWithSameName = repositoryManager.findBy(depot.getOwner(), depot.getName());
 				if (repoWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another repository in this account.");
 				} else {
-					repositoryManager.save(repository);
+					repositoryManager.save(depot);
 					Session.get().success("New repository created");
 					setResponsePage(AccountReposPage.class, paramsOf(getAccount()));
 				}

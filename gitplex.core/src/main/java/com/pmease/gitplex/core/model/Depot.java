@@ -38,7 +38,6 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
@@ -46,6 +45,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
@@ -93,14 +93,14 @@ import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
-import com.pmease.gitplex.core.validation.RepositoryName;
+import com.pmease.gitplex.core.validation.DepotName;
 
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"owner", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 @SuppressWarnings("serial")
-public class Repository extends AbstractEntity implements UserBelonging {
+public class Depot extends AbstractEntity implements UserBelonging {
 
 	private static final String FQN_SEPARATOR = "/";
 	
@@ -116,7 +116,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
-	private Repository forkedFrom;
+	private Depot forkedFrom;
 
 	@Column(nullable=false)
 	private String name;
@@ -134,19 +134,19 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	@Column(nullable=false)
 	private Date createdAt = new Date();
 
-	@OneToMany(mappedBy="targetRepo")
+	@OneToMany(mappedBy="targetDepot")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequest> incomingRequests = new ArrayList<>();
 	
-	@OneToMany(mappedBy="sourceRepo")
+	@OneToMany(mappedBy="sourceDepot")
 	private Collection<PullRequest> outgoingRequests = new ArrayList<>();
 	
-	@OneToMany(mappedBy="repository")
+	@OneToMany(mappedBy="depot")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Authorization> authorizations = new ArrayList<>();
 
     @OneToMany(mappedBy="forkedFrom")
-	private Collection<Repository> forks = new ArrayList<>();
+	private Collection<Depot> forks = new ArrayList<>();
     
     private transient Map<BlobIdent, Blob> blobCache;
     
@@ -176,7 +176,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 	@Editable(order=100, description=
 			"Specify name of the repository. It will be used to identify the repository when accessing via Git.")
-	@RepositoryName
+	@DepotName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -252,25 +252,25 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		this.authorizations = authorizations;
 	}
 
-	public Repository getForkedFrom() {
+	public Depot getForkedFrom() {
 		return forkedFrom;
 	}
 
-	public void setForkedFrom(Repository forkedFrom) {
+	public void setForkedFrom(Depot forkedFrom) {
 		this.forkedFrom = forkedFrom;
 	}
 
-	public Collection<Repository> getForks() {
+	public Collection<Depot> getForks() {
 		return forks;
 	}
 
-	public void setForks(Collection<Repository> forks) {
+	public void setForks(Collection<Depot> forks) {
 		this.forks = forks;
 	}
 	
-	public FileRepository openAsJGitRepo() {
+	public Repository openRepository() {
 		try {
-			return (FileRepository) RepositoryCache.open(FileKey.exact(git().repoDir(), FS.DETECTED), true);
+			return RepositoryCache.open(FileKey.exact(git().depotDir(), FS.DETECTED), true);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -327,9 +327,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
     @Override
 	public boolean has(ProtectedObject object) {
-		if (object instanceof Repository) {
-			Repository repository = (Repository) object;
-			return repository.getId().equals(getId());
+		if (object instanceof Depot) {
+			Depot depot = (Depot) object;
+			return depot.getId().equals(getId());
 		} else {
 			return false;
 		}
@@ -353,7 +353,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public Git git() {
-		return new Git(AppLoader.getInstance(StorageManager.class).getRepoDir(this));
+		return new Git(AppLoader.getInstance(StorageManager.class).getDepotDir(this));
 	}
 	
 	/**
@@ -368,7 +368,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public boolean isUpdateHookValid() {
-        File updateHook = new File(git().repoDir(), "hooks/update");
+        File updateHook = new File(git().depotDir(), "hooks/update");
         if (!updateHook.exists()) 
         	return false;
         
@@ -387,7 +387,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public boolean isPostReceiveHookValid() {
-        File postReceiveHook = new File(git().repoDir(), "hooks/post-receive");
+        File postReceiveHook = new File(git().depotDir(), "hooks/post-receive");
         if (!postReceiveHook.exists()) 
         	return false;
         
@@ -419,9 +419,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * 			fork root of this repository, or <tt>null</tt> if the repository is not 
 	 * 			forked from any other repository  
 	 */
-	public @Nullable Repository findForkRoot() {
+	public @Nullable Depot findForkRoot() {
 		if (forkedFrom != null) {
-			Repository forkedRoot = forkedFrom.findForkRoot();
+			Depot forkedRoot = forkedFrom.findForkRoot();
 			if (forkedRoot != null)
 				return forkedRoot;
 			else
@@ -437,9 +437,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * @return
 	 * 			all descendant repositories forking from current repository
 	 */
-	public List<Repository> findForkDescendants() {
-		List<Repository> descendants = new ArrayList<>();
-		for (Repository fork: getForks()) { 
+	public List<Depot> findForkDescendants() {
+		List<Depot> descendants = new ArrayList<>();
+		for (Depot fork: getForks()) { 
 			descendants.add(fork);
 			descendants.addAll(fork.findForkDescendants());
 		}
@@ -455,9 +455,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	 * 			comparable repositories of current repository, with current repository also 
 	 * 			included in the collection
 	 */
-	public List<Repository> findAffinals() {
-		List<Repository> affinals = new ArrayList<Repository>();
-		Repository forkRoot = findForkRoot();
+	public List<Depot> findAffinals() {
+		List<Depot> affinals = new ArrayList<Depot>();
+		Depot forkRoot = findForkRoot();
 		if (forkRoot != null) {
 			affinals.add(forkRoot);
 			affinals.addAll(forkRoot.findForkDescendants());
@@ -469,8 +469,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public RevCommit getMergeBase(String ancestor, String descendant) {
-		try (	FileRepository jgitRepo = openAsJGitRepo();
-				RevWalk revWalk = new RevWalk(jgitRepo)) {
+		try (	Repository repository = openRepository();
+				RevWalk revWalk = new RevWalk(repository)) {
 			ObjectId ancestorId = getObjectId(ancestor);
 			ObjectId descendantId = getObjectId(descendant);
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
@@ -489,8 +489,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public boolean isAncestor(String ancestor, String descendant) {
-		try (	FileRepository jgitRepo = openAsJGitRepo();
-				RevWalk revWalk = new RevWalk(jgitRepo)) {
+		try (	Repository repository = openRepository();
+				RevWalk revWalk = new RevWalk(repository)) {
 			ObjectId ancestorId = getObjectId(ancestor);
 			ObjectId descendantId = getObjectId(descendant);
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
@@ -573,7 +573,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		Blob blob = getBlobCache().get(blobIdent);
 		if (blob == null) {
 			if (blobIdent.id != null) {
-				try (FileRepository jgitRepo = openAsJGitRepo()) {
+				try (Repository repository = openRepository()) {
 					if (blobIdent.isGitLink()) {
 						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 						if (url == null)
@@ -582,7 +582,7 @@ public class Repository extends AbstractEntity implements UserBelonging {
 					} else if (blobIdent.isTree()) {
 						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = jgitRepo.open(ObjectId.fromString(blobIdent.id), Constants.OBJ_BLOB);
+						ObjectLoader objectLoader = repository.open(ObjectId.fromString(blobIdent.id), Constants.OBJ_BLOB);
 						blob = readBlob(objectLoader, blobIdent);
 					}
 					getBlobCache().put(blobIdent, blob);
@@ -590,11 +590,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 					throw new RuntimeException(e);
 				}
 			} else {
-				try (	FileRepository jgitRepo = openAsJGitRepo(); 
-						RevWalk revWalk = new RevWalk(jgitRepo)) {
+				try (	Repository repository = openRepository(); 
+						RevWalk revWalk = new RevWalk(repository)) {
 					ObjectId commitId = getObjectId(blobIdent.revision);		
 					RevTree revTree = revWalk.parseCommit(commitId).getTree();
-					TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, blobIdent.path, revTree);
+					TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
 					if (treeWalk != null) {
 						if (blobIdent.isGitLink()) {
 							String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
@@ -621,11 +621,11 @@ public class Repository extends AbstractEntity implements UserBelonging {
 	}
 	
 	public InputStream getInputStream(BlobIdent ident) {
-		try (	FileRepository jgitRepo = openAsJGitRepo(); 
-				RevWalk revWalk = new RevWalk(jgitRepo)) {
+		try (	Repository repository = openRepository(); 
+				RevWalk revWalk = new RevWalk(repository)) {
 			ObjectId commitId = getObjectId(ident.revision);
 			RevTree revTree = revWalk.parseCommit(commitId).getTree();
-			TreeWalk treeWalk = TreeWalk.forPath(jgitRepo, ident.path, revTree);
+			TreeWalk treeWalk = TreeWalk.forPath(repository, ident.path, revTree);
 			if (treeWalk != null) {
 				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 				return objectLoader.openStream();
@@ -657,8 +657,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
 			ObjectId objectId;
-			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				objectId = jgitRepo.resolve(revision);
+			try (Repository repository = openRepository()) {
+				objectId = repository.resolve(revision);
 			} catch (RevisionSyntaxException | IOException e) {
 				if (!mustExist) {
 					objectId = null;
@@ -692,9 +692,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		DiffKey key = new DiffKey(oldRev, newRev, detectRenames, paths);
 		List<DiffEntry> diffs = diffCache.get(key);
 		if (diffs == null) {
-			try (	FileRepository jgitRepo = openAsJGitRepo();
+			try (	Repository repository = openRepository();
 					DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
-		    	diffFormatter.setRepository(jgitRepo);
+		    	diffFormatter.setRepository(repository);
 		    	diffFormatter.setDetectRenames(detectRenames);
 				AnyObjectId oldCommitId = getObjectId(oldRev);
 				AnyObjectId newCommitId = getObjectId(newRev);
@@ -800,9 +800,9 @@ public class Repository extends AbstractEntity implements UserBelonging {
 
 		final AnyObjectId commitId = getObjectId(revision);
 		
-		try (FileRepository jgitRepo = openAsJGitRepo()) {
+		try (Repository repository = openRepository()) {
 			long time = System.currentTimeMillis();
-			LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(jgitRepo, commitId, path, cache);
+			LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(repository, commitId, path, cache);
 			long elapsed = System.currentTimeMillis()-time;
 			if (elapsed > LAST_COMMITS_CACHE_THRESHOLD) {
 				lock.writeLock().lock();
@@ -828,8 +828,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			refCache = new HashMap<>();
 		Optional<Ref> optional = refCache.get(revision);
 		if (optional == null) {
-			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				optional = Optional.fromNullable(jgitRepo.getRef(revision));
+			try (Repository repository = openRepository()) {
+				optional = Optional.fromNullable(repository.getRef(revision));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -851,8 +851,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			revObjectCache = new HashMap<>();
 		Optional<RevObject> optional = revObjectCache.get(revId);
 		if (optional == null) {
-			try (	FileRepository jgitRepo = openAsJGitRepo();
-					RevWalk revWalk = new RevWalk(jgitRepo);) {
+			try (	Repository repository = openRepository();
+					RevWalk revWalk = new RevWalk(repository);) {
 				optional = Optional.of(revWalk.parseAny(revId));
 			} catch (MissingObjectException e) {
 				if (!mustExist)
@@ -881,8 +881,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 			revCommitCache = new HashMap<>();
 		Optional<RevCommit> optional = revCommitCache.get(revObject);
 		if (optional == null) {
-			try (	FileRepository jgitRepo = openAsJGitRepo();
-					RevWalk revWalk = new RevWalk(jgitRepo);) {
+			try (	Repository repository = openRepository();
+					RevWalk revWalk = new RevWalk(repository);) {
 				RevObject peeled = revWalk.peel(revObject);
 				if (peeled instanceof RevCommit)
 					optional = Optional.of((RevCommit) peeled);
@@ -923,8 +923,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
 		
 		Map<String, Ref> cached = prefixRefsCache.get(prefix);
 		if (cached == null) {
-			try (FileRepository jgitRepo = openAsJGitRepo()) {
-				cached = jgitRepo.getRefDatabase().getRefs(prefix); 
+			try (Repository repository = openRepository()) {
+				cached = repository.getRefDatabase().getRefs(prefix); 
 				prefixRefsCache.put(prefix, cached);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -972,8 +972,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     }
     
     public void createBranch(String branchName, String branchRevision) {
-		try (FileRepository jgitRepo = openAsJGitRepo()) {
-			CreateBranchCommand command = org.eclipse.jgit.api.Git.wrap(jgitRepo).branchCreate();
+		try (Repository repository = openRepository()) {
+			CreateBranchCommand command = org.eclipse.jgit.api.Git.wrap(repository).branchCreate();
 			command.setName(branchName);
 			command.setStartPoint(getRevCommit(branchRevision));
 			command.call();
@@ -983,8 +983,8 @@ public class Repository extends AbstractEntity implements UserBelonging {
     }
     
     public void tag(String tagName, String tagRevision, PersonIdent taggerIdent, @Nullable String tagMessage) {
-		try (FileRepository jgitRepo = openAsJGitRepo();) {
-			TagCommand tag = org.eclipse.jgit.api.Git.wrap(jgitRepo).tag();
+		try (Repository repository = openRepository();) {
+			TagCommand tag = org.eclipse.jgit.api.Git.wrap(repository).tag();
 			tag.setName(tagName);
 			if (tagMessage != null)
 				tag.setMessage(tagMessage);

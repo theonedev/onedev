@@ -9,13 +9,13 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.pmease.gitplex.core.GitPlex;
 
-public class RepositoryNameValidator implements ConstraintValidator<RepositoryName, String> {
+public class RepositoryNameValidator implements ConstraintValidator<DepotName, String> {
 
 	private static Set<String> reservedNames;
 	
 	private static Pattern pattern = Pattern.compile("^[\\w-\\.]+$");
 	
-	public void initialize(RepositoryName constaintAnnotation) {
+	public void initialize(DepotName constaintAnnotation) {
 	}
 
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {

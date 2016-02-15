@@ -9,11 +9,12 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -21,7 +22,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {
 
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private final String revision;
 	
@@ -29,7 +30,7 @@ abstract class CreateTagPanel extends Panel {
 	
 	private String tagMessage;
 	
-	public CreateTagPanel(String id, IModel<Repository> repoModel, String revision) {
+	public CreateTagPanel(String id, IModel<Depot> repoModel, String revision) {
 		super(id);
 		this.repoModel = repoModel;
 		this.revision = revision;
@@ -90,7 +91,7 @@ abstract class CreateTagPanel extends Panel {
 					form.error("Tag name is required.");
 					target.focusComponent(nameInput);
 					target.add(form);
-				} else if (!GitUtils.isValidRefName(Constants.R_HEADS + tagName)) {
+				} else if (!Repository.isValidRefName(Constants.R_HEADS + tagName)) {
 					form.error("Tag name is not valid.");
 					target.focusComponent(nameInput);
 					target.add(form);
@@ -99,7 +100,7 @@ abstract class CreateTagPanel extends Panel {
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					Repository repo = repoModel.getObject();
+					Depot repo = repoModel.getObject();
 					User user = GitPlex.getInstance(UserManager.class).getCurrent();
 					repo.tag(tagName, revision, user.asPerson(), tagMessage);
 					onCreate(target, tagName);

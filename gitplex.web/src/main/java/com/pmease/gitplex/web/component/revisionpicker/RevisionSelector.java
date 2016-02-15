@@ -35,6 +35,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Throwables;
@@ -46,12 +47,12 @@ import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.model.Repository;
+import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
 	
-	private final IModel<Repository> repoModel;
+	private final IModel<Depot> repoModel;
 	
 	private static final String COMMIT_FLAG = "*";
 	
@@ -109,7 +110,7 @@ public abstract class RevisionSelector extends Panel {
 		target.focusComponent(revField);
 	}
 
-	public RevisionSelector(String id, IModel<Repository> repoModel, String revision, boolean canCreateRef) {
+	public RevisionSelector(String id, IModel<Depot> repoModel, String revision, boolean canCreateRef) {
 		super(id);
 		
 		this.repoModel = repoModel;
@@ -122,7 +123,7 @@ public abstract class RevisionSelector extends Panel {
 		filteredRefs = new ArrayList<>(refs);
 	}
 	
-	public RevisionSelector(String id, IModel<Repository> repoModel, String revision) {
+	public RevisionSelector(String id, IModel<Depot> repoModel, String revision) {
 		this(id, repoModel, revision, false);
 	}
 
@@ -216,7 +217,7 @@ public abstract class RevisionSelector extends Panel {
 					if (!found) {
 						if (repoModel.getObject().getRevCommit(revInput, false) != null) {
 							filteredRefs.add(COMMIT_FLAG + revInput);
-						} else if (canCreateRef && GitUtils.isValidRefName(Constants.R_HEADS + revInput)) { 
+						} else if (canCreateRef && Repository.isValidRefName(Constants.R_HEADS + revInput)) { 
 							filteredRefs.add(ADD_FLAG + revInput);
 						}
 					}
