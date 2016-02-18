@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.util.editable.UserChoice;
 
 @SuppressWarnings("serial")
-@Editable(order=200, icon="fa-user", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
+@Editable(order=200, icon="fa-user", category=GateKeeper.CATEGORY_CHECK_SUBMITTER, description=
 		"This gate keeper will be passed if the commit is submitted by specified user.")
 public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 

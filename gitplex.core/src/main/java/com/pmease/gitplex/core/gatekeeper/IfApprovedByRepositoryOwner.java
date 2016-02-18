@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=300, icon="fa-user", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
+@Editable(order=300, icon="fa-user", category=GateKeeper.CATEGORY_CHECK_APPROVALS, description=
 		"This gate keeper will be passed if the commit is approved by owner of the repository.")
 public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
 

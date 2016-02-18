@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
-@Editable(order=50, icon="fa-group", category=GateKeeper.CATEGROY_CHECK_REVIEW, description=
+@Editable(order=50, icon="fa-group", category=GateKeeper.CATEGORY_CHECK_APPROVALS, description=
 		"This gate keeper will be passed if the commit is approved by specified number of users with "
 		+ "writing permission.")
 public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {

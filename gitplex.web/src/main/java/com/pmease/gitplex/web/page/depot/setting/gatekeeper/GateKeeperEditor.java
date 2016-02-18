@@ -14,6 +14,8 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+
 @SuppressWarnings("serial")
 public abstract class GateKeeperEditor extends Panel {
 
@@ -37,6 +39,7 @@ public abstract class GateKeeperEditor extends Panel {
 		
 		Form<?> form = new Form<Void>("form");
 		add(form);
+		form.add(new NotificationPanel("feedback", form));
 		form.add(BeanContext.editBean("beanEditor", gateKeeper));
 		
 		form.add(new AjaxLink<Void>("cancel") {

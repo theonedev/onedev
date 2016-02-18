@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
-@Editable(order=100, icon="fa-file-text", category=GateKeeper.CATEGROY_CHECK_FILES, description=
+@Editable(order=100, icon="fa-file-text", category=GateKeeper.CATEGORY_CHECK_FILES, description=
 		"This gate keeper will be passed if any commit file maches specified file patterns.")
 public class IfTouchSpecifiedFilePatterns extends AbstractGateKeeper {
 

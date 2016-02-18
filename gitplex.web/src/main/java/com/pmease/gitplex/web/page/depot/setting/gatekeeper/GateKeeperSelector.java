@@ -38,12 +38,13 @@ public abstract class GateKeeperSelector extends Panel {
 		super.onInitialize();
 
 		final Map<String, List<Class<?>>> gateKeeperClasses = new LinkedHashMap<>();
-		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_REFS, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_FILES, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_REVIEW, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_SUBMITTER, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.CATEGROY_OTHERS, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.CATEGROY_COMPOSITION, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGORY_CHECK_REFS, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGORY_CHECK_FILES, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGORY_CHECK_OPERATIONS, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGORY_CHECK_APPROVALS, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGORY_CHECK_SUBMITTER, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGORY_OTHERS, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGORY_COMPOSITION, new ArrayList<Class<?>>());
 		
 		List<Class<?>> implementations = new ArrayList<>();
 		for (Class<?> clazz: GitPlex.getInstance(ImplementationRegistry.class).getImplementations(GateKeeper.class)) 
@@ -68,7 +69,7 @@ public abstract class GateKeeperSelector extends Panel {
 				}
 			}
 			if (categoryClasses == null)
-				categoryClasses = gateKeeperClasses.get(GateKeeper.CATEGROY_OTHERS);
+				categoryClasses = gateKeeperClasses.get(GateKeeper.CATEGORY_OTHERS);
 			categoryClasses.add(implementation);
 		}
 		

@@ -71,6 +71,12 @@
 	margin-right: 8px; 
 	margin-top: 4px;
 }
+.gate-keeper-editor form>.feedback {
+	margin: 20px 16px -16px 16px;
+}
+.gate-keeper-editor form>.feedback .alert {
+	margin-bottom: 0;
+}
 .gate-keeper .panel-title {
 	font-size: 14px;
 }
