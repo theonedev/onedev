@@ -1,10 +1,10 @@
 package com.pmease.gitplex.web.component.createbranch;
 
-import java.util.UUID;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.model.Depot;
@@ -27,7 +27,9 @@ public abstract class CreateBranchLink extends ModalLink {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canCreate(depotModel.getObject(), UUID.randomUUID().toString()));
+		
+		ObjectId commitId = depotModel.getObject().getRevCommit(revision);
+		setVisible(SecurityUtils.canPushRef(depotModel.getObject(), Constants.R_HEADS, ObjectId.zeroId(), commitId));
 	}
 	
 	@Override

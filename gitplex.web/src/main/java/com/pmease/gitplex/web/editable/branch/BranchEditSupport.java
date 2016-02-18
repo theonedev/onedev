@@ -19,8 +19,8 @@ import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
-import com.pmease.gitplex.core.editable.BranchChoice;
 import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.util.editable.BranchChoice;
 
 @SuppressWarnings("serial")
 public class BranchEditSupport implements EditSupport {
@@ -45,10 +45,10 @@ public class BranchEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        List<String> repoAndBranches = model.getObject();
-						        if (repoAndBranches != null && !repoAndBranches.isEmpty()) {
+						        List<String> depotAndBranches = model.getObject();
+						        if (depotAndBranches != null && !depotAndBranches.isEmpty()) {
 						        	List<String> branches = new ArrayList<>();
-						        	for (String each: repoAndBranches) {
+						        	for (String each: depotAndBranches) {
 										if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
 											branches.add(new DepotAndBranch(each).getFQN());
 						        		else
@@ -83,12 +83,12 @@ public class BranchEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        String repoAndBranch = model.getObject();
-						        if (repoAndBranch != null) {
+						        String depotAndBranch = model.getObject();
+						        if (depotAndBranch != null) {
 									if (isAffinal(getPropertyGetter()) || isGlobal(getPropertyGetter()))
-						        		return new Label(id, new DepotAndBranch(repoAndBranch).getFQN());
+						        		return new Label(id, new DepotAndBranch(depotAndBranch).getFQN());
 						        	else
-						        		return new Label(id, repoAndBranch);
+						        		return new Label(id, depotAndBranch);
 						        } else {
 									return new NotDefinedLabel(id);
 						        }

@@ -93,7 +93,7 @@ import com.pmease.gitplex.core.listeners.RefListener;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
-import com.pmease.gitplex.core.validation.DepotName;
+import com.pmease.gitplex.core.util.validation.DepotName;
 
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"owner", "name"})})

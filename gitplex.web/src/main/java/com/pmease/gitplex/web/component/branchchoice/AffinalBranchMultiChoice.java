@@ -130,8 +130,8 @@ public class AffinalBranchMultiChoice extends FormComponentPanel<Collection<Stri
 		return getModelObject();
 	}
 
-	private void setDepotAndBranches(Collection<String> repoAndBranches) {
-		getModel().setObject(repoAndBranches);
+	private void setDepotAndBranches(Collection<String> depotAndBranches) {
+		getModel().setObject(depotAndBranches);
 	}
 
 	@Override

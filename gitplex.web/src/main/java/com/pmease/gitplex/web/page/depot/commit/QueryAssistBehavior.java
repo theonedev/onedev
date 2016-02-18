@@ -27,7 +27,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser;
 
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends ANTLRAssistBehavior {

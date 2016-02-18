@@ -16,7 +16,7 @@ import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.core.validation.UserNameReservation;
+import com.pmease.gitplex.core.util.validation.UserNameReservation;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;

@@ -17,8 +17,8 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.markdown.MentionParser;
-import com.pmease.gitplex.core.markdown.PullRequestParser;
+import com.pmease.gitplex.core.util.markdown.MentionParser;
+import com.pmease.gitplex.core.util.markdown.PullRequestParser;
 
 @Singleton
 public class CommentPersistListener implements HibernateListener {

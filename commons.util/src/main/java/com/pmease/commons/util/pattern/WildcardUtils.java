@@ -9,9 +9,9 @@ import com.pmease.commons.util.Range;
 
 public class WildcardUtils {
 	
-	private static final PatternMatcher stringPatternSetMatcher = new PatternSetMatcher(new WildcardStringMatcher());
+	private static final PatternSetMatcher stringPatternSetMatcher = new PatternSetMatcher(new WildcardStringMatcher());
 	
-	private static final PatternMatcher pathPatternSetMatcher = new PatternSetMatcher(new WildcardPathMatcher());
+	private static final PatternSetMatcher pathPatternSetMatcher = new PatternSetMatcher(new WildcardPathMatcher());
 
 	/**
      * Tests whether or not a given path matches a given patterns. 
@@ -48,6 +48,10 @@ public class WildcardUtils {
     public static boolean matchPath(String patterns, String path) {
     	return pathPatternSetMatcher.matches(patterns, path);
     }
+    
+    public static boolean matchPath(List<String> includes, List<String> excludes, String path) {
+    	return pathPatternSetMatcher.matches(includes, excludes, path);
+    }
 	
     /**
      * Tests whether or not a string matches against specified patterns. 
@@ -83,6 +87,10 @@ public class WildcardUtils {
      */
     public static boolean matchString(String patterns, String str) {
     	return stringPatternSetMatcher.matches(patterns, str);
+    }
+    
+    public static boolean matchString(List<String> includes, List<String> excludes, String str) {
+    	return stringPatternSetMatcher.matches(includes, excludes, str);
     }
 
     public static boolean hasWildcards(String input) {

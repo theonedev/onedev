@@ -10,9 +10,9 @@ import javax.validation.constraints.Size;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.branchmatcher.AffinalBranchMatcher;
-import com.pmease.gitplex.core.branchmatcher.LocalBranchMatcher;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.util.branchmatcher.AffinalBranchMatcher;
+import com.pmease.gitplex.core.util.branchmatcher.LocalBranchMatcher;
 
 @SuppressWarnings("serial")
 @Editable

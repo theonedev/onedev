@@ -5,12 +5,14 @@ import java.util.HashSet;
 
 import javax.validation.constraints.Min;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
@@ -93,17 +95,12 @@ public class IfApprovedBySpecifiedTeam extends TeamAwareGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user);
 	}
 
 	@Override
 	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
-		return check(user);
-	}
-
-	@Override
-	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
 		return check(user);
 	}
 

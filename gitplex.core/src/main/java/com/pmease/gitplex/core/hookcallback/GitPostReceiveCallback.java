@@ -19,7 +19,6 @@ import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.RefListener;
@@ -82,7 +81,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         	String field = fields.get(pos);
 //        	String oldCommitHash = StringUtils.reverse(field.substring(0, 40));
         	
-        	if (!newCommitHash.equals(GitUtils.NULL_SHA1)) {
+        	if (!newCommitHash.equals(ObjectId.zeroId().name())) {
         		depot.cacheObjectId(refName, ObjectId.fromString(newCommitHash));
         	} else {
         		newCommitHash = null;

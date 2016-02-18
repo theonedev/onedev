@@ -70,8 +70,8 @@ import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
-import com.pmease.gitplex.core.validation.RepositoryNameReservation;
-import com.pmease.gitplex.core.validation.UserNameReservation;
+import com.pmease.gitplex.core.util.validation.RepositoryNameReservation;
+import com.pmease.gitplex.core.util.validation.UserNameReservation;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

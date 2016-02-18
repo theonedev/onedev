@@ -2,19 +2,19 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import java.io.Serializable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @Editable(name="Misc")
 public interface GateKeeper extends Trimmable, Serializable {
 	
-	String CATEGORY_COMMONLY_USED = "Commonly Used";
-	
-	String CATEGROY_CHECK_BRANCH = "Check Destination Branch";
+	String CATEGROY_CHECK_REFS = "Check Target Refs";
 	
 	String CATEGROY_CHECK_FILES = "Check Touched Files";
 
@@ -45,39 +45,27 @@ public interface GateKeeper extends Trimmable, Serializable {
 	 * @param branch
 	 * 			branch to be checked
 	 * @param file
-	 * 			file to be checked, pass <tt>null</tt> to check any file
+	 * 			file to be checked
 	 * @return
 	 * 			result of the check. 
 	 */
 	CheckResult checkFile(User user, Depot depot, String branch, String file);
 	
 	/**
-	 * Check if specified user can push specified commit to specified branch.
+	 * Check if specified user can push specified commit to specified ref.
 	 *
 	 * @param user
 	 * 			user to be checked
-	 * @param branch
-	 * 			branch to be checked
-	 * @param commit
-	 * 			commit to be checked
-	 * @return
-	 * 			result of the check
-	 */
-	CheckResult checkCommit(User user, Depot depot, String branch, String commit);
-	
-	/**
-	 * Check if specified user can push specified reference to specified repository. 
-	 * 
-	 * @param user
-	 * 			user to be checked
-	 * @param depot
-	 * 			repository to be checked
 	 * @param refName
-	 * 			reference name to be checked
+	 * 			refName to be checked
+	 * @param oldCommitHash
+	 * 			old commit of the ref
+	 * @param newCommitHash
+	 * 			new commit of the ref
 	 * @return
 	 * 			result of the check
 	 */
-	CheckResult checkRef(User user, Depot depot, String refName);
+	CheckResult checkPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
 	
 	boolean isEnabled();
 }

@@ -69,10 +69,10 @@ import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryLexer;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CriteriaContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.QueryContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryLexer;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.CriteriaContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.QueryContext;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

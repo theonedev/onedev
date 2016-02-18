@@ -1,11 +1,13 @@
 package com.pmease.gitplex.core.gatekeeper;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
@@ -43,16 +45,8 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
+	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user, depot);
-	}
-
-	@Override
-	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
-		if (user.equals(depot.getOwner()))
-			return passed(Lists.newArrayList("Approved by repository owner."));
-		else
-			return failed(Lists.newArrayList("Not approved by repository owner."));
 	}
 
 }

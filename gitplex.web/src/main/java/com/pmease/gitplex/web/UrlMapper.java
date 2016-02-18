@@ -11,8 +11,8 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.validation.RepositoryNameValidator;
-import com.pmease.gitplex.core.validation.UserNameValidator;
+import com.pmease.gitplex.core.util.validation.DepotNameValidator;
+import com.pmease.gitplex.core.util.validation.UserNameValidator;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 import com.pmease.gitplex.web.page.account.depots.NewAccountDepotPage;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
@@ -57,7 +57,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("init", ServerInitPage.class));
 		addAdministrationPages();
 		addAccountPages();
-		addRepoPages();
+		addDepotPages();
 		addSecurityPages();
 		
 		add(new MountedMapper("/test", TestPage.class));
@@ -67,7 +67,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addResources() {
-		add(new ResourceMapper("${user}/${repo}/archive", new ArchiveResourceReference()) {
+		add(new ResourceMapper("${user}/${depot}/archive", new ArchiveResourceReference()) {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
@@ -75,7 +75,7 @@ public class UrlMapper extends CompoundRequestMapper {
 			}
 			
 		});
-		add(new ResourceMapper("${user}/${repo}/raw", new BlobResourceReference()) {
+		add(new ResourceMapper("${user}/${depot}/raw", new BlobResourceReference()) {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
@@ -83,7 +83,7 @@ public class UrlMapper extends CompoundRequestMapper {
 			}
 			
 		});
-		add(new ResourceMapper("${user}/${repo}/pulls/${request}/attachments/${attachment}", new AttachmentResourceReference()) {
+		add(new ResourceMapper("${user}/${depot}/pulls/${request}/attachments/${attachment}", new AttachmentResourceReference()) {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
@@ -133,16 +133,16 @@ public class UrlMapper extends CompoundRequestMapper {
 
 		});
 		
-		add(new MountedMapper("${user}/repositories", AccountDepotsPage.class));
-		add(new MountedMapper("${user}/repositories/new", NewAccountDepotPage.class));
+		add(new MountedMapper("${user}/depots", AccountDepotsPage.class));
+		add(new MountedMapper("${user}/depots/new", NewAccountDepotPage.class));
 		add(new MountedMapper("${user}/notifications", AccountNotificationsPage.class));
 		add(new MountedMapper("${user}/setting/profile", ProfileEditPage.class));
 		add(new MountedMapper("${user}/setting/avatar", AvatarEditPage.class));
 		add(new MountedMapper("${user}/setting/password", PasswordEditPage.class));
 	}
 
-	private void addRepoPages() {
-		add(new MountedMapper("${user}/${repo}", DepotFilePage.class) {
+	private void addDepotPages() {
+		add(new MountedMapper("${user}/${depot}", DepotFilePage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -153,38 +153,38 @@ public class UrlMapper extends CompoundRequestMapper {
 				if (UserNameValidator.getReservedNames().contains(userName))
 					return false;
 
-				String repositoryName = urlSegments.get(1);
-				return !RepositoryNameValidator.getReservedNames().contains(repositoryName);
+				String depotName = urlSegments.get(1);
+				return !DepotNameValidator.getReservedNames().contains(depotName);
 			}
 
 		});
 
-//		add(new ParameterAwareMountedMapper("${user}/${repo}/browse", RepoFilePage.class));
-		add(new MountedMapper("${user}/${repo}/commit", CommitDetailPage.class));
-		add(new MountedMapper("${user}/${repo}/commits", DepotCommitsPage.class));
-		add(new MountedMapper("${user}/${repo}/compare", RevisionComparePage.class));
+//		add(new ParameterAwareMountedMapper("${user}/${depot}/browse", RepoFilePage.class));
+		add(new MountedMapper("${user}/${depot}/commit", CommitDetailPage.class));
+		add(new MountedMapper("${user}/${depot}/commits", DepotCommitsPage.class));
+		add(new MountedMapper("${user}/${depot}/compare", RevisionComparePage.class));
 
-		add(new MountedMapper("${user}/${repo}/branches", DepotBranchesPage.class));
-		add(new MountedMapper("${user}/${repo}/tags", DepotTagsPage.class));
+		add(new MountedMapper("${user}/${depot}/branches", DepotBranchesPage.class));
+		add(new MountedMapper("${user}/${depot}/tags", DepotTagsPage.class));
 
-		add(new MountedMapper("${user}/${repo}/pulls", RequestListPage.class));
-		add(new MountedMapper("${user}/${repo}/pulls/new", NewRequestPage.class));
-		add(new MountedMapper("${user}/${repo}/pulls/${request}", RequestOverviewPage.class));
+		add(new MountedMapper("${user}/${depot}/pulls", RequestListPage.class));
+		add(new MountedMapper("${user}/${depot}/pulls/new", NewRequestPage.class));
+		add(new MountedMapper("${user}/${depot}/pulls/${request}", RequestOverviewPage.class));
 		add(new MountedMapper(
-				"${user}/${repo}/pulls/${request}/overview", RequestOverviewPage.class));
+				"${user}/${depot}/pulls/${request}/overview", RequestOverviewPage.class));
 		add(new MountedMapper(
-				"${user}/${repo}/pulls/${request}/updates", RequestUpdatesPage.class));
+				"${user}/${depot}/pulls/${request}/updates", RequestUpdatesPage.class));
 		add(new MountedMapper(
-				"${user}/${repo}/pulls/${request}/compare", RequestComparePage.class));
+				"${user}/${depot}/pulls/${request}/compare", RequestComparePage.class));
 		add(new MountedMapper(
-				"${user}/${repo}/pulls/${request}/attachments", RequestAttachmentsPage.class));
+				"${user}/${depot}/pulls/${request}/attachments", RequestAttachmentsPage.class));
 
-		add(new MountedMapper("${user}/${repo}/setting", GeneralSettingPage.class));
-		add(new MountedMapper("${user}/${repo}/setting/general", GeneralSettingPage.class));
-		add(new MountedMapper("${user}/${repo}/setting/gate-keeper", GateKeeperPage.class));
-		add(new MountedMapper("${user}/${repo}/setting/integration-policy", IntegrationPolicyPage.class));
+		add(new MountedMapper("${user}/${depot}/setting", GeneralSettingPage.class));
+		add(new MountedMapper("${user}/${depot}/setting/general", GeneralSettingPage.class));
+		add(new MountedMapper("${user}/${depot}/setting/gate-keeper", GateKeeperPage.class));
+		add(new MountedMapper("${user}/${depot}/setting/integration-policy", IntegrationPolicyPage.class));
 		
-		add(new MountedMapper("${user}/${repo}/no-commits", NoCommitsPage.class));
+		add(new MountedMapper("${user}/${depot}/no-commits", NoCommitsPage.class));
 	}
 
 }

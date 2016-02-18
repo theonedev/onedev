@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -77,7 +78,7 @@ public class Git implements Serializable {
 			throw new GeneralException(String.format("Branch %s already exists.", branchName));
 
 		new UpdateRefCommand(repoDir).refName(Constants.R_HEADS + branchName).revision(commitHash)
-				.oldRevision(GitUtils.NULL_SHA1).call();
+				.oldRevision(ObjectId.zeroId().name()).call();
 		
 		return this;
 	}

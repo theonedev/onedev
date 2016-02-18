@@ -42,11 +42,11 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
     		
     	});
 
-    	ArrayList<String> repoAndBranches = new ArrayList<>();
+    	ArrayList<String> depotAndBranches = new ArrayList<>();
 		if (getModelObject() != null) 
-			repoAndBranches.addAll(getModelObject());
+			depotAndBranches.addAll(getModelObject());
 		
-		input = new BranchMultiChoice("input", new Model(repoAndBranches), branchProvider);
+		input = new BranchMultiChoice("input", new Model(depotAndBranches), branchProvider);
         
         add(input);
 	}
@@ -58,11 +58,11 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> repoAndBranches = new ArrayList<>();
+		List<String> depotAndBranches = new ArrayList<>();
 		Collection<String> convertedInput = input.getConvertedInput();
 		if (convertedInput != null) 
-			repoAndBranches.addAll(convertedInput);
-		return repoAndBranches;
+			depotAndBranches.addAll(convertedInput);
+		return depotAndBranches;
 	}
 
 }

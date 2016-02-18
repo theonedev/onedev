@@ -63,6 +63,8 @@ public abstract class GateKeeperEditor extends Panel {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 	
 	protected abstract void onCancel(AjaxRequestTarget target);

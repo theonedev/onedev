@@ -14,24 +14,24 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 @SuppressWarnings("serial")
 public class BranchLink extends BookmarkablePageLink<Void> {
 
-	private final DepotAndBranch repoAndBranch;
+	private final DepotAndBranch depotAndBranch;
 	
-	public BranchLink(String id, DepotAndBranch repoAndBranch) {
-		super(id, DepotFilePage.class, getPageParams(repoAndBranch));
-		this.repoAndBranch = repoAndBranch;
+	public BranchLink(String id, DepotAndBranch depotAndBranch) {
+		super(id, DepotFilePage.class, getPageParams(depotAndBranch));
+		this.depotAndBranch = depotAndBranch;
 	}
 	
-	private static PageParameters getPageParams(DepotAndBranch repoAndBranch) {
+	private static PageParameters getPageParams(DepotAndBranch depotAndBranch) {
 		HistoryState state = new HistoryState();
-		state.blobIdent.revision = repoAndBranch.getBranch();
-		return DepotFilePage.paramsOf(repoAndBranch.getDepot(), state);
+		state.blobIdent.revision = depotAndBranch.getBranch();
+		return DepotFilePage.paramsOf(depotAndBranch.getDepot(), state);
 	}
 
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setEnabled(SecurityUtils.canPull(repoAndBranch.getDepot()) 
-				&& repoAndBranch.getObjectName(false) != null);
+		setEnabled(SecurityUtils.canPull(depotAndBranch.getDepot()) 
+				&& depotAndBranch.getObjectName(false) != null);
 	}
 
 	@Override
@@ -39,12 +39,12 @@ public class BranchLink extends BookmarkablePageLink<Void> {
 		String label;
 		if (getPage() instanceof DepotPage) {
 			DepotPage page = (DepotPage) getPage();
-			if (page.getDepot().equals(repoAndBranch.getDepot())) 
-				label = repoAndBranch.getBranch();
+			if (page.getDepot().equals(depotAndBranch.getDepot())) 
+				label = depotAndBranch.getBranch();
 			else 
-				label = repoAndBranch.getFQN();
+				label = depotAndBranch.getFQN();
 		} else {
-			label = repoAndBranch.getFQN();
+			label = depotAndBranch.getFQN();
 		}
 		return Model.of(label);
 	}

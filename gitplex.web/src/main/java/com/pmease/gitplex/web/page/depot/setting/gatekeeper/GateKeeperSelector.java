@@ -38,8 +38,7 @@ public abstract class GateKeeperSelector extends Panel {
 		super.onInitialize();
 
 		final Map<String, List<Class<?>>> gateKeeperClasses = new LinkedHashMap<>();
-		gateKeeperClasses.put(GateKeeper.CATEGORY_COMMONLY_USED, new ArrayList<Class<?>>());
-		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_BRANCH, new ArrayList<Class<?>>());
+		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_REFS, new ArrayList<Class<?>>());
 		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_FILES, new ArrayList<Class<?>>());
 		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_REVIEW, new ArrayList<Class<?>>());
 		gateKeeperClasses.put(GateKeeper.CATEGROY_CHECK_SUBMITTER, new ArrayList<Class<?>>());

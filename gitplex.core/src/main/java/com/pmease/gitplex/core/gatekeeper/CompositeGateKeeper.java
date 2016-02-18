@@ -1,8 +1,10 @@
 package com.pmease.gitplex.core.gatekeeper;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -39,24 +41,13 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckCommit(final User user, final Depot depot, final String branch, final String commit) {
+	protected CheckResult doCheckPush(final User user, final Depot depot, final String refName, 
+			final ObjectId oldCommit, final ObjectId newCommit) {
 		return aggregate(new Checker() {
 
 			@Override
 			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkCommit(user, depot, branch, commit);
-			}
-			
-		});
-	}
-
-	@Override
-	protected CheckResult doCheckRef(final User user, final Depot depot, final String refName) {
-		return aggregate(new Checker() {
-
-			@Override
-			public CheckResult check(GateKeeper gateKeeper) {
-				return gateKeeper.checkRef(user, depot, refName);
+				return gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
 			}
 			
 		});

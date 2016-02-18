@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,18 +62,6 @@ public class GitUpdateCallback extends HttpServlet {
 		output.writeLine();
 	}
 	
-	private void checkRef(User user, Depot depot, String refName, Output output) {
-		GateKeeper gateKeeper = depot.getGateKeeper();
-		CheckResult checkResult = gateKeeper.checkRef(user, depot, refName);
-
-		if (!(checkResult instanceof Passed)) {
-			List<String> messages = new ArrayList<>();
-			for (String each: checkResult.getReasons())
-				messages.add(each);
-			error(output, messages.toArray(new String[messages.size()]));
-		}
-	}
-	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String clientIp = request.getHeader("X-Forwarded-For");
@@ -98,8 +87,8 @@ public class GitUpdateCallback extends HttpServlet {
         
         fields = StringUtils.splitAndTrim(new String(baos.toByteArray()), " ");
         String refName = fields.get(0);
-        String oldCommitHash = fields.get(1);
-        String newCommitHash = fields.get(2);
+        ObjectId oldCommit = ObjectId.fromString(fields.get(1));
+        ObjectId newCommit = ObjectId.fromString(fields.get(2));
         
 		logger.debug("Executing update hook against reference {}...", refName);
 
@@ -110,40 +99,21 @@ public class GitUpdateCallback extends HttpServlet {
 			if (!user.asSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot)))
 				error(output, "Only repository administrators can update gitplex refs.");
 		} else {
-			String branch = GitUtils.ref2branch(refName);
-			if (branch != null) { // push branch ref 
-				if (oldCommitHash.equals(GitUtils.NULL_SHA1)) { // create new branch
-					checkRef(user, depot, refName, output);
-				} else {
-					if (newCommitHash.equals(GitUtils.NULL_SHA1)) { // deleting a branch ref
-						GateKeeper gateKeeper = depot.getGateKeeper();
-						CheckResult checkResult = gateKeeper.checkFile(user, depot, branch, null);
-						
-						if (!(checkResult instanceof Passed)) {
-							List<String> messages = new ArrayList<>();
-							for (String each: checkResult.getReasons())
-								messages.add(each);
-							error(output, messages.toArray(new String[messages.size()]));
-						}
-					} else {
-						GateKeeper gateKeeper = depot.getGateKeeper();
-						CheckResult checkResult = gateKeeper.checkCommit(user, depot, branch, newCommitHash);
-				
-						if (!(checkResult instanceof Passed)) {
-							List<String> messages = new ArrayList<>();
-							for (String each: checkResult.getReasons())
-								messages.add(each);
-							if (!newCommitHash.equals(GitUtils.NULL_SHA1) && !(checkResult instanceof Failed)) {
-								messages.add("");
-								messages.add("----------------------------------------------------");
-								messages.add("You may submit a pull request instead.");
-							}
-							error(output, messages.toArray(new String[messages.size()]));
-						}
-					}
+			GateKeeper gateKeeper = depot.getGateKeeper();
+			CheckResult checkResult = gateKeeper.checkPush(user, depot, refName, oldCommit, newCommit);
+			if (!(checkResult instanceof Passed)) {
+				List<String> messages = new ArrayList<>();
+				for (String each: checkResult.getReasons())
+					messages.add(each);
+				if (GitUtils.ref2branch(refName) != null 
+						&& !oldCommit.equals(ObjectId.zeroId()) 
+						&& !newCommit.equals(ObjectId.zeroId()) 
+						&& !(checkResult instanceof Failed)) {
+					messages.add("");
+					messages.add("----------------------------------------------------");
+					messages.add("You may submit a pull request instead.");
 				}
-			} else { // push non-branch refs
-				checkRef(user, depot, refName, output);
+				error(output, messages.toArray(new String[messages.size()]));
 			}
 		}
 	}	

@@ -33,9 +33,9 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<String>>
 
 			@Override
 			protected Object load() {
-				List<String> repoAndBranches = getModelObject();
-				if (repoAndBranches != null)
-					return repoAndBranches;
+				List<String> depotAndBranches = getModelObject();
+				if (depotAndBranches != null)
+					return depotAndBranches;
 				else
 					return new ArrayList<>();
 			}
@@ -52,11 +52,11 @@ public class AffinalBranchMultiChoiceEditor extends PropertyEditor<List<String>>
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> repoAndBranches = new ArrayList<>();
+		List<String> depotAndBranches = new ArrayList<>();
 		Collection<String> convertedInput = input.getConvertedInput();
 		if (convertedInput != null)
-			repoAndBranches.addAll(convertedInput);
-		return repoAndBranches;
+			depotAndBranches.addAll(convertedInput);
+		return depotAndBranches;
 	}
 
 }

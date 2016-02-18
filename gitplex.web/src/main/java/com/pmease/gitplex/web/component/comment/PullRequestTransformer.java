@@ -4,8 +4,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Element;
 
 import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
-import com.pmease.gitplex.core.markdown.PullRequestParser;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.util.markdown.PullRequestParser;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 
 public class PullRequestTransformer extends PullRequestParser implements HtmlTransformer {

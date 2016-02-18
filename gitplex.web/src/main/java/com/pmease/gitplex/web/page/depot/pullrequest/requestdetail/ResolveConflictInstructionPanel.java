@@ -5,21 +5,21 @@ import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERG
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
 import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 class ResolveConflictInstructionPanel extends Panel {
@@ -37,7 +37,6 @@ class ResolveConflictInstructionPanel extends Panel {
 		Depot targetDepot = request.getTarget().getDepot();
 		User user = GitPlex.getInstance(UserManager.class).getCurrent();
 		IntegrationPreview preview = request.getIntegrationPreview();
-		String sourceHead = preview.getRequestHead();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		boolean sameRepo = request.getTarget().getDepot().equals(request.getSource().getDepot());					
 		if (strategy == MERGE_WITH_SQUASH || strategy == REBASE_SOURCE_ONTO_TARGET) {
@@ -69,8 +68,8 @@ class ResolveConflictInstructionPanel extends Panel {
 			differentRepoContainer.setVisible(!sameRepo);
 			fragment.add(differentRepoContainer);
 		} else if (user != null 
-						&& SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPush(targetDepot))
-						&& targetDepot.getGateKeeper().checkCommit(user, request.getTargetDepot(), request.getTargetBranch(), sourceHead).allowIntegration()) {
+						&& SecurityUtils.canPush(targetDepot)
+						&& targetDepot.getGateKeeper().checkPush(user, request.getTargetDepot(), request.getTargetRef(), request.getTarget().getObjectId(), ObjectId.fromString(preview.getRequestHead())).allowIntegration()) {
 			fragment = new Fragment("content", "mergeInTargetFrag", this);
 			fragment.add(new Label("destRepoName", request.getTarget().getDepot()));
 			fragment.add(new Label("destBranchNameForCheckout", request.getTargetBranch()));

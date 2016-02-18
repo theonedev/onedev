@@ -4,17 +4,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
@@ -66,26 +64,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 
-	public static boolean canCreate(DepotAndBranch depotAndBranch) {
-		return canCreate(depotAndBranch.getDepot(), depotAndBranch.getBranch());
-	}
-	
-	public static boolean canCreate(Depot depot, String branch) {
+	public static boolean canPushRef(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot))	
-				&& depot.getGateKeeper().checkRef(currentUser, depot, Constants.R_HEADS + branch).isPassed();
-	}
-
-	public static boolean canModify(DepotAndBranch depotAndBranch) {
-		return canModify(depotAndBranch.getDepot(), GitUtils.branch2ref(depotAndBranch.getBranch()));
-	}
-	
-	public static boolean canModify(Depot depot, String refName) {
-		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot))	
-				&& depot.getGateKeeper().checkRef(currentUser, depot, refName).isPassed();
+				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassed();
 	}
 	
 	public static boolean canManage(User account) {

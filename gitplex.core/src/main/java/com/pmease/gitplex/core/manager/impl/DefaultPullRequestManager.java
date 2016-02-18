@@ -690,14 +690,14 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 	public void onRefUpdate(Depot depot, String refName, @Nullable String newCommitHash) {
 		final String branch = GitUtils.ref2branch(refName);
 		if (branch != null) {
-			DepotAndBranch repoAndBranch = new DepotAndBranch(depot, branch);
+			DepotAndBranch depotAndBranch = new DepotAndBranch(depot, branch);
 			if (newCommitHash != null) {
 				/**
 				 * Source branch update is key to the logic as it has to create 
 				 * pull request update, so we should not postpone it to be executed
 				 * in a executor service like target branch update below
 				 */
-				Criterion criterion = Restrictions.and(ofOpen(), ofSource(repoAndBranch));
+				Criterion criterion = Restrictions.and(ofOpen(), ofSource(depotAndBranch));
 				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) {
 					if (depot.getObjectId(request.getBaseCommitHash(), false) != null)
 						onSourceBranchUpdate(request, true);
@@ -714,8 +714,8 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 
 							@Override
 							public void run() {
-								DepotAndBranch repoAndBranch = new DepotAndBranch(repoId, branch);								
-								Criterion criterion = Restrictions.and(ofOpen(), ofTarget(repoAndBranch));
+								DepotAndBranch depotAndBranch = new DepotAndBranch(repoId, branch);								
+								Criterion criterion = Restrictions.and(ofOpen(), ofTarget(depotAndBranch));
 								for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
 									if (request.getSourceDepot().getObjectId(request.getBaseCommitHash(), false) != null)
 										onTargetBranchUpdate(request);
@@ -732,7 +732,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 			} else {
 				Criterion criterion = Restrictions.and(
 						ofOpen(), 
-						Restrictions.or(ofSource(repoAndBranch), ofTarget(repoAndBranch)));
+						Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
 				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) {
 					if (request.getTargetDepot().equals(depot) && request.getTargetBranch().equals(branch)) 
 						discard(request, "Target branch is deleted.");

@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -210,8 +209,8 @@ public class DepotBranchesPage extends DepotPage {
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			DepotAndBranch repoAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
-			for (PullRequest request: pullRequestManager.queryOpenTo(repoAndBranch, getDepot())) 
+			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
+			for (PullRequest request: pullRequestManager.queryOpenTo(depotAndBranch, getDepot())) 
 				requests.put(request.getSource().getBranch(), request);
 			return requests;
 		}
@@ -225,8 +224,8 @@ public class DepotBranchesPage extends DepotPage {
 		protected Map<String, PullRequest> load() {
 			Map<String, PullRequest> requests = new HashMap<>();
 			PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-			DepotAndBranch repoAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
-			for (PullRequest request: pullRequestManager.queryOpenFrom(repoAndBranch, getDepot())) 
+			DepotAndBranch depotAndBranch = new DepotAndBranch(getDepot(), getBaseBranch());
+			for (PullRequest request: pullRequestManager.queryOpenFrom(depotAndBranch, getDepot())) 
 				requests.put(request.getTarget().getBranch(), request);
 			return requests;
 		}
@@ -311,12 +310,14 @@ public class DepotBranchesPage extends DepotPage {
 
 			private String branchName;
 			
-			private String branchRevision;
+			private String branchRevision = getDepot().getDefaultBranch();
 			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canCreate(getDepot(), UUID.randomUUID().toString()));
+				
+				ObjectId commit = getDepot().getObjectId(branchRevision);
+				setVisible(SecurityUtils.canPushRef(getDepot(), Constants.R_HEADS, ObjectId.zeroId(), commit));
 			}
 
 			private RevisionPicker newRevisionPicker() {
@@ -361,7 +362,6 @@ public class DepotBranchesPage extends DepotPage {
 				}));
 				nameInput.setOutputMarkupId(true);
 				
-				branchRevision = getDepot().getDefaultBranch();
 				form.add(newRevisionPicker());
 				form.add(new AjaxButton("create") {
 
@@ -635,7 +635,10 @@ public class DepotBranchesPage extends DepotPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (!getDepot().getDefaultBranch().equals(branch) && SecurityUtils.canModify(new DepotAndBranch(getDepot(), branch))) {
+						Ref ref = item.getModelObject();
+						if (!getDepot().getDefaultBranch().equals(branch) 
+								&& SecurityUtils.canPushRef(getDepot(), ref.getName(), ref.getObjectId(), ObjectId.zeroId())) {
+					
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getDepot().getGateKeeper();

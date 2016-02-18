@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.pmease.commons.git.Git;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -127,7 +129,7 @@ public enum PullRequestOperation {
 					&& (request.getSource().getObjectName().equals(preview.getRequestHead()) 
 							|| request.getSource().getObjectName().equals(preview.getIntegrated()))
 					&& SecurityUtils.canModify(request)
-					&& SecurityUtils.canModify(request.getSource())
+					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), request.getSource().getObjectId(), ObjectId.zeroId())
 					&& pullRequestManager.queryOpenTo(request.getSource(), null).isEmpty();
 		}
 		
@@ -141,8 +143,10 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return request.getSourceDepot() != null && request.getSource().getObjectName(false) == null 
-					&& SecurityUtils.canModify(request) && SecurityUtils.canCreate(request.getSource());
+			return request.getSourceDepot() != null 
+					&& request.getSource().getObjectName(false) == null 
+					&& SecurityUtils.canModify(request) 
+					&& SecurityUtils.canPushRef(request.getSourceDepot(), request.getSourceRef(), ObjectId.zeroId(), ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()));
 		}
 		
 	};

@@ -7,7 +7,7 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
-import com.pmease.gitplex.core.editable.PathChoice;
+import com.pmease.gitplex.core.util.editable.PathChoice;
 import com.pmease.gitplex.web.component.pathchoice.PathSingleChoice;
 
 @SuppressWarnings("serial")

@@ -20,8 +20,8 @@ import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.editable.UserChoice;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.util.editable.UserChoice;
 
 @SuppressWarnings("serial")
 public class UserEditSupport implements EditSupport {

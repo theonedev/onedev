@@ -1,10 +1,12 @@
 package com.pmease.gitplex.core.gatekeeper;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
@@ -30,12 +32,7 @@ public class IfSubmittedByRepositoryOwner extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
-		return check(user, depot);
-	}
-
-	@Override
-	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
+	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user, depot);
 	}
 

@@ -26,18 +26,12 @@ import com.google.common.collect.Iterables;
 
 public class GitUtils {
 	
-	public static final String NULL_SHA1 = StringUtils.repeat("0", 40);
-    
 	public static final Pattern PATTERN_HASH = Pattern.compile("[a-z0-9]{40}");
     
     public static final int SHORT_SHA_LENGTH = 8;
     
     public static boolean isHash(String sha) {
     	return PATTERN_HASH.matcher(sha).matches();
-    }
-    
-    public static boolean isNullHash(String sha) {
-    	return Objects.equal(NULL_SHA1, sha);
     }
     
     public static boolean isEmptyPath(String path) {

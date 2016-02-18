@@ -10,9 +10,9 @@ import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.annotation.Editable;
-import com.pmease.gitplex.core.editable.BranchChoice;
-import com.pmease.gitplex.core.editable.UserChoice;
 import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.util.editable.BranchChoice;
+import com.pmease.gitplex.core.util.editable.UserChoice;
 import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")

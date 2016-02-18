@@ -1,11 +1,10 @@
 package com.pmease.gitplex.web.component.createtag;
 
-import java.util.UUID;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.model.Depot;
@@ -28,7 +27,10 @@ public abstract class CreateTagLink extends ModalLink {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canModify(depotModel.getObject(), Constants.R_TAGS + UUID.randomUUID().toString()));
+		
+		ObjectId commit = depotModel.getObject().getRevCommit(revision);
+		setVisible(SecurityUtils.canPushRef(depotModel.getObject(), Constants.R_HEADS, 
+				ObjectId.zeroId(), commit));
 	}
 	
 	@Override

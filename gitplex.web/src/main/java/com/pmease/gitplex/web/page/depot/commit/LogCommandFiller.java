@@ -6,17 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.unbescape.java.JavaEscape;
 
 import com.pmease.commons.git.command.LogCommand;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryBaseListener;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.AfterContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.AuthorContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.BeforeContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.CommitterContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.MessageContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.PathContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionExclusionContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.RevisionRangeContext;
-import com.pmease.gitplex.web.page.repository.commit.CommitQueryParser.SingleRevisionContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryBaseListener;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.AfterContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.AuthorContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.BeforeContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.CommitterContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.MessageContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.PathContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.RevisionContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.RevisionExclusionContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.RevisionRangeContext;
+import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.SingleRevisionContext;
 
 public class LogCommandFiller extends CommitQueryBaseListener {
 

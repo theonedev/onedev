@@ -5,9 +5,9 @@ import javax.validation.constraints.NotNull;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.editable.TeamChoice;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.Team;
+import com.pmease.gitplex.core.util.editable.TeamChoice;
 
 @SuppressWarnings("serial")
 public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {

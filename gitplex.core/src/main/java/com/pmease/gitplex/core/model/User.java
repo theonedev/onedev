@@ -25,7 +25,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
-import com.pmease.gitplex.core.validation.UserName;
+import com.pmease.gitplex.core.util.validation.UserName;
 
 @SuppressWarnings("serial")
 @Entity

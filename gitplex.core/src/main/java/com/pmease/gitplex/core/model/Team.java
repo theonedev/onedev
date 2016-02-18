@@ -21,7 +21,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
-import com.pmease.gitplex.core.validation.TeamName;
+import com.pmease.gitplex.core.util.validation.TeamName;
 
 @Entity
 @Table(uniqueConstraints={

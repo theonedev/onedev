@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.depot.tags;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -33,6 +32,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -112,12 +112,14 @@ public class DepotTagsPage extends DepotPage {
 			
 			private String tagMessage;
 			
-			private String tagRevision;
+			private String tagRevision = getDepot().getDefaultBranch();
 			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getDepot(), Constants.R_TAGS + UUID.randomUUID().toString()));
+				
+				ObjectId commit = getDepot().getObjectId(tagRevision);
+				setVisible(SecurityUtils.canPushRef(getDepot(), Constants.R_TAGS, ObjectId.zeroId(), commit));
 			}
 
 			private RevisionPicker newRevisionPicker() {
@@ -179,7 +181,6 @@ public class DepotTagsPage extends DepotPage {
 					}
 					
 				}));
-				tagRevision = getDepot().getDefaultBranch();
 				form.add(newRevisionPicker());
 				form.add(new AjaxButton("create") {
 
@@ -361,7 +362,9 @@ public class DepotTagsPage extends DepotPage {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						if (SecurityUtils.canModify(getDepot(), GitUtils.tag2ref(tagName))) {
+						Ref ref = item.getModelObject();
+						ObjectId commit = getDepot().getRevCommit(ref.getObjectId());
+						if (SecurityUtils.canPushRef(getDepot(), ref.getName(), commit, ObjectId.zeroId())) {
 							User currentUser = getCurrentUser();
 							if (currentUser != null) {
 								GateKeeper gateKeeper = getDepot().getGateKeeper();

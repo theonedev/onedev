@@ -4,14 +4,16 @@ import java.util.Collection;
 
 import javax.validation.constraints.Min;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.VerificationManager;
+import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.IntegrationPreview;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.model.Verification;
 
@@ -123,17 +125,16 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
-		if (blockMode) {
-			return blocking(Lists.newArrayList("Has to be verified by builds."));
+	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+		if (!newCommit.equals(ObjectId.zeroId())) {
+			if (blockMode) {
+				return blocking(Lists.newArrayList("Has to be verified by builds."));
+			} else {
+				return blocking(Lists.newArrayList("Has to be verified by builds."));
+			}
 		} else {
-			return blocking(Lists.newArrayList("Has to be verified by builds."));
+			return ignored();
 		}
-	}
-
-	@Override
-	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
-		return ignored();
 	}
 
 }

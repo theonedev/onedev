@@ -2,15 +2,17 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.editable.UserChoice;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.util.editable.UserChoice;
 
 @SuppressWarnings("serial")
 @Editable(order=200, icon="fa-user", category=GateKeeper.CATEGROY_CHECK_SUBMITTER, description=
@@ -57,12 +59,7 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckCommit(User user, Depot depot, String branch, String commit) {
-		return check(user);
-	}
-
-	@Override
-	protected CheckResult doCheckRef(User user, Depot depot, String refName) {
+	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user);
 	}
 

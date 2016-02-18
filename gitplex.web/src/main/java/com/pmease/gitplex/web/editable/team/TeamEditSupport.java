@@ -20,8 +20,8 @@ import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.editable.TeamChoice;
 import com.pmease.gitplex.core.model.Team;
+import com.pmease.gitplex.core.util.editable.TeamChoice;
 
 @SuppressWarnings("serial")
 public class TeamEditSupport implements EditSupport {
