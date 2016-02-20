@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.util.editable.RefMatch;
-import com.pmease.gitplex.core.util.refmatch.RefMatchUtils;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @SuppressWarnings("serial")
 @Editable(order=100, icon="fa-code-fork", description=
@@ -32,7 +32,7 @@ public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 	}
 
 	private CheckResult doCheck(String refName) {
-		if (RefMatchUtils.matches(refMatch, refName)) {
+		if (IncludeExcludeUtils.matches(refMatch, refName)) {
 			return passed(Lists.newArrayList("Target ref matches '" + refMatch + "'."));
 		} else {
 			return failed(Lists.newArrayList("Target ref does not match '" + refMatch + "'."));

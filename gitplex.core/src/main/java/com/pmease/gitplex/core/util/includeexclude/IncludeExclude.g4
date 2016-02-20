@@ -1,4 +1,4 @@
-grammar PathMatch;
+grammar IncludeExclude;
 
 match: criteria+ EOF;
 

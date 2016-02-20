@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.util.editable.PathMatch;
-import com.pmease.gitplex.core.util.pathmatch.PathMatchUtils;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @SuppressWarnings("serial")
 @Editable(order=300, icon="fa-file-text", description=
@@ -35,7 +35,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	public CheckResult doCheckRequest(PullRequest request) {
 		for (PullRequestUpdate update: request.getEffectiveUpdates()) {
 			for (String file: update.getChangedFiles()) {
-				if (PathMatchUtils.matches(pathMatch, file)) {
+				if (IncludeExcludeUtils.matches(pathMatch, file)) {
 					request.setReferentialUpdate(update);
 					return passed(Lists.newArrayList("Touched files matches '" + pathMatch + "'."));
 				}
@@ -47,7 +47,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
-		if (PathMatchUtils.matches(pathMatch, file)) 
+		if (IncludeExcludeUtils.matches(pathMatch, file)) 
 			return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'."));
 		else
 			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'."));
@@ -57,7 +57,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			for (String file: depot.git().listChangedFiles(oldCommit.name(), newCommit.name(), null)) {
-				if (PathMatchUtils.matches(pathMatch, file))
+				if (IncludeExcludeUtils.matches(pathMatch, file))
 					return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'."));
 			}
 			

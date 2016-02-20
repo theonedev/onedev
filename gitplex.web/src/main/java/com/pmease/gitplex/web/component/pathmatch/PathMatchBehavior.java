@@ -13,7 +13,7 @@ import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.util.pathmatch.PathMatchParser;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -26,7 +26,7 @@ public class PathMatchBehavior extends ANTLRAssistBehavior {
 	private static final String VALUE_CLOSE = ")";
 	
 	public PathMatchBehavior(IModel<Depot> depotModel) {
-		super(PathMatchParser.class, "match");
+		super(IncludeExcludeParser.class, "match");
 		this.depotModel = depotModel;
 	}
 

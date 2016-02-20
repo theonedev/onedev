@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.util.pathmatch.PathMatchUtils;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @SuppressWarnings("serial")
 public class PathMatchInput extends TextField<String> {
@@ -37,7 +37,7 @@ public class PathMatchInput extends TextField<String> {
 			@Override
 			public void validate(IValidatable<String> validatable) {
 				try {
-					PathMatchUtils.parse(validatable.getValue()); 
+					IncludeExcludeUtils.parse(validatable.getValue()); 
 				} catch (final Exception e) {
 					logger.error("Error parsing ref match string: " + validatable.getValue(), e);
 					if (e.getCause().getMessage() != null) {

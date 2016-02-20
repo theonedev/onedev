@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.util.pathmatch;
+package com.pmease.gitplex.core.util.includeexclude;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,17 +9,17 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.pmease.commons.util.pattern.WildcardUtils;
-import com.pmease.gitplex.core.util.pathmatch.PathMatchParser.CriteriaContext;
-import com.pmease.gitplex.core.util.pathmatch.PathMatchParser.MatchContext;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser.CriteriaContext;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser.MatchContext;
 
-public class PathMatchUtils {
+public class IncludeExcludeUtils {
 	
 	public static MatchContext parse(String refMatch) {
 		ANTLRInputStream is = new ANTLRInputStream(refMatch); 
-		PathMatchLexer lexer = new PathMatchLexer(is);
+		IncludeExcludeLexer lexer = new IncludeExcludeLexer(is);
 		lexer.removeErrorListeners();
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		PathMatchParser parser = new PathMatchParser(tokens);
+		IncludeExcludeParser parser = new IncludeExcludeParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
 		return parser.match();

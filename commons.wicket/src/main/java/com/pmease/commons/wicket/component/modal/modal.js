@@ -11,7 +11,7 @@ pmease.commons.modal = {
 		// use keydown as keypress does not work in chrome/safari
 		$(document).on("keydown", $modal.data("keydown"));
 		
-		$modal.modal({backdrop: "static"});
+		$modal.modal({backdrop: "static", "keyboard": false});
 	}, 
 	
 	close: function($modal, callCloseCallback) {

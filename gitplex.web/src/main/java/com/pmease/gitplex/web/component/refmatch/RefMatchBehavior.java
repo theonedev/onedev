@@ -1,10 +1,13 @@
 package com.pmease.gitplex.web.component.refmatch;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Ref;
 
 import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
@@ -14,8 +17,7 @@ import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.util.refmatch.RefMatchParser;
-import com.pmease.gitplex.web.util.SuggestionUtils;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 
 @SuppressWarnings("serial")
 public class RefMatchBehavior extends ANTLRAssistBehavior {
@@ -26,8 +28,12 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
+	private static final String ANY_BRANCH = "refs/heads/*";
+	
+	private static final String ANY_TAG = "refs/tags/*";
+	
 	public RefMatchBehavior(IModel<Depot> depotModel) {
-		super(RefMatchParser.class, "match");
+		super(IncludeExcludeParser.class, "match");
 		this.depotModel = depotModel;
 	}
 
@@ -46,31 +52,39 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
 						List<InputSuggestion> suggestions = new ArrayList<>();
+
 						Depot depot = depotModel.getObject();
-						switch (tokenType) {
-						case RefMatchParser.BRANCH:
-						case RefMatchParser.EXCLUDE_BRANCH:
-							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count));
-							break;
-						case RefMatchParser.TAG:
-						case RefMatchParser.EXCLUDE_TAG:
-							suggestions.addAll(SuggestionUtils.suggestTag(depot, unfencedMatchWith, count));
-							break;
-						case RefMatchParser.PATTERN:
-						case RefMatchParser.EXCLUDE_PATTERN:
-							if (!unfencedMatchWith.contains(VALUE_CLOSE)) {
-								if (unfencedMatchWith.length() != 0) {
-									String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
-									Range matchRange = new Range(0, fenced.length());
-									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
+
+						String lowerCaseMatchWith = unfencedMatchWith.toLowerCase();
+						int numSuggestions = 0;
+						Collection<String> suggestedValues = new ArrayList<>();
+						suggestedValues.add(ANY_BRANCH);
+						suggestedValues.add(ANY_TAG);
+						for (Ref ref: depot.getRefs(Constants.R_HEADS).values())
+							suggestedValues.add(ref.getName());
+						for (Ref ref: depot.getRefs(Constants.R_TAGS).values())
+							suggestedValues.add(ref.getName());
+						
+						for (String suggestedValue: suggestedValues) {
+							int index = suggestedValue.toLowerCase().indexOf(lowerCaseMatchWith);
+							if (index != -1 && numSuggestions++<count) {
+								Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
+								if (suggestedValue.equals(ANY_BRANCH)) {
+									suggestions.add(new InputSuggestion(suggestedValue, "any branch", matchRange));
+								} else if (suggestedValue.equals(ANY_TAG)) {
+									suggestions.add(new InputSuggestion(suggestedValue, "any tag", matchRange));
+								} else {
+									suggestions.add(new InputSuggestion(suggestedValue, matchRange));
 								}
-								suggestions.add(new InputSuggestion("refs/heads/*", "Any branches", null));
-								suggestions.add(new InputSuggestion("refs/tags/*", "Any tags", null));
 							}
-							break;
-						} 
+						}
+
+						if (!unfencedMatchWith.contains(VALUE_CLOSE) && unfencedMatchWith.length() != 0) {
+							String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
+							Range matchRange = new Range(0, fenced.length());
+							suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
+						}
 						return suggestions;
 					}
 
@@ -91,10 +105,7 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value") && !matchWith.contains(VALUE_CLOSE)) {
-				int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
-				if (tokenType == RefMatchParser.PATTERN || tokenType == RefMatchParser.EXCLUDE_PATTERN) {
-					hints.add("Use * to match any part of ref");
-				}
+				hints.add("Use * to match any part of ref");
 			}
 		} 
 		return hints;
