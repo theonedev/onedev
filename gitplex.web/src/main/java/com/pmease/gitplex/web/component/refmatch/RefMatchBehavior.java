@@ -122,30 +122,7 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
 			String suggestedLiteral, boolean complete) {
-		String description;
-		switch (suggestedLiteral) {
-		case "branch": 
-			description = "specify branch";
-			break;
-		case "tag":
-			description = "specify tag";
-			break;
-		case "pattern":
-			description = "specify ref pattern";
-			break;
-		case "excludeBranch":
-			description = "exclude branch";
-			break;
-		case "excludeTag":
-			description = "exclude tag";
-			break;
-		case "excludePattern":
-			description = "exclude ref pattern";
-			break;
-		default:
-			description = null;
-		}
-		return new InputSuggestion(suggestedLiteral, description, null);
+		return new InputSuggestion(suggestedLiteral);
 	}
-
+	
 }

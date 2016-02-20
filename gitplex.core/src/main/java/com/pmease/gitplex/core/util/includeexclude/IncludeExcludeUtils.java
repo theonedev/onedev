@@ -14,8 +14,8 @@ import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser.MatchCon
 
 public class IncludeExcludeUtils {
 	
-	public static MatchContext parse(String refMatch) {
-		ANTLRInputStream is = new ANTLRInputStream(refMatch); 
+	public static MatchContext parse(String match) {
+		ANTLRInputStream is = new ANTLRInputStream(match); 
 		IncludeExcludeLexer lexer = new IncludeExcludeLexer(is);
 		lexer.removeErrorListeners();
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -34,8 +34,8 @@ public class IncludeExcludeUtils {
 		return value;
 	}
 	
-	public static boolean matches(String pathMatch, String path) {
-		MatchContext matchContext = parse(pathMatch);
+	public static boolean matches(String match, String value) {
+		MatchContext matchContext = parse(match);
 		List<String> includes = new ArrayList<>();
 		List<String> excludes = new ArrayList<>();
 		for (CriteriaContext criteriaContext: matchContext.criteria()) {
@@ -46,7 +46,7 @@ public class IncludeExcludeUtils {
 			}
 		}
 
-		return WildcardUtils.matchString(includes, excludes, path);
+		return WildcardUtils.matchString(includes, excludes, value);
 	}
 	
 }

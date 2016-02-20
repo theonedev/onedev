@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.pathmatch;
+package com.pmease.gitplex.web.component.branchmatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class PathMatchBehavior extends ANTLRAssistBehavior {
+public class BranchMatchBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Depot> depotModel;
 	
@@ -25,7 +25,7 @@ public class PathMatchBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
-	public PathMatchBehavior(IModel<Depot> depotModel) {
+	public BranchMatchBehavior(IModel<Depot> depotModel) {
 		super(IncludeExcludeParser.class, "match");
 		this.depotModel = depotModel;
 	}
@@ -45,7 +45,7 @@ public class PathMatchBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						return SuggestionUtils.suggestPath(depotModel.getObject(), unfencedMatchWith, count);
+						return SuggestionUtils.suggestBranch(depotModel.getObject(), unfencedMatchWith, count);
 					}
 
 					@Override
@@ -65,8 +65,7 @@ public class PathMatchBehavior extends ANTLRAssistBehavior {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value") && !matchWith.contains(VALUE_CLOSE)) {
-				hints.add("Use * to match any part of path");
-				hints.add("Folder (path ending with '/') matches all files under it");
+				hints.add("Use * to match any part of branch");
 			}
 		} 
 		return hints;
@@ -85,5 +84,5 @@ public class PathMatchBehavior extends ANTLRAssistBehavior {
 			String suggestedLiteral, boolean complete) {
 		return new InputSuggestion(suggestedLiteral);
 	}
-
+	
 }

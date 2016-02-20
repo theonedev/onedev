@@ -8,18 +8,20 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.util.branchmatcher.AffinalBranchMatcher;
-import com.pmease.gitplex.core.util.branchmatcher.LocalBranchMatcher;
+import com.pmease.gitplex.core.util.editable.BranchMatch;
 
 @SuppressWarnings("serial")
 @Editable
 @Horizontal
 public class IntegrationPolicy implements Serializable {
 	
-	private LocalBranchMatcher targetBranches;
+	private String targetBranchMatch;
 
 	private AffinalBranchMatcher sourceBranches;
 	
@@ -27,14 +29,14 @@ public class IntegrationPolicy implements Serializable {
 	
 	@Editable(name="Target Branches", order=100, description="Specify target branches of pull requests to which "
 			+ "this policy applies to.")
-	@NotNull
-	@Valid
-	public LocalBranchMatcher getTargetBranches() {
-		return targetBranches;
+	@BranchMatch
+	@NotEmpty
+	public String getTargetBranchMatch() {
+		return targetBranchMatch;
 	}
 
-	public void setTargetBranches(LocalBranchMatcher targetBranches) {
-		this.targetBranches = targetBranches;
+	public void setTargetBranchMatch(String targetBranchMatch) {
+		this.targetBranchMatch = targetBranchMatch;
 	}
 
 	@Editable(name="Source Branches", order=200, description="Specify source branches of pull requests to which "
