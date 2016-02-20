@@ -4,7 +4,7 @@ import org.apache.wicket.markup.html.basic.Label;
 
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 class ReopenActivityPanel extends AbstractActivityPanel {

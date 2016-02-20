@@ -33,7 +33,7 @@ public class AttachmentResource extends AbstractResource {
 
 	private static final String PARAM_USER = "user";
 	
-	private static final String PARAM_REPO = "repo";
+	private static final String PARAM_DEPOT = "depot";
 	
 	private static final String PARAM_REQUEST = "request";
 	
@@ -47,7 +47,7 @@ public class AttachmentResource extends AbstractResource {
 		if (StringUtils.isBlank(userName))
 			throw new IllegalArgumentException("account name has to be specified");
 		
-		String repoName = Preconditions.checkNotNull(params.get(PARAM_REPO).toString());
+		String repoName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
 		if (StringUtils.isBlank(repoName))
 			throw new IllegalArgumentException("repository name has to be specified");
 		
@@ -108,7 +108,7 @@ public class AttachmentResource extends AbstractResource {
 	public static PageParameters paramsOf(PullRequest request, String attachment) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_USER, request.getTargetDepot().getOwner().getName());
-		params.set(PARAM_REPO, request.getTargetDepot().getName());
+		params.set(PARAM_DEPOT, request.getTargetDepot().getName());
 		params.set(PARAM_REQUEST, request.getId());
 		params.set(PARAM_ATTACHMENT, attachment);
 		final File attachmentFile = new File(getAttachmentsDir(request), attachment);

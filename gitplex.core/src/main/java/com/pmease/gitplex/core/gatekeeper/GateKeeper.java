@@ -14,19 +14,11 @@ import com.pmease.gitplex.core.model.User;
 @Editable(name="Misc")
 public interface GateKeeper extends Trimmable, Serializable {
 	
-	String CATEGORY_CHECK_REFS = "Check Target Refs";
+	String CATEGORY_BASIC = "Basic Gate Keepers";
 	
-	String CATEGORY_CHECK_FILES = "Check Touched Files";
+	String CATEGORY_USER = "Check Approver/Submitter";
 	
-	String CATEGORY_CHECK_OPERATIONS = "Check Operations";
-
-	String CATEGORY_CHECK_APPROVALS = "Check Approvals";
-
-	String CATEGORY_CHECK_SUBMITTER = "Check Submitter";
-
-	String CATEGORY_OTHERS = "Other Gate Keepers";
-	
-	String CATEGORY_COMPOSITION = "Gate Keeper Composition";
+	String CATEGORY_COMPOSITION = "Gate Keeper Compositions";
 	
 	/**
 	 * Check the gate keeper against specified request. This is typically used to determine 

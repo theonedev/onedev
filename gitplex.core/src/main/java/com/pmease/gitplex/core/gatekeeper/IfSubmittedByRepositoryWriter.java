@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
-@Editable(order=50, icon="fa-group", category=GateKeeper.CATEGORY_CHECK_SUBMITTER, description=
+@Editable(order=800, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is submitted by an user with "
 		+ "write permission against the repository.")
 public class IfSubmittedByRepositoryWriter extends AbstractGateKeeper {

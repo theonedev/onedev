@@ -73,16 +73,16 @@ public abstract class DepotPage extends AccountPage {
 	public DepotPage(PageParameters params) {
 		super(params);
 		
-		String repoName = params.get(PARAM_DEPOT).toString();
-		Preconditions.checkNotNull(repoName);
+		String depotName = params.get(PARAM_DEPOT).toString();
+		Preconditions.checkNotNull(depotName);
 		
-		if (repoName.endsWith(Constants.DOT_GIT_EXT))
-			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
+		if (depotName.endsWith(Constants.DOT_GIT_EXT))
+			depotName = depotName.substring(0, depotName.length() - Constants.DOT_GIT_EXT.length());
 		
-		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(getAccount(), repoName);
+		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(getAccount(), depotName);
 		
 		if (depot == null) 
-			throw new EntityNotFoundException("Unable to find repository " + getAccount() + "/" + repoName);
+			throw new EntityNotFoundException("Unable to find repository " + getAccount() + "/" + depotName);
 		
 		depotModel = new DepotModel(depot);
 		
@@ -100,7 +100,7 @@ public abstract class DepotPage extends AccountPage {
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", DepotFilePage.class));
 		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", DepotCommitsPage.class, CommitDetailPage.class));
-		tabs.add(new DepotTab(Model.of("Branches"), "fa fa-fw fa-ext fa-branch", DepotBranchesPage.class));
+		tabs.add(new DepotTab(Model.of("Branches"), "fa fa-fw fa-code-fork", DepotBranchesPage.class));
 		tabs.add(new DepotTab(Model.of("Tags"), "fa fa-fw fa-tag", DepotTagsPage.class));
 		tabs.add(new DepotTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
 				RequestListPage.class, PullRequestPage.class));

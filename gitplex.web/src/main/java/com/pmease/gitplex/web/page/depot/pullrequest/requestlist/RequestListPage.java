@@ -49,7 +49,7 @@ import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.SearchOption.Status;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class RequestListPage extends PullRequestPage {

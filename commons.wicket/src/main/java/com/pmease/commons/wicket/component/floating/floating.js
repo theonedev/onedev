@@ -19,8 +19,9 @@ pmease.commons.floating = {
 		$(document).on("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 		
 		$floating.data("keydown", function(e) {
-			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0) 
+			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0) {
 				pmease.commons.floating.close($floating, true);
+			}
 		});
 		
 		// use keydown as keypress does not work in chrome/safari

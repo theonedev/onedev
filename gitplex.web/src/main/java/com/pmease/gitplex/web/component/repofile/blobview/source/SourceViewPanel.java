@@ -75,8 +75,8 @@ import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
+import com.pmease.gitplex.web.util.DateUtils;
 import com.pmease.gitplex.web.page.depot.file.Mark;
-import com.pmease.gitplex.web.utils.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

@@ -8,7 +8,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.pullrequest.requeststatus.RequestStatusPanel;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 class ReferenceActivityPanel extends AbstractActivityPanel {

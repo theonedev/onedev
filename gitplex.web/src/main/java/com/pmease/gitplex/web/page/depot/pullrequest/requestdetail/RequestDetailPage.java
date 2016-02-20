@@ -80,7 +80,7 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.attachments.R
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 

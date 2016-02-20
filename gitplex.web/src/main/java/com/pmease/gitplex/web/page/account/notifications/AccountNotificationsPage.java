@@ -30,7 +30,7 @@ import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class AccountNotificationsPage extends AccountLayoutPage {

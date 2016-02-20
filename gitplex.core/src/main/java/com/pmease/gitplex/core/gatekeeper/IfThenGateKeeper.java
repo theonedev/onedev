@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
 @SuppressWarnings("serial")
-@Editable(name="If...Then... Composition", order=300, icon="fa-sitemap",  
+@Editable(name="If...Then... Composition", order=300, icon="fa-object-group",  
 		category=GateKeeper.CATEGORY_COMPOSITION, 
 		description="If first gate keeper is passed, then go ahead to check second gate keeper;")
 @Horizontal

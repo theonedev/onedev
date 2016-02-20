@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.refmatch;
+package com.pmease.gitplex.web.editable.pathmatch;
 
 import java.lang.reflect.Method;
 
@@ -14,10 +14,10 @@ import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
-import com.pmease.gitplex.core.util.editable.RefMatch;
+import com.pmease.gitplex.core.util.editable.PathMatch;
 
 @SuppressWarnings("serial")
-public class RefMatchEditSupport implements EditSupport {
+public class PathMatchEditSupport implements EditSupport {
 
 	@Override
 	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
@@ -28,9 +28,9 @@ public class RefMatchEditSupport implements EditSupport {
 	public PropertyContext<?> getPropertyEditContext(Class<?> beanClass, String propertyName) {
 		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(RefMatch.class) != null) {
+        if (propertyGetter.getAnnotation(PathMatch.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
-	    		throw new RuntimeException("Annotation 'RefMatch' should be applied to property "
+	    		throw new RuntimeException("Annotation 'PathMatch' should be applied to property "
 	    				+ "with type 'String'.");
         	}
     		return new PropertyContext<String>(propertyDescriptor) {
@@ -54,7 +54,7 @@ public class RefMatchEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new RefMatchEditor(componentId, this, model);
+		        	return new PathMatchEditor(componentId, this, model);
 				}
     			
     		};

@@ -46,7 +46,7 @@ import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.UpdateChangesLink;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")

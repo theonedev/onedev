@@ -47,12 +47,8 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
-import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.DepotAndRevision;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
@@ -65,7 +61,7 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.resource.ArchiveResource;
 import com.pmease.gitplex.web.resource.ArchiveResourceReference;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -364,18 +360,7 @@ public class DepotTagsPage extends DepotPage {
 
 						Ref ref = item.getModelObject();
 						ObjectId commit = getDepot().getRevCommit(ref.getObjectId());
-						if (SecurityUtils.canPushRef(getDepot(), ref.getName(), commit, ObjectId.zeroId())) {
-							User currentUser = getCurrentUser();
-							if (currentUser != null) {
-								GateKeeper gateKeeper = getDepot().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkFile(currentUser, getDepot(), tagName, null);
-								setVisible(checkResult instanceof Passed);
-							} else {
-								setVisible(false);
-							}
-						} else {
-							setVisible(false);
-						}
+						setVisible(SecurityUtils.canPushRef(getDepot(), ref.getName(), commit, ObjectId.zeroId()));
 					}
 					
 				});

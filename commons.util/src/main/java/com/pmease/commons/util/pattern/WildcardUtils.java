@@ -97,6 +97,14 @@ public class WildcardUtils {
     	return (input.indexOf('*') != -1 || input.indexOf('?') != -1);
     }
     
+    /**
+     * Check the unit test for explanation.
+     * 
+     * @param text
+     * @param wildcard
+     * @param caseSensitive
+     * @return
+     */
     @Nullable
     public static WildcardApplied applyWildcard(String text, String wildcard, boolean caseSensitive) {
 		String normalizedText;

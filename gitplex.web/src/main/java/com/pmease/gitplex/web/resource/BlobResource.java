@@ -30,7 +30,7 @@ public class BlobResource extends AbstractResource {
 
 	private static final String PARAM_USER = "user";
 	
-	private static final String PARAM_REPO = "repo";
+	private static final String PARAM_DEPOT = "depot";
 	
 	private static final String PARAM_REVISION = "revision";
 	
@@ -44,7 +44,7 @@ public class BlobResource extends AbstractResource {
 		if (StringUtils.isBlank(userName))
 			throw new IllegalArgumentException("account name has to be specified");
 		
-		String repoName = Preconditions.checkNotNull(params.get(PARAM_REPO).toString());
+		String repoName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
 		if (StringUtils.isBlank(repoName))
 			throw new IllegalArgumentException("repository name has to be specified");
 		
@@ -102,7 +102,7 @@ public class BlobResource extends AbstractResource {
 	public static PageParameters paramsOf(Depot depot, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_USER, depot.getOwner().getName());
-		params.set(PARAM_REPO, depot.getName());
+		params.set(PARAM_DEPOT, depot.getName());
 		params.set(PARAM_REVISION, blobIdent.revision);
 		params.set(PARAM_PATH, blobIdent.path);
 		

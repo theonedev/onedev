@@ -51,7 +51,7 @@ import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;

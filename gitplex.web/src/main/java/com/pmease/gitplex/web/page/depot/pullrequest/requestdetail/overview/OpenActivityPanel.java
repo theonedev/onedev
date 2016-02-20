@@ -25,7 +25,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

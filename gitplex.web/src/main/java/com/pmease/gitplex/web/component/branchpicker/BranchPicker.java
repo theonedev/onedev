@@ -48,7 +48,7 @@ public abstract class BranchPicker extends DropdownLink {
 
 	@Override
 	public IModel<?> getBody() {
-		return Model.of(String.format("<i class='fa fa-ext fa-branch'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", 
+		return Model.of(String.format("<i class='fa fa-code-fork'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", 
 				HtmlEscape.escapeHtml5(branch)));
 	}
 

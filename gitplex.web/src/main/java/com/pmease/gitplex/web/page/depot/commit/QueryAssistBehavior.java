@@ -1,22 +1,18 @@
 package com.pmease.gitplex.web.page.depot.commit;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.lib.Ref;
 
 import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.StringUtils;
@@ -27,7 +23,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser;
+import com.pmease.gitplex.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
 public class QueryAssistBehavior extends ANTLRAssistBehavior {
@@ -65,34 +61,20 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
 						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
 						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
-						int numSuggestions = 0;
 						List<InputSuggestion> suggestions = new ArrayList<>();
+						Depot depot = depotModel.getObject();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							for (Ref ref: depotModel.getObject().getBranchRefs()) {
-								String branch = GitUtils.ref2branch(ref.getName());
-								int index = branch.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
-								if (index != -1 && numSuggestions++<count) {
-									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
-									suggestions.add(new InputSuggestion(branch, matchRange));
-								}
-							}
+							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count));
 							break;
 						case CommitQueryParser.TAG:
-							for (Ref ref: depotModel.getObject().getTagRefs()) {
-								String tag = GitUtils.ref2tag(ref.getName()); 
-								int index = tag.toLowerCase().indexOf(unfencedLowerCaseMatchWith);
-								if (index != -1 && numSuggestions++<count) {
-									Range matchRange = new Range(index, index+unfencedLowerCaseMatchWith.length());
-									suggestions.add(new InputSuggestion(tag, matchRange));
-								}
-							}
+							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count));
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
 							Map<String, Range> suggestedInputs = new LinkedHashMap<>();
 							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
-							List<NameAndEmail> contributors = auxiliaryManager.getContributors(depotModel.getObject());
+							List<NameAndEmail> contributors = auxiliaryManager.getContributors(depot);
 							for (NameAndEmail contributor: contributors) {
 								String content;
 								if (StringUtils.isNotBlank(contributor.getEmailAddress()))
@@ -126,46 +108,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							}
 							break;
 						case CommitQueryParser.PATH:
-							List<WildcardApplied> allApplied = new ArrayList<>();
-							auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
-							for (String path: auxiliaryManager.getFiles(depotModel.getObject())) {
-								WildcardApplied applied = WildcardUtils.applyWildcard(path, unfencedLowerCaseMatchWith, false);
-								if (applied != null) 
-									allApplied.add(applied);
-							}
-							Collections.sort(allApplied, new Comparator<WildcardApplied>() {
-
-								@Override
-								public int compare(WildcardApplied o1, WildcardApplied o2) {
-									return o1.getMatchRange().getFrom() - o2.getMatchRange().getFrom();
-								}
-								
-							});
-
-							suggestedInputs = new LinkedHashMap<>();
-							for (WildcardApplied applied: allApplied) {
-								Range matchRange = applied.getMatchRange();
-								String suffix = applied.getText().substring(matchRange.getTo());
-								int index = suffix.indexOf('/');
-								String suggestedInput = applied.getText().substring(0, matchRange.getTo());
-								if (index != -1)
-									suggestedInput += suffix.substring(0, index) + "/";
-								else
-									suggestedInput += suffix;
-								suggestedInputs.put(suggestedInput, matchRange);
-								if (suggestedInputs.size() == count)
-									break;
-							}
-							
-							for (Map.Entry<String, Range> entry: suggestedInputs.entrySet()) { 
-								String text = entry.getKey();
-								int caret;
-								if (text.endsWith("/"))
-									caret = text.length();
-								else
-									caret = -1;
-								suggestions.add(new InputSuggestion(text, caret, true, null, entry.getValue()));
-							}
+							suggestions.addAll(SuggestionUtils.suggestPath(depotModel.getObject(), unfencedMatchWith, count));
 							break;
 						} 
 						return suggestions;

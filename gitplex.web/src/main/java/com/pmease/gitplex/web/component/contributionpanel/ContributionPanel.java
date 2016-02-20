@@ -9,7 +9,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.gitplex.web.component.UserLink;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 public class ContributionPanel extends Panel {

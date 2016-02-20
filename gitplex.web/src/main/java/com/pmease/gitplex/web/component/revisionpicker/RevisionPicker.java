@@ -74,7 +74,7 @@ public abstract class RevisionPicker extends DropdownLink {
 		DepotAndRevision repoAndRevision = new DepotAndRevision(depotModel.getObject(), revision);
 		String label = repoAndRevision.getBranch();
 		if (label != null) {
-			iconClass = "fa fa-ext fa-branch";
+			iconClass = "fa fa-code-fork";
 		} else {
 			label = repoAndRevision.getTag();
 			if (label != null) {

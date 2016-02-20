@@ -1,0 +1,70 @@
+package com.pmease.gitplex.core.gatekeeper;
+
+import org.eclipse.jgit.lib.ObjectId;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.util.editable.PathMatch;
+import com.pmease.gitplex.core.util.pathmatch.PathMatchUtils;
+
+@SuppressWarnings("serial")
+@Editable(order=300, icon="fa-file-text", description=
+		"This gate keeper will be passed if specified files are modified.")
+public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
+
+	private String pathMatch;
+	
+	@Editable(name="Files to Match", description="Specify files to match.")
+	@PathMatch
+	@NotEmpty
+	public String getPathMatch() {
+		return pathMatch;
+	}
+
+	public void setPathMatch(String pathMatch) {
+		this.pathMatch = pathMatch;
+	}
+
+	@Override
+	public CheckResult doCheckRequest(PullRequest request) {
+		for (PullRequestUpdate update: request.getEffectiveUpdates()) {
+			for (String file: update.getChangedFiles()) {
+				if (PathMatchUtils.matches(pathMatch, file)) {
+					request.setReferentialUpdate(update);
+					return passed(Lists.newArrayList("Touched files matches '" + pathMatch + "'."));
+				}
+			}
+		}
+
+		return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'."));
+	}
+
+	@Override
+	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+		if (PathMatchUtils.matches(pathMatch, file)) 
+			return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'."));
+		else
+			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'."));
+	}
+
+	@Override
+	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
+			for (String file: depot.git().listChangedFiles(oldCommit.name(), newCommit.name(), null)) {
+				if (PathMatchUtils.matches(pathMatch, file))
+					return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'."));
+			}
+			
+			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'."));
+		} else {
+			return ignored();
+		}
+	}
+
+}

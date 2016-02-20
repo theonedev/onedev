@@ -59,16 +59,12 @@ import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.model.BranchWatch;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.branchchoice.BranchChoiceProvider;
 import com.pmease.gitplex.web.component.branchchoice.BranchSingleChoice;
@@ -81,7 +77,7 @@ import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -638,22 +634,10 @@ public class DepotBranchesPage extends DepotPage {
 						Ref ref = item.getModelObject();
 						if (!getDepot().getDefaultBranch().equals(branch) 
 								&& SecurityUtils.canPushRef(getDepot(), ref.getName(), ref.getObjectId(), ObjectId.zeroId())) {
-					
-							User currentUser = getCurrentUser();
-							if (currentUser != null) {
-								GateKeeper gateKeeper = getDepot().getGateKeeper();
-								CheckResult checkResult = gateKeeper.checkFile(currentUser, getDepot(), branch, null);
-								if (checkResult instanceof Passed) {
-									setVisible(true);
-									PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
-									PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
-									setEnabled(aheadOpen == null && behindOpen == null);
-								} else {
-									setVisible(false);
-								}
-							} else {
-								setVisible(false);
-							}
+							setVisible(true);
+							PullRequest aheadOpen = aheadOpenRequestsModel.getObject().get(branch);
+							PullRequest behindOpen = behindOpenRequestsModel.getObject().get(branch);
+							setEnabled(aheadOpen == null && behindOpen == null);
 						} else {
 							setVisible(false);
 						}

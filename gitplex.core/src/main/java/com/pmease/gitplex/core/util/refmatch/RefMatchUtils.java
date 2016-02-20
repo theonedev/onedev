@@ -51,7 +51,7 @@ public class RefMatchUtils {
 			}
 		}
 
-		return WildcardUtils.matchPath(includes, excludes, refName);
+		return WildcardUtils.matchString(includes, excludes, refName);
 	}
 	
 }

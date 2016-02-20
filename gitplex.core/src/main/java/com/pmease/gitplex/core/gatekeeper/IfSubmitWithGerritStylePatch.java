@@ -9,7 +9,7 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@Editable(order=150, icon="fa-ext fa-file-diff", description="This gate keeper will be passed if the pull request "
+@Editable(order=3000, icon="fa-ext fa-file-diff", description="This gate keeper will be passed if the pull request "
 		+ "is submitted with gerrit style patch, that is, only one commit is submitted for review at "
 		+ "a time, and subsequent updates to the review should be done by amending previous commit.")
 @SuppressWarnings("serial")

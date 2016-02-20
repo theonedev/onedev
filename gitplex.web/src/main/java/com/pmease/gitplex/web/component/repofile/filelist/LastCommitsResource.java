@@ -26,7 +26,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
-import com.pmease.gitplex.web.utils.DateUtils;
+import com.pmease.gitplex.web.util.DateUtils;
 
 /**
  * Loading commits of children may take some time, and we do this via resource loading to avoid blocking 

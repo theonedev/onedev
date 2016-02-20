@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.refmatch;
+package com.pmease.gitplex.web.component.pathmatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +11,13 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.util.refmatch.RefMatchParser;
+import com.pmease.gitplex.core.util.pathmatch.PathMatchParser;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class RefMatchBehavior extends ANTLRAssistBehavior {
+public class PathMatchBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Depot> depotModel;
 	
@@ -26,8 +25,8 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
-	public RefMatchBehavior(IModel<Depot> depotModel) {
-		super(RefMatchParser.class, "match");
+	public PathMatchBehavior(IModel<Depot> depotModel) {
+		super(PathMatchParser.class, "match");
 		this.depotModel = depotModel;
 	}
 
@@ -46,32 +45,7 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
-						List<InputSuggestion> suggestions = new ArrayList<>();
-						Depot depot = depotModel.getObject();
-						switch (tokenType) {
-						case RefMatchParser.BRANCH:
-						case RefMatchParser.EXCLUDE_BRANCH:
-							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count));
-							break;
-						case RefMatchParser.TAG:
-						case RefMatchParser.EXCLUDE_TAG:
-							suggestions.addAll(SuggestionUtils.suggestTag(depot, unfencedMatchWith, count));
-							break;
-						case RefMatchParser.PATTERN:
-						case RefMatchParser.EXCLUDE_PATTERN:
-							if (!unfencedMatchWith.contains(VALUE_CLOSE)) {
-								if (unfencedMatchWith.length() != 0) {
-									String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
-									Range matchRange = new Range(0, fenced.length());
-									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
-								}
-								suggestions.add(new InputSuggestion("refs/heads/*", "Any branches", null));
-								suggestions.add(new InputSuggestion("refs/tags/*", "Any tags", null));
-							}
-							break;
-						} 
-						return suggestions;
+						return SuggestionUtils.suggestPath(depotModel.getObject(), unfencedMatchWith, count);
 					}
 
 					@Override
@@ -91,10 +65,8 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value") && !matchWith.contains(VALUE_CLOSE)) {
-				int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
-				if (tokenType == RefMatchParser.PATTERN || tokenType == RefMatchParser.EXCLUDE_PATTERN) {
-					hints.add("Use * to match any part of ref");
-				}
+				hints.add("Use * to match any part of path");
+				hints.add("Folder (path ending with '/') matches all files under it");
 			}
 		} 
 		return hints;
@@ -113,23 +85,11 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 			String suggestedLiteral, boolean complete) {
 		String description;
 		switch (suggestedLiteral) {
-		case "branch": 
-			description = "specify branch";
+		case "include": 
+			description = "include file";
 			break;
-		case "tag":
-			description = "specify tag";
-			break;
-		case "pattern":
-			description = "specify ref pattern";
-			break;
-		case "excludeBranch":
-			description = "exclude branch";
-			break;
-		case "excludeTag":
-			description = "exclude tag";
-			break;
-		case "excludePattern":
-			description = "exclude ref pattern";
+		case "exclude":
+			description = "exclude file";
 			break;
 		default:
 			description = null;
