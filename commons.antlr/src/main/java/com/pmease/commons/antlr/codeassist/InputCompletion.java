@@ -18,23 +18,26 @@ public class InputCompletion implements Serializable {
 	
 	private final int caret;
 	
+	private final String label;
+	
 	private final String description;
 	
 	private final Range matchRange;
 	
 	public InputCompletion(int replaceBegin, int replaceEnd, String replaceContent, 
-			int caret, @Nullable String description, @Nullable Range matchRange) {
+			int caret, @Nullable String label, @Nullable String description, @Nullable Range matchRange) {
 		this.replaceBegin = replaceBegin;
 		this.replaceEnd = replaceEnd;
 		this.replaceContent = replaceContent;
 		this.caret = caret;
+		this.label = label;
 		this.description = description;
 		this.matchRange = matchRange;
 	}
 	
 	public InputCompletion(InputCompletion completion) {
 		this(completion.getReplaceBegin(), completion.getReplaceEnd(), completion.getReplaceContent(), 
-				completion.getCaret(), completion.getDescription(), completion.getMatchRange());
+				completion.getCaret(), completion.getLabel(), completion.getDescription(), completion.getMatchRange());
 	}
 	
 	public int getReplaceBegin() {
@@ -51,6 +54,10 @@ public class InputCompletion implements Serializable {
 
 	public int getCaret() {
 		return caret;
+	}
+
+	public String getLabel() {
+		return label;
 	}
 
 	public String getDescription() {
