@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.component.repopicker.RepositoryPicker;
-import com.pmease.gitplex.web.model.AffinalRepositoriesModel;
+import com.pmease.gitplex.web.model.AffinalDepotsModel;
 
 @SuppressWarnings("serial")
 public abstract class AffinalBranchPicker extends Panel {
@@ -61,7 +61,7 @@ public abstract class AffinalBranchPicker extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RepositoryPicker("repositoryPicker", new AffinalRepositoriesModel(depotId), depotId) {
+		add(new RepositoryPicker("repositoryPicker", new AffinalDepotsModel(depotId), depotId) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot) {

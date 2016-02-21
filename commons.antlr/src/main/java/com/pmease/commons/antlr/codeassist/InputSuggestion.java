@@ -10,6 +10,8 @@ public class InputSuggestion extends InputStatus {
 
 	private final boolean complete;
 	
+	private final String label;
+	
 	private final String description;
 	
 	private final Range matchRange;
@@ -29,12 +31,18 @@ public class InputSuggestion extends InputStatus {
 	 * @param matchRange
 	 * 			optionally specifies range of the string being matched against user input
 	 */
-	public InputSuggestion(String content, int caret, boolean complete, @Nullable String description, 
-			@Nullable Range matchRange) {
+	public InputSuggestion(String content, int caret, boolean complete, @Nullable String label, 
+			@Nullable String description, @Nullable Range matchRange) {
 		super(content, caret);
 		this.complete = complete;
+		this.label = label;
 		this.description = description;
 		this.matchRange = matchRange;
+	}
+	
+	public InputSuggestion(String content, int caret, boolean complete, 
+			@Nullable String description, @Nullable Range matchRange) {
+		this(content, caret, complete, null, description, matchRange);
 	}
 	
 	public InputSuggestion(String content, @Nullable String description, @Nullable Range highlight) {
@@ -51,6 +59,10 @@ public class InputSuggestion extends InputStatus {
 	
 	public boolean isComplete() {
 		return complete;
+	}
+
+	public String getLabel() {
+		return label;
 	}
 
 	@Nullable

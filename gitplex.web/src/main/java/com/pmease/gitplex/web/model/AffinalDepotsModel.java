@@ -14,11 +14,11 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
-public class AffinalRepositoriesModel extends LoadableDetachableModel<List<Depot>> {
+public class AffinalDepotsModel extends LoadableDetachableModel<List<Depot>> {
 
 	private final Long repoId;
 	
-	public AffinalRepositoriesModel(Long repoId) {
+	public AffinalDepotsModel(Long repoId) {
 		this.repoId = repoId;
 	}
 	

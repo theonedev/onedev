@@ -465,6 +465,17 @@ public class Depot extends AbstractEntity implements UserBelonging {
 			affinals.add(this);
 			affinals.addAll(findForkDescendants());
 		}
+		Collections.sort(affinals, new Comparator<Depot>() {
+
+			@Override
+			public int compare(Depot repo1, Depot repo2) {
+				if (repo1.getUser().equals(repo2.getUser()))
+					return repo1.getName().compareTo(repo2.getName());
+				else
+					return repo1.getUser().getName().compareTo(repo2.getUser().getName());
+			}
+			
+		});
 		return affinals;
 	}
 	

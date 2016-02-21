@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.StringUtils;
 
 import com.pmease.commons.util.match.IncludeExclude;
 import com.pmease.commons.util.match.RuleMatcher;
@@ -51,19 +52,20 @@ public class FullBranchMatchUtils {
 			
 			@Override
 			public boolean matches(FullBranchMatchContext rule, DepotAndBranch value) {
-				if (rule.accountMatch() != null) {
-					String accountPattern = getValue(rule.accountMatch().Value());
-					String depotPattern = getValue(rule.depotMatch().Value());
+				if (rule.depotMatch() != null) {
+					String fullDepotPattern = getValue(rule.depotMatch().Value());
 					String branchPattern = getValue(rule.branchMatch().Value());
-					return WildcardUtils.matchString(accountPattern, value.getDepot().getUser().getName())
-							&& WildcardUtils.matchString(depotPattern, value.getDepot().getName())
-							&& WildcardUtils.matchString(branchPattern, value.getBranch());
-				} else if (rule.depotMatch() != null) {
-					String depotPattern = getValue(rule.depotMatch().Value());
-					String branchPattern = getValue(rule.branchMatch().Value());
-					return value.getDepot().getUser().equals(currentDepot.getUser())
-							&& WildcardUtils.matchString(depotPattern, value.getDepot().getName())
-							&& WildcardUtils.matchString(branchPattern, value.getBranch());
+					if (fullDepotPattern.indexOf("/") != -1) {
+						String accountPattern = StringUtils.substringBefore(fullDepotPattern, "/");
+						String depotPattern = StringUtils.substringAfter(fullDepotPattern, "/");
+						return WildcardUtils.matchString(accountPattern, value.getDepot().getUser().getName())
+								&& WildcardUtils.matchString(depotPattern, value.getDepot().getName())
+								&& WildcardUtils.matchString(branchPattern, value.getBranch());
+					} else {
+						return value.getDepot().getUser().equals(currentDepot.getUser())
+								&& WildcardUtils.matchString(fullDepotPattern, value.getDepot().getName())
+								&& WildcardUtils.matchString(branchPattern, value.getBranch());
+					}
 				} else {
 					String branchPattern = getValue(rule.branchMatch().Value());
 					return value.getDepot().equals(currentDepot)

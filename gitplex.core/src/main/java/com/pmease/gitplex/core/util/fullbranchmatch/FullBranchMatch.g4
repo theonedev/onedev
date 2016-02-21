@@ -7,16 +7,14 @@ criteria: includeMatch | excludeMatch;
 includeMatch: INCLUDE '(' fullBranchMatch ')';
 excludeMatch: EXCLUDE '(' fullBranchMatch ')';
 
-fullBranchMatch: accountMatch ':' depotMatch ':' branchMatch | depotMatch ':' branchMatch | branchMatch;
+fullBranchMatch: depotMatch ':' branchMatch | branchMatch;
 
-accountMatch: ACCOUNT Value;
-depotMatch: REPOSITORY Value;
+depotMatch: DEPOT depotFQN=Value;
 branchMatch: BRANCH Value;
 
 INCLUDE: 'include';
 EXCLUDE: 'exclude';
-ACCOUNT: 'account';
-REPOSITORY: 'repository';
+DEPOT: 'repository';
 BRANCH: 'branch';
 
 Value: '(' (ESCAPE|~[()\\])+? ')';

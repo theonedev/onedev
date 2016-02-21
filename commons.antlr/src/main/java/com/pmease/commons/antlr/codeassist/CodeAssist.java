@@ -24,10 +24,10 @@ import com.pmease.commons.antlr.grammar.Grammar;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.grammar.RuleSpec;
 import com.pmease.commons.antlr.grammar.TokenElementSpec;
+import com.pmease.commons.antlr.parser.Chart;
 import com.pmease.commons.antlr.parser.EarleyParser;
 import com.pmease.commons.antlr.parser.Element;
 import com.pmease.commons.antlr.parser.State;
-import com.pmease.commons.antlr.parser.Chart;
 import com.pmease.commons.util.StringUtils;
 
 public abstract class CodeAssist implements Serializable {
@@ -104,7 +104,8 @@ public abstract class CodeAssist implements Serializable {
 			 *  logic 
 			 */
 			String key = inputContent.substring(0, elementCompletion.getReplaceBegin()) 
-					+ elementCompletion.getReplaceContent() + inputContent.substring(elementCompletion.getReplaceEnd());
+					+ elementCompletion.getReplaceContent() 
+					+ inputContent.substring(elementCompletion.getReplaceEnd());
 			List<ElementCompletion> value = grouped.get(key);
 			if (value == null) {
 				value = new ArrayList<>();
@@ -113,7 +114,7 @@ public abstract class CodeAssist implements Serializable {
 			value.add(elementCompletion);
 		}
 		
-		for (Map.Entry<String, List<ElementCompletion>> entry: grouped.entrySet())	 {
+		for (Map.Entry<String, List<ElementCompletion>> entry: grouped.entrySet()) {
 			List<ElementCompletion> value = entry.getValue();
 			ElementCompletion completion = value.get(0);
 			String description = completion.getDescription();
@@ -189,9 +190,12 @@ public abstract class CodeAssist implements Serializable {
 			
 			String replaceContent = content.substring(completion.getReplaceBegin(), 
 					content.length()-inputContent.length()+completion.getReplaceEnd());
+			String label = completion.getLabel();
+			if (label == null)
+				label = completion.getReplaceContent();
 			inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
-					completion.getReplaceEnd(), replaceContent, caret, description, 
-					completion.getMatchRange()));
+					completion.getReplaceEnd(), replaceContent, caret, label, 
+					description, completion.getMatchRange()));
 		}
 		
 		/*
@@ -462,7 +466,7 @@ public abstract class CodeAssist implements Serializable {
 						inputSuggestion.isComplete()?replaceEnd:inputStatus.getCaret(),  
 						inputSuggestion.getContent(), inputSuggestion.getCaret(), 
 						inputSuggestion.isComplete(), inputSuggestion.getDescription(), 
-						inputSuggestion.getMatchRange()));
+						inputSuggestion.getLabel(), inputSuggestion.getMatchRange()));
 			}
 		}
 		return completions;

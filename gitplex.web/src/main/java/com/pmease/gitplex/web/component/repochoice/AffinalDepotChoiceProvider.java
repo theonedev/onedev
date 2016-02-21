@@ -15,7 +15,7 @@ import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.model.AffinalRepositoriesModel;
+import com.pmease.gitplex.web.model.AffinalDepotsModel;
 
 @SuppressWarnings("serial")
 public class AffinalDepotChoiceProvider extends ListChoiceProvider<Depot> {
@@ -28,7 +28,7 @@ public class AffinalDepotChoiceProvider extends ListChoiceProvider<Depot> {
 		super(Constants.DEFAULT_PAGE_SIZE);
 	
 		this.depotId = repoId;
-		affinalDepotsModel = new AffinalRepositoriesModel(repoId);
+		affinalDepotsModel = new AffinalDepotsModel(repoId);
 	}
 	
 	@Override
@@ -61,7 +61,7 @@ public class AffinalDepotChoiceProvider extends ListChoiceProvider<Depot> {
 		return GitPlex.getInstance(Dao.class).load(Depot.class, depotId);
 	}
 	
-	private List<Depot> getAffinalRepositories() {
+	private List<Depot> getAffinalDepots() {
 		return affinalDepotsModel.getObject();
 	}
 
@@ -76,7 +76,7 @@ public class AffinalDepotChoiceProvider extends ListChoiceProvider<Depot> {
 	protected List<Depot> filterList(String term) {
 		term = term.toLowerCase();
 		List<Depot> depots = new ArrayList<>();
-		for (Depot depot: getAffinalRepositories()) {
+		for (Depot depot: getAffinalDepots()) {
 			if (depot.getOwner().getName().toLowerCase().startsWith(term))
 				depots.add(depot);
 		}

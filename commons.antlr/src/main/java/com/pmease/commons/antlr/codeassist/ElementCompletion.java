@@ -14,8 +14,8 @@ public class ElementCompletion extends InputCompletion {
 	
 	public ElementCompletion(ParentedElement expectedElement, int replaceBegin, 
 			int replaceEnd, String replaceContent, int caret, boolean complete, 
-			@Nullable String description, @Nullable Range highlight) {
-		super(replaceBegin, replaceEnd, replaceContent, caret, description, highlight);
+			@Nullable String label, @Nullable String description, @Nullable Range highlight) {
+		super(replaceBegin, replaceEnd, replaceContent, caret, label, description, highlight);
 		
 		this.complete = complete;
 		this.expectedElement = expectedElement;

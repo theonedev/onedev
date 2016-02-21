@@ -35,6 +35,21 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
+	public static List<InputSuggestion> suggestAffinals(Depot depot, String matchWith, int count) {
+		String lowerCaseMatchWith = matchWith.toLowerCase();
+		int numSuggestions = 0;
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (Depot affinal: depot.findAffinals()) {
+			String FQN = affinal.getFQN();
+			int index = FQN.toLowerCase().indexOf(lowerCaseMatchWith);
+			if (index != -1 && numSuggestions++<count) {
+				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(FQN, matchRange));
+			}
+		}
+		return suggestions;
+	}
+	
 	public static List<InputSuggestion> suggestTag(Depot depot, String matchWith, int count) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;

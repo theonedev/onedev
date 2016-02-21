@@ -99,13 +99,12 @@ class AssistPanel extends Panel {
 		if (label == null)	
 			label = suggestion.getReplaceContent();
 		if (matchRange != null) {
-			String content = suggestion.getReplaceContent();
-			String prefix = StringEscapeUtils.escapeHtml4(content.substring(0, matchRange.getFrom()));
-			String suffix = StringEscapeUtils.escapeHtml4(content.substring(matchRange.getTo()));
-			String matched = StringEscapeUtils.escapeHtml4(content.substring(matchRange.getFrom(), matchRange.getTo()));
+			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, matchRange.getFrom()));
+			String suffix = StringEscapeUtils.escapeHtml4(label.substring(matchRange.getTo()));
+			String matched = StringEscapeUtils.escapeHtml4(label.substring(matchRange.getFrom(), matchRange.getTo()));
 			link.add(new Label("label", prefix + "<b>" + matched + "</b>" + suffix).setEscapeModelStrings(false));
 		} else {
-			link.add(new Label("label", suggestion.getReplaceContent()));
+			link.add(new Label("label", label));
 		}
 		item.add(link);
 		if (suggestion.getDescription() != null)
