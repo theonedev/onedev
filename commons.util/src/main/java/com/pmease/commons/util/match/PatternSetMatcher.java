@@ -1,6 +1,4 @@
-package com.pmease.commons.util.pattern;
-
-import java.util.List;
+package com.pmease.commons.util.match;
 
 public class PatternSetMatcher implements PatternMatcher {
 
@@ -27,20 +25,4 @@ public class PatternSetMatcher implements PatternMatcher {
     	return lastExclusive;
 	}
 
-	public boolean matches(List<String> includes, List<String> excludes, String input) {
-		for (String exclude: excludes) {
-			if (patternMatcher.matches(exclude, input))
-				return false;
-		}
-		if (includes.isEmpty()) {
-			return true;
-		} else {
-			for (String include: includes) {
-				if (patternMatcher.matches(include, input))
-					return true;
-			}
-			return false;
-		}
-	}
-	
 }

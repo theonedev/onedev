@@ -1,7 +1,9 @@
 package com.pmease.gitplex.web.editable.branchmatch;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.pmease.commons.wicket.editable.ErrorContext;
@@ -35,6 +37,19 @@ public class BranchMatchEditor extends PropertyEditor<String> {
     	}, getModel());
         
         add(input);
+        
+		add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (hasError(true))
+					return " has-error";
+				else
+					return "";
+			}
+			
+		}));
+        
 	}
 
 	@Override

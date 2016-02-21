@@ -20,7 +20,7 @@ public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 
 	private String refMatch;
 	
-	@Editable(name="Refs to Match", order=100, description="Specify refs to match")
+	@Editable(name="Refs to Match", order=100)
 	@RefMatch
 	@NotEmpty
 	public String getRefMatch() {

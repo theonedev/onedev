@@ -20,7 +20,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 
 	private String pathMatch;
 	
-	@Editable(name="Files to Match", description="Specify files to match.")
+	@Editable(name="Files to Match")
 	@PathMatch
 	@NotEmpty
 	public String getPathMatch() {

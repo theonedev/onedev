@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.pathmatch;
+package com.pmease.gitplex.web.editable.fullbranchmatch;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -11,15 +11,15 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.web.component.pathmatch.PathMatchInput;
+import com.pmease.gitplex.web.component.fullbranchmatch.FullBranchMatchInput;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
-public class PathMatchEditor extends PropertyEditor<String> {
+public class FullBranchMatchEditor extends PropertyEditor<String> {
 	
-	private PathMatchInput input;
+	private FullBranchMatchInput input;
 	
-	public PathMatchEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public FullBranchMatchEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -27,7 +27,7 @@ public class PathMatchEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-    	input = new PathMatchInput("input", new AbstractReadOnlyModel<Depot>() {
+    	input = new FullBranchMatchInput("input", new AbstractReadOnlyModel<Depot>() {
 
 			@Override
 			public Depot getObject() {

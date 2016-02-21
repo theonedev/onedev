@@ -73,6 +73,7 @@ import com.pmease.gitplex.core.model.DepotAndBranch;
 import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.ReviewInvitation;
 import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Singleton
@@ -369,7 +370,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		List<IntegrationStrategy> strategies = null;
 		for (IntegrationPolicy policy: request.getTargetDepot().getIntegrationPolicies()) {
 			if (IncludeExcludeUtils.matches(policy.getTargetBranchMatch(), request.getTargetBranch()) 
-					&& policy.getSourceBranches().matches(request.getSourceDepot(), request.getSourceBranch())) {
+					&& FullBranchMatchUtils.matches(policy.getSourceBranchMatch(), request.getTargetDepot(), request.getSource())) {
 				strategies = policy.getIntegrationStrategies();
 				break;
 			}

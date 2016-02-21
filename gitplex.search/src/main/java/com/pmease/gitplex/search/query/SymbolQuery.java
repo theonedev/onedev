@@ -26,7 +26,7 @@ import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.ContentDetector;
-import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.SymbolHit;

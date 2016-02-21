@@ -80,10 +80,4 @@ public class PathMatchBehavior extends ANTLRAssistBehavior {
 			return super.getEndOfMatch(spec, content);
 	}
 
-	@Override
-	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
-			String suggestedLiteral, boolean complete) {
-		return new InputSuggestion(suggestedLiteral);
-	}
-
 }

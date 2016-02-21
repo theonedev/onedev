@@ -1,7 +1,7 @@
 package com.pmease.commons.util.pattern;
 
+import static com.pmease.commons.util.match.WildcardUtils.*;
 import static org.junit.Assert.*;
-import static com.pmease.commons.util.pattern.WildcardUtils.*;
 
 import org.junit.Test;
 

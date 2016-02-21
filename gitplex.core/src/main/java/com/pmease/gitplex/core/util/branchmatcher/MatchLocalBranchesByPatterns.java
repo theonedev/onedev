@@ -2,7 +2,7 @@ package com.pmease.gitplex.core.util.branchmatcher;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.OmitName;
 

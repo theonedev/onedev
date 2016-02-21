@@ -21,8 +21,8 @@ public class PathMatchInput extends TextField<String> {
 	
 	private final IModel<Depot> depotModel;
 	
-	public PathMatchInput(String id, IModel<Depot> depotModel, IModel<String> refMatchModel) {
-		super(id, refMatchModel);
+	public PathMatchInput(String id, IModel<Depot> depotModel, IModel<String> pathMatchModel) {
+		super(id, pathMatchModel);
 		
 		this.depotModel = depotModel;
 	}

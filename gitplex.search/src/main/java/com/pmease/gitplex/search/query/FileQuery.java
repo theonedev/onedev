@@ -15,7 +15,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Splitter;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 

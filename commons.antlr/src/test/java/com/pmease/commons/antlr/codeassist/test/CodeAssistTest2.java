@@ -63,6 +63,9 @@ public class CodeAssistTest2 {
 	public void test() {
 		List<InputStatus> suggestions;
 
+		suggestions = suggest(new InputStatus(""), "query");
+		System.out.println(suggestions);
+		
 		suggestions = suggest(new InputStatus("message"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("message(:8", suggestions.get(0).toString());
@@ -76,10 +79,10 @@ public class CodeAssistTest2 {
 		
 		suggestions = suggest(new InputStatus("branch(feature)"), "query");
 		assertEquals(12, suggestions.size());
-		assertEquals("branch(feature)^:16", suggestions.get(0).toString());
-		assertEquals("branch(feature)branch(:22", suggestions.get(1).toString());
-		assertEquals("branch(feature)tag(:19", suggestions.get(2).toString());
-		assertEquals("branch(feature)id(:18", suggestions.get(3).toString());
+		assertEquals("branch(feature)branch(:22", suggestions.get(0).toString());
+		assertEquals("branch(feature)tag(:19", suggestions.get(1).toString());
+		assertEquals("branch(feature)id(:18", suggestions.get(2).toString());
+		assertEquals("branch(feature)^:16", suggestions.get(3).toString());
 		assertEquals("branch(feature)..:17", suggestions.get(4).toString());
 		assertEquals("branch(feature)...:18", suggestions.get(5).toString());
 		assertEquals("branch(feature)before(:22", suggestions.get(6).toString());

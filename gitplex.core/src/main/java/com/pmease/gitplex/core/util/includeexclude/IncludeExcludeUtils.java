@@ -8,7 +8,8 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import com.pmease.commons.util.pattern.WildcardUtils;
+import com.pmease.commons.util.match.IncludeExclude;
+import com.pmease.commons.util.match.WildcardStringMatcher;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser.CriteriaContext;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser.MatchContext;
 
@@ -46,7 +47,7 @@ public class IncludeExcludeUtils {
 			}
 		}
 
-		return WildcardUtils.matchString(includes, excludes, value);
+		return new IncludeExclude<String, String>(includes, excludes).matches(new WildcardStringMatcher(), value);
 	}
 	
 }

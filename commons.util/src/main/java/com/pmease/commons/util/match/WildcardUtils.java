@@ -1,4 +1,4 @@
-package com.pmease.commons.util.pattern;
+package com.pmease.commons.util.match;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +49,6 @@ public class WildcardUtils {
     	return pathPatternSetMatcher.matches(patterns, path);
     }
     
-    public static boolean matchPath(List<String> includes, List<String> excludes, String path) {
-    	return pathPatternSetMatcher.matches(includes, excludes, path);
-    }
-	
     /**
      * Tests whether or not a string matches against specified patterns. 
      * <p>
@@ -89,10 +85,6 @@ public class WildcardUtils {
     	return stringPatternSetMatcher.matches(patterns, str);
     }
     
-    public static boolean matchString(List<String> includes, List<String> excludes, String str) {
-    	return stringPatternSetMatcher.matches(includes, excludes, str);
-    }
-
     public static boolean hasWildcards(String input) {
     	return (input.indexOf('*') != -1 || input.indexOf('?') != -1);
     }

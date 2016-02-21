@@ -1,26 +1,23 @@
-package com.pmease.gitplex.web.component.refmatch;
+package com.pmease.gitplex.web.component.fullbranchmatch;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Ref;
 
 import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
-import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
+import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser;
+import com.pmease.gitplex.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class RefMatchBehavior extends ANTLRAssistBehavior {
+public class FullBranchMatchBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Depot> depotModel;
 	
@@ -28,12 +25,8 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 	
 	private static final String VALUE_CLOSE = ")";
 	
-	private static final String ANY_BRANCH = "refs/heads/*";
-	
-	private static final String ANY_TAG = "refs/tags/*";
-	
-	public RefMatchBehavior(IModel<Depot> depotModel) {
-		super(IncludeExcludeParser.class, "match");
+	public FullBranchMatchBehavior(IModel<Depot> depotModel) {
+		super(FullBranchMatchParser.class, "match");
 		this.depotModel = depotModel;
 	}
 
@@ -52,40 +45,7 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						List<InputSuggestion> suggestions = new ArrayList<>();
-
-						Depot depot = depotModel.getObject();
-
-						String lowerCaseMatchWith = unfencedMatchWith.toLowerCase();
-						int numSuggestions = 0;
-						Collection<String> suggestedValues = new ArrayList<>();
-						suggestedValues.add(ANY_BRANCH);
-						suggestedValues.add(ANY_TAG);
-						for (Ref ref: depot.getRefs(Constants.R_HEADS).values())
-							suggestedValues.add(ref.getName());
-						for (Ref ref: depot.getRefs(Constants.R_TAGS).values())
-							suggestedValues.add(ref.getName());
-						
-						for (String suggestedValue: suggestedValues) {
-							int index = suggestedValue.toLowerCase().indexOf(lowerCaseMatchWith);
-							if (index != -1 && numSuggestions++<count) {
-								Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-								if (suggestedValue.equals(ANY_BRANCH)) {
-									suggestions.add(new InputSuggestion(suggestedValue, "any branch", matchRange));
-								} else if (suggestedValue.equals(ANY_TAG)) {
-									suggestions.add(new InputSuggestion(suggestedValue, "any tag", matchRange));
-								} else {
-									suggestions.add(new InputSuggestion(suggestedValue, matchRange));
-								}
-							}
-						}
-
-						if (!unfencedMatchWith.contains(VALUE_CLOSE) && unfencedMatchWith.length() != 0) {
-							String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
-							Range matchRange = new Range(0, fenced.length());
-							suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
-						}
-						return suggestions;
+						return SuggestionUtils.suggestBranch(depotModel.getObject(), unfencedMatchWith, count);
 					}
 
 					@Override
@@ -105,7 +65,7 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value") && !matchWith.contains(VALUE_CLOSE)) {
-				hints.add("Use * to match any part of ref");
+				hints.add("Use * to do wildcard match");
 			}
 		} 
 		return hints;

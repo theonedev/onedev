@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -13,8 +11,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.util.branchmatcher.AffinalBranchMatcher;
 import com.pmease.gitplex.core.util.editable.BranchMatch;
+import com.pmease.gitplex.core.util.editable.FullBranchMatch;
 
 @SuppressWarnings("serial")
 @Editable
@@ -23,7 +21,7 @@ public class IntegrationPolicy implements Serializable {
 	
 	private String targetBranchMatch;
 
-	private AffinalBranchMatcher sourceBranches;
+	private String sourceBranchMatch;
 	
 	private List<IntegrationStrategy> integrationStrategies = new ArrayList<>();
 	
@@ -41,14 +39,14 @@ public class IntegrationPolicy implements Serializable {
 
 	@Editable(name="Source Branches", order=200, description="Specify source branches of pull requests to which "
 			+ "this policy applies to.")
-	@NotNull
-	@Valid
-	public AffinalBranchMatcher getSourceBranches() {
-		return sourceBranches;
+	@FullBranchMatch
+	@NotEmpty
+	public String getSourceBranchMatch() {
+		return sourceBranchMatch;
 	}
 
-	public void setSourceBranches(AffinalBranchMatcher sourceBranches) {
-		this.sourceBranches = sourceBranches;
+	public void setSourceBranchMatch(String sourceBranchMatch) {
+		this.sourceBranchMatch = sourceBranchMatch;
 	}
 
 	@Editable(order=300, descriptionProvider="getIntegrationStrategyHelp")

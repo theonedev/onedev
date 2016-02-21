@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.branchmatch;
+package com.pmease.gitplex.web.component.fullbranchmatch;
 
 import java.io.Serializable;
 
@@ -12,17 +12,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
+import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 
 @SuppressWarnings("serial")
-public class BranchMatchInput extends TextField<String> {
+public class FullBranchMatchInput extends TextField<String> {
 
-	private static final Logger logger = LoggerFactory.getLogger(BranchMatchInput.class);
+	private static final Logger logger = LoggerFactory.getLogger(FullBranchMatchInput.class);
 	
 	private final IModel<Depot> depotModel;
 	
-	public BranchMatchInput(String id, IModel<Depot> depotModel, IModel<String> branchMatchModel) {
-		super(id, branchMatchModel);
+	public FullBranchMatchInput(String id, IModel<Depot> depotModel, IModel<String> fullBranchMatchModel) {
+		super(id, fullBranchMatchModel);
 		
 		this.depotModel = depotModel;
 	}
@@ -31,13 +31,13 @@ public class BranchMatchInput extends TextField<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BranchMatchBehavior(depotModel));
+		add(new FullBranchMatchBehavior(depotModel));
 		add(new IValidator<String>() {
 
 			@Override
 			public void validate(IValidatable<String> validatable) {
 				try {
-					IncludeExcludeUtils.parse(validatable.getValue()); 
+					FullBranchMatchUtils.parse(validatable.getValue()); 
 				} catch (final Exception e) {
 					logger.error("Error parsing branch match string: " + validatable.getValue(), e);
 					if (e.getCause().getMessage() != null) {

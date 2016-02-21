@@ -186,7 +186,7 @@ public class Depot extends AbstractEntity implements UserBelonging {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Specify description of the repository.")
+	@Editable(order=200)
 	@Markdown
 	public String getDescription() {
 		return description;
