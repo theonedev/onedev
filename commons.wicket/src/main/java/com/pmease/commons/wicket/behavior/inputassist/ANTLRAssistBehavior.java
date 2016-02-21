@@ -228,6 +228,6 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	@Nullable
 	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
 			String suggestedLiteral, boolean complete) {
-		return new InputSuggestion(suggestedLiteral, suggestedLiteral.length(), complete, null, null);
+		return new InputSuggestion(suggestedLiteral, -1, complete, null, null);
 	}
 }

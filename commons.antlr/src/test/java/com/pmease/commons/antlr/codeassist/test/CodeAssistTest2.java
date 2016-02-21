@@ -8,11 +8,11 @@ import java.util.List;
 import org.junit.Test;
 
 import com.pmease.commons.antlr.codeassist.CodeAssist;
+import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 
 public class CodeAssistTest2 {
@@ -63,9 +63,6 @@ public class CodeAssistTest2 {
 	public void test() {
 		List<InputStatus> suggestions;
 
-		suggestions = suggest(new InputStatus(""), "query");
-		System.out.println(suggestions);
-		
 		suggestions = suggest(new InputStatus("message"), "query");
 		assertEquals(1, suggestions.size());
 		assertEquals("message(:8", suggestions.get(0).toString());
