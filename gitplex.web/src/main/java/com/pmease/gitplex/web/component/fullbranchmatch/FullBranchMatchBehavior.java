@@ -6,10 +6,8 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
-import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.parser.Element;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
@@ -25,10 +23,6 @@ public class FullBranchMatchBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Depot> depotModel;
 	
-	private static final String VALUE_OPEN = "(";
-	
-	private static final String VALUE_CLOSE = ")";
-	
 	public FullBranchMatchBehavior(IModel<Depot> depotModel) {
 		super(FullBranchMatchParser.class, "match");
 		this.depotModel = depotModel;
@@ -42,68 +36,42 @@ public class FullBranchMatchBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, final int count) {
-		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
-			if (spec.getRuleName().equals("Value")) {
-				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
-
-					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
-						DepotPage page = (DepotPage) getComponent().getPage();
-						Depot depot = page.getDepot();
-						if (tokenType == FullBranchMatchParser.DEPOT) {
-							return SuggestionUtils.suggestAffinals(depot, unfencedMatchWith, count);
-						} else {
-							ParentedElement criteriaElement = expectedElement.findParentByRule("criteria");
-							List<Element> depotFQNElements = criteriaElement.findChildrenByLabel("depotFQN", true);
-							if (!depotFQNElements.isEmpty()) {
-								Element depotFQNElement = depotFQNElements.get(0);
-								String branchDepotFQN = depotFQNElement.getMatchedText().trim().substring(1);
-								branchDepotFQN = branchDepotFQN.substring(0, branchDepotFQN.length()-1);
-								Depot branchDepot = GitPlex.getInstance(DepotManager.class).findBy(branchDepotFQN);
-								if (branchDepot != null) {
-									return SuggestionUtils.suggestBranch(branchDepot, unfencedMatchWith, count);
-								} else {
-									return new ArrayList<>();
-								}
-							} else {
-								return SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count);
-							}
-						}
+		if (expectedElement.getState() != null) {
+			String ruleName = expectedElement.getState().getRuleSpec().getName();
+			if (ruleName.equals("branchMatch")) {
+				DepotPage page = (DepotPage) getComponent().getPage();
+				Depot depot = page.getDepot();
+				ParentedElement criteriaElement = expectedElement.findParentByRule("criteria");
+				List<Element> children = criteriaElement.findChildrenByRule("fullDepotMatch", true);
+				if (children.isEmpty()) {
+					return SuggestionUtils.suggestBranch(depot, matchWith, count, 
+							"branch in current repository", "any branch in current repository");
+				} else {
+					String depotFQN = children.get(0).getMatchedText().trim();
+					Depot branchDepot;
+					DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
+					if (depotFQN.indexOf("/") == -1) {
+						branchDepot = depotManager.findBy(depot.getUser(), depotFQN);
+					} else {
+						branchDepot = depotManager.findBy(depotFQN);
 					}
-
-					@Override
-					protected String getFencingDescription() {
-						return "value needs to be enclosed in brackets";
+					if (branchDepot != null) {
+						return SuggestionUtils.suggestBranch(branchDepot, matchWith, count, 
+								"branch in selected repository", "any branch in selected repository");
+					} else {
+						return new ArrayList<>();
 					}
-					
-				}.suggest(expectedElement.getSpec(), matchWith);
-			}
+				}
+			} else if (ruleName.equals("fullDepotMatch")) {
+				List<InputSuggestion> suggestions = new ArrayList<>();
+				DepotPage page = (DepotPage) getComponent().getPage();
+				Depot depot = page.getDepot();
+				suggestions.addAll(SuggestionUtils.suggestAffinals(depot, matchWith, count, 
+						"select branch in this repository", "any repository"));
+				return suggestions;
+			} 
 		} 
 		return null;
-	}
-	
-	@Override
-	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
-			String suggestedLiteral, boolean complete) {
-		String description;
-		switch (suggestedLiteral) {
-		case "repository": 
-			description = "Choose repository (branch will be selected later)";
-			break;
-		case "branch":
-			ParentedElement criteriaElement = expectedElement.findParentByRule("criteria");
-			if (!criteriaElement.findChildrenByRule("depotMatch", true).isEmpty()) {
-				description = "Choose branch from specified repository";
-			} else {
-				description = "Choose branch from current repository";
-			}
-			break;
-		default:
-			description = null;
-		}
-		return new InputSuggestion(suggestedLiteral, description, null);
 	}
 	
 	@Override
@@ -111,19 +79,11 @@ public class FullBranchMatchBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
-			if (spec.getRuleName().equals("Value") && !matchWith.contains(VALUE_CLOSE)) {
+			if (spec.getRuleName().equals("Value")) {
 				hints.add("Use * to do wildcard match");
 			}
 		} 
 		return hints;
-	}
-
-	@Override
-	protected int getEndOfMatch(ElementSpec spec, String content) {
-		if (content.startsWith(VALUE_OPEN+VALUE_CLOSE))
-			return 2;
-		else
-			return super.getEndOfMatch(spec, content);
 	}
 
 }

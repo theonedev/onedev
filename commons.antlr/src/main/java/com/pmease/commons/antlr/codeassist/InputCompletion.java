@@ -30,7 +30,10 @@ public class InputCompletion implements Serializable {
 		this.replaceEnd = replaceEnd;
 		this.replaceContent = replaceContent;
 		this.caret = caret;
-		this.label = label;
+		if (label != null)
+			this.label = label;
+		else
+			this.label = replaceContent;
 		this.description = description;
 		this.matchRange = matchRange;
 	}

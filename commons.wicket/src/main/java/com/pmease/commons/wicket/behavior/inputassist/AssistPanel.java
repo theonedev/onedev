@@ -96,8 +96,6 @@ class AssistPanel extends Panel {
 		WebMarkupContainer link = new WebMarkupContainer("link");
 		Range matchRange = suggestion.getMatchRange();
 		String label = suggestion.getLabel();
-		if (label == null)	
-			label = suggestion.getReplaceContent();
 		if (matchRange != null) {
 			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, matchRange.getFrom()));
 			String suffix = StringEscapeUtils.escapeHtml4(label.substring(matchRange.getTo()));

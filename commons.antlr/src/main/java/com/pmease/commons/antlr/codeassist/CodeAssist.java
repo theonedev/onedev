@@ -2,13 +2,10 @@ package com.pmease.commons.antlr.codeassist;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -17,7 +14,6 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import com.pmease.commons.antlr.grammar.AlternativeSpec;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.Grammar;
@@ -69,7 +65,7 @@ public abstract class CodeAssist implements Serializable {
 		List<Token> tokens = grammar.lex(inputStatus.getContentBeforeCaret());
 		EarleyParser parser = new EarleyParser(rule, tokens);
 		
-		List<String> hints = new ArrayList<>();
+		Set<String> hints = new LinkedHashSet<>();
 		for (Chart chart: getTerminatingCharts(parser)) {
 			String matchWith = getMatchWith(chart, inputStatus);
 			for (List<ParentedElement> expectChain: getExpectChains(chart)) {
@@ -77,7 +73,7 @@ public abstract class CodeAssist implements Serializable {
 					hints.addAll(getHints(element, matchWith));
 			}
 		}
-		return hints;
+		return new ArrayList<>(hints);
 	}
 	
 	public List<InputCompletion> suggest(InputStatus inputStatus, String ruleName, int count) {
@@ -85,56 +81,22 @@ public abstract class CodeAssist implements Serializable {
 		
 		String inputContent = inputStatus.getContent();
 		List<InputCompletion> inputCompletions = new ArrayList<>();
-		
-		/*
-		 * Mandatory literals may come after a suggestion (for instance if a method name is suggested, 
-		 * the character '(' can be a mandatory literal), so for every suggestion, we need to 
-		 * append mandatory literals to make user typing less, however if a suggested text has two or
-		 * more different mandatories (this is possible if the suggested text comes from different 
-		 * element specs, and each spec calculates a different set of mandatories after the text), we 
-		 * should display the suggested text as a single entry in the final suggestion list without 
-		 * appending mandatories they are no longer mandatories from aspect of whole rule. Below code
-		 * mainly handles this logic.         
-		 */
-		Map<String, List<ElementCompletion>> grouped = new LinkedHashMap<>();
-		for (ElementCompletion elementCompletion: suggest(rule, inputStatus, count)) {
-			/*
-			 *  key will be the new input (without considering mandatories of course), and we use 
-			 *  this to group suggestions to facilitate mandatories calculation and exclusion 
-			 *  logic 
-			 */
-			String key = inputContent.substring(0, elementCompletion.getReplaceBegin()) 
-					+ elementCompletion.getReplaceContent() 
-					+ inputContent.substring(elementCompletion.getReplaceEnd());
-			List<ElementCompletion> value = grouped.get(key);
-			if (value == null) {
-				value = new ArrayList<>();
-				grouped.put(key, value);
-			}
-			value.add(elementCompletion);
-		}
-		
-		for (Map.Entry<String, List<ElementCompletion>> entry: grouped.entrySet()) {
-			List<ElementCompletion> value = entry.getValue();
-			ElementCompletion completion = value.get(0);
-			String description = completion.getDescription();
-			String content = entry.getKey(); 
-			
-			/*
-			 * only append mandatory literals if suggested content is complete and it does not 
-			 * replace any part of current input. We do not append mandatories in the latter case
-			 * as most probably they already exist in the current input
-			 */
-			if (completion.isComplete() && completion.getReplaceEnd() == inputStatus.getCaret()) {
-				List<String> contents = new ArrayList<>();
-				for (ElementCompletion each: value) {
-					content = inputContent.substring(0, each.getReplaceBegin()) + each.getReplaceContent();
-					ParentedElement parentElement = each.getExpectedElement().getParent();
-					ElementSpec elementSpec = each.getExpectedElement().getSpec();
+
+		Set<String> labels = new HashSet<>();
+		for (ElementCompletion completion: suggest(rule, inputStatus, count)) {
+			if (!labels.contains(completion.getLabel())) {
+				labels.add(completion.getLabel());
+				String content = inputContent.substring(0, completion.getReplaceBegin()) 
+						+ completion.getReplaceContent();
+				boolean mandatoriesAdded = false;
+				if (completion.isComplete() && completion.getReplaceEnd() == inputStatus.getCaret()) {
+					ParentedElement parentElement = completion.getExpectedElement().getParent();
+					ElementSpec elementSpec = completion.getExpectedElement().getSpec();
 					for (String mandatory: getMandatoriesAfter(parentElement, elementSpec)) {
 						String prevContent = content;
 						content += mandatory;
-
+						mandatoriesAdded = true;
+						
 						if (grammar.getTokenTypeByLiteral(mandatory) != null) {
 							/*
 							 * if mandatory can be appended without space, the last token 
@@ -152,56 +114,46 @@ public abstract class CodeAssist implements Serializable {
 							}
 						}
 					}
-					content += inputContent.substring(each.getReplaceEnd());
-					
-					if (contents.isEmpty()) {
-						contents.add(content);
-					} else if (!contents.get(contents.size()-1).equals(content)) {
-						content = entry.getKey();
-						break;
-					}
 				}
-			} 
+				content += inputContent.substring(completion.getReplaceEnd());
 
-			/*
-			 * Adjust caret to move it to next place expecting user input if suggestion is 
-			 * complete, that is, we move it after all mandatory tokens after the replacement, 
-			 * unless user puts caret explicitly in the middle of replacement via suggestion, 
-			 * indicating the replacement has some place holders expecting user input. 
-			 */
-			int caret = completion.getCaret();
-			if (completion.isComplete() && caret == -1) {
-				// caret is not at the middle of replacement, so we need to move it to 
-				// be after mandatory tokens if provided suggestion is complete
-				caret = content.length() - inputContent.length() + completion.getReplaceEnd(); 
-				if (content.equals(entry.getKey())) { 
-					// in case mandatory tokens are not added after replacement, 
-					// we skip existing mandatory tokens in current input
-					String contentAfterCaret = content.substring(caret);
-					ParentedElement parentElement = completion.getExpectedElement().getParent();
-					ElementSpec elementSpec = completion.getExpectedElement().getSpec();
-					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(parentElement, elementSpec));
+				/*
+				 * Adjust caret to move it to next place expecting user input if suggestion is 
+				 * complete, that is, we move it after all mandatory tokens after the replacement, 
+				 * unless user puts caret explicitly in the middle of replacement via suggestion, 
+				 * indicating the replacement has some place holders expecting user input. 
+				 */
+				int caret = completion.getCaret();
+				if (completion.isComplete() && caret == -1) {
+					// caret is not at the middle of replacement, so we need to move it to 
+					// be after mandatory tokens if provided suggestion is complete
+					caret = content.length() - inputContent.length() + completion.getReplaceEnd(); 
+					if (!mandatoriesAdded) { 
+						// in case mandatory tokens are not added after replacement, 
+						// we skip existing mandatory tokens in current input
+						String contentAfterCaret = content.substring(caret);
+						ParentedElement parentElement = completion.getExpectedElement().getParent();
+						ElementSpec elementSpec = completion.getExpectedElement().getSpec();
+						caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(parentElement, elementSpec));
+					}
+				} else {
+					if (caret == -1)
+						caret = completion.getReplaceContent().length();
+					caret += completion.getReplaceBegin();
 				}
-			} else {
-				if (caret == -1)
-					caret = completion.getReplaceContent().length();
-				caret += completion.getReplaceBegin();
+				
+				String replaceContent = content.substring(completion.getReplaceBegin(), 
+						content.length()-inputContent.length()+completion.getReplaceEnd());
+				inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
+						completion.getReplaceEnd(), replaceContent, caret, completion.getLabel(), 
+						completion.getDescription(), completion.getMatchRange()));
 			}
-			
-			String replaceContent = content.substring(completion.getReplaceBegin(), 
-					content.length()-inputContent.length()+completion.getReplaceEnd());
-			String label = completion.getLabel();
-			if (label == null)
-				label = completion.getReplaceContent();
-			inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
-					completion.getReplaceEnd(), replaceContent, caret, label, 
-					description, completion.getMatchRange()));
 		}
 		
 		/*
-		 * remove duplicate suggestions and suggestions the same as current input
+		 * remove duplicate suggestions
 		 */
-		Set<String> suggestedContents = Sets.newHashSet(inputStatus.getContent());
+		Set<String> suggestedContents = new HashSet<>();
 		for (Iterator<InputCompletion> it = inputCompletions.iterator(); it.hasNext();) {
 			String content = it.next().complete(inputStatus).getContent();
 			if (suggestedContents.contains(content))
@@ -314,19 +266,17 @@ public abstract class CodeAssist implements Serializable {
 		List<ElementSuggestion> suggestions = new ArrayList<>();
 		String matchWith = getMatchWith(chart, inputStatus);
 		
+		int numSuggested = 0;
 		for (List<ParentedElement> expectChain: getExpectChains(chart)) {
 			// goes through the expect chain to check if there are suggestions for expected element 
 			List<InputSuggestion> inputSuggestions = null;
 			for (ParentedElement element: expectChain) {
-				inputSuggestions = suggest(element, matchWith, count);
+				inputSuggestions = suggest(element, matchWith, count - numSuggested);
 				if (inputSuggestions != null) {
-					for (Iterator<InputSuggestion> it = inputSuggestions.iterator(); it.hasNext();) {
-						InputSuggestion suggestion = it.next();
-						if (suggestion.getContent().length() != 0 && suggestion.getContent().equals(matchWith))
-							it.remove();
-					}
-					if (!inputSuggestions.isEmpty())
+					if (!inputSuggestions.isEmpty()) {
 						suggestions.add(new ElementSuggestion(element, matchWith, inputSuggestions));
+						numSuggested += inputSuggestions.size();
+					}
 					break;
 				}
 			}
@@ -341,56 +291,30 @@ public abstract class CodeAssist implements Serializable {
 						List<Token> tokens = grammar.lex(leadingLiteral);
 						boolean complete = tokens.size() == 1 && tokens.get(0).getType() == spec.getTokenType(); 
 						InputSuggestion suggestion = wrapAsSuggestion(elementExpectingTerminal, leadingLiteral, complete);
-						if (suggestion != null)
+						if (suggestion != null) {
 							inputSuggestions.add(suggestion);
+							if (++numSuggested >= count)
+								break;
+						}
 					}
 				}
 				if (!inputSuggestions.isEmpty())
 					suggestions.add(new ElementSuggestion(elementExpectingTerminal, matchWith, inputSuggestions));
 			}
+			
+			if (numSuggested >= count)
+				break;
 		}
 		
-		// sort suggestions to make it the same order as appearing in grammar definition
-		Collections.sort(suggestions, new Comparator<ElementSuggestion>() {
-
-			@Override
-			public int compare(ElementSuggestion suggestion1, ElementSuggestion suggestion2) {
-				ParentedElement root1 = suggestion1.getExpectedElement().getRoot();
-				ParentedElement root2 = suggestion2.getExpectedElement().getRoot();
-				return compare(root1, root2);
-			}
-			
-			private int compare(Element element1, Element element2) {
-				Preconditions.checkState(element1.getState() != null && element2.getState() != null);
-				int alternativeSpecIndex1 = element1.getState().getAlternativeSpecIndex();
-				int alternativeSpecIndex2 = element2.getState().getAlternativeSpecIndex();
-				if (alternativeSpecIndex1 != alternativeSpecIndex2)
-					return alternativeSpecIndex1 - alternativeSpecIndex2;
-				int expectedElementSpecIndex1 = element1.getState().getExpectedElementSpecIndex();
-				int expectedElementSpecIndex2 = element2.getState().getExpectedElementSpecIndex();
-				if (expectedElementSpecIndex1 != expectedElementSpecIndex2)
-					return expectedElementSpecIndex1 - expectedElementSpecIndex2;
-				element1 = element1.getState().getElements().get(element1.getState().getElements().size()-1);
-				element2 = element2.getState().getElements().get(element2.getState().getElements().size()-1);
-				if (element1.getState() == null || element2.getState() == null)
-					return 0;
-				else
-					return compare(element1, element2);
-			}
-			
-		});
 		return suggestions;
  	}
 	
 	private List<Chart> getTerminatingCharts(EarleyParser parser) {
 		List<Chart> terminatingCharts = new ArrayList<>();
 		
-		if (parser.getCharts().size() >= 1)
-			terminatingCharts.add(parser.getCharts().get(parser.getCharts().size()-1));
-
 		/*
-		 * do another match by not considering the last matched token. This is useful
-		 * for below cases:
+		 * Use the second last chart in order to not considering the last matched token. 
+		 * This is useful for below cases:
 		 * 1. when the last token matches either a keyword or part of an identifier. 
 		 * For instance, the last token can be keyword 'for', but can also match 
 		 * identifier 'forme' if the spec allows.  
@@ -403,6 +327,9 @@ public abstract class CodeAssist implements Serializable {
 		if (parser.getCharts().size() >= 2) 
 			terminatingCharts.add(parser.getCharts().get(parser.getCharts().size()-2));
 		
+		if (parser.getCharts().size() >= 1)
+			terminatingCharts.add(parser.getCharts().get(parser.getCharts().size()-1));
+
 		return terminatingCharts;
 	}
 	
@@ -414,8 +341,15 @@ public abstract class CodeAssist implements Serializable {
 		List<Token> tokens = grammar.lex(inputStatus.getContentBeforeCaret());
 		EarleyParser parser = new EarleyParser(spec, tokens);
 		
-		for (Chart chart: getTerminatingCharts(parser))
-			suggestions.addAll(suggest(chart, inputStatus, count));
+		int numSuggested = 0;
+		for (Chart chart: getTerminatingCharts(parser)) {
+			List<ElementSuggestion> chartSuggestions = suggest(chart, inputStatus, count-numSuggested);
+			suggestions.addAll(chartSuggestions);
+			for (ElementSuggestion each: chartSuggestions)
+				numSuggested += each.getInputSuggestions().size();
+			if (numSuggested >= count)
+				break;
+		}
 		
 		String inputContent = inputStatus.getContent();
 		for (ElementSuggestion suggestion: suggestions) {
@@ -465,8 +399,8 @@ public abstract class CodeAssist implements Serializable {
 						// replace only if provided suggestion is a complete representation of the element
 						inputSuggestion.isComplete()?replaceEnd:inputStatus.getCaret(),  
 						inputSuggestion.getContent(), inputSuggestion.getCaret(), 
-						inputSuggestion.isComplete(), inputSuggestion.getDescription(), 
-						inputSuggestion.getLabel(), inputSuggestion.getMatchRange()));
+						inputSuggestion.isComplete(), inputSuggestion.getLabel(), 
+						inputSuggestion.getDescription(), inputSuggestion.getMatchRange()));
 			}
 		}
 		return completions;

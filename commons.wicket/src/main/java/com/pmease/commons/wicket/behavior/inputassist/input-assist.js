@@ -169,8 +169,9 @@ pmease.commons.inputassist = {
 	
 	initInfiniteScroll: function(assistId, callback) {
 		$("#" + assistId + " .suggestions").scroll(function() {
-			if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight)
+			if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight - 25) {
 				callback();
+			}
 		});
 	},
 	

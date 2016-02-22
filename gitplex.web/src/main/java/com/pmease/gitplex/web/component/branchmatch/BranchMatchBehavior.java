@@ -45,7 +45,8 @@ public class BranchMatchBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						return SuggestionUtils.suggestBranch(depotModel.getObject(), unfencedMatchWith, count);
+						return SuggestionUtils.suggestBranch(depotModel.getObject(), unfencedMatchWith, count, 
+								null, "any branch");
 					}
 
 					@Override

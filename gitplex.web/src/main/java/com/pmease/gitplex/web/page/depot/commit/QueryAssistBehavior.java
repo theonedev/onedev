@@ -65,10 +65,10 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						Depot depot = depotModel.getObject();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count));
+							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count, null, null));
 							break;
 						case CommitQueryParser.TAG:
-							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count));
+							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count, null, null));
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:

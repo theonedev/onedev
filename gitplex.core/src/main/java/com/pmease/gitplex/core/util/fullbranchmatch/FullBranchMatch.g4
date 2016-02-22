@@ -7,19 +7,17 @@ criteria: includeMatch | excludeMatch;
 includeMatch: INCLUDE '(' fullBranchMatch ')';
 excludeMatch: EXCLUDE '(' fullBranchMatch ')';
 
-fullBranchMatch: depotMatch ':' branchMatch | branchMatch;
+fullBranchMatch: branchMatch | fullDepotMatch ':' branchMatch;
 
-depotMatch: DEPOT depotFQN=Value;
-branchMatch: BRANCH Value;
+fullDepotMatch: Value;
+branchMatch: Value;
 
 INCLUDE: 'include';
 EXCLUDE: 'exclude';
-DEPOT: 'repository';
-BRANCH: 'branch';
 
-Value: '(' (ESCAPE|~[()\\])+? ')';
+Value: (ESCAPE|~[:()\\])+;
 
 fragment
-ESCAPE: '\\'[()\\];
+ESCAPE: '\\'[:()\\];
 
 WS: [ \t\r\n]+ -> skip;

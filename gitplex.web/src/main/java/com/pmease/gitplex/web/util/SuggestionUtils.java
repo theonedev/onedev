@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.Ref;
 
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
@@ -20,31 +22,49 @@ import com.pmease.gitplex.core.model.Depot;
 
 public class SuggestionUtils {
 	
-	public static List<InputSuggestion> suggestBranch(Depot depot, String matchWith, int count) {
+	public static List<InputSuggestion> suggestBranch(Depot depot, String matchWith,
+			int count, @Nullable String description, @Nullable String wildcardDescription) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
+		if (wildcardDescription != null) {
+			String wildcard = "*";
+			int index = wildcard.indexOf(lowerCaseMatchWith);
+			if (index != -1) {
+				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
+			}
+		}
 		for (Ref ref: depot.getBranchRefs()) {
 			String branch = GitUtils.ref2branch(ref.getName());
 			int index = branch.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(branch, matchRange));
+				suggestions.add(new InputSuggestion(branch, description, matchRange));
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestAffinals(Depot depot, String matchWith, int count) {
+	public static List<InputSuggestion> suggestAffinals(Depot depot, String matchWith, 
+			int count, @Nullable String description, @Nullable String wildcardDescription) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
+		if (wildcardDescription != null) {
+			String wildcard = "*/*";
+			int index = wildcard.indexOf(lowerCaseMatchWith);
+			if (index != -1) {
+				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
+				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
+			}
+		}
 		for (Depot affinal: depot.findAffinals()) {
 			String FQN = affinal.getFQN();
 			int index = FQN.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {
 				Range matchRange = new Range(index, index+lowerCaseMatchWith.length());
-				suggestions.add(new InputSuggestion(FQN, matchRange));
+				suggestions.add(new InputSuggestion(FQN, description, matchRange));
 			}
 		}
 		return suggestions;
