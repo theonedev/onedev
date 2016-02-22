@@ -3,6 +3,8 @@ package com.pmease.commons.antlr.grammar;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.codeassist.MandatoryScan;
 
@@ -36,7 +38,8 @@ public class LiteralElementSpec extends TokenElementSpec {
 	@Override
 	public Set<String> getPossiblePrefixes() {
 		Set<String> possiblePrefixes = new LinkedHashSet<>();
-		possiblePrefixes.add(literal);
+		if (StringUtils.isNotBlank(literal))
+			possiblePrefixes.add(literal);
 		return possiblePrefixes;
 	}
 

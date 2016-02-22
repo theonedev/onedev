@@ -282,8 +282,8 @@ public abstract class CodeAssist implements Serializable {
 			}
 			
 			ParentedElement elementExpectingTerminal = expectChain.get(0);
-			// no suggestions, let's see if we can provide some default suggestions 
 			if (inputSuggestions == null && elementExpectingTerminal.getSpec() instanceof TokenElementSpec) {
+				// no suggestions, let's see if we can provide some default suggestions 
 				inputSuggestions = new ArrayList<>();
 				TokenElementSpec spec = (TokenElementSpec) elementExpectingTerminal.getSpec();
 				for (String leadingLiteral: spec.getPossiblePrefixes()) {

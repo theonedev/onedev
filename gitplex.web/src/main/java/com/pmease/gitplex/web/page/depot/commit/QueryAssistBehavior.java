@@ -68,7 +68,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count, null, null));
 							break;
 						case CommitQueryParser.TAG:
-							suggestions.addAll(SuggestionUtils.suggestBranch(depot, unfencedMatchWith, count, null, null));
+							suggestions.addAll(SuggestionUtils.suggestTag(depot, unfencedMatchWith, count));
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
