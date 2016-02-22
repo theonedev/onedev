@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.pmease.commons.util.trimmable.Trimmable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.model.Depot;
@@ -12,7 +11,7 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
 @Editable(name="Misc")
-public interface GateKeeper extends Trimmable, Serializable {
+public interface GateKeeper extends Serializable {
 	
 	String CATEGORY_BASIC = "Basic Gate Keepers";
 	

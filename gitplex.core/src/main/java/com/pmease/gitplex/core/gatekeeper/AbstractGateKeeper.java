@@ -2,11 +2,8 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -94,16 +91,6 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * 			result of the check
 	 */
 	protected abstract CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
-
-	@Override
-	public final Object trim(@Nullable Object context) {
-		Preconditions.checkArgument(context instanceof Depot);
-		return trim((Depot)context);
-	}
-	
-	protected GateKeeper trim(Depot depot) {
-		return this;
-	}
 
 	protected CheckResult ignored() {
 		return new Ignored();

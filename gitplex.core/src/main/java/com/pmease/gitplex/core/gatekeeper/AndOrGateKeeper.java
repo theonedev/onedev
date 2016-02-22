@@ -6,10 +6,6 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.pmease.commons.util.trimmable.AndOrConstruct;
-import com.pmease.commons.util.trimmable.TrimUtils;
-import com.pmease.gitplex.core.model.Depot;
-
 @SuppressWarnings("serial")
 public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 
@@ -23,23 +19,6 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	@NotNull
 	public List<GateKeeper> getGateKeepers() {
 		return gateKeepers;
-	}
-
-	@Override
-	protected GateKeeper trim(Depot depot) {
-		return (GateKeeper) TrimUtils.trim(new AndOrConstruct() {
-			
-			@Override
-			public Object getSelf() {
-				return AndOrGateKeeper.this;
-			}
-			
-			@Override
-			public List<?> getMembers() {
-				return getGateKeepers();
-			}
-			
-		}, depot);
 	}
 
 }

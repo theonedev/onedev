@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
-import com.pmease.gitplex.core.util.editable.PathMatch;
+import com.pmease.gitplex.core.annotation.PathMatch;
 
 @SuppressWarnings("serial")
 public class PathMatchEditSupport implements EditSupport {

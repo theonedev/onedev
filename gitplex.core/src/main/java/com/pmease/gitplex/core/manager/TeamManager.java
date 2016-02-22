@@ -1,10 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
-import java.util.Collection;
-
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 public interface TeamManager {
 
@@ -26,7 +23,4 @@ public interface TeamManager {
 	
 	Team getOwners(User user);
 
-	void trim(Collection<Long> teamIds);
-
-	DepotOperation getActualAuthorizedOperation(Team team);
 }

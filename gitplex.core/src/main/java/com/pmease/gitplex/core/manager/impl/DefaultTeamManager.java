@@ -1,8 +1,5 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -18,7 +15,6 @@ import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @Singleton
 public class DefaultTeamManager implements TeamManager {
@@ -81,27 +77,4 @@ public class DefaultTeamManager implements TeamManager {
 		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).ownersId);
 	}
 
-	@Override
-	public DepotOperation getActualAuthorizedOperation(Team team) {
-		if (team.isOwners()) {
-			return DepotOperation.ADMIN;
-		} else if (team.isAnonymous()) {
-			return team.getAuthorizedOperation();
-		} else if (team.isLoggedIn()) {
-			return DepotOperation.mostPermissive(team.getAuthorizedOperation(), 
-					getAnonymous(team.getOwner()).getAuthorizedOperation());
-		} else {
-			return DepotOperation.mostPermissive(team.getAuthorizedOperation(), 
-					getAnonymous(team.getOwner()).getAuthorizedOperation(), 
-					getLoggedIn(team.getOwner()).getAuthorizedOperation());
-		}
-	}
-
-	@Override
-	public void trim(Collection<Long> teamIds) {
-		for (Iterator<Long> it = teamIds.iterator(); it.hasNext();) {
-			if (dao.get(Team.class, it.next()) == null)
-				it.remove();
-		}
-	}
 }

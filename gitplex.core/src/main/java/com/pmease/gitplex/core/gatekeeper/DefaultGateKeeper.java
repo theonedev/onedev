@@ -13,11 +13,6 @@ import com.pmease.gitplex.core.model.User;
 public class DefaultGateKeeper extends AbstractGateKeeper {
 
 	@Override
-	protected GateKeeper trim(Depot depot) {
-		return this;
-	}
-
-	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
 		return ignored();
 	}

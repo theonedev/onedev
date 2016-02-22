@@ -1,7 +1,5 @@
 package com.pmease.gitplex.core.manager;
 
-import java.util.Collection;
-
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
@@ -59,7 +57,5 @@ public interface UserManager {
 	 * 			if current user is not a run-as user. 
 	 */
 	@Nullable User getPrevious();
-	
-	void trim(Collection<Long> userIds);
 	
 }

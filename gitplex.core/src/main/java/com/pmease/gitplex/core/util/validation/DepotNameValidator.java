@@ -38,7 +38,7 @@ public class DepotNameValidator implements ConstraintValidator<DepotName, String
 	public static synchronized Set<String> getReservedNames() {
 		if (reservedNames == null) {
 			reservedNames = new HashSet<>();
-	        for (RepositoryNameReservation each : GitPlex.getExtensions(RepositoryNameReservation.class)) {
+	        for (DepotNameReservation each : GitPlex.getExtensions(DepotNameReservation.class)) {
 	        	reservedNames.addAll(each.getReserved());
 	        }
 		}

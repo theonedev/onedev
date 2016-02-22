@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
-import com.pmease.gitplex.core.util.editable.RefMatch;
+import com.pmease.gitplex.core.annotation.RefMatch;
 
 @SuppressWarnings("serial")
 public class RefMatchEditSupport implements EditSupport {

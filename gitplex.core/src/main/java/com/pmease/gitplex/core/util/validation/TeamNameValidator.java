@@ -19,4 +19,5 @@ public class TeamNameValidator implements ConstraintValidator<TeamName, String> 
 		return !value.equalsIgnoreCase(Team.ANONYMOUS) && !value.equalsIgnoreCase(Team.LOGGEDIN)
 				&& !value.equalsIgnoreCase(Team.OWNERS);
 	}
+	
 }

@@ -10,9 +10,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
+import com.pmease.gitplex.core.annotation.BranchMatch;
+import com.pmease.gitplex.core.annotation.FullBranchMatch;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.util.editable.BranchMatch;
-import com.pmease.gitplex.core.util.editable.FullBranchMatch;
 
 @SuppressWarnings("serial")
 @Editable

@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.PropertyContext;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.commons.wicket.editable.PropertyViewer;
-import com.pmease.gitplex.core.util.editable.BranchMatch;
+import com.pmease.gitplex.core.annotation.BranchMatch;
 
 @SuppressWarnings("serial")
 public class BranchMatchEditSupport implements EditSupport {

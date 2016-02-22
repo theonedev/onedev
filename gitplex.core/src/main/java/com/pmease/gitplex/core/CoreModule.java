@@ -70,7 +70,7 @@ import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
-import com.pmease.gitplex.core.util.validation.RepositoryNameReservation;
+import com.pmease.gitplex.core.util.validation.DepotNameReservation;
 import com.pmease.gitplex.core.util.validation.UserNameReservation;
 
 /**
@@ -111,7 +111,7 @@ public class CoreModule extends AbstractPluginModule {
 		/*
 		 * Contribute empty reservations to avoid Guice complain 
 		 */
-		contribute(RepositoryNameReservation.class, new RepositoryNameReservation() {
+		contribute(DepotNameReservation.class, new DepotNameReservation() {
 			
 			@Override
 			public Set<String> getReserved() {

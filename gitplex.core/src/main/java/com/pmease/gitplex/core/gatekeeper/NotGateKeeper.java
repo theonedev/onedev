@@ -8,7 +8,6 @@ import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
-import com.pmease.gitplex.core.model.Depot;
 
 @SuppressWarnings("serial")
 @Editable(name="Not Composition", order=400, icon="fa-object-group", category=GateKeeper.CATEGORY_COMPOSITION,
@@ -28,11 +27,6 @@ public class NotGateKeeper extends CompositeGateKeeper {
 		this.gateKeeper = gateKeeper;
 	}
 	
-	@Override
-	protected GateKeeper trim(Depot depot) {
-		return (GateKeeper) getGateKeeper().trim(depot);
-	}
-
 	@Override
 	protected CheckResult aggregate(Checker checker) {
 		CheckResult result = checker.check(getGateKeeper());

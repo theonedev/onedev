@@ -1,6 +1,5 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,8 +25,8 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.Membership;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
@@ -241,14 +240,6 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 				return user;
 		}
 		return null;
-	}
-
-	@Override
-	public void trim(Collection<Long> userIds) {
-		for (Iterator<Long> it = userIds.iterator(); it.hasNext();) {
-			if (dao.get(User.class, it.next()) == null)
-				it.remove();
-		}
 	}
 
 	@Override

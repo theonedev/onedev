@@ -22,7 +22,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=NameValidator.class) 
 public @interface Name {
-	String message() default "Name can not contain any of below characters:\n" + 
+	String message() default "Name can not contain any of these characters:\n" + 
 			NameValidator.invalidChars;
 
 	Class<?>[] groups() default {};
