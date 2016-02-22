@@ -90,14 +90,14 @@ public class FullBranchMatchBehavior extends ANTLRAssistBehavior {
 		String description;
 		switch (suggestedLiteral) {
 		case "repository": 
-			description = "specify repository of source branches";
+			description = "Choose repository (branch will be selected later)";
 			break;
 		case "branch":
 			ParentedElement criteriaElement = expectedElement.findParentByRule("criteria");
 			if (!criteriaElement.findChildrenByRule("depotMatch", true).isEmpty()) {
-				description = "";
+				description = "Choose branch from specified repository";
 			} else {
-				description = "";
+				description = "Choose branch from current repository";
 			}
 			break;
 		default:
