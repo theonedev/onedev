@@ -96,6 +96,7 @@ import com.pmease.gitplex.core.permission.object.UserBelonging;
 import com.pmease.gitplex.core.util.validation.DepotName;
 
 @Entity
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_owner_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 @SuppressWarnings("serial")

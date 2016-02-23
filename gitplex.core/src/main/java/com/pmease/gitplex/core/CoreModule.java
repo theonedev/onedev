@@ -83,7 +83,7 @@ public class CoreModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bind(PhysicalNamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
+		bind(PhysicalNamingStrategy.class).toInstance(new PrefixedNamingStrategy("g_"));
 		
 		contribute(ModelProvider.class, new ModelProvider() {
 

@@ -14,6 +14,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"g_request_id", "g_user_id", "task"})
+})
 public class Notification extends AbstractEntity {
 
 	public enum Task {

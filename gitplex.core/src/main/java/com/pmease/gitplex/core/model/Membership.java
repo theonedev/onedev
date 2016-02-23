@@ -11,6 +11,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"g_user_id", "g_team_id"})
+})
 public class Membership extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)

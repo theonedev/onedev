@@ -24,17 +24,17 @@ public class PrefixedNamingStrategy extends PhysicalNamingStrategyStandardImpl {
 
 	@Override
 	public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment context) {
-		return super.toPhysicalSequenceName(name, context);
+		return new Identifier(prefix+name.getText(), name.isQuoted());
 	}
 
 	@Override
 	public Identifier toPhysicalSequenceName(Identifier name, JdbcEnvironment context) {
-		return super.toPhysicalSequenceName(name, context);
+		return new Identifier(prefix+name.getText(), name.isQuoted());
 	}
 
 	@Override
 	public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment context) {
-		return super.toPhysicalColumnName(name, context);
+		return new Identifier(prefix+name.getText(), name.isQuoted());
 	}
 	
 }

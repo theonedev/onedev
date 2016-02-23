@@ -16,6 +16,9 @@ import org.hibernate.annotations.FetchMode;
 import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"g_referenced_id", "g_referencedBy_id"})
+})
 @Entity
 public class PullRequestReference extends AbstractEntity {
 

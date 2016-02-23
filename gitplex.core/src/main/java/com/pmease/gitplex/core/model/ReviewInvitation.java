@@ -14,6 +14,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"g_reviewer_id", "g_request_id"})
+})
 public class ReviewInvitation extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)

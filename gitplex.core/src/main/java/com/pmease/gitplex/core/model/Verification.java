@@ -12,6 +12,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(uniqueConstraints={
+		@UniqueConstraint(columnNames={"g_request_id", "commit", "configuration"})
+})
 public class Verification extends AbstractEntity {
 	
 	public enum Status {ONGOING, PASSED, NOT_PASSED}
