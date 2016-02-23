@@ -102,7 +102,7 @@ import com.pmease.gitplex.core.util.validation.DepotName;
 @SuppressWarnings("serial")
 public class Depot extends AbstractEntity implements UserBelonging {
 
-	private static final String FQN_SEPARATOR = "/";
+	public static final String FQN_SEPARATOR = "/";
 	
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	

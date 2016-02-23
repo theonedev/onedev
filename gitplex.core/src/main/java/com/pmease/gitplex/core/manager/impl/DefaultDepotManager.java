@@ -170,10 +170,10 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
     @Sessional
     @Override
     public Depot findBy(String depotFQN) {
-    	String userName = StringUtils.substringBefore(depotFQN, "/");
+    	String userName = StringUtils.substringBefore(depotFQN, Depot.FQN_SEPARATOR);
     	User user = userManager.findByName(userName);
     	if (user != null)
-    		return findBy(user, StringUtils.substringAfter(depotFQN, "/"));
+    		return findBy(user, StringUtils.substringAfter(depotFQN, Depot.FQN_SEPARATOR));
     	else
     		return null;
     }

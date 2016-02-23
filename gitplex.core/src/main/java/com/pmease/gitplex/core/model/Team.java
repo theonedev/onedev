@@ -31,6 +31,8 @@ import com.pmease.gitplex.core.util.validation.TeamName;
 @SuppressWarnings("serial")
 public class Team extends AbstractEntity {
 
+	public static final String FQN_SEPARATOR = "/";
+	
 	public static final String ANONYMOUS = "Anonymous";
 	public static final String OWNERS = "Owners";
 	public static final String LOGGEDIN = "Logged-In";

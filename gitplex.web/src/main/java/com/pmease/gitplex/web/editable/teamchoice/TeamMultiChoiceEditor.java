@@ -11,24 +11,25 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.model.Team;
+import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 
 @SuppressWarnings("serial")
-public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
+public class TeamMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private TeamMultiChoice input;
 	
-	public TeamMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Long>> propertyModel) {
+	public TeamMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -42,8 +43,7 @@ public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
 			@Override
 			protected EntityCriteria<Team> load() {
 				EntityCriteria<Team> criteria = EntityCriteria.of(Team.class);
-				DepotPage page = (DepotPage) getPage();
-				criteria.add(Restrictions.eq("owner", page.getDepot().getOwner()));
+				criteria.add(Restrictions.eq("owner", getOwner()));
 				return criteria;
 			}
     		
@@ -51,9 +51,9 @@ public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
 
     	List<Team> teames = new ArrayList<>();
 		if (getModelObject() != null) {
-			Dao dao = GitPlex.getInstance(Dao.class);
-			for (Long teamId: getModelObject()) 
-				teames.add(dao.load(Team.class, teamId));
+			TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
+			for (String teamName: getModelObject()) 
+				teames.add(teamManager.findBy(getOwner(), teamName));
 		} 
 		
 		input = new TeamMultiChoice("input", new Model((Serializable)teames), teamProvider);
@@ -62,20 +62,24 @@ public class TeamMultiChoiceEditor extends PropertyEditor<List<Long>> {
         add(input);
 	}
 
+	private User getOwner() {
+		return ((DepotPage)getPage()).getDepot().getOwner();
+	}
+	
 	@Override
 	public ErrorContext getErrorContext(PathSegment pathSegment) {
 		return null;
 	}
 
 	@Override
-	protected List<Long> convertInputToValue() throws ConversionException {
-		List<Long> teamIds = new ArrayList<>();
+	protected List<String> convertInputToValue() throws ConversionException {
+		List<String> teamNames = new ArrayList<>();
 		Collection<Team> teames = input.getConvertedInput();
 		if (teames != null) {
 			for (Team team: teames)
-				teamIds.add(team.getId());
+				teamNames.add(team.getName());
 		}
-		return teamIds;
+		return teamNames;
 	}
 
 }
