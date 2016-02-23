@@ -11,13 +11,14 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
-@SuppressWarnings("serial")
 @Editable(name="If...Then... Composition", order=300, icon="fa-object-group",  
 		category=GateKeeper.CATEGORY_COMPOSITION, 
 		description="If first gate keeper is passed, then go ahead to check second gate keeper;")
 @Horizontal
 public class IfThenGateKeeper extends CompositeGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private GateKeeper ifGate = new DefaultGateKeeper();
 	
 	private GateKeeper thenGate = new DefaultGateKeeper();

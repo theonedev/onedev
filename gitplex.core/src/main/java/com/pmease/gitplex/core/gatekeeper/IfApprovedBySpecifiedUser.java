@@ -16,11 +16,12 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 @Editable(order=200, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is approved by specified user.")
 public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
     private String userName;
 
     @Editable(name="Select User Below")

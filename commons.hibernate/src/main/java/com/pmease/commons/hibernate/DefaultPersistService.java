@@ -23,8 +23,9 @@ public class DefaultPersistService implements PersistService, Provider<SessionFa
 	@SuppressWarnings("deprecation")
 	public void start() {
 		Preconditions.checkState(sessionFactory == null);
-		if (configurationProvider.get() != null)
+		if (configurationProvider.get() != null) {
 			sessionFactory = configurationProvider.get().buildSessionFactory();
+		}
 	}
 
 	public void stop() {

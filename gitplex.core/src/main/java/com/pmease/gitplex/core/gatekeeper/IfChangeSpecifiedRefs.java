@@ -13,11 +13,12 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
-@SuppressWarnings("serial")
 @Editable(order=100, icon="fa-code-fork", description=
 		"This gate keeper will be passed if specified refs is being changed.")
 public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private String refMatch;
 	
 	@Editable(name="Refs to Match", order=100)

@@ -9,12 +9,13 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 
-@SuppressWarnings("serial")
 @Editable(name="Not Composition", order=400, icon="fa-object-group", category=GateKeeper.CATEGORY_COMPOSITION,
 		description="This gate keeper will be passed if contained gate keeper is not passed.")
 @Horizontal
 public class NotGateKeeper extends CompositeGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private GateKeeper gateKeeper = new DefaultGateKeeper();
 	
 	@Valid

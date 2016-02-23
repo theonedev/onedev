@@ -30,5 +30,5 @@ public class ExceptionUtils extends org.apache.commons.lang3.exception.Exception
 	public static RuntimeException unchecked(Exception e) {
 		return BootstrapUtils.unchecked(e);
 	}
-	
+
 }

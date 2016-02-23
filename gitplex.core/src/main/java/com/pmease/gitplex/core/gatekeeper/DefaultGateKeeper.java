@@ -8,10 +8,11 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 @Editable
 public class DefaultGateKeeper extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
 		return ignored();

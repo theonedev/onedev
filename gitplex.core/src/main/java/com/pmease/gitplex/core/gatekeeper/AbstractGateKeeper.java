@@ -15,10 +15,11 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 @Editable
 public abstract class AbstractGateKeeper implements GateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private boolean enabled = true;
 	
 	public boolean isEnabled() {
@@ -110,6 +111,10 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 
 	protected CheckResult blocking(List<String> reasons) {
 		return new Blocking(reasons);
+	}
+
+	@Override
+	public void onDepotNameChange(Depot depot, String oldName, String newName) {
 	}
 
 }

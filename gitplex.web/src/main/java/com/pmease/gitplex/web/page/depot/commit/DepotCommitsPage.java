@@ -60,19 +60,17 @@ import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.DepotAndRevision;
 import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.model.DepotAndRevision;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
-import com.pmease.gitplex.web.page.depot.commit.CommitQueryLexer;
-import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.CriteriaContext;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.QueryContext;
+import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -258,10 +256,10 @@ public class DepotCommitsPage extends DepotPage {
 					updateCommits(target);
 				} catch (Exception e) {
 					logger.error("Error parsing commit query string: " + state.getQuery(), e);
-					if (e.getCause().getMessage() != null)
-						error("Syntax error in query: " + e.getCause().getMessage());
+					if (StringUtils.isNotBlank(e.getMessage()))
+						error(e.getMessage());
 					else
-						error("Syntax error in query: " + e.getCause().getClass().getSimpleName());
+						error("Syntax error");
 					target.add(feedback);
 				}
 			}

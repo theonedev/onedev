@@ -138,10 +138,8 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
 			
 		});
 		
-		for (DepotListener listener: listenersProvider.get())
-			listener.afterDelete(depot);
     }
-
+    
     @Sessional
     @Override
     public Depot findBy(String ownerName, String depotName) {

@@ -11,12 +11,13 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
-@SuppressWarnings("serial")
 @Editable(name="Or Composition", order=200, icon="fa-object-group", category=GateKeeper.CATEGORY_COMPOSITION,
 		description="This gate keeper will be passed if any of the contained gate keepers is passed.")
 @Horizontal
 public class OrGateKeeper extends AndOrGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	@Override
 	protected CheckResult aggregate(Checker checker) {
 		List<String> pendingReasons = new ArrayList<String>();

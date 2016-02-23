@@ -11,11 +11,12 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 @Editable(order=300, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is approved by owner of the repository.")
 public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
         User repoOwner = request.getTargetDepot().getOwner();

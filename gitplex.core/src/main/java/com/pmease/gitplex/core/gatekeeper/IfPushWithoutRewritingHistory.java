@@ -13,9 +13,10 @@ import com.pmease.gitplex.core.model.User;
 		+ "operation does not rewrite history of target branch. Rewriting history of public branches "
 		+ "is dangerous, and it happens when user forces a push without merging/rebasing with the "
 		+ "branch head.")
-@SuppressWarnings("serial")
 public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	@Override
 	protected CheckResult doCheckRequest(PullRequest request) {
 		return ignored();

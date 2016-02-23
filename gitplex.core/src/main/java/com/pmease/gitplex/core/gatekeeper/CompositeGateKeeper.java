@@ -7,8 +7,9 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 public abstract class CompositeGateKeeper extends AbstractGateKeeper {
+	
+	private static final long serialVersionUID = 1L;
 	
 	public static interface Checker {
 		CheckResult check(GateKeeper gateKeeper);

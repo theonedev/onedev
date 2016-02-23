@@ -60,5 +60,7 @@ public interface GateKeeper extends Serializable {
 	 */
 	CheckResult checkPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
 	
+	void onDepotNameChange(Depot depot, String oldName, String newName);
+	
 	boolean isEnabled();
 }

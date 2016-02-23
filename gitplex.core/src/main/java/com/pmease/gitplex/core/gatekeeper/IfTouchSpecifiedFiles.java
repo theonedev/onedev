@@ -13,11 +13,12 @@ import com.pmease.gitplex.core.model.PullRequestUpdate;
 import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
-@SuppressWarnings("serial")
 @Editable(order=300, icon="fa-file-text", description=
 		"This gate keeper will be passed if specified files are modified.")
 public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private String pathMatch;
 	
 	@Editable(name="Files to Match")

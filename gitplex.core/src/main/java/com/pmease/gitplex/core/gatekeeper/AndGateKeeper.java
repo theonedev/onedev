@@ -11,12 +11,13 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
-@SuppressWarnings("serial")
 @Editable(name="And Composition", icon="fa-object-group", order=100, 
 		category=GateKeeper.CATEGORY_COMPOSITION, 
 		description="This gate keeper will be passed if all contained gate keepers are passed.")
 @Horizontal
 public class AndGateKeeper extends AndOrGateKeeper {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected CheckResult aggregate(Checker checker) {

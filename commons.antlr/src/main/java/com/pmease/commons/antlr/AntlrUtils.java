@@ -24,5 +24,5 @@ public class AntlrUtils {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 }

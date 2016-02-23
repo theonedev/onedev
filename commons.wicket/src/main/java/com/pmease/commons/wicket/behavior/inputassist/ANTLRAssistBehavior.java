@@ -90,6 +90,9 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		this.ruleName = ruleName;
 	}
 	
+	protected void validate(String value) {
+	}
+	
 	@Override
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
 		return codeAssist.suggest(inputStatus, ruleName, count);
@@ -230,4 +233,5 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			String suggestedLiteral, boolean complete) {
 		return new InputSuggestion(suggestedLiteral, -1, complete, null, null);
 	}
+	
 }

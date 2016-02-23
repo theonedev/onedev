@@ -6,9 +6,12 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-@SuppressWarnings("serial")
+import com.pmease.gitplex.core.model.Depot;
+
 public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private List<GateKeeper> gateKeepers = new ArrayList<GateKeeper>();
 	
 	public void setGateKeepers(List<GateKeeper> gateKeepers) {
@@ -19,6 +22,12 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	@NotNull
 	public List<GateKeeper> getGateKeepers() {
 		return gateKeepers;
+	}
+
+	@Override
+	public void onDepotNameChange(Depot depot, String oldName, String newName) {
+		for (GateKeeper gateKeeper: gateKeepers)
+			gateKeeper.onDepotNameChange(depot, oldName, newName);
 	}
 
 }

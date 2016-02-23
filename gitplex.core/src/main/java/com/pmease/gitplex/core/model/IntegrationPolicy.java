@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -13,6 +14,7 @@ import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.annotation.BranchMatch;
 import com.pmease.gitplex.core.annotation.FullBranchMatch;
 import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 
 @SuppressWarnings("serial")
 @Editable
@@ -78,4 +80,18 @@ public class IntegrationPolicy implements Serializable {
 		
 		return help.toString();
 	}
+	
+	public void onDepotRename(Depot depot, String oldName, String newName) {
+		sourceBranchMatch = FullBranchMatchUtils.updateDepotName(sourceBranchMatch, depot, oldName, newName);
+	}
+	
+	public void onAccountRename(User account, String oldName, String newName) {
+		sourceBranchMatch = FullBranchMatchUtils.updateAccountName(sourceBranchMatch, account, oldName, newName);
+	}
+
+	@Nullable
+	public IntegrationPolicy onDepotDelete(Depot depot) {
+		return null;
+	}
+	
 }

@@ -16,12 +16,13 @@ import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 @Editable(order=200, icon="fa-wrench", description=
 		"This gate keeper will be passed if one of specified operations is performed.")
 @ClassValidating
 public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements Validatable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private boolean createRef;
 	
 	private boolean updateRef;

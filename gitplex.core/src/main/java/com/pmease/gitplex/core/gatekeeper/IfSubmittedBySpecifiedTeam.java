@@ -14,11 +14,12 @@ import com.pmease.gitplex.core.model.PullRequest;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 @Editable(order=500, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is submitted by a member of specified team.")
 public class IfSubmittedBySpecifiedTeam extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private String teamName;
 
 	@Editable(name="Team", order=100)

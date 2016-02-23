@@ -430,5 +430,5 @@ public class DefaultIndexManager implements IndexManager {
 		if (refName.startsWith(Constants.R_HEADS) && newCommitHash != null)
 			index(depot, newCommitHash);
 	}
-	
+
 }

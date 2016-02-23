@@ -21,12 +21,13 @@ import com.pmease.gitplex.core.model.Review;
 import com.pmease.gitplex.core.model.Team;
 import com.pmease.gitplex.core.model.User;
 
-@SuppressWarnings("serial")
 @Editable(order=100, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is approved by specified number of users "
 		+ "from specified team.")
 public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
 
+	private static final long serialVersionUID = 1L;
+	
 	private String teamName;
 	
     private int leastApprovals = 1;
