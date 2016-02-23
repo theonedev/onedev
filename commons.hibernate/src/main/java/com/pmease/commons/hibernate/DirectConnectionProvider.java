@@ -9,8 +9,8 @@ import javax.inject.Singleton;
 
 import org.hibernate.HibernateException;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.service.UnknownUnwrapTypeException;
-import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
 
 import com.google.inject.Key;
 import com.google.inject.name.Names;

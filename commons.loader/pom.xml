@@ -64,11 +64,6 @@
 			<artifactId>guice-multibindings</artifactId>
 			<version>${guiceVersion}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.hibernate.javax.persistence</groupId>
-			<artifactId>hibernate-jpa-2.0-api</artifactId>
-			<version>1.0.1.Final</version>
-		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
@@ -88,6 +83,6 @@
 		</repository>
 	</repositories>
 	<properties>
-		<guiceVersion>4.0-beta5</guiceVersion>
+		<guiceVersion>4.0</guiceVersion>
 	</properties>
 </project>

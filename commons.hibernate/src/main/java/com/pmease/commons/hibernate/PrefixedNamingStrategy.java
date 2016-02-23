@@ -8,11 +8,12 @@
  */
 package com.pmease.commons.hibernate;
 
-import org.hibernate.AssertionFailure;
-import org.hibernate.cfg.ImprovedNamingStrategy;
-import org.hibernate.internal.util.StringHelper;
+import org.hibernate.boot.model.naming.Identifier;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 
-public class PrefixedNamingStrategy extends ImprovedNamingStrategy {
+public class PrefixedNamingStrategy extends PhysicalNamingStrategyStandardImpl {
+	
 	private static final long serialVersionUID = 1L;
 	
 	private String prefix;
@@ -20,42 +21,20 @@ public class PrefixedNamingStrategy extends ImprovedNamingStrategy {
 	public PrefixedNamingStrategy(String prefix) {
 		this.prefix = prefix;
 	}
-	
+
 	@Override
-	public String classToTableName(String className) {
-		return prefix + "_" + addUnderscores(
-				StringHelper.unqualify(className)).toUpperCase();
-	}
-	
-	@Override
-	public String propertyToColumnName(String propertyName) {
-		return prefix + "_" + addUnderscores(
-				StringHelper.unqualify(propertyName)).toUpperCase();
+	public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment context) {
+		return super.toPhysicalSequenceName(name, context);
 	}
 
 	@Override
-	public String logicalCollectionColumnName(String columnName,
-			String propertyName, String referencedColumn) {
-		if ((propertyToColumnName(propertyName) + "_" + 
-				referencedColumn.toUpperCase())
-				.equalsIgnoreCase(columnName)) {
-			return StringHelper.unqualify(propertyName);
-		} else {
-			return StringHelper.isNotEmpty( columnName ) ?
-					columnName :
-					StringHelper.unqualify( propertyName );
-		}
+	public Identifier toPhysicalSequenceName(Identifier name, JdbcEnvironment context) {
+		return super.toPhysicalSequenceName(name, context);
 	}
 
 	@Override
-	public String foreignKeyColumnName(String propertyName,
-			String propertyEntityName, String propertyTableName,
-			String referencedColumnName) {
-		String header = propertyName != null ? 
-				StringHelper.unqualify( propertyName ) : propertyTableName;
-		if (header == null) 
-			throw new AssertionFailure("NamingStrategy not properly filled");
-		return prefix + "_" + columnName(header).toUpperCase() + 
-				"_" + referencedColumnName.toUpperCase();
+	public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment context) {
+		return super.toPhysicalColumnName(name, context);
 	}
+	
 }

@@ -6,12 +6,13 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Email;
@@ -29,24 +30,22 @@ import com.pmease.gitplex.core.util.validation.UserName;
 
 @SuppressWarnings("serial")
 @Entity
+@Table(indexes={@Index(columnList="email"), @Index(columnList="fullName"), 
+		@Index(columnList="noSpaceName"), @Index(columnList="noSpaceFullName")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
 
 	public static final Long ROOT_ID = 1L;
 
-	@Index(name="USR_EMAIL")
 	@Column(nullable=false)
 	private String email;
 	
-	@Index(name="USR_FNAME")
 	private String fullName;
 
-	@Index(name="USR_NOSP_NAME")
 	@Column(nullable=false)
 	private String noSpaceName;
 	
-	@Index(name="USR_NOSP_FNAME")
 	private String noSpaceFullName;
 	
 	private Date avatarUploadDate;

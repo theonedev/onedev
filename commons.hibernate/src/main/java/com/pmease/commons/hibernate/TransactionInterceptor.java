@@ -13,6 +13,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.google.inject.Inject;
 
@@ -25,7 +26,7 @@ public class TransactionInterceptor implements MethodInterceptor {
 		unitOfWork.begin();
 		try {
 			Session session = unitOfWork.getSession();
-			if (session.getTransaction().isActive()) {
+			if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE) {
 				return mi.proceed();
 			} else {
 				FlushMode previousMode = session.getFlushMode();

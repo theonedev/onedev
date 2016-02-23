@@ -11,9 +11,9 @@ import javax.inject.Singleton;
 
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
-import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.type.Type;
 
 import com.google.inject.Provider;
@@ -28,14 +28,14 @@ public class ConfigurationProvider implements Provider<Configuration> {
 	
 	private final Set<ModelProvider> modelProviders;
 	
-	private final NamingStrategy namingStrategy;
+	private final PhysicalNamingStrategy namingStrategy;
 	
 	private final Properties hibernateProperties;
 	
 	private final Set<HibernateListener> hibernateListeners;
 	
 	@Inject
-	public ConfigurationProvider(Set<ModelProvider> modelProviders, NamingStrategy namingStrategy, 
+	public ConfigurationProvider(Set<ModelProvider> modelProviders, PhysicalNamingStrategy namingStrategy, 
 			@Nullable @Named("hibernate") Properties hibernateProperties, 
 			Set<HibernateListener> hibernateListeners) {
 		this.modelProviders = modelProviders;
@@ -55,7 +55,7 @@ public class ConfigurationProvider implements Provider<Configuration> {
 					StringUtils.replace(url, "${installDir}", Bootstrap.installDir.getAbsolutePath()));
 			
 			configuration = new Configuration();
-			configuration.setNamingStrategy(namingStrategy);
+			configuration.setPhysicalNamingStrategy(namingStrategy);
 			for (Class<? extends AbstractEntity> each: ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class)) {
 				configuration.addAnnotatedClass(each);
 			}

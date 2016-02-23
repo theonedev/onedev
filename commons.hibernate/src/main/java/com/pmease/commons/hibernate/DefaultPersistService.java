@@ -20,7 +20,7 @@ public class DefaultPersistService implements PersistService, Provider<SessionFa
 		this.configurationProvider = configurationProvider;
 	}
 	
-	@SuppressWarnings("deprecation")
+	@Override
 	public void start() {
 		Preconditions.checkState(sessionFactory == null);
 		if (configurationProvider.get() != null) {
@@ -28,6 +28,7 @@ public class DefaultPersistService implements PersistService, Provider<SessionFa
 		}
 	}
 
+	@Override
 	public void stop() {
 		if (sessionFactory != null) {
 			Preconditions.checkState(!sessionFactory.isClosed());

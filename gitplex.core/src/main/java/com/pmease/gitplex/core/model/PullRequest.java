@@ -17,17 +17,18 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
@@ -61,6 +62,7 @@ import com.pmease.gitplex.core.permission.ObjectPermission;
 @SuppressWarnings("serial")
 @Entity
 @DynamicUpdate 
+@Table(indexes={@Index(columnList="title"), @Index(columnList="idStr"), @Index(columnList="noSpaceTitle")})
 public class PullRequest extends AbstractEntity {
 
 	public enum Status {
@@ -148,7 +150,6 @@ public class PullRequest extends AbstractEntity {
 	@Embedded
 	private CloseInfo closeInfo;
 
-	@Index(name="PR_TITLE")
 	@Column(nullable=false)
 	private String title;
 	
@@ -179,12 +180,10 @@ public class PullRequest extends AbstractEntity {
 	private User assignee;
 
 	// used for id search in markdown editor
-	@Index(name="PR_ID_STR")
 	@Column(nullable=false)
 	private String idStr;
 	
 	// used for title search in markdown editor
-	@Index(name="PR_NO_SP_TITLE")
 	@Column(nullable=false)
 	private String noSpaceTitle;
 	

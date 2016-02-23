@@ -381,7 +381,12 @@
 			<dependency>
 				<groupId>org.javassist</groupId>
 				<artifactId>javassist</artifactId>
-				<version>3.18.0-GA</version>
+				<version>3.20.0-GA</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>1.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.ant</groupId>
@@ -461,7 +466,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-validator</artifactId>
-				<version>5.1.0.Final</version>
+				<version>5.2.4.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.reflections</groupId>

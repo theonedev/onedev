@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hibernate.cfg.NamingStrategy;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.GitConfig;
@@ -19,10 +19,10 @@ import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.listeners.ConfigListener;
+import com.pmease.gitplex.core.listeners.DepotListener;
 import com.pmease.gitplex.core.listeners.LifecycleListener;
 import com.pmease.gitplex.core.listeners.PullRequestListener;
 import com.pmease.gitplex.core.listeners.RefListener;
-import com.pmease.gitplex.core.listeners.DepotListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
@@ -30,12 +30,12 @@ import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.CommentReplyManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
-import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
@@ -51,12 +51,12 @@ import com.pmease.gitplex.core.manager.impl.DefaultCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCommentReplyManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
+import com.pmease.gitplex.core.manager.impl.DefaultDepotManager;
 import com.pmease.gitplex.core.manager.impl.DefaultMailManager;
 import com.pmease.gitplex.core.manager.impl.DefaultNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
-import com.pmease.gitplex.core.manager.impl.DefaultDepotManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultSequentialWorkManager;
@@ -83,7 +83,7 @@ public class CoreModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bind(NamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
+		bind(PhysicalNamingStrategy.class).toInstance(new PrefixedNamingStrategy("G"));
 		
 		contribute(ModelProvider.class, new ModelProvider() {
 

@@ -4,15 +4,15 @@ import java.util.Properties;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.ImprovedNamingStrategy;
-import org.hibernate.cfg.NamingStrategy;
 
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.jackson.HibernateObjectMapperConfigurator;
 import com.pmease.commons.jackson.ObjectMapperConfigurator;
 import com.pmease.commons.jetty.ServletConfigurator;
@@ -28,7 +28,7 @@ public class HibernateModule extends AbstractPluginModule {
 		// Use an optional binding here in case our client does not like to 
 		// start persist service provided by this plugin
 		bind(Properties.class).annotatedWith(Names.named("hibernate")).toProvider(Providers.<Properties>of(null));
-		bind(NamingStrategy.class).to(ImprovedNamingStrategy.class);
+		bind(PhysicalNamingStrategy.class).to(PhysicalNamingStrategyStandardImpl.class);
 		
 		bind(PersistService.class).to(DefaultPersistService.class);
 		bind(SessionFactory.class).toProvider(DefaultPersistService.class);
