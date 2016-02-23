@@ -24,9 +24,6 @@ import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.util.validation.TeamName;
 
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"owner", "name"})
-})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @SuppressWarnings("serial")
 public class Team extends AbstractEntity {

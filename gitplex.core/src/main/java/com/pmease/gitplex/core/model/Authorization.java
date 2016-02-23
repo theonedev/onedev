@@ -12,9 +12,6 @@ import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"team", "depot"})
-})
 public class Authorization extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)

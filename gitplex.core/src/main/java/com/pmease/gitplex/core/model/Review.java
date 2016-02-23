@@ -14,9 +14,6 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"reviewer", "update"})
-})
 public class Review extends AbstractEntity {
 
 	public static enum Result {APPROVE, DISAPPROVE};

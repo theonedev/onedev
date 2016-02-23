@@ -14,7 +14,6 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={"request", "user"})})
 public class PullRequestVisit extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
