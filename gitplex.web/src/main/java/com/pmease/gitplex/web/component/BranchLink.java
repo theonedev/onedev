@@ -5,7 +5,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.gitplex.core.model.DepotAndBranch;
+import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;

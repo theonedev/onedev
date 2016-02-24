@@ -5,7 +5,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.pmease.gitplex.core.model.Team;
+import com.pmease.gitplex.core.entity.Team;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 
 @SuppressWarnings("serial")

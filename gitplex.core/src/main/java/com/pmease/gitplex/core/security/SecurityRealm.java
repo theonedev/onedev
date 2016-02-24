@@ -11,13 +11,13 @@ import org.apache.shiro.authz.Permission;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
+import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Authorization;
-import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.Team;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.PrivilegedOperation;
 

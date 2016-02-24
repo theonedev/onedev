@@ -16,7 +16,7 @@ import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 
 @SuppressWarnings("serial")

@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.bootstrap.Bootstrap;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.setting.MailSetting;
 
 @Singleton

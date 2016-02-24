@@ -17,7 +17,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.joda.time.DateTime;
 
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;

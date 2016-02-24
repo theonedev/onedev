@@ -1,25 +1,27 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.Team;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultTeamManager implements TeamManager {
+public class DefaultTeamManager extends DefaultDao implements TeamManager {
 
 	private static class BuiltInTeam {
 		final Long anonymousId;
@@ -33,15 +35,14 @@ public class DefaultTeamManager implements TeamManager {
 		}
 	}
 
-	private final Dao dao;
-	
 	private final UserManager userManager;
 	
 	private final LoadingCache<Long, BuiltInTeam> builtInTeamsCache;
 	
 	@Inject
-	public DefaultTeamManager(final Dao dao, final UserManager userManager) {
-		this.dao = dao;
+	public DefaultTeamManager(Provider<Session> sessionProvider, final UserManager userManager) {
+		super(sessionProvider);
+		
 		this.userManager = userManager;
 		builtInTeamsCache =
 				CacheBuilder.newBuilder()
@@ -49,7 +50,7 @@ public class DefaultTeamManager implements TeamManager {
 
 						@Override
 						public BuiltInTeam load(Long key) throws Exception {
-							User user = dao.get(User.class, key);
+							User user = get(User.class, key);
 							Team anonymous = findBy(user, Team.ANONYMOUS);
 							Team owners = findBy(user, Team.OWNERS);
 							Team loggedIn = findBy(user, Team.LOGGEDIN);
@@ -61,7 +62,7 @@ public class DefaultTeamManager implements TeamManager {
 	@Sessional
 	@Override
 	public Team findBy(User owner, String teamName) {
-		return dao.find(EntityCriteria.of(Team.class)
+		return find(EntityCriteria.of(Team.class)
 				.add(Restrictions.eq("owner", owner))
 				.add(Restrictions.eq("name", teamName)));
 	}
@@ -79,17 +80,17 @@ public class DefaultTeamManager implements TeamManager {
 
 	@Override
 	public Team getAnonymous(User user) {
-		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).anonymousId);
+		return load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).anonymousId);
 	}
 
 	@Override
 	public Team getLoggedIn(User user) {
-		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).loggedInId);
+		return load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).loggedInId);
 	}
 
 	@Override
 	public Team getOwners(User user) {
-		return dao.load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).ownersId);
+		return load(Team.class, builtInTeamsCache.getUnchecked(user.getId()).ownersId);
 	}
 
 }

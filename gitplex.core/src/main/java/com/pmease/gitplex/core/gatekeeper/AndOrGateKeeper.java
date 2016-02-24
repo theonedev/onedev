@@ -6,7 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 

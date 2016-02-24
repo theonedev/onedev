@@ -30,7 +30,7 @@ import org.apache.wicket.util.upload.FileUploadException;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.comment.CommentAttachmentSupport;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;

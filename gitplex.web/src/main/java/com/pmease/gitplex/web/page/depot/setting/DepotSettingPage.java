@@ -11,7 +11,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.setting.gatekeeper.GateKeeperPage;

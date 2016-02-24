@@ -6,25 +6,24 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.listeners.ConfigListener;
+import com.pmease.gitplex.core.entity.Config;
+import com.pmease.gitplex.core.entity.Config.Key;
+import com.pmease.gitplex.core.extensionpoint.ConfigListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
-import com.pmease.gitplex.core.model.Config;
-import com.pmease.gitplex.core.model.Config.Key;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.QosSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
-public class DefaultConfigManager implements ConfigManager {
-	
-	private final Dao dao;
+public class DefaultConfigManager extends DefaultDao implements ConfigManager {
 	
 	private final Provider<Set<ConfigListener>> listenersProvider;
 	
@@ -35,8 +34,10 @@ public class DefaultConfigManager implements ConfigManager {
 	private volatile Long qosSettingConfigId;
 	
 	@Inject
-	public DefaultConfigManager(Dao dao, Provider<Set<ConfigListener>> listenersProvider) {
-		this.dao = dao;
+	public DefaultConfigManager(Provider<Session> sessionProvider, 
+			Provider<Set<ConfigListener>> listenersProvider) {
+		super(sessionProvider);
+		
 		this.listenersProvider = listenersProvider;
 	}
 
@@ -49,7 +50,7 @@ public class DefaultConfigManager implements ConfigManager {
     		Preconditions.checkNotNull(config);
             systemSettingConfigId = config.getId();
         } else {
-            config = dao.load(Config.class, systemSettingConfigId);
+            config = load(Config.class, systemSettingConfigId);
         }
         SystemSetting setting = (SystemSetting) config.getSetting();
         Preconditions.checkNotNull(setting);
@@ -67,7 +68,7 @@ public class DefaultConfigManager implements ConfigManager {
 			config.setKey(Key.SYSTEM);
 		}
 		config.setSetting(systemSetting);
-		dao.persist(config);
+		persist(config);
 		
 		for (ConfigListener listener: listenersProvider.get())
 			listener.onSave(config);
@@ -76,7 +77,7 @@ public class DefaultConfigManager implements ConfigManager {
 	@Sessional
 	@Override
 	public Config getConfig(Key key) {
-		return dao.find(EntityCriteria.of(Config.class).add(Restrictions.eq("key", key)));
+		return find(EntityCriteria.of(Config.class).add(Restrictions.eq("key", key)));
 	}
 
 	@Sessional
@@ -88,7 +89,7 @@ public class DefaultConfigManager implements ConfigManager {
     		Preconditions.checkNotNull(config);
     		mailSettingConfigId = config.getId();
         } else {
-            config = dao.load(Config.class, mailSettingConfigId);
+            config = load(Config.class, mailSettingConfigId);
         }
         return (MailSetting) config.getSetting();
 	}
@@ -102,7 +103,7 @@ public class DefaultConfigManager implements ConfigManager {
 			config.setKey(Key.MAIL);
 		}
 		config.setSetting(mailSetting);
-		dao.persist(config);
+		persist(config);
 
 		for (ConfigListener listener: listenersProvider.get())
 			listener.onSave(config);
@@ -117,7 +118,7 @@ public class DefaultConfigManager implements ConfigManager {
     		Preconditions.checkNotNull(config);
             qosSettingConfigId = config.getId();
         } else {
-            config = dao.load(Config.class, qosSettingConfigId);
+            config = load(Config.class, qosSettingConfigId);
         }
         QosSetting setting = (QosSetting) config.getSetting();
         Preconditions.checkNotNull(setting);
@@ -135,7 +136,7 @@ public class DefaultConfigManager implements ConfigManager {
 			config.setKey(Key.QOS);
 		}
 		config.setSetting(qosSetting);
-		dao.persist(config);
+		persist(config);
 
 		for (ConfigListener listener: listenersProvider.get())
 			listener.onSave(config);

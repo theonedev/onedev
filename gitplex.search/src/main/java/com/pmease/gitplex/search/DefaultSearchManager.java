@@ -31,9 +31,9 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Throwables;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 

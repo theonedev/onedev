@@ -36,8 +36,8 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 

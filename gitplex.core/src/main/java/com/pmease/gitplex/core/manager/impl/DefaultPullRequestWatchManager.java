@@ -1,13 +1,13 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.model.PullRequest.Event.COMMENTED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.DISCARDED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.INTEGRATED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.OPENED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.REOPENED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.REVIEWED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.UPDATED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.VERIFIED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.COMMENTED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.DISCARDED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.INTEGRATED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.OPENED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.REOPENED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.REVIEWED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.UPDATED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.VERIFIED;
 
 import java.util.Collection;
 import java.util.Date;
@@ -17,37 +17,37 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.PersonIdent;
+import org.hibernate.Session;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.util.Pair;
+import com.pmease.gitplex.core.entity.BranchWatch;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.PullRequestVisit;
+import com.pmease.gitplex.core.entity.PullRequestWatch;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.PullRequest.Event;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.BranchWatch;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.Event;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.CommentReply;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.PullRequestVisit;
-import com.pmease.gitplex.core.model.PullRequestWatch;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
+public class DefaultPullRequestWatchManager extends DefaultDao implements PullRequestWatchManager {
 
-	private final Dao dao;
-	
 	private final UserManager userManager;
 	
 	private final BranchWatchManager branchWatchManager;
@@ -57,10 +57,11 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 	private final UrlManager urlManager;
 	
 	@Inject
-	public DefaultPullRequestWatchManager(Dao dao, UserManager userManager, 
-			BranchWatchManager branchWatchManager, MailManager mailManager, 
-			UrlManager urlManager) {
-		this.dao = dao;
+	public DefaultPullRequestWatchManager(Provider<Session> sessionProvider, 
+			UserManager userManager, BranchWatchManager branchWatchManager, 
+			MailManager mailManager, UrlManager urlManager) {
+		super(sessionProvider);
+		
 		this.userManager = userManager;
 		this.branchWatchManager = branchWatchManager;
 		this.mailManager = mailManager;
@@ -211,7 +212,7 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 			watch.setUser(user);
 			watch.setReason(reason);
 			request.getWatches().add(watch);
-			dao.persist(watch);
+			persist(watch);
 		}
 	}
 
@@ -252,7 +253,7 @@ public class DefaultPullRequestWatchManager implements PullRequestWatchManager {
 		request.setLastEventDate(new Date());
 		request.setLastEvent(event);
 		
-		dao.persist(request);
+		persist(request);
 	}
 
 	@Transactional

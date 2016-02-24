@@ -5,7 +5,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
 @SuppressWarnings("serial")
 public class UpdatePullRequest extends AbstractRenderableActivity {

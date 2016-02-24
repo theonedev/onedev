@@ -3,7 +3,7 @@ package com.pmease.gitplex.core.util.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.pmease.gitplex.core.model.Team;
+import com.pmease.gitplex.core.entity.Team;
 
 public class TeamNameValidator implements ConstraintValidator<TeamName, String> {
 

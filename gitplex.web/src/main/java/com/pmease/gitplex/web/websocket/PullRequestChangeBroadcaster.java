@@ -9,14 +9,14 @@ import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.CommentReply;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 
 public class PullRequestChangeBroadcaster implements PullRequestListener {
 	

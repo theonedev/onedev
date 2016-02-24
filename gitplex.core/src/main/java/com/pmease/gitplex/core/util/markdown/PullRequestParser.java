@@ -15,7 +15,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.JsoupUtils;
 import com.pmease.commons.util.TextNodeVisitor;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest;
 
 public class PullRequestParser {
 	

@@ -2,7 +2,7 @@ package com.pmease.gitplex.search;
 
 import java.util.List;
 
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;

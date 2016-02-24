@@ -6,7 +6,7 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestChangeRenderer extends WebSocketRenderBehavior {

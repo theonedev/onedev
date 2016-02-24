@@ -11,7 +11,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 
 import com.pmease.commons.git.GitUtils;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

@@ -4,8 +4,8 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.WebSession;
 
 @SuppressWarnings("serial")

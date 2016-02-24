@@ -1,7 +1,7 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare;
 
-import static com.pmease.gitplex.core.model.PullRequest.Event.INTEGRATION_PREVIEW_CALCULATED;
-import static com.pmease.gitplex.core.model.PullRequest.Event.UPDATED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.INTEGRATION_PREVIEW_CALCULATED;
+import static com.pmease.gitplex.core.entity.PullRequest.Event.UPDATED;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -45,11 +45,11 @@ import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.IntegrationPreview;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.web.component.comment.InlineCommentLink;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;

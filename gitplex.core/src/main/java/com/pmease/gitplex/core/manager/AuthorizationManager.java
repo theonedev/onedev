@@ -1,4 +1,6 @@
 package com.pmease.gitplex.core.manager;
 
-public interface AuthorizationManager {
+import com.pmease.commons.hibernate.dao.Dao;
+
+public interface AuthorizationManager extends Dao {
 }

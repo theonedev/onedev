@@ -2,10 +2,11 @@ package com.pmease.gitplex.core.manager;
 
 import java.util.Collection;
 
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Verification;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.Verification;
 
-public interface VerificationManager {
+public interface VerificationManager extends Dao {
 	
 	void save(Verification verification);
 	

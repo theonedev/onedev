@@ -8,8 +8,8 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.ReviewInvitation;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
 
 @SuppressWarnings("serial")
 public class ReviewersModel extends LoadableDetachableModel<List<ReviewInvitation>>{

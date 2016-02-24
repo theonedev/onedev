@@ -9,7 +9,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.gitplex.core.model.Review;
+import com.pmease.gitplex.core.entity.Review;
 
 @SuppressWarnings("serial")
 public class ReviewResultIcon extends WebComponent {

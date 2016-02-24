@@ -21,7 +21,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;

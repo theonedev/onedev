@@ -14,8 +14,8 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.component.userchoice.UserMultiChoice;
 
 @SuppressWarnings("serial")

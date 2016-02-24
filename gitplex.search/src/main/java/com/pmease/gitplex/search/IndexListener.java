@@ -1,6 +1,6 @@
 package com.pmease.gitplex.search;
 
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 public interface IndexListener {
 	

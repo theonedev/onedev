@@ -14,8 +14,8 @@ import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.util.JsoupUtils;
 import com.pmease.commons.util.TextNodeVisitor;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 
 public class MentionParser {
 	

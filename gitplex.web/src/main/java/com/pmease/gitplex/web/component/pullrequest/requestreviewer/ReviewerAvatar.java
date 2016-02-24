@@ -8,11 +8,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
 import com.pmease.gitplex.web.model.EntityModel;

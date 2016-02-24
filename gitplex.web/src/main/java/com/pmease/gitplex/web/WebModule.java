@@ -14,7 +14,7 @@ import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.commons.markdown.extensionpoint.MarkdownExtension;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.util.validation.UserNameReservation;
 import com.pmease.gitplex.search.IndexListener;

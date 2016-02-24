@@ -26,7 +26,7 @@ import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;

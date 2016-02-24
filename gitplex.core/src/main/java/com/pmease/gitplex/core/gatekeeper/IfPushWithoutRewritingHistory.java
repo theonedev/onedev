@@ -4,10 +4,10 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
 
 @Editable(order=2000, icon="fa-ext fa-repo-lock", description="This gate keeper will be passed if the push "
 		+ "operation does not rewrite history of target branch. Rewriting history of public branches "

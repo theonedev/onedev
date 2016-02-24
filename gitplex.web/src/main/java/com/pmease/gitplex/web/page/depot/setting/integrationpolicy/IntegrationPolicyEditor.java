@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.wicket.editable.BeanContext;
-import com.pmease.gitplex.core.model.IntegrationPolicy;
+import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

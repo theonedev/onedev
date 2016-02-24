@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.editable.BeanContext;
-import com.pmease.gitplex.core.model.IntegrationPolicy;
+import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 
 @SuppressWarnings("serial")
 abstract class IntegrationPolicyPanel extends Panel {

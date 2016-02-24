@@ -24,8 +24,8 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
+import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.manager.VerificationManager;
-import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @Path("/verifications")

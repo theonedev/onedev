@@ -6,11 +6,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.pmease.commons.util.FileUtils;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Depot;
 
 @Singleton
 public class DefaultStorageManager implements StorageManager {

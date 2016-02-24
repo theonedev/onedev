@@ -2,10 +2,11 @@ package com.pmease.gitplex.core.manager;
 
 import java.util.Collection;
 
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.CommentReply;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.PullRequest;
 
-public interface CommentReplyManager {
+public interface CommentReplyManager extends Dao {
 
 	void save(CommentReply reply);
 	

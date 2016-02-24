@@ -33,7 +33,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;

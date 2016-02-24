@@ -16,8 +16,8 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 

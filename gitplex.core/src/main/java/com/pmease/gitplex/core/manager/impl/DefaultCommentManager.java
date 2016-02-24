@@ -1,44 +1,45 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.model.Comment.DIFF_CONTEXT_SIZE;
+import static com.pmease.gitplex.core.entity.Comment.DIFF_CONTEXT_SIZE;
 
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.diff.DiffEntry;
+import org.hibernate.Session;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultCommentManager implements CommentManager {
+public class DefaultCommentManager extends DefaultDao implements CommentManager {
 
-	private final Dao dao;
-	
 	private final UserManager userManager;
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultCommentManager(Dao dao, UserManager userManager, 
+	public DefaultCommentManager(Provider<Session> sessionProvider, UserManager userManager, 
 			Set<PullRequestListener> pullRequestListeners) {
-		this.dao = dao;
+		super(sessionProvider);
+		
 		this.userManager = userManager;
 		this.pullRequestListeners = pullRequestListeners;
 	}
@@ -176,14 +177,14 @@ public class DefaultCommentManager implements CommentManager {
 					comment.setBlobIdent(blobIdent);
 				}
 			}
-			dao.persist(comment);		
+			persist(comment);		
 		}
 	}
 	
 	@Transactional
 	@Override
 	public void save(Comment comment, boolean notify) {
-		dao.persist(comment);
+		persist(comment);
 		
 		if (notify) {
 			for (PullRequestListener listener: pullRequestListeners)

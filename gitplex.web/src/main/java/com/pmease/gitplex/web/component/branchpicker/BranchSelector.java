@@ -33,7 +33,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 @SuppressWarnings("serial")
 public abstract class BranchSelector extends Panel {

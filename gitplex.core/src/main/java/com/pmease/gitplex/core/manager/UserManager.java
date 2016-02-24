@@ -4,9 +4,10 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.pmease.gitplex.core.model.User;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.User;
 
-public interface UserManager {
+public interface UserManager extends Dao {
 	
 	void save(User user);
 	

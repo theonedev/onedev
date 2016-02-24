@@ -9,12 +9,12 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.annotation.UserChoice;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.User;
 
 @Editable(order=200, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is approved by specified user.")

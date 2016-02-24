@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 
 interface RenderableActivity extends Serializable {
 	

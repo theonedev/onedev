@@ -22,8 +22,8 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 

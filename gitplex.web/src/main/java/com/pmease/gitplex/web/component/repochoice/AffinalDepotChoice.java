@@ -5,7 +5,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 @SuppressWarnings("serial")
 public class AffinalDepotChoice extends Select2Choice<Depot> {

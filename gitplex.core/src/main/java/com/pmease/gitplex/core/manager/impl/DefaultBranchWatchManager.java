@@ -3,26 +3,26 @@ package com.pmease.gitplex.core.manager.impl;
 import java.util.Collection;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.entity.BranchWatch;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
-import com.pmease.gitplex.core.model.BranchWatch;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultBranchWatchManager implements BranchWatchManager {
+public class DefaultBranchWatchManager extends DefaultDao implements BranchWatchManager {
 
-	private final Dao dao;
-	
 	@Inject
-	public DefaultBranchWatchManager(Dao dao) {
-		this.dao = dao;
+	public DefaultBranchWatchManager(Provider<Session> sessionProvider) {
+		super(sessionProvider);
 	}
 
 	@Sessional
@@ -31,7 +31,7 @@ public class DefaultBranchWatchManager implements BranchWatchManager {
 		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
 		criteria.add(Restrictions.eq("user", user));
 		criteria.add(Restrictions.eq("depot", depot));
-		return dao.query(criteria);
+		return query(criteria);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class DefaultBranchWatchManager implements BranchWatchManager {
 		EntityCriteria<BranchWatch> criteria = EntityCriteria.of(BranchWatch.class);
 		criteria.add(Restrictions.eq("depot", depot));
 		criteria.add(Restrictions.eq("branch", branch));
-		return dao.query(criteria);
+		return query(criteria);
 	}
 
 }

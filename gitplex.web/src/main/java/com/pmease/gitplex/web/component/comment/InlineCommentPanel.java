@@ -11,8 +11,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;

@@ -13,8 +13,8 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;

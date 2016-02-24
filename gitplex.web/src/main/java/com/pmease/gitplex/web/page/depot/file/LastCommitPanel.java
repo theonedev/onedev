@@ -7,7 +7,7 @@ import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;

@@ -12,8 +12,8 @@ import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
 public class PasswordEditPage extends AccountSettingPage {

@@ -3,13 +3,13 @@ package com.pmease.gitplex.web;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.CommentReply;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
 public class WebUrlManager implements UrlManager {

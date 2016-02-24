@@ -21,8 +21,8 @@ import org.eclipse.jgit.lib.Repository;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 public class ArchiveResource extends AbstractResource {

@@ -23,13 +23,13 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")

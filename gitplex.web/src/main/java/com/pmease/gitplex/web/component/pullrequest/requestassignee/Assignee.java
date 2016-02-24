@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 
 @SuppressWarnings("serial")
 public class Assignee implements Serializable {

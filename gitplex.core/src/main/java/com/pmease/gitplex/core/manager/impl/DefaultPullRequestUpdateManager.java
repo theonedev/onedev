@@ -3,24 +3,25 @@ package com.pmease.gitplex.core.manager.impl;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import org.hibernate.Session;
 
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
 
 @Singleton
-public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager {
-	
-	private final Dao dao;
+public class DefaultPullRequestUpdateManager extends DefaultDao implements PullRequestUpdateManager {
 	
 	private final StorageManager storageManager;
 	
@@ -31,10 +32,11 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	private final UnitOfWork unitOfWork;
 	
 	@Inject
-	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
-			Set<PullRequestListener> pullRequestListeners, UnitOfWork unitOfWork,
-			CommentManager commentManager) {
-		this.dao = dao;
+	public DefaultPullRequestUpdateManager(Provider<Session> sessionProvider, 
+			StorageManager storageManager, Set<PullRequestListener> pullRequestListeners, 
+			UnitOfWork unitOfWork, CommentManager commentManager) {
+		super(sessionProvider);
+		
 		this.storageManager = storageManager;
 		this.pullRequestListeners = pullRequestListeners;
 		this.unitOfWork = unitOfWork;
@@ -44,7 +46,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	@Transactional
 	@Override
 	public void save(PullRequestUpdate update, boolean notify) {
-		dao.persist(update);
+		persist(update);
 		
 		FileUtils.cleanDir(storageManager.getCacheDir(update));
 
@@ -68,7 +70,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 		// Inline comment update can be time consuming and we do it inside a separate thread 
 		// in order not to blocking the push operation
 		final Long requestId = request.getId();
-		dao.afterCommit(new Runnable() {
+		afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -76,7 +78,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 
 					@Override
 					public void run() {
-						PullRequest request = dao.load(PullRequest.class, requestId);
+						PullRequest request = load(PullRequest.class, requestId);
 						for (Comment comment: request.getComments()) {
 							if (comment.getInlineInfo() != null)
 								commentManager.updateInlineInfo(comment);
@@ -93,7 +95,7 @@ public class DefaultPullRequestUpdateManager implements PullRequestUpdateManager
 	@Override
 	public void delete(PullRequestUpdate update) {
 		update.deleteRefs();
-		dao.remove(update);
+		remove(update);
 	}
 
 }

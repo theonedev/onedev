@@ -18,9 +18,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Verification;
-import com.pmease.gitplex.core.model.Verification.Status;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.Verification;
+import com.pmease.gitplex.core.entity.Verification.Status;
 
 @SuppressWarnings("serial")
 public abstract class VerificationStatusPanel extends Panel {

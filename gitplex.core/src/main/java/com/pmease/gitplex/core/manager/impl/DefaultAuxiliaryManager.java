@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -35,6 +36,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,17 +46,17 @@ import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.git.command.CommitConsumer;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
-import com.pmease.gitplex.core.listeners.RefListener;
-import com.pmease.gitplex.core.listeners.DepotListener;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.extensionpoint.DepotListener;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
+import com.pmease.gitplex.core.extensionpoint.RefListener;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.Depot;
 
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
@@ -68,7 +70,8 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener, RefListener, LifecycleListener {
+public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryManager, 
+		DepotListener, RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultAuxiliaryManager.class);
 	
@@ -96,8 +99,6 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final Dao dao;
-	
 	private final Map<Long, Environment> envs = new HashMap<>();
 	
 	private final Map<Long, List<String>> files = new ConcurrentHashMap<>();
@@ -105,12 +106,13 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	private final Map<Long, List<NameAndEmail>> contributors = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultAuxiliaryManager(StorageManager storageManager, WorkManager workManager, 
-			SequentialWorkManager sequentialWorkManager, Dao dao, UnitOfWork unitOfWork) {
+	public DefaultAuxiliaryManager(Provider<Session> sessionProvider, StorageManager storageManager, 
+			WorkManager workManager, SequentialWorkManager sequentialWorkManager, UnitOfWork unitOfWork) {
+		super(sessionProvider);
+		
 		this.storageManager = storageManager;
 		this.workManager = workManager;
 		this.sequentialWorkManager = sequentialWorkManager;
-		this.dao = dao;
 		this.unitOfWork = unitOfWork;
 	}
 	
@@ -314,7 +316,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 
 								@Override
 								public Void call() throws Exception {
-									doCollect(dao.load(Depot.class, repoId), revision);
+									doCollect(load(Depot.class, repoId), revision);
 									return null;
 								}
 								

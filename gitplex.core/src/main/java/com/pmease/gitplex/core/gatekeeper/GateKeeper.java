@@ -5,10 +5,10 @@ import java.io.Serializable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
 
 @Editable(name="Misc")
 public interface GateKeeper extends Serializable {

@@ -11,7 +11,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.repopicker.RepositoryPicker;
 import com.pmease.gitplex.web.model.AffinalDepotsModel;
 

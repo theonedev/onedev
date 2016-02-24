@@ -1,6 +1,6 @@
 package com.pmease.gitplex.web.model;
 
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 /** Shortcut for {@link EntityModel}<Repository> */
 public class DepotModel extends EntityModel<Depot> {

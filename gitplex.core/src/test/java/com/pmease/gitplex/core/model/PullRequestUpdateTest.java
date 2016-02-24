@@ -11,6 +11,9 @@ import com.google.common.collect.Sets;
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.loader.AppLoader;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.manager.StorageManager;
 
 public class PullRequestUpdateTest extends AbstractGitTest {

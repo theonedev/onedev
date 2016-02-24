@@ -5,15 +5,15 @@ import java.util.List;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Ignored;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
 
 @Editable
 public abstract class AbstractGateKeeper implements GateKeeper {

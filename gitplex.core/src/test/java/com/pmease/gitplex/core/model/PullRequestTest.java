@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import com.pmease.commons.git.AbstractGitTest;
 import com.pmease.commons.git.Git;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
 public class PullRequestTest extends AbstractGitTest {
 

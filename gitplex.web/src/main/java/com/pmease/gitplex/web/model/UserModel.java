@@ -1,6 +1,6 @@
 package com.pmease.gitplex.web.model;
 
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 
 public class UserModel extends EntityModel<User> {
 

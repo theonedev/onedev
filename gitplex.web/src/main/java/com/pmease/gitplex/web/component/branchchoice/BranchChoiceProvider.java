@@ -12,7 +12,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.pmease.commons.git.GitUtils;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;

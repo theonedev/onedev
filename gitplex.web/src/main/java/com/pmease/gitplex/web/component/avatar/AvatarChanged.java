@@ -3,7 +3,7 @@ package com.pmease.gitplex.web.component.avatar;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.wicket.AjaxEvent;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 
 public class AvatarChanged extends AjaxEvent {
 

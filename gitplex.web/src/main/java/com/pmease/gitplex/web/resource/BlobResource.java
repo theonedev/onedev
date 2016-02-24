@@ -20,8 +20,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 public class BlobResource extends AbstractResource {

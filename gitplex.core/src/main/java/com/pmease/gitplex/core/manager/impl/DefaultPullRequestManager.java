@@ -1,16 +1,16 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofOpen;
-import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofSource;
-import static com.pmease.gitplex.core.model.PullRequest.CriterionHelper.ofTarget;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
-import static com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
-import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_APPROVAL;
-import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_INTEGRATE;
-import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_UPDATE;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofOpen;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofSource;
+import static com.pmease.gitplex.core.entity.PullRequest.CriterionHelper.ofTarget;
+import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_ALWAYS;
+import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_IF_NECESSARY;
+import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.MERGE_WITH_SQUASH;
+import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.REBASE_SOURCE_ONTO_TARGET;
+import static com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy.REBASE_TARGET_ONTO_SOURCE;
+import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_APPROVAL;
+import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
+import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
 import java.io.File;
 import java.util.Collection;
@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -28,6 +29,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
@@ -42,16 +44,29 @@ import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.listeners.DepotListener;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.listeners.RefListener;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestActivity;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.PullRequestVisit;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.entity.component.CloseInfo;
+import com.pmease.gitplex.core.entity.component.DepotAndBranch;
+import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
+import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.extensionpoint.DepotListener;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.RefListener;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -60,32 +75,18 @@ import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.CloseInfo;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.DepotAndBranch;
-import com.pmease.gitplex.core.model.IntegrationPolicy;
-import com.pmease.gitplex.core.model.IntegrationPreview;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.model.PullRequestActivity;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.PullRequestVisit;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Singleton
-public class DefaultPullRequestManager implements PullRequestManager, DepotListener, RefListener, LifecycleListener {
+public class DefaultPullRequestManager extends DefaultDao implements PullRequestManager, 
+		DepotListener, RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
 	private static final int UI_PREVIEW_PRIORITY = 10;
 	
 	private static final int BACKEND_PREVIEW_PRIORITY = 50;
-	
-	private final Dao dao;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
@@ -106,13 +107,14 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 	private final WorkManager workManager;
 
 	@Inject
-	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager, 
-			StorageManager storageManager, ReviewInvitationManager reviewInvitationManager, 
-			UserManager userManager, NotificationManager notificationManager, 
-			CommentManager commentManager, MarkdownManager markdownManager, 
-			WorkManager workManager, UnitOfWork unitOfWork, 
-			Set<PullRequestListener> pullRequestListeners) {
-		this.dao = dao;
+	public DefaultPullRequestManager(Provider<Session> sessionProvider, 
+			PullRequestUpdateManager pullRequestUpdateManager, StorageManager storageManager, 
+			ReviewInvitationManager reviewInvitationManager, UserManager userManager, 
+			NotificationManager notificationManager, CommentManager commentManager, 
+			MarkdownManager markdownManager, WorkManager workManager, 
+			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
+		super(sessionProvider);
+		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.storageManager = storageManager;
 		this.reviewInvitationManager = reviewInvitationManager;
@@ -128,7 +130,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 	public void delete(PullRequest request) {
 		deleteRefs(request);
 		
-		dao.remove(request);
+		remove(request);
 	}
 
 	@Sessional
@@ -155,7 +157,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 			activity.setAction(PullRequestActivity.Action.RESTORE_SOURCE_BRANCH);
 			activity.setDate(new Date());
 			activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
-			dao.persist(activity);
+			persist(activity);
 		}
 	}
 
@@ -172,7 +174,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 			activity.setAction(PullRequestActivity.Action.DELETE_SOURCE_BRANCH);
 			activity.setDate(new Date());
 			activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
-			dao.persist(activity);
+			persist(activity);
 		}
 	}
 	
@@ -186,7 +188,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		request.setSubmitter(user);
 		request.setSubmitDate(new Date());
 		
-		dao.persist(request);
+		persist(request);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
@@ -194,7 +196,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		activity.setAction(PullRequestActivity.Action.REOPEN);
 		activity.setUser(user);
 		
-		dao.persist(activity);
+		persist(activity);
 
 		if (comment != null) {
 			Comment requestComment = new Comment();
@@ -222,7 +224,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		activity.setAction(PullRequestActivity.Action.DISCARD);
 		activity.setUser(user);
 		
-		dao.persist(activity);
+		persist(activity);
 
 		if (comment != null) {
 			Comment requestComment = new Comment();
@@ -239,7 +241,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		request.setLastEventDate(activity.getDate());
-		dao.persist(request);
+		persist(request);
 		
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onDiscarded(request, user, comment);
@@ -302,7 +304,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		activity.setAction(PullRequestActivity.Action.INTEGRATE);
 		activity.setUser(user);
 		
-		dao.persist(activity);
+		persist(activity);
 
 		if (comment != null) {
 			Comment requestComment = new Comment();
@@ -320,7 +322,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		
 		request.setLastEventDate(activity.getDate());
 
-		dao.persist(request);
+		persist(request);
 
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onIntegrated(request, user, comment);
@@ -329,14 +331,14 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 	@Transactional
 	@Override
 	public void open(final PullRequest request, final Object listenerData) {
-		dao.persist(request);
+		persist(request);
 
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setDate(request.getSubmitDate());
 		activity.setAction(PullRequestActivity.Action.OPEN);
 		activity.setRequest(request);
 		activity.setUser(request.getSubmitter());
-		dao.persist(activity);
+		persist(activity);
 		
 		FileUtils.cleanDir(storageManager.getCacheDir(request));
 		
@@ -353,7 +355,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onOpened(request);
 		
-		dao.afterCommit(new Runnable() {
+		afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -383,7 +385,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 	@Transactional
 	@Override
 	public void onAssigneeChange(PullRequest request) {
-		dao.persist(request);
+		persist(request);
 		for (PullRequestListener listener: pullRequestListeners)
 			listener.onAssigned(request);
 	}
@@ -410,7 +412,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 			activity.setUser(GitPlex.getInstance(UserManager.class).getRoot());
 			activity.setAction(PullRequestActivity.Action.INTEGRATE);
 			activity.setDate(new Date());
-			dao.persist(activity);
+			persist(activity);
 			
 			request.setLastIntegrationPreview(null);
 			CloseInfo closeInfo = new CloseInfo();
@@ -420,7 +422,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 			request.setCloseInfo(closeInfo);
 			request.setLastEventDate(activity.getDate());
 			
-			dao.persist(request);
+			persist(request);
 			
 			for (PullRequestListener listener: pullRequestListeners)
 				listener.onIntegrated(request, null, null);
@@ -442,7 +444,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 
 			if (request.isOpen()) {
 				final Long requestId = request.getId();
-				dao.afterCommit(new Runnable() {
+				afterCommit(new Runnable() {
 
 					@Override
 					public void run() {
@@ -450,7 +452,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 
 							@Override
 							public void run() {
-								check(dao.load(PullRequest.class, requestId));
+								check(load(PullRequest.class, requestId));
 							}
 							
 						});
@@ -539,7 +541,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 					integrationPreviewCalculatingRequestIds.add(requestId);
 					logger.info("Calculating integration preview of pull request #{}...", requestId);
 					try {
-						PullRequest request = dao.load(PullRequest.class, requestId);
+						PullRequest request = load(PullRequest.class, requestId);
 						IntegrationPreview preview = request.getLastIntegrationPreview();
 						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
@@ -603,7 +605,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 									FileUtils.deleteDir(tempDir);
 								}
 							}
-							dao.persist(request);
+							persist(request);
 
 							if (request.getStatus() == PENDING_INTEGRATE 
 									&& preview.getIntegrated() != null
@@ -677,7 +679,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
         		discard(request, "Source repository is deleted.");
     	}
     	
-    	Query query = dao.getSession().createQuery("update PullRequest set sourceDepot=null where "
+    	Query query = getSession().createQuery("update PullRequest set sourceDepot=null where "
     			+ "sourceDepot = :depot and targetDepot != :depot");
     	query.setParameter("depot", depot);
     	query.executeUpdate();
@@ -700,7 +702,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 				 * in a executor service like target branch update below
 				 */
 				Criterion criterion = Restrictions.and(ofOpen(), ofSource(depotAndBranch));
-				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) {
+				for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
 					if (depot.getObjectId(request.getBaseCommitHash(), false) != null)
 						onSourceBranchUpdate(request, true);
 					else
@@ -708,7 +710,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 				}
 				
 				final Long repoId = depot.getId();
-				dao.afterCommit(new Runnable() {
+				afterCommit(new Runnable() {
 
 					@Override
 					public void run() {
@@ -718,7 +720,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 							public void run() {
 								DepotAndBranch depotAndBranch = new DepotAndBranch(repoId, branch);								
 								Criterion criterion = Restrictions.and(ofOpen(), ofTarget(depotAndBranch));
-								for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
+								for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
 									if (request.getSourceDepot().getObjectId(request.getBaseCommitHash(), false) != null)
 										onTargetBranchUpdate(request);
 									else
@@ -735,7 +737,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 				Criterion criterion = Restrictions.and(
 						ofOpen(), 
 						Restrictions.or(ofSource(depotAndBranch), ofTarget(depotAndBranch)));
-				for (PullRequest request: dao.query(EntityCriteria.of(PullRequest.class).add(criterion))) {
+				for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
 					if (request.getTargetDepot().equals(depot) && request.getTargetBranch().equals(branch)) 
 						discard(request, "Target branch is deleted.");
 					else
@@ -748,7 +750,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 	@Sessional
 	@Override
 	public PullRequest findOpen(DepotAndBranch target, DepotAndBranch source) {
-		return dao.find(EntityCriteria.of(PullRequest.class)
+		return find(EntityCriteria.of(PullRequest.class)
 				.add(ofTarget(target)).add(ofSource(source)).add(ofOpen()));
 	}
 
@@ -761,7 +763,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		if (sourceDepot != null)
 			criteria.add(Restrictions.eq("sourceDepot", sourceDepot));
 		criteria.add(ofOpen());
-		return dao.query(criteria);
+		return query(criteria);
 	}
 
 	@Sessional
@@ -773,7 +775,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		if (targetDepot != null)
 			criteria.add(Restrictions.eq("targetDepot", targetDepot));
 		criteria.add(ofOpen());
-		return dao.query(criteria);
+		return query(criteria);
 	}
 
 	@Sessional
@@ -782,7 +784,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
-		return dao.query(criteria);
+		return query(criteria);
 	}
 
 	@Transactional
@@ -792,7 +794,7 @@ public class DefaultPullRequestManager implements PullRequestManager, DepotListe
 		
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
-		for (PullRequest request: dao.query(criteria)) {
+		for (PullRequest request: query(criteria)) {
 			Depot sourceDepot = request.getSourceDepot();
 			if (sourceDepot == null) {
 				discard(request, "Source repository is deleted.");

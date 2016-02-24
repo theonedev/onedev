@@ -33,11 +33,11 @@ import com.pmease.commons.git.command.UploadCommand;
 import com.pmease.commons.git.exception.GitException;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.setting.ServerConfig;
 

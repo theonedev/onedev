@@ -1,10 +1,11 @@
 package com.pmease.gitplex.core.manager;
 
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.PullRequest;
 
-public interface CommentManager {
+public interface CommentManager extends Dao {
 
 	/**
 	 * Update specified inline comment to make sure it is up to date with latest pull request update

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest;
 
 public class PullRequestChangeTrait implements WebSocketTrait {
 	

@@ -32,7 +32,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.BlobIcon;
 
 @SuppressWarnings("serial")

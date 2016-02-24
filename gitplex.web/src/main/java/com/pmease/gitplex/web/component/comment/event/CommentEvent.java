@@ -3,7 +3,7 @@ package com.pmease.gitplex.web.component.comment.event;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.wicket.AjaxEvent;
-import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.entity.Comment;
 
 public class CommentEvent extends AjaxEvent {
 

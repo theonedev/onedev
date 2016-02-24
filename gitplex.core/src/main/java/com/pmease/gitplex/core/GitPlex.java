@@ -36,7 +36,7 @@ import com.pmease.commons.util.init.Skippable;
 import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Validatable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.setting.ServerConfig;

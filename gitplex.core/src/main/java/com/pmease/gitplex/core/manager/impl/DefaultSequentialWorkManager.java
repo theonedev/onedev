@@ -11,7 +11,7 @@ import javax.inject.Singleton;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.util.concurrent.PrioritizedExecutor;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 
 @Singleton

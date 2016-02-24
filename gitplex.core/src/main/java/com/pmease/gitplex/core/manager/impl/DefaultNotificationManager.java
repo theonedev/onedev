@@ -1,33 +1,35 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_INTEGRATE;
-import static com.pmease.gitplex.core.model.Notification.Task.INTEGRATE;
-import static com.pmease.gitplex.core.model.Notification.Task.REVIEW;
-import static com.pmease.gitplex.core.model.Notification.Task.UPDATE;
+import static com.pmease.gitplex.core.entity.Notification.Task.INTEGRATE;
+import static com.pmease.gitplex.core.entity.Notification.Task.REVIEW;
+import static com.pmease.gitplex.core.entity.Notification.Task.UPDATE;
+import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.Notification;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.CommentReply;
-import com.pmease.gitplex.core.model.Notification;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
 
 /**
  * This class manages pull request task notifications and send email to relevant users. This 
@@ -38,9 +40,7 @@ import com.pmease.gitplex.core.model.User;
  *
  */
 @Singleton
-public class DefaultNotificationManager implements NotificationManager {
-
-	private final Dao dao;
+public class DefaultNotificationManager extends DefaultDao implements NotificationManager {
 	
 	private final MailManager mailManager;
 	
@@ -49,9 +49,10 @@ public class DefaultNotificationManager implements NotificationManager {
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public DefaultNotificationManager(Dao dao, MailManager mailManager, 
+	public DefaultNotificationManager(Provider<Session> sessionProvider, MailManager mailManager, 
 			UrlManager urlManager, MarkdownManager markdownManager) {
-		this.dao = dao;
+		super(sessionProvider);
+		
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.markdownManager = markdownManager;
@@ -67,7 +68,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onUpdated(PullRequestUpdate update) {
-		Query query = dao.getSession().createQuery("delete from Notification "
+		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request and task=:task");
 		query.setParameter("request", update.getRequest());
 		query.setParameter("task", UPDATE);
@@ -85,7 +86,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onReviewed(Review review, String comment) {
-		Query query = dao.getSession().createQuery("delete from Notification "
+		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request and user=:user and task=:task");
 		query.setParameter("request", review.getUpdate().getRequest());
 		query.setParameter("user", review.getReviewer());
@@ -99,7 +100,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		Preconditions.checkNotNull(request.getAssignee());
 		
 		if (request.getStatus() == PENDING_INTEGRATE) {  
-			Query query = dao.getSession().createQuery("delete from Notification "
+			Query query = getSession().createQuery("delete from Notification "
 					+ "where request=:request and task=:task and user!=:user");
 			query.setParameter("request", request);
 			query.setParameter("task", INTEGRATE);
@@ -117,7 +118,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onIntegrated(PullRequest request, User user, String comment) {
-		Query query = dao.getSession().createQuery("delete from Notification "
+		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
 		query.executeUpdate();
@@ -126,7 +127,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void onDiscarded(PullRequest request, User user, String comment) {
-		Query query = dao.getSession().createQuery("delete from Notification "
+		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
 		query.executeUpdate();
@@ -143,7 +144,7 @@ public class DefaultNotificationManager implements NotificationManager {
 		PullRequest request = invitation.getRequest();
 		User user = invitation.getReviewer();
 		if (!invitation.isPreferred()) {
-			Query query = dao.getSession().createQuery("delete from Notification "
+			Query query = getSession().createQuery("delete from Notification "
 					+ "where request=:request and user=:user and task=:task");
 			query.setParameter("request", request);
 			query.setParameter("user", user);
@@ -158,8 +159,8 @@ public class DefaultNotificationManager implements NotificationManager {
 			criteria.add(Restrictions.eq("request", request))
 					.add(Restrictions.eq("user", user))
 					.add(Restrictions.eq("task", notification.getTask()));
-			if (dao.find(criteria) == null) {
-				dao.persist(notification);
+			if (find(criteria) == null) {
+				persist(notification);
 				String subject = String.format("Please review pull request #%d (%s)", 
 						request.getId(), request.getTitle());
 				String url = urlManager.urlFor(request);
@@ -184,7 +185,7 @@ public class DefaultNotificationManager implements NotificationManager {
 	@Transactional
 	@Override
 	public void pendingApproval(PullRequest request) {
-		Query query = dao.getSession().createQuery("delete from Notification "
+		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request and (task=:update or task=:integrate)");
 		query.setParameter("request", request);
 		query.setParameter("update", UPDATE);
@@ -254,8 +255,8 @@ public class DefaultNotificationManager implements NotificationManager {
 		criteria.add(Restrictions.eq("request", notification.getRequest()))
 				.add(Restrictions.eq("user", user))
 				.add(Restrictions.eq("task", notification.getTask()));
-		if (dao.find(criteria) == null) {
-			dao.persist(notification);
+		if (find(criteria) == null) {
+			persist(notification);
 			String subject = String.format("Please integrate pull request #%d (%s)", 
 					request.getId(), request.getTitle());
 			String url = urlManager.urlFor(request);
@@ -286,8 +287,8 @@ public class DefaultNotificationManager implements NotificationManager {
 			criteria.add(Restrictions.eq("request", notification.getRequest()))
 					.add(Restrictions.eq("user", notification.getUser()))
 					.add(Restrictions.eq("task", notification.getTask()));
-			if (dao.find(criteria) == null)
-				dao.persist(notification);
+			if (find(criteria) == null)
+				persist(notification);
 		}
 	}
 

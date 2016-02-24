@@ -4,7 +4,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Element;
 
 import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.util.markdown.MentionParser;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;

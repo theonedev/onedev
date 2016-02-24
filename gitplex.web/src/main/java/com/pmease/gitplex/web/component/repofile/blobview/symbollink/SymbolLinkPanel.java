@@ -19,7 +19,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.commons.git.Blob;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;

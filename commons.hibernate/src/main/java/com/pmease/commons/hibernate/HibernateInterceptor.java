@@ -54,7 +54,7 @@ public class HibernateInterceptor extends EmptyInterceptor {
 			if (listener.onSave(entity, id, state, propertyNames, types))
 				changed = true;
 		}
-			
+		
 		return changed;
 	}
 

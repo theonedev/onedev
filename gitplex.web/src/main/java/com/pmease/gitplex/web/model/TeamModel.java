@@ -1,6 +1,6 @@
 package com.pmease.gitplex.web.model;
 
-import com.pmease.gitplex.core.model.Team;
+import com.pmease.gitplex.core.entity.Team;
 
 public class TeamModel extends EntityModel<Team> {
 	private static final long serialVersionUID = 1L;

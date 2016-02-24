@@ -5,9 +5,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.CommentReply;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 
 @SuppressWarnings("serial")

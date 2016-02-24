@@ -2,7 +2,7 @@ package com.pmease.gitplex.core.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.SystemObject;
 import com.pmease.gitplex.core.permission.operation.PrivilegedOperation;

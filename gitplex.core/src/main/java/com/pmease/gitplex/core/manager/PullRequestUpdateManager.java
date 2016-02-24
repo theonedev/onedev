@@ -1,8 +1,9 @@
 package com.pmease.gitplex.core.manager;
 
-import com.pmease.gitplex.core.model.PullRequestUpdate;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
 
-public interface PullRequestUpdateManager {
+public interface PullRequestUpdateManager extends Dao {
 	
 	void save(PullRequestUpdate update, boolean notify);
 	

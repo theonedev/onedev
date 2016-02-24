@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.setting.MailSetting;
 
 public interface MailManager {

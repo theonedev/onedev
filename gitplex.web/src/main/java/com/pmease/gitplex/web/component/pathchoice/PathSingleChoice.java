@@ -16,7 +16,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 

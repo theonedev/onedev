@@ -11,10 +11,10 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.validation.ClassValidating;
 import com.pmease.commons.validation.Validatable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
 
 @Editable(order=200, icon="fa-wrench", description=
 		"This gate keeper will be passed if one of specified operations is performed.")

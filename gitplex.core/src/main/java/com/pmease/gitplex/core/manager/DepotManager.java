@@ -2,10 +2,11 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 
-public interface DepotManager {
+public interface DepotManager extends Dao {
 	
 	@Nullable Depot findBy(String ownerName, String depotName);
 	
@@ -33,4 +34,5 @@ public interface DepotManager {
 	void save(Depot depot);
 	
 	void delete(Depot depot);
+	
 }

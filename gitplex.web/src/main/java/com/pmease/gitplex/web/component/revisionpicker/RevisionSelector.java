@@ -47,7 +47,7 @@ import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {

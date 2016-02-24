@@ -9,9 +9,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.page.depot.file.Mark;
 

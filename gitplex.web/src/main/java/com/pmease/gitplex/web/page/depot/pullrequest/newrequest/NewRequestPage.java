@@ -1,7 +1,7 @@
 package com.pmease.gitplex.web.page.depot.pullrequest.newrequest;
 
-import static com.pmease.gitplex.core.model.PullRequest.Status.INTEGRATED;
-import static com.pmease.gitplex.core.model.PullRequest.Status.PENDING_UPDATE;
+import static com.pmease.gitplex.core.entity.PullRequest.Status.INTEGRATED;
+import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,17 +44,17 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.component.CloseInfo;
+import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.model.CloseInfo;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.IntegrationStrategy;
-import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.DepotAndBranch;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;

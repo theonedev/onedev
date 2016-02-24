@@ -10,8 +10,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.web.model.UserModel;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 

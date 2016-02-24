@@ -6,13 +6,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.TeamManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Team;
-import com.pmease.gitplex.core.model.User;
 
 @Editable(order=500, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is submitted by a member of specified team.")

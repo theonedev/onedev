@@ -10,7 +10,7 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 
 @SuppressWarnings("serial")

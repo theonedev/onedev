@@ -23,7 +23,7 @@ import org.hibernate.validator.constraints.Email;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Path("/users")

@@ -6,15 +6,15 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.git.Git;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.IntegrationPreview;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.Status;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.ReviewInvitation;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 

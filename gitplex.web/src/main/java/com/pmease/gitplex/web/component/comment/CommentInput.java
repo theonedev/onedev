@@ -28,8 +28,8 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")

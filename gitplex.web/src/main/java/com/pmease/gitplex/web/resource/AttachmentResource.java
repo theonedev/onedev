@@ -21,10 +21,10 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 public class AttachmentResource extends AbstractResource {

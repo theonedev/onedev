@@ -11,7 +11,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 
 @SuppressWarnings("serial")
 public abstract class RemoveableAvatar extends Panel {

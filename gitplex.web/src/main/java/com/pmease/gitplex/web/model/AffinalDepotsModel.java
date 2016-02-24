@@ -10,7 +10,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")

@@ -11,8 +11,8 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 

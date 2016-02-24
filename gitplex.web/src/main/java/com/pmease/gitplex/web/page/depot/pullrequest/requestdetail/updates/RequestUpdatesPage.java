@@ -27,12 +27,12 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.manager.ReviewManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.Verification;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;

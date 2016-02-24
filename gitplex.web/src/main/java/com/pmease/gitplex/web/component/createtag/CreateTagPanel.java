@@ -13,9 +13,9 @@ import org.eclipse.jgit.lib.Repository;
 
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

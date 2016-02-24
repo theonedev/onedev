@@ -26,8 +26,8 @@ import org.hibernate.criterion.Restrictions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.model.Depot;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @Path("/repositories")

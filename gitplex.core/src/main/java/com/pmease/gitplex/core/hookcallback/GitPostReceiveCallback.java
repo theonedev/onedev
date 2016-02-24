@@ -21,9 +21,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.listeners.RefListener;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.extensionpoint.RefListener;
 
 @SuppressWarnings("serial")
 @Singleton

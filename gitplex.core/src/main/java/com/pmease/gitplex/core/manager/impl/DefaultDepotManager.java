@@ -14,6 +14,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,27 +24,25 @@ import com.google.common.collect.HashBiMap;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
-import com.pmease.gitplex.core.listeners.DepotListener;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.extensionpoint.DepotListener;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
-import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultDepotManager implements DepotManager, LifecycleListener {
+public class DefaultDepotManager extends DefaultDao implements DepotManager, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultDepotManager.class);
-	
-	private final Dao dao;
 	
 	private final Provider<Set<DepotListener>> listenersProvider;
 	
@@ -64,10 +63,11 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     
     @Inject
-    public DefaultDepotManager(Dao dao, UserManager userManager, StorageManager storageManager,
-    		AuxiliaryManager auxiliaryManager, PullRequestManager pullRequestManager, 
-    		Provider<Set<DepotListener>> listenersProvider) {
-    	this.dao = dao;
+    public DefaultDepotManager(Provider<Session> sessionProvider, UserManager userManager, 
+    		StorageManager storageManager, AuxiliaryManager auxiliaryManager, 
+    		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
+    	super(sessionProvider);
+    	
         this.storageManager = storageManager;
         this.userManager = userManager;
         this.auxiliaryManager = auxiliaryManager;
@@ -92,11 +92,11 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
     @Transactional
     @Override
     public void save(final Depot depot) {
-    	dao.persist(depot);
+    	persist(depot);
     	
         checkSanity(depot);
         
-        dao.afterCommit(new Runnable() {
+        afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -117,13 +117,13 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
 		for (DepotListener listener: listenersProvider.get())
 			listener.beforeDelete(depot);
 		
-    	Query query = dao.getSession().createQuery("update Depot set forkedFrom=null where forkedFrom=:forkedFrom");
+    	Query query = getSession().createQuery("update Depot set forkedFrom=null where forkedFrom=:forkedFrom");
     	query.setParameter("forkedFrom", depot);
     	query.executeUpdate();
     	
-        dao.remove(depot);
+        remove(depot);
 
-		dao.afterCommit(new Runnable() {
+		afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -157,7 +157,7 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
     	try {
     		Long id = nameToId.get(new Pair<>(owner.getId(), depotName));
     		if (id != null)
-    			return dao.load(Depot.class, id);
+    			return load(Depot.class, id);
     		else
     			return null;
     	} finally {
@@ -206,7 +206,7 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
 				forked.setName(depot.getName());
 			}
 
-			dao.persist(forked);
+			persist(forked);
 
             FileUtils.cleanDir(forked.git().depotDir());
             forked.git().clone(depot.git().depotDir().getAbsolutePath(), true, false, false, null);
@@ -253,7 +253,7 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (Depot depot: dao.allOf(Depot.class)) 
+        for (Depot depot: allOf(Depot.class)) 
         	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getUser().getId(), depot.getName()));
 	}
 	
@@ -261,7 +261,7 @@ public class DefaultDepotManager implements DepotManager, LifecycleListener {
 	@Override
 	public void checkSanity() {
 		logger.info("Checking sanity of repositories...");
-		for (Depot depot: dao.query(EntityCriteria.of(Depot.class), 0, 0))
+		for (Depot depot: query(EntityCriteria.of(Depot.class), 0, 0))
 			checkSanity(depot);
 	}
 

@@ -9,32 +9,32 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
+import org.hibernate.Session;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.Membership;
-import com.pmease.gitplex.core.model.Team;
-import com.pmease.gitplex.core.model.User;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @Singleton
-public class DefaultUserManager implements UserManager, LifecycleListener {
-
-    private final Dao dao;
+public class DefaultUserManager extends DefaultDao implements UserManager, LifecycleListener {
 
     private final DepotManager repositoryManager;
     
@@ -45,8 +45,9 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(Dao dao, DepotManager repositoryManager) {
-        this.dao = dao;
+    public DefaultUserManager(Provider<Session> sessionProvider, DepotManager repositoryManager) {
+        super(sessionProvider);
+        
         this.repositoryManager = repositoryManager;
     }
 
@@ -55,11 +56,11 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	public void save(final User user) {
     	boolean isNew;
     	if (user.isRoot()) {
-    		isNew = dao.get(User.class, User.ROOT_ID) == null;
-    		dao.getSession().replicate(user, ReplicationMode.OVERWRITE);
+    		isNew = get(User.class, User.ROOT_ID) == null;
+    		getSession().replicate(user, ReplicationMode.OVERWRITE);
     	} else {
     		isNew = user.isNew();
-    		dao.persist(user);
+    		persist(user);
     	}
     	
     	if (isNew) {
@@ -67,27 +68,27 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
         	team.setOwner(user);
         	team.setAuthorizedOperation(DepotOperation.NO_ACCESS);
         	team.setName(Team.ANONYMOUS);
-        	dao.persist(team);
+        	persist(team);
         	
         	team = new Team();
         	team.setOwner(user);
         	team.setName(Team.LOGGEDIN);
         	team.setAuthorizedOperation(DepotOperation.NO_ACCESS);
-        	dao.persist(team);
+        	persist(team);
         	
         	team = new Team();
         	team.setOwner(user);
         	team.setName(Team.OWNERS);
         	team.setAuthorizedOperation(DepotOperation.ADMIN);
-        	dao.persist(team);
+        	persist(team);
         	
         	Membership membership = new Membership();
         	membership.setTeam(team);
         	membership.setUser(user);
-        	dao.persist(membership);
+        	persist(membership);
     	}
     	
-    	dao.afterCommit(new Runnable() {
+    	afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -111,47 +112,47 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     @Sessional
     @Override
     public User getRoot() {
-    	return dao.load(User.class, User.ROOT_ID);
+    	return load(User.class, User.ROOT_ID);
     }
 
     @Transactional
     @Override
 	public void delete(final User user) {
-    	Query query = dao.getSession().createQuery("update PullRequest set submitter=null where submitter=:submitter");
+    	Query query = getSession().createQuery("update PullRequest set submitter=null where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update PullRequest set assignee.id=:rootId where assignee=:assignee");
+    	query = getSession().createQuery("update PullRequest set assignee.id=:rootId where assignee=:assignee");
     	query.setParameter("rootId", User.ROOT_ID);
     	query.setParameter("assignee", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update PullRequest set closedBy=null where closedBy=:closedBy");
+    	query = getSession().createQuery("update PullRequest set closedBy=null where closedBy=:closedBy");
     	query.setParameter("closedBy", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update PullRequestActivity set user=null where user=:user");
+    	query = getSession().createQuery("update PullRequestActivity set user=null where user=:user");
     	query.setParameter("user", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update PullRequestActivity set user=null where user=:user");
+    	query = getSession().createQuery("update PullRequestActivity set user=null where user=:user");
     	query.setParameter("user", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update Comment set user=null where user=:user");
+    	query = getSession().createQuery("update Comment set user=null where user=:user");
     	query.setParameter("user", user);
     	query.executeUpdate();
     	
-    	query = dao.getSession().createQuery("update CommentReply set user=null where user=:user");
+    	query = getSession().createQuery("update CommentReply set user=null where user=:user");
     	query.setParameter("user", user);
     	query.executeUpdate();
     	
     	for (Depot depot: user.getDepots())
     		repositoryManager.delete(depot);
     	
-		dao.remove(user);
+		remove(user);
 		
-		dao.afterCommit(new Runnable() {
+		afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -179,7 +180,7 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     	try {
     		Long id = nameToId.get(userName);
     		if (id != null)
-    			return dao.load(User.class, id);
+    			return load(User.class, id);
     		else
     			return null;
     	} finally {
@@ -199,7 +200,7 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
     				int minDistance = Integer.MAX_VALUE;
     				User minDistanceUser = null;
 	    			for (Long id: ids) {
-	    				User user = dao.load(User.class, id);
+	    				User user = load(User.class, id);
 	    				int distance;
 	    				if (user.getFullName() != null) {
 	    					int distance1 = StringUtils.calcLevenshteinDistance(personName, user.getFullName().toLowerCase());
@@ -221,7 +222,7 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	    			}
 	    			return Preconditions.checkNotNull(minDistanceUser);
     			} else {
-    				return dao.load(User.class, ids.iterator().next());
+    				return load(User.class, ids.iterator().next());
     			}
     		} else {
     			return null;
@@ -235,7 +236,7 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	public User getCurrent() {
 		Long userId = User.getCurrentId();
 		if (userId != 0L) {
-			User user = dao.get(User.class, userId);
+			User user = get(User.class, userId);
 			if (user != null)
 				return user;
 		}
@@ -246,7 +247,7 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	public User getPrevious() {
 		Long userId = User.getPreviousId();
 		if (userId != 0L) {
-			User user = dao.get(User.class, userId);
+			User user = get(User.class, userId);
 			if (user != null)
 				return user;
 		}
@@ -256,7 +257,7 @@ public class DefaultUserManager implements UserManager, LifecycleListener {
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (User user: dao.allOf(User.class)) {
+        for (User user: allOf(User.class)) {
         	Set<Long> ids = emailToIds.get(user.getEmail());
         	if (ids == null) {
         		ids = new HashSet<>();

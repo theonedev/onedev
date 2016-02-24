@@ -10,8 +10,8 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.modal.ModalPanel;
-import com.pmease.gitplex.core.model.DepotAndRevision;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 
 @SuppressWarnings("serial")
 public abstract class RevisionPicker extends DropdownLink {

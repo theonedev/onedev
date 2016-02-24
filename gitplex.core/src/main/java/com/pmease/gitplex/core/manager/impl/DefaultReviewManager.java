@@ -5,35 +5,35 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestActivity;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Review.Result;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestActivity;
-import com.pmease.gitplex.core.model.Comment;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Review;
-import com.pmease.gitplex.core.model.Review.Result;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
-public class DefaultReviewManager implements ReviewManager {
+public class DefaultReviewManager extends DefaultDao implements ReviewManager {
 
-	private final Dao dao;
-	
 	private final PullRequestManager pullRequestManager;
 	
 	private final CommentManager commentManager;
@@ -43,10 +43,11 @@ public class DefaultReviewManager implements ReviewManager {
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultReviewManager(Dao dao, PullRequestManager pullRequestManager,
-			CommentManager commentManager, UnitOfWork unitOfWork, 
-			Set<PullRequestListener> pullRequestListeners) {
-		this.dao = dao;
+	public DefaultReviewManager(Provider<Session> sessionProvider, 
+			PullRequestManager pullRequestManager, CommentManager commentManager, 
+			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
+		super(sessionProvider);
+		
 		this.pullRequestManager = pullRequestManager;
 		this.commentManager = commentManager;
 		this.unitOfWork = unitOfWork;
@@ -56,7 +57,7 @@ public class DefaultReviewManager implements ReviewManager {
 	@Sessional
 	@Override
 	public Review findBy(User reviewer, PullRequestUpdate update) {
-		return dao.find(EntityCriteria.of(Review.class)
+		return find(EntityCriteria.of(Review.class)
 				.add(Restrictions.eq("reviewer", reviewer)) 
 				.add(Restrictions.eq("update", update)));
 	}
@@ -71,7 +72,7 @@ public class DefaultReviewManager implements ReviewManager {
 		review.setUpdate(request.getLatestUpdate());
 		review.setReviewer(reviewer);
 		
-		dao.persist(review);	
+		persist(review);	
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		if (result == Review.Result.APPROVE)
@@ -81,7 +82,7 @@ public class DefaultReviewManager implements ReviewManager {
 		activity.setDate(new Date());
 		activity.setRequest(request);
 		activity.setUser(reviewer);
-		dao.persist(activity);
+		persist(activity);
 		
 		if (comment != null) {
 			Comment requestComment = new Comment();
@@ -97,7 +98,7 @@ public class DefaultReviewManager implements ReviewManager {
 
 		final Long requestId = request.getId();
 		
-		dao.afterCommit(new Runnable() {
+		afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -105,7 +106,7 @@ public class DefaultReviewManager implements ReviewManager {
 
 					@Override
 					public void run() {
-						pullRequestManager.check(dao.load(PullRequest.class, requestId));
+						pullRequestManager.check(load(PullRequest.class, requestId));
 					}
 					
 				});
@@ -120,23 +121,23 @@ public class DefaultReviewManager implements ReviewManager {
 		EntityCriteria<Review> criteria = EntityCriteria.of(Review.class);
 		criteria.createCriteria("update").add(Restrictions.eq("request", request));
 		criteria.addOrder(Order.asc("date"));
-		return dao.query(criteria);
+		return query(criteria);
 	}
 
 	@Transactional
 	@Override
 	public void delete(Review review) {
-		dao.remove(review);
+		remove(review);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setAction(PullRequestActivity.Action.UNDO_REVIEW);
 		activity.setDate(new Date());
 		activity.setRequest(review.getUpdate().getRequest());
 		activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
-		dao.persist(activity);
+		persist(activity);
 
 		final Long requestId = review.getUpdate().getRequest().getId();
-		dao.afterCommit(new Runnable() {
+		afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -144,7 +145,7 @@ public class DefaultReviewManager implements ReviewManager {
 
 					@Override
 					public void run() {
-						pullRequestManager.check(dao.load(PullRequest.class, requestId));
+						pullRequestManager.check(load(PullRequest.class, requestId));
 					}
 					
 				});

@@ -7,8 +7,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.User;
 
 @SuppressWarnings("serial")
 class ReferencePullRequest extends AbstractRenderableActivity {

@@ -29,7 +29,7 @@ import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.menu.CheckItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
 import com.pmease.gitplex.web.component.pathselector.PathSelector;

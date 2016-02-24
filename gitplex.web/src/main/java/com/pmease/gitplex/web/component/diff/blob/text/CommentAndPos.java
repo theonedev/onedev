@@ -2,7 +2,7 @@ package com.pmease.gitplex.web.component.diff.blob.text;
 
 import java.io.Serializable;
 
-import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.entity.Comment;
 
 class CommentAndPos implements Serializable {
 

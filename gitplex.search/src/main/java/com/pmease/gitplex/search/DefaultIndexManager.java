@@ -71,11 +71,11 @@ import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.model.Depot;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {

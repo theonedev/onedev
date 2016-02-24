@@ -11,8 +11,8 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 
 @SuppressWarnings("serial")
 public class NewAccountPage extends AdministrationPage {

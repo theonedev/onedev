@@ -17,8 +17,8 @@ import com.pmease.commons.util.Range;
 import com.pmease.commons.util.match.WildcardApplied;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
-import com.pmease.gitplex.core.model.Depot;
 
 public class SuggestionUtils {
 	

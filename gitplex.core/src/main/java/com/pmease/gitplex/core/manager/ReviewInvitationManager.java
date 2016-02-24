@@ -1,10 +1,11 @@
 package com.pmease.gitplex.core.manager;
 
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.User;
-import com.pmease.gitplex.core.model.ReviewInvitation;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.entity.User;
 
-public interface ReviewInvitationManager {
+public interface ReviewInvitationManager extends Dao {
 	
 	ReviewInvitation find(User reviewer, PullRequest request);
 	

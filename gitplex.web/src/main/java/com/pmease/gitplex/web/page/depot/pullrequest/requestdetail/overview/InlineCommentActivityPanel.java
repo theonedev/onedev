@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import com.pmease.gitplex.core.model.Comment;
+import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.web.component.comment.CommentPanel;
 import com.pmease.gitplex.web.component.comment.InlineCommentLink;
 

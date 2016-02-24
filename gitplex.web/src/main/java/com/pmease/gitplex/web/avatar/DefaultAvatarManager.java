@@ -22,9 +22,9 @@ import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.UserManager;
-import com.pmease.gitplex.core.model.User;
 
 @Singleton
 public class DefaultAvatarManager implements AvatarManager {

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Team;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.model.IModel;
 import org.hibernate.criterion.MatchMode;
@@ -15,7 +17,6 @@ import org.json.JSONWriter;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.model.Team;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 

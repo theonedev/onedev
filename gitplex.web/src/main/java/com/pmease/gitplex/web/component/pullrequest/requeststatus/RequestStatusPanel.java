@@ -6,9 +6,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.gitplex.core.model.CloseInfo;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequest.Status;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.component.CloseInfo;
 
 @SuppressWarnings("serial")
 public class RequestStatusPanel extends Panel {

@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
 
 public class UserMultiChoice extends Select2MultiChoice<User> {

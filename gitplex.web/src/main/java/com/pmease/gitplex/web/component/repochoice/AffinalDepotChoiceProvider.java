@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.model.AffinalDepotsModel;
 

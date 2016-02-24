@@ -4,8 +4,8 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.LabelLink;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.manager.CommentManager;
-import com.pmease.gitplex.core.model.Comment;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;

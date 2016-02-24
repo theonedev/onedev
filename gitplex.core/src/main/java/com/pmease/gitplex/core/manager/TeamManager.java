@@ -2,10 +2,11 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.pmease.gitplex.core.model.Team;
-import com.pmease.gitplex.core.model.User;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.User;
 
-public interface TeamManager {
+public interface TeamManager extends Dao {
 
 	/**
 	 * Find team of specified name belonging to specified owner.

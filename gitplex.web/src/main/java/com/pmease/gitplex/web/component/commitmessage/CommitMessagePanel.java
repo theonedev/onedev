@@ -20,7 +20,7 @@ import org.unbescape.html.HtmlEscape;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.util.Highlighter;
 import com.pmease.commons.util.Transformer;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 
 @SuppressWarnings("serial")

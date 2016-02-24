@@ -4,17 +4,16 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
@@ -24,27 +23,23 @@ import com.pmease.commons.loader.ManagedSerializedForm;
 @SuppressWarnings("unchecked")
 public class DefaultDao implements Dao, Serializable {
 
-	private final Provider<SessionFactory> sessionFactoryProvider;
-	
 	private final Provider<Session> sessionProvider;
 	
 	@Inject
-	public DefaultDao(Provider<SessionFactory> sessionFactoryProvider, 
-			Provider<Session> sessionProvider) {
-		this.sessionFactoryProvider = sessionFactoryProvider;
+	public DefaultDao(Provider<Session> sessionProvider) {
 		this.sessionProvider = sessionProvider;
 	}
 	
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
-		return (T) getSession().get(unproxy(entityClass), entityId);
+		return (T) getSession().get(unproxy(getSession(), entityClass), entityId);
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
-		return (T) getSession().load(unproxy(entityClass), entityId);
+		return (T) getSession().load(unproxy(getSession(), entityClass), entityId);
 	}
 
 	@Transactional
@@ -64,12 +59,12 @@ public class DefaultDao implements Dao, Serializable {
 		return sessionProvider.get();
 	}
 
-	protected <T extends AbstractEntity> Class<T> unproxy(Class<T> entityClass) {
+	protected <T extends AbstractEntity> Class<T> unproxy(Session session, Class<T> entityClass) {
 		//class meta data will be null if entityClass is not registered with Hibernate or when
 		//it is a Hibernate proxy class (e.x. test.googlecode.genericdao.model.Person_$$_javassist_5).
 		//So if a class is not recognized, we will look at superclasses to see if
 		//it is a proxy.
-		while (sessionFactoryProvider.get().getClassMetadata(entityClass) == null) {
+		while (session.getSessionFactory().getClassMetadata(entityClass) == null) {
 			entityClass = (Class<T>) entityClass.getSuperclass();
 			if (Object.class.equals(entityClass))
 				return null;

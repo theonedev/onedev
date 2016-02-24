@@ -18,11 +18,14 @@ import com.pmease.commons.loader.AbstractPluginModule;
 import com.pmease.commons.loader.ImplementationProvider;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
-import com.pmease.gitplex.core.listeners.ConfigListener;
-import com.pmease.gitplex.core.listeners.DepotListener;
-import com.pmease.gitplex.core.listeners.LifecycleListener;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
-import com.pmease.gitplex.core.listeners.RefListener;
+import com.pmease.gitplex.core.entity.Config;
+import com.pmease.gitplex.core.entity.EntityLocator;
+import com.pmease.gitplex.core.entity.listener.ListenerLocator;
+import com.pmease.gitplex.core.extensionpoint.ConfigListener;
+import com.pmease.gitplex.core.extensionpoint.DepotListener;
+import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.extensionpoint.RefListener;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
@@ -65,8 +68,6 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultWorkManager;
-import com.pmease.gitplex.core.model.Config;
-import com.pmease.gitplex.core.model.ModelLocator;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
@@ -91,7 +92,7 @@ public class CoreModule extends AbstractPluginModule {
 			public Collection<Class<? extends AbstractEntity>> getModelClasses() {
 				Collection<Class<? extends AbstractEntity>> modelClasses = 
 						new HashSet<Class<? extends AbstractEntity>>();
-				modelClasses.addAll(ClassUtils.findImplementations(AbstractEntity.class, ModelLocator.class));
+				modelClasses.addAll(ClassUtils.findImplementations(AbstractEntity.class, EntityLocator.class));
 				return modelClasses;
 			}
 			
@@ -187,7 +188,7 @@ public class CoreModule extends AbstractPluginModule {
 			}
 			
 		});
-		contributeFromPackage(PersistListener.class, ModelLocator.class);
+		contributeFromPackage(PersistListener.class, ListenerLocator.class);
 	}
 	
 	@Override

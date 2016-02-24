@@ -7,9 +7,10 @@ import java.util.Set;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.git.NameAndEmail;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.Depot;
 
-public interface AuxiliaryManager {
+public interface AuxiliaryManager extends Dao {
 	
 	void collect(Depot depot);
 	

@@ -10,7 +10,7 @@ import org.apache.wicket.model.Model;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.model.Depot;
+import com.pmease.gitplex.core.entity.Depot;
 
 @SuppressWarnings("serial")
 public abstract class RepositoryPicker extends DropdownLink {

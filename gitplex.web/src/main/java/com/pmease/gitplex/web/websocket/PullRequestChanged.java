@@ -3,7 +3,7 @@ package com.pmease.gitplex.web.websocket;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.wicket.AjaxEvent;
-import com.pmease.gitplex.core.model.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest;
 
 public class PullRequestChanged extends AjaxEvent {
 

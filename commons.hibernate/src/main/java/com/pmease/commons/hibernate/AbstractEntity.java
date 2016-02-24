@@ -21,10 +21,6 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	/*
-	@GenericGenerator(name="table-hilo-generator", strategy="org.hibernate.id.TableHiLoGenerator")
-	@GeneratedValue(generator="table-hilo-generator")
-	*/
 	@GeneratedValue(generator = "increment")
 	@GenericGenerator(name = "increment", strategy = "increment")
 	private Long id;

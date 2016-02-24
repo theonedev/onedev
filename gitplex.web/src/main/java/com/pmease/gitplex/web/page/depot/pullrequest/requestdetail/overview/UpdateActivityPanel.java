@@ -16,10 +16,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.git.Commit;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.PullRequestUpdate;
-import com.pmease.gitplex.core.model.Depot;
-import com.pmease.gitplex.core.model.Verification;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;

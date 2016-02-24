@@ -4,27 +4,27 @@ import java.util.Collection;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.listeners.PullRequestListener;
+import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.Verification;
+import com.pmease.gitplex.core.entity.Verification.Status;
+import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
-import com.pmease.gitplex.core.model.PullRequest;
-import com.pmease.gitplex.core.model.Verification;
-import com.pmease.gitplex.core.model.Verification.Status;
 
 @Singleton
-public class DefaultVerificationManager implements VerificationManager {
+public class DefaultVerificationManager extends DefaultDao implements VerificationManager {
 
-	private final Dao dao;
-	
 	private final PullRequestManager pullRequestManager;
 	
 	private final UnitOfWork unitOfWork;
@@ -32,9 +32,11 @@ public class DefaultVerificationManager implements VerificationManager {
 	private final Set<PullRequestListener> pullRequestListeners;
 
 	@Inject
-	public DefaultVerificationManager(Dao dao, PullRequestManager pullRequestManager, UnitOfWork unitOfWork, 
+	public DefaultVerificationManager(Provider<Session> sessionProvider, 
+			PullRequestManager pullRequestManager, UnitOfWork unitOfWork, 
 			Set<PullRequestListener> pullRequestListeners) {
-		this.dao = dao;
+		super(sessionProvider);
+		
 		this.pullRequestManager = pullRequestManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
@@ -43,7 +45,7 @@ public class DefaultVerificationManager implements VerificationManager {
 	@Sessional
 	@Override
 	public Collection<Verification> findBy(PullRequest request, String commit) {
-		return dao.query(EntityCriteria.of(Verification.class)
+		return query(EntityCriteria.of(Verification.class)
 				.add(Restrictions.eq("request", request))
 				.add(Restrictions.eq("commit", commit)), 0, 0);
 	}
@@ -51,7 +53,7 @@ public class DefaultVerificationManager implements VerificationManager {
 	@Sessional
 	@Override
 	public Verification findBy(PullRequest request, String commit, String configuration) {
-		return dao.find(EntityCriteria.of(Verification.class)
+		return find(EntityCriteria.of(Verification.class)
 				.add(Restrictions.eq("request", request))
 				.add(Restrictions.eq("commit", commit))
 				.add(Restrictions.eq("configuration", configuration)));
@@ -60,7 +62,7 @@ public class DefaultVerificationManager implements VerificationManager {
 	@Transactional
 	@Override
 	public void save(Verification verification) {
-		dao.persist(verification);
+		persist(verification);
 
 		onVerificationChange(verification.getRequest());
 	}
@@ -68,7 +70,7 @@ public class DefaultVerificationManager implements VerificationManager {
 	@Transactional
 	@Override
 	public void delete(Verification verification) {
-		dao.remove(verification);
+		remove(verification);
 		
 		onVerificationChange(verification.getRequest());
 	}
@@ -78,7 +80,7 @@ public class DefaultVerificationManager implements VerificationManager {
 			listener.onVerified(request);
 
 		final Long requestId = request.getId();
-		dao.afterCommit(new Runnable() {
+		afterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -86,7 +88,7 @@ public class DefaultVerificationManager implements VerificationManager {
 
 					@Override
 					public void run() {
-						pullRequestManager.check(dao.load(PullRequest.class, requestId));
+						pullRequestManager.check(load(PullRequest.class, requestId));
 					}
 					
 				});
