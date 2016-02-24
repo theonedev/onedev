@@ -2,11 +2,11 @@ package com.pmease.commons.hibernate;
 
 import java.util.Properties;
 
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
-import org.hibernate.cfg.Configuration;
 
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
@@ -27,12 +27,12 @@ public class HibernateModule extends AbstractPluginModule {
 
 		// Use an optional binding here in case our client does not like to 
 		// start persist service provided by this plugin
+		bind(Interceptor.class).to(HibernateInterceptor.class);
 		bind(Properties.class).annotatedWith(Names.named("hibernate")).toProvider(Providers.<Properties>of(null));
 		bind(PhysicalNamingStrategy.class).to(PhysicalNamingStrategyStandardImpl.class);
 		
 		bind(PersistService.class).to(DefaultPersistService.class);
 		bind(SessionFactory.class).toProvider(DefaultPersistService.class);
-		bind(Configuration.class).toProvider(ConfigurationProvider.class);
 		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);
 		bind(Session.class).toProvider(DefaultUnitOfWork.class);
 		

@@ -19,6 +19,7 @@ public class TestPage extends BasePage {
 			@Override
 			public void onClick() {
 				User user = getCurrentUser();
+				user.setFullName("hello");
 				GitPlex.getInstance(UserManager.class).save(user);
 			}
 			

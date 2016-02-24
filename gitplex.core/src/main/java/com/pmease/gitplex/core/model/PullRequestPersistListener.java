@@ -13,7 +13,7 @@ import org.hibernate.CallbackException;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.Type;
 
-import com.pmease.commons.hibernate.HibernateListener;
+import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
@@ -23,7 +23,7 @@ import com.pmease.gitplex.core.util.markdown.MentionParser;
 import com.pmease.gitplex.core.util.markdown.PullRequestParser;
 
 @Singleton
-public class PullRequestPersistListener implements HibernateListener {
+public class PullRequestPersistListener implements PersistListener {
 
 	private final MarkdownManager markdownManager;
 	
