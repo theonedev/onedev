@@ -37,9 +37,9 @@ public class SearchOption implements Serializable {
 	
 	private Status status = Status.OPEN;
 
-	private Long assigneeId;
+	private String assigneeName;
 	
-	private Long submitterId;
+	private String submitterName;
 	
 	private String targetBranch;
 	
@@ -61,22 +61,22 @@ public class SearchOption implements Serializable {
 
 	@Editable(order=200, name="Assigned To")
 	@UserChoice
-	public Long getAssigneeId() {
-		return assigneeId;
+	public String getAssigneeName() {
+		return assigneeName;
 	}
 
-	public void setAssigneeId(Long assigneeId) {
-		this.assigneeId = assigneeId;
+	public void setAssigneeName(String assigneeName) {
+		this.assigneeName = assigneeName;
 	}
 
 	@Editable(order=300, name="Submitted By")
 	@UserChoice
-	public Long getSubmitterId() {
-		return submitterId;
+	public String getSubmitterName() {
+		return submitterName;
 	}
 
-	public void setSubmitterId(Long submitterId) {
-		this.submitterId = submitterId;
+	public void setSubmitterName(String submitterName) {
+		this.submitterName = submitterName;
 	}
 
 	@Editable(order=400)
@@ -124,13 +124,9 @@ public class SearchOption implements Serializable {
 		if (value != null)
 			status = Status.valueOf(value);
 		
-		value = params.get(PARAM_ASSIGNEE).toString();
-		if (value != null)
-			assigneeId = Long.valueOf(value);
+		assigneeName = params.get(PARAM_ASSIGNEE).toString();
 		
-		value = params.get(PARAM_SUBMITTER).toString();
-		if (value != null)
-			submitterId = Long.valueOf(value);
+		submitterName = params.get(PARAM_SUBMITTER).toString();
 		
 		targetBranch = params.get(PARAM_TARGET).toString();
 		title = params.get(PARAM_TITLE).toString();
@@ -153,10 +149,12 @@ public class SearchOption implements Serializable {
 		else if (status == Status.CLOSED) 
 			criteria.add(PullRequest.CriterionHelper.ofClosed());
 		
-		if (submitterId != null)
-			criteria.add(Restrictions.eq("submitter.id", submitterId));
-		if (assigneeId != null)
-			criteria.add(Restrictions.eq("assignee.id", assigneeId));
+		if (submitterName != null) {
+			criteria.createCriteria("submitter").add(Restrictions.eq("name", submitterName));
+		}
+		if (assigneeName != null) {
+			criteria.createCriteria("assignee").add(Restrictions.eq("name", assigneeName));
+		}
 		if (targetBranch != null)
 			criteria.add(Restrictions.eq("targetBranch", targetBranch));
 		if (title != null)
@@ -170,10 +168,10 @@ public class SearchOption implements Serializable {
 	
 	public void fillPageParams(PageParameters params) {
 		params.set(PARAM_STATUS, status.name());
-		if (assigneeId != null)
-			params.set(PARAM_ASSIGNEE, assigneeId);
-		if (submitterId != null)
-			params.set(PARAM_SUBMITTER, submitterId);
+		if (assigneeName != null)
+			params.set(PARAM_ASSIGNEE, assigneeName);
+		if (submitterName != null)
+			params.set(PARAM_SUBMITTER, submitterName);
 		if (targetBranch != null)
 			params.set(PARAM_TARGET, targetBranch);
 		if (title != null)

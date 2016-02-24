@@ -86,14 +86,14 @@ public class RequestListPage extends PullRequestPage {
 
 				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
 				if (currentUser != null) {
-					final Long userId = currentUser.getId();
+					final String userName = currentUser.getName();
 					menuItems.add(new LinkItem("Open requests assigned to me") {
 
 						@Override
 						public void onClick() {
 							searchOption = new SearchOption();
 							searchOption.setStatus(Status.OPEN);
-							searchOption.setAssigneeId(userId);
+							searchOption.setAssigneeName(userName);
 							
 							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 						}
@@ -105,7 +105,7 @@ public class RequestListPage extends PullRequestPage {
 						public void onClick() {
 							searchOption = new SearchOption();
 							searchOption.setStatus(Status.OPEN);
-							searchOption.setSubmitterId(userId);
+							searchOption.setSubmitterName(userName);
 
 							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
 						}
