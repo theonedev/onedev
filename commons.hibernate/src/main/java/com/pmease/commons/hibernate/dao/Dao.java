@@ -38,7 +38,7 @@ public interface Dao {
 	/**
 	 * If the id of the entity is null or zero, add it to the datastore and
 	 * assign it an id; otherwise, update the corresponding entity in the
-	 * datastore with the properties of this entity. In either case the entity
+	 * data store with the properties of this entity. In either case the entity
 	 * passed to this method will be attached to the session.
 	 * <p>
 	 * If an entity to update is already attached to the session, this method
