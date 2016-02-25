@@ -57,16 +57,17 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
+@Entity
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
  * on certain fields tell Hibernate not to perform version check on those fields
  * which can be updated from background thread.
  */
-@SuppressWarnings("serial")
-@Entity
 @DynamicUpdate 
 @Table(indexes={@Index(columnList="title"), @Index(columnList="idStr"), @Index(columnList="noSpaceTitle")})
 public class PullRequest extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum Status {
 		PENDING_APPROVAL("Pending Approval"), 

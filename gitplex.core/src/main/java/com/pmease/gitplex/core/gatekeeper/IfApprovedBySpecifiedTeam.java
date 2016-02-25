@@ -126,4 +126,15 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
 		return check(user, depot.getOwner());
 	}
 
+	@Override
+	public void onTeamRename(String oldName, String newName) {
+		if (teamName.equals(oldName))
+			teamName = newName;
+	}
+
+	@Override
+	public boolean onTeamDelete(Team team) {
+		return teamName.equals(team.getName());
+	}
+	
 }

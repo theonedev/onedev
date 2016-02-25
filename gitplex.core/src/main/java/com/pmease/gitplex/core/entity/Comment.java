@@ -37,11 +37,12 @@ import com.pmease.gitplex.core.manager.UserManager;
  * on certain fields tell Hibernate not to perform version check on those fields
  * which can be updated from background thread.
  */
-@SuppressWarnings("serial")
 @Entity
 @DynamicUpdate 
 public class Comment extends AbstractEntity {
 	
+	private static final long serialVersionUID = 1L;
+
 	public static final int DIFF_CONTEXT_SIZE = 3;
 
 	@Version

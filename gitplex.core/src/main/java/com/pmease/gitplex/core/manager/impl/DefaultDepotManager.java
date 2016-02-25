@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -31,8 +32,10 @@ import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
+import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -123,6 +126,17 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
     	
         remove(depot);
 
+		for (Depot each: allOf(Depot.class)) {
+			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
+				if (it.next().onDepotDelete(depot))
+					it.remove();
+			}
+			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
+				if (it.next().onDepotDelete(depot))
+					it.remove();
+			}
+		}
+		
 		afterCommit(new Runnable() {
 
 			@Override
@@ -278,6 +292,41 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 
 	@Override
 	public void systemStopped() {
+	}
+
+	@Transactional
+	@Override
+	public void rename(User depotOwner, final Long depotId, String oldName, final String newName) {
+		Query query = getSession().createQuery("update Depot set name=:newName where "
+				+ "owner=:owner and name=:oldName");
+		query.setParameter("owner", depotOwner);
+		query.setParameter("oldName", oldName);
+		query.setParameter("newName", newName);
+		query.executeUpdate();
+		
+		for (Depot depot: allOf(Depot.class)) {
+			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
+				integrationPolicy.onDepotRename(depotOwner, oldName, newName);
+			}
+			for (GateKeeper gateKeeper: depot.getGateKeepers()) {
+				gateKeeper.onDepotRename(depotOwner, oldName, newName);
+			}
+		}
+		
+        afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				idLock.writeLock().lock();
+				try {
+					nameToId.inverse().put(depotId, new Pair<>(depotOwner.getId(), newName));
+				} finally {
+					idLock.writeLock().unlock();
+				}
+			}
+        	
+        });
+		
 	}
 
 }

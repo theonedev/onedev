@@ -15,9 +15,10 @@ import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 
-@SuppressWarnings("serial")
 @Entity
 public class CommentReply extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	@Version
 	private long version;

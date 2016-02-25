@@ -10,12 +10,13 @@ import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"branch", "g_user_id"})
 })
 public class BranchWatch extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

@@ -4,3 +4,12 @@
 #repo-setting>.nav {
 	margin-bottom: 20px;
 }
+#repo-setting .general-setting form.name {
+	margin-bottom: 16px;
+}
+#repo-setting .general-setting form.name .alert {
+	margin-top: 16px;
+}
+#repo-setting .general-setting label.name {
+	display: none;
+}

@@ -28,7 +28,9 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
+import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
@@ -53,7 +55,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 
     @Transactional
     @Override
-	public void save(final User user) {
+	public void save(User user) {
     	boolean isNew;
     	if (user.isRoot()) {
     		isNew = get(User.class, User.ROOT_ID) == null;
@@ -100,7 +102,8 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 						emailToIds.put(user.getEmail(), ids);
 					}
 					ids.add(user.getId());
-					nameToId.inverse().put(user.getId(), user.getName());
+					if (isNew)
+						nameToId.inverse().put(user.getId(), user.getName());
 				} finally {
 					idLock.writeLock().unlock();
 				}
@@ -108,7 +111,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
     		
     	});
     }
-
+    
     @Sessional
     @Override
     public User getRoot() {
@@ -127,7 +130,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
     	query.setParameter("assignee", user);
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set closedBy=null where closedBy=:closedBy");
+    	query = getSession().createQuery("update PullRequest set closeInfo.closedBy=null where closeInfo.closedBy=:closedBy");
     	query.setParameter("closedBy", user);
     	query.executeUpdate();
     	
@@ -151,6 +154,17 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
     		repositoryManager.delete(depot);
     	
 		remove(user);
+		
+		for (Depot each: allOf(Depot.class)) {
+			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
+				if (it.next().onUserDelete(user))
+					it.remove();
+			}
+			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
+				if (it.next().onUserDelete(user))
+					it.remove();
+			}
+		}
 		
 		afterCommit(new Runnable() {
 
@@ -279,6 +293,38 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 
 	@Override
 	public void systemStopped() {
+	}
+
+	@Transactional
+	@Override
+	public void rename(Long userId, String oldName, String newName) {
+		Query query = getSession().createQuery("update User set name=:newName where name=:oldName");
+		query.setParameter("oldName", oldName);
+		query.setParameter("newName", newName);
+		query.executeUpdate();
+		
+		for (Depot depot: allOf(Depot.class)) {
+			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
+				integrationPolicy.onUserRename(oldName, newName);
+			}
+			for (GateKeeper gateKeeper: depot.getGateKeepers()) {
+				gateKeeper.onUserRename(oldName, newName);
+			}
+		}
+		
+    	afterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				idLock.writeLock().lock();
+				try {
+					nameToId.inverse().put(userId, newName);
+				} finally {
+					idLock.writeLock().unlock();
+				}
+			}
+    		
+    	});
 	}
 
 }

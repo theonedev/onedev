@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
@@ -17,12 +17,15 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
+import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
+import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
 
-@SuppressWarnings("serial")
 @Editable
 @Horizontal
 public class IntegrationPolicy implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private String targetBranchMatch;
 
 	private String sourceBranchMatch;
@@ -83,23 +86,122 @@ public class IntegrationPolicy implements Serializable {
 		return help.toString();
 	}
 	
-	public boolean onDepotRename(User depotOwner, String oldName, String newName) {
-		String sourceBranchMatch = FullBranchMatchUtils.updateDepotName(this.sourceBranchMatch, depotOwner, oldName, newName);
-		if (sourceBranchMatch.equals(this.sourceBranchMatch)) {
-			this.sourceBranchMatch = sourceBranchMatch;
-			return true;
-		} else {
-			return false;
+	public boolean onUserDelete(User user) {
+		StringBuilder builder = new StringBuilder();
+		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
+			if (criteriaContext.includeMatch() != null) { 
+				String deleted = deleteUser(user, criteriaContext.includeMatch().fullBranchMatch()); 
+				if (deleted != null)
+					builder.append(String.format("include(%s) ", deleted));
+			} else {
+				String deleted = deleteUser(user, criteriaContext.includeMatch().fullBranchMatch()); 
+				if (deleted != null)
+					builder.append(String.format("exclude(%s) ", deleted));
+			}
 		}
+		sourceBranchMatch = builder.toString().trim();
+		return sourceBranchMatch.length() == 0;
 	}
 	
-	public void onAccountRename(String oldName, String newName) {
-		sourceBranchMatch = FullBranchMatchUtils.updateAccountName(sourceBranchMatch, oldName, newName);
+	private String deleteUser(User user, FullBranchMatchContext fullBranchMatchContext) {
+		if (fullBranchMatchContext.fullDepotMatch() != null) {
+			String fullDepotMatch = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());
+			String accountMatch = StringUtils.substringBeforeLast(fullDepotMatch, Depot.FQN_SEPARATOR);
+			if (accountMatch.equals(user.getName())) { 
+				return null;
+			}
+		}
+		return fullBranchMatchContext.getText();
+	}
+	
+	public boolean onDepotDelete(Depot depot) {
+		StringBuilder builder = new StringBuilder();
+		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
+			if (criteriaContext.includeMatch() != null) { 
+				String deleted = deleteDepot(depot, criteriaContext.includeMatch().fullBranchMatch()); 
+				if (deleted != null)
+					builder.append(String.format("include(%s) ", deleted));
+			} else {
+				String deleted = deleteDepot(depot, criteriaContext.includeMatch().fullBranchMatch()); 
+				if (deleted != null)
+					builder.append(String.format("exclude(%s) ", deleted));
+			}
+		}
+		sourceBranchMatch = builder.toString().trim();
+		return sourceBranchMatch.length() == 0;
+	}
+	
+	private String deleteDepot(Depot depot, FullBranchMatchContext fullBranchMatchContext) {
+		if (fullBranchMatchContext.fullDepotMatch() != null) {
+			String fullDepotMatch = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());
+			if (fullDepotMatch.equals(depot.getFQN())) { 
+				return null;
+			}
+		}
+		return fullBranchMatchContext.getText();
+	}
+	
+	public void onDepotRename(User depotOwner, String oldName, String newName) {
+		StringBuilder builder = new StringBuilder();
+		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
+			if (criteriaContext.includeMatch() != null) { 
+				String updated = updateDepotName(depotOwner, oldName, newName, 
+						criteriaContext.includeMatch().fullBranchMatch()); 
+				builder.append(String.format("include(%s) ", updated));
+			} else {
+				String updated = updateDepotName(depotOwner, oldName, newName, 
+						criteriaContext.includeMatch().fullBranchMatch()); 
+				builder.append(String.format("exclude(%s) ", updated));
+			}
+		}
+		sourceBranchMatch = builder.toString().trim();
+	}
+	
+	private String updateDepotName(User depotOwner, String oldName, String newName, 
+			FullBranchMatchContext fullBranchMatchContext) {
+		if (fullBranchMatchContext.fullDepotMatch() != null) {
+			String fullDepot = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());
+			if (fullDepot.equals(depotOwner.getName() + Depot.FQN_SEPARATOR + oldName)) { 
+				return depotOwner.getName() 
+						+ Depot.FQN_SEPARATOR 
+						+ newName 
+						+ DepotAndBranch.SEPARATOR 
+						+ fullBranchMatchContext.branchMatch().getText().trim();
+			}
+		}
+		return fullBranchMatchContext.getText();
 	}
 
-	@Nullable
-	public IntegrationPolicy onDepotDelete(Depot depot) {
-		return null;
+	public void onUserRename(String oldName, String newName) {
+		StringBuilder builder = new StringBuilder();
+		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
+			if (criteriaContext.includeMatch() != null) { 
+				String updated = updateUserName(oldName, newName, 
+						criteriaContext.includeMatch().fullBranchMatch()); 
+				builder.append(String.format("include(%s) ", updated));
+			} else {
+				String updated = updateUserName(oldName, newName, 
+						criteriaContext.includeMatch().fullBranchMatch()); 
+				builder.append(String.format("exclude(%s) ", updated));
+			}
+		}
+		sourceBranchMatch = builder.toString().trim();
+	}
+	
+	private static String updateUserName(String oldName, String newName, 
+			FullBranchMatchContext fullBranchMatchContext) {
+		if (fullBranchMatchContext.fullDepotMatch() != null) {
+			String fullDepotMatch = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());
+			String accountMatch = StringUtils.substringBeforeLast(fullDepotMatch, Depot.FQN_SEPARATOR);
+			if (accountMatch.equals(oldName)) { 
+				return newName 
+						+ Depot.FQN_SEPARATOR 
+						+ StringUtils.substringAfterLast(fullDepotMatch, Depot.FQN_SEPARATOR) 
+						+ DepotAndBranch.SEPARATOR 
+						+ fullBranchMatchContext.branchMatch().getText().trim();
+			}
+		}
+		return fullBranchMatchContext.getText();
 	}
 	
 }

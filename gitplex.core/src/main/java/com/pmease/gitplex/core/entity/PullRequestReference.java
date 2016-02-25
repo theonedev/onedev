@@ -15,12 +15,13 @@ import org.hibernate.annotations.FetchMode;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@SuppressWarnings("serial")
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_referenced_id", "g_referencedBy_id"})
 })
 @Entity
 public class PullRequestReference extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@Fetch(FetchMode.JOIN)

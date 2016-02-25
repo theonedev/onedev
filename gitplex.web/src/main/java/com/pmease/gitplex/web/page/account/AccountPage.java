@@ -47,11 +47,15 @@ public abstract class AccountPage extends LayoutPage {
 	}
 	
 	public static PageParameters paramsOf(User user) {
-		PageParameters params = new PageParameters();
-		params.set(PARAM_USER, user.getName());
-		return params;
+		return paramsOf(user.getName());
 	}
 
+	public static PageParameters paramsOf(String accountName) {
+		PageParameters params = new PageParameters();
+		params.set(PARAM_USER, accountName);
+		return params;
+	}
+	
 	@Override
 	protected Component newContextHead(String componentId) {
 		return new Label(componentId, getAccount().getName());

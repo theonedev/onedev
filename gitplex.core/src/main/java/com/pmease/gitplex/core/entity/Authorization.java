@@ -10,12 +10,13 @@ import javax.persistence.UniqueConstraint;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_team_id", "g_depot_id"})
 })
 public class Authorization extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

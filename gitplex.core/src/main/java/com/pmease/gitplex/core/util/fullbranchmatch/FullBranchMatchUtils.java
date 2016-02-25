@@ -15,7 +15,6 @@ import com.pmease.commons.util.match.IncludeExclude;
 import com.pmease.commons.util.match.RuleMatcher;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
@@ -91,68 +90,5 @@ public class FullBranchMatchUtils {
 	public static String deleteDepot(String match, Depot depot) {
 		return null;
 	}
-	
-	public static String updateDepotName(String match, User depotOwner, String oldName, String newName) {
-		StringBuilder builder = new StringBuilder();
-		for (CriteriaContext criteriaContext: parse(match).criteria()) {
-			if (criteriaContext.includeMatch() != null) { 
-				String updated = updateDepotName(depotOwner, oldName, newName, 
-						criteriaContext.includeMatch().fullBranchMatch()); 
-				builder.append(String.format("include(%s) ", updated));
-			} else {
-				String updated = updateDepotName(depotOwner, oldName, newName, 
-						criteriaContext.includeMatch().fullBranchMatch()); 
-				builder.append(String.format("exclude(%s) ", updated));
-			}
-		}
-		return builder.toString().trim();
-	}
-	
-	private static String updateDepotName(User depotOwner, String oldName, String newName, 
-			FullBranchMatchContext fullBranchMatchContext) {
-		if (fullBranchMatchContext.fullDepotMatch() != null) {
-			String fullDepot = fullBranchMatchContext.fullDepotMatch().getText().trim();
-			if (fullDepot.equals(depotOwner.getName() + Depot.FQN_SEPARATOR + oldName)) { 
-				return depotOwner.getName() 
-						+ Depot.FQN_SEPARATOR 
-						+ newName 
-						+ DepotAndBranch.SEPARATOR 
-						+ fullBranchMatchContext.branchMatch().getText().trim();
-			}
-		}
-		return fullBranchMatchContext.getText();
-	}
-
-	public static String updateAccountName(String match, String oldName, String newName) {
-		StringBuilder builder = new StringBuilder();
-		for (CriteriaContext criteriaContext: parse(match).criteria()) {
-			if (criteriaContext.includeMatch() != null) { 
-				String updated = updateAccountName(oldName, newName, 
-						criteriaContext.includeMatch().fullBranchMatch()); 
-				builder.append(String.format("include(%s) ", updated));
-			} else {
-				String updated = updateAccountName(oldName, newName, 
-						criteriaContext.includeMatch().fullBranchMatch()); 
-				builder.append(String.format("exclude(%s) ", updated));
-			}
-		}
-		return builder.toString().trim();
-	}
-	
-	private static String updateAccountName(String oldName, String newName, 
-			FullBranchMatchContext fullBranchMatchContext) {
-		if (fullBranchMatchContext.fullDepotMatch() != null) {
-			String fullDepotMatch = fullBranchMatchContext.fullDepotMatch().getText().trim();
-			String accountMatch = StringUtils.substringBeforeLast(fullDepotMatch, Depot.FQN_SEPARATOR);
-			if (accountMatch.equals(oldName)) { 
-				return newName 
-						+ Depot.FQN_SEPARATOR 
-						+ StringUtils.substringAfterLast(fullDepotMatch, Depot.FQN_SEPARATOR) 
-						+ DepotAndBranch.SEPARATOR 
-						+ fullBranchMatchContext.branchMatch().getText().trim();
-			}
-		}
-		return fullBranchMatchContext.getText();
-	}
-	
+		
 }

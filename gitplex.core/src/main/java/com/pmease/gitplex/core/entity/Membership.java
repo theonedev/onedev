@@ -9,12 +9,13 @@ import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_user_id", "g_team_id"})
 })
 public class Membership extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

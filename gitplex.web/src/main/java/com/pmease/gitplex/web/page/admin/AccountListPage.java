@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.home.admin;
+package com.pmease.gitplex.web.page.admin;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -170,7 +170,7 @@ public class AccountListPage extends AdministrationPage {
 							
 							@Override
 							protected void onDeleted(AjaxRequestTarget target) {
-								setResponsePage(getPage());
+								setResponsePage(AccountListPage.this);
 							}
 							
 							@Override

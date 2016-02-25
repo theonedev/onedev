@@ -5,6 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
@@ -38,6 +40,26 @@ public class NotGateKeeper extends CompositeGateKeeper {
 			return passed(result.getReasons());
 		else
 			return result;
+	}
+
+	@Override
+	public boolean onUserDelete(User user) {
+		return gateKeeper.onUserDelete(user);
+	}
+
+	@Override
+	public boolean onDepotDelete(Depot depot) {
+		return gateKeeper.onDepotDelete(depot);
+	}
+
+	@Override
+	public void onDepotRename(User depotOwner, String oldName, String newName) {
+		gateKeeper.onDepotRename(depotOwner, oldName, newName);
+	}
+
+	@Override
+	public void onUserRename(String oldName, String newName) {
+		gateKeeper.onUserRename(oldName, newName);
 	}
 
 }

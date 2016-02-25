@@ -12,12 +12,13 @@ import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_request_id", "g_user_id", "task"})
 })
 public class Notification extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum Task {
 		REVIEW("Please review this pull request."), 

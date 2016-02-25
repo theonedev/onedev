@@ -2,13 +2,20 @@
 	<section class="general-setting">
 		<div class="head">General Setting</div>
 		<div class="body">
-			<form wicket:id="form">
+			<form wicket:id="name" class="form-inline name">
+				<input wicket:id="input" class="form-control"></input> 
+				<input type="submit" class="dirty-aware btn btn-default" value="Rename"></input>
+				<div wicket:id="feedback"></div>
+			</form>
+			<hr/>
+			<form wicket:id="settings">
 				<div wicket:id="editor"></div>
 				<div class="actions">
-					<input wicket:id="save" class="btn btn-primary dirty-aware" value="Update" type="submit"></input>
-					<a wicket:id="delete" class="btn btn-danger pull-right">Delete this Repository</a>
+					<input wicket:id="save" class="btn btn-default dirty-aware" value="Update description" type="submit"></input>
 				</div>
 			</form>
+			<hr/>
+			<a wicket:id="delete" class="btn btn-danger">Delete this Repository</a>
 		</div>
 	</section>
 </wicket:extend>

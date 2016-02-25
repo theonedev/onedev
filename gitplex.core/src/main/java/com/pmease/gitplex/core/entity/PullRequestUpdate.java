@@ -34,9 +34,10 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.StorageManager;
 
-@SuppressWarnings("serial")
 @Entity
 public class PullRequestUpdate extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -335,6 +336,8 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	private static class CachedInfo implements Serializable {
 		
+		private static final long serialVersionUID = 1L;
+
 		private Collection<String> changedFiles;
 		
 		private List<Commit> logCommits;

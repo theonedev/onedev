@@ -13,6 +13,7 @@ import org.eclipse.jgit.lib.Ref;
 
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.match.WildcardApplied;
 import com.pmease.commons.util.match.WildcardUtils;
@@ -59,7 +60,7 @@ public class SuggestionUtils {
 				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
 			}
 		}
-		for (Depot affinal: depot.findAffinals()) {
+		for (Depot affinal: /*depot.findAffinals()*/GitPlex.getInstance(Dao.class).allOf(Depot.class)) {
 			String FQN = affinal.getFQN();
 			int index = FQN.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {

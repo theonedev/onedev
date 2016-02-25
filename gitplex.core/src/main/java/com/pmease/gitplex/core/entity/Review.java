@@ -12,12 +12,13 @@ import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_reviewer_id", "g_update_id"})
 })
 public class Review extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	public static enum Result {APPROVE, DISAPPROVE};
 	

@@ -56,4 +56,15 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 		return check(user);
 	}
 
+	@Override
+	public void onUserRename(String oldName, String newName) {
+		if (userName.equals(oldName))
+			userName = newName;
+	}
+
+	@Override
+	public boolean onUserDelete(User user) {
+		return userName.equals(user.getName());
+	}
+
 }

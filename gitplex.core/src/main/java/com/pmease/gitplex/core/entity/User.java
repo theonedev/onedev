@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Email;
@@ -28,13 +29,21 @@ import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
 import com.pmease.gitplex.core.util.validation.UserName;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(indexes={@Index(columnList="email"), @Index(columnList="fullName"), 
 		@Index(columnList="noSpaceName"), @Index(columnList="noSpaceFullName")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+
+/* 
+ * use dynamic update as we do not want to change name while persisting user, 
+ * as name of user can be referenced in other places, and we want to update 
+ * these references in a transaction via UserManager.rename method 
+ */  
+@DynamicUpdate
 @Editable
 public class User extends AbstractUser implements ProtectedObject {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final Long ROOT_ID = 1L;
 

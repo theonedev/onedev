@@ -6,12 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -84,24 +80,4 @@ public class RepositoryResource {
 		return depots;
 	}
 
-	@POST
-    public Long save(@NotNull @Valid Depot depot) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot)))
-    		throw new UnauthorizedException();
-    	
-    	dao.persist(depot);
-    	return depot.getId();
-    }
-
-    @DELETE
-    @Path("/{id}")
-    public void delete(@PathParam("id") Long id) {
-    	Depot depot = dao.load(Depot.class, id);
-
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot)))
-    		throw new UnauthorizedException();
-    	
-    	dao.remove(depot);
-    }
-    
 }

@@ -3,7 +3,9 @@ package com.pmease.commons.wicket.editable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import com.pmease.commons.util.BeanUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 
@@ -15,6 +17,10 @@ public class DefaultBeanDescriptor implements BeanDescriptor {
 	protected final List<PropertyDescriptor> propertyDescriptors;
 	
 	public DefaultBeanDescriptor(Class<?> beanClass) {
+		this(beanClass, Sets.newHashSet());
+	}
+	
+	public DefaultBeanDescriptor(Class<?> beanClass, Set<String> excludeProperties) {
 		this.beanClass = beanClass;
 		
 		propertyDescriptors = new ArrayList<>();
@@ -23,8 +29,10 @@ public class DefaultBeanDescriptor implements BeanDescriptor {
 		EditableUtils.sortAnnotatedElements(propertyGetters);
 		
 		for (Method propertyGetter: propertyGetters) {
-			if (propertyGetter.getAnnotation(Editable.class) == null)
+			if (propertyGetter.getAnnotation(Editable.class) == null 
+					|| excludeProperties.contains(BeanUtils.getPropertyName(propertyGetter))) {
 				continue;
+			}
 			Method propertySetter = BeanUtils.findSetter(propertyGetter);
 			if (propertySetter == null)
 				continue;

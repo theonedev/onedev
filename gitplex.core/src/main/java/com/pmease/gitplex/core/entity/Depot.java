@@ -64,6 +64,7 @@ import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -99,9 +100,17 @@ import com.pmease.gitplex.core.util.validation.DepotName;
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_owner_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+
+/*
+ * use dynamic update as we do not want to change name while persisting depot, 
+ * as name of depot can be referenced in other places, and we want to update 
+ * these references in a transaction via DepotManager.rename  
+ */  
+@DynamicUpdate
 @Editable
-@SuppressWarnings("serial")
 public class Depot extends AbstractEntity implements UserBelonging {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String FQN_SEPARATOR = "/";
 	
@@ -175,8 +184,7 @@ public class Depot extends AbstractEntity implements UserBelonging {
 		this.owner = owner;
 	}
 
-	@Editable(order=100, description=
-			"Specify name of the repository. It will be used to identify the repository when accessing via Git.")
+	@Editable(order=100)
 	@DepotName
 	@NotEmpty
 	public String getName() {
@@ -1016,6 +1024,9 @@ public class Depot extends AbstractEntity implements UserBelonging {
     }
     
 	private static class DiffKey implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
 		String oldRev;
 		
 		String newRev;

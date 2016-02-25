@@ -11,9 +11,10 @@ import javax.persistence.ManyToOne;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@SuppressWarnings("serial")
 @Entity
 public class PullRequestActivity extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum Action {OPEN, INTEGRATE, DISCARD, APPROVE, DISAPPROVE, UNDO_REVIEW, 
 		REOPEN, DELETE_SOURCE_BRANCH, RESTORE_SOURCE_BRANCH};

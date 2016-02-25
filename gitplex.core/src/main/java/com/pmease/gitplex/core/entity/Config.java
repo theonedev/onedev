@@ -16,10 +16,11 @@ import com.pmease.commons.hibernate.AbstractEntity;
  * representing one object. 
  *
  */
-@SuppressWarnings("serial")
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Config extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum Key {SYSTEM, MAIL, QOS};
 	

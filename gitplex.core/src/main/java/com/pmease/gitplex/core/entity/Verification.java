@@ -10,13 +10,14 @@ import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_request_id", "commit", "configuration"})
 })
 public class Verification extends AbstractEntity {
 	
+	private static final long serialVersionUID = 1L;
+
 	public enum Status {ONGOING, PASSED, NOT_PASSED}
 	
 	@ManyToOne(fetch=FetchType.LAZY)

@@ -7,6 +7,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -114,7 +115,30 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public void onDepotNameChange(Depot depot, String oldName, String newName) {
+	public void onDepotRename(User depotOwner, String oldName, String newName) {
 	}
 
+	@Override
+	public void onUserRename(String oldName, String newName) {
+	}
+
+	@Override
+	public boolean onUserDelete(User user) {
+		return false;
+	}
+
+	@Override
+	public boolean onDepotDelete(Depot depot) {
+		return false;
+	}
+
+	@Override
+	public void onTeamRename(String oldName, String newName) {
+	}
+
+	@Override
+	public boolean onTeamDelete(Team team) {
+		return false;
+	}
+	
 }

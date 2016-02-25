@@ -38,6 +38,7 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
@@ -65,8 +66,12 @@ public abstract class DepotPage extends AccountPage {
 	protected final IModel<Depot> depotModel;
 	
 	public static PageParameters paramsOf(Depot depot) {
-		PageParameters params = paramsOf(depot.getUser());
-		params.set(PARAM_DEPOT, depot.getName());
+		return paramsOf(depot.getOwner(), depot.getName());
+	}
+	
+	public static PageParameters paramsOf(User account, String depotName) {
+		PageParameters params = paramsOf(account);
+		params.set(PARAM_DEPOT, depotName);
 		return params;
 	}
 	

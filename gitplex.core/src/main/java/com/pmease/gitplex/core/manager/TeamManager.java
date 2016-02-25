@@ -30,4 +30,7 @@ public interface TeamManager extends Dao {
 	
 	Team getOwners(User user);
 
+	void delete(Team team);
+	
+	void rename(User teamOwner, String oldName, String newName);
 }

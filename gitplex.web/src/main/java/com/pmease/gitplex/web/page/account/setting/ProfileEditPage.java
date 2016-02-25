@@ -1,20 +1,31 @@
 package com.pmease.gitplex.web.page.account.setting;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.validation.IErrorMessageSource;
+import org.apache.wicket.validation.IValidatable;
+import org.apache.wicket.validation.IValidationError;
+import org.apache.wicket.validation.IValidator;
 
+import com.google.common.collect.Sets;
+import com.pmease.commons.loader.AppLoader;
+import com.pmease.commons.wicket.editable.BeanDescriptor;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
 import com.pmease.commons.wicket.editable.PathSegment;
-import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.User;
@@ -22,9 +33,13 @@ import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+
 @SuppressWarnings("serial")
 public class ProfileEditPage extends AccountSettingPage {
 
+	private String newName;
+	
 	public ProfileEditPage(PageParameters params) {
 		super(params);
 	}
@@ -33,8 +48,73 @@ public class ProfileEditPage extends AccountSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final ProfileDescriptor profileDesciptor = new ProfileDescriptor();
-		final BeanEditor<?> editor = new ReflectionBeanEditor("editor", profileDesciptor, new IModel<Serializable>() {
+		String oldName = getAccount().getName();
+		newName = oldName;
+		
+		final Form<?> nameForm = new Form<Void>("name") {
+
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				
+				GitPlex.getInstance(UserManager.class).rename(getAccount().getId(), oldName, newName);
+				setResponsePage(ProfileEditPage.class, paramsOf(newName));
+				Session.get().success("Account has been renamed");
+			}
+
+			@Override
+			protected void onError() {
+				super.onError();
+				add(AttributeAppender.append("class", "has-error"));
+			}
+			
+		};
+		TextField<String> input = new TextField<String>("input", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return newName;
+			}
+
+			@Override
+			public void setObject(String object) {
+				newName = object;
+			}
+			
+		});
+		input.setRequired(true);
+		input.add(new IValidator<String>() {
+
+			@Override
+			public void validate(IValidatable<String> validatable) {
+				Validator validator = AppLoader.getInstance(Validator.class);
+				Set<?> violations = validator.validateValue(
+						User.class, "name", validatable.getValue());
+				
+				for (Object each: violations) {
+					final ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
+					validatable.error(new IValidationError() {
+						
+						@Override
+						public Serializable getErrorMessage(IErrorMessageSource messageSource) {
+							return violation.getMessage();
+						}
+					});
+				}
+			}
+			
+		});
+		nameForm.add(input);
+		nameForm.add(new NotificationPanel("feedback", nameForm));
+		
+		add(nameForm);
+
+		final BeanDescriptor beanDesciptor = new DefaultBeanDescriptor(User.class, Sets.newHashSet("name", "password"));
+		final BeanEditor<?> editor = new ReflectionBeanEditor("editor", beanDesciptor, new IModel<Serializable>() {
 
 			@Override
 			public void detach() {
@@ -47,12 +127,12 @@ public class ProfileEditPage extends AccountSettingPage {
 
 			@Override
 			public void setObject(Serializable object) {
-				profileDesciptor.copyProperties(object, getAccount());
+				beanDesciptor.copyProperties(object, getAccount());
 			}
 			
 		});
 		
-		Form<?> form = new Form<Void>("form") {
+		Form<?> settingsForm = new Form<Void>("settings") {
 
 			@Override
 			protected void onError() {
@@ -77,10 +157,12 @@ public class ProfileEditPage extends AccountSettingPage {
 			}
 			
 		};
-		form.add(editor);
-		form.add(new SubmitLink("save"));
+		settingsForm.add(editor);
+		settingsForm.add(new SubmitLink("save"));
 
-		form.add(new AjaxLink<Void>("delete") {
+		add(settingsForm);
+		
+		add(new AjaxLink<Void>("delete") {
 
 			@Override
 			protected void onConfigure() {
@@ -108,19 +190,6 @@ public class ProfileEditPage extends AccountSettingPage {
 			
 		});
 		
-		add(form);
 	}
 
-	private static class ProfileDescriptor extends DefaultBeanDescriptor {
-
-		public ProfileDescriptor() {
-			super(User.class);
-			
-			for (Iterator<PropertyDescriptor> it = propertyDescriptors.iterator(); it.hasNext();) {
-				if (it.next().getPropertyName().equals("password"))
-					it.remove();
-			}
-		}
-		
-	}
 }

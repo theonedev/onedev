@@ -9,6 +9,11 @@ import com.pmease.gitplex.core.entity.User;
 
 public interface UserManager extends Dao {
 	
+	/**
+	 * Save user properties. Note that name of the user should not be changed 
+	 * via this method. Call the {@link this#rename(Long, String, String)} to 
+	 * rename an user.
+	 */
 	void save(User user);
 	
 	void delete(User user);
@@ -59,4 +64,5 @@ public interface UserManager extends Dao {
 	 */
 	@Nullable User getPrevious();
 	
+	void rename(Long userId, String oldName, String newName);
 }

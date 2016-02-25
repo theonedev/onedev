@@ -14,6 +14,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -28,8 +29,16 @@ import com.pmease.gitplex.core.util.validation.TeamName;
 		@UniqueConstraint(columnNames={"g_owner_id", "name"})
 })
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-@SuppressWarnings("serial")
+
+/* 
+ * use dynamic update as we do not want to change name while persisting team, 
+ * as name of team can be referenced in other places, and we want to update 
+ * these references in a transaction via TeamManager.rename 
+ */  
+@DynamicUpdate
 public class Team extends AbstractEntity {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String FQN_SEPARATOR = "/";
 	

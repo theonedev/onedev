@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.home.admin;
+package com.pmease.gitplex.web.page.admin;
 
 import java.io.Serializable;
 

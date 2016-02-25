@@ -31,8 +31,16 @@ public interface DepotManager extends Dao {
 	
 	void checkSanity();
 	
+	/**
+	 * Save depot. Note that depot name should not be changed via this method. 
+	 * Call {@link #rename(User, Long, String, String)} if you want to rename
+	 * the depot. 
+	 * 
+	 * @param depot
+	 */
 	void save(Depot depot);
 	
 	void delete(Depot depot);
 	
+	void rename(User depotOwner, Long depotId, String oldName, String newName);
 }
