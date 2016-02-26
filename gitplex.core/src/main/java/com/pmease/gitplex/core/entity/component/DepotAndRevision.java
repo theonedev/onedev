@@ -1,8 +1,6 @@
 package com.pmease.gitplex.core.entity.component;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
 
 import javax.annotation.Nullable;
 
@@ -105,16 +103,7 @@ public class DepotAndRevision implements Serializable {
 	}
 
 	public String getFQN() {
-		return getDepot().getRevisionFQN(revision);		
-	}
-	
-	public static void trim(Collection<String> depotAndBranches) {
-		Dao dao = GitPlex.getInstance(Dao.class);
-		for (Iterator<String> it = depotAndBranches.iterator(); it.hasNext();) {
-			DepotAndRevision depotAndRevision = new DepotAndRevision(it.next());
-			if (dao.get(Depot.class, depotAndRevision.getDepotId()) == null)
-				it.remove();
-		}
+		return getDepot().getFQN() + SEPARATOR + revision;		
 	}
 	
 	public boolean isDefault() {

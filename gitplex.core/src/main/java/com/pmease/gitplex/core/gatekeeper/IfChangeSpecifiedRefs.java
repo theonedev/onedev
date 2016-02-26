@@ -11,6 +11,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Editable(order=100, icon="fa-code-fork", description=
@@ -53,6 +54,24 @@ public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 	@Override
 	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return doCheck(refName);
+	}
+
+	@Override
+	public boolean onRefDelete(String refName) {
+		StringBuilder builder = new StringBuilder();
+		for (IncludeExcludeParser.CriteriaContext criteriaContext: IncludeExcludeUtils.parse(refMatch).criteria()) {
+			if (criteriaContext.includeMatch() != null) { 
+				String value = IncludeExcludeUtils.getValue(criteriaContext.includeMatch().Value());
+				if (!value.equals(refName))
+					builder.append(String.format("include(%s) ", value));
+			} else {
+				String value = IncludeExcludeUtils.getValue(criteriaContext.excludeMatch().Value());
+				if (!value.equals(refName))
+					builder.append(String.format("exclude(%s) ", value));
+			}
+		}
+		refMatch = builder.toString().trim();
+		return refMatch.length() == 0;
 	}
 
 }

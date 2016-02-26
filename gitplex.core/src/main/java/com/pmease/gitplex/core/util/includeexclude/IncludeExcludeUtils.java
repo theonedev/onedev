@@ -26,7 +26,7 @@ public class IncludeExcludeUtils {
 		return parser.match();
 	}
 	
-	private static String getValue(TerminalNode terminal) {
+	public static String getValue(TerminalNode terminal) {
 		String value = terminal.getText().substring(1);
 		value = value.substring(0, value.length()-1).trim();
 		if (value.endsWith("/") && !value.endsWith("*")) {
@@ -34,7 +34,7 @@ public class IncludeExcludeUtils {
 		}
 		return value;
 	}
-	
+ 	
 	public static boolean matches(String match, String value) {
 		MatchContext matchContext = parse(match);
 		List<String> includes = new ArrayList<>();

@@ -15,7 +15,7 @@ branchMatch: Value;
 INCLUDE: 'include';
 EXCLUDE: 'exclude';
 
-Value: (ESCAPE|~[:()\\])+;
+Value: (ESCAPE|~[:() \\])+;
 
 fragment
 ESCAPE: '\\'[:()\\];

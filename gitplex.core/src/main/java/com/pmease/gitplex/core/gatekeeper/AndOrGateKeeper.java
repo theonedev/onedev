@@ -71,5 +71,14 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 		}
 		return gateKeepers.isEmpty();
 	}
+
+	@Override
+	public boolean onRefDelete(String refName) {
+		for (Iterator<GateKeeper> it = gateKeepers.iterator(); it.hasNext();) {
+			if (it.next().onRefDelete(refName))
+				it.remove();
+		}
+		return gateKeepers.isEmpty();
+	}
 	
 }

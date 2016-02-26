@@ -17,6 +17,8 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
+import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.CriteriaContext;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchParser.FullBranchMatchContext;
 
@@ -94,7 +96,7 @@ public class IntegrationPolicy implements Serializable {
 				if (deleted != null)
 					builder.append(String.format("include(%s) ", deleted));
 			} else {
-				String deleted = deleteUser(user, criteriaContext.includeMatch().fullBranchMatch()); 
+				String deleted = deleteUser(user, criteriaContext.excludeMatch().fullBranchMatch()); 
 				if (deleted != null)
 					builder.append(String.format("exclude(%s) ", deleted));
 			}
@@ -113,6 +115,56 @@ public class IntegrationPolicy implements Serializable {
 		}
 		return fullBranchMatchContext.getText();
 	}
+
+	public boolean onBranchDelete(Depot depotDefiningPolicy, Depot depotContainingRef, String branch) {
+		StringBuilder builder = new StringBuilder();
+		if (depotDefiningPolicy.equals(depotContainingRef)) {
+			for (IncludeExcludeParser.CriteriaContext criteriaContext: IncludeExcludeUtils.parse(targetBranchMatch).criteria()) {
+				if (criteriaContext.includeMatch() != null) { 
+					String value = IncludeExcludeUtils.getValue(criteriaContext.includeMatch().Value());
+					if (!value.equals(branch))
+						builder.append(String.format("include(%s) ", value));
+				} else {
+					String value = IncludeExcludeUtils.getValue(criteriaContext.excludeMatch().Value());
+					if (!value.equals(branch))
+						builder.append(String.format("exclude(%s) ", value));
+				}
+			}
+			targetBranchMatch = builder.toString().trim();
+			if (targetBranchMatch.length() == 0)
+				return true;
+		}
+		
+		builder = new StringBuilder();
+		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
+			if (criteriaContext.includeMatch() != null) { 
+				String deleted = deleteSourceBranch(depotDefiningPolicy, depotContainingRef, 
+						branch, criteriaContext.includeMatch().fullBranchMatch()); 
+				if (deleted != null)
+					builder.append(String.format("include(%s) ", deleted));
+			} else {
+				String deleted = deleteSourceBranch(depotDefiningPolicy, depotContainingRef, 
+						branch, criteriaContext.excludeMatch().fullBranchMatch()); 
+				if (deleted != null)
+					builder.append(String.format("exclude(%s) ", deleted));
+			}
+		}
+		sourceBranchMatch = builder.toString().trim();
+		
+		return sourceBranchMatch.length() == 0;
+	}
+	
+	private String deleteSourceBranch(Depot depotDefiningPolicy, Depot depotContainingBranch, 
+			String branch, FullBranchMatchContext fullBranchMatchContext) {
+		DepotAndRevision depotAndRevision = new DepotAndRevision(depotContainingBranch, branch);
+		String fullBranchMatch = StringUtils.deleteWhitespace(fullBranchMatchContext.getText());
+		if (fullBranchMatch.equals(depotAndRevision.getFQN()) 
+				|| depotContainingBranch.equals(depotDefiningPolicy) && branch.equals(fullBranchMatch)) {
+			return null;
+		} else {
+			return fullBranchMatchContext.getText();
+		}
+	}
 	
 	public boolean onDepotDelete(Depot depot) {
 		StringBuilder builder = new StringBuilder();
@@ -122,7 +174,7 @@ public class IntegrationPolicy implements Serializable {
 				if (deleted != null)
 					builder.append(String.format("include(%s) ", deleted));
 			} else {
-				String deleted = deleteDepot(depot, criteriaContext.includeMatch().fullBranchMatch()); 
+				String deleted = deleteDepot(depot, criteriaContext.excludeMatch().fullBranchMatch()); 
 				if (deleted != null)
 					builder.append(String.format("exclude(%s) ", deleted));
 			}
@@ -150,7 +202,7 @@ public class IntegrationPolicy implements Serializable {
 				builder.append(String.format("include(%s) ", updated));
 			} else {
 				String updated = updateDepotName(depotOwner, oldName, newName, 
-						criteriaContext.includeMatch().fullBranchMatch()); 
+						criteriaContext.excludeMatch().fullBranchMatch()); 
 				builder.append(String.format("exclude(%s) ", updated));
 			}
 		}
@@ -181,7 +233,7 @@ public class IntegrationPolicy implements Serializable {
 				builder.append(String.format("include(%s) ", updated));
 			} else {
 				String updated = updateUserName(oldName, newName, 
-						criteriaContext.includeMatch().fullBranchMatch()); 
+						criteriaContext.excludeMatch().fullBranchMatch()); 
 				builder.append(String.format("exclude(%s) ", updated));
 			}
 		}

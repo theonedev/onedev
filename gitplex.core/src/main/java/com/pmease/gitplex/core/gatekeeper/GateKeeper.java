@@ -73,5 +73,7 @@ public interface GateKeeper extends Serializable {
 	
 	boolean onUserDelete(User user);
 	
+	boolean onRefDelete(String refName);
+	
 	boolean isEnabled();
 }

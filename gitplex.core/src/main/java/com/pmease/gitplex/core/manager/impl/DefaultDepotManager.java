@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.DefaultDao;
@@ -35,6 +36,7 @@ import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
+import com.pmease.gitplex.core.extensionpoint.RefListener;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.DepotManager;
@@ -43,7 +45,7 @@ import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.UserManager;
 
 @Singleton
-public class DefaultDepotManager extends DefaultDao implements DepotManager, LifecycleListener {
+public class DefaultDepotManager extends DefaultDao implements DepotManager, LifecycleListener, RefListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultDepotManager.class);
 	
@@ -327,6 +329,26 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
         	
         });
 		
+	}
+
+	@Transactional
+	@Override
+	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
+		if (newCommitHash == null) {
+			for (Depot each: allOf(Depot.class)) {
+				String branch = GitUtils.ref2branch(refName);
+				if (branch != null) {
+					for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
+						if (it.next().onBranchDelete(each, depot, branch))
+							it.remove();
+					}
+				}
+				for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
+					if (it.next().onRefDelete(refName))
+						it.remove();
+				}
+			}
+		}
 	}
 
 }

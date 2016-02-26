@@ -78,7 +78,7 @@ public class FullBranchMatchUtils {
 				}
 			} else if (criteriaContext.excludeMatch() != null) {
 				if (criteriaContext.excludeMatch().fullBranchMatch().fullDepotMatch() != null) {
-					String fullDepotMatch = criteriaContext.includeMatch().fullBranchMatch().fullDepotMatch().getText();
+					String fullDepotMatch = criteriaContext.excludeMatch().fullBranchMatch().fullDepotMatch().getText();
 					if (fullDepotMatch.indexOf("/") == -1)
 						throw new ValidationException("Depot match '" + fullDepotMatch + "' should contain '/'");
 				}

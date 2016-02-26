@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -85,6 +86,22 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 	@Override
 	public boolean onDepotDelete(Depot depot) {
 		return ifGate.onDepotDelete(depot) || thenGate.onDepotDelete(depot);
+	}
+
+	@Override
+	public void onTeamRename(String oldName, String newName) {
+		ifGate.onTeamRename(oldName, newName);
+		thenGate.onTeamRename(oldName, newName);
+	}
+
+	@Override
+	public boolean onTeamDelete(Team team) {
+		return ifGate.onTeamDelete(team) || thenGate.onTeamDelete(team);
+	}
+
+	@Override
+	public boolean onRefDelete(String refName) {
+		return ifGate.onRefDelete(refName) || thenGate.onRefDelete(refName);
 	}
 
 }

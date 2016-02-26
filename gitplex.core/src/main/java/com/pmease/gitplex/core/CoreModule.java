@@ -172,6 +172,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(DepotListener.class, DefaultAuxiliaryManager.class);
 		contribute(RefListener.class, DefaultPullRequestManager.class);
 		contribute(RefListener.class, DefaultAuxiliaryManager.class);
+		contribute(RefListener.class, DefaultDepotManager.class);
 		contribute(PullRequestListener.class, DefaultNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
 		contribute(LifecycleListener.class, DefaultPullRequestManager.class);

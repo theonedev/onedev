@@ -114,6 +114,8 @@ public class Depot extends AbstractEntity implements UserBelonging {
 
 	public static final String FQN_SEPARATOR = "/";
 	
+	public static final String REF_FQN_SEPARATOR = ":";
+	
 	public static final String REFS_GITPLEX = "refs/gitplex/";
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
@@ -979,10 +981,6 @@ public class Depot extends AbstractEntity implements UserBelonging {
 		
 		return submodules;
 	}
-
-    public String getRevisionFQN(String revision) {
-    	return getFQN() + ":" + revision;
-    }
 
     public void deleteBranch(String branch) {
     	String refName = GitUtils.branch2ref(branch);

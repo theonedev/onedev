@@ -140,5 +140,10 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	public boolean onTeamDelete(Team team) {
 		return false;
 	}
+
+	@Override
+	public boolean onRefDelete(String refName) {
+		return false;
+	}
 	
 }
