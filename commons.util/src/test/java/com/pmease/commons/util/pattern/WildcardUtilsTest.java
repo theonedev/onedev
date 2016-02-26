@@ -9,7 +9,6 @@ public class WildcardUtilsTest {
 
 	@Test
 	public void shouldMatchPath() {
-		assertTrue(matchPath("-*.java", "file.c"));
 		assertTrue(matchPath("**//*.java", "com/example/Test.java"));
 		assertFalse(matchPath("**/*.java", "com/example/test.c"));
 		assertFalse(matchPath("com/*.java", "com/example/Test.java"));
@@ -18,14 +17,6 @@ public class WildcardUtilsTest {
 		assertTrue(matchPath("src///**/*.java", "src/com/example/Test.java"));
 		assertFalse(matchPath("/src/**/*.java", "src/com/example/Test.java"));
 		assertFalse(matchPath("src/**////*.java", "resource/com/example/Test.java"));
-
-		assertTrue(matchPath("-**/*.java, **", "test/hello.c"));
-		assertFalse(matchPath("-**/*.java, **", "test/hello.java"));
-		assertFalse(matchPath("-**/*.java, **/*.java, **/*.c", "test/hello.txt"));
-		assertFalse(matchPath("-**/*.java, **/*.java, **/*.c", "test/hello.java"));
-		assertTrue(matchPath("+**/*.java, -**/*.java, **/*.c", "test/hello.java"));
-		assertTrue(matchPath("-**/generated/**, **/*.xml", "test/test.xml"));		
-		assertFalse(matchPath("-**/generated/**, **/*.xml", "generated/test.xml"));		
 	}
 	
 	@Test
@@ -40,14 +31,6 @@ public class WildcardUtilsTest {
 		assertTrue(matchString("com/*.java", "com/Test.java"));
 		assertTrue(matchString("src/**/*.java", "src/com/example/Test.java"));
 		assertFalse(matchString("src/**/*.java", "resource/com/example/Test.java"));
-		
-		assertTrue(matchString("-*.java", "hello.c"));
-		assertFalse(matchString("-*.java", "hello.java"));
-		assertTrue(matchString("-*.java, *", "hello.c"));
-		assertFalse(matchString("-*.java, *", "hello.java"));
-		assertFalse(matchString("-*.java, *.java, *.c", "hello.txt"));
-		assertFalse(matchString("-*.java, *.java, *.c", "hello.java"));
-		assertTrue(matchString("+*.java, -*.java, *.c", "hello.java"));
 	}
 
 	@Test

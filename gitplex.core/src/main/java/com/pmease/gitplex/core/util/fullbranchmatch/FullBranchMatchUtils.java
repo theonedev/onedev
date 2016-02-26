@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.util.fullbranchmatch;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.validation.ValidationException;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -12,7 +11,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.commons.lang3.StringUtils;
 
 import com.pmease.commons.util.match.IncludeExclude;
-import com.pmease.commons.util.match.RuleMatcher;
+import com.pmease.commons.util.match.Matcher;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
@@ -45,7 +44,7 @@ public class FullBranchMatchUtils {
 			}
 		}
 
-		RuleMatcher<FullBranchMatchContext, DepotAndBranch> matcher = new RuleMatcher<FullBranchMatchContext, DepotAndBranch>() {
+		Matcher<FullBranchMatchContext, DepotAndBranch> matcher = new Matcher<FullBranchMatchContext, DepotAndBranch>() {
 			
 			@Override
 			public boolean matches(FullBranchMatchContext rule, DepotAndBranch value) {
@@ -86,9 +85,4 @@ public class FullBranchMatchUtils {
 		}
 	}
 	
-	@Nullable
-	public static String deleteDepot(String match, Depot depot) {
-		return null;
-	}
-		
 }

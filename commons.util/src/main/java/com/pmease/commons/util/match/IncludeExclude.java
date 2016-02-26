@@ -13,7 +13,7 @@ public class IncludeExclude<T, V> {
 		this.excludes = excludes;
 	}
 	
-	public boolean matches(RuleMatcher<T, V> matcher, V value) {
+	public boolean matches(Matcher<T, V> matcher, V value) {
 		for (T exclude: excludes) {
 			if (matcher.matches(exclude, value))
 				return false;
