@@ -30,7 +30,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.component.InlineInfo;
 import com.pmease.gitplex.core.manager.CommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -53,7 +53,7 @@ public class Comment extends AbstractEntity {
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User user;
+	private Account user;
 	
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -81,11 +81,11 @@ public class Comment extends AbstractEntity {
 	}
 
 	@Nullable
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 
-	public void setUser(@Nullable User user) {
+	public void setUser(@Nullable Account user) {
 		this.user = user;
 	}
 
@@ -118,7 +118,7 @@ public class Comment extends AbstractEntity {
 	}
 
 	public CommentReply addReply(String content) {
-		User user = GitPlex.getInstance(UserManager.class).getCurrent();
+		Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 		Preconditions.checkNotNull(user);
 		CommentReply reply = new CommentReply();
 		reply.setUser(user);

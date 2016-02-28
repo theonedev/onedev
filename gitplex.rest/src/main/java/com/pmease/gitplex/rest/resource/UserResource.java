@@ -18,7 +18,7 @@ import org.hibernate.validator.constraints.Email;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @Path("/users")
 @Consumes(MediaType.WILDCARD)
@@ -35,11 +35,11 @@ public class UserResource {
 	
 	@ValidQueryParams
 	@GET
-	public Collection<User> query(
+	public Collection<Account> query(
 			@QueryParam("name") String name, 
 			@Email @QueryParam("email") String email, 
 			@QueryParam("fullName") String fullName) {
-    	EntityCriteria<User> criteria = EntityCriteria.of(User.class);
+    	EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
 		if (name != null)
 			criteria.add(Restrictions.eq("name", name));
 		if (email != null)
@@ -51,8 +51,8 @@ public class UserResource {
 	
     @GET
     @Path("/{id}")
-    public User get(@PathParam("id") Long id) {
-    	return dao.load(User.class, id);
+    public Account get(@PathParam("id") Long id) {
+    	return dao.load(Account.class, id);
     }
     
 }

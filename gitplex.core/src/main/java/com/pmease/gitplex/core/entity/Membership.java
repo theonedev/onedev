@@ -19,17 +19,17 @@ public class Membership extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User user;
+	private Account user;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Team team;
 
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Account user) {
 		this.user = user;
 	}
 

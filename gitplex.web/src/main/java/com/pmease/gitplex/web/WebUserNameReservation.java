@@ -18,9 +18,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.pmease.commons.jetty.JettyPlugin;
 import com.pmease.commons.util.ReflectionUtils;
-import com.pmease.gitplex.core.util.validation.UserNameReservation;
+import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 
-public class WebUserNameReservation implements UserNameReservation {
+public class WebUserNameReservation implements AccountNameReservation {
 
 	private final JettyPlugin jettyPlugin;
 	

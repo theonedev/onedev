@@ -10,8 +10,8 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 @SuppressWarnings("serial")
 abstract class CreateTagPanel extends Panel {
@@ -59,7 +59,7 @@ abstract class CreateTagPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				User user = GitPlex.getInstance(UserManager.class).getCurrent();
+				Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 				depotModel.getObject().tag(tagName, revision, user.asPerson(), message);
 				onCreate(target, tagName);
 			}

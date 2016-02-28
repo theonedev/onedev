@@ -20,7 +20,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -29,7 +28,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
@@ -44,21 +42,22 @@ import com.pmease.commons.git.command.MergeCommand.FastForwardMode;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestVisit;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
@@ -67,19 +66,19 @@ import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.extensionpoint.RefListener;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Singleton
-public class DefaultPullRequestManager extends DefaultDao implements PullRequestManager, 
+public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> implements PullRequestManager, 
 		DepotListener, RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
@@ -92,7 +91,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 	
 	private final CommentManager commentManager;
 	
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	private final StorageManager storageManager;
 	
@@ -107,13 +106,13 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 	private final WorkManager workManager;
 
 	@Inject
-	public DefaultPullRequestManager(Provider<Session> sessionProvider, 
+	public DefaultPullRequestManager(Dao dao, 
 			PullRequestUpdateManager pullRequestUpdateManager, StorageManager storageManager, 
-			ReviewInvitationManager reviewInvitationManager, UserManager userManager, 
+			ReviewInvitationManager reviewInvitationManager, AccountManager userManager, 
 			NotificationManager notificationManager, CommentManager commentManager, 
 			MarkdownManager markdownManager, WorkManager workManager, 
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
-		super(sessionProvider);
+		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.storageManager = storageManager;
@@ -156,7 +155,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 			activity.setRequest(request);
 			activity.setAction(PullRequestActivity.Action.RESTORE_SOURCE_BRANCH);
 			activity.setDate(new Date());
-			activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
 			persist(activity);
 		}
 	}
@@ -173,7 +172,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 			activity.setRequest(request);
 			activity.setAction(PullRequestActivity.Action.DELETE_SOURCE_BRANCH);
 			activity.setDate(new Date());
-			activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
 			persist(activity);
 		}
 	}
@@ -183,7 +182,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 	public void reopen(PullRequest request, String comment) {
 		Preconditions.checkState(!request.isOpen());
 		
-		User user = userManager.getCurrent();
+		Account user = userManager.getCurrent();
 		request.setCloseInfo(null);
 		request.setSubmitter(user);
 		request.setSubmitDate(new Date());
@@ -217,7 +216,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 	@Transactional
 	@Override
  	public void discard(PullRequest request, final String comment) {
-		User user = userManager.getCurrent();
+		Account user = userManager.getCurrent();
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
 		activity.setDate(new Date());
@@ -261,7 +260,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 		if (integrated == null)
 			throw new IllegalStateException("There are integration conflicts.");
 		
-		User user = userManager.getCurrent();
+		Account user = userManager.getCurrent();
 
 		Depot targetDepot = request.getTargetDepot();
 		Git git = targetDepot.git();
@@ -409,7 +408,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 		if (request.getTargetDepot().isAncestor(request.getLatestUpdate().getHeadCommitHash(), request.getTarget().getObjectName())) {
 			PullRequestActivity activity = new PullRequestActivity();
 			activity.setRequest(request);
-			activity.setUser(GitPlex.getInstance(UserManager.class).getRoot());
+			activity.setUser(GitPlex.getInstance(AccountManager.class).getRoot());
 			activity.setAction(PullRequestActivity.Action.INTEGRATE);
 			activity.setDate(new Date());
 			persist(activity);
@@ -452,7 +451,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 
 							@Override
 							public void run() {
-								check(load(PullRequest.class, requestId));
+								check(load(requestId));
 							}
 							
 						});
@@ -541,7 +540,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 					integrationPreviewCalculatingRequestIds.add(requestId);
 					logger.info("Calculating integration preview of pull request #{}...", requestId);
 					try {
-						PullRequest request = load(PullRequest.class, requestId);
+						PullRequest request = load(requestId);
 						IntegrationPreview preview = request.getLastIntegrationPreview();
 						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
@@ -647,7 +646,7 @@ public class DefaultPullRequestManager extends DefaultDao implements PullRequest
 
 	@Override
 	public Date getLastVisitDate(PullRequest request) {
-		User user = userManager.getCurrent();
+		Account user = userManager.getCurrent();
 		if (user != null) {
 			PullRequestVisit visit = request.getVisit(user);
 			if (visit != null)

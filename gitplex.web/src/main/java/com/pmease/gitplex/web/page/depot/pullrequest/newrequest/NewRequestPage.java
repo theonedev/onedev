@@ -49,7 +49,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
@@ -126,7 +126,7 @@ public class NewRequestPage extends PullRequestPage {
 			}
 		}
 
-		User currentUser = getCurrentUser();
+		Account currentUser = getCurrentUser();
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		
@@ -467,9 +467,9 @@ public class NewRequestPage extends PullRequestPage {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);
 					for (ReviewInvitation invitation: getPullRequest().getReviewInvitations())
-						invitation.setReviewer(dao.load(User.class, invitation.getReviewer().getId()));
+						invitation.setReviewer(dao.load(Account.class, invitation.getReviewer().getId()));
 					
-					getPullRequest().setAssignee(dao.load(User.class, getPullRequest().getAssignee().getId()));
+					getPullRequest().setAssignee(dao.load(Account.class, getPullRequest().getAssignee().getId()));
 					
 					GitPlex.getInstance(PullRequestManager.class).open(getPullRequest(), new PageId(getPageId()));
 					
@@ -540,7 +540,7 @@ public class NewRequestPage extends PullRequestPage {
 
 		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
 		form.add(assigneeContainer);
-		IModel<User> assigneeModel = new PropertyModel<>(getPullRequest(), "assignee");
+		IModel<Account> assigneeModel = new PropertyModel<>(getPullRequest(), "assignee");
 		final AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", depotModel, assigneeModel);
 		assigneeChoice.setRequired(true);
 		assigneeContainer.add(assigneeChoice);
@@ -589,7 +589,7 @@ public class NewRequestPage extends PullRequestPage {
 		reviewersContainer.add(new ReviewerChoice("addReviewer", requestModel) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, User user) {
+			protected void onSelect(AjaxRequestTarget target, Account user) {
 				super.onSelect(target, user);
 				
 				target.add(reviewersContainer);

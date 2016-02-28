@@ -10,8 +10,8 @@ import javax.validation.Payload;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=UserNameValidator.class) 
-public @interface UserName {
+@Constraint(validatedBy=AccountNameValidator.class) 
+public @interface AccountName {
 
     String message() default "";
 

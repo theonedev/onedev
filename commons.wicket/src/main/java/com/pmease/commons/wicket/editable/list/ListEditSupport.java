@@ -2,6 +2,7 @@ package com.pmease.commons.wicket.editable.list;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -28,7 +29,7 @@ import com.pmease.commons.wicket.editable.list.polymorphic.PolymorphicListProper
 public class ListEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

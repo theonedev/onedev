@@ -14,7 +14,7 @@ import com.pmease.commons.wicket.editable.annotation.Horizontal;
 import com.pmease.gitplex.core.annotation.BranchMatch;
 import com.pmease.gitplex.core.annotation.FullBranchMatch;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
@@ -88,7 +88,7 @@ public class IntegrationPolicy implements Serializable {
 		return help.toString();
 	}
 	
-	public boolean onUserDelete(User user) {
+	public boolean onUserDelete(Account user) {
 		StringBuilder builder = new StringBuilder();
 		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
 			if (criteriaContext.includeMatch() != null) { 
@@ -105,7 +105,7 @@ public class IntegrationPolicy implements Serializable {
 		return sourceBranchMatch.length() == 0;
 	}
 	
-	private String deleteUser(User user, FullBranchMatchContext fullBranchMatchContext) {
+	private String deleteUser(Account user, FullBranchMatchContext fullBranchMatchContext) {
 		if (fullBranchMatchContext.fullDepotMatch() != null) {
 			String fullDepotMatch = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());
 			String accountMatch = StringUtils.substringBeforeLast(fullDepotMatch, Depot.FQN_SEPARATOR);
@@ -193,7 +193,7 @@ public class IntegrationPolicy implements Serializable {
 		return fullBranchMatchContext.getText();
 	}
 	
-	public void onDepotRename(User depotOwner, String oldName, String newName) {
+	public void onDepotRename(Account depotOwner, String oldName, String newName) {
 		StringBuilder builder = new StringBuilder();
 		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
 			if (criteriaContext.includeMatch() != null) { 
@@ -209,7 +209,7 @@ public class IntegrationPolicy implements Serializable {
 		sourceBranchMatch = builder.toString().trim();
 	}
 	
-	private String updateDepotName(User depotOwner, String oldName, String newName, 
+	private String updateDepotName(Account depotOwner, String oldName, String newName, 
 			FullBranchMatchContext fullBranchMatchContext) {
 		if (fullBranchMatchContext.fullDepotMatch() != null) {
 			String fullDepot = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());

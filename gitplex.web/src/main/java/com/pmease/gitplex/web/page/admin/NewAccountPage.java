@@ -11,15 +11,15 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 @SuppressWarnings("serial")
 public class NewAccountPage extends AdministrationPage {
 
-	private final User account;
+	private final Account account;
 	
-	public NewAccountPage(User account) {
+	public NewAccountPage(Account account) {
 		this.account = account;
 	}
 
@@ -35,8 +35,8 @@ public class NewAccountPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				UserManager userManager = GitPlex.getInstance(UserManager.class);
-				User accountWithSameName = userManager.findByName(account.getName());
+				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
+				Account accountWithSameName = userManager.findByName(account.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");

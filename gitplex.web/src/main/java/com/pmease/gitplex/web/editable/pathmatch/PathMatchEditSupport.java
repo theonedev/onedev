@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.editable.pathmatch;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -20,7 +21,7 @@ import com.pmease.gitplex.core.annotation.PathMatch;
 public class PathMatchEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

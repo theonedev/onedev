@@ -16,7 +16,7 @@ import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.core.util.validation.UserNameReservation;
+import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
@@ -45,7 +45,7 @@ public class WebModule extends AbstractPluginModule {
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
 		
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
-		contribute(UserNameReservation.class, WebUserNameReservation.class);
+		contribute(AccountNameReservation.class, WebUserNameReservation.class);
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
 		

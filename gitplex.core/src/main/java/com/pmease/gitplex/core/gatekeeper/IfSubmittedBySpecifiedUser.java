@@ -10,9 +10,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.annotation.UserChoice;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 @Editable(order=600, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is submitted by specified user.")
@@ -38,8 +38,8 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
     	return check(request.getSubmitter());
     }
 
-    private CheckResult check(User user) {
-		User expectedUser = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).findByName(userName));
+    private CheckResult check(Account user) {
+		Account expectedUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
         if (expectedUser.equals(user)) 
         	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName() + "."));
         else 
@@ -47,12 +47,12 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return check(user);
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user);
 	}
 
@@ -63,7 +63,7 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 	}
 
 	@Override
-	public boolean onUserDelete(User user) {
+	public boolean onUserDelete(Account user) {
 		return userName.equals(user.getName());
 	}
 

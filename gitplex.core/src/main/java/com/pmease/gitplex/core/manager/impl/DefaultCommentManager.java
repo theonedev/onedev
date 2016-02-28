@@ -6,39 +6,38 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.diff.DiffEntry;
-import org.hibernate.Session;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommentManager;
-import com.pmease.gitplex.core.manager.UserManager;
 
 @Singleton
-public class DefaultCommentManager extends DefaultDao implements CommentManager {
+public class DefaultCommentManager extends AbstractEntityDao<Comment> implements CommentManager {
 
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultCommentManager(Provider<Session> sessionProvider, UserManager userManager, 
+	public DefaultCommentManager(Dao dao, AccountManager userManager, 
 			Set<PullRequestListener> pullRequestListeners) {
-		super(sessionProvider);
+		super(dao);
 		
 		this.userManager = userManager;
 		this.pullRequestListeners = pullRequestListeners;
@@ -195,7 +194,7 @@ public class DefaultCommentManager extends DefaultDao implements CommentManager 
 	@Transactional
 	@Override
 	public Comment addInline(PullRequest request, BlobIdent blobInfo, BlobIdent compareWith, int line, String content) {
-		User user = userManager.getCurrent();
+		Account user = userManager.getCurrent();
 		Preconditions.checkNotNull(user);
 		Comment comment = new Comment();
 		request.getComments().add(comment);

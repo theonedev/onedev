@@ -19,9 +19,9 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReference;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.util.markdown.MentionParser;
 import com.pmease.gitplex.core.util.markdown.PullRequestParser;
 
@@ -34,11 +34,11 @@ public class PullRequestPersistListener implements PersistListener {
 	
 	private final Dao dao;
 	
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	@Inject
 	public PullRequestPersistListener(MarkdownManager markdownManager, 
-			Set<PullRequestListener> pullRequestListeners, Dao dao, UserManager userManager) {
+			Set<PullRequestListener> pullRequestListeners, Dao dao, AccountManager userManager) {
 		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
 		this.dao = dao;
@@ -62,7 +62,7 @@ public class PullRequestPersistListener implements PersistListener {
 					String prevDescription = (String) previousState[i];
 					if (!Objects.equal(description, prevDescription)) {
 						MentionParser mentionParser = new MentionParser();
-						Collection<User> mentions;
+						Collection<Account> mentions;
 						String html;
 						if (description != null) {
 							html = markdownManager.parse(description);
@@ -73,7 +73,7 @@ public class PullRequestPersistListener implements PersistListener {
 						}
 						if (prevDescription != null)
 							mentions.removeAll(mentionParser.parseMentions(markdownManager.parse(prevDescription)));
-						for (User user: mentions) {
+						for (Account user: mentions) {
 							for (PullRequestListener listener: pullRequestListeners)
 								listener.onMentioned((PullRequest) entity, user);
 						}
@@ -117,8 +117,8 @@ public class PullRequestPersistListener implements PersistListener {
 					String description = (String) state[i];
 					if (description != null) {
 						String html = markdownManager.parse(description);
-						Collection<User> mentions = new MentionParser().parseMentions(html);
-						for (User user: mentions) {
+						Collection<Account> mentions = new MentionParser().parseMentions(html);
+						for (Account user: mentions) {
 							for (PullRequestListener listener: pullRequestListeners)
 								listener.onMentioned((PullRequest) entity, user);
 						}

@@ -28,8 +28,8 @@ import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
@@ -57,7 +57,7 @@ public class ProfileEditPage extends AccountSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				GitPlex.getInstance(UserManager.class).rename(getAccount().getId(), oldName, newName);
+				GitPlex.getInstance(AccountManager.class).rename(getAccount().getId(), oldName, newName);
 				setResponsePage(ProfileEditPage.class, paramsOf(newName));
 				Session.get().success("Account has been renamed");
 			}
@@ -93,7 +93,7 @@ public class ProfileEditPage extends AccountSettingPage {
 			public void validate(IValidatable<String> validatable) {
 				Validator validator = AppLoader.getInstance(Validator.class);
 				Set<?> violations = validator.validateValue(
-						User.class, "name", validatable.getValue());
+						Account.class, "name", validatable.getValue());
 				
 				for (Object each: violations) {
 					final ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
@@ -113,7 +113,7 @@ public class ProfileEditPage extends AccountSettingPage {
 		
 		add(nameForm);
 
-		final BeanDescriptor beanDesciptor = new DefaultBeanDescriptor(User.class, Sets.newHashSet("name", "password"));
+		final BeanDescriptor beanDesciptor = new DefaultBeanDescriptor(Account.class, Sets.newHashSet("name", "password"));
 		final BeanEditor<?> editor = new ReflectionBeanEditor("editor", beanDesciptor, new IModel<Serializable>() {
 
 			@Override
@@ -143,9 +143,9 @@ public class ProfileEditPage extends AccountSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				User account = getAccount();
-				UserManager userManager = GitPlex.getInstance(UserManager.class);
-				User accountWithSameName = userManager.findByName(account.getName());
+				Account account = getAccount();
+				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
+				Account accountWithSameName = userManager.findByName(account.getName());
 				if (accountWithSameName != null && !accountWithSameName.equals(account)) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
@@ -181,7 +181,7 @@ public class ProfileEditPage extends AccountSettingPage {
 					}
 
 					@Override
-					protected User getAccount() {
+					protected Account getAccount() {
 						return ProfileEditPage.this.getAccount();
 					}
 					

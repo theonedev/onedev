@@ -9,13 +9,13 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.pmease.gitplex.core.GitPlex;
 
-public class UserNameValidator implements ConstraintValidator<UserName, String> {
+public class AccountNameValidator implements ConstraintValidator<AccountName, String> {
 	
 	private static Set<String> reservedNames;
 	
 	private static Pattern pattern = Pattern.compile("^[\\w-\\.]+$");
 	
-	public void initialize(UserName constaintAnnotation) {
+	public void initialize(AccountName constaintAnnotation) {
 	}
 
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
@@ -38,7 +38,7 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 	public static synchronized Set<String> getReservedNames() {
 		if (reservedNames == null) {
 			reservedNames = new HashSet<>();
-	        for (UserNameReservation each : GitPlex.getExtensions(UserNameReservation.class)) {
+	        for (AccountNameReservation each : GitPlex.getExtensions(AccountNameReservation.class)) {
 	        	reservedNames.addAll(each.getReserved());
 	        }
 		}

@@ -16,8 +16,8 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -39,7 +39,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 	@Override
 	public void query(String term, int page, Response<Assignee> response) {
 		List<Assignee> assignees = new ArrayList<>();
-		for (User user: SecurityUtils.findUsersCan(depotModel.getObject(), DepotOperation.PUSH)) {
+		for (Account user: SecurityUtils.findUsersCan(depotModel.getObject(), DepotOperation.PUSH)) {
 			if (StringUtils.isBlank(term) 
 					|| user.getName().startsWith(term) 
 					|| user.getDisplayName().startsWith(term)) {
@@ -57,7 +57,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 		if (StringUtils.isBlank(term)) {
 			assignees.add(0, new Assignee(depotModel.getObject().getOwner(), "Repository Owner"));
 			ObjectPermission writePermission = ObjectPermission.ofDepotPush(depotModel.getObject());
-			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+			Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))
 				assignees.add(0, new Assignee(currentUser, "Me"));
 		}
@@ -91,7 +91,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			assignees.add(new Assignee(dao.load(User.class, id), null));
+			assignees.add(new Assignee(dao.load(Account.class, id), null));
 		}
 
 		return assignees;

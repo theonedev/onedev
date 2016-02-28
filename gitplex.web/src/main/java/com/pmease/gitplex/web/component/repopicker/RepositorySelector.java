@@ -37,7 +37,7 @@ import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
@@ -149,14 +149,14 @@ public abstract class RepositorySelector extends Panel {
 			
 		});
 		
-		dataContainer.add(new ListView<User>("accounts", new LoadableDetachableModel<List<User>>() {
+		dataContainer.add(new ListView<Account>("accounts", new LoadableDetachableModel<List<Account>>() {
 
 			@Override
-			protected List<User> load() {
-				List<User> users = GitPlex.getInstance(Dao.class).allOf(User.class);
+			protected List<Account> load() {
+				List<Account> users = GitPlex.getInstance(Dao.class).allOf(Account.class);
 
-				for (Iterator<User> it = users.iterator(); it.hasNext();) {
-					User account = it.next();
+				for (Iterator<Account> it = users.iterator(); it.hasNext();) {
+					Account account = it.next();
 					if (!account.getName().toLowerCase().contains(accountSearch)) {
 						it.remove();
 					} else {
@@ -169,10 +169,10 @@ public abstract class RepositorySelector extends Panel {
 							it.remove();
 					}
 				}
-				Collections.sort(users, new Comparator<User>() {
+				Collections.sort(users, new Comparator<Account>() {
 
 					@Override
-					public int compare(User user1, User user2) {
+					public int compare(Account user1, Account user2) {
 						return user1.getName().compareTo(user2.getName());
 					}
 					
@@ -183,7 +183,7 @@ public abstract class RepositorySelector extends Panel {
 		}) {
 
 			@Override
-			protected void populateItem(final ListItem<User> userItem) {
+			protected void populateItem(final ListItem<Account> userItem) {
 				userItem.add(new Avatar("avatar", userItem.getModelObject(), null));
 				userItem.add(new Label("name", userItem.getModelObject().getName()));
 				

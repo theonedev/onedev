@@ -2,11 +2,11 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
 
-public interface TeamManager extends Dao {
+public interface TeamManager extends EntityDao<Team> {
 
 	/**
 	 * Find team of specified name belonging to specified owner.
@@ -19,18 +19,18 @@ public interface TeamManager extends Dao {
 	 * 			matching team, or <tt>null</tt> if not found 
 	 */
 	@Nullable
-	Team findBy(User owner, String teamName);
+	Team findBy(Account owner, String teamName);
 	
 	@Nullable
 	Team findBy(String teamFQN);
 	
-	Team getAnonymous(User user);
+	Team getAnonymous(Account user);
 	
-	Team getLoggedIn(User user);
+	Team getLoggedIn(Account user);
 	
-	Team getOwners(User user);
+	Team getOwners(Account user);
 
 	void delete(Team team);
 	
-	void rename(User teamOwner, String oldName, String newName);
+	void rename(Account teamOwner, String oldName, String newName);
 }

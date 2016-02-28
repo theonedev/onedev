@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.bootstrap.Bootstrap;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.setting.MailSetting;
@@ -37,7 +37,7 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	@Override
-	public void sendMail(final Collection<User> toList, final String subject, final String body) {
+	public void sendMail(final Collection<Account> toList, final String subject, final String body) {
 		executorService.execute(new Runnable() {
 
 			@Override
@@ -53,9 +53,9 @@ public class DefaultMailManager implements MailManager {
 	}
 
 	@Override
-	public void sendMailNow(MailSetting mailSetting, Collection<User> toList, String subject, String body) {
+	public void sendMailNow(MailSetting mailSetting, Collection<Account> toList, String subject, String body) {
 		Collection<String> toAddresses = new ArrayList<>();
-		for (User user: toList) {
+		for (Account user: toList) {
 			if (user.getEmail() != null)
 				toAddresses.add(user.getEmail());
 		}

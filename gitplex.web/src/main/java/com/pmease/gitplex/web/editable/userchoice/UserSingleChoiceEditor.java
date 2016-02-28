@@ -9,8 +9,8 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
 
 @SuppressWarnings("serial")
@@ -26,9 +26,9 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		User user;
+		Account user;
 		if (getModelObject() != null)
-			user = GitPlex.getInstance(UserManager.class).findByName(getModelObject());
+			user = GitPlex.getInstance(AccountManager.class).findByName(getModelObject());
 		else
 			user = null;
 		
@@ -45,7 +45,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		User user = input.getConvertedInput();
+		Account user = input.getConvertedInput();
 		if (user != null)
 			return user.getName();
 		else

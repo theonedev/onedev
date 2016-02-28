@@ -13,7 +13,7 @@ import com.pmease.commons.validation.Validatable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
 @Editable(order=200, icon="fa-wrench", description=
@@ -76,12 +76,12 @@ public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements 
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return checkUpdate();
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (oldCommit.equals(ObjectId.zeroId())) {
 			if (createRef) {
 				return passed(Lists.newArrayList("Ref is being created."));

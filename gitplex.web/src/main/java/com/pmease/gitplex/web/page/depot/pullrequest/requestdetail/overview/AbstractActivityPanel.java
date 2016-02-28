@@ -5,7 +5,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 abstract class AbstractActivityPanel extends Panel {
@@ -21,10 +21,10 @@ abstract class AbstractActivityPanel extends Panel {
 		
 	};
 	
-	protected final IModel<User> userModel = new LoadableDetachableModel<User>() {
+	protected final IModel<Account> userModel = new LoadableDetachableModel<Account>() {
 
 		@Override
-		protected User load() {
+		protected Account load() {
 			return activity.getUser();
 		}
 		

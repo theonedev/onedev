@@ -21,8 +21,8 @@ import com.pmease.commons.wicket.component.menu.LinkItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
@@ -56,7 +56,7 @@ public abstract class LayoutPage extends BasePage {
 		mainHead.add(new BookmarkablePageLink<Void>("administration", AccountListPage.class)
 					.setVisible(SecurityUtils.canManageSystem()));
 
-		final User user = getCurrentUser();
+		final Account user = getCurrentUser();
 		boolean signedIn = user != null;
 
 		mainHead.add(new BookmarkablePageLink<Void>("login", LoginPage.class).setVisible(!signedIn));
@@ -79,7 +79,7 @@ public abstract class LayoutPage extends BasePage {
 		}
 		
 		if (signedIn) {
-			final User prevUser = GitPlex.getInstance(UserManager.class).getPrevious();
+			final Account prevUser = GitPlex.getInstance(AccountManager.class).getPrevious();
 			
 			if (prevUser != null) {
 				Link<Void> prevLink = new Link<Void>("prevUser") {

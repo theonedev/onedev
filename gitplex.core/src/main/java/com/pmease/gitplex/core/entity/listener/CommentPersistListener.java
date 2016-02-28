@@ -18,9 +18,9 @@ import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReference;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.util.markdown.MentionParser;
 import com.pmease.gitplex.core.util.markdown.PullRequestParser;
 
@@ -31,13 +31,13 @@ public class CommentPersistListener implements PersistListener {
 
 	private final Dao dao;
 	
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
 	public CommentPersistListener(MarkdownManager markdownManager, Dao dao, 
-			UserManager userManager, Set<PullRequestListener> pullRequestListeners) {
+			AccountManager userManager, Set<PullRequestListener> pullRequestListeners) {
 		this.markdownManager = markdownManager;
 		this.dao = dao;
 		this.userManager = userManager;
@@ -64,10 +64,10 @@ public class CommentPersistListener implements PersistListener {
 						String prevHtml = markdownManager.parse(prevContent);
 
 						MentionParser mentionParser = new MentionParser();
-						Collection<User> mentions = mentionParser.parseMentions(html);
+						Collection<Account> mentions = mentionParser.parseMentions(html);
 						
 						mentions.removeAll(mentionParser.parseMentions(prevHtml));
-						for (User user: mentions) {
+						for (Account user: mentions) {
 							for (PullRequestListener listener: pullRequestListeners)
 								listener.onMentioned((Comment) entity, user);
 						}
@@ -92,8 +92,8 @@ public class CommentPersistListener implements PersistListener {
 				if (propertyNames[i].equals("content")) {
 					String content = (String) state[i];
 					String html = markdownManager.parse(content);
-					Collection<User> mentions = new MentionParser().parseMentions(html);
-					for (User user: mentions) {
+					Collection<Account> mentions = new MentionParser().parseMentions(html);
+					for (Account user: mentions) {
 						for (PullRequestListener listener: pullRequestListeners)
 							listener.onMentioned((Comment) entity, user);
 					}

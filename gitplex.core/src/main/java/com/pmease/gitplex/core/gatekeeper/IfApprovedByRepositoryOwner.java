@@ -8,7 +8,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
 @Editable(order=300, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
@@ -19,7 +19,7 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
 	
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-        User repoOwner = request.getTargetDepot().getOwner();
+        Account repoOwner = request.getTargetDepot().getOwner();
 
         Review.Result result = repoOwner.checkReviewSince(request.getReferentialUpdate());
 
@@ -33,7 +33,7 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
         }
     }
 
-    private CheckResult check(User user, Depot depot) {
+    private CheckResult check(Account user, Depot depot) {
 		if (user.equals(depot.getOwner()))
 			return passed(Lists.newArrayList("Approved by repository owner."));
 		else
@@ -41,12 +41,12 @@ public class IfApprovedByRepositoryOwner extends AbstractGateKeeper {
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user, depot);
 	}
 

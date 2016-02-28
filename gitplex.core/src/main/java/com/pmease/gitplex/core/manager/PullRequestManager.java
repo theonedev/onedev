@@ -6,14 +6,14 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityDao;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 
-public interface PullRequestManager extends Dao {
+public interface PullRequestManager extends EntityDao<PullRequest> {
     
     @Nullable 
     PullRequest findOpen(DepotAndBranch target, DepotAndBranch source);

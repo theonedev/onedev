@@ -5,15 +5,15 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public class UserSingleChoice extends Select2Choice<User> {
+public class UserSingleChoice extends Select2Choice<Account> {
 
 	private final boolean allowEmpty;
 	
-	public UserSingleChoice(String id, IModel<User> model, boolean allowEmpty) {
+	public UserSingleChoice(String id, IModel<Account> model, boolean allowEmpty) {
 		super(id, model, new UserChoiceProvider());
 		
 		this.allowEmpty = allowEmpty;

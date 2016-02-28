@@ -8,14 +8,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 class ReferencePullRequest extends AbstractRenderableActivity {
 
 	private final Long referencedByRequestId;
 	
-	public ReferencePullRequest(PullRequest request, User user, Date date, PullRequest referencedByRequest) {
+	public ReferencePullRequest(PullRequest request, Account user, Date date, PullRequest referencedByRequest) {
 		super(request, user, date);
 		this.referencedByRequestId = referencedByRequest.getId();
 	}

@@ -12,8 +12,8 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
@@ -32,7 +32,7 @@ public class RegisterPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		final User account = new User();
+		final Account account = new Account();
 		final BeanEditor<?> editor = BeanContext.editBean("editor", account);
 		
 		Form<?> form = new Form<Void>("form") {
@@ -41,8 +41,8 @@ public class RegisterPage extends BasePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				UserManager userManager = GitPlex.getInstance(UserManager.class);
-				User accountWithSameName = userManager.findByName(account.getName());
+				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
+				Account accountWithSameName = userManager.findByName(account.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");

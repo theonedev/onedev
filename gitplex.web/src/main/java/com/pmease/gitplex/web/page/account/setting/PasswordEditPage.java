@@ -12,8 +12,8 @@ import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 @SuppressWarnings("serial")
 public class PasswordEditPage extends AccountSettingPage {
@@ -32,7 +32,7 @@ public class PasswordEditPage extends AccountSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 
-				GitPlex.getInstance(UserManager.class).save(getAccount());
+				GitPlex.getInstance(AccountManager.class).save(getAccount());
 				Session.get().success("Password has been changed");
 			}
 			
@@ -62,7 +62,7 @@ public class PasswordEditPage extends AccountSettingPage {
 	private static class PasswordDescriptor extends DefaultBeanDescriptor {
 
 		public PasswordDescriptor() {
-			super(User.class);
+			super(Account.class);
 			
 			for (Iterator<PropertyDescriptor> it = propertyDescriptors.iterator(); it.hasNext();) {
 				if (!it.next().getPropertyName().equals("password"))

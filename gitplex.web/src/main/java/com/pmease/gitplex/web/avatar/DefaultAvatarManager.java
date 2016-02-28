@@ -22,9 +22,9 @@ import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ConfigManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 @Singleton
 public class DefaultAvatarManager implements AvatarManager {
@@ -35,17 +35,17 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	private final ConfigManager configManager;
 	
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	@Inject
-	public DefaultAvatarManager(ConfigManager configManager, UserManager userManager) {
+	public DefaultAvatarManager(ConfigManager configManager, AccountManager userManager) {
 		this.configManager = configManager;
 		this.userManager = userManager;
 	}
 	
 	@Transactional
 	@Override
-	public String getAvatarUrl(User user) {
+	public String getAvatarUrl(Account user) {
 		if (user == null) 
 			return AVATARS_BASE_URL + "default.png";
 		
@@ -123,7 +123,7 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	@Transactional
 	@Override
-	public void useAvatar(User user, FileUpload upload) {
+	public void useAvatar(Account user, FileUpload upload) {
 		if (upload != null) {
 			Lock avatarLock = LockUtils.getLock("avatars:" + user.getId());
 			avatarLock.lock();

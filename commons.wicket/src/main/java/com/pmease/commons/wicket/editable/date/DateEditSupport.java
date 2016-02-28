@@ -1,6 +1,7 @@
 package com.pmease.commons.wicket.editable.date;
 
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -21,7 +22,7 @@ public class DateEditSupport implements EditSupport {
 	public static final String DATE_INPUT_FORMAT = "yyyy-MM-dd";
 	
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

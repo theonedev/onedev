@@ -9,12 +9,12 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
@@ -62,7 +62,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			User user = GitPlex.getInstance(UserManager.class).getCurrent();
+			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 			GitPlex.getInstance(ReviewManager.class).review(
 					request, user, Review.Result.APPROVE, comment);
 		}		
@@ -77,7 +77,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			User user = GitPlex.getInstance(UserManager.class).getCurrent();
+			Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 			GitPlex.getInstance(ReviewManager.class).review(
 					request, user, Review.Result.DISAPPROVE, comment);
 		}
@@ -152,7 +152,7 @@ public enum PullRequestOperation {
 	};
 	
 	private static boolean canReview(PullRequest request) {
-		User user = GitPlex.getInstance(UserManager.class).getCurrent();
+		Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 		
 		// call request.getStatus() in order to trigger generation of review
 		// integrations which will be used in else condition 

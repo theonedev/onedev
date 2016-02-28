@@ -1,6 +1,8 @@
 package com.pmease.commons.wicket.editable;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -12,8 +14,12 @@ import com.pmease.commons.util.ClassUtils;
 @SuppressWarnings("serial")
 public abstract class BeanContext<T> extends DefaultBeanDescriptor {
 	
+	public BeanContext(Class<?> beanClass, Set<String> excludeProperties) {
+		super(beanClass, excludeProperties);
+	}
+	
 	public BeanContext(Class<?> beanClass) {
-		super(beanClass);
+		super(beanClass, new HashSet<>());
 	}
 	
 	public BeanContext(BeanDescriptor beanDescriptor) {
@@ -45,15 +51,26 @@ public abstract class BeanContext<T> extends DefaultBeanDescriptor {
 		};
 	}
 
+	public static BeanEditor<Serializable> editModel(String componentId, 
+			IModel<? extends Serializable> beanModel) {
+		return editModel(componentId, beanModel, new HashSet<>());
+	}
+			
 	@SuppressWarnings("unchecked")
-	public static BeanEditor<Serializable> editModel(String componentId, IModel<? extends Serializable> beanModel) {
+	public static BeanEditor<Serializable> editModel(String componentId, 
+			IModel<? extends Serializable> beanModel, Set<String> excludeProperties) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanClass);
+		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanClass, excludeProperties);
 		return editContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
 	}
 	
-	public static BeanEditor<Serializable> editBean(String componentId, final Serializable bean) {
+	public static BeanEditor<Serializable> editBean(String componentId, Serializable bean) {
+		return editBean(componentId, bean, new HashSet<>());
+	}
+			
+	public static BeanEditor<Serializable> editBean(String componentId, final Serializable bean, 
+			Set<String> excludeProperties) {
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
@@ -73,27 +90,38 @@ public abstract class BeanContext<T> extends DefaultBeanDescriptor {
 		};
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanClass);
+		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanClass, excludeProperties);
 		beanModel = editContext.wrapAsSelfUpdating(beanModel);
 		return editContext.renderForEdit(componentId, beanModel);
 	}
 
 	public static Component viewModel(String componentId, IModel<Serializable> beanModel) {
+		return viewModel(componentId, beanModel, new HashSet<>());
+	}
+			
+	public static Component viewModel(String componentId, IModel<Serializable> beanModel, 
+			Set<String> excludeProperties) {
 		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		BeanContext<Serializable> editContext = registry.getBeanEditContext(beanModel.getObject().getClass());
+		BeanContext<Serializable> editContext = registry.getBeanEditContext(
+				beanModel.getObject().getClass(), excludeProperties);
 		return editContext.renderForView(componentId, beanModel);
 	}
 	
 	public static Component viewBean(String componentId, Serializable bean) {
-		return viewModel(componentId, Model.of(bean));
+		return viewBean(componentId, bean, new HashSet<>());
+	}
+	
+	public static Component viewBean(String componentId, Serializable bean, Set<String> excludeProperties) {
+		return viewModel(componentId, Model.of(bean), excludeProperties);
 	}
 	
 	public static BeanContext<Serializable> of(Class<?> beanClass) {
-		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
-		return registry.getBeanEditContext(beanClass);
+		return of(beanClass, new HashSet<>());
 	}
 	
-	public static BeanContext<Serializable> of(BeanDescriptor beanDescriptor) {
-		return of(beanDescriptor.getBeanClass());
+	public static BeanContext<Serializable> of(Class<?> beanClass, Set<String> excludeProperties) {
+		EditSupportRegistry registry = AppLoader.getInstance(EditSupportRegistry.class);
+		return registry.getBeanEditContext(beanClass, excludeProperties);
 	}
+	
 }

@@ -6,13 +6,13 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
 public class AssigneeChoice extends Select2Choice<Assignee> {
 
-	public AssigneeChoice(String id, IModel<Depot> depotModel, final IModel<User> assigneeModel) {
+	public AssigneeChoice(String id, IModel<Depot> depotModel, final IModel<Account> assigneeModel) {
 		super(id, new IModel<Assignee>() {
 
 			@Override
@@ -21,7 +21,7 @@ public class AssigneeChoice extends Select2Choice<Assignee> {
 
 			@Override
 			public Assignee getObject() {
-				User user = assigneeModel.getObject();
+				Account user = assigneeModel.getObject();
 				if (user != null)
 					return new Assignee(user, null);
 				else

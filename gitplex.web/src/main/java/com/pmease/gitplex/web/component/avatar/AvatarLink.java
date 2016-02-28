@@ -14,8 +14,8 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
@@ -35,11 +35,11 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 	
 	private final TooltipConfig tooltipConfig;
 	
-	public AvatarLink(String id, @Nullable User user) {
+	public AvatarLink(String id, @Nullable Account user) {
 		this(id, user, null);
 	}
 	
-	public AvatarLink(String id, @Nullable User user, @Nullable TooltipConfig tooltipConfig) {
+	public AvatarLink(String id, @Nullable Account user, @Nullable TooltipConfig tooltipConfig) {
 		super(id, AccountDepotsPage.class);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
@@ -65,7 +65,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		
-		User user = GitPlex.getInstance(UserManager.class).findByPerson(person);
+		Account user = GitPlex.getInstance(AccountManager.class).findByPerson(person);
 		if (user != null) { 
 			userId = user.getId();
 			params = AccountPage.paramsOf(user);

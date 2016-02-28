@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket.editable.string;
 
+import java.util.Set;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -23,7 +25,7 @@ import com.pmease.commons.wicket.editable.annotation.Password;
 public class StringEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

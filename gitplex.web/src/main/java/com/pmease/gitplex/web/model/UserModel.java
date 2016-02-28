@@ -1,12 +1,12 @@
 package com.pmease.gitplex.web.model;
 
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
-public class UserModel extends EntityModel<User> {
+public class UserModel extends EntityModel<Account> {
 
 	private static final long serialVersionUID = 1L;
 
-	public UserModel(User entity) {
+	public UserModel(Account entity) {
 		super(entity);
 	}
 

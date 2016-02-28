@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
 
+import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.ManagedSerializedForm;
@@ -16,11 +17,11 @@ import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Config;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Config.Key;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.QosSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
@@ -30,14 +31,14 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 	private final Dao dao;
 	
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	private final ConfigManager configManager;
 	
 	private final Validator validator;
 	
 	@Inject
-	public DefaultDataManager(Dao dao, UserManager userManager, ConfigManager configManager, Validator validator) {
+	public DefaultDataManager(Dao dao, AccountManager userManager, ConfigManager configManager, Validator validator) {
 		this.dao = dao;
 		this.userManager = userManager;
 		this.configManager = configManager;
@@ -49,11 +50,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		User rootUser = dao.get(User.class, User.ROOT_ID);		
+		Account rootUser = dao.get(Account.class, Account.ROOT_ID);		
 		if (rootUser == null) {
-			rootUser = new User();
-			rootUser.setId(User.ROOT_ID);
-			manualConfigs.add(new ManualConfig("Create Administator Account", rootUser) {
+			rootUser = new Account();
+			rootUser.setId(Account.ROOT_ID);
+			manualConfigs.add(new ManualConfig("Create Administator Account", rootUser, Sets.newHashSet("description")) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -62,7 +63,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					userManager.save((User) getSetting());
+					userManager.save((Account) getSetting());
 				}
 				
 			});

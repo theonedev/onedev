@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 
 public class PullRequestChangeBroadcaster implements PullRequestListener {
@@ -43,12 +43,12 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onIntegrated(PullRequest request, User user, String comment) {
+	public void onIntegrated(PullRequest request, Account user, String comment) {
 		onChange(request, PullRequest.Event.INTEGRATED);
 	}
 
 	@Override
-	public void onDiscarded(PullRequest request, User user, String comment) {
+	public void onDiscarded(PullRequest request, Account user, String comment) {
 		onChange(request, PullRequest.Event.DISCARDED);
 	}
 
@@ -106,20 +106,20 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 	
 	@Override
-	public void onReopened(PullRequest request, User user, String comment) {
+	public void onReopened(PullRequest request, Account user, String comment) {
 		onChange(request, PullRequest.Event.REOPENED);
 	}
 
 	@Override
-	public void onMentioned(PullRequest request, User user) {
+	public void onMentioned(PullRequest request, Account user) {
 	}
 
 	@Override
-	public void onMentioned(Comment comment, User user) {
+	public void onMentioned(Comment comment, Account user) {
 	}
 
 	@Override
-	public void onMentioned(CommentReply reply, User user) {
+	public void onMentioned(CommentReply reply, Account user) {
 	}
 	
 	@Override

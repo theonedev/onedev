@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.OptimisticLock;
 
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @Embeddable
 public class CloseInfo implements Serializable {
@@ -20,7 +20,7 @@ public class CloseInfo implements Serializable {
 	
 	@OptimisticLock(excluded=true)
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User closedBy;
+	private Account closedBy;
 
 	@OptimisticLock(excluded=true)
 	private Date closeDate;
@@ -28,11 +28,11 @@ public class CloseInfo implements Serializable {
 	@OptimisticLock(excluded=true)
 	private Status closeStatus;
 
-	public User getClosedBy() {
+	public Account getClosedBy() {
 		return closedBy;
 	}
 
-	public void setClosedBy(User closedBy) {
+	public void setClosedBy(Account closedBy) {
 		this.closedBy = closedBy;
 	}
 

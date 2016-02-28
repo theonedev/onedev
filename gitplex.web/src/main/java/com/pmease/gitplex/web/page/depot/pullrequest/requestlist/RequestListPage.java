@@ -38,8 +38,8 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.UserLink;
@@ -84,7 +84,7 @@ public class RequestListPage extends PullRequestPage {
 			protected List<MenuItem> getMenuItems() {
 				List<MenuItem> menuItems = new ArrayList<>();
 
-				User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+				Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 				if (currentUser != null) {
 					final String userName = currentUser.getName();
 					menuItems.add(new LinkItem("Open requests assigned to me") {

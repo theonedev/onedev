@@ -14,8 +14,8 @@ import org.eclipse.jgit.lib.Repository;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -101,7 +101,7 @@ abstract class CreateTagPanel extends Panel {
 					target.add(form);
 				} else {
 					Depot repo = depotModel.getObject();
-					User user = GitPlex.getInstance(UserManager.class).getCurrent();
+					Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 					repo.tag(tagName, revision, user.asPerson(), tagMessage);
 					onCreate(target, tagName);
 				}

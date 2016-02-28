@@ -1,20 +1,19 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
-
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
 
 @Singleton
-public class DefaultAuthorizationManager extends DefaultDao implements AuthorizationManager {
+public class DefaultAuthorizationManager extends AbstractEntityDao<Authorization> implements AuthorizationManager {
 
 	@Inject
-	public DefaultAuthorizationManager(Provider<Session> sessionProvider) {
-		super(sessionProvider);
+	public DefaultAuthorizationManager(Dao dao) {
+		super(dao);
 	}
 
 }

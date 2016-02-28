@@ -9,34 +9,33 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
-import org.hibernate.Session;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.manager.UserManager;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @Singleton
-public class DefaultUserManager extends DefaultDao implements UserManager, LifecycleListener {
+public class DefaultAccountManager extends AbstractEntityDao<Account> implements AccountManager, LifecycleListener {
 
     private final DepotManager repositoryManager;
     
@@ -47,18 +46,18 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
 	@Inject
-    public DefaultUserManager(Provider<Session> sessionProvider, DepotManager repositoryManager) {
-        super(sessionProvider);
+    public DefaultAccountManager(Dao dao, DepotManager repositoryManager) {
+        super(dao);
         
         this.repositoryManager = repositoryManager;
     }
 
     @Transactional
     @Override
-	public void save(User user) {
+	public void save(Account user) {
     	boolean isNew;
     	if (user.isRoot()) {
-    		isNew = get(User.class, User.ROOT_ID) == null;
+    		isNew = get(Account.ROOT_ID) == null;
     		getSession().replicate(user, ReplicationMode.OVERWRITE);
     	} else {
     		isNew = user.isNew();
@@ -114,19 +113,19 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
     
     @Sessional
     @Override
-    public User getRoot() {
-    	return load(User.class, User.ROOT_ID);
+    public Account getRoot() {
+    	return load(Account.ROOT_ID);
     }
 
     @Transactional
     @Override
-	public void delete(final User user) {
+	public void delete(final Account user) {
     	Query query = getSession().createQuery("update PullRequest set submitter=null where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update PullRequest set assignee.id=:rootId where assignee=:assignee");
-    	query.setParameter("rootId", User.ROOT_ID);
+    	query.setParameter("rootId", Account.ROOT_ID);
     	query.setParameter("assignee", user);
     	query.executeUpdate();
     	
@@ -155,7 +154,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
     	
 		remove(user);
 		
-		for (Depot each: allOf(Depot.class)) {
+		for (Depot each: dao.allOf(Depot.class)) {
 			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
 				if (it.next().onUserDelete(user))
 					it.remove();
@@ -189,12 +188,12 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 
 	@Sessional
     @Override
-    public User findByName(String userName) {
+    public Account findByName(String userName) {
     	idLock.readLock().lock();
     	try {
     		Long id = nameToId.get(userName);
     		if (id != null)
-    			return load(User.class, id);
+    			return load(id);
     		else
     			return null;
     	} finally {
@@ -204,7 +203,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 
     @Sessional
     @Override
-    public User findByPerson(PersonIdent person) {
+    public Account findByPerson(PersonIdent person) {
     	idLock.readLock().lock();
     	try {
     		Set<Long> ids = emailToIds.get(person.getEmailAddress());
@@ -212,9 +211,9 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
     			if (ids.size() > 1) {
     				String personName = person.getName().toLowerCase();
     				int minDistance = Integer.MAX_VALUE;
-    				User minDistanceUser = null;
+    				Account minDistanceUser = null;
 	    			for (Long id: ids) {
-	    				User user = load(User.class, id);
+	    				Account user = load(id);
 	    				int distance;
 	    				if (user.getFullName() != null) {
 	    					int distance1 = StringUtils.calcLevenshteinDistance(personName, user.getFullName().toLowerCase());
@@ -236,7 +235,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 	    			}
 	    			return Preconditions.checkNotNull(minDistanceUser);
     			} else {
-    				return load(User.class, ids.iterator().next());
+    				return load(ids.iterator().next());
     			}
     		} else {
     			return null;
@@ -247,10 +246,10 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
     }
     
     @Override
-	public User getCurrent() {
-		Long userId = User.getCurrentId();
+	public Account getCurrent() {
+		Long userId = Account.getCurrentId();
 		if (userId != 0L) {
-			User user = get(User.class, userId);
+			Account user = get(userId);
 			if (user != null)
 				return user;
 		}
@@ -258,10 +257,10 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 	}
 
 	@Override
-	public User getPrevious() {
-		Long userId = User.getPreviousId();
+	public Account getPrevious() {
+		Long userId = Account.getPreviousId();
 		if (userId != 0L) {
-			User user = get(User.class, userId);
+			Account user = get(userId);
 			if (user != null)
 				return user;
 		}
@@ -271,7 +270,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (User user: allOf(User.class)) {
+        for (Account user: allOf()) {
         	Set<Long> ids = emailToIds.get(user.getEmail());
         	if (ids == null) {
         		ids = new HashSet<>();
@@ -303,7 +302,7 @@ public class DefaultUserManager extends DefaultDao implements UserManager, Lifec
 		query.setParameter("newName", newName);
 		query.executeUpdate();
 		
-		for (Depot depot: allOf(Depot.class)) {
+		for (Depot depot: dao.allOf(Depot.class)) {
 			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
 				integrationPolicy.onUserRename(oldName, newName);
 			}

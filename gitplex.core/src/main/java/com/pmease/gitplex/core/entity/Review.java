@@ -24,7 +24,7 @@ public class Review extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User reviewer;
+	private Account reviewer;
 
 	@Column(nullable=false)
 	private Date date = new Date();
@@ -44,11 +44,11 @@ public class Review extends AbstractEntity {
 		this.date = date;
 	}
 
-	public User getReviewer() {
+	public Account getReviewer() {
 		return reviewer;
 	}
 
-	public void setReviewer(User reviewer) {
+	public void setReviewer(Account reviewer) {
 		this.reviewer = reviewer;
 	}
 	

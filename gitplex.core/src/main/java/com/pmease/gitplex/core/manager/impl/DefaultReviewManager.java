@@ -5,34 +5,33 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.entity.Review.Result;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
-import com.pmease.gitplex.core.manager.UserManager;
 
 @Singleton
-public class DefaultReviewManager extends DefaultDao implements ReviewManager {
+public class DefaultReviewManager extends AbstractEntityDao<Review> implements ReviewManager {
 
 	private final PullRequestManager pullRequestManager;
 	
@@ -43,10 +42,10 @@ public class DefaultReviewManager extends DefaultDao implements ReviewManager {
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultReviewManager(Provider<Session> sessionProvider, 
+	public DefaultReviewManager(Dao dao, 
 			PullRequestManager pullRequestManager, CommentManager commentManager, 
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
-		super(sessionProvider);
+		super(dao);
 		
 		this.pullRequestManager = pullRequestManager;
 		this.commentManager = commentManager;
@@ -56,7 +55,7 @@ public class DefaultReviewManager extends DefaultDao implements ReviewManager {
 
 	@Sessional
 	@Override
-	public Review findBy(User reviewer, PullRequestUpdate update) {
+	public Review findBy(Account reviewer, PullRequestUpdate update) {
 		return find(EntityCriteria.of(Review.class)
 				.add(Restrictions.eq("reviewer", reviewer)) 
 				.add(Restrictions.eq("update", update)));
@@ -64,7 +63,7 @@ public class DefaultReviewManager extends DefaultDao implements ReviewManager {
 
 	@Transactional
 	@Override
-	public void review(PullRequest request, User reviewer, Result result, String comment) {
+	public void review(PullRequest request, Account reviewer, Result result, String comment) {
 		reviewer.setReviewEffort(reviewer.getReviewEffort()+1);
 		
 		final Review review = new Review();
@@ -106,7 +105,7 @@ public class DefaultReviewManager extends DefaultDao implements ReviewManager {
 
 					@Override
 					public void run() {
-						pullRequestManager.check(load(PullRequest.class, requestId));
+						pullRequestManager.check(dao.load(PullRequest.class, requestId));
 					}
 					
 				});
@@ -133,7 +132,7 @@ public class DefaultReviewManager extends DefaultDao implements ReviewManager {
 		activity.setAction(PullRequestActivity.Action.UNDO_REVIEW);
 		activity.setDate(new Date());
 		activity.setRequest(review.getUpdate().getRequest());
-		activity.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+		activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
 		persist(activity);
 
 		final Long requestId = review.getUpdate().getRequest().getId();
@@ -145,7 +144,7 @@ public class DefaultReviewManager extends DefaultDao implements ReviewManager {
 
 					@Override
 					public void run() {
-						pullRequestManager.check(load(PullRequest.class, requestId));
+						pullRequestManager.check(dao.load(PullRequest.class, requestId));
 					}
 					
 				});

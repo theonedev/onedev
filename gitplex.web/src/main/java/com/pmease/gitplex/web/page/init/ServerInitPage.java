@@ -16,8 +16,8 @@ import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.wicket.component.wizard.ManualConfigStep;
 import com.pmease.commons.wicket.component.wizard.Wizard;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.page.base.BasePage;
@@ -51,7 +51,7 @@ public class ServerInitPage extends BasePage {
 				@Override
 				protected void finished() {
 					WebSession.get().logout();
-					User root = GitPlex.getInstance(UserManager.class).getRoot();
+					Account root = GitPlex.getInstance(AccountManager.class).getRoot();
 					SecurityUtils.getSubject().runAs(root.getPrincipals());
 					setResponsePage(ServerInitPage.class);
 				}

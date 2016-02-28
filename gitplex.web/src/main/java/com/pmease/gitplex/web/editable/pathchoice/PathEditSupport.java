@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.editable.pathchoice;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -23,7 +24,7 @@ import com.pmease.gitplex.core.annotation.PathChoice;
 public class PathEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

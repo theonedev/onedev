@@ -50,11 +50,11 @@ import com.pmease.gitplex.core.entity.PullRequestVisit;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -241,7 +241,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					// onDetach can be called multiple times at end of a request cycle
 					RequestCycle.get().setMetaData(RENDERED_ACTIVITY, null);
 					
-					User user = getCurrentUser();
+					Account user = getCurrentUser();
 					if (user != null) {
 						PullRequestVisit visit = getPullRequest().getVisit(user);
 						if (visit == null) {
@@ -315,7 +315,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(GitPlex.getInstance(UserManager.class).getCurrent() != null);
+				setVisible(GitPlex.getInstance(AccountManager.class).getCurrent() != null);
 			}
 			
 		};
@@ -339,7 +339,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 				Comment comment = new Comment();
 				comment.setRequest(getPullRequest());
-				comment.setUser(GitPlex.getInstance(UserManager.class).getCurrent());
+				comment.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
 				comment.setContent(input.getModelObject());
 				InheritableThreadLocalData.set(new PageId(getPage().getPageId()));
 				try {
@@ -585,8 +585,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 		PullRequest request = getPullRequest();
 		
 		Fragment assigneeContainer;
-		User assignee = request.getAssignee();
-		User currentUser = getCurrentUser();
+		Account assignee = request.getAssignee();
+		Account currentUser = getCurrentUser();
 		boolean canChangeAssignee = request.isOpen() 
 				&& (currentUser != null && currentUser.equals(request.getSubmitter()) 
 					|| SecurityUtils.canManage(getDepot()));
@@ -596,19 +596,19 @@ public class RequestOverviewPage extends RequestDetailPage {
 				assigneeContainer = new Fragment("assignee", "assigneeEditFrag", this);			
 				assigneeContainer.add(new WebMarkupContainer("help").add(new TooltipBehavior(Model.of(ASSIGNEE_HELP))));
 				
-				AssigneeChoice choice = new AssigneeChoice("assignee", depotModel, new IModel<User>() {
+				AssigneeChoice choice = new AssigneeChoice("assignee", depotModel, new IModel<Account>() {
 
 					@Override
 					public void detach() {
 					}
 
 					@Override
-					public User getObject() {
+					public Account getObject() {
 						return getPullRequest().getAssignee();
 					}
 
 					@Override
-					public void setObject(User object) {
+					public void setObject(Account object) {
 						getPullRequest().setAssignee(object);
 					}
 					
@@ -645,7 +645,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				if (request.getReviewInvitations().isEmpty()) {
-					User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+					Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 					setVisible(request.isOpen() 
 							&& !request.getPotentialReviewers().isEmpty()
 							&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(request.getTarget().getDepot()))));
@@ -692,7 +692,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		reviewersContainer.add(new ReviewerChoice("addReviewer", requestModel) {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, User user) {
+			protected void onSelect(AjaxRequestTarget target, Account user) {
 				super.onSelect(target, user);
 				
 				target.add(reviewersContainer);

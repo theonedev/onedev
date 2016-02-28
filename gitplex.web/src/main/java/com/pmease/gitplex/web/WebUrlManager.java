@@ -7,7 +7,7 @@ import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 
@@ -27,7 +27,7 @@ public class WebUrlManager implements UrlManager {
 	}
 
 	@Override
-	public String urlFor(User user) {
+	public String urlFor(Account user) {
 		return configManager.getSystemSetting().getServerUrl() + "/" + user.getName();
 	}
 	

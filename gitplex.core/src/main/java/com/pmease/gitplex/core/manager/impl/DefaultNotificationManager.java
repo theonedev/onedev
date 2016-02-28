@@ -6,19 +6,19 @@ import static com.pmease.gitplex.core.entity.Notification.Task.UPDATE;
 import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_INTEGRATE;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.Notification;
@@ -26,7 +26,6 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.UrlManager;
@@ -40,7 +39,7 @@ import com.pmease.gitplex.core.manager.UrlManager;
  *
  */
 @Singleton
-public class DefaultNotificationManager extends DefaultDao implements NotificationManager {
+public class DefaultNotificationManager extends AbstractEntityDao<Notification> implements NotificationManager {
 	
 	private final MailManager mailManager;
 	
@@ -49,9 +48,9 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public DefaultNotificationManager(Provider<Session> sessionProvider, MailManager mailManager, 
+	public DefaultNotificationManager(Dao dao, MailManager mailManager, 
 			UrlManager urlManager, MarkdownManager markdownManager) {
-		super(sessionProvider);
+		super(dao);
 		
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
@@ -117,7 +116,7 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 
 	@Transactional
 	@Override
-	public void onIntegrated(PullRequest request, User user, String comment) {
+	public void onIntegrated(PullRequest request, Account user, String comment) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
@@ -126,7 +125,7 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 
 	@Transactional
 	@Override
-	public void onDiscarded(PullRequest request, User user, String comment) {
+	public void onDiscarded(PullRequest request, Account user, String comment) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
@@ -142,7 +141,7 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 	@Override
 	public void onInvitingReview(ReviewInvitation invitation) {
 		PullRequest request = invitation.getRequest();
-		User user = invitation.getReviewer();
+		Account user = invitation.getReviewer();
 		if (!invitation.isPreferred()) {
 			Query query = getSession().createQuery("delete from Notification "
 					+ "where request=:request and user=:user and task=:task");
@@ -173,7 +172,7 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 		
 	}
 	
-	private String decorateMail(User user, String body) {
+	private String decorateMail(Account user, String body) {
 		return String.format("Dear %s, "
 				+ "<p style='margin: 16px 0;'>"
 				+ "%s"
@@ -195,7 +194,7 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 
 	@Transactional
 	@Override
-	public void onMentioned(PullRequest request, User user) {
+	public void onMentioned(PullRequest request, Account user) {
 		String subject = String.format("You are mentioned in pull request #%d (%s)", 
 				request.getId(), request.getTitle());
 		String url = urlManager.urlFor(request);
@@ -210,7 +209,7 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 
 	@Transactional
 	@Override
-	public void onMentioned(Comment comment, User user) {
+	public void onMentioned(Comment comment, Account user) {
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				comment.getRequest().getId(), comment.getRequest().getTitle());
 		String url = urlManager.urlFor(comment);
@@ -225,7 +224,7 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 	
 	@Transactional
 	@Override
-	public void onMentioned(CommentReply reply, User user) {
+	public void onMentioned(CommentReply reply, Account user) {
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				reply.getComment().getRequest().getId(), reply.getComment().getRequest().getTitle());
 		String url = urlManager.urlFor(reply);
@@ -240,13 +239,13 @@ public class DefaultNotificationManager extends DefaultDao implements Notificati
 	
 	@Transactional
 	@Override
-	public void onReopened(PullRequest request, User user, String comment) {
+	public void onReopened(PullRequest request, Account user, String comment) {
 		if (request.getAssignee() != null && !request.getAssignee().equals(user))
 			onAssigned(request);
 	}
 
 	private void requestIntegration(PullRequest request) {
-		User user = request.getAssignee();
+		Account user = request.getAssignee();
 		Notification notification = new Notification();
 		notification.setRequest(request);
 		notification.setUser(user);

@@ -18,7 +18,7 @@ import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;
@@ -62,7 +62,7 @@ public class TeamMultiChoiceEditor extends PropertyEditor<List<String>> {
         add(input);
 	}
 
-	private User getOwner() {
+	private Account getOwner() {
 		return ((DepotPage)getPage()).getDepot().getOwner();
 	}
 	

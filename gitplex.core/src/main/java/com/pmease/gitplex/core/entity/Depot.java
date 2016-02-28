@@ -124,7 +124,7 @@ public class Depot extends AbstractEntity implements UserBelonging {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User owner;
+	private Account owner;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
@@ -178,11 +178,11 @@ public class Depot extends AbstractEntity implements UserBelonging {
     
     private transient String defaultBranch;
     
-	public User getOwner() {
+	public Account getOwner() {
 		return owner;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwner(Account owner) {
 		this.owner = owner;
 	}
 
@@ -235,7 +235,7 @@ public class Depot extends AbstractEntity implements UserBelonging {
 	}
 
     @Override
-	public User getUser() {
+	public Account getUser() {
 		return getOwner();
 	}
 

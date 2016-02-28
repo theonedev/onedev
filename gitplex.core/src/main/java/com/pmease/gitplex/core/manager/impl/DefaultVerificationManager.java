@@ -4,16 +4,15 @@ import java.util.Collection;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Verification;
@@ -23,7 +22,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 
 @Singleton
-public class DefaultVerificationManager extends DefaultDao implements VerificationManager {
+public class DefaultVerificationManager extends AbstractEntityDao<Verification> implements VerificationManager {
 
 	private final PullRequestManager pullRequestManager;
 	
@@ -32,10 +31,10 @@ public class DefaultVerificationManager extends DefaultDao implements Verificati
 	private final Set<PullRequestListener> pullRequestListeners;
 
 	@Inject
-	public DefaultVerificationManager(Provider<Session> sessionProvider, 
+	public DefaultVerificationManager(Dao dao, 
 			PullRequestManager pullRequestManager, UnitOfWork unitOfWork, 
 			Set<PullRequestListener> pullRequestListeners) {
-		super(sessionProvider);
+		super(dao);
 		
 		this.pullRequestManager = pullRequestManager;
 		this.unitOfWork = unitOfWork;
@@ -88,7 +87,7 @@ public class DefaultVerificationManager extends DefaultDao implements Verificati
 
 					@Override
 					public void run() {
-						pullRequestManager.check(load(PullRequest.class, requestId));
+						pullRequestManager.check(dao.load(PullRequest.class, requestId));
 					}
 					
 				});

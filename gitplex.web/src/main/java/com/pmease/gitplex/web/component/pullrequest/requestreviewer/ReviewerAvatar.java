@@ -10,9 +10,9 @@ import org.apache.wicket.model.IModel;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
 import com.pmease.gitplex.web.model.EntityModel;
@@ -37,7 +37,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		super.onConfigure();
 
 		PullRequest request = requestModel.getObject();
-		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 		
 		boolean reviewEffective = false;
 		if (!request.isNew())
@@ -50,7 +50,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 	protected void onAvatarRemove(AjaxRequestTarget target) {
 		Date now = new Date();
 		PullRequest request = requestModel.getObject();
-		Set<User> prevInvited = new HashSet<>();
+		Set<Account> prevInvited = new HashSet<>();
 		for (ReviewInvitation each: request.getReviewInvitations()) {
 			if (each.isPreferred())
 				prevInvited.add(each.getReviewer());
@@ -61,7 +61,7 @@ public class ReviewerAvatar extends RemoveableAvatar {
 		}
 		request.getTargetDepot().getGateKeeper().checkRequest(request);
 
-		Set<User> nowInvited = new HashSet<>();
+		Set<Account> nowInvited = new HashSet<>();
 		for (ReviewInvitation each: request.getReviewInvitations()) {
 			if (each.isPreferred())
 				nowInvited.add(each.getReviewer());

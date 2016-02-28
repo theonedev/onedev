@@ -43,7 +43,7 @@ public class Notification extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User user;
+	private Account user;
 	
 	@Column(nullable=false)
 	private Task task;
@@ -59,11 +59,11 @@ public class Notification extends AbstractEntity {
 		this.request = request;
 	}
 
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Account user) {
 		this.user = user;
 	}
 

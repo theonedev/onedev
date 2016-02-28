@@ -11,16 +11,16 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 public abstract class RemoveableAvatar extends Panel {
 
-	private final IModel<User> userModel;
+	private final IModel<Account> userModel;
 	
 	private final String actionName;
 	
-	public RemoveableAvatar(String id, IModel<User> userModel, String actionName) {
+	public RemoveableAvatar(String id, IModel<Account> userModel, String actionName) {
 		super(id);
 		
 		this.userModel = userModel;
@@ -64,7 +64,7 @@ public abstract class RemoveableAvatar extends Panel {
 		add(link);
 	}
 	
-	protected User getUser() {
+	protected Account getUser() {
 		return userModel.getObject();
 	}
 	

@@ -16,13 +16,13 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
-public class ReviewerProvider extends ChoiceProvider<User> {
+public class ReviewerProvider extends ChoiceProvider<Account> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,21 +33,21 @@ public class ReviewerProvider extends ChoiceProvider<User> {
 	}
 	
 	@Override
-	public void query(String term, int page, Response<User> response) {
-		List<User> reviewers = requestModel.getObject().getPotentialReviewers();
+	public void query(String term, int page, Response<Account> response) {
+		List<Account> reviewers = requestModel.getObject().getPotentialReviewers();
 
 		if (StringUtils.isNotBlank(term)) {
-			for (Iterator<User> it = reviewers.iterator(); it.hasNext();) {
-				User user = it.next();
+			for (Iterator<Account> it = reviewers.iterator(); it.hasNext();) {
+				Account user = it.next();
 				if (!user.getName().startsWith(term) && !user.getDisplayName().startsWith(term))
 					it.remove();
 			}
 		}
 		
-		Collections.sort(reviewers, new Comparator<User>() {
+		Collections.sort(reviewers, new Comparator<Account>() {
 
 			@Override
-			public int compare(User user1, User user2) {
+			public int compare(Account user1, Account user2) {
 				return user1.getDisplayName().compareTo(user2.getDisplayName());
 			}
 			
@@ -64,7 +64,7 @@ public class ReviewerProvider extends ChoiceProvider<User> {
 	}
 
 	@Override
-	public void toJson(User choice, JSONWriter writer) throws JSONException {
+	public void toJson(Account choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId())
 			.key("name").value(StringEscapeUtils.escapeHtml4(choice.getName()));
 		if (choice.getFullName() != null)
@@ -75,12 +75,12 @@ public class ReviewerProvider extends ChoiceProvider<User> {
 	}
 
 	@Override
-	public Collection<User> toChoices(Collection<String> ids) {
-		List<User> reviewers = Lists.newArrayList();
+	public Collection<Account> toChoices(Collection<String> ids) {
+		List<Account> reviewers = Lists.newArrayList();
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			reviewers.add(dao.load(User.class, id));
+			reviewers.add(dao.load(Account.class, id));
 		}
 
 		return reviewers;

@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
@@ -65,7 +65,7 @@ class LastCommitsResource extends AbstractResource {
 				
 				LastCommitsOfChildren lastCommits = repo.getLastCommitsOfChildren(revision, path);
 				
-				UserManager userManager = GitPlex.getInstance(UserManager.class);
+				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 				
 				Map<String, LastCommitInfo> map = new HashMap<>();
@@ -79,7 +79,7 @@ class LastCommitsResource extends AbstractResource {
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
-					User user = userManager.findByPerson(author);
+					Account user = userManager.findByPerson(author);
 					if (user != null) {
 						info.authorName = HtmlEscape.escapeHtml5(user.getDisplayName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(user);

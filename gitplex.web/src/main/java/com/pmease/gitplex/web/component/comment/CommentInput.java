@@ -29,7 +29,7 @@ import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
@@ -59,7 +59,7 @@ public class CommentInput extends TextArea<String> {
 
 					AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 					List<Map<String, String>> userList = new ArrayList<>();
-					for (User user: queryUsers(userQuery, ATWHO_LIMIT)) {
+					for (Account user: queryUsers(userQuery, ATWHO_LIMIT)) {
 						Map<String, String> userMap = new HashMap<>();
 						userMap.put("name", user.getName());
 						userMap.put("fullName", user.getFullName());
@@ -127,8 +127,8 @@ public class CommentInput extends TextArea<String> {
 		});
 	}
 	
-	protected List<User> queryUsers(String query, int count) {
-		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
+	protected List<Account> queryUsers(String query, int count) {
+		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
 		if (StringUtils.isNotBlank(query)) {
 			criteria.add(Restrictions.or(
 					Restrictions.ilike("noSpaceName", query, MatchMode.ANYWHERE), 

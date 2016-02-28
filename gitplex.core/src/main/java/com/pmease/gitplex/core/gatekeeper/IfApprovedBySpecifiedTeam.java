@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.TeamManager;
 
@@ -52,19 +52,19 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
         this.leastApprovals = leastApprovals;
     }
 
-    private Team getTeam(User owner) {
+    private Team getTeam(Account owner) {
     	return Preconditions.checkNotNull(GitPlex.getInstance(TeamManager.class).findBy(owner, teamName));
     }
     
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-        Collection<User> members = new HashSet<User>();
+        Collection<Account> members = new HashSet<Account>();
         for (Membership membership : getTeam(request.getTargetDepot().getOwner()).getMemberships())
             members.add(membership.getUser());
 
         int approvals = 0;
         int pendings = 0;
-        for (User member : members) {
+        for (Account member : members) {
             Review.Result result = member.checkReviewSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
@@ -89,8 +89,8 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
         }
     }
 
-	private CheckResult check(User user, User owner) {
-        Collection<User> members = new HashSet<User>();
+	private CheckResult check(Account user, Account owner) {
+        Collection<Account> members = new HashSet<Account>();
         for (Membership membership : getTeam(owner).getMemberships())
             members.add(membership.getUser());
 
@@ -117,12 +117,12 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user, depot.getOwner());
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return check(user, depot.getOwner());
 	}
 

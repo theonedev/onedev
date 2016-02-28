@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Comment;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 class CommentPullRequest extends AbstractRenderableActivity {
@@ -20,7 +20,7 @@ class CommentPullRequest extends AbstractRenderableActivity {
 	}
 
 	@Override
-	public User getUser() {
+	public Account getUser() {
 		return getComment().getUser();
 	}
 

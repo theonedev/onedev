@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 public interface AvatarManager {
 	
@@ -18,7 +18,7 @@ public interface AvatarManager {
 	 * 			url of avatar image. This url will be relative to context root if gravatar is disabled, or 
 	 * 			a default avatar is returned when user is null 
 	 */
-	String getAvatarUrl(@Nullable User user);
+	String getAvatarUrl(@Nullable Account user);
 	
 	/**
 	 * Get URL of avatar image of specified person. 
@@ -30,7 +30,7 @@ public interface AvatarManager {
 	 */
 	String getAvatarUrl(PersonIdent person);
 
-	void useAvatar(User user, @Nullable FileUpload avatar);
+	void useAvatar(Account user, @Nullable FileUpload avatar);
 	
 }
 

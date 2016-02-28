@@ -15,24 +15,24 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
-public class UserChoiceProvider extends ChoiceProvider<User> {
+public class UserChoiceProvider extends ChoiceProvider<Account> {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public void query(String term, int page, Response<User> response) {
+	public void query(String term, int page, Response<Account> response) {
 		Dao dao = GitPlex.getInstance(Dao.class);
 		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
 		Criterion criterion = Restrictions.and(Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.ANYWHERE),
 				Restrictions.ilike("fullName", term, MatchMode.ANYWHERE)));
-		List<User> users = dao.query(EntityCriteria.of(User.class)
+		List<Account> users = dao.query(EntityCriteria.of(Account.class)
 				.add(criterion).addOrder(Order.asc("name")), first, Constants.DEFAULT_SELECT2_PAGE_SIZE + 1);
 
 		if (users.size() <= Constants.DEFAULT_SELECT2_PAGE_SIZE) {
@@ -44,19 +44,19 @@ public class UserChoiceProvider extends ChoiceProvider<User> {
 	}
 
 	@Override
-	public void toJson(User choice, JSONWriter writer) throws JSONException {
+	public void toJson(Account choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId()).key("name").value(StringEscapeUtils.escapeHtml4(choice.getDisplayName()));
 		String avatarUrl = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice);
 		writer.key("avatar").value(avatarUrl);
 	}
 
 	@Override
-	public Collection<User> toChoices(Collection<String> ids) {
-		List<User> users = Lists.newArrayList();
+	public Collection<Account> toChoices(Collection<String> ids) {
+		List<Account> users = Lists.newArrayList();
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			users.add(dao.load(User.class, id));
+			users.add(dao.load(Account.class, id));
 		}
 
 		return users;

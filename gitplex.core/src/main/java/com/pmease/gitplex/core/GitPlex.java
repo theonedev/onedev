@@ -38,7 +38,7 @@ import com.pmease.commons.validation.Validatable;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.manager.DataManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.setting.ServerConfig;
 
 public class GitPlex extends AbstractPlugin implements Serializable {
@@ -47,7 +47,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	
 	private final DataManager dataManager;
 	
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	private final ServerConfig serverConfig;
 
@@ -68,7 +68,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	@Inject
 	public GitPlex(ServerConfig serverConfig, DataManager dataManager, 
             TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
-            UserManager userManager, Provider<Set<LifecycleListener>> listenersProvider, 
+            AccountManager userManager, Provider<Set<LifecycleListener>> listenersProvider, 
             @AppName String appName) {
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;

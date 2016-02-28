@@ -4,8 +4,8 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.WebSession;
 
 @SuppressWarnings("serial")
@@ -17,9 +17,9 @@ public abstract class ConfirmDeleteAccountModal extends ConfirmDeleteModal {
 
 	@Override
 	protected void doDelete(AjaxRequestTarget target) {
-		UserManager userManager = GitPlex.getInstance(UserManager.class);
+		AccountManager userManager = GitPlex.getInstance(AccountManager.class);
 		
-		User account = getAccount();
+		Account account = getAccount();
 		if (account.equals(userManager.getCurrent())) {
 			if (userManager.getPrevious() != null)
 				SecurityUtils.getSubject().releaseRunAs();
@@ -29,7 +29,7 @@ public abstract class ConfirmDeleteAccountModal extends ConfirmDeleteModal {
 			WebSession.get().logout();
 		}
 		
-		GitPlex.getInstance(UserManager.class).delete(account);
+		GitPlex.getInstance(AccountManager.class).delete(account);
 		getSession().success("Account has been deleted");
 		
 		onDeleted(target);
@@ -47,5 +47,5 @@ public abstract class ConfirmDeleteAccountModal extends ConfirmDeleteModal {
 
 	protected abstract void onDeleted(AjaxRequestTarget target);
 	
-	protected abstract User getAccount();
+	protected abstract Account getAccount();
 }

@@ -24,7 +24,7 @@ public class PullRequestVisit extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User user;
+	private Account user;
 	
 	@Column(nullable=false)
 	private Date date = new Date();
@@ -37,11 +37,11 @@ public class PullRequestVisit extends AbstractEntity {
 		this.request = request;
 	}
 
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Account user) {
 		this.user = user;
 	}
 

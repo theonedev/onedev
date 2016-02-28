@@ -17,38 +17,37 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.PersonIdent;
-import org.hibernate.Session;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.BranchWatch;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest.Event;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestVisit;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.entity.PullRequest.Event;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.core.manager.UserManager;
 
 @Singleton
-public class DefaultPullRequestWatchManager extends DefaultDao implements PullRequestWatchManager {
+public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullRequestWatch> implements PullRequestWatchManager {
 
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	private final BranchWatchManager branchWatchManager;
 	
@@ -57,10 +56,10 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 	private final UrlManager urlManager;
 	
 	@Inject
-	public DefaultPullRequestWatchManager(Provider<Session> sessionProvider, 
-			UserManager userManager, BranchWatchManager branchWatchManager, 
+	public DefaultPullRequestWatchManager(Dao dao, 
+			AccountManager userManager, BranchWatchManager branchWatchManager, 
 			MailManager mailManager, UrlManager urlManager) {
-		super(sessionProvider);
+		super(dao);
 		
 		this.userManager = userManager;
 		this.branchWatchManager = branchWatchManager;
@@ -81,7 +80,7 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 
 		addParticipantsToWatchList(request.getLatestUpdate());
 		
-		Collection<User> excludingUsers = new HashSet<>();
+		Collection<Account> excludingUsers = new HashSet<>();
 		if (request.getSubmitter() != null)
 			excludingUsers.add(request.getSubmitter());
 		if (request.getAssignee() != null)
@@ -101,7 +100,7 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 		}
 		for (Pair<String, String> pair: nameEmailPairs) {
 			PersonIdent person = new PersonIdent(pair.getFirst(), pair.getSecond());
-			User user = userManager.findByPerson(person);
+			Account user = userManager.findByPerson(person);
 			if (user != null) 
 				watch(update.getRequest(), user, "You are set to watch this pull request as it contains your commits.");
 		}
@@ -109,10 +108,10 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 
 	@Transactional
 	@Override
-	public void onReopened(PullRequest request, User user, String comment) {
+	public void onReopened(PullRequest request, Account user, String comment) {
 		watch(request, user, "You are set to watch this pull request as you've reopened it.");
 		
-		Collection<User> excludingUsers = new HashSet<>();
+		Collection<Account> excludingUsers = new HashSet<>();
 		excludingUsers.add(user);
 		if (request.getAssignee() != null)
 			excludingUsers.add(request.getAssignee());
@@ -124,7 +123,7 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 	public void onUpdated(PullRequestUpdate update) {
 		addParticipantsToWatchList(update);
 
-		notify(update.getRequest(), new HashSet<User>(), UPDATED);
+		notify(update.getRequest(), new HashSet<Account>(), UPDATED);
 	}
 
 	@Transactional
@@ -159,25 +158,25 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 	@Transactional
 	@Override
 	public void onVerified(PullRequest request) {
-		notify(request, new HashSet<User>(), VERIFIED);
+		notify(request, new HashSet<Account>(), VERIFIED);
 	}
 
 	@Transactional
 	@Override
-	public void onIntegrated(PullRequest request, User user, String comment) {
+	public void onIntegrated(PullRequest request, Account user, String comment) {
 		if (user != null)
 			notify(request, Sets.newHashSet(user), INTEGRATED);
 		else
-			notify(request, new HashSet<User>(), INTEGRATED);
+			notify(request, new HashSet<Account>(), INTEGRATED);
 	}
 
 	@Transactional
 	@Override
-	public void onDiscarded(PullRequest request, User user, String comment) {
+	public void onDiscarded(PullRequest request, Account user, String comment) {
 		if (user != null)
 			notify(request, Sets.newHashSet(user), DISCARDED);
 		else
-			notify(request, new HashSet<User>(), DISCARDED);
+			notify(request, new HashSet<Account>(), DISCARDED);
 	}
 
 	@Override
@@ -204,7 +203,7 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 	}
 
 	@Transactional
-	private void watch(PullRequest request, User user, String reason) {
+	private void watch(PullRequest request, Account user, String reason) {
 		PullRequestWatch watch = request.getWatch(user);
 		if (watch == null) {
 			watch = new PullRequestWatch();
@@ -217,12 +216,12 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 	}
 
 	@Transactional
-	private void notify(PullRequest request, Collection<User> excludingUsers, Event event) {
-		Map<User, Date> visitDates = new HashMap<>();
+	private void notify(PullRequest request, Collection<Account> excludingUsers, Event event) {
+		Map<Account, Date> visitDates = new HashMap<>();
 		for (PullRequestVisit visit: request.getVisits()) 
 			visitDates.put(visit.getUser(), visit.getDate());
 		
-		Collection<User> usersToNotify = new HashSet<>();
+		Collection<Account> usersToNotify = new HashSet<>();
 		
 		for (PullRequestWatch watch: request.getWatches()) {
 			if (!watch.isIgnore() && !excludingUsers.contains(watch.getUser())) { 
@@ -258,17 +257,17 @@ public class DefaultPullRequestWatchManager extends DefaultDao implements PullRe
 
 	@Transactional
 	@Override
-	public void onMentioned(PullRequest request, User user) {
+	public void onMentioned(PullRequest request, Account user) {
 		watch(request, user, "You are set to watch this pull request as you are mentioned.");
 	}
 
 	@Override
-	public void onMentioned(Comment comment, User user) {
+	public void onMentioned(Comment comment, Account user) {
 		watch(comment.getRequest(), user, "You are set to watch this pull request as you are mentioned.");
 	}
 
 	@Override
-	public void onMentioned(CommentReply reply, User user) {
+	public void onMentioned(CommentReply reply, Account user) {
 		watch(reply.getComment().getRequest(), user, "You are set to watch this pull request as you are mentioned.");
 	}
 	

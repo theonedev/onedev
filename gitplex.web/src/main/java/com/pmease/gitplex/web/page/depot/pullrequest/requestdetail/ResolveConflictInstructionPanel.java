@@ -15,10 +15,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
@@ -35,7 +35,7 @@ class ResolveConflictInstructionPanel extends Panel {
 		PullRequest request = (PullRequest) getDefaultModelObject();
 		Fragment fragment;
 		Depot targetDepot = request.getTarget().getDepot();
-		User user = GitPlex.getInstance(UserManager.class).getCurrent();
+		Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
 		IntegrationPreview preview = request.getIntegrationPreview();
 		IntegrationStrategy strategy = request.getIntegrationStrategy();
 		boolean sameRepo = request.getTarget().getDepot().equals(request.getSource().getDepot());					

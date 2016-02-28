@@ -6,7 +6,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 abstract class AbstractRenderableActivity implements RenderableActivity {
@@ -17,7 +17,7 @@ abstract class AbstractRenderableActivity implements RenderableActivity {
 	
 	private final Date date;
 	
-	public AbstractRenderableActivity(PullRequest request, User user, Date date) {
+	public AbstractRenderableActivity(PullRequest request, Account user, Date date) {
 		this.requestId = request.getId();
 		this.userId = user!=null?user.getId():null;
 		this.date = date;
@@ -38,9 +38,9 @@ abstract class AbstractRenderableActivity implements RenderableActivity {
 	}
 
 	@Override
-	public User getUser() {
+	public Account getUser() {
 		if (userId != null)
-			return GitPlex.getInstance(Dao.class).load(User.class, userId);
+			return GitPlex.getInstance(Dao.class).load(Account.class, userId);
 		else
 			return null;
 	}

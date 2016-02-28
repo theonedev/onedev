@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 
@@ -34,7 +34,7 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public boolean onUserDelete(User user) {
+	public boolean onUserDelete(Account user) {
 		for (Iterator<GateKeeper> it = gateKeepers.iterator(); it.hasNext();) {
 			if (it.next().onUserDelete(user))
 				it.remove();
@@ -43,7 +43,7 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public void onDepotRename(User depotOwner, String oldName, String newName) {
+	public void onDepotRename(Account depotOwner, String oldName, String newName) {
 		for (GateKeeper gateKeeper: gateKeepers)
 			gateKeeper.onDepotRename(depotOwner, oldName, newName);
 	}

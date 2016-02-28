@@ -1,5 +1,7 @@
 package com.pmease.commons.wicket.editable.numeric;
 
+import java.util.Set;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -17,7 +19,7 @@ import com.pmease.commons.wicket.editable.PropertyViewer;
 public class NumericEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

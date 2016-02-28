@@ -45,7 +45,7 @@ import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.CommentReplyManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
@@ -363,7 +363,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 	private Component newAddReply() {
 		WebMarkupContainer addReplyRow = new WebMarkupContainer(ADD_REPLY_ID);
 		addReplyRow.setOutputMarkupId(true);
-		addReplyRow.setVisible(GitPlex.getInstance(UserManager.class).getCurrent() != null);
+		addReplyRow.setVisible(GitPlex.getInstance(AccountManager.class).getCurrent() != null);
 		
 		Fragment fragment = new Fragment(CONTENT_ID, "addFrag", this);
 		fragment.add(new AjaxLink<Void>(ADD_REPLY_ID) {

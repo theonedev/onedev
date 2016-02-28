@@ -34,7 +34,7 @@ import com.pmease.commons.git.exception.GitException;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
@@ -125,7 +125,7 @@ public class GitFilter implements Filter {
             serverUrl = "https://localhost:" + serverConfig.getSslConfig().getPort();
 
 		environments.put("GITPLEX_URL", serverUrl);
-		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
+		environments.put("GITPLEX_USER_ID", Account.getCurrentId().toString());
 		environments.put("GITPLEX_REPOSITORY_ID", depot.getId().toString());
 		final File gitDir = storageManager.getDepotDir(depot);
 

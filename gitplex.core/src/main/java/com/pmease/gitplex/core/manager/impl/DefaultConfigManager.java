@@ -6,13 +6,13 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.Config.Key;
@@ -23,7 +23,7 @@ import com.pmease.gitplex.core.setting.QosSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
-public class DefaultConfigManager extends DefaultDao implements ConfigManager {
+public class DefaultConfigManager extends AbstractEntityDao<Config> implements ConfigManager {
 	
 	private final Provider<Set<ConfigListener>> listenersProvider;
 	
@@ -34,9 +34,8 @@ public class DefaultConfigManager extends DefaultDao implements ConfigManager {
 	private volatile Long qosSettingConfigId;
 	
 	@Inject
-	public DefaultConfigManager(Provider<Session> sessionProvider, 
-			Provider<Set<ConfigListener>> listenersProvider) {
-		super(sessionProvider);
+	public DefaultConfigManager(Dao dao, Provider<Set<ConfigListener>> listenersProvider) {
+		super(dao);
 		
 		this.listenersProvider = listenersProvider;
 	}
@@ -50,7 +49,7 @@ public class DefaultConfigManager extends DefaultDao implements ConfigManager {
     		Preconditions.checkNotNull(config);
             systemSettingConfigId = config.getId();
         } else {
-            config = load(Config.class, systemSettingConfigId);
+            config = load(systemSettingConfigId);
         }
         SystemSetting setting = (SystemSetting) config.getSetting();
         Preconditions.checkNotNull(setting);
@@ -89,7 +88,7 @@ public class DefaultConfigManager extends DefaultDao implements ConfigManager {
     		Preconditions.checkNotNull(config);
     		mailSettingConfigId = config.getId();
         } else {
-            config = load(Config.class, mailSettingConfigId);
+            config = load(mailSettingConfigId);
         }
         return (MailSetting) config.getSetting();
 	}
@@ -118,7 +117,7 @@ public class DefaultConfigManager extends DefaultDao implements ConfigManager {
     		Preconditions.checkNotNull(config);
             qosSettingConfigId = config.getId();
         } else {
-            config = load(Config.class, qosSettingConfigId);
+            config = load(qosSettingConfigId);
         }
         QosSetting setting = (QosSetting) config.getSetting();
         Preconditions.checkNotNull(setting);

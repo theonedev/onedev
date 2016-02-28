@@ -14,8 +14,8 @@ import com.google.common.collect.ImmutableSet;
 import com.pmease.commons.util.JsoupUtils;
 import com.pmease.commons.util.TextNodeVisitor;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 
 public class MentionParser {
 	
@@ -23,12 +23,12 @@ public class MentionParser {
 	
 	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)(?=($|\\s+))");
 
-	public Collection<User> parseMentions(String html) {
+	public Collection<Account> parseMentions(String html) {
 		return parseMentions(Jsoup.parseBodyFragment(html).body());		
 	}
 	
-	public Collection<User> parseMentions(Element body) {
-		Collection<User> mentions = new HashSet<>();
+	public Collection<Account> parseMentions(Element body) {
+		Collection<Account> mentions = new HashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
@@ -44,14 +44,14 @@ public class MentionParser {
 		NodeTraversor tranversor = new NodeTraversor(visitor);
 		tranversor.traverse(body);
 		
-		UserManager userManager = GitPlex.getInstance(UserManager.class);
+		AccountManager userManager = GitPlex.getInstance(AccountManager.class);
 		
 		for (TextNode node : visitor.getMatchedNodes()) {
 			Matcher matcher = PATTERN.matcher(node.getWholeText());
 			while (matcher.find()) {
 				String userName = matcher.group(2);
 				String userTag;
-				User user = userManager.findByName(userName);
+				Account user = userManager.findByName(userName);
 				if (user != null) {
 					mentions.add(user);
 					userTag = toHtml(user);
@@ -66,7 +66,7 @@ public class MentionParser {
 		return mentions;
 	}
 
-	protected String toHtml(User user) {
+	protected String toHtml(Account user) {
 		return "@" + user.getName();
 	}
 	

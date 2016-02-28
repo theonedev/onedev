@@ -16,8 +16,8 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 
@@ -42,8 +42,8 @@ public abstract class BasePage extends CommonPage {
 		return true;
 	}
 	
-	protected final User getCurrentUser() {
-		return GitPlex.getInstance(UserManager.class).getCurrent();
+	protected final Account getCurrentUser() {
+		return GitPlex.getInstance(AccountManager.class).getCurrent();
 	}
 	
 	@Override

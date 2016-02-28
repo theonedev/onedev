@@ -23,18 +23,18 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 
 @SuppressWarnings("serial")
 public class DepotChoiceProvider extends ListChoiceProvider<Depot> {
 
-	private final IModel<User> userModel;
+	private final IModel<Account> userModel;
 	
 	private final IModel<List<Depot>> repositoriesModel;
 	
-	public DepotChoiceProvider(final @Nullable IModel<User> userModel) {
+	public DepotChoiceProvider(final @Nullable IModel<Account> userModel) {
 		super(Constants.DEFAULT_PAGE_SIZE);
 		
 		this.userModel = userModel;
@@ -86,7 +86,7 @@ public class DepotChoiceProvider extends ListChoiceProvider<Depot> {
 	}
 	
 	@Nullable
-	private User getUser() {
+	private Account getUser() {
 		if (userModel != null)
 			return userModel.getObject();
 		else

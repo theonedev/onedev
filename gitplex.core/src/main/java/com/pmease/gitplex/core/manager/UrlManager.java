@@ -4,11 +4,11 @@ import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 public interface UrlManager {
 	
-	String urlFor(User user);
+	String urlFor(Account user);
 	
 	String urlFor(Depot depot);
 	

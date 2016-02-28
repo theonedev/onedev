@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
 @Editable(order=700, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
@@ -20,7 +20,7 @@ public class IfSubmittedByRepositoryOwner extends AbstractGateKeeper {
     	return check(request.getSubmitter(), request.getTargetDepot());
     }
 
-    private CheckResult check(User user, Depot depot) {
+    private CheckResult check(Account user, Depot depot) {
 		if (depot.getOwner().equals(user))
 			return passed(Lists.newArrayList("Submitted by repository owner."));
 		else
@@ -28,12 +28,12 @@ public class IfSubmittedByRepositoryOwner extends AbstractGateKeeper {
     }
     
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user, depot);
 	}
 

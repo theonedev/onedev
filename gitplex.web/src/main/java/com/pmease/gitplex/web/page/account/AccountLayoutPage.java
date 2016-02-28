@@ -16,8 +16,8 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
@@ -40,7 +40,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 		
 		add(new Avatar("accountAvatar", accountModel.getObject(), null));
 		
-		final IModel<User> accountModel = Model.of(getAccount());
+		final IModel<Account> accountModel = Model.of(getAccount());
 		UserSingleChoice accountChoice = new UserSingleChoice("accountChoice", accountModel, false);
 		accountChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
@@ -64,8 +64,8 @@ public abstract class AccountLayoutPage extends AccountPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				UserManager userManager = GitPlex.getInstance(UserManager.class);
-				User currentUser = userManager.getCurrent();
+				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
+				Account currentUser = userManager.getCurrent();
 				setVisible(!getAccount().equals(currentUser) && SecurityUtils.canManage(getAccount()));
 			}
 			

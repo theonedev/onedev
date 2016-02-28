@@ -14,8 +14,8 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.userchoice.UserMultiChoice;
 
 @SuppressWarnings("serial")
@@ -32,11 +32,11 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<User> users = new ArrayList<>();
+    	List<Account> users = new ArrayList<>();
 		if (getModelObject() != null) {
-			UserManager userManager = GitPlex.getInstance(UserManager.class);
+			AccountManager userManager = GitPlex.getInstance(AccountManager.class);
 			for (String userName: getModelObject()) {
-				User user = userManager.findByName(userName);
+				Account user = userManager.findByName(userName);
 				if (user != null)
 					users.add(user);
 			}
@@ -56,9 +56,9 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> userNames = new ArrayList<>();
-		Collection<User> useres = input.getConvertedInput();
+		Collection<Account> useres = input.getConvertedInput();
 		if (useres != null) {
-			for (User user: useres)
+			for (Account user: useres)
 				userNames.add(user.getName());
 		} 
 		return userNames;

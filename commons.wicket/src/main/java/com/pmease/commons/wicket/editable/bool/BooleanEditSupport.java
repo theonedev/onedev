@@ -1,6 +1,7 @@
 package com.pmease.commons.wicket.editable.bool;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -19,7 +20,7 @@ import com.pmease.commons.wicket.editable.PropertyViewer;
 public class BooleanEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

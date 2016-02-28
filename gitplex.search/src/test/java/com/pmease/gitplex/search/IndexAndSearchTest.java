@@ -34,7 +34,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -179,7 +179,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		depot = new Depot();
 		depot.setId(1L);
 		depot.setName("test");
-		depot.setOwner(new User());
+		depot.setOwner(new Account());
 		depot.getOwner().setName("test");
         
 		storageManager = mock(StorageManager.class);

@@ -48,7 +48,7 @@ public class Team extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User owner;
+	private Account owner;
 
 	@Column(nullable=false)
 	private String name;
@@ -64,11 +64,11 @@ public class Team extends AbstractEntity {
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Authorization> authorizations = new ArrayList<Authorization>();
 
-	public User getOwner() {
+	public Account getOwner() {
 		return owner;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwner(Account owner) {
 		this.owner = owner;
 	}
 

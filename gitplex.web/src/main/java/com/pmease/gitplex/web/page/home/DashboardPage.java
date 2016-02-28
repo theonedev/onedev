@@ -26,8 +26,8 @@ import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -40,7 +40,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {
 
-	private PageableListView<User> accountsView;
+	private PageableListView<Account> accountsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
@@ -74,28 +74,28 @@ public class DashboardPage extends LayoutPage {
 		accountsContainer.setOutputMarkupId(true);
 		add(accountsContainer);
 		
-		accountsContainer.add(accountsView = new PageableListView<User>("accounts", new LoadableDetachableModel<List<User>>() {
+		accountsContainer.add(accountsView = new PageableListView<Account>("accounts", new LoadableDetachableModel<List<Account>>() {
 
 			@Override
-			protected List<User> load() {
+			protected List<Account> load() {
 				Dao dao = GitPlex.getInstance(Dao.class);
-				List<User> users = dao.allOf(User.class);
+				List<Account> users = dao.allOf(Account.class);
 				
 				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<User> it = users.iterator(); it.hasNext();) {
-						User user = it.next();
+					for (Iterator<Account> it = users.iterator(); it.hasNext();) {
+						Account user = it.next();
 						if (!user.getName().toLowerCase().contains(searchFor))
 							it.remove();
 					}
 				} else {
 					searchFor = null;
 				}
-				Collections.sort(users, new Comparator<User>() {
+				Collections.sort(users, new Comparator<Account>() {
 
 					@Override
-					public int compare(User user1, User user2) {
+					public int compare(Account user1, Account user2) {
 						return user1.getName().compareTo(user2.getName());
 					}
 					
@@ -106,8 +106,8 @@ public class DashboardPage extends LayoutPage {
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(final ListItem<User> item) {
-				User user = item.getModelObject();
+			protected void populateItem(final ListItem<Account> item) {
+				Account user = item.getModelObject();
 
 				item.add(new Avatar("avatar", item.getModelObject(), null));
 				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountDepotsPage.class, AccountPage.paramsOf(user)); 
@@ -120,7 +120,7 @@ public class DashboardPage extends LayoutPage {
 
 					@Override
 					public void onClick() {
-						User account = item.getModelObject();
+						Account account = item.getModelObject();
 						SecurityUtils.getSubject().runAs(account.getPrincipals());
 						setResponsePage(getPage().getClass(), getPageParameters());
 					}
@@ -129,9 +129,9 @@ public class DashboardPage extends LayoutPage {
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						UserManager userManager = GitPlex.getInstance(UserManager.class);
-						User account = item.getModelObject();
-						User currentUser = userManager.getCurrent();
+						AccountManager userManager = GitPlex.getInstance(AccountManager.class);
+						Account account = item.getModelObject();
+						Account currentUser = userManager.getCurrent();
 						setVisible(!account.equals(currentUser) && SecurityUtils.canManage(account));
 					}
 					

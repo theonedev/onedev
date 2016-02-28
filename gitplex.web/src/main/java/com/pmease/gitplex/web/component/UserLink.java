@@ -7,8 +7,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 
@@ -19,7 +19,7 @@ public class UserLink extends BookmarkablePageLink<Void> {
 	
 	private final String name;
 	
-	public UserLink(String id, User user) {
+	public UserLink(String id, Account user) {
 		super(id, AccountDepotsPage.class);
 
 		params = AccountPage.paramsOf(user);
@@ -29,7 +29,7 @@ public class UserLink extends BookmarkablePageLink<Void> {
 	public UserLink(String id, PersonIdent person) {
 		super(id, AccountDepotsPage.class);
 		
-		User user = GitPlex.getInstance(UserManager.class).findByPerson(person);
+		Account user = GitPlex.getInstance(AccountManager.class).findByPerson(person);
 		if (user != null) { 
 			params = AccountPage.paramsOf(user);
 			name = user.getDisplayName();

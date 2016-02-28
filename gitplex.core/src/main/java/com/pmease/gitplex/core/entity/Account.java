@@ -24,10 +24,11 @@ import com.google.common.base.Objects;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.UserBelonging;
-import com.pmease.gitplex.core.util.validation.UserName;
+import com.pmease.gitplex.core.util.validation.AccountName;
 
 @Entity
 @Table(indexes={@Index(columnList="email"), @Index(columnList="fullName"), 
@@ -41,17 +42,22 @@ import com.pmease.gitplex.core.util.validation.UserName;
  */  
 @DynamicUpdate
 @Editable
-public class User extends AbstractUser implements ProtectedObject {
+public class Account extends AbstractUser implements ProtectedObject {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final Long ROOT_ID = 1L;
 
-	@Column(nullable=false)
-	private String email;
+	private boolean organization;
 	
 	private String fullName;
-
+	
+	/* used by user account */
+	private String email;
+	
+	/* used by organization account */
+	private String description;
+	
 	@Column(nullable=false)
 	private String noSpaceName;
 	
@@ -117,8 +123,8 @@ public class User extends AbstractUser implements ProtectedObject {
 	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
 
-    @Editable(name="Login Name", order=100)
-	@UserName
+    @Editable(name="Name", order=100)
+	@AccountName
 	@NotEmpty
 	@Override
 	public String getName() {
@@ -141,6 +147,14 @@ public class User extends AbstractUser implements ProtectedObject {
 		noSpaceFullName = StringUtils.deleteWhitespace(fullName);
 	}
 	
+	public boolean isOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(boolean organization) {
+		this.organization = organization;
+	}
+
 	@Editable(order=300)
 	@NotEmpty
 	@Email
@@ -150,6 +164,16 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	@Editable(order=350)
+	@Markdown
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Editable(order=400)
@@ -265,8 +289,8 @@ public class User extends AbstractUser implements ProtectedObject {
 
 	@Override
 	public boolean has(ProtectedObject object) {
-		if (object instanceof User) {
-			User user = (User) object;
+		if (object instanceof Account) {
+			Account user = (Account) object;
 			return user.equals(this);
 		} else if (object instanceof UserBelonging) {
 			UserBelonging userBelonging = (UserBelonging) object;

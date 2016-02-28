@@ -12,7 +12,7 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.util.validation.DepotNameValidator;
-import com.pmease.gitplex.core.util.validation.UserNameValidator;
+import com.pmease.gitplex.core.util.validation.AccountNameValidator;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 import com.pmease.gitplex.web.page.account.depots.NewAccountDepotPage;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
@@ -128,7 +128,7 @@ public class UrlMapper extends CompoundRequestMapper {
 					return false;
 				String userName = urlSegments.get(0);
 				
-				return !UserNameValidator.getReservedNames().contains(userName);
+				return !AccountNameValidator.getReservedNames().contains(userName);
 			}
 
 		});
@@ -150,7 +150,7 @@ public class UrlMapper extends CompoundRequestMapper {
 				if (urlSegments.size() < 2)
 					return false;
 				String userName = urlSegments.get(0);
-				if (UserNameValidator.getReservedNames().contains(userName))
+				if (AccountNameValidator.getReservedNames().contains(userName))
 					return false;
 
 				String depotName = urlSegments.get(1);

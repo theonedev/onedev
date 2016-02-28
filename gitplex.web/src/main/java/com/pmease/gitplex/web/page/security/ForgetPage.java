@@ -19,10 +19,10 @@ import com.pmease.commons.wicket.behavior.testform.TestResult;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -52,8 +52,8 @@ public class ForgetPage extends BasePage {
 
 					@Override
 					protected TestResult test() {
-						UserManager userManager = GitPlex.getInstance(UserManager.class);
-						User user = userManager.findByName(bean.getUserName());
+						AccountManager userManager = GitPlex.getInstance(AccountManager.class);
+						Account user = userManager.findByName(bean.getUserName());
 						if (user != null) {
 							ConfigManager configManager = GitPlex.getInstance(ConfigManager.class);
 							if (configManager.getMailSetting() != null) {

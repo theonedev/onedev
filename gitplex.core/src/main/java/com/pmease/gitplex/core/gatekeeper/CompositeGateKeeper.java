@@ -4,7 +4,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
 public abstract class CompositeGateKeeper extends AbstractGateKeeper {
@@ -30,7 +30,7 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(final User user, final Depot depot, final String branch, final String file) {
+	protected CheckResult doCheckFile(final Account user, final Depot depot, final String branch, final String file) {
 		return aggregate(new Checker() {
 
 			@Override
@@ -42,7 +42,7 @@ public abstract class CompositeGateKeeper extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckPush(final User user, final Depot depot, final String refName, 
+	protected CheckResult doCheckPush(final Account user, final Depot depot, final String refName, 
 			final ObjectId oldCommit, final ObjectId newCommit) {
 		return aggregate(new Checker() {
 

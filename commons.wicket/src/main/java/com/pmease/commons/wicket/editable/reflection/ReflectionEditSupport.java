@@ -1,6 +1,7 @@
 package com.pmease.commons.wicket.editable.reflection;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -23,9 +24,9 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 public class ReflectionEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		if (beanClass.getAnnotation(Editable.class) != null && ClassUtils.isConcrete(beanClass)) {
-			return new BeanContext<Serializable>(beanClass) {
+			return new BeanContext<Serializable>(beanClass, excludeProperties) {
 
 				@Override
 				public BeanViewer renderForView(String componentId, final IModel<Serializable> model) {

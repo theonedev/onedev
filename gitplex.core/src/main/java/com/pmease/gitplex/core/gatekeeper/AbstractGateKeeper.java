@@ -8,7 +8,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
@@ -40,7 +40,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public CheckResult checkFile(User user, Depot depot, String branch, String file) {
+	public CheckResult checkFile(Account user, Depot depot, String branch, String file) {
 		if (isEnabled())
 			return doCheckFile(user, depot, branch, file);
 		else
@@ -48,7 +48,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 	
 	@Override
-	public CheckResult checkPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	public CheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (isEnabled())
 			return doCheckPush(user, depot, refName, oldCommit, newCommit);
 		else
@@ -78,7 +78,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(User user, Depot depot, String branch, String file);
+	protected abstract CheckResult doCheckFile(Account user, Depot depot, String branch, String file);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch, without considering enable flag.
@@ -92,7 +92,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
+	protected abstract CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
 
 	protected CheckResult ignored() {
 		return new Ignored();
@@ -115,7 +115,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public void onDepotRename(User depotOwner, String oldName, String newName) {
+	public void onDepotRename(Account depotOwner, String oldName, String newName) {
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public boolean onUserDelete(User user) {
+	public boolean onUserDelete(Account user) {
 		return false;
 	}
 

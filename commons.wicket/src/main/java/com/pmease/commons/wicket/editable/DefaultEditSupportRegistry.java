@@ -22,9 +22,9 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public BeanContext<Serializable> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<Serializable> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		for (EditSupport each: editSupports) {
-			BeanContext<?> editContext = each.getBeanEditContext(beanClass);
+			BeanContext<?> editContext = each.getBeanEditContext(beanClass, excludeProperties);
 			if (editContext != null)
 				return (BeanContext<Serializable>) editContext;
 		}

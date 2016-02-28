@@ -11,7 +11,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -37,12 +37,12 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
-		Collection<User> authorizedUsers = SecurityUtils.findUsersCan(
+		Collection<Account> authorizedUsers = SecurityUtils.findUsersCan(
 				request.getTargetDepot(), DepotOperation.PUSH);
 
         int approvals = 0;
         int pendings = 0;
-        for (User user: authorizedUsers) {
+        for (Account user: authorizedUsers) {
             Review.Result result = user.checkReviewSince(request.getReferentialUpdate());
             if (result == null) {
                 pendings++;
@@ -65,8 +65,8 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
         }
 	}
 	
-	private CheckResult check(User user, Depot depot) {
-		Collection<User> writers = SecurityUtils.findUsersCan(depot, DepotOperation.PUSH);
+	private CheckResult check(Account user, Depot depot) {
+		Collection<Account> writers = SecurityUtils.findUsersCan(depot, DepotOperation.PUSH);
 
         int approvals = 0;
         int pendings = writers.size();
@@ -87,12 +87,12 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	}
 	
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return check(user, depot);
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return check(user, depot);
 	}
 

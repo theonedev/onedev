@@ -63,7 +63,7 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
     		else
     			this.password = HASH_PREFIX + AppLoader.getInstance(PasswordService.class).encryptPassword(password);
     	} else {
-    		this.password = null;
+    		this.password = "";
     	}
     }
     

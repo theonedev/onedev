@@ -4,17 +4,17 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityDao;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.User;
 
-public interface ReviewManager extends Dao {
+public interface ReviewManager extends EntityDao<Review> {
 
-	Review findBy(User reviewer, PullRequestUpdate update);
+	Review findBy(Account reviewer, PullRequestUpdate update);
 
-	void review(PullRequest request, User reviewer, Review.Result result, @Nullable String comment);
+	void review(PullRequest request, Account reviewer, Review.Result result, @Nullable String comment);
 	
 	/**
 	 * Find list of reviews ordered by review date for specified pull request.

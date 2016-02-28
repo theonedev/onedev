@@ -9,7 +9,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.annotation.RefMatch;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
@@ -47,12 +47,12 @@ public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return doCheck(GitUtils.branch2ref(branch));
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		return doCheck(refName);
 	}
 

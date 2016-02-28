@@ -44,8 +44,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
 import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
@@ -227,7 +227,7 @@ public abstract class EditSavePanel extends Panel {
 							commitMessage = getDefaultCommitMessage();
 						if (StringUtils.isNotBlank(detailCommitMessage))
 							commitMessage += "\n\n" + detailCommitMessage;
-						User user = Preconditions.checkNotNull(GitPlex.getInstance(UserManager.class).getCurrent());
+						Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).getCurrent());
 
 						ObjectId newCommitId = null;
 						while(newCommitId == null) {

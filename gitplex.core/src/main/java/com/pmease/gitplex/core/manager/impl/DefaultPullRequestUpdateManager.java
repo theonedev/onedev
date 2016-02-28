@@ -3,14 +3,12 @@ package com.pmease.gitplex.core.manager.impl;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import org.hibernate.Session;
 
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -21,7 +19,7 @@ import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
 @Singleton
-public class DefaultPullRequestUpdateManager extends DefaultDao implements PullRequestUpdateManager {
+public class DefaultPullRequestUpdateManager extends AbstractEntityDao<PullRequestUpdate> implements PullRequestUpdateManager {
 	
 	private final StorageManager storageManager;
 	
@@ -32,10 +30,10 @@ public class DefaultPullRequestUpdateManager extends DefaultDao implements PullR
 	private final UnitOfWork unitOfWork;
 	
 	@Inject
-	public DefaultPullRequestUpdateManager(Provider<Session> sessionProvider, 
+	public DefaultPullRequestUpdateManager(Dao dao, 
 			StorageManager storageManager, Set<PullRequestListener> pullRequestListeners, 
 			UnitOfWork unitOfWork, CommentManager commentManager) {
-		super(sessionProvider);
+		super(dao);
 		
 		this.storageManager = storageManager;
 		this.pullRequestListeners = pullRequestListeners;
@@ -78,7 +76,7 @@ public class DefaultPullRequestUpdateManager extends DefaultDao implements PullR
 
 					@Override
 					public void run() {
-						PullRequest request = load(PullRequest.class, requestId);
+						PullRequest request = dao.load(PullRequest.class, requestId);
 						for (Comment comment: request.getComments()) {
 							if (comment.getInlineInfo() != null)
 								commentManager.updateInlineInfo(comment);

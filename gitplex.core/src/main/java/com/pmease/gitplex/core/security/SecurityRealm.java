@@ -15,9 +15,9 @@ import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.TeamManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.PrivilegedOperation;
 
@@ -26,12 +26,12 @@ public class SecurityRealm extends AbstractRealm {
 
     private final Dao dao;
     
-    private final UserManager userManager;
+    private final AccountManager userManager;
     
     private final TeamManager teamManager;
     
     @Inject
-    public SecurityRealm(Dao dao, UserManager userManager, TeamManager teamManager) {
+    public SecurityRealm(Dao dao, AccountManager userManager, TeamManager teamManager) {
     	this.dao = dao;
     	this.userManager = userManager;
     	this.teamManager = teamManager;
@@ -61,7 +61,7 @@ public class SecurityRealm extends AbstractRealm {
             		ObjectPermission objectPermission = (ObjectPermission) permission;
             		Collection<Team> teams = new ArrayList<>();
 	                if (userId != 0L) {
-	                    User user = dao.get(User.class, userId);
+	                    Account user = dao.get(Account.class, userId);
 	                    if (user != null) {
 		                    // root user can do anything
 		                    if (user.isRoot())
@@ -102,12 +102,12 @@ public class SecurityRealm extends AbstractRealm {
         return permissions;        
     }
     
-    private User getUser(ObjectPermission permission) {
+    private Account getUser(ObjectPermission permission) {
         if (permission.getObject() instanceof Depot) {
         	Depot depot = (Depot) permission.getObject();
         	return depot.getOwner();
-        } else if (permission.getObject() instanceof User) {
-        	return (User) permission.getObject();
+        } else if (permission.getObject() instanceof Account) {
+        	return (Account) permission.getObject();
         } else {
         	return null;
         }

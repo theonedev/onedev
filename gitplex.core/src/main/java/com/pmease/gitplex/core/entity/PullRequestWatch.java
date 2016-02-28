@@ -24,7 +24,7 @@ public class PullRequestWatch extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private User user;
+	private Account user;
 	
 	private String reason;
 	
@@ -38,11 +38,11 @@ public class PullRequestWatch extends AbstractEntity {
 		this.request = request;
 	}
 
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Account user) {
 		this.user = user;
 	}
 

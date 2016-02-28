@@ -11,14 +11,14 @@ import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public abstract class ReviewerChoice extends SelectToAddChoice<User> {
+public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 
 	private static final String PLACEHOLDER = "Select user to add as reviewer...";
 	
@@ -35,7 +35,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		super.onConfigure();
 
 		PullRequest request = requestModel.getObject();
-		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 		setVisible(request.isOpen() 
 				&& !request.getPotentialReviewers().isEmpty()
 				&& (currentUser != null && currentUser.equals(request.getSubmitter()) || SecurityUtils.canManage(request.getTargetDepot())));
@@ -66,7 +66,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		super.onDetach();
 	}
 
-	protected void onSelect(AjaxRequestTarget target, User user) {
+	protected void onSelect(AjaxRequestTarget target, Account user) {
 		PullRequest request = requestModel.getObject();
 		ReviewInvitation invitation = null;
 		for(ReviewInvitation each: request.getReviewInvitations()) {

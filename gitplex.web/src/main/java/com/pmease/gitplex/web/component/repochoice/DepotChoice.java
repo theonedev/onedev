@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 public class DepotChoice extends Select2Choice<Depot> {
@@ -25,7 +25,7 @@ public class DepotChoice extends Select2Choice<Depot> {
 	 * @param userModel
 	 * 			model of user to choose repository under, <tt>null</tt> to choose all accessible repositories
 	 */
-	public DepotChoice(String id, IModel<Depot> depotModel, @Nullable IModel<User> userModel, boolean allowEmpty) {
+	public DepotChoice(String id, IModel<Depot> depotModel, @Nullable IModel<Account> userModel, boolean allowEmpty) {
 		super(id, depotModel, new DepotChoiceProvider(userModel));
 		
 		this.allowEmpty = allowEmpty;

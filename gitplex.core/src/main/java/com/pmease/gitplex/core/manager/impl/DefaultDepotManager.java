@@ -15,7 +15,6 @@ import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,26 +25,27 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.DefaultDao;
+import com.pmease.commons.hibernate.dao.AbstractEntityDao;
+import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.extensionpoint.RefListener;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.manager.UserManager;
 
 @Singleton
-public class DefaultDepotManager extends DefaultDao implements DepotManager, LifecycleListener, RefListener {
+public class DefaultDepotManager extends AbstractEntityDao<Depot> implements DepotManager, LifecycleListener, RefListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultDepotManager.class);
 	
@@ -53,7 +53,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 	
     private final StorageManager storageManager;
     
-    private final UserManager userManager;
+    private final AccountManager userManager;
     
     private final AuxiliaryManager auxiliaryManager;
    
@@ -68,10 +68,10 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     
     @Inject
-    public DefaultDepotManager(Provider<Session> sessionProvider, UserManager userManager, 
+    public DefaultDepotManager(Dao dao, AccountManager userManager, 
     		StorageManager storageManager, AuxiliaryManager auxiliaryManager, 
     		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
-    	super(sessionProvider);
+    	super(dao);
     	
         this.storageManager = storageManager;
         this.userManager = userManager;
@@ -128,7 +128,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
     	
         remove(depot);
 
-		for (Depot each: allOf(Depot.class)) {
+		for (Depot each: allOf()) {
 			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
 				if (it.next().onDepotDelete(depot))
 					it.remove();
@@ -159,7 +159,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
     @Sessional
     @Override
     public Depot findBy(String ownerName, String depotName) {
-    	User user = userManager.findByName(ownerName);
+    	Account user = userManager.findByName(ownerName);
     	if (user != null)
     		return findBy(user, depotName);
     	else
@@ -168,12 +168,12 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 
     @Sessional
     @Override
-    public Depot findBy(User owner, String depotName) {
+    public Depot findBy(Account owner, String depotName) {
     	idLock.readLock().lock();
     	try {
     		Long id = nameToId.get(new Pair<>(owner.getId(), depotName));
     		if (id != null)
-    			return load(Depot.class, id);
+    			return load(id);
     		else
     			return null;
     	} finally {
@@ -185,7 +185,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
     @Override
     public Depot findBy(String depotFQN) {
     	String userName = StringUtils.substringBefore(depotFQN, Depot.FQN_SEPARATOR);
-    	User user = userManager.findByName(userName);
+    	Account user = userManager.findByName(userName);
     	if (user != null)
     		return findBy(user, StringUtils.substringAfter(depotFQN, Depot.FQN_SEPARATOR));
     	else
@@ -194,7 +194,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 
     @Transactional
 	@Override
-	public Depot fork(Depot depot, User user) {
+	public Depot fork(Depot depot, Account user) {
 		if (depot.getOwner().equals(user))
 			return depot;
 		
@@ -269,7 +269,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (Depot depot: allOf(Depot.class)) 
+        for (Depot depot: allOf()) 
         	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getUser().getId(), depot.getName()));
 	}
 	
@@ -298,7 +298,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 
 	@Transactional
 	@Override
-	public void rename(User depotOwner, final Long depotId, String oldName, final String newName) {
+	public void rename(Account depotOwner, final Long depotId, String oldName, final String newName) {
 		Query query = getSession().createQuery("update Depot set name=:newName where "
 				+ "owner=:owner and name=:oldName");
 		query.setParameter("owner", depotOwner);
@@ -306,7 +306,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 		query.setParameter("newName", newName);
 		query.executeUpdate();
 		
-		for (Depot depot: allOf(Depot.class)) {
+		for (Depot depot: allOf()) {
 			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
 				integrationPolicy.onDepotRename(depotOwner, oldName, newName);
 			}
@@ -335,7 +335,7 @@ public class DefaultDepotManager extends DefaultDao implements DepotManager, Lif
 	@Override
 	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
 		if (newCommitHash == null) {
-			for (Depot each: allOf(Depot.class)) {
+			for (Depot each: allOf()) {
 				String branch = GitUtils.ref2branch(refName);
 				if (branch != null) {
 					for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {

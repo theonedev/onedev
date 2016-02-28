@@ -22,7 +22,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.extensionpoint.RefListener;
 
 @SuppressWarnings("serial")
@@ -57,7 +57,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         
         Depot depot = dao.load(Depot.class, Long.valueOf(fields.get(0)));
         
-        SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
+        SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.copy(request.getInputStream(), baos);

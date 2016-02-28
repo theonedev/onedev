@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.editable.userchoice;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -23,7 +24,7 @@ import com.pmease.gitplex.core.annotation.UserChoice;
 public class UserEditSupport implements EditSupport {
 
 	@Override
-	public BeanContext<?> getBeanEditContext(Class<?> beanClass) {
+	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
 		return null;
 	}
 

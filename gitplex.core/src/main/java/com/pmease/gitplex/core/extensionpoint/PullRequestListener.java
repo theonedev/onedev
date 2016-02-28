@@ -9,22 +9,22 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @ExtensionPoint
 public interface PullRequestListener {
 	
 	void onOpened(PullRequest request);
 	
-	void onReopened(PullRequest request, @Nullable User user, @Nullable String comment);
+	void onReopened(PullRequest request, @Nullable Account user, @Nullable String comment);
 	
 	void onUpdated(PullRequestUpdate update);
 	
-	void onMentioned(PullRequest request, User user);
+	void onMentioned(PullRequest request, Account user);
 	
-	void onMentioned(Comment comment, User user);
+	void onMentioned(Comment comment, Account user);
 
-	void onMentioned(CommentReply reply, User user);
+	void onMentioned(CommentReply reply, Account user);
 	
 	void onCommented(Comment comment);
 	
@@ -36,9 +36,9 @@ public interface PullRequestListener {
 	
 	void onVerified(PullRequest request);
 	
-	void onIntegrated(PullRequest request, @Nullable User user, @Nullable String comment);
+	void onIntegrated(PullRequest request, @Nullable Account user, @Nullable String comment);
 	
-	void onDiscarded(PullRequest request, @Nullable User user, @Nullable String comment);
+	void onDiscarded(PullRequest request, @Nullable Account user, @Nullable String comment);
 
 	void onIntegrationPreviewCalculated(PullRequest request);
 	

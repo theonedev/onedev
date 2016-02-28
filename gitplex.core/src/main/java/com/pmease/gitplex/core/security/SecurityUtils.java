@@ -14,16 +14,16 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
-	public static Collection<User> findUsersCan(Depot depot, DepotOperation operation) {
-		Set<User> authorizedUsers = new HashSet<User>();
-		for (User user: GitPlex.getInstance(Dao.class).query(EntityCriteria.of(User.class), 0, 0)) {
+	public static Collection<Account> findUsersCan(Depot depot, DepotOperation operation) {
+		Set<Account> authorizedUsers = new HashSet<Account>();
+		for (Account user: GitPlex.getInstance(Dao.class).query(EntityCriteria.of(Account.class), 0, 0)) {
 			if (user.asSubject().isPermitted(new ObjectPermission(depot, operation)))
 				authorizedUsers.add(user);
 		}
@@ -35,8 +35,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
 		} else {
-			User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
-			User submitter = request.getSubmitter();
+			Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
+			Account submitter = request.getSubmitter();
 			return currentUser != null && currentUser.equals(submitter);
 		}
 	}
@@ -46,12 +46,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
 		} else {
-			return review.getReviewer().equals(GitPlex.getInstance(UserManager.class).getCurrent());
+			return review.getReviewer().equals(GitPlex.getInstance(AccountManager.class).getCurrent());
 		}
 	}
 	
 	public static boolean canModify(Comment comment) {
-		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 		if (currentUser == null) {
 			return false;
 		} else {
@@ -65,14 +65,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canPushRef(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot))	
 				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassed();
 	}
 	
-	public static boolean canManage(User account) {
-		User currentUser = GitPlex.getInstance(UserManager.class).getCurrent();
+	public static boolean canManage(Account account) {
+		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 		if (currentUser != null) {
 			if (currentUser.isRoot())
 				return true;

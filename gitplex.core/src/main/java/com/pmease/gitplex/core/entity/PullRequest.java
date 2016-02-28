@@ -162,7 +162,7 @@ public class PullRequest extends AbstractEntity {
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User submitter;
+	private Account submitter;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -181,7 +181,7 @@ public class PullRequest extends AbstractEntity {
 	private String baseCommitHash;
 
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User assignee;
+	private Account assignee;
 
 	// used for id search in markdown editor
 	@Column(nullable=false)
@@ -301,11 +301,11 @@ public class PullRequest extends AbstractEntity {
 	 * 			the user submitting the pull request, or <tt>null</tt> if unknown
 	 */
 	@Nullable
-	public User getSubmitter() {
+	public Account getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(@Nullable User submitter) {
+	public void setSubmitter(@Nullable Account submitter) {
 		this.submitter = submitter;
 	}
 
@@ -317,11 +317,11 @@ public class PullRequest extends AbstractEntity {
 	 * 			system integrate the pull request automatically
 	 */
 	@Nullable
-	public User getAssignee() {
+	public Account getAssignee() {
 		return assignee;
 	}
 
-	public void setAssignee(User assignee) {
+	public void setAssignee(Account assignee) {
 		this.assignee = assignee;
 	}
 
@@ -683,8 +683,8 @@ public class PullRequest extends AbstractEntity {
 	 * @param count 
 	 * 			number of users to invite
 	 */
-	public void pickReviewers(Collection<User> candidates, int count) {
-		List<User> pickList = new ArrayList<User>(candidates);
+	public void pickReviewers(Collection<Account> candidates, int count) {
+		List<Account> pickList = new ArrayList<Account>(candidates);
 
 		/*
 		 * users already reviewed since base update should be excluded from
@@ -693,8 +693,8 @@ public class PullRequest extends AbstractEntity {
 		for (Review review: getReferentialUpdate().listReviewsOnwards())
 			pickList.remove(review.getReviewer());
 
-		final Map<User, Date> firstChoices = new HashMap<>();
-		final Map<User, Date> secondChoices = new HashMap<>();
+		final Map<Account, Date> firstChoices = new HashMap<>();
+		final Map<Account, Date> secondChoices = new HashMap<>();
 		
 		for (ReviewInvitation invitation: getReviewInvitations()) {
 			if (invitation.isPreferred())
@@ -712,10 +712,10 @@ public class PullRequest extends AbstractEntity {
 		 * 2. If user is already a reviewer, it will be considered first.
 		 * 3. Otherwise pick user with least reviews.
 		 */
-		Collections.sort(pickList, new Comparator<User>() {
+		Collections.sort(pickList, new Comparator<Account>() {
 
 			@Override
-			public int compare(User user1, User user2) {
+			public int compare(Account user1, Account user2) {
 				if (firstChoices.containsKey(user1)) {
 					if (firstChoices.containsKey(user2)) 
 						return user1.getReviewEffort() - user2.getReviewEffort();
@@ -737,13 +737,13 @@ public class PullRequest extends AbstractEntity {
 			
 		});
 
-		List<User> picked;
+		List<Account> picked;
 		if (count <= pickList.size())
 			picked = pickList.subList(0, count);
 		else
 			picked = pickList;
 
-		for (User user: picked) {
+		for (Account user: picked) {
 			boolean found = false;
 			for (ReviewInvitation invitation: getReviewInvitations()) {
 				if (invitation.getReviewer().equals(user)) {
@@ -783,7 +783,7 @@ public class PullRequest extends AbstractEntity {
 					Restrictions.eq("sourceBranch", source.getBranch()));
 		}
 		
-		public static Criterion ofSubmitter(User submitter) {
+		public static Criterion ofSubmitter(Account submitter) {
 			return Restrictions.eq("submitter", submitter);
 		}
 		
@@ -909,7 +909,7 @@ public class PullRequest extends AbstractEntity {
 		return reviews;
 	}
 	
-	public boolean isReviewEffective(User user) {
+	public boolean isReviewEffective(Account user) {
 		for (Review review: getReviews()) {
 			if (review.getUpdate().equals(getLatestUpdate()) && review.getReviewer().equals(user)) 
 				return true;
@@ -923,15 +923,15 @@ public class PullRequest extends AbstractEntity {
 	 * @return
 	 * 			list of potential reviewers
 	 */
-	public List<User> getPotentialReviewers() {
-		List<User> reviewers = new ArrayList<>();
-		Set<User> alreadyInvited = new HashSet<>();
+	public List<Account> getPotentialReviewers() {
+		List<Account> reviewers = new ArrayList<>();
+		Set<Account> alreadyInvited = new HashSet<>();
 		for (ReviewInvitation invitation: getReviewInvitations()) {
 			if (invitation.isPreferred())
 				alreadyInvited.add(invitation.getReviewer());
 		}
 		ObjectPermission readPerm = ObjectPermission.ofDepotPull(getTargetDepot());
-		for (User user: GitPlex.getInstance(Dao.class).allOf(User.class)) {
+		for (Account user: GitPlex.getInstance(Dao.class).allOf(Account.class)) {
 			if (user.asSubject().isPermitted(readPerm) && !alreadyInvited.contains(user))
 				reviewers.add(user);
 		}
@@ -939,7 +939,7 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	@Nullable
-	public PullRequestWatch getWatch(User user) {
+	public PullRequestWatch getWatch(Account user) {
 		for (PullRequestWatch watch: getWatches()) {
 			if (watch.getUser().equals(user))
 				return watch;
@@ -948,7 +948,7 @@ public class PullRequest extends AbstractEntity {
 	}
 
 	@Nullable
-	public PullRequestVisit getVisit(User user) {
+	public PullRequestVisit getVisit(Account user) {
 		for (PullRequestVisit visit: getVisits()) {
 			if (visit.getUser().equals(user))
 				return visit;

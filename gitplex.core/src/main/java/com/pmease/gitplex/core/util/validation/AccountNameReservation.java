@@ -5,6 +5,6 @@ import java.util.Set;
 import com.pmease.commons.loader.ExtensionPoint;
 
 @ExtensionPoint
-public interface UserNameReservation {
+public interface AccountNameReservation {
 	Set<String> getReserved();
 }

@@ -4,21 +4,21 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 public class Assignee implements Serializable {
 	
-	private final User user;
+	private final Account user;
 	
 	private final String alias;
 	
-	public Assignee(User user, @Nullable String alias) {
+	public Assignee(Account user, @Nullable String alias) {
 		this.user = user;
 		this.alias = alias;
 	}
 
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 

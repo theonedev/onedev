@@ -8,14 +8,14 @@ import javax.annotation.Nullable;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 
 interface RenderableActivity extends Serializable {
 	
 	Date getDate();
 	
 	@Nullable
-	User getUser();
+	Account getUser();
 	
 	PullRequest getRequest();
 	

@@ -3,8 +3,9 @@ package com.pmease.gitplex.web.page.test;
 import org.apache.wicket.markup.html.link.Link;
 
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.User;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -18,9 +19,11 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				User user = getCurrentUser();
-				user.setFullName("hello2");
-				GitPlex.getInstance(UserManager.class).save(user);
+				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				Account account = accountManager.load(1L);
+				account.setPassword("");
+				accountManager.save(account);
+				WebSession.get().login("admin", "just do it", true);
 			}
 			
 		});

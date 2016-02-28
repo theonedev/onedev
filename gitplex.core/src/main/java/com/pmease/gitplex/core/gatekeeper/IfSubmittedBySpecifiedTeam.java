@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.TeamManager;
 
@@ -31,7 +31,7 @@ public class IfSubmittedBySpecifiedTeam extends AbstractGateKeeper {
 		this.teamName = teamName;
 	}
 
-	private Team getTeam(User owner) {
+	private Team getTeam(Account owner) {
     	return Preconditions.checkNotNull(GitPlex.getInstance(TeamManager.class).findBy(owner, teamName));
     }
 
@@ -40,7 +40,7 @@ public class IfSubmittedBySpecifiedTeam extends AbstractGateKeeper {
     	return check(request.getSubmitter(), request.getTargetDepot().getOwner());
     }
 
-	private CheckResult check(User user, User owner) {
+	private CheckResult check(Account user, Account owner) {
 		if (user != null) {
 			for (Membership membership: user.getMemberships()) {
 				if (membership.getTeam().equals(getTeam(owner)))
@@ -51,13 +51,13 @@ public class IfSubmittedBySpecifiedTeam extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, 
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, 
 			ObjectId oldCommit, ObjectId newCommit) {
 		return check(user, depot.getOwner());
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		return check(user, depot.getOwner());
 	}
 

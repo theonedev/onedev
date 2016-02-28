@@ -9,7 +9,7 @@ import com.pmease.gitplex.core.annotation.PathMatch;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
@@ -47,7 +47,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckFile(User user, Depot depot, String branch, String file) {
+	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		if (IncludeExcludeUtils.matches(pathMatch, file)) 
 			return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'."));
 		else
@@ -55,7 +55,7 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 	}
 
 	@Override
-	protected CheckResult doCheckPush(User user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			for (String file: depot.git().listChangedFiles(oldCommit.name(), newCommit.name(), null)) {
 				if (IncludeExcludeUtils.matches(pathMatch, file))

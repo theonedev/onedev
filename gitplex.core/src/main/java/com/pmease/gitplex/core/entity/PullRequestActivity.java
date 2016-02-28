@@ -27,7 +27,7 @@ public class PullRequestActivity extends AbstractEntity {
 	private Action action;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User user;
+	private Account user;
 	
 	@Column(nullable=false)
 	private Date date = new Date();
@@ -49,11 +49,11 @@ public class PullRequestActivity extends AbstractEntity {
 	}
 
 	@Nullable
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Account user) {
 		this.user = user;
 	}
 

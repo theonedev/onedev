@@ -24,12 +24,12 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.User;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
@@ -42,10 +42,10 @@ public class GitUpdateCallback extends HttpServlet {
 
 	private final Dao dao;
 	
-	private final UserManager userManager;
+	private final AccountManager userManager;
 	
 	@Inject
-	public GitUpdateCallback(Dao dao, UserManager userManager) {
+	public GitUpdateCallback(Dao dao, AccountManager userManager) {
 		this.dao = dao;
 		this.userManager = userManager;
 	}
@@ -78,7 +78,7 @@ public class GitUpdateCallback extends HttpServlet {
         
         Depot depot = dao.load(Depot.class, Long.valueOf(fields.get(0)));
         
-        SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
+        SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.copy(request.getInputStream(), baos);
@@ -92,7 +92,7 @@ public class GitUpdateCallback extends HttpServlet {
         
 		logger.debug("Executing update hook against reference {}...", refName);
 
-		User user = userManager.getCurrent();
+		Account user = userManager.getCurrent();
 		Preconditions.checkNotNull(user);
 
 		if (refName.startsWith(Depot.REFS_GITPLEX)) {

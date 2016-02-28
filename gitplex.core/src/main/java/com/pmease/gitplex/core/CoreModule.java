@@ -44,7 +44,7 @@ import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamManager;
-import com.pmease.gitplex.core.manager.UserManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
@@ -65,14 +65,14 @@ import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultSequentialWorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
-import com.pmease.gitplex.core.manager.impl.DefaultUserManager;
+import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultWorkManager;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
 import com.pmease.gitplex.core.util.validation.DepotNameReservation;
-import com.pmease.gitplex.core.util.validation.UserNameReservation;
+import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -101,7 +101,7 @@ public class CoreModule extends AbstractPluginModule {
 		/*
 		 * Contribute empty reservations to avoid Guice complain 
 		 */
-		contribute(UserNameReservation.class, new UserNameReservation() {
+		contribute(AccountNameReservation.class, new AccountNameReservation() {
 			
 			@Override
 			public Set<String> getReserved() {
@@ -154,7 +154,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestUpdateManager.class).to(DefaultPullRequestUpdateManager.class);
 		bind(DepotManager.class).to(DefaultDepotManager.class);
 		bind(TeamManager.class).to(DefaultTeamManager.class);
-		bind(UserManager.class).to(DefaultUserManager.class);
+		bind(AccountManager.class).to(DefaultAccountManager.class);
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
 		bind(ReviewInvitationManager.class).to(DefaultReviewInvitationManager.class);
 		bind(ReviewManager.class).to(DefaultReviewManager.class);
@@ -176,7 +176,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(PullRequestListener.class, DefaultNotificationManager.class);
 		contribute(PullRequestListener.class, DefaultPullRequestWatchManager.class);
 		contribute(LifecycleListener.class, DefaultPullRequestManager.class);
-		contribute(LifecycleListener.class, DefaultUserManager.class);
+		contribute(LifecycleListener.class, DefaultAccountManager.class);
 		contribute(LifecycleListener.class, DefaultDepotManager.class);
 		contribute(LifecycleListener.class, DefaultAuxiliaryManager.class);
 		contribute(LifecycleListener.class, DefaultWorkManager.class);
