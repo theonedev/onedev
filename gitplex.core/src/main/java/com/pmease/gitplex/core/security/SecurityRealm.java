@@ -19,25 +19,26 @@ import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.privilege.Privilege;
 
 @Singleton
 public class SecurityRealm extends AbstractRealm {
 
-    private final AccountManager userManager;
+    private final AccountManager accountManager;
     
-    private final TeamManager teamManager;
+    private final AuthorizationManager authorizationManager;
     
     @Inject
-    public SecurityRealm(AccountManager userManager, TeamManager teamManager) {
-    	this.userManager = userManager;
-    	this.teamManager = teamManager;
+    public SecurityRealm(AccountManager userManager, AuthorizationManager authorizationManager) {
+    	this.accountManager = userManager;
+    	this.authorizationManager = authorizationManager;
     }
 
     @Override
     protected AbstractUser getUserByName(String userName) {
-    	return userManager.findByName(userName);
+    	return accountManager.findByName(userName);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class SecurityRealm extends AbstractRealm {
             		ObjectPermission objectPermission = (ObjectPermission) permission;
             		Collection<Team> teams = new ArrayList<>();
 	                if (userId != 0L) {
-	                    Account user = userManager.get(userId);
+	                    Account user = accountManager.get(userId);
 	                    if (user != null) {
 		                    // administrator can do anything
 		                    if (user.isRoot() || user.isAdmin())
@@ -74,7 +75,17 @@ public class SecurityRealm extends AbstractRealm {
 		                    		return true;
 		                    	
 			                	for (OrganizationMembership membership: user.getOrganizationMemberships()) {
-			                		
+			                		if (membership.getOrganization().equals(checkAccount)) {
+			                			if (membership.isAdmin() 
+			                					|| checkAccount.getDefaultPrivilege().can(objectPermission.getOperation())) {
+			                				return true;
+			                			}
+			                			user.getTeamMemberships();
+			                			for (Authorization authorization: 
+			                					authorizationManager.findAuthorizations(checkAccount)) {
+			                			}
+			                			break;
+			                		}
 			                	}
 		                    }
 	                    }
@@ -88,7 +99,7 @@ public class SecurityRealm extends AbstractRealm {
                     			break;
                     		}
                     	}
-                    	if (operation == null && team.getOwner().has(objectPermission.getObject())) {
+                    	if (operation == null && team.getOrganization().has(objectPermission.getObject())) {
                     		operation = team.getAuthorizedOperation();
                     	}
                     	

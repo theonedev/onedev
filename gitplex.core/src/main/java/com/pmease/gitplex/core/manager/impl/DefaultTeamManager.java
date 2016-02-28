@@ -55,7 +55,7 @@ public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamM
 	@Transactional
 	@Override
 	public void delete(Team team) {
-		for (Depot each: team.getOwner().getDepots()) {
+		for (Depot each: team.getOrganization().getDepots()) {
 			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
 				if (it.next().onTeamDelete(team))
 					it.remove();
