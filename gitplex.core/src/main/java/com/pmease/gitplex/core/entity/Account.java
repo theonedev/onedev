@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,6 +29,7 @@ import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.entity.component.Team;
 import com.pmease.gitplex.core.permission.object.AccountBelonging;
 import com.pmease.gitplex.core.util.validation.AccountName;
 
@@ -65,6 +67,9 @@ public class Account extends AbstractUser implements ProtectedObject {
 	/* used by organization account */
 	private DepotPrivilege defaultPrivilege;
 	
+	/* used by organization account */
+	private List<Team> teams = new ArrayList<>();
+	
 	@Column(nullable=false)
 	private String noSpaceName;
 	
@@ -76,15 +81,11 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<OrganizationMembership> organizationMemberships = new ArrayList<>();
+	private Collection<Membership> organizationMemberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="organization")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<OrganizationMembership> userMemberships = new ArrayList<>();
-	
-	@OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<TeamMembership> teamMemberships = new ArrayList<>();
+	private Collection<Membership> userMemberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner")
 	private Collection<Depot> depots = new ArrayList<>();
@@ -92,10 +93,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestReference> requestReferences = new ArrayList<>();
-	
-	@OneToMany(mappedBy="owner")
-	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Team> teams = new ArrayList<Team>();
 	
 	@OneToMany(mappedBy="submitter")
 	private Collection<PullRequest> submittedRequests = new ArrayList<>();
@@ -227,28 +224,20 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.avatarUploadDate = avatarUploadDate;
 	}
 
-	public Collection<OrganizationMembership> getOrganizationMemberships() {
+	public Collection<Membership> getOrganizationMemberships() {
 		return organizationMemberships;
 	}
 
-	public void setOrganizationMemberships(Collection<OrganizationMembership> organizationMemberships) {
+	public void setOrganizationMemberships(Collection<Membership> organizationMemberships) {
 		this.organizationMemberships = organizationMemberships;
 	}
 
-	public Collection<OrganizationMembership> getUserMemberships() {
+	public Collection<Membership> getUserMemberships() {
 		return userMemberships;
 	}
 
-	public void setUserMemberships(Collection<OrganizationMembership> userMemberships) {
+	public void setUserMemberships(Collection<Membership> userMemberships) {
 		this.userMemberships = userMemberships;
-	}
-
-	public Collection<TeamMembership> getTeamMemberships() {
-		return teamMemberships;
-	}
-
-	public void setTeamMemberships(Collection<TeamMembership> teamMemberships) {
-		this.teamMemberships = teamMemberships;
 	}
 
 	public int getReviewEffort() {
@@ -267,11 +256,11 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.depots = depots;
 	}
 
-	public Collection<Team> getTeams() {
+	public List<Team> getTeams() {
 		return teams;
 	}
 
-	public void setTeams(Collection<Team> teams) {
+	public void setTeams(List<Team> teams) {
 		this.teams = teams;
 	}
 

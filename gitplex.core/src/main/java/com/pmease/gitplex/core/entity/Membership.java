@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.entity;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -11,9 +13,9 @@ import com.pmease.commons.hibernate.AbstractEntity;
 
 @Entity
 @Table(uniqueConstraints={
-		@UniqueConstraint(columnNames={"g_user_id", "g_team_id"})
+		@UniqueConstraint(columnNames={"g_user_id", "g_organization_id"})
 })
-public class TeamMembership extends AbstractEntity {
+public class Membership extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -23,8 +25,12 @@ public class TeamMembership extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Team team;
+	private Account organization;
 	
+	private boolean admin;
+	
+	private List<String> joinedTeams;
+
 	public Account getUser() {
 		return user;
 	}
@@ -33,12 +39,28 @@ public class TeamMembership extends AbstractEntity {
 		this.user = user;
 	}
 
-	public Team getTeam() {
-		return team;
+	public Account getOrganization() {
+		return organization;
 	}
 
-	public void setTeam(Team team) {
-		this.team = team;
+	public void setOrganization(Account organization) {
+		this.organization = organization;
+	}
+
+	public boolean isAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
+	}
+
+	public List<String> getJoinedTeams() {
+		return joinedTeams;
+	}
+
+	public void setJoinedTeams(List<String> joinedTeams) {
+		this.joinedTeams = joinedTeams;
 	}
 
 }

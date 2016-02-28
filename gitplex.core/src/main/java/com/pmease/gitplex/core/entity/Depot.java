@@ -93,8 +93,8 @@ import com.pmease.gitplex.core.extensionpoint.RefListener;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.StorageManager;
-import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.AccountBelonging;
+import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.util.validation.DepotName;
 
 @Entity
@@ -153,10 +153,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	@OneToMany(mappedBy="sourceDepot")
 	private Collection<PullRequest> outgoingRequests = new ArrayList<>();
 	
-	@OneToMany(mappedBy="depot")
-	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Authorization> authorizations = new ArrayList<>();
-
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Depot> forks = new ArrayList<>();
     
@@ -249,14 +245,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	public void setOutgoingRequests(Collection<PullRequest> outgoingRequests) {
 		this.outgoingRequests = outgoingRequests;
-	}
-
-	public Collection<Authorization> getAuthorizations() {
-		return authorizations;
-	}
-
-	public void setAuthorizations(Collection<Authorization> authorizations) {
-		this.authorizations = authorizations;
 	}
 
 	public Depot getForkedFrom() {

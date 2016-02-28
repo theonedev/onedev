@@ -13,7 +13,7 @@ import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.OrganizationMembership;
+import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.entity.Account;
@@ -74,7 +74,7 @@ public class SecurityRealm extends AbstractRealm {
 		                    	if (checkAccount.equals(user)) 
 		                    		return true;
 		                    	
-			                	for (OrganizationMembership membership: user.getOrganizationMemberships()) {
+			                	for (Membership membership: user.getOrganizationMemberships()) {
 			                		if (membership.getOrganization().equals(checkAccount)) {
 			                			if (membership.isAdmin() 
 			                					|| checkAccount.getDefaultPrivilege().can(objectPermission.getOperation())) {
