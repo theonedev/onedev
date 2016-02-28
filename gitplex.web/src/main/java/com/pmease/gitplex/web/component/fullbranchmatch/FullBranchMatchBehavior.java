@@ -51,7 +51,7 @@ public class FullBranchMatchBehavior extends ANTLRAssistBehavior {
 					Depot branchDepot;
 					DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
 					if (depotFQN.indexOf("/") == -1) {
-						branchDepot = depotManager.findBy(depot.getUser(), depotFQN);
+						branchDepot = depotManager.findBy(depot.getOwner(), depotFQN);
 					} else {
 						branchDepot = depotManager.findBy(depotFQN);
 					}

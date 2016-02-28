@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.entity.listener;
+package com.pmease.gitplex.core.entity.persistlistener;
 
 import java.io.Serializable;
 import java.util.Collection;

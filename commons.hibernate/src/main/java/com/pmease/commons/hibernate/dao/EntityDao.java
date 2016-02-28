@@ -71,7 +71,7 @@ public interface EntityDao<T extends AbstractEntity> {
 	
 	List<T> query(EntityCriteria<T> criteria);
 	
-	List<T> allOf();
+	List<T> all();
 	
 	/**
 	 * This method expects to lookup a single entity with specified criteria

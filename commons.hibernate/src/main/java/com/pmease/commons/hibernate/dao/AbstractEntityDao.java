@@ -56,7 +56,7 @@ public abstract class AbstractEntityDao<T extends AbstractEntity> implements Ent
 	}
 
 	@Override
-	public List<T> allOf() {
+	public List<T> all() {
 		return dao.allOf(entityClass);
 	}
 

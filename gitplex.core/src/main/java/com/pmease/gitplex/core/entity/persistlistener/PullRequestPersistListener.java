@@ -1,12 +1,14 @@
-package com.pmease.gitplex.core.entity.listener;
+package com.pmease.gitplex.core.entity.persistlistener;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.wicket.util.lang.Objects;
 import org.hibernate.CallbackException;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.Type;
@@ -15,7 +17,6 @@ import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestReference;
 import com.pmease.gitplex.core.entity.Account;
@@ -25,7 +26,7 @@ import com.pmease.gitplex.core.util.markdown.MentionParser;
 import com.pmease.gitplex.core.util.markdown.PullRequestParser;
 
 @Singleton
-public class CommentReplyPersistListener implements PersistListener {
+public class PullRequestPersistListener implements PersistListener {
 
 	private final MarkdownManager markdownManager;
 	
@@ -36,7 +37,7 @@ public class CommentReplyPersistListener implements PersistListener {
 	private final AccountManager userManager;
 	
 	@Inject
-	public CommentReplyPersistListener(MarkdownManager markdownManager, 
+	public PullRequestPersistListener(MarkdownManager markdownManager, 
 			Set<PullRequestListener> pullRequestListeners, Dao dao, AccountManager userManager) {
 		this.markdownManager = markdownManager;
 		this.pullRequestListeners = pullRequestListeners;
@@ -53,49 +54,35 @@ public class CommentReplyPersistListener implements PersistListener {
 	@Override
 	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
 			String[] propertyNames, Type[] types) throws CallbackException {
-		if (entity instanceof CommentReply) {
-			CommentReply reply = (CommentReply) entity;
+		if (entity instanceof PullRequest) {
+			PullRequest request = (PullRequest) entity;
 			for (int i=0; i<propertyNames.length; i++) {
-				if (propertyNames[i].equals("content")) {
-					String content = (String) currentState[i];
-					String prevContent = (String) previousState[i];
-					if (!content.equals(prevContent)) {
-						MentionParser parser = new MentionParser();
-						String html = markdownManager.parse(content);
-						Collection<Account> mentions = parser.parseMentions(html);
-						mentions.removeAll(parser.parseMentions(markdownManager.parse(prevContent)));
+				if (propertyNames[i].equals("description")) {
+					String description = (String) currentState[i];
+					String prevDescription = (String) previousState[i];
+					if (!Objects.equal(description, prevDescription)) {
+						MentionParser mentionParser = new MentionParser();
+						Collection<Account> mentions;
+						String html;
+						if (description != null) {
+							html = markdownManager.parse(description);
+							mentions = mentionParser.parseMentions(html);
+						} else {
+							mentions = new HashSet<>();
+							html = null;
+						}
+						if (prevDescription != null)
+							mentions.removeAll(mentionParser.parseMentions(markdownManager.parse(prevDescription)));
 						for (Account user: mentions) {
 							for (PullRequestListener listener: pullRequestListeners)
-								listener.onMentioned((CommentReply) entity, user);
+								listener.onMentioned((PullRequest) entity, user);
 						}
 						
-						for (PullRequest request: new PullRequestParser().parseRequests(html))
-							saveReference(request, reply.getComment().getRequest());
+						if (html != null) {
+							for (PullRequest referenced: new PullRequestParser().parseRequests(html))
+								saveReference(referenced, request);
+						}
 					}
-					break;
-				}
-			}
-		} 
-		return false;
-	}
-
-	@Override
-	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
-			throws CallbackException {
-		if (entity instanceof CommentReply) {
-			CommentReply reply = (CommentReply) entity;
-			for (int i=0; i<propertyNames.length; i++) {
-				if (propertyNames[i].equals("content")) {
-					String content = (String) state[i];
-					String html = markdownManager.parse(content);
-					Collection<Account> mentions = new MentionParser().parseMentions(html);
-					for (Account user: mentions) {
-						for (PullRequestListener listener: pullRequestListeners)
-							listener.onMentioned((CommentReply) entity, user);
-					}
-
-					for (PullRequest request: new PullRequestParser().parseRequests(html))
-						saveReference(request, reply.getComment().getRequest());
 					break;
 				}
 			}
@@ -118,6 +105,33 @@ public class CommentReplyPersistListener implements PersistListener {
 		}
 	}
 	
+	@Override
+	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
+			throws CallbackException {
+		if (entity instanceof PullRequest) {
+			PullRequest request = (PullRequest) entity;
+			for (int i=0; i<propertyNames.length; i++) {
+				if (propertyNames[i].equals("idStr")) {
+					state[i] = id.toString();
+				} else if (propertyNames[i].equals("description")) {
+					String description = (String) state[i];
+					if (description != null) {
+						String html = markdownManager.parse(description);
+						Collection<Account> mentions = new MentionParser().parseMentions(html);
+						for (Account user: mentions) {
+							for (PullRequestListener listener: pullRequestListeners)
+								listener.onMentioned((PullRequest) entity, user);
+						}
+						
+						for (PullRequest referenced: new PullRequestParser().parseRequests(html))
+							saveReference(referenced, request);
+					}
+				}
+			}
+		} 
+		return true;
+	}
+
 	@Override
 	public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
 			throws CallbackException {

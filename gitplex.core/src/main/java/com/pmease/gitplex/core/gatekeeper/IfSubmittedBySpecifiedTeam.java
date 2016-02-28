@@ -6,11 +6,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.TeamManager;
 
@@ -42,7 +42,7 @@ public class IfSubmittedBySpecifiedTeam extends AbstractGateKeeper {
 
 	private CheckResult check(Account user, Account owner) {
 		if (user != null) {
-			for (Membership membership: user.getMemberships()) {
+			for (TeamMembership membership: user.getTeamMemberships()) {
 				if (membership.getTeam().equals(getTeam(owner)))
 					return passed(Lists.newArrayList("Submitted by a member of team '" + teamName + "'."));
 			}

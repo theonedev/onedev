@@ -53,7 +53,7 @@ public class FullBranchMatchUtils {
 					String branchMatch = rule.branchMatch().getText().trim();
 					String accountMatch = StringUtils.substringBeforeLast(fullDepotMatch, Depot.FQN_SEPARATOR).trim();
 					String depotMatch = StringUtils.substringAfterLast(fullDepotMatch, Depot.FQN_SEPARATOR).trim();
-					return WildcardUtils.matchString(accountMatch, value.getDepot().getUser().getName())
+					return WildcardUtils.matchString(accountMatch, value.getDepot().getOwner().getName())
 							&& WildcardUtils.matchString(depotMatch, value.getDepot().getName())
 							&& WildcardUtils.matchString(branchMatch, value.getBranch());
 				} else {

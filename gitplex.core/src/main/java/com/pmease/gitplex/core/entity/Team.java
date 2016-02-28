@@ -21,7 +21,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
 import com.pmease.gitplex.core.util.validation.TeamName;
 
 @Entity
@@ -42,10 +41,6 @@ public class Team extends AbstractEntity {
 
 	public static final String FQN_SEPARATOR = "/";
 	
-	public static final String ANONYMOUS = "Anonymous";
-	public static final String OWNERS = "Owners";
-	public static final String LOGGEDIN = "Logged-In";
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Account owner;
@@ -53,12 +48,9 @@ public class Team extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 	
-	@Column(nullable=false)
-	private DepotOperation authorizedOperation = DepotOperation.NO_ACCESS;
-	
 	@OneToMany(mappedBy="team")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Membership> memberships = new ArrayList<Membership>();
+	private Collection<TeamMembership> memberships = new ArrayList<TeamMembership>();
 	
 	@OneToMany(mappedBy="team")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -82,19 +74,11 @@ public class Team extends AbstractEntity {
 		this.name = name;
 	}
 
-	public DepotOperation getAuthorizedOperation() {
-		return authorizedOperation;
-	}
-
-	public void setAuthorizedOperation(DepotOperation authorizedOeration) {
-		this.authorizedOperation = authorizedOeration;
-	}
-
-	public Collection<Membership> getMemberships() {
+	public Collection<TeamMembership> getMemberships() {
 		return memberships;
 	}
 
-	public void setMemberships(Collection<Membership> memberships) {
+	public void setMemberships(Collection<TeamMembership> memberships) {
 		this.memberships = memberships;
 	}
 
@@ -106,22 +90,6 @@ public class Team extends AbstractEntity {
 		this.authorizations = authorizations;
 	}
 
-	public boolean isAnonymous() {
-		return ANONYMOUS.equalsIgnoreCase(getName());
-	}
-	
-	public boolean isOwners() {
-		return OWNERS.equalsIgnoreCase(getName());
-	}
-	
-	public boolean isLoggedIn() {
-		return LOGGEDIN.equalsIgnoreCase(getName());
-	}
-	
-	public boolean isBuiltIn() {
-		return isAnonymous() || isOwners() || isLoggedIn();
-	}
-	
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)

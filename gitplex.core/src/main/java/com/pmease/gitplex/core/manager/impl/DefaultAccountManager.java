@@ -25,14 +25,11 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Membership;
-import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
 
 @Singleton
 public class DefaultAccountManager extends AbstractEntityDao<Account> implements AccountManager, LifecycleListener {
@@ -62,31 +59,6 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     	} else {
     		isNew = user.isNew();
     		persist(user);
-    	}
-    	
-    	if (isNew) {
-        	Team team = new Team();
-        	team.setOwner(user);
-        	team.setAuthorizedOperation(DepotOperation.NO_ACCESS);
-        	team.setName(Team.ANONYMOUS);
-        	persist(team);
-        	
-        	team = new Team();
-        	team.setOwner(user);
-        	team.setName(Team.LOGGEDIN);
-        	team.setAuthorizedOperation(DepotOperation.NO_ACCESS);
-        	persist(team);
-        	
-        	team = new Team();
-        	team.setOwner(user);
-        	team.setName(Team.OWNERS);
-        	team.setAuthorizedOperation(DepotOperation.ADMIN);
-        	persist(team);
-        	
-        	Membership membership = new Membership();
-        	membership.setTeam(team);
-        	membership.setUser(user);
-        	persist(membership);
     	}
     	
     	afterCommit(new Runnable() {
@@ -270,7 +242,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (Account user: allOf()) {
+        for (Account user: all()) {
         	Set<Long> ids = emailToIds.get(user.getEmail());
         	if (ids == null) {
         		ids = new HashSet<>();

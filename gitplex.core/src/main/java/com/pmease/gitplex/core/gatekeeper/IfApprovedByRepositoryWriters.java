@@ -13,7 +13,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 @Editable(order=400, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
@@ -38,7 +38,7 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	@Override
 	public CheckResult doCheckRequest(PullRequest request) {
 		Collection<Account> authorizedUsers = SecurityUtils.findUsersCan(
-				request.getTargetDepot(), DepotOperation.PUSH);
+				request.getTargetDepot(), DepotPrivilege.PUSH);
 
         int approvals = 0;
         int pendings = 0;
@@ -66,7 +66,7 @@ public class IfApprovedByRepositoryWriters extends AbstractGateKeeper {
 	}
 	
 	private CheckResult check(Account user, Depot depot) {
-		Collection<Account> writers = SecurityUtils.findUsersCan(depot, DepotOperation.PUSH);
+		Collection<Account> writers = SecurityUtils.findUsersCan(depot, DepotPrivilege.PUSH);
 
         int approvals = 0;
         int pendings = writers.size();

@@ -27,7 +27,8 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
-import com.pmease.gitplex.core.permission.object.UserBelonging;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.permission.object.AccountBelonging;
 import com.pmease.gitplex.core.util.validation.AccountName;
 
 @Entity
@@ -55,8 +56,14 @@ public class Account extends AbstractUser implements ProtectedObject {
 	/* used by user account */
 	private String email;
 	
+	/* used by user account */
+	private boolean admin;
+	
 	/* used by organization account */
 	private String description;
+	
+	/* used by organization account */
+	private DepotPrivilege defaultPrivilege;
 	
 	@Column(nullable=false)
 	private String noSpaceName;
@@ -69,7 +76,15 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Membership> memberships = new ArrayList<>();
+	private Collection<OrganizationMembership> organizationMemberships = new ArrayList<>();
+	
+	@OneToMany(mappedBy="organization")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<OrganizationMembership> userMemberships = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<TeamMembership> teamMemberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner")
 	private Collection<Depot> depots = new ArrayList<>();
@@ -176,6 +191,26 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.description = description;
 	}
 
+	@Editable(name="Administrator", order=360, description="Check this if you want this user to be "
+			+ "administrator of this GitPlex installation")
+	public boolean isAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
+	}
+
+	@Editable(order=370, description="Members will have this minimal privilege on all repositories "
+			+ "in this organization")
+	public DepotPrivilege getDefaultPrivilege() {
+		return defaultPrivilege;
+	}
+
+	public void setDefaultPrivilege(DepotPrivilege defaultPrivilege) {
+		this.defaultPrivilege = defaultPrivilege;
+	}
+
 	@Editable(order=400)
 	@Password(confirmative=true)
 	@NotEmpty
@@ -192,12 +227,28 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.avatarUploadDate = avatarUploadDate;
 	}
 
-	public Collection<Membership> getMemberships() {
-		return memberships;
+	public Collection<OrganizationMembership> getOrganizationMemberships() {
+		return organizationMemberships;
 	}
 
-	public void setMemberships(Collection<Membership> memberships) {
-		this.memberships = memberships;
+	public void setOrganizationMemberships(Collection<OrganizationMembership> organizationMemberships) {
+		this.organizationMemberships = organizationMemberships;
+	}
+
+	public Collection<OrganizationMembership> getUserMemberships() {
+		return userMemberships;
+	}
+
+	public void setUserMemberships(Collection<OrganizationMembership> userMemberships) {
+		this.userMemberships = userMemberships;
+	}
+
+	public Collection<TeamMembership> getTeamMemberships() {
+		return teamMemberships;
+	}
+
+	public void setTeamMemberships(Collection<TeamMembership> teamMemberships) {
+		this.teamMemberships = teamMemberships;
 	}
 
 	public int getReviewEffort() {
@@ -292,9 +343,9 @@ public class Account extends AbstractUser implements ProtectedObject {
 		if (object instanceof Account) {
 			Account user = (Account) object;
 			return user.equals(this);
-		} else if (object instanceof UserBelonging) {
-			UserBelonging userBelonging = (UserBelonging) object;
-			return userBelonging.getUser().equals(this);
+		} else if (object instanceof AccountBelonging) {
+			AccountBelonging userBelonging = (AccountBelonging) object;
+			return userBelonging.getOwner().equals(this);
 		} else {
 			return false;
 		}

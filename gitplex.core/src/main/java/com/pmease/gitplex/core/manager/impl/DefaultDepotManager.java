@@ -107,7 +107,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 			public void run() {
 				idLock.writeLock().lock();
 				try {
-					nameToId.inverse().put(depot.getId(), new Pair<>(depot.getUser().getId(), depot.getName()));
+					nameToId.inverse().put(depot.getId(), new Pair<>(depot.getOwner().getId(), depot.getName()));
 				} finally {
 					idLock.writeLock().unlock();
 				}
@@ -128,7 +128,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     	
         remove(depot);
 
-		for (Depot each: allOf()) {
+		for (Depot each: all()) {
 			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
 				if (it.next().onDepotDelete(depot))
 					it.remove();
@@ -269,8 +269,8 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	@Sessional
 	@Override
 	public void systemStarting() {
-        for (Depot depot: allOf()) 
-        	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getUser().getId(), depot.getName()));
+        for (Depot depot: all()) 
+        	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getOwner().getId(), depot.getName()));
 	}
 	
 	@Transactional
@@ -306,7 +306,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 		query.setParameter("newName", newName);
 		query.executeUpdate();
 		
-		for (Depot depot: allOf()) {
+		for (Depot depot: all()) {
 			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
 				integrationPolicy.onDepotRename(depotOwner, oldName, newName);
 			}
@@ -335,7 +335,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	@Override
 	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
 		if (newCommitHash == null) {
-			for (Depot each: allOf()) {
+			for (Depot each: all()) {
 				String branch = GitUtils.ref2branch(refName);
 				if (branch != null) {
 					for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {

@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 
 @Entity
 @Table(uniqueConstraints={
@@ -26,13 +26,13 @@ public class Authorization extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Depot depot;
 	
-	private DepotOperation operation = DepotOperation.PULL;
+	private DepotPrivilege operation = DepotPrivilege.PULL;
 	
-	public DepotOperation getOperation() {
+	public DepotPrivilege getOperation() {
 		return operation;
 	}
 
-	public void setOperation(DepotOperation operation) {
+	public void setOperation(DepotPrivilege operation) {
 		this.operation = operation;
 	}
 

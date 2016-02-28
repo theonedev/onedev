@@ -19,7 +19,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
@@ -39,7 +39,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 	@Override
 	public void query(String term, int page, Response<Assignee> response) {
 		List<Assignee> assignees = new ArrayList<>();
-		for (Account user: SecurityUtils.findUsersCan(depotModel.getObject(), DepotOperation.PUSH)) {
+		for (Account user: SecurityUtils.findUsersCan(depotModel.getObject(), DepotPrivilege.PUSH)) {
 			if (StringUtils.isBlank(term) 
 					|| user.getName().startsWith(term) 
 					|| user.getDisplayName().startsWith(term)) {

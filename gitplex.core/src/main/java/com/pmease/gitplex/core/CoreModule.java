@@ -20,7 +20,7 @@ import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.util.ClassUtils;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.EntityLocator;
-import com.pmease.gitplex.core.entity.listener.ListenerLocator;
+import com.pmease.gitplex.core.entity.persistlistener.ListenerLocator;
 import com.pmease.gitplex.core.extensionpoint.ConfigListener;
 import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;

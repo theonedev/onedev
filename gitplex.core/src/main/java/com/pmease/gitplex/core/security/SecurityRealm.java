@@ -13,26 +13,24 @@ import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.permission.operation.PrivilegedOperation;
+import com.pmease.gitplex.core.permission.privilege.Privilege;
 
 @Singleton
 public class SecurityRealm extends AbstractRealm {
 
-    private final Dao dao;
-    
     private final AccountManager userManager;
     
     private final TeamManager teamManager;
     
     @Inject
-    public SecurityRealm(Dao dao, AccountManager userManager, TeamManager teamManager) {
-    	this.dao = dao;
+    public SecurityRealm(AccountManager userManager, TeamManager teamManager) {
     	this.userManager = userManager;
     	this.teamManager = teamManager;
     }
@@ -43,7 +41,7 @@ public class SecurityRealm extends AbstractRealm {
     }
 
     @Override
-    protected Collection<Permission> permissionsOf(final Long userId) {
+    protected Collection<Permission> permissionsOf(Long userId) {
         Collection<Permission> permissions = new ArrayList<>();
 
         /*
@@ -61,25 +59,29 @@ public class SecurityRealm extends AbstractRealm {
             		ObjectPermission objectPermission = (ObjectPermission) permission;
             		Collection<Team> teams = new ArrayList<>();
 	                if (userId != 0L) {
-	                    Account user = dao.get(Account.class, userId);
+	                    Account user = userManager.get(userId);
 	                    if (user != null) {
-		                    // root user can do anything
-		                    if (user.isRoot())
+		                    // administrator can do anything
+		                    if (user.isRoot() || user.isAdmin())
 		                    	return true;
-		
-		                    for (Membership membership: user.getMemberships())
-		                    	teams.add(membership.getTeam());
+
+		                    Account checkAccount = getAccount(objectPermission);
 		                    
-		                    if (getUser(objectPermission) != null)
-		                    	teams.add(teamManager.getLoggedIn(getUser(objectPermission)));
+		                    // if permission is to check privilege of account belongings		                    
+		                    if (checkAccount != null) {  
+		                    	// I can do anything against my own account
+		                    	if (checkAccount.equals(user)) 
+		                    		return true;
+		                    	
+			                	for (OrganizationMembership membership: user.getOrganizationMemberships()) {
+			                		
+			                	}
+		                    }
 	                    }
 	                }
 
-                    if (getUser(objectPermission) != null)
-                    	teams.add(teamManager.getAnonymous(getUser(objectPermission)));
-
                     for (Team team: teams) {
-                    	PrivilegedOperation operation = null;
+                    	Privilege operation = null;
                     	for (Authorization authorization: team.getAuthorizations()) {
                     		if (authorization.getDepot().has(objectPermission.getObject())) {
                     			operation = authorization.getOperation();
@@ -102,7 +104,7 @@ public class SecurityRealm extends AbstractRealm {
         return permissions;        
     }
     
-    private Account getUser(ObjectPermission permission) {
+    private Account getAccount(ObjectPermission permission) {
         if (permission.getObject() instanceof Depot) {
         	Depot depot = (Depot) permission.getObject();
         	return depot.getOwner();

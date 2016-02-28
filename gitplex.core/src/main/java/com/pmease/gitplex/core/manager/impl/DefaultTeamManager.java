@@ -8,9 +8,6 @@ import javax.inject.Singleton;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
@@ -27,40 +24,13 @@ import com.pmease.gitplex.core.manager.TeamManager;
 @Singleton
 public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamManager {
 
-	private static class BuiltInTeam {
-		final Long anonymousId;
-		final Long ownersId;
-		final Long loggedInId;
-		
-		BuiltInTeam(Long anonymousId, Long ownersId, Long loggedInId) {
-			this.anonymousId = anonymousId;
-			this.ownersId = ownersId;
-			this.loggedInId = loggedInId;
-		}
-	}
-
 	private final AccountManager userManager;
-	
-	private final LoadingCache<Long, BuiltInTeam> builtInTeamsCache;
 	
 	@Inject
 	public DefaultTeamManager(Dao dao, AccountManager userManager) {
 		super(dao);
 		
 		this.userManager = userManager;
-		builtInTeamsCache =
-				CacheBuilder.newBuilder()
-					.build(new CacheLoader<Long, BuiltInTeam>() {
-
-						@Override
-						public BuiltInTeam load(Long key) throws Exception {
-							Account user = dao.get(Account.class, key);
-							Team anonymous = findBy(user, Team.ANONYMOUS);
-							Team owners = findBy(user, Team.OWNERS);
-							Team loggedIn = findBy(user, Team.LOGGEDIN);
-							return new BuiltInTeam(anonymous.getId(), owners.getId(), loggedIn.getId());
-						}
-					});
 	}
 
 	@Sessional
@@ -80,21 +50,6 @@ public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamM
     		return findBy(user, StringUtils.substringAfter(teamFQN, Depot.FQN_SEPARATOR));
     	else
     		return null;
-	}
-
-	@Override
-	public Team getAnonymous(Account user) {
-		return load(builtInTeamsCache.getUnchecked(user.getId()).anonymousId);
-	}
-
-	@Override
-	public Team getLoggedIn(Account user) {
-		return load(builtInTeamsCache.getUnchecked(user.getId()).loggedInId);
-	}
-
-	@Override
-	public Team getOwners(Account user) {
-		return load(builtInTeamsCache.getUnchecked(user.getId()).ownersId);
 	}
 
 	@Transactional

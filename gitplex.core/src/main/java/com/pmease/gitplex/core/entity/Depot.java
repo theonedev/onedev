@@ -94,7 +94,7 @@ import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
-import com.pmease.gitplex.core.permission.object.UserBelonging;
+import com.pmease.gitplex.core.permission.object.AccountBelonging;
 import com.pmease.gitplex.core.util.validation.DepotName;
 
 @Entity
@@ -108,7 +108,7 @@ import com.pmease.gitplex.core.util.validation.DepotName;
  */  
 @DynamicUpdate
 @Editable
-public class Depot extends AbstractEntity implements UserBelonging {
+public class Depot extends AbstractEntity implements AccountBelonging {
 
 	private static final long serialVersionUID = 1L;
 
@@ -178,6 +178,7 @@ public class Depot extends AbstractEntity implements UserBelonging {
     
     private transient String defaultBranch;
     
+    @Override
 	public Account getOwner() {
 		return owner;
 	}
@@ -232,11 +233,6 @@ public class Depot extends AbstractEntity implements UserBelonging {
 
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
-	}
-
-    @Override
-	public Account getUser() {
-		return getOwner();
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {
@@ -480,10 +476,10 @@ public class Depot extends AbstractEntity implements UserBelonging {
 
 			@Override
 			public int compare(Depot repo1, Depot repo2) {
-				if (repo1.getUser().equals(repo2.getUser()))
+				if (repo1.getOwner().equals(repo2.getOwner()))
 					return repo1.getName().compareTo(repo2.getName());
 				else
-					return repo1.getUser().getName().compareTo(repo2.getUser().getName());
+					return repo1.getOwner().getName().compareTo(repo2.getOwner().getName());
 			}
 			
 		});

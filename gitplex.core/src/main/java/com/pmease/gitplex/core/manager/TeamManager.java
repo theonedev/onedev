@@ -24,12 +24,6 @@ public interface TeamManager extends EntityDao<Team> {
 	@Nullable
 	Team findBy(String teamFQN);
 	
-	Team getAnonymous(Account user);
-	
-	Team getLoggedIn(Account user);
-	
-	Team getOwners(Account user);
-
 	void delete(Team team);
 	
 	void rename(Account teamOwner, String oldName, String newName);

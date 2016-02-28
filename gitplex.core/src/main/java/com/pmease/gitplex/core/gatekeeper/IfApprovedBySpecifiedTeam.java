@@ -12,12 +12,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.TeamManager;
 
@@ -59,7 +59,7 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
         Collection<Account> members = new HashSet<Account>();
-        for (Membership membership : getTeam(request.getTargetDepot().getOwner()).getMemberships())
+        for (TeamMembership membership : getTeam(request.getTargetDepot().getOwner()).getMemberships())
             members.add(membership.getUser());
 
         int approvals = 0;
@@ -91,7 +91,7 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
 
 	private CheckResult check(Account user, Account owner) {
         Collection<Account> members = new HashSet<Account>();
-        for (Membership membership : getTeam(owner).getMemberships())
+        for (TeamMembership membership : getTeam(owner).getMemberships())
             members.add(membership.getUser());
 
         int approvals = 0;

@@ -13,7 +13,7 @@ import com.pmease.commons.hibernate.AbstractEntity;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_user_id", "g_team_id"})
 })
-public class Membership extends AbstractEntity {
+public class TeamMembership extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,7 +24,7 @@ public class Membership extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Team team;
-
+	
 	public Account getUser() {
 		return user;
 	}
@@ -40,5 +40,5 @@ public class Membership extends AbstractEntity {
 	public void setTeam(Team team) {
 		this.team = team;
 	}
-	
+
 }

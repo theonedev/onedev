@@ -6,24 +6,21 @@ import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
-import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
-	public static Collection<Account> findUsersCan(Depot depot, DepotOperation operation) {
+	public static Collection<Account> findUsersCan(Depot depot, DepotPrivilege operation) {
 		Set<Account> authorizedUsers = new HashSet<Account>();
-		for (Account user: GitPlex.getInstance(Dao.class).query(EntityCriteria.of(Account.class), 0, 0)) {
+		for (Account user: GitPlex.getInstance(AccountManager.class).all()) {
 			if (user.asSubject().isPermitted(new ObjectPermission(depot, operation)))
 				authorizedUsers.add(user);
 		}
@@ -72,17 +69,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canManage(Account account) {
-		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
-		if (currentUser != null) {
-			if (currentUser.isRoot())
-				return true;
-			
-			for (Team team: currentUser.getTeams()) {
-				if (team.isOwners() && team.getOwner().equals(account))
-					return true;
-			}
-		}  
-		return false;
+		return getSubject().isPermitted(ObjectPermission.ofAccountAdmin(account));
+	}
+	
+	public static boolean canAccess(Account organization) {
+		return getSubject().isPermitted(ObjectPermission.ofOrganizationAccess(organization));
 	}
 	
 	public static boolean canPull(Depot depot) {
@@ -98,6 +89,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canManageSystem() {
-		return getSubject().isPermitted(ObjectPermission.ofSystemAdmin());
+		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
+		return currentUser.isRoot() || currentUser.isAdmin();
 	}
+	
 }

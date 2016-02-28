@@ -2,12 +2,15 @@ package com.pmease.gitplex.core.permission;
 
 import org.apache.shiro.authz.Permission;
 
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.SystemObject;
-import com.pmease.gitplex.core.permission.operation.PrivilegedOperation;
-import com.pmease.gitplex.core.permission.operation.DepotOperation;
-import com.pmease.gitplex.core.permission.operation.SystemOperation;
+import com.pmease.gitplex.core.permission.privilege.AccountAdmin;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.permission.privilege.OrganizationAccess;
+import com.pmease.gitplex.core.permission.privilege.Privilege;
+import com.pmease.gitplex.core.permission.privilege.SystemAdmin;
 
 /**
  * This class represents permissions to operate an account and its belongings.
@@ -19,9 +22,9 @@ public class ObjectPermission implements Permission {
 	
 	private ProtectedObject object;
 	
-	private PrivilegedOperation operation;
+	private Privilege operation;
 
-	public ObjectPermission(ProtectedObject object, PrivilegedOperation operation) {
+	public ObjectPermission(ProtectedObject object, Privilege operation) {
 		this.object = object;
 		this.operation = operation;
 	}
@@ -30,11 +33,11 @@ public class ObjectPermission implements Permission {
 		return object;
 	}
 	
-	public PrivilegedOperation getOperation() {
+	public Privilege getOperation() {
 		return operation;
 	}
 
-	public void setOperation(PrivilegedOperation operation) {
+	public void setOperation(Privilege operation) {
 		this.operation = operation;
 	}
 
@@ -54,18 +57,27 @@ public class ObjectPermission implements Permission {
 	}
 
 	public static ObjectPermission ofDepotAdmin(Depot depot) {
-		return new ObjectPermission(depot, DepotOperation.ADMIN);
+		return new ObjectPermission(depot, DepotPrivilege.ADMIN);
 	}
 
 	public static ObjectPermission ofDepotPull(Depot depot) {
-		return new ObjectPermission(depot, DepotOperation.PULL);
+		return new ObjectPermission(depot, DepotPrivilege.PULL);
 	}
 
 	public static ObjectPermission ofDepotPush(Depot depot) {
-		return new ObjectPermission(depot, DepotOperation.PUSH);
+		return new ObjectPermission(depot, DepotPrivilege.PUSH);
 	}
 
-	public static ObjectPermission ofSystemAdmin() {
-	    return new ObjectPermission(new SystemObject(), SystemOperation.ADMINISTRATION);
+	public static ObjectPermission ofAccountAdmin(Account account) {
+		return new ObjectPermission(account, new AccountAdmin());
 	}
+	
+	public static ObjectPermission ofOrganizationAccess(Account organization) {
+		return new ObjectPermission(organization, new OrganizationAccess());
+	}
+	
+	public static ObjectPermission ofSystemAdmin() {
+		return new ObjectPermission(new SystemObject(), new SystemAdmin());
+	}
+	
 }
