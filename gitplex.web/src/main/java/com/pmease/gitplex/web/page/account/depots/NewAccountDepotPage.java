@@ -44,13 +44,13 @@ public class NewAccountDepotPage extends AccountLayoutPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				DepotManager repositoryManager = GitPlex.getInstance(DepotManager.class);
-				Depot repoWithSameName = repositoryManager.findBy(depot.getOwner(), depot.getName());
+				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
+				Depot repoWithSameName = depotManager.findBy(depot.getOwner(), depot.getName());
 				if (repoWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another repository in this account.");
 				} else {
-					repositoryManager.save(depot);
+					depotManager.save(depot, null, null);
 					Session.get().success("New repository created");
 					setResponsePage(AccountDepotsPage.class, paramsOf(getAccount()));
 				}

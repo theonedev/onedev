@@ -41,7 +41,7 @@ public class NewAccountPage extends AdministrationPage {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
 				} else {
-					userManager.save(account);
+					userManager.save(account, null);
 					Session.get().success("New account created");
 					setResponsePage(AccountListPage.class);
 				}

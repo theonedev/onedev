@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -36,7 +35,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,14 +44,15 @@ import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.git.command.CommitConsumer;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.hibernate.UnitOfWork;
-import com.pmease.commons.hibernate.dao.DefaultDao;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.extensionpoint.RefListener;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
@@ -70,8 +69,8 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryManager, 
-		DepotListener, RefListener, LifecycleListener {
+public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener, 
+RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultAuxiliaryManager.class);
 	
@@ -97,6 +96,8 @@ public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryMana
 	
 	private final SequentialWorkManager sequentialWorkManager;
 	
+	private final DepotManager depotManager;
+	
 	private final UnitOfWork unitOfWork;
 	
 	private final Map<Long, Environment> envs = new HashMap<>();
@@ -106,10 +107,9 @@ public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryMana
 	private final Map<Long, List<NameAndEmail>> contributors = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultAuxiliaryManager(Provider<Session> sessionProvider, StorageManager storageManager, 
+	public DefaultAuxiliaryManager(DepotManager depotManager, StorageManager storageManager, 
 			WorkManager workManager, SequentialWorkManager sequentialWorkManager, UnitOfWork unitOfWork) {
-		super(sessionProvider);
-		
+		this.depotManager = depotManager;
 		this.storageManager = storageManager;
 		this.workManager = workManager;
 		this.sequentialWorkManager = sequentialWorkManager;
@@ -316,7 +316,7 @@ public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryMana
 
 								@Override
 								public Void call() throws Exception {
-									doCollect(load(Depot.class, repoId), revision);
+									doCollect(depotManager.load(repoId), revision);
 									return null;
 								}
 								
@@ -541,11 +541,7 @@ public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryMana
 	}
 
 	@Override
-	public void beforeDelete(Depot depot) {
-	}
-
-	@Override
-	public synchronized void afterDelete(Depot depot) {
+	public synchronized void onDepotDelete(Depot depot) {
 		sequentialWorkManager.removeExecutor(getSequentialExecutorKey(depot));
 		Environment env = envs.remove(depot.getId());
 		if (env != null)
@@ -554,6 +550,10 @@ public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryMana
 		FileUtils.deleteDir(getAuxiliaryDir(depot));
 	}
 	
+	@Override
+	public void onDepotRename(Depot renamedDepot, String oldName) {
+	}
+
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
 		if (byteIterable != null)
 			return Arrays.copyOf(byteIterable.getBytesUnsafe(), byteIterable.getLength());
@@ -626,6 +626,10 @@ public class DefaultAuxiliaryManager extends DefaultDao implements AuxiliaryMana
 	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
 		if (newCommitHash != null)
 			collect(depot, newCommitHash);
+	}
+
+	@Override
+	public void onDepotTransfer(Depot depot, Account oldOwner) {
 	}
 
 }

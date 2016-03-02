@@ -5,15 +5,14 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
-import com.pmease.gitplex.core.entity.Team;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 
 @SuppressWarnings("serial")
-public class TeamSingleChoice extends Select2Choice<Team> {
+public class TeamSingleChoice extends Select2Choice<String> {
 
 	private final boolean allowEmpty;
 	
-	public TeamSingleChoice(String id, IModel<Team> model, ChoiceProvider<Team> teamsProvider, boolean allowEmpty) {
+	public TeamSingleChoice(String id, IModel<String> model, ChoiceProvider<String> teamsProvider, boolean allowEmpty) {
 		super(id, model, teamsProvider);
 		
 		this.allowEmpty = allowEmpty;

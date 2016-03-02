@@ -64,7 +64,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					userManager.save((Account) getSetting());
+					userManager.save((Account) getSetting(), null);
 				}
 				
 			});

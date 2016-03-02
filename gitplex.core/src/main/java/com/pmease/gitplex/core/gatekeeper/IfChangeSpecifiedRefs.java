@@ -35,9 +35,9 @@ public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 
 	private CheckResult doCheck(String refName) {
 		if (IncludeExcludeUtils.matches(refMatch, refName)) {
-			return passed(Lists.newArrayList("Target ref matches '" + refMatch + "'."));
+			return passed(Lists.newArrayList("Target ref matches '" + refMatch + "'"));
 		} else {
-			return failed(Lists.newArrayList("Target ref does not match '" + refMatch + "'."));
+			return failed(Lists.newArrayList("Target ref does not match '" + refMatch + "'"));
 		}
 	}
 	

@@ -83,7 +83,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 			}
 			commit = preview.getIntegrated();
 			if (commit == null) 
-				return failed(Lists.newArrayList("Can not build against integration result due to conflicts."));
+				return failed(Lists.newArrayList("Can not build against integration result due to conflicts"));
 		} else {
 			commit = request.getLatestUpdate().getHeadCommitHash();
 		}
@@ -94,7 +94,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 		Collection<Verification> verifications = verificationManager.findBy(request, commit);
 		for (Verification each: verifications) {
 			if (each.getStatus() == Verification.Status.NOT_PASSED)
-				return failed(Lists.newArrayList("At least one build is not passed for the commit."));
+				return failed(Lists.newArrayList("At least one build is not passed for the commit"));
 			else if (each.getStatus() == Verification.Status.PASSED)
 				passedCount++;
 		}
@@ -120,18 +120,18 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		if (blockMode)
-			return blocking(Lists.newArrayList("Not verified by build."));
+			return blocking(Lists.newArrayList("Not verified by build"));
 		else
-			return pending(Lists.newArrayList("Not verified by build."));
+			return pending(Lists.newArrayList("Not verified by build"));
 	}
 
 	@Override
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (!newCommit.equals(ObjectId.zeroId())) {
 			if (blockMode) {
-				return blocking(Lists.newArrayList("Has to be verified by builds."));
+				return blocking(Lists.newArrayList("Has to be verified by builds"));
 			} else {
-				return blocking(Lists.newArrayList("Has to be verified by builds."));
+				return blocking(Lists.newArrayList("Has to be verified by builds"));
 			}
 		} else {
 			return ignored();

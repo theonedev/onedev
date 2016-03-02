@@ -62,6 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
@@ -71,6 +72,7 @@ import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.ContentDetector;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
@@ -411,16 +413,17 @@ public class DefaultIndexManager implements IndexManager {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	@Override
-	public void beforeDelete(Depot depot) {
-	}
 
+	@Transactional
 	@Override
-	public void afterDelete(Depot depot) {
+	public void onDepotDelete(Depot depot) {
 		for (IndexListener listener: listeners)
 			listener.indexRemoving(depot);
 		FileUtils.deleteDir(storageManager.getIndexDir(depot));
+	}
+
+	@Override
+	public void onDepotRename(Depot renamedDepot, String oldName) {
 	}
 
 	@Override
@@ -429,6 +432,10 @@ public class DefaultIndexManager implements IndexManager {
 		// as many tags might be pushed all at once when the repository is imported 
 		if (refName.startsWith(Constants.R_HEADS) && newCommitHash != null)
 			index(depot, newCommitHash);
+	}
+
+	@Override
+	public void onDepotTransfer(Depot depot, Account oldOwner) {
 	}
 
 }

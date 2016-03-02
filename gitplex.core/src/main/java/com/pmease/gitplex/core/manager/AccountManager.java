@@ -10,13 +10,19 @@ import com.pmease.gitplex.core.entity.Account;
 public interface AccountManager extends EntityDao<Account> {
 	
 	/**
-	 * Save user properties. Note that name of the user should not be changed 
-	 * via this method. Call the {@link this#rename(Long, String, String)} to 
-	 * rename an user.
+	 * Save specified account
+	 * 
+	 * @param account
+	 * 			account to save
+	 * @param oldName
+	 * 			in case of rename, this parameter should hold the original name 
+	 * 			when above account object is initially loaded to ensure database
+	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
+	 * 			or the name is not changed
 	 */
-	void save(Account user);
+	void save(Account account, @Nullable String oldName);
 	
-	void delete(Account user);
+	void delete(Account account);
 	
 	/**
 	 * Find root account in the system. 
@@ -29,12 +35,12 @@ public interface AccountManager extends EntityDao<Account> {
 	/**
 	 * Find user of specified name.
 	 * <p>
-	 * @param userName
+	 * @param accountName
 	 * 			name of the user
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable Account findByName(String userName);
+	@Nullable Account findByName(String accountName);
 	
 	/**
 	 * Find user by person
@@ -63,6 +69,5 @@ public interface AccountManager extends EntityDao<Account> {
 	 * 			if current user is not a run-as user. 
 	 */
 	@Nullable Account getPrevious();
-	
-	void rename(Long userId, String oldName, String newName);
+
 }

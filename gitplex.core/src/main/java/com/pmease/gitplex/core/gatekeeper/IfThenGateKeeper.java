@@ -5,9 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
@@ -67,20 +66,27 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public void onDepotRename(Account depotOwner, String oldName, String newName) {
-		ifGate.onDepotRename(depotOwner, oldName, newName);
-		thenGate.onDepotRename(depotOwner, oldName, newName);
+	public void onDepotRename(Depot renamedDepot, String oldName) {
+		ifGate.onDepotRename(renamedDepot, oldName);
+		thenGate.onDepotRename(renamedDepot, oldName);
 	}
 
 	@Override
-	public void onUserRename(String oldName, String newName) {
-		ifGate.onUserRename(oldName, newName);
-		thenGate.onUserRename(oldName, newName);
+	public void onAccountRename(String oldName, String newName) {
+		ifGate.onAccountRename(oldName, newName);
+		thenGate.onAccountRename(oldName, newName);
 	}
 
 	@Override
-	public boolean onUserDelete(Account user) {
-		return ifGate.onUserDelete(user) || thenGate.onUserDelete(user);
+	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
+			Account originalOwner) {
+		return ifGate.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalOwner) 
+				|| thenGate.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalOwner);
+	}
+	
+	@Override
+	public boolean onAccountDelete(String accountName) {
+		return ifGate.onAccountDelete(accountName) || thenGate.onAccountDelete(accountName);
 	}
 
 	@Override
@@ -95,8 +101,8 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public boolean onTeamDelete(Team team) {
-		return ifGate.onTeamDelete(team) || thenGate.onTeamDelete(team);
+	public boolean onTeamDelete(String teamName) {
+		return ifGate.onTeamDelete(teamName) || thenGate.onTeamDelete(teamName);
 	}
 
 	@Override

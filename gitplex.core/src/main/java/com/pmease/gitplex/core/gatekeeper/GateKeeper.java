@@ -7,7 +7,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
@@ -61,17 +60,19 @@ public interface GateKeeper extends Serializable {
 	 */
 	CheckResult checkPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
 	
-	void onDepotRename(Account depotOwner, String oldName, String newName);
+	void onDepotRename(Depot renamedDepot, String oldName);
 	
 	boolean onDepotDelete(Depot depot);
 	
+	boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, Account originalOwner);
+	
 	void onTeamRename(String oldName, String newName);
 	
-	boolean onTeamDelete(Team team);
+	boolean onTeamDelete(String teamName);
 	
-	void onUserRename(String oldName, String newName);
+	void onAccountRename(String oldName, String newName);
 	
-	boolean onUserDelete(Account user);
+	boolean onAccountDelete(String accountName);
 	
 	boolean onRefDelete(String refName);
 	

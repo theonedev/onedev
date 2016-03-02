@@ -5,9 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Horizontal;
-import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
@@ -44,8 +43,8 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public boolean onUserDelete(Account user) {
-		return gateKeeper.onUserDelete(user);
+	public boolean onAccountDelete(String accountName) {
+		return gateKeeper.onAccountDelete(accountName);
 	}
 
 	@Override
@@ -54,13 +53,19 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public void onDepotRename(Account depotOwner, String oldName, String newName) {
-		gateKeeper.onDepotRename(depotOwner, oldName, newName);
+	public void onDepotRename(Depot renamedDepot, String oldName) {
+		gateKeeper.onDepotRename(renamedDepot, oldName);
 	}
 
 	@Override
-	public void onUserRename(String oldName, String newName) {
-		gateKeeper.onUserRename(oldName, newName);
+	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
+			Account origninalOwner) {
+		return gateKeeper.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, origninalOwner);
+	}
+	
+	@Override
+	public void onAccountRename(String oldName, String newName) {
+		gateKeeper.onAccountRename(oldName, newName);
 	}
 
 	@Override
@@ -69,8 +74,8 @@ public class NotGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public boolean onTeamDelete(Team team) {
-		return gateKeeper.onTeamDelete(team);
+	public boolean onTeamDelete(String teamName) {
+		return gateKeeper.onTeamDelete(teamName);
 	}
 
 	@Override

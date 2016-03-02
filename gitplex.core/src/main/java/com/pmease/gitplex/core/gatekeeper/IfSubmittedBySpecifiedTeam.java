@@ -2,17 +2,13 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
-import com.pmease.gitplex.core.manager.TeamManager;
 
 @Editable(order=500, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
 		"This gate keeper will be passed if the commit is submitted by a member of specified team.")
@@ -31,34 +27,50 @@ public class IfSubmittedBySpecifiedTeam extends AbstractGateKeeper {
 		this.teamName = teamName;
 	}
 
-	private Team getTeam(Account owner) {
-    	return Preconditions.checkNotNull(GitPlex.getInstance(TeamManager.class).findBy(owner, teamName));
-    }
-
 	@Override
     public CheckResult doCheckRequest(PullRequest request) {
-    	return check(request.getSubmitter(), request.getTargetDepot().getOwner());
+    	return checkSubmitter(request.getSubmitter(), request.getTargetDepot().getOwner());
     }
 
-	private CheckResult check(Account user, Account owner) {
+	private CheckResult checkSubmitter(Account user, Account owner) {
 		if (user != null) {
-			for (TeamMembership membership: user.getTeamMemberships()) {
-				if (membership.getTeam().equals(getTeam(owner)))
-					return passed(Lists.newArrayList("Submitted by a member of team '" + teamName + "'."));
-			}
+	    	for (Membership membership: owner.getUserMemberships()) {
+	    		if (membership.getJoinedTeams().contains(teamName)) {
+	    			if (membership.getUser().equals(user)) {
+						return passed(Lists.newArrayList("Submitted by a member of team " + teamName));
+	    			}
+	    		}
+	    	}
 		}
-		return failed(Lists.newArrayList("Not submitted by a member of team '" + teamName + "'."));
+		return failed(Lists.newArrayList("Not submitted by a member of team " + teamName));
 	}
 
 	@Override
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, 
 			ObjectId oldCommit, ObjectId newCommit) {
-		return check(user, depot.getOwner());
+		return checkSubmitter(user, depot.getOwner());
 	}
 
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-		return check(user, depot.getOwner());
+		return checkSubmitter(user, depot.getOwner());
+	}
+
+	@Override
+	public void onTeamRename(String oldName, String newName) {
+		if (teamName.equals(oldName))
+			teamName = newName;
+	}
+
+	@Override
+	public boolean onTeamDelete(String teamName) {
+		return this.teamName.equals(teamName);
+	}
+
+	@Override
+	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
+			Account originalOwner) {
+		return depotDefiningGateKeeper.equals(transferredDepot);
 	}
 
 }

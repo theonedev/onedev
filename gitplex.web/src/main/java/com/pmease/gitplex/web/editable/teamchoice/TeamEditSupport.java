@@ -1,7 +1,7 @@
 package com.pmease.gitplex.web.editable.teamchoice;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.wicket.Component;
@@ -33,17 +33,17 @@ public class TeamEditSupport implements EditSupport {
 		PropertyDescriptor propertyDescriptor = new DefaultPropertyDescriptor(beanClass, propertyName);
 		Method propertyGetter = propertyDescriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(TeamChoice.class) != null) {
-        	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
+        	if (Collection.class.isAssignableFrom(propertyGetter.getReturnType()) 
         			&& EditableUtils.getElementClass(propertyGetter.getGenericReturnType()) == String.class) {
-        		return new PropertyContext<List<String>>(propertyDescriptor) {
+        		return new PropertyContext<Collection<String>>(propertyDescriptor) {
 
 					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
+					public PropertyViewer renderForView(String componentId, final IModel<Collection<String>> model) {
 						return new PropertyViewer(componentId, this) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        List<String> teamNames = model.getObject();
+								Collection<String> teamNames = model.getObject();
 						        if (teamNames != null && !teamNames.isEmpty()) {
 						            return new Label(id, StringUtils.join(teamNames, ", " ));
 						        } else {
@@ -55,7 +55,7 @@ public class TeamEditSupport implements EditSupport {
 					}
 
 					@Override
-					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
+					public PropertyEditor<Collection<String>> renderForEdit(String componentId, IModel<Collection<String>> model) {
 						return new TeamMultiChoiceEditor(componentId, this, model);
 					}
         			
@@ -87,7 +87,7 @@ public class TeamEditSupport implements EditSupport {
         			
         		};
         	} else {
-        		throw new RuntimeException("Annotation 'TeamChoice' should be applied to property with type Long or List<Long>.");
+        		throw new RuntimeException("Annotation 'TeamChoice' should be applied to property with type String or Collection<String>.");
         	}
         } else {
             return null;

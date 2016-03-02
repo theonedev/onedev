@@ -1,30 +1,27 @@
 package com.pmease.gitplex.core.manager;
 
-import javax.annotation.Nullable;
-
-import com.pmease.commons.hibernate.dao.EntityDao;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Team;
 
-public interface TeamManager extends EntityDao<Team> {
-
+public interface TeamManager {
 	/**
-	 * Find team of specified name belonging to specified owner.
-	 * <p>
-	 * @param owner
-	 * 			user owns the team
+	 * Delete specified team from specified organization
+	 * 
+	 * @param organization
+	 * 			organization to delete team from
 	 * @param teamName
-	 * 			name of the team
-	 * @return
-	 * 			matching team, or <tt>null</tt> if not found 
+	 * 			name of team to delete. Note that this name should exist in the organization
 	 */
-	@Nullable
-	Team findBy(Account owner, String teamName);
+	void delete(Account organization, String teamName);
 	
-	@Nullable
-	Team findBy(String teamFQN);
-	
-	void delete(Team team);
-	
-	void rename(Account teamOwner, String oldName, String newName);
+	/**
+	 * Rename specified team in specified organization
+	 * 
+	 * @param organization
+	 * 			organization to rename team in
+	 * @param oldTeamName
+	 * 			old name of the team which should exist in the organization
+	 * @param newTeamName
+	 * 			new name of the team
+	 */
+	void rename(Account organization, String oldTeamName, String newTeamName);
 }

@@ -7,7 +7,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -115,15 +114,21 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public void onDepotRename(Account depotOwner, String oldName, String newName) {
+	public void onDepotRename(Depot renamedDepot, String oldName) {
 	}
 
 	@Override
-	public void onUserRename(String oldName, String newName) {
+	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
+			Account originalOwner) {
+		return false;
+	}
+	
+	@Override
+	public void onAccountRename(String oldName, String newName) {
 	}
 
 	@Override
-	public boolean onUserDelete(Account user) {
+	public boolean onAccountDelete(String accountName) {
 		return false;
 	}
 
@@ -137,7 +142,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	}
 
 	@Override
-	public boolean onTeamDelete(Team team) {
+	public boolean onTeamDelete(String teamName) {
 		return false;
 	}
 

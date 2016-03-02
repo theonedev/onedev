@@ -27,6 +27,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -64,7 +65,6 @@ import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -100,13 +100,6 @@ import com.pmease.gitplex.core.util.validation.DepotName;
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_owner_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-
-/*
- * use dynamic update as we do not want to change name while persisting depot, 
- * as name of depot can be referenced in other places, and we want to update 
- * these references in a transaction via DepotManager.rename  
- */  
-@DynamicUpdate
 @Editable
 public class Depot extends AbstractEntity implements AccountBelonging {
 
@@ -134,6 +127,13 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	private String name;
 	
 	private String description;
+	
+	/*
+	 * Optimistic lock is necessary to ensure database integrity when update 
+	 * gate keepers and integration policies upon depot renaming/deletion
+	 */
+	@Version
+	private long version;
 	
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -1040,6 +1040,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			return Objects.hashCode(oldRev, newRev, paths, detectRenames);
 		}
 		
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 }

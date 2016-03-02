@@ -401,7 +401,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	@Override
 	protected void teardown() {
 		super.teardown();
-		indexManager.afterDelete(depot);
+		indexManager.onDepotDelete(depot);
 	}
 
 }

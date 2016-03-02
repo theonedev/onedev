@@ -1,9 +1,17 @@
 package com.pmease.gitplex.core.entity.component;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+
+/**
+ * Team and its authorizations are designed as serializable objects living in 
+ * organization object as otherwise checking permission on an user requires 
+ * 1+N database calls if the user belongs to N teams.
+ *
+ */
 public class Team implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -12,7 +20,7 @@ public class Team implements Serializable {
 	
 	private String description;
 
-	private List<DepotAuthorization> depotAuthorizations = new ArrayList<>();
+	private Map<String, DepotPrivilege> authorizations = new LinkedHashMap<>();
 
 	public String getName() {
 		return name;
@@ -30,12 +38,12 @@ public class Team implements Serializable {
 		this.description = description;
 	}
 
-	public List<DepotAuthorization> getDepotAuthorizations() {
-		return depotAuthorizations;
+	public Map<String, DepotPrivilege> getAuthorizations() {
+		return authorizations;
 	}
 
-	public void setDepotAuthorizations(List<DepotAuthorization> depotAuthorizations) {
-		this.depotAuthorizations = depotAuthorizations;
+	public void setAuthorizations(Map<String, DepotPrivilege> authorizations) {
+		this.authorizations = authorizations;
 	}
-	
+
 }

@@ -7,9 +7,8 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 
 public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 
@@ -28,26 +27,36 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public void onUserRename(String oldName, String newName) {
+	public void onAccountRename(String oldName, String newName) {
 		for (GateKeeper gateKeeper: gateKeepers)
-			gateKeeper.onUserRename(oldName, newName);
+			gateKeeper.onAccountRename(oldName, newName);
 	}
 
 	@Override
-	public boolean onUserDelete(Account user) {
+	public boolean onAccountDelete(String accountName) {
 		for (Iterator<GateKeeper> it = gateKeepers.iterator(); it.hasNext();) {
-			if (it.next().onUserDelete(user))
+			if (it.next().onAccountDelete(accountName))
 				it.remove();
 		}
 		return gateKeepers.isEmpty();
 	}
 
 	@Override
-	public void onDepotRename(Account depotOwner, String oldName, String newName) {
+	public void onDepotRename(Depot renamedDepot, String oldName) {
 		for (GateKeeper gateKeeper: gateKeepers)
-			gateKeeper.onDepotRename(depotOwner, oldName, newName);
+			gateKeeper.onDepotRename(renamedDepot, oldName);
 	}
 
+	@Override
+	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
+			Account originalOwner) {
+		for (Iterator<GateKeeper> it = gateKeepers.iterator(); it.hasNext();) {
+			if (it.next().onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalOwner))
+				it.remove();
+		}
+		return gateKeepers.isEmpty();
+	}
+	
 	@Override
 	public boolean onDepotDelete(Depot depot) {
 		for (Iterator<GateKeeper> it = gateKeepers.iterator(); it.hasNext();) {
@@ -64,9 +73,9 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 	}
 
 	@Override
-	public boolean onTeamDelete(Team team) {
+	public boolean onTeamDelete(String teamName) {
 		for (Iterator<GateKeeper> it = gateKeepers.iterator(); it.hasNext();) {
-			if (it.next().onTeamDelete(team))
+			if (it.next().onTeamDelete(teamName))
 				it.remove();
 		}
 		return gateKeepers.isEmpty();

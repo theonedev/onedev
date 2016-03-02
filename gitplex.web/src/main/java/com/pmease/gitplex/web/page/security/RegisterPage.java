@@ -47,7 +47,7 @@ public class RegisterPage extends BasePage {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
 				} else {
-					userManager.save(account);
+					userManager.save(account, null);
 					Session.get().success("New account registered");
 					SecurityUtils.getSubject().runAs(account.getPrincipals());
 					setResponsePage(AvatarEditPage.class, AccountPage.paramsOf(account));

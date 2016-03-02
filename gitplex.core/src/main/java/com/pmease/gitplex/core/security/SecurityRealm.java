@@ -8,32 +8,25 @@ import javax.inject.Singleton;
 
 import org.apache.shiro.authz.Permission;
 
-import com.pmease.commons.hibernate.dao.Dao;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
-import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Membership;
-import com.pmease.gitplex.core.entity.Team;
-import com.pmease.gitplex.core.entity.TeamMembership;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.manager.TeamManager;
+import com.pmease.gitplex.core.entity.component.Team;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.permission.privilege.Privilege;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 
 @Singleton
 public class SecurityRealm extends AbstractRealm {
 
     private final AccountManager accountManager;
     
-    private final AuthorizationManager authorizationManager;
-    
     @Inject
-    public SecurityRealm(AccountManager userManager, AuthorizationManager authorizationManager) {
+    public SecurityRealm(AccountManager userManager) {
     	this.accountManager = userManager;
-    	this.authorizationManager = authorizationManager;
     }
 
     @Override
@@ -58,7 +51,6 @@ public class SecurityRealm extends AbstractRealm {
             public boolean implies(Permission permission) {
             	if (permission instanceof ObjectPermission) {
             		ObjectPermission objectPermission = (ObjectPermission) permission;
-            		Collection<Team> teams = new ArrayList<>();
 	                if (userId != 0L) {
 	                    Account user = accountManager.get(userId);
 	                    if (user != null) {
@@ -80,9 +72,15 @@ public class SecurityRealm extends AbstractRealm {
 			                					|| checkAccount.getDefaultPrivilege().can(objectPermission.getOperation())) {
 			                				return true;
 			                			}
-			                			user.getTeamMemberships();
-			                			for (Authorization authorization: 
-			                					authorizationManager.findAuthorizations(checkAccount)) {
+			                			Depot checkDepot = getDepot(objectPermission);
+			                			if (checkDepot != null) {
+				                			for (String teamName: membership.getJoinedTeams()) {
+				                				Team team = Preconditions.checkNotNull(checkAccount.getTeams().get(teamName));
+				                				DepotPrivilege privilege = team.getAuthorizations().get(checkDepot.getName());
+				                				if (privilege != null && privilege.can(objectPermission.getOperation())) {				                					
+				                					return true;
+				                				}
+				                			}
 			                			}
 			                			break;
 			                		}
@@ -90,23 +88,6 @@ public class SecurityRealm extends AbstractRealm {
 		                    }
 	                    }
 	                }
-
-                    for (Team team: teams) {
-                    	Privilege operation = null;
-                    	for (Authorization authorization: team.getAuthorizations()) {
-                    		if (authorization.getDepot().has(objectPermission.getObject())) {
-                    			operation = authorization.getOperation();
-                    			break;
-                    		}
-                    	}
-                    	if (operation == null && team.getOrganization().has(objectPermission.getObject())) {
-                    		operation = team.getAuthorizedOperation();
-                    	}
-                    	
-                    	if (operation != null && operation.can(objectPermission.getOperation()))
-                    		return true;
-                    }
-                    
             	} 
             	return false;
             }
@@ -126,4 +107,13 @@ public class SecurityRealm extends AbstractRealm {
         }
     }
 
+    private Depot getDepot(ObjectPermission permission) {
+        if (permission.getObject() instanceof Depot) {
+        	Depot depot = (Depot) permission.getObject();
+        	return depot;
+        } else {
+        	return null;
+        }
+    }
+    
 }

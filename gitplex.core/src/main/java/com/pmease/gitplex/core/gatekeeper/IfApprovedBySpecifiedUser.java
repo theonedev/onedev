@@ -43,42 +43,33 @@ public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
         if (result == null) {
             request.pickReviewers(Sets.newHashSet(user), 1);
 
-            return pending(Lists.newArrayList("To be approved by " + user.getDisplayName() + "."));
+            return pending(Lists.newArrayList("To be approved by " + user.getDisplayName()));
         } else if (result == Review.Result.APPROVE) {
-            return passed(Lists.newArrayList("Approved by " + user.getDisplayName() + "."));
+            return passed(Lists.newArrayList("Approved by " + user.getDisplayName()));
         } else {
-            return failed(Lists.newArrayList("Rejected by " + user.getDisplayName() + "."));
+            return failed(Lists.newArrayList("Disapproved by " + user.getDisplayName()));
         }
     }
 
-    private CheckResult check(Account user) {
-        Account approver = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
-        if (approver.equals(user)) {
-        	return passed(Lists.newArrayList("Approved by " + approver.getName() + "."));
-        } else {
-        	return pending(Lists.newArrayList("Not approved by " + approver.getName() + ".")); 
-        }
-    }
-    
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-		return check(user);
+    	return pending(Lists.newArrayList("Need approval from " + user.getName())); 
 	}
 
 	@Override
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		return check(user);
+    	return pending(Lists.newArrayList("Need approval from " + user.getName())); 
 	}
 
 	@Override
-	public void onUserRename(String oldName, String newName) {
+	public void onAccountRename(String oldName, String newName) {
 		if (userName.equals(oldName))
 			userName = newName;
 	}
 
 	@Override
-	public boolean onUserDelete(Account user) {
-		return userName.equals(user.getName());
+	public boolean onAccountDelete(String accountName) {
+		return userName.equals(accountName);
 	}
 
 }

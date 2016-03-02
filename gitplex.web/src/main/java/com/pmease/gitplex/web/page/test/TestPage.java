@@ -22,7 +22,7 @@ public class TestPage extends BasePage {
 				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
 				Account account = accountManager.load(1L);
 				account.setPassword("");
-				accountManager.save(account);
+				accountManager.save(account, null);
 				WebSession.get().login("admin", "just do it", true);
 			}
 			

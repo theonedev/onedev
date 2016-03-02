@@ -672,7 +672,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	@Transactional
 	@Override
-	public void beforeDelete(Depot depot) {
+	public void onDepotDelete(Depot depot) {
     	for (PullRequest request: depot.getOutgoingRequests()) {
     		if (!request.getTargetDepot().equals(depot) && request.isOpen())
         		discard(request, "Source repository is deleted.");
@@ -683,11 +683,11 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
     	query.setParameter("depot", depot);
     	query.executeUpdate();
 	}
-
-	@Override
-	public void afterDelete(Depot depot) {
-	}
 	
+	@Override
+	public void onDepotRename(Depot renamedDepot, String oldName) {
+	}
+
 	@Transactional
 	@Override
 	public void onRefUpdate(Depot depot, String refName, @Nullable String newCommitHash) {
@@ -838,6 +838,10 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	@Override
 	public void systemStarting() {
+	}
+
+	@Override
+	public void onDepotTransfer(Depot depot, Account oldOwner) {
 	}
 
 }

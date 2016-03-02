@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.entity;
 
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 
@@ -29,8 +31,15 @@ public class Membership extends AbstractEntity {
 	
 	private boolean admin;
 	
-	private List<String> joinedTeams;
+	private Set<String> joinedTeams = new LinkedHashSet<>();
 
+	/*
+	 * Optimistic lock is necessary to ensure database integrity when update 
+	 * joinedTeams upon team renaming/deletion
+	 */
+	@Version
+	private long version;
+	
 	public Account getUser() {
 		return user;
 	}
@@ -55,12 +64,16 @@ public class Membership extends AbstractEntity {
 		this.admin = admin;
 	}
 
-	public List<String> getJoinedTeams() {
+	public Set<String> getJoinedTeams() {
 		return joinedTeams;
 	}
 
-	public void setJoinedTeams(List<String> joinedTeams) {
+	public void setJoinedTeams(Set<String> joinedTeams) {
 		this.joinedTeams = joinedTeams;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 }

@@ -51,14 +51,25 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 
     @Transactional
     @Override
-	public void save(Account user) {
+	public void save(Account account, String oldName) {
     	boolean isNew;
-    	if (user.isRoot()) {
+    	if (account.isRoot()) {
     		isNew = get(Account.ROOT_ID) == null;
-    		getSession().replicate(user, ReplicationMode.OVERWRITE);
+    		getSession().replicate(account, ReplicationMode.OVERWRITE);
     	} else {
-    		isNew = user.isNew();
-    		persist(user);
+    		isNew = account.isNew();
+    		persist(account);
+    	}
+
+    	if (oldName != null && !oldName.equals(account.getName())) {
+    		for (Depot depot: dao.allOf(Depot.class)) {
+    			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
+    				integrationPolicy.onAccountRename(oldName, account.getName());
+    			}
+    			for (GateKeeper gateKeeper: depot.getGateKeepers()) {
+    				gateKeeper.onAccountRename(oldName, account.getName());
+    			}
+    		}
     	}
     	
     	afterCommit(new Runnable() {
@@ -67,14 +78,14 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 			public void run() {
 				idLock.writeLock().lock();
 				try {
-					Set<Long> ids = emailToIds.get(user.getEmail());
+					Set<Long> ids = emailToIds.get(account.getEmail());
 					if (ids == null) {
 						ids = new HashSet<>();
-						emailToIds.put(user.getEmail(), ids);
+						emailToIds.put(account.getEmail(), ids);
 					}
-					ids.add(user.getId());
+					ids.add(account.getId());
 					if (isNew)
-						nameToId.inverse().put(user.getId(), user.getName());
+						nameToId.inverse().put(account.getId(), account.getName());
 				} finally {
 					idLock.writeLock().unlock();
 				}
@@ -91,48 +102,48 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 
     @Transactional
     @Override
-	public void delete(final Account user) {
+	public void delete(Account account) {
     	Query query = getSession().createQuery("update PullRequest set submitter=null where submitter=:submitter");
-    	query.setParameter("submitter", user);
+    	query.setParameter("submitter", account);
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update PullRequest set assignee.id=:rootId where assignee=:assignee");
     	query.setParameter("rootId", Account.ROOT_ID);
-    	query.setParameter("assignee", user);
+    	query.setParameter("assignee", account);
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update PullRequest set closeInfo.closedBy=null where closeInfo.closedBy=:closedBy");
-    	query.setParameter("closedBy", user);
+    	query.setParameter("closedBy", account);
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update PullRequestActivity set user=null where user=:user");
-    	query.setParameter("user", user);
+    	query.setParameter("user", account);
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update PullRequestActivity set user=null where user=:user");
-    	query.setParameter("user", user);
+    	query.setParameter("user", account);
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update Comment set user=null where user=:user");
-    	query.setParameter("user", user);
+    	query.setParameter("user", account);
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update CommentReply set user=null where user=:user");
-    	query.setParameter("user", user);
+    	query.setParameter("user", account);
     	query.executeUpdate();
-    	
-    	for (Depot depot: user.getDepots())
+
+    	for (Depot depot: account.getDepots())
     		repositoryManager.delete(depot);
     	
-		remove(user);
+		remove(account);
 		
-		for (Depot each: dao.allOf(Depot.class)) {
-			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
-				if (it.next().onUserDelete(user))
+		for (Depot depot: dao.allOf(Depot.class)) {
+			for (Iterator<IntegrationPolicy> it = depot.getIntegrationPolicies().iterator(); it.hasNext();) {
+				if (it.next().onAccountDelete(account.getName()))
 					it.remove();
 			}
-			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-				if (it.next().onUserDelete(user))
+			for (Iterator<GateKeeper> it = depot.getGateKeepers().iterator(); it.hasNext();) {
+				if (it.next().onAccountDelete(account.getName()))
 					it.remove();
 			}
 		}
@@ -145,11 +156,11 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 				try {
 					for (Iterator<Map.Entry<String, Set<Long>>> it = emailToIds.entrySet().iterator(); it.hasNext();) {
 						Map.Entry<String, Set<Long>> entry = it.next();
-						entry.getValue().remove(user.getId());
+						entry.getValue().remove(account.getId());
 						if (entry.getValue().isEmpty())
 							it.remove();
 					}
-					nameToId.inverse().remove(user.getId());
+					nameToId.inverse().remove(account.getId());
 				} finally {
 					idLock.writeLock().unlock();
 				}
@@ -264,38 +275,6 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 
 	@Override
 	public void systemStopped() {
-	}
-
-	@Transactional
-	@Override
-	public void rename(Long userId, String oldName, String newName) {
-		Query query = getSession().createQuery("update User set name=:newName where name=:oldName");
-		query.setParameter("oldName", oldName);
-		query.setParameter("newName", newName);
-		query.executeUpdate();
-		
-		for (Depot depot: dao.allOf(Depot.class)) {
-			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
-				integrationPolicy.onUserRename(oldName, newName);
-			}
-			for (GateKeeper gateKeeper: depot.getGateKeepers()) {
-				gateKeeper.onUserRename(oldName, newName);
-			}
-		}
-		
-    	afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				idLock.writeLock().lock();
-				try {
-					nameToId.inverse().put(userId, newName);
-				} finally {
-					idLock.writeLock().unlock();
-				}
-			}
-    		
-    	});
 	}
 
 }

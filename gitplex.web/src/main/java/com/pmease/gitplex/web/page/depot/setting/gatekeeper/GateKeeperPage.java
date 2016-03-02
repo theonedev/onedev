@@ -101,7 +101,7 @@ public class GateKeeperPage extends DepotSettingPage {
 	}
 	
 	private void onGateKeeperChanged(AjaxRequestTarget target) {
-		GitPlex.getInstance(DepotManager.class).save(getDepot());
+		GitPlex.getInstance(DepotManager.class).save(getDepot(), null, null);
 		replace(newContent());
 		target.add(get(CONTAINER_ID));
 	}

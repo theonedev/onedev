@@ -1,63 +1,39 @@
 package com.pmease.gitplex.core.manager.impl;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.hibernate.Query;
-import org.hibernate.criterion.Restrictions;
-
-import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.AbstractEntityDao;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.component.Team;
+import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.TeamManager;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 
 @Singleton
-public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamManager {
-
-	private final AccountManager userManager;
-	
-	@Inject
-	public DefaultTeamManager(Dao dao, AccountManager userManager) {
-		super(dao);
-		
-		this.userManager = userManager;
-	}
-
-	@Sessional
-	@Override
-	public Team findBy(Account owner, String teamName) {
-		return find(EntityCriteria.of(Team.class)
-				.add(Restrictions.eq("owner", owner))
-				.add(Restrictions.eq("name", teamName)));
-	}
-	
-	@Sessional
-	@Override
-	public Team findBy(String teamFQN) {
-    	String userName = StringUtils.substringBefore(teamFQN, Depot.FQN_SEPARATOR);
-    	Account user = userManager.findByName(userName);
-    	if (user != null)
-    		return findBy(user, StringUtils.substringAfter(teamFQN, Depot.FQN_SEPARATOR));
-    	else
-    		return null;
-	}
+public class DefaultTeamManager implements TeamManager, DepotListener {
 
 	@Transactional
 	@Override
-	public void delete(Team team) {
-		for (Depot each: team.getOrganization().getDepots()) {
-			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-				if (it.next().onTeamDelete(team))
+	public void delete(Account organization, String teamName) {
+		if (!organization.getTeams().containsKey(teamName)) {
+			throw new RuntimeException("Unable to find team to delete: " + teamName);
+		}
+		organization.getTeams().remove(teamName);
+		for (Membership membership: organization.getUserMemberships()) {
+			membership.getJoinedTeams().remove(teamName);
+		}
+		for (Depot depot: organization.getDepots()) {
+			for (Iterator<GateKeeper> it = depot.getGateKeepers().iterator(); it.hasNext();) {
+				if (it.next().onTeamDelete(teamName))
 					it.remove();
 			}
 		}
@@ -65,18 +41,74 @@ public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamM
 
 	@Transactional
 	@Override
-	public void rename(Account teamOwner, String oldName, String newName) {
-		Query query = getSession().createQuery("update Team set name=:newName where "
-				+ "owner=:owner and name=:oldName");
-		query.setParameter("owner", teamOwner);
-		query.setParameter("oldName", oldName);
-		query.setParameter("newName", newName);
-		query.executeUpdate();
-		
-		for (Depot depot: teamOwner.getDepots()) {
-			for (GateKeeper gateKeeper: depot.getGateKeepers()) {
-				gateKeeper.onTeamRename(oldName, newName);
+	public void rename(Account organization, String oldTeamName, String newTeamName) {
+		if (!oldTeamName.equals(newTeamName)) {
+			if (!organization.getTeams().containsKey(oldTeamName)) {
+				throw new RuntimeException("Unable to find team to rename: " + oldTeamName);
 			}
+			if (organization.getTeams().containsKey(newTeamName)) {
+				throw new RuntimeException("Team with name '" + newTeamName + "' already exists");
+			}
+			
+			Map<String, Team> teams = new LinkedHashMap<>();
+			for (Map.Entry<String, Team> entry: organization.getTeams().entrySet()) {
+				if (entry.getKey().equals(oldTeamName)) {
+					Team team = entry.getValue();
+					team.setName(newTeamName);
+					teams.put(newTeamName, team);
+				} else {
+					teams.put(entry.getKey(), entry.getValue());
+				}
+			}
+			organization.setTeams(teams);
+
+			for (Membership membership: organization.getUserMemberships()) {
+				Set<String> joinedTeams = new LinkedHashSet<>();
+				for (String teamName: membership.getJoinedTeams()) {
+					if (teamName.equals(oldTeamName))
+						joinedTeams.add(newTeamName);
+					else
+						joinedTeams.add(teamName);
+				}
+				membership.setJoinedTeams(joinedTeams);
+			}
+			
+			for (Depot depot: organization.getDepots()) {
+				for (GateKeeper gateKeeper: depot.getGateKeepers()) {
+					gateKeeper.onTeamRename(oldTeamName, newTeamName);
+				}
+			}
+		}
+	}
+
+	@Transactional
+	@Override
+	public void onDepotDelete(Depot depot) {
+		for (Team team: depot.getOwner().getTeams().values()) {
+			team.getAuthorizations().remove(depot.getName());
+		}
+	}
+
+	@Transactional
+	@Override
+	public void onDepotRename(Depot renamedDepot, String oldName) {
+		for (Team team: renamedDepot.getOwner().getTeams().values()) {
+			Map<String, DepotPrivilege> authorizations = new LinkedHashMap<>();
+			for (Map.Entry<String, DepotPrivilege> entry: team.getAuthorizations().entrySet()) {
+				if (entry.getKey().equals(oldName))
+					authorizations.put(renamedDepot.getName(), entry.getValue());
+				else
+					authorizations.put(entry.getKey(), entry.getValue());
+			}
+			team.setAuthorizations(authorizations);
+		}
+	}
+	
+	@Transactional
+	@Override
+	public void onDepotTransfer(Depot depot, Account oldOwner) {
+		for (Team team: oldOwner.getTeams().values()) {
+			team.getAuthorizations().remove(depot.getName());
 		}
 	}
 

@@ -38,20 +38,20 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 			for (String file: update.getChangedFiles()) {
 				if (IncludeExcludeUtils.matches(pathMatch, file)) {
 					request.setReferentialUpdate(update);
-					return passed(Lists.newArrayList("Touched files matches '" + pathMatch + "'."));
+					return passed(Lists.newArrayList("Touched files matches '" + pathMatch + "'"));
 				}
 			}
 		}
 
-		return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'."));
+		return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'"));
 	}
 
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
 		if (IncludeExcludeUtils.matches(pathMatch, file)) 
-			return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'."));
+			return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));
 		else
-			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'."));
+			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'"));
 	}
 
 	@Override
@@ -59,10 +59,10 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			for (String file: depot.git().listChangedFiles(oldCommit.name(), newCommit.name(), null)) {
 				if (IncludeExcludeUtils.matches(pathMatch, file))
-					return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'."));
+					return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));
 			}
 			
-			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'."));
+			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'"));
 		} else {
 			return ignored();
 		}

@@ -9,8 +9,8 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import com.google.common.collect.Sets;
 import com.pmease.commons.git.GitConfig;
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.ModelProvider;
+import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.PrefixedNamingStrategy;
 import com.pmease.commons.jetty.ServletConfigurator;
 import com.pmease.commons.loader.AbstractPlugin;
@@ -26,7 +26,7 @@ import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
 import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 import com.pmease.gitplex.core.extensionpoint.RefListener;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.CommentManager;
@@ -44,10 +44,9 @@ import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuxiliaryManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCommentManager;
@@ -65,14 +64,13 @@ import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
 import com.pmease.gitplex.core.manager.impl.DefaultSequentialWorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
-import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultWorkManager;
 import com.pmease.gitplex.core.security.SecurityRealm;
 import com.pmease.gitplex.core.setting.SpecifiedGit;
 import com.pmease.gitplex.core.setting.SystemGit;
-import com.pmease.gitplex.core.util.validation.DepotNameReservation;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
+import com.pmease.gitplex.core.util.validation.DepotNameReservation;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -145,7 +143,6 @@ public class CoreModule extends AbstractPluginModule {
 		 * HK2 to guice bridge can only search in explicit bindings in Guice   
 		 */
 		bind(StorageManager.class).to(DefaultStorageManager.class);
-		bind(AuthorizationManager.class).to(DefaultAuthorizationManager.class);
 		bind(ConfigManager.class).to(DefaultConfigManager.class);
 		bind(DataManager.class).to(DefaultDataManager.class);
 		bind(CommentManager.class).to(DefaultCommentManager.class);
@@ -153,7 +150,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestManager.class).to(DefaultPullRequestManager.class);
 		bind(PullRequestUpdateManager.class).to(DefaultPullRequestUpdateManager.class);
 		bind(DepotManager.class).to(DefaultDepotManager.class);
-		bind(TeamManager.class).to(DefaultTeamManager.class);
 		bind(AccountManager.class).to(DefaultAccountManager.class);
 		bind(VerificationManager.class).to(DefaultVerificationManager.class);
 		bind(ReviewInvitationManager.class).to(DefaultReviewInvitationManager.class);
@@ -165,11 +161,13 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AuxiliaryManager.class).to(DefaultAuxiliaryManager.class);
 		bind(WorkManager.class).to(DefaultWorkManager.class);
 		bind(SequentialWorkManager.class).to(DefaultSequentialWorkManager.class);
+		bind(TeamManager.class).to(DefaultTeamManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 
 		contribute(DepotListener.class, DefaultPullRequestManager.class);
 		contribute(DepotListener.class, DefaultAuxiliaryManager.class);
+		contribute(DepotListener.class, DefaultTeamManager.class);
 		contribute(RefListener.class, DefaultPullRequestManager.class);
 		contribute(RefListener.class, DefaultAuxiliaryManager.class);
 		contribute(RefListener.class, DefaultDepotManager.class);

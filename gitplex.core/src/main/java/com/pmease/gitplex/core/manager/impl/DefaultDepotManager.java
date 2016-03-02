@@ -68,7 +68,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     
     @Inject
-    public DefaultDepotManager(Dao dao, AccountManager userManager, 
+    public DefaultDepotManager(Dao dao, AccountManager userManager,
     		StorageManager storageManager, AuxiliaryManager auxiliaryManager, 
     		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
     	super(dao);
@@ -96,10 +96,46 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     
     @Transactional
     @Override
-    public void save(final Depot depot) {
-    	persist(depot);
+    public void save(Depot depot, Long oldOwnerId, String oldName) {
+    	Preconditions.checkArgument(oldOwnerId!=null && oldName!=null, 
+    			"Can not rename and transfer depot in the same time");
     	
-        checkSanity(depot);
+    	boolean isNew = depot.isNew();
+    	
+    	persist(depot);
+
+    	if (oldOwnerId != null && !depot.getOwner().getId().equals(oldOwnerId)) {
+    		Account oldOwner = userManager.load(oldOwnerId);
+    		for (DepotListener listener: listenersProvider.get())
+    			listener.onDepotTransfer(depot, oldOwner);
+    		
+    		for (Depot each: all()) {
+    			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
+    				policy.onDepotTransfer(depot, oldOwner);
+    			}
+    			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
+    				if (it.next().onDepotTransfer(each, depot, oldOwner))
+    					it.remove();
+    			}
+    		}
+    	}
+    	if (oldName != null && !depot.getName().equals(oldName)) {
+    		for (DepotListener listener: listenersProvider.get())
+    			listener.onDepotRename(depot, oldName);
+    		
+    		for (Depot each: all()) {
+    			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
+    				integrationPolicy.onDepotRename(depot.getOwner(), oldName, depot.getName());
+    			}
+    			for (GateKeeper gateKeeper: each.getGateKeepers()) {
+    				gateKeeper.onDepotRename(depot, oldName);
+    			}
+    		}
+    	}
+
+    	if (isNew) {
+    		checkSanity(depot);
+    	}
         
         afterCommit(new Runnable() {
 
@@ -118,16 +154,16 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 
     @Transactional
     @Override
-    public void delete(final Depot depot) {
+    public void delete(Depot depot) {
 		for (DepotListener listener: listenersProvider.get())
-			listener.beforeDelete(depot);
+			listener.onDepotDelete(depot);
 		
     	Query query = getSession().createQuery("update Depot set forkedFrom=null where forkedFrom=:forkedFrom");
     	query.setParameter("forkedFrom", depot);
     	query.executeUpdate();
-    	
-        remove(depot);
 
+    	remove(depot);
+    	
 		for (Depot each: all()) {
 			for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
 				if (it.next().onDepotDelete(depot))
@@ -226,17 +262,13 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 
             FileUtils.cleanDir(forked.git().depotDir());
             forked.git().clone(depot.git().depotDir().getAbsolutePath(), true, false, false, null);
-            
-            checkSanity(forked);
 		}
 		
 		return forked;
 	}
 
-	@Transactional
-	@Override
-	public void checkSanity(Depot depot) {
-		logger.debug("Checking sanity of repository '{}'...", depot);
+	private void checkSanity(Depot depot) {
+		logger.debug("Checking git of repository '{}'...", depot);
 
 		Git git = depot.git();
 
@@ -265,7 +297,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
         
         auxiliaryManager.collect(depot);
 	}
-
+	
 	@Sessional
 	@Override
 	public void systemStarting() {
@@ -277,8 +309,9 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	@Override
 	public void checkSanity() {
 		logger.info("Checking sanity of repositories...");
-		for (Depot depot: query(EntityCriteria.of(Depot.class), 0, 0))
+		for (Depot depot: query(EntityCriteria.of(Depot.class), 0, 0)) {
 			checkSanity(depot);
+		}
 	}
 
 	@Transactional
@@ -298,45 +331,10 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 
 	@Transactional
 	@Override
-	public void rename(Account depotOwner, final Long depotId, String oldName, final String newName) {
-		Query query = getSession().createQuery("update Depot set name=:newName where "
-				+ "owner=:owner and name=:oldName");
-		query.setParameter("owner", depotOwner);
-		query.setParameter("oldName", oldName);
-		query.setParameter("newName", newName);
-		query.executeUpdate();
-		
-		for (Depot depot: all()) {
-			for (IntegrationPolicy integrationPolicy: depot.getIntegrationPolicies()) {
-				integrationPolicy.onDepotRename(depotOwner, oldName, newName);
-			}
-			for (GateKeeper gateKeeper: depot.getGateKeepers()) {
-				gateKeeper.onDepotRename(depotOwner, oldName, newName);
-			}
-		}
-		
-        afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				idLock.writeLock().lock();
-				try {
-					nameToId.inverse().put(depotId, new Pair<>(depotOwner.getId(), newName));
-				} finally {
-					idLock.writeLock().unlock();
-				}
-			}
-        	
-        });
-		
-	}
-
-	@Transactional
-	@Override
 	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
 		if (newCommitHash == null) {
+			String branch = GitUtils.ref2branch(refName);
 			for (Depot each: all()) {
-				String branch = GitUtils.ref2branch(refName);
 				if (branch != null) {
 					for (Iterator<IntegrationPolicy> it = each.getIntegrationPolicies().iterator(); it.hasNext();) {
 						if (it.next().onBranchDelete(each, depot, branch))

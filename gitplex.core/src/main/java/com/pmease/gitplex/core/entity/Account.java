@@ -3,18 +3,19 @@ package com.pmease.gitplex.core.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Email;
@@ -27,23 +28,16 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
-import com.pmease.gitplex.core.permission.object.ProtectedObject;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.entity.component.Team;
 import com.pmease.gitplex.core.permission.object.AccountBelonging;
+import com.pmease.gitplex.core.permission.object.ProtectedObject;
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.util.validation.AccountName;
 
 @Entity
 @Table(indexes={@Index(columnList="email"), @Index(columnList="fullName"), 
 		@Index(columnList="noSpaceName"), @Index(columnList="noSpaceFullName")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-
-/* 
- * use dynamic update as we do not want to change name while persisting user, 
- * as name of user can be referenced in other places, and we want to update 
- * these references in a transaction via UserManager.rename method 
- */  
-@DynamicUpdate
 @Editable
 public class Account extends AbstractUser implements ProtectedObject {
 
@@ -68,7 +62,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private DepotPrivilege defaultPrivilege;
 	
 	/* used by organization account */
-	private List<Team> teams = new ArrayList<>();
+	private Map<String, Team> teams = new LinkedHashMap<>();
 	
 	@Column(nullable=false)
 	private String noSpaceName;
@@ -79,6 +73,13 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	private int reviewEffort;
 	
+	/*
+	 * Optimistic lock is necessary to ensure database integrity when update 
+	 * gate keepers and integration policies upon account renaming/deletion
+	 */
+	@Version
+	private long version;
+	
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Membership> organizationMemberships = new ArrayList<>();
@@ -88,6 +89,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private Collection<Membership> userMemberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="owner")
+	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Depot> depots = new ArrayList<>();
 
 	@OneToMany(mappedBy="user")
@@ -256,11 +258,11 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.depots = depots;
 	}
 
-	public List<Team> getTeams() {
+	public Map<String, Team> getTeams() {
 		return teams;
 	}
 
-	public void setTeams(List<Team> teams) {
+	public void setTeams(Map<String, Team> teams) {
 		this.teams = teams;
 	}
 
@@ -377,6 +379,10 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	public String getNoSpaceFullName() {
 		return noSpaceFullName;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 	
 }

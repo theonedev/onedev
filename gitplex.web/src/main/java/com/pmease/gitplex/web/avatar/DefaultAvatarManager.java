@@ -55,7 +55,7 @@ public class DefaultAvatarManager implements AvatarManager {
 				return AVATARS_BASE_URL + user.getId() + "?version=" + user.getAvatarUploadDate().getTime();
 			} else {
 				user.setAvatarUploadDate(null);
-				userManager.save(user);
+				userManager.save(user, null);
 			}
 		} 
 		
@@ -138,7 +138,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		} else {
 			user.setAvatarUploadDate(null);
 		}
-		userManager.save(user);
+		userManager.save(user, null);
 	}
 
 }

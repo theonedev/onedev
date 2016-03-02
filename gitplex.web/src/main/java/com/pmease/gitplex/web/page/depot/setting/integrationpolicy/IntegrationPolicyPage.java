@@ -53,14 +53,14 @@ public class IntegrationPolicyPage extends DepotSettingPage {
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
 						getDepot().getIntegrationPolicies().remove(item.getIndex());
-						GitPlex.getInstance(DepotManager.class).save(getDepot());
+						GitPlex.getInstance(DepotManager.class).save(getDepot(), null, null);
 						target.add(container);
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, IntegrationPolicy policy) {
 						getDepot().getIntegrationPolicies().set(item.getIndex(), policy);
-						GitPlex.getInstance(DepotManager.class).save(getDepot());
+						GitPlex.getInstance(DepotManager.class).save(getDepot(), null, null);
 					}
 					
 				});
@@ -75,7 +75,7 @@ public class IntegrationPolicyPage extends DepotSettingPage {
 				List<IntegrationPolicy> policies = getDepot().getIntegrationPolicies();
 				IntegrationPolicy policy = policies.get(from.getItemIndex());
 				policies.set(from.getItemIndex(), policies.set(to.getItemIndex(), policy));
-				GitPlex.getInstance(DepotManager.class).save(getDepot());
+				GitPlex.getInstance(DepotManager.class).save(getDepot(), null, null);
 				
 				target.add(container);
 			}
@@ -98,7 +98,7 @@ public class IntegrationPolicyPage extends DepotSettingPage {
 					@Override
 					protected void onSave(AjaxRequestTarget target, IntegrationPolicy policy) {
 						getDepot().getIntegrationPolicies().add(policy);
-						GitPlex.getInstance(DepotManager.class).save(getDepot());
+						GitPlex.getInstance(DepotManager.class).save(getDepot(), null, null);
 						container.replace(newAddNewFrag());
 						target.add(container);
 					}

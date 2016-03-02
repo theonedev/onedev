@@ -27,20 +27,26 @@ public interface DepotManager extends EntityDao<Depot> {
 	 */
 	Depot fork(Depot depot, Account user);
 	
-	void checkSanity(Depot depot);
-	
 	void checkSanity();
 	
 	/**
-	 * Save depot. Note that depot name should not be changed via this method. 
-	 * Call {@link #rename(Account, Long, String, String)} if you want to rename
-	 * the depot. 
+	 * Save specified depot. Note that oldName and oldOwnerId should not be 
+	 * specified together, meaning that you should not rename and transfer 
+	 * a depot in a single call
 	 * 
 	 * @param depot
+	 * 			depot to save
+	 * @param oldOwnerId
+	 * 			in case of transfer, this parameter should hold the id of original 
+	 * 			owner when above depot object is initially loaded to ensure database 
+	 * 			integrity. Use <tt>null</tt> if owner is not changed
+	 * @param oldName
+	 * 			in case of rename, this parameter should hold the original name 
+	 * 			when above depot object is initially loaded to ensure database 
+	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
+	 * 			or the name is not changed
 	 */
-	void save(Depot depot);
+	void save(Depot depot, @Nullable Long oldOwnerId, @Nullable String oldName);
 	
 	void delete(Depot depot);
-	
-	void rename(Account depotOwner, Long depotId, String oldName, String newName);
 }

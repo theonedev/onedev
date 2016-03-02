@@ -32,7 +32,7 @@ public class PasswordEditPage extends AccountSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 
-				GitPlex.getInstance(AccountManager.class).save(getAccount());
+				GitPlex.getInstance(AccountManager.class).save(getAccount(), null);
 				Session.get().success("Password has been changed");
 			}
 			

@@ -58,14 +58,14 @@ public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements 
 
 	private CheckResult checkUpdate() {
 		if (updateRef) {
-			return passed(Lists.newArrayList("Ref is being updated."));
+			return passed(Lists.newArrayList("Ref is being updated"));
 		} 
 		List<String> reasons = new ArrayList<>();
 		if (deleteRef) {
-			reasons.add("Ref is not being deleted.");
+			reasons.add("Ref is not being deleted");
 		}
 		if (createRef) {
-			reasons.add("Ref is not being created.");
+			reasons.add("Ref is not being created");
 		}
 		return failed(reasons);
 	}
@@ -84,26 +84,26 @@ public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements 
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		if (oldCommit.equals(ObjectId.zeroId())) {
 			if (createRef) {
-				return passed(Lists.newArrayList("Ref is being created."));
+				return passed(Lists.newArrayList("Ref is being created"));
 			}
 			List<String> reasons = new ArrayList<>();
 			if (updateRef) {
-				reasons.add("Ref is not being updated.");
+				reasons.add("Ref is not being updated");
 			}
 			if (deleteRef) {
-				reasons.add("Ref is not being deleted.");
+				reasons.add("Ref is not being deleted");
 			}
 			return failed(reasons);
 		} else if (newCommit.equals(ObjectId.zeroId())) {
 			if (deleteRef) {
-				return passed(Lists.newArrayList("Ref is being deleted."));
+				return passed(Lists.newArrayList("Ref is being deleted"));
 			}
 			List<String> reasons = new ArrayList<>();
 			if (createRef) {
-				reasons.add("Ref is not being created.");
+				reasons.add("Ref is not being created");
 			}
 			if (updateRef) {
-				reasons.add("Ref is not being updated.");
+				reasons.add("Ref is not being updated");
 			}
 			return failed(reasons);
 		} else {
@@ -115,7 +115,7 @@ public class IfPerformSpecifiedOperations extends AbstractGateKeeper implements 
 	public boolean isValid(ConstraintValidatorContext context) {
 		if (!createRef && !updateRef && !deleteRef) {
 			context.disableDefaultConstraintViolation();
-			context.buildConstraintViolationWithTemplate("Please select at least one operation.").addConstraintViolation();
+			context.buildConstraintViolationWithTemplate("Please select at least one operation").addConstraintViolation();
 			return false;
 		} else {
 			return true;

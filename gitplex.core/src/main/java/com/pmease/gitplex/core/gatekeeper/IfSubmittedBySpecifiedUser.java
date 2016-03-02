@@ -35,36 +35,36 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 
     @Override
     public CheckResult doCheckRequest(PullRequest request) {
-    	return check(request.getSubmitter());
+    	return checkSubmitter(request.getSubmitter());
     }
 
-    private CheckResult check(Account user) {
+    private CheckResult checkSubmitter(Account user) {
 		Account expectedUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
         if (expectedUser.equals(user)) 
-        	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName() + "."));
+        	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName()));
         else 
-        	return failed(Lists.newArrayList("Not submitted by " + expectedUser.getDisplayName() + ".")); 
+        	return failed(Lists.newArrayList("Not submitted by " + expectedUser.getDisplayName())); 
     }
     
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-		return check(user);
+		return checkSubmitter(user);
 	}
 
 	@Override
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		return check(user);
+		return checkSubmitter(user);
 	}
 
 	@Override
-	public void onUserRename(String oldName, String newName) {
+	public void onAccountRename(String oldName, String newName) {
 		if (userName.equals(oldName))
 			userName = newName;
 	}
 
 	@Override
-	public boolean onUserDelete(Account user) {
-		return userName.equals(user.getName());
+	public boolean onAccountDelete(String accountName) {
+		return userName.equals(accountName);
 	}
 
 }
