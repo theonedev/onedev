@@ -143,9 +143,7 @@ public class CmToken implements Serializable {
 		String escapedText = "";
 		for (int i=0; i<text.length(); i++) {
 			char ch = text.charAt(i);
-			if (Character.isWhitespace(ch))
-				escapedText += " ";
-			else
+			if (ch == ' ' || ch == '\t' || !Character.isWhitespace(ch))
 				escapedText += ch;
 		}
 		escapedText = HtmlEscape.escapeHtml5(escapedText);
