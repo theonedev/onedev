@@ -9,9 +9,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import com.pmease.commons.util.match.IncludeExclude;
-import com.pmease.commons.util.match.WildcardStringMatcher;
-import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeLexer;
-import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser.CriteriaContext;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser.MatchContext;
 
@@ -30,14 +27,10 @@ public class IncludeExcludeUtils {
 	
 	public static String getValue(TerminalNode terminal) {
 		String value = terminal.getText().substring(1);
-		value = value.substring(0, value.length()-1).trim();
-		if (value.endsWith("/") && !value.endsWith("*")) {
-			value = value + "*";
-		}
-		return value;
+		return value.substring(0, value.length()-1).trim();
 	}
  	
-	public static boolean matches(String match, String value) {
+	public static IncludeExclude<String, String> getIncludeExclude(String match) {
 		MatchContext matchContext = parse(match);
 		List<String> includes = new ArrayList<>();
 		List<String> excludes = new ArrayList<>();
@@ -49,7 +42,7 @@ public class IncludeExcludeUtils {
 			}
 		}
 
-		return new IncludeExclude<String, String>(includes, excludes).matches(new WildcardStringMatcher(), value);
+		return new IncludeExclude<String, String>(includes, excludes);
 	}
 	
 }

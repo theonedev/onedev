@@ -29,7 +29,7 @@ public abstract class CreateTagLink extends ModalLink {
 		super.onConfigure();
 		
 		ObjectId commit = depotModel.getObject().getRevCommit(revision);
-		setVisible(SecurityUtils.canPushRef(depotModel.getObject(), Constants.R_HEADS, 
+		setVisible(SecurityUtils.canPushRef(depotModel.getObject(), Constants.R_TAGS, 
 				ObjectId.zeroId(), commit));
 	}
 	

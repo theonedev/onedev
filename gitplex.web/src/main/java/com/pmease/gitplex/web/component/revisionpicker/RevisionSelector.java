@@ -34,6 +34,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.unbescape.html.HtmlEscape;
@@ -48,6 +49,7 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
@@ -60,8 +62,10 @@ public abstract class RevisionSelector extends Panel {
 	
 	private final String revision;
 	
-	private final boolean canCreateRef;
+	private final boolean canCreateBranch;
 	
+	private final boolean canCreateTag;
+
 	private boolean branchesActive;
 	
 	private int activeRefIndex;
@@ -115,7 +119,15 @@ public abstract class RevisionSelector extends Panel {
 		
 		this.depotModel = depotModel;
 		this.revision = revision;		
-		this.canCreateRef = canCreateRef;
+		if (canCreateRef) {
+			Depot depot = depotModel.getObject();
+			ObjectId commitId = depot.getRevCommit(revision);
+			canCreateBranch = SecurityUtils.canPushRef(depot, Constants.R_HEADS, ObjectId.zeroId(), commitId);						
+			canCreateTag = SecurityUtils.canPushRef(depot, Constants.R_TAGS, ObjectId.zeroId(), commitId);						
+		} else {
+			canCreateBranch = false;
+			canCreateTag = false;
+		}
 		Ref ref = depotModel.getObject().getRef(revision);
 		branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
 		
@@ -136,10 +148,19 @@ public abstract class RevisionSelector extends Panel {
 
 			@Override
 			protected String load() {
-				if (branchesActive)
-					return canCreateRef?"Find or create branch":"Find branch";
-				else
-					return canCreateRef?"Find or create tag":"Find tag";
+				if (branchesActive) {
+					if (canCreateBranch) {
+						return "Find or create branch";
+					} else {
+						return "Find branch";
+					}
+				} else {
+					if (canCreateTag) {
+						return "Find or create tag";
+					} else {
+						return "Find tag";
+					}
+				}
 			}
 			
 		}));
@@ -215,10 +236,21 @@ public abstract class RevisionSelector extends Panel {
 							filteredRefs.add(ref);
 					}
 					if (!found) {
-						if (depotModel.getObject().getRevCommit(revInput, false) != null) {
+						Depot depot = depotModel.getObject();
+						if (depot.getRevCommit(revInput, false) != null) {
 							filteredRefs.add(COMMIT_FLAG + revInput);
-						} else if (canCreateRef && Repository.isValidRefName(Constants.R_HEADS + revInput)) { 
-							filteredRefs.add(ADD_FLAG + revInput);
+						} else if (branchesActive) {
+							String refName = Constants.R_HEADS + revInput;
+							if (Repository.isValidRefName(refName) 
+									&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+								filteredRefs.add(ADD_FLAG + revInput);
+							}
+						} else {
+							String refName = Constants.R_TAGS + revInput;
+							if (Repository.isValidRefName(refName) 
+									&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+								filteredRefs.add(ADD_FLAG + revInput);
+							}
 						}
 					}
 				} else {

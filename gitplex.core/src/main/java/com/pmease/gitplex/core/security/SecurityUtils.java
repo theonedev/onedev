@@ -32,10 +32,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
 		} else {
-			Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
+			Account currentUser = getAccount();
 			Account submitter = request.getSubmitter();
 			return currentUser != null && currentUser.equals(submitter);
 		}
+	}
+
+	public static Account getAccount() {
+		return GitPlex.getInstance(AccountManager.class).getCurrent();
 	}
 	
 	public static boolean canModify(Review review) {
@@ -43,12 +47,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(depot))) {
 			return true;
 		} else {
-			return review.getReviewer().equals(GitPlex.getInstance(AccountManager.class).getCurrent());
+			return review.getReviewer().equals(getAccount());
 		}
 	}
 	
 	public static boolean canModify(Comment comment) {
-		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
+		Account currentUser = getAccount();
 		if (currentUser == null) {
 			return false;
 		} else {
@@ -62,7 +66,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canPushRef(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
+		Account currentUser = getAccount();
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot))	
 				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassed();
@@ -89,8 +93,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canManageSystem() {
-		Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
-		return currentUser.isRoot() || currentUser.isAdmin();
+		Account currentUser = getAccount();
+		return currentUser != null && (currentUser.isRoot() || currentUser.isAdmin());
 	}
 	
 }

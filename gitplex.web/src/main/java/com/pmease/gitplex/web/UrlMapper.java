@@ -19,10 +19,9 @@ import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPag
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.admin.AccountListPage;
+import com.pmease.gitplex.web.page.admin.UserListPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
-import com.pmease.gitplex.web.page.admin.NewAccountPage;
-import com.pmease.gitplex.web.page.admin.QosSettingPage;
+import com.pmease.gitplex.web.page.admin.NewUserPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
@@ -101,11 +100,10 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addAdministrationPages() {
-		add(new MountedMapper("administration/accounts", AccountListPage.class));
-		add(new MountedMapper("administration/accounts/new", NewAccountPage.class));
+		add(new MountedMapper("administration/accounts", UserListPage.class));
+		add(new MountedMapper("administration/accounts/new", NewUserPage.class));
 		add(new MountedMapper("administration/mail-setting", MailSettingPage.class));
 		add(new MountedMapper("administration/system-setting", SystemSettingPage.class));
-		add(new MountedMapper("administration/qos-setting", QosSettingPage.class));
 	}
 	
 	public List<String> normalize(List<String> urlSegments) {

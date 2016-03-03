@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import com.pmease.commons.hibernate.dao.EntityDao;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.setting.MailSetting;
-import com.pmease.gitplex.core.setting.QosSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 public interface ConfigManager extends EntityDao<Config> {
@@ -61,19 +60,4 @@ public interface ConfigManager extends EntityDao<Config> {
 	 */
 	void saveMailSetting(@Nullable MailSetting mailSetting);
 	
-	/**
-	 * Get QOS setting.
-	 * 
-	 * @return
-	 * 			QOS setting
-	 */
-	QosSetting getQosSetting();
-	
-	/**
-	 * Save QOS setting.
-	 * 
-	 * @param qosSetting
-	 * 			setting of QOS
-	 */
-	void saveQosSetting(QosSetting qosSetting);
 }

@@ -37,7 +37,7 @@ import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
-public class AccountListPage extends AdministrationPage {
+public class UserListPage extends AdministrationPage {
 
 	private PageableListView<Account> accountsView;
 	
@@ -79,7 +79,7 @@ public class AccountListPage extends AdministrationPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(new NewAccountPage(new Account()));
+				setResponsePage(new NewUserPage(new Account()));
 			}
 			
 		});
@@ -170,7 +170,7 @@ public class AccountListPage extends AdministrationPage {
 							
 							@Override
 							protected void onDeleted(AjaxRequestTarget target) {
-								setResponsePage(AccountListPage.this);
+								setResponsePage(UserListPage.this);
 							}
 							
 							@Override

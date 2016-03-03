@@ -5,20 +5,27 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.util.match.PatternMatcher;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.annotation.RefMatch;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.util.ChildAwareMatcher;
+import com.pmease.gitplex.core.util.ParentAwareMatcher;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Editable(order=100, icon="fa-code-fork", description=
-		"This gate keeper will be passed if specified refs is being changed")
-public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
+		"This gate keeper will be passed if specified refs is being touched")
+public class IfTouchSpecifiedRefs extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final PatternMatcher INCLUDE_MATCHER = new ParentAwareMatcher();
+	
+	private static final PatternMatcher EXCLUDE_MATCHER = new ChildAwareMatcher();
 	
 	private String refMatch;
 	
@@ -34,7 +41,7 @@ public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 	}
 
 	private CheckResult doCheck(String refName) {
-		if (IncludeExcludeUtils.matches(refMatch, refName)) {
+		if (IncludeExcludeUtils.getIncludeExclude(refMatch).matches(INCLUDE_MATCHER, EXCLUDE_MATCHER, refName)) {
 			return passed(Lists.newArrayList("Target ref matches '" + refMatch + "'"));
 		} else {
 			return failed(Lists.newArrayList("Target ref does not match '" + refMatch + "'"));

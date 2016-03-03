@@ -14,15 +14,19 @@ public class IncludeExclude<T, V> {
 	}
 	
 	public boolean matches(Matcher<T, V> matcher, V value) {
+		return matches(matcher, matcher, value);
+	}
+	
+	public boolean matches(Matcher<T, V> includeMatcher, Matcher<T, V> excludeMatcher, V value) {
 		for (T exclude: excludes) {
-			if (matcher.matches(exclude, value))
+			if (excludeMatcher.matches(exclude, value))
 				return false;
 		}
 		if (includes.isEmpty()) {
 			return true;
 		} else {
 			for (T include: includes) {
-				if (matcher.matches(include, value))
+				if (includeMatcher.matches(include, value))
 					return true;
 			}
 			return false;

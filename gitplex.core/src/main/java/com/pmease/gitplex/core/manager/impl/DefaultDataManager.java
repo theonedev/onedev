@@ -16,14 +16,13 @@ import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.Config.Key;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.setting.MailSetting;
-import com.pmease.gitplex.core.setting.QosSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;
 
 @Singleton
@@ -128,12 +127,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		Config qosConfig = configManager.getConfig(Key.QOS);
-		if (qosConfig == null)
-			configManager.saveQosSetting(new QosSetting());
-
-		if (!manualConfigs.isEmpty()) {
-		}
 		return manualConfigs;
 	}
 

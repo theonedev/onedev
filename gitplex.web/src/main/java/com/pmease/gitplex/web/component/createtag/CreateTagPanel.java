@@ -9,13 +9,16 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
+import com.pmease.gitplex.core.security.SecurityUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -91,7 +94,7 @@ abstract class CreateTagPanel extends Panel {
 					form.error("Tag name is required.");
 					target.focusComponent(nameInput);
 					target.add(form);
-				} else if (!Repository.isValidRefName(Constants.R_HEADS + tagName)) {
+				} else if (!Repository.isValidRefName(Constants.R_TAGS + tagName)) {
 					form.error("Tag name is not valid.");
 					target.focusComponent(nameInput);
 					target.add(form);
@@ -100,10 +103,19 @@ abstract class CreateTagPanel extends Panel {
 					target.focusComponent(nameInput);
 					target.add(form);
 				} else {
-					Depot repo = depotModel.getObject();
-					Account user = GitPlex.getInstance(AccountManager.class).getCurrent();
-					repo.tag(tagName, revision, user.asPerson(), tagMessage);
-					onCreate(target, tagName);
+					Depot depot = depotModel.getObject();
+					ObjectId commitId = depot.getRevCommit(revision);
+					Account user = Preconditions.checkNotNull(SecurityUtils.getAccount());
+					CheckResult checkResult = depot.getGateKeeper().checkPush(user, 
+							depot, Constants.R_TAGS + tagName, ObjectId.zeroId(), commitId);
+					if (!checkResult.isPassed()) {
+						form.error(Joiner.on(", ").join(checkResult.getReasons()));
+						target.focusComponent(nameInput);
+						target.add(form);
+					} else {
+						depot.tag(tagName, revision, user.asPerson(), tagMessage);
+						onCreate(target, tagName);
+					}
 				}
 			}
 

@@ -48,6 +48,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
+import com.pmease.commons.util.match.PatternMatcher;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
@@ -74,6 +75,7 @@ import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
+import com.pmease.gitplex.core.util.ChildAwareMatcher;
 import com.pmease.gitplex.core.util.fullbranchmatch.FullBranchMatchUtils;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
@@ -86,6 +88,8 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	private static final int UI_PREVIEW_PRIORITY = 10;
 	
 	private static final int BACKEND_PREVIEW_PRIORITY = 50;
+	
+	private static final PatternMatcher BRANCH_MATCHER = new ChildAwareMatcher();
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
@@ -370,7 +374,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	public List<IntegrationStrategy> getApplicableIntegrationStrategies(PullRequest request) {
 		List<IntegrationStrategy> strategies = null;
 		for (IntegrationPolicy policy: request.getTargetDepot().getIntegrationPolicies()) {
-			if (IncludeExcludeUtils.matches(policy.getTargetBranchMatch(), request.getTargetBranch()) 
+			if (IncludeExcludeUtils.getIncludeExclude(policy.getTargetBranchMatch()).matches(BRANCH_MATCHER, request.getTargetBranch()) 
 					&& FullBranchMatchUtils.matches(policy.getSourceBranchMatch(), request.getTargetDepot(), request.getSource())) {
 				strategies = policy.getIntegrationStrategies();
 				break;

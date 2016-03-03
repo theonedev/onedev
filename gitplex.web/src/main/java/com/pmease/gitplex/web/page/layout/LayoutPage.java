@@ -28,7 +28,7 @@ import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.notifications.AccountNotificationsPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.admin.AccountListPage;
+import com.pmease.gitplex.web.page.admin.UserListPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
@@ -53,7 +53,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		mainHead.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
 		mainHead.add(newContextHead("context"));
-		mainHead.add(new BookmarkablePageLink<Void>("administration", AccountListPage.class)
+		mainHead.add(new BookmarkablePageLink<Void>("administration", UserListPage.class)
 					.setVisible(SecurityUtils.canManageSystem()));
 
 		final Account user = getCurrentUser();
