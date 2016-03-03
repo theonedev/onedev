@@ -8,20 +8,23 @@ import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.annotation.UserChoice;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.AccountManager;
 
-@Editable(order=600, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
-		"This gate keeper will be passed if the commit is submitted by specified user")
-public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
+@Editable(order=300, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
+		"This gate keeper will be passed if the commit is disapproved by specified user. "
+		+ "It normally works together with a NOT container to reject the pull request "
+		+ "in case the user disapproved it")
+public class IfDisapprovedBySpecifiedUser extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	
-    private String userName;
-
+	private String userName;
+	
     @Editable(name="Select User Below")
     @UserChoice
     @NotEmpty
@@ -32,30 +35,30 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
     public void setUserName(String userName) {
         this.userName = userName;
     }
+	
+	@Override
+	protected CheckResult doCheckRequest(PullRequest request) {
+		Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class)
+					.findByName(userName));
+		Review.Result result = user.checkReviewSince(request.getReferentialUpdate());
+		if (result == Review.Result.DISAPPROVE) {
+            return passed(Lists.newArrayList("Disapproved by " + userName));
+		} else {
+            return failed(Lists.newArrayList("Not disapproved by " + userName));
+		}
+	}
 
-    @Override
-    public CheckResult doCheckRequest(PullRequest request) {
-    	return checkSubmitter(request.getSubmitter());
-    }
-
-    private CheckResult checkSubmitter(Account user) {
-		Account expectedUser = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
-        if (expectedUser.equals(user)) 
-        	return passed(Lists.newArrayList("Submitted by " + expectedUser.getDisplayName()));
-        else 
-        	return failed(Lists.newArrayList("Not submitted by " + expectedUser.getDisplayName())); 
-    }
-    
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-		return checkSubmitter(user);
+		return failed(Lists.newArrayList("Not disapproved by " + userName));
 	}
 
 	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		return checkSubmitter(user);
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit,
+			ObjectId newCommit) {
+		return failed(Lists.newArrayList("Not disapproved by " + userName));
 	}
-
+	
 	@Override
 	public void onAccountRename(String oldName, String newName) {
 		if (userName.equals(oldName))
@@ -66,5 +69,5 @@ public class IfSubmittedBySpecifiedUser extends AbstractGateKeeper {
 	public boolean onAccountDelete(String accountName) {
 		return userName.equals(accountName);
 	}
-
+	
 }

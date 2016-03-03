@@ -1,7 +1,6 @@
 package com.pmease.gitplex.core.entity;
 
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -31,7 +30,7 @@ public class Membership extends AbstractEntity {
 	
 	private boolean admin;
 	
-	private Set<String> joinedTeams = new LinkedHashSet<>();
+	private LinkedHashSet<String> joinedTeams = new LinkedHashSet<>();
 
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -64,11 +63,11 @@ public class Membership extends AbstractEntity {
 		this.admin = admin;
 	}
 
-	public Set<String> getJoinedTeams() {
+	public LinkedHashSet<String> getJoinedTeams() {
 		return joinedTeams;
 	}
 
-	public void setJoinedTeams(Set<String> joinedTeams) {
+	public void setJoinedTeams(LinkedHashSet<String> joinedTeams) {
 		this.joinedTeams = joinedTeams;
 	}
 

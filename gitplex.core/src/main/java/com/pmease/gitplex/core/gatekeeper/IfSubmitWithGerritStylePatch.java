@@ -11,7 +11,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
 @Editable(order=3000, icon="fa-ext fa-file-diff", description="This gate keeper will be passed if the pull request "
 		+ "is submitted with gerrit style patch, that is, only one commit is submitted for review at "
-		+ "a time, and subsequent updates to the review should be done by amending previous commit.")
+		+ "a time, and subsequent updates to the review should be done by amending previous commit")
 public class IfSubmitWithGerritStylePatch extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;

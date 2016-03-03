@@ -14,7 +14,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Editable(order=300, icon="fa-file-text", description=
-		"This gate keeper will be passed if specified files are modified.")
+		"This gate keeper will be passed if specified files are modified")
 public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;

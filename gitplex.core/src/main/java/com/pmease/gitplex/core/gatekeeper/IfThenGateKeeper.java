@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
 
 @Editable(name="If...Then... Composition", order=300, icon="fa-object-group",  
 		category=GateKeeper.CATEGORY_COMPOSITION, 
-		description="If first gate keeper is passed, then go ahead to check second gate keeper;")
+		description="If first gate keeper is passed, then go ahead to check second gate keeper")
 @Horizontal
 public class IfThenGateKeeper extends CompositeGateKeeper {
 

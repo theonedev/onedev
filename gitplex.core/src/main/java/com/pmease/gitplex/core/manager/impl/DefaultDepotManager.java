@@ -97,7 +97,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     @Transactional
     @Override
     public void save(Depot depot, Long oldOwnerId, String oldName) {
-    	Preconditions.checkArgument(oldOwnerId!=null && oldName!=null, 
+    	Preconditions.checkArgument(oldOwnerId==null || oldName==null, 
     			"Can not rename and transfer depot in the same time");
     	
     	boolean isNew = depot.isNew();

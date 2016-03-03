@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.manager.AccountManager;
 
 @Editable(order=200, icon="fa-user", category=GateKeeper.CATEGORY_USER, description=
-		"This gate keeper will be passed if the commit is approved by specified user.")
+		"This gate keeper will be passed if the commit is approved by specified user")
 public class IfApprovedBySpecifiedUser extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;

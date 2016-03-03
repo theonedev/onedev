@@ -53,7 +53,7 @@ public class ProfileEditPage extends AccountSettingPage {
 				editor.getBeanDescriptor().copyProperties(object, getAccount());
 			}
 			
-		}, Sets.newHashSet("password"));
+		}, Sets.newHashSet("admin", "description", "defaultPrivilege", "password"));
 		
 		Form<?> form = new Form<Void>("form") {
 

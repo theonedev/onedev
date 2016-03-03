@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 
 @Editable(name="Not Composition", order=400, icon="fa-object-group", category=GateKeeper.CATEGORY_COMPOSITION,
-		description="This gate keeper will be passed if contained gate keeper is not passed.")
+		description="This gate keeper will be passed if contained gate keeper is not passed")
 @Horizontal
 public class NotGateKeeper extends CompositeGateKeeper {
 

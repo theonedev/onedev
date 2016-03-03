@@ -20,7 +20,7 @@ import com.pmease.gitplex.core.manager.VerificationManager;
 @Editable(icon="fa-check-circle", order=1000,
 		description="This gate keeper will be satisfied if commit is verified successfully "
 				+ "by specified number of builds. To make this working, your CI system has to "
-				+ "be configured to build against GitPlex pull requests.")
+				+ "be configured to build against GitPlex pull requests")
 public class IfVerifiedByBuilds extends AbstractGateKeeper {
 	
 	private static final long serialVersionUID = 1L;

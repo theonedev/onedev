@@ -17,16 +17,18 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 
-@Editable(order=100, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
-		"This gate keeper will be passed if the commit is approved by specified number of users "
-		+ "from specified team")
-public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
+@Editable(order=300, icon="fa-group", category=GateKeeper.CATEGORY_USER, description=
+		"This gate keeper will be passed if the commit gets specified number "
+		+ "of disapprovals from specified team. It normally works together "
+		+ "with a NOT container to reject the pull request in case there are "
+		+ "disapprovals")
+public class IfDisapprovedBySpecifiedTeam extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;
 	
 	private String teamName;
 	
-    private int leastApprovals = 1;
+	private int leastDisapprovals = 1;
 
     @Editable(name="Team", order=100)
     @NotEmpty
@@ -38,20 +40,19 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
 		this.teamName = teamName;
 	}
 
-	@Editable(name="Least Approvals Required", order=200)
-    @Min(value = 1, message = "Least approvals should not be less than 1")
-    public int getLeastApprovals() {
-        return leastApprovals;
-    }
+	@Editable(name="Least Disapprovals Required", order=200)
+    @Min(value = 1, message = "Least disapprovals should not be less than 1")
+	public int getLeastDisapprovals() {
+		return leastDisapprovals;
+	}
 
-    public void setLeastApprovals(int leastApprovals) {
-        this.leastApprovals = leastApprovals;
-    }
-    
-    @Override
-    public CheckResult doCheckRequest(PullRequest request) {
-        int approvals = 0;
-        int pendings = 0;
+	public void setLeastDisapprovals(int leastDisapprovals) {
+		this.leastDisapprovals = leastDisapprovals;
+	}
+
+	@Override
+	protected CheckResult doCheckRequest(PullRequest request) {
+        int disapprovals = 0;
         
     	Collection<Account> members = new ArrayList<>();
     	for (Membership membership: request.getTargetDepot().getOwner().getUserMemberships()) {
@@ -61,41 +62,31 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
         
         for (Account member : members) {
             Review.Result result = member.checkReviewSince(request.getReferentialUpdate());
-            if (result == null) {
-                pendings++;
-            } else if (result == Review.Result.APPROVE) {
-                approvals++;
+            if (result == Review.Result.DISAPPROVE) {
+                disapprovals++;
             }
         }
 
-        if (approvals >= getLeastApprovals()) {
-            return passed(Lists.newArrayList("Approved by at least " + getLeastApprovals() 
+        if (disapprovals >= getLeastDisapprovals()) {
+            return passed(Lists.newArrayList("Disapproved by at least " + getLeastDisapprovals() 
             		+ " member(s) of team " + teamName));
-        } else if (getLeastApprovals() - approvals > pendings) {
-            return failed(Lists.newArrayList("Unable to get at least " + getLeastApprovals()
-                    + " approvals from team " + teamName));
         } else {
-            int lackApprovals = getLeastApprovals() - approvals;
-
-            request.pickReviewers(members, lackApprovals);
-
-            return pending(Lists.newArrayList("To be approved by " + lackApprovals 
-            		+ " member(s) from team " + teamName));
+            return failed(Lists.newArrayList("Not disapproved by at least " + getLeastDisapprovals() 
+            		+ " member(s) of team " + teamName));
         }
-    }
-
-	@Override
-	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-        return pending(Lists.newArrayList("Need to be approved by at least " + getLeastApprovals()
-        			+ " member(s) of team " + teamName));
 	}
 
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-        return pending(Lists.newArrayList("Need to be approved by at least " + getLeastApprovals()
-        			+ " member(s) of team " + teamName));
+		return failed(Lists.newArrayList("Not disapproved by anyone from team " + teamName));
 	}
 
+	@Override
+	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit,
+			ObjectId newCommit) {
+		return failed(Lists.newArrayList("Not disapproved by anyone from team " + teamName));
+	}
+	
 	@Override
 	public void onTeamRename(String oldName, String newName) {
 		if (teamName.equals(oldName))
@@ -112,5 +103,5 @@ public class IfApprovedBySpecifiedTeam extends AbstractGateKeeper {
 			Account originalOwner) {
 		return depotDefiningGateKeeper.equals(transferredDepot);
 	}
-
+	
 }

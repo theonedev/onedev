@@ -116,9 +116,9 @@ public class IntegrationPolicy implements Serializable {
 		return fullBranchMatchContext.getText();
 	}
 
-	public boolean onBranchDelete(Depot depotDefiningPolicy, Depot depotContainingRef, String branch) {
+	public boolean onBranchDelete(Depot depotDefiningPolicy, Depot depotContainingBranch, String branch) {
 		StringBuilder builder = new StringBuilder();
-		if (depotDefiningPolicy.equals(depotContainingRef)) {
+		if (depotDefiningPolicy.equals(depotContainingBranch)) {
 			for (IncludeExcludeParser.CriteriaContext criteriaContext: IncludeExcludeUtils.parse(targetBranchMatch).criteria()) {
 				if (criteriaContext.includeMatch() != null) { 
 					String value = IncludeExcludeUtils.getValue(criteriaContext.includeMatch().Value());
@@ -138,12 +138,12 @@ public class IntegrationPolicy implements Serializable {
 		builder = new StringBuilder();
 		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
 			if (criteriaContext.includeMatch() != null) { 
-				String deleted = deleteSourceBranch(depotDefiningPolicy, depotContainingRef, 
+				String deleted = deleteSourceBranch(depotDefiningPolicy, depotContainingBranch, 
 						branch, criteriaContext.includeMatch().fullBranchMatch()); 
 				if (deleted != null)
 					builder.append(String.format("include(%s) ", deleted));
 			} else {
-				String deleted = deleteSourceBranch(depotDefiningPolicy, depotContainingRef, 
+				String deleted = deleteSourceBranch(depotDefiningPolicy, depotContainingBranch, 
 						branch, criteriaContext.excludeMatch().fullBranchMatch()); 
 				if (deleted != null)
 					builder.append(String.format("exclude(%s) ", deleted));

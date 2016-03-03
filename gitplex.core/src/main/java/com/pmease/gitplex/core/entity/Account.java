@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -59,10 +58,11 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private String description;
 	
 	/* used by organization account */
-	private DepotPrivilege defaultPrivilege;
+	@Column(nullable=false)
+	private DepotPrivilege defaultPrivilege = DepotPrivilege.NONE;
 	
 	/* used by organization account */
-	private Map<String, Team> teams = new LinkedHashMap<>();
+	private LinkedHashMap<String, Team> teams = new LinkedHashMap<>();
 	
 	@Column(nullable=false)
 	private String noSpaceName;
@@ -258,11 +258,11 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.depots = depots;
 	}
 
-	public Map<String, Team> getTeams() {
+	public LinkedHashMap<String, Team> getTeams() {
 		return teams;
 	}
 
-	public void setTeams(Map<String, Team> teams) {
+	public void setTeams(LinkedHashMap<String, Team> teams) {
 		this.teams = teams;
 	}
 

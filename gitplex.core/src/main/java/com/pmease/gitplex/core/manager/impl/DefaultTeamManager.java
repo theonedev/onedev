@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Singleton;
 
@@ -50,7 +49,7 @@ public class DefaultTeamManager implements TeamManager, DepotListener {
 				throw new RuntimeException("Team with name '" + newTeamName + "' already exists");
 			}
 			
-			Map<String, Team> teams = new LinkedHashMap<>();
+			LinkedHashMap<String, Team> teams = new LinkedHashMap<>();
 			for (Map.Entry<String, Team> entry: organization.getTeams().entrySet()) {
 				if (entry.getKey().equals(oldTeamName)) {
 					Team team = entry.getValue();
@@ -63,7 +62,7 @@ public class DefaultTeamManager implements TeamManager, DepotListener {
 			organization.setTeams(teams);
 
 			for (Membership membership: organization.getUserMemberships()) {
-				Set<String> joinedTeams = new LinkedHashSet<>();
+				LinkedHashSet<String> joinedTeams = new LinkedHashSet<>();
 				for (String teamName: membership.getJoinedTeams()) {
 					if (teamName.equals(oldTeamName))
 						joinedTeams.add(newTeamName);

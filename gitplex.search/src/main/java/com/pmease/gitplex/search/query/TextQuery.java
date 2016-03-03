@@ -34,6 +34,8 @@ public class TextQuery extends BlobQuery {
 
 	private static int MAX_LINE_LEN = 1024;
 
+	private static CharMatcher EOL_MATCHER = CharMatcher.anyOf("\r\n");
+	
 	private final String term;
 	
 	private final boolean regex;
@@ -94,7 +96,7 @@ public class TextQuery extends BlobQuery {
 					Pattern pattern = getPattern();
 					if (pattern != null) {
 						int lineNo = 0;
-						for (String line: Splitter.on(CharMatcher.anyOf("\n\r")).split(content)) {
+						for (String line: Splitter.on(EOL_MATCHER).split(content)) {
 							if (line.length() <= MAX_LINE_LEN) {
 								Matcher matcher = pattern.matcher(line);
 								while (matcher.find()) {
@@ -116,45 +118,47 @@ public class TextQuery extends BlobQuery {
 							normalizedTerm = term;
 						
 						int lineNo = 0;
-						for (String line: Splitter.on("\n").split(content)) {
-							String normalizedLine;
-							if (!caseSensitive)
-								normalizedLine = line.toLowerCase();
-							else
-								normalizedLine = line;
-							
-							int start = normalizedLine.indexOf(normalizedTerm, 0);
-							while (start != -1) {
-								int end = start + normalizedTerm.length();
-								if (wholeWord) {
-									char beforeChar;
-									if (start == 0)
-										beforeChar = ' ';
-									else 
-										beforeChar = line.charAt(start-1);
-									
-									char afterChar;
-									if (end == line.length())
-										afterChar = ' ';
-									else
-										afterChar = line.charAt(end);
-									
-									if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
+						for (String line: Splitter.on(EOL_MATCHER).split(content)) {
+							if (line.length() <= MAX_LINE_LEN) {
+								String normalizedLine;
+								if (!caseSensitive)
+									normalizedLine = line.toLowerCase();
+								else
+									normalizedLine = line;
+								
+								int start = normalizedLine.indexOf(normalizedTerm, 0);
+								while (start != -1) {
+									int end = start + normalizedTerm.length();
+									if (wholeWord) {
+										char beforeChar;
+										if (start == 0)
+											beforeChar = ' ';
+										else 
+											beforeChar = line.charAt(start-1);
+										
+										char afterChar;
+										if (end == line.length())
+											afterChar = ' ';
+										else
+											afterChar = line.charAt(end);
+										
+										if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
+											Range range = new Range(start, end);
+											hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
+											if (hits.size() >= getCount())
+												break;
+										}
+									} else {
 										Range range = new Range(start, end);
 										hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
 										if (hits.size() >= getCount())
 											break;
 									}
-								} else {
-									Range range = new Range(start, end);
-									hits.add(new TextHit(blobPath, line, new TokenPosition(lineNo, range)));
-									if (hits.size() >= getCount())
-										break;
+									start = normalizedLine.indexOf(normalizedTerm, end);
 								}
-								start = normalizedLine.indexOf(normalizedTerm, end);
+								if (hits.size() >= getCount())
+									break;
 							}
-							if (hits.size() >= getCount())
-								break;
 							lineNo++;
 						}
 					}

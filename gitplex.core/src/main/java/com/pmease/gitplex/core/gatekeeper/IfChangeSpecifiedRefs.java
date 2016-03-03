@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeParser;
 import com.pmease.gitplex.core.util.includeexclude.IncludeExcludeUtils;
 
 @Editable(order=100, icon="fa-code-fork", description=
-		"This gate keeper will be passed if specified refs is being changed.")
+		"This gate keeper will be passed if specified refs is being changed")
 public class IfChangeSpecifiedRefs extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;

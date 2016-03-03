@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 @Editable(order=2000, icon="fa-ext fa-repo-lock", description="This gate keeper will be passed if the push "
 		+ "operation does not rewrite history of target branch. Rewriting history of public branches "
 		+ "is dangerous, and it happens when user forces a push without merging/rebasing with the "
-		+ "branch head.")
+		+ "branch head")
 public class IfPushWithoutRewritingHistory extends AbstractGateKeeper {
 
 	private static final long serialVersionUID = 1L;

@@ -55,7 +55,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			rootUser = new Account();
 			rootUser.setId(Account.ROOT_ID);
 			manualConfigs.add(new ManualConfig("Create Administator Account", rootUser, 
-					Sets.newHashSet("description", "admin")) {
+					Sets.newHashSet("description", "admin", "defaultPrivilege")) {
 
 				@Override
 				public Skippable getSkippable() {
