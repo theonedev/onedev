@@ -2,8 +2,8 @@ package com.pmease.commons.lang.tokenizers;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
@@ -140,11 +140,15 @@ public class CmToken implements Serializable {
 	}
 
 	public String toHtml(Operation operation) {
-		String escapedText;
-		if (text.equals("\f"))
-			escapedText = "";
-		else
-			escapedText = StringEscapeUtils.escapeHtml4(text);
+		String escapedText = "";
+		for (int i=0; i<text.length(); i++) {
+			char ch = text.charAt(i);
+			if (Character.isWhitespace(ch))
+				escapedText += " ";
+			else
+				escapedText += ch;
+		}
+		escapedText = HtmlEscape.escapeHtml5(escapedText);
 		
 		if (operation == Operation.EQUAL && StringUtils.isBlank(type)) {
 			return escapedText;

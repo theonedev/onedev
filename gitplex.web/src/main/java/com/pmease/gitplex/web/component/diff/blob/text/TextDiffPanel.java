@@ -525,8 +525,9 @@ public class TextDiffPanel extends Panel {
 		if (lastContextSize == 0)
 			appendAddComment(contentBuilder, oldLineNo, newLineNo);
 		contentBuilder.append("<span class='operation'>&nbsp;</span>");
-		for (CmToken token: block.getUnits().get(lineIndex))
+		for (CmToken token: block.getUnits().get(lineIndex)) {
 			contentBuilder.append(token.toHtml(Operation.EQUAL));
+		}
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
