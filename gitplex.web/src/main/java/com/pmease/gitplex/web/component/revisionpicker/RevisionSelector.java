@@ -240,16 +240,20 @@ public abstract class RevisionSelector extends Panel {
 						if (depot.getRevCommit(revInput, false) != null) {
 							filteredRefs.add(COMMIT_FLAG + revInput);
 						} else if (branchesActive) {
-							String refName = Constants.R_HEADS + revInput;
-							if (Repository.isValidRefName(refName) 
-									&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
-								filteredRefs.add(ADD_FLAG + revInput);
+							if (canCreateBranch) {
+								String refName = Constants.R_HEADS + revInput;
+								if (Repository.isValidRefName(refName) 
+										&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+									filteredRefs.add(ADD_FLAG + revInput);
+								}
 							}
 						} else {
-							String refName = Constants.R_TAGS + revInput;
-							if (Repository.isValidRefName(refName) 
-									&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
-								filteredRefs.add(ADD_FLAG + revInput);
+							if (canCreateTag) {
+								String refName = Constants.R_TAGS + revInput;
+								if (Repository.isValidRefName(refName) 
+										&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+									filteredRefs.add(ADD_FLAG + revInput);
+								}
 							}
 						}
 					}
