@@ -405,7 +405,7 @@ public class RevisionComparePage extends DepotPage {
 	private void newRevDiffPanel(final WebMarkupContainer tabPanel, @Nullable AjaxRequestTarget target) {
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
 				new Model<PullRequest>(null), new Model<Comment>(null), 
-				RevisionComparePage.this.target.getRevision(), source.getRevision(), 
+				mergeBaseModel.getObject(), source.getRevision(), 
 				StringUtils.isBlank(path)?null:path, null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
