@@ -102,7 +102,7 @@ public class NewRequestPage extends PullRequestPage {
 	public NewRequestPage(PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasCommits()) 
+		if (!getDepot().git().hasRefs()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 
 		if (params.get("target").toString() != null) {

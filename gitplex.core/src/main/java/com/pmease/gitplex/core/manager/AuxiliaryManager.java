@@ -13,7 +13,7 @@ public interface AuxiliaryManager {
 	
 	void collect(Depot depot);
 	
-	void collect(Depot depot, String revision);
+	void collect(Depot depot, ObjectId commit);
 	
 	List<String> getFiles(Depot depot);
 	

@@ -968,9 +968,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
     public void deleteBranch(String branch) {
     	String refName = GitUtils.branch2ref(branch);
+    	ObjectId commitId = getRevCommit(refName).getId();
 		git().deleteRef(refName);
 		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			listener.onRefUpdate(this, refName, null);
+			listener.onRefUpdate(this, refName, commitId, ObjectId.zeroId());
     }
     
     public void createBranch(String branchName, String branchRevision) {
@@ -1000,9 +1001,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     
     public void deleteTag(String tag) {
     	String refName = GitUtils.tag2ref(tag);
+    	ObjectId commitId = getRevCommit(refName).getId();
 		git().deleteRef(refName);
 		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			listener.onRefUpdate(this, refName, null);
+			listener.onRefUpdate(this, refName, commitId, ObjectId.zeroId());
     }
     
 	private static class DiffKey implements Serializable {

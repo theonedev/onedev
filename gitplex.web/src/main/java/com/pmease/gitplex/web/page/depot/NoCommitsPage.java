@@ -17,7 +17,7 @@ public class NoCommitsPage extends DepotPage {
 	public NoCommitsPage(PageParameters params) {
 		super(params);
 		
-		if (getDepot().git().hasCommits())
+		if (getDepot().git().hasRefs())
 			throw new RestartResponseException(DepotFilePage.class, paramsOf(getDepot()));
 	}
 

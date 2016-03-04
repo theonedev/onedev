@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Test;
@@ -33,8 +34,8 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.IndexResult;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -217,27 +218,27 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Cat.java", code, "add cat");
 		
-		String commitHash = git.parseRevision("master", true);
-		assertEquals(2, indexManager.index(depot, commitHash).get().getIndexed());
+		ObjectId commit = ObjectId.fromString(git.parseRevision("master", true));
+		assertEquals(2, indexManager.index(depot, commit).get().getIndexed());
 		
 		BlobQuery query = new TextQuery("public", false, false, false, null, null, Integer.MAX_VALUE);
-		List<QueryHit> hits = searchManager.search(depot, commitHash, query);
+		List<QueryHit> hits = searchManager.search(depot, commit, query);
 		assertEquals(4, hits.size());
 
 		query = new SymbolQuery("nam*", false, false, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 		
 		query = new SymbolQuery("nam", false, false, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(0, hits.size());
 		
 		query = new SymbolQuery("name", false, false, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 		
 		query = new SymbolQuery("cat", true, false, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(1, hits.size());
 		
 		code = ""
@@ -247,15 +248,15 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Dog.java", code, "add dog age");		
 
-		commitHash = git.parseRevision("master", true);
-		assertEquals(1, indexManager.index(depot, commitHash).get().getIndexed());
+		commit = ObjectId.fromString(git.parseRevision("master", true));
+		assertEquals(1, indexManager.index(depot, commit).get().getIndexed());
 
 		query = new TextQuery("strin", false, false, false, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 		
 		query = new SymbolQuery("Age", false, false, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(1, hits.size());
 		
 		code = ""
@@ -271,14 +272,14 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Cat.java", code, "add cat age");
 		
-		commitHash = git.parseRevision("master", true);
+		commit = ObjectId.fromString(git.parseRevision("master", true));
 		
-		IndexResult indexResult = indexManager.index(depot, commitHash).get();
+		IndexResult indexResult = indexManager.index(depot, commit).get();
 		assertEquals(2, indexResult.getChecked());
 		assertEquals(1, indexResult.getIndexed());
 		
-		commitHash = git.parseRevision("master~2", true);
-		assertEquals(0, indexManager.index(depot, commitHash).get().getChecked());
+		commit = ObjectId.fromString(git.parseRevision("master~2", true));
+		assertEquals(0, indexManager.index(depot, commit).get().getChecked());
 		
 		when(extractors.getVersion()).thenReturn("java:2");
 		when(extractors.getExtractor(anyString())).thenReturn(new Extractor() {
@@ -329,10 +330,10 @@ public class IndexAndSearchTest extends AbstractGitTest {
 			
 		});
 		
-		assertEquals(2, indexManager.index(depot, commitHash).get().getIndexed());
+		assertEquals(2, indexManager.index(depot, commit).get().getIndexed());
 		
 		query = new SymbolQuery("tiger", false, true, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 	}
 	
@@ -351,19 +352,19 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("Cat.java", code, "add cat");
 		
-		String commitHash = git.parseRevision("master", true);
-		indexManager.index(depot, commitHash);
+		ObjectId commit = ObjectId.fromString(git.parseRevision("master", true));
+		indexManager.index(depot, commit);
 
 		BlobQuery query = new TextQuery("public|}", true, false, false, null, null, Integer.MAX_VALUE);
-		List<QueryHit> hits = searchManager.search(depot, commitHash, query);
+		List<QueryHit> hits = searchManager.search(depot, commit, query);
 		assertEquals(7, hits.size());
 		
 		query = new TextQuery("nam", true, false, false, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(3, hits.size());
 		
 		query = new TextQuery("nam", true, false, true, null, null, Integer.MAX_VALUE);
-		hits = searchManager.search(depot, commitHash, query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(1, hits.size());
 	}
 	
@@ -387,14 +388,15 @@ public class IndexAndSearchTest extends AbstractGitTest {
 				+ "}";
 		addFileAndCommit("plants/Pine.java", code, "add pine");
 		
-		indexManager.index(depot, "master");
+		ObjectId commit = ObjectId.fromString(git.parseRevision("master", true));
+		indexManager.index(depot, commit);
 
 		BlobQuery query = new TextQuery("name", false, true, false, "plants/", null, Integer.MAX_VALUE);
-		List<QueryHit> hits = searchManager.search(depot, "master", query);
+		List<QueryHit> hits = searchManager.search(depot, commit, query);
 		assertEquals(1, hits.size());
 		
 		query = new TextQuery("name", false, true, false, null, "*.c", Integer.MAX_VALUE);
-		hits = searchManager.search(depot, "master", query);
+		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 	}
 	

@@ -78,7 +78,7 @@ public class DepotTagsPage extends DepotPage {
 	public DepotTagsPage(PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasCommits()) 
+		if (!getDepot().git().hasRefs()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 	}
 	

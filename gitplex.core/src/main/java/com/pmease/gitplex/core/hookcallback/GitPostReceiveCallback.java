@@ -19,6 +19,7 @@ import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Depot;
@@ -76,20 +77,24 @@ public class GitPostReceiveCallback extends HttpServlet {
         while (true) {
         	String refName = StringUtils.reverse(fields.get(pos));
         	pos++;
-        	String newCommitHash = StringUtils.reverse(fields.get(pos));
+        	ObjectId newCommit = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
         	pos++;
         	String field = fields.get(pos);
-//        	String oldCommitHash = StringUtils.reverse(field.substring(0, 40));
+        	ObjectId oldCommit = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
         	
-        	if (!newCommitHash.equals(ObjectId.zeroId().name())) {
-        		depot.cacheObjectId(refName, ObjectId.fromString(newCommitHash));
+        	if (!newCommit.equals(ObjectId.zeroId())) {
+        		depot.cacheObjectId(refName, newCommit);
         	} else {
-        		newCommitHash = null;
+        		newCommit = ObjectId.zeroId();
         		depot.cacheObjectId(refName, null);
         	}
         	
+        	String branch = GitUtils.ref2branch(refName);
+        	if (branch != null && depot.getObjectId(depot.getDefaultBranch(), false) == null) {
+        		depot.git().updateDefaultBranch(branch);
+        	}
     		for (RefListener listener: listenersProvider.get())
-    			listener.onRefUpdate(depot, refName, newCommitHash);
+    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
     		
         	field = field.substring(40);
         	if (field.length() == 0)

@@ -30,6 +30,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
@@ -155,7 +156,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							List<QueryHit> hits = searchManager.search(depotModel.getObject(), revision, query);
+							ObjectId commit = depotModel.getObject().getRevCommit(revision);
+							List<QueryHit> hits = searchManager.search(depotModel.getObject(), commit, query);
 							onOccurrencesQueried(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
@@ -194,10 +196,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 				try {
 					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					symbolHits = searchManager.search(depotModel.getObject(), revision, query);
+					ObjectId commit = depotModel.getObject().getRevCommit(revision);
+					symbolHits = searchManager.search(depotModel.getObject(), commit, query);
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
-						symbolHits.addAll(searchManager.search(depotModel.getObject(), revision, query));
+						symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);

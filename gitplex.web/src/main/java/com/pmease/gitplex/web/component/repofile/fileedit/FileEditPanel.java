@@ -201,8 +201,8 @@ public abstract class FileEditPanel extends Panel {
 		add(editSavePanel = new EditSavePanel("save", depotModel, refName, oldPath, newFile, prevCommitId, null) {
 
 			@Override
-			protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
-				FileEditPanel.this.onCommitted(target, newCommitId);
+			protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
+				FileEditPanel.this.onCommitted(target, oldCommit, newCommit);
 			}
 			
 		});
@@ -260,7 +260,7 @@ public abstract class FileEditPanel extends Panel {
 		target.appendJavaScript(script);
 	}
 
-	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);
+	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 }

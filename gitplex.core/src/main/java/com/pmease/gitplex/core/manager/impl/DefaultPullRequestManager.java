@@ -286,20 +286,21 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 				FileUtils.deleteDir(tempDir);
 			}
 		}
+		ObjectId integratedCommit = ObjectId.fromString(integrated);
 		if (strategy == REBASE_SOURCE_ONTO_TARGET || strategy == MERGE_WITH_SQUASH) {
 			Depot sourceDepot = request.getSourceDepot();
 			Git sourceGit = sourceDepot.git();
 			String sourceRef = request.getSourceRef();
 			sourceGit.updateRef(sourceRef, integrated, preview.getRequestHead(), 
 					"Pull request #" + request.getId());
-			sourceDepot.cacheObjectId(request.getSourceRef(), ObjectId.fromString(integrated));
-			onRefUpdate(sourceDepot, sourceRef, integrated);
+			sourceDepot.cacheObjectId(request.getSourceRef(), integratedCommit);
+			onRefUpdate(sourceDepot, sourceRef, ObjectId.fromString(preview.getRequestHead()), integratedCommit);
 		}
 		
 		String targetRef = request.getTargetRef();
 		git.updateRef(targetRef, integrated, preview.getTargetHead(), "Pull request #" + request.getId());
 		targetDepot.cacheObjectId(request.getTargetRef(), ObjectId.fromString(integrated));
-		onRefUpdate(targetDepot, targetRef, integrated);
+		onRefUpdate(targetDepot, targetRef, ObjectId.fromString(preview.getTargetHead()), integratedCommit);
 		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setRequest(request);
@@ -694,11 +695,11 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	@Transactional
 	@Override
-	public void onRefUpdate(Depot depot, String refName, @Nullable String newCommitHash) {
+	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		final String branch = GitUtils.ref2branch(refName);
 		if (branch != null) {
 			DepotAndBranch depotAndBranch = new DepotAndBranch(depot, branch);
-			if (newCommitHash != null) {
+			if (!newCommit.equals(ObjectId.zeroId())) {
 				/**
 				 * Source branch update is key to the logic as it has to create 
 				 * pull request update, so we should not postpone it to be executed

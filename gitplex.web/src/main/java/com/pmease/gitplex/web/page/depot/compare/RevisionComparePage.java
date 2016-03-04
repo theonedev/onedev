@@ -92,7 +92,7 @@ public class RevisionComparePage extends DepotPage {
 	public RevisionComparePage(final PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasCommits()) 
+		if (!getDepot().git().hasRefs()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 
 		String str = params.get(PARAM_SOURCE).toString();

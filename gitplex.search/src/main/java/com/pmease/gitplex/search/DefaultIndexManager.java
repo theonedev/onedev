@@ -311,7 +311,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 	
 	@Override
-	public Future<IndexResult> index(Depot depot, final String revision) {
+	public Future<IndexResult> index(Depot depot, ObjectId commit) {
 		final Long depotId = depot.getId();
 		final int priority;
 		if (RequestCycle.get() != null)
@@ -334,8 +334,7 @@ public class DefaultIndexManager implements IndexManager {
 								@Override
 								public IndexResult call() throws Exception {
 									Depot depot = dao.load(Depot.class, depotId);
-									AnyObjectId commitId = depot.getObjectId(revision);
-									logger.debug("Indexing commit '{}' of repository '{}'...", commitId.getName(), depot.getFQN());
+									logger.debug("Indexing commit '{}' of repository '{}'...", commit.getName(), depot.getFQN());
 									IndexResult indexResult;
 									File indexDir = storageManager.getIndexDir(depot);
 									try (Directory directory = FSDirectory.open(indexDir)) {
@@ -344,7 +343,7 @@ public class DefaultIndexManager implements IndexManager {
 												IndexSearcher searcher = new IndexSearcher(reader);
 												try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
 													try (Repository jgitRepo = depot.openRepository()) {
-														indexResult = index(jgitRepo, commitId, writer, searcher);
+														indexResult = index(jgitRepo, commit, writer, searcher);
 														writer.commit();
 													} catch (Exception e) {
 														writer.rollback();
@@ -355,7 +354,7 @@ public class DefaultIndexManager implements IndexManager {
 										} else {
 											try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
 												try (Repository repository = depot.openRepository()) {
-													indexResult = index(repository, commitId, writer, null);
+													indexResult = index(repository, commit, writer, null);
 													writer.commit();
 												} catch (Exception e) {
 													writer.rollback();
@@ -365,10 +364,10 @@ public class DefaultIndexManager implements IndexManager {
 										}
 									}
 									logger.debug("Commit {} indexed for repository {} (checked blobs: {}, indexed blobs: {})", 
-											commitId.getName(), depot.getFQN(), indexResult.getChecked(), indexResult.getIndexed());
+											commit.name(), depot.getFQN(), indexResult.getChecked(), indexResult.getIndexed());
 									
 									for (IndexListener listener: listeners)
-										listener.commitIndexed(depot, revision);
+										listener.commitIndexed(depot, commit);
 									
 									return indexResult;
 								}
@@ -397,14 +396,13 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public boolean isIndexed(Depot depot, String revision) {
-		AnyObjectId commitId = depot.getObjectId(revision);
+	public boolean isIndexed(Depot depot, ObjectId commit) {
 		File indexDir = storageManager.getIndexDir(depot);
 		try (Directory directory = FSDirectory.open(indexDir)) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
-					return getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commitId));
+					return getCurrentCommitIndexVersion().equals(getCommitIndexVersion(searcher, commit));
 				}
 			} else {
 				return false;
@@ -427,11 +425,11 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public void onRefUpdate(Depot depot, String refName, final String newCommitHash) {
+	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		// only index branches at back end, tags will be indexed on demand from GUI 
 		// as many tags might be pushed all at once when the repository is imported 
-		if (refName.startsWith(Constants.R_HEADS) && newCommitHash != null)
-			index(depot, newCommitHash);
+		if (refName.startsWith(Constants.R_HEADS) && !newCommit.equals(ObjectId.zeroId()))
+			index(depot, newCommit);
 	}
 
 	@Override

@@ -34,6 +34,7 @@ import org.apache.wicket.validation.IErrorMessageSource;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
+import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -520,13 +521,14 @@ public abstract class AdvancedSearchPanel extends Panel {
 			BlobQuery query = new SymbolQuery(term, true, caseSensitive, 
 					context.getDirectory(insideCurrentDir), fileNames, 
 					SearchResultPanel.MAX_QUERY_ENTRIES);
-			hits = searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query);
+			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
+			hits = searchManager.search(context.depotModel.getObject(), commit, query);
 			
 			if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 				query = new SymbolQuery(term, false, caseSensitive, 
 						context.getDirectory(insideCurrentDir), fileNames, 
 						SearchResultPanel.MAX_QUERY_ENTRIES - hits.size());
-				hits.addAll(searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query));
+				hits.addAll(searchManager.search(context.depotModel.getObject(), commit, query));
 			}
 			
 			return hits;
@@ -547,7 +549,8 @@ public abstract class AdvancedSearchPanel extends Panel {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			BlobQuery query = new FileQuery(term, caseSensitive, 
 					context.getDirectory(insideCurrentDir), SearchResultPanel.MAX_QUERY_ENTRIES);
-			return searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query);
+			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
+			return searchManager.search(context.depotModel.getObject(), commit, query);
 		}
 		
 	}
@@ -570,7 +573,8 @@ public abstract class AdvancedSearchPanel extends Panel {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			BlobQuery query = new TextQuery(term, regex, caseSensitive, wholeWord, 
 					context.getDirectory(insideCurrentDir), fileNames, SearchResultPanel.MAX_QUERY_ENTRIES);
-			return searchManager.search(context.depotModel.getObject(), context.revisionModel.getObject(), query);
+			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
+			return searchManager.search(context.depotModel.getObject(), commit, query);
 		}
 		
 	}

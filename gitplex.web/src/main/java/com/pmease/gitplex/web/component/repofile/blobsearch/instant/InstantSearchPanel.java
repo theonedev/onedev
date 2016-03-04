@@ -33,6 +33,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
@@ -116,22 +117,22 @@ public abstract class InstantSearchPanel extends Panel {
 					searchInput = params.getParameterValue("input").toString();
 					if (StringUtils.isNotBlank(searchInput)) {
 						SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-
+						ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());
 						try {
 							BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
 									null, null, MAX_QUERY_ENTRIES);
-							symbolHits = searchManager.search(depotModel.getObject(), revisionModel.getObject(), query);
+							symbolHits = searchManager.search(depotModel.getObject(), commit, query);
 							
 							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
 								query = new FileQuery(searchInput+"*", false, null, 
 										MAX_QUERY_ENTRIES-symbolHits.size());
-								symbolHits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
+								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}
 							
 							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
 								query = new SymbolQuery(searchInput+"*", false, false, 
 										null, null, MAX_QUERY_ENTRIES-symbolHits.size());
-								symbolHits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
+								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}
 						} catch (TooGeneralQueryException e) {
 							symbolHits = new ArrayList<>();
@@ -142,7 +143,7 @@ public abstract class InstantSearchPanel extends Panel {
 						try {
 							BlobQuery query = new TextQuery(searchInput, false, false, false, 
 									null, null, MAX_QUERY_ENTRIES);
-							textHits = searchManager.search(depotModel.getObject(), revisionModel.getObject(), query);
+							textHits = searchManager.search(depotModel.getObject(), commit, query);
 						} catch (TooGeneralQueryException e) {
 							textHits = new ArrayList<>();
 						} catch (InterruptedException e) {
@@ -294,19 +295,19 @@ public abstract class InstantSearchPanel extends Panel {
 											null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									
-									hits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
+									ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());
+									hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 									
 									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 										query = new FileQuery(searchInput+"*", false, null, 
 												SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
-										hits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
+										hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 									}
 									
 									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
 										query = new SymbolQuery(searchInput+"*", false, false, 
 												null, null, SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
-										hits.addAll(searchManager.search(depotModel.getObject(), revisionModel.getObject(), query));
+										hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 									}
 									onMoreQueried(target, hits);
 								} catch (TooGeneralQueryException e) {
@@ -414,7 +415,8 @@ public abstract class InstantSearchPanel extends Panel {
 										null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 								try {
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									List<QueryHit> hits = searchManager.search(depotModel.getObject(), revisionModel.getObject(), query);
+									ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());
+									List<QueryHit> hits = searchManager.search(depotModel.getObject(), commit, query);
 									onMoreQueried(target, hits);
 								} catch (TooGeneralQueryException e) {
 									// this is impossible as we already queried part of the result

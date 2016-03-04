@@ -120,7 +120,7 @@ RefListener, LifecycleListener {
 		return "repository-" + depot.getId() + "-checkAuxiliary";
 	}
 	
-	private void doCollect(final Depot depot, final String revision) {
+	private void doCollect(Depot depot, ObjectId commit) {
 		logger.debug("Collecting auxiliary information of repository {}...", depot.getFQN());
 		Environment env = getEnv(depot);
 		final Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -152,10 +152,10 @@ RefListener, LifecycleListener {
 				LogCommand log = new LogCommand(git.depotDir());
 				List<String> revisions = new ArrayList<>();
 				if (lastCommit.get() != null) {
-					revisions.add(lastCommit.get() + ".." + revision);
+					revisions.add(lastCommit.get() + ".." + commit.name());
 					lastCommit.set(null);
 				} else { 
-					revisions.add(revision);
+					revisions.add(commit.name());
 				}
 				
 				final AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
@@ -301,7 +301,7 @@ RefListener, LifecycleListener {
 	}
 	
 	@Override
-	public void collect(Depot depot, final String revision) {
+	public void collect(Depot depot, ObjectId commit) {
 		final Long repoId = depot.getId();
 		sequentialWorkManager.execute(getSequentialExecutorKey(depot), new PrioritizedRunnable(PRIORITY) {
 
@@ -316,7 +316,7 @@ RefListener, LifecycleListener {
 
 								@Override
 								public Void call() throws Exception {
-									doCollect(depotManager.load(repoId), revision);
+									doCollect(depotManager.load(repoId), commit);
 									return null;
 								}
 								
@@ -584,10 +584,8 @@ RefListener, LifecycleListener {
 			refs.addAll(repository.getRefDatabase().getRefs(Constants.R_TAGS).values());
 			
 			for (Ref ref: refs) {
-				RevObject revObj = revWalk.parseAny(ref.getObjectId());
-				revObj = revWalk.peel(revObj);
+				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
 				if (revObj instanceof RevCommit) {
-					final String commitHash = revObj.name();
 					Environment env = getEnv(depot);
 					final Store commitsStore = getStore(env, COMMITS_STORE);
 					boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
@@ -595,8 +593,7 @@ RefListener, LifecycleListener {
 						@Override
 						public Boolean compute(Transaction txn) {
 							byte[] keyBytes = new byte[20];
-							ObjectId commitId = ObjectId.fromString(commitHash);
-							commitId.copyRawTo(keyBytes, 0);
+							revObj.copyRawTo(keyBytes, 0);
 							ByteIterable key = new ArrayByteIterable(keyBytes);
 							byte[] valueBytes = getBytes(commitsStore.get(txn, key));
 							return valueBytes != null && valueBytes.length%2 != 0;
@@ -604,7 +601,7 @@ RefListener, LifecycleListener {
 						
 					});
 					if (!collected) 
-						collect(depot, commitHash);
+						collect(depot, revObj);
 				}
 			}
 		} catch (IOException e) {
@@ -623,9 +620,9 @@ RefListener, LifecycleListener {
 	}
 
 	@Override
-	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
-		if (newCommitHash != null)
-			collect(depot, newCommitHash);
+	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+		if (!newCommit.equals(ObjectId.zeroId()))
+			collect(depot, newCommit);
 	}
 
 	@Override

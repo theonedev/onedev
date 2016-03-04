@@ -394,7 +394,7 @@ public class Git implements Serializable {
 		return new ListCherriesCommand(repoDir).fromRev(fromRev).toRev(toRev).call();
 	}
 
-	public boolean hasCommits() {
+	public boolean hasRefs() {
 		File headsDir = new File(repoDir, Constants.R_HEADS);
 		return headsDir.exists() && headsDir.list().length != 0 || new File(repoDir, "packed-refs").exists();
 	}

@@ -1,6 +1,6 @@
 package com.pmease.gitplex.core.extensionpoint;
 
-import javax.annotation.Nullable;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.entity.Depot;
 
@@ -15,9 +15,11 @@ public interface RefListener {
 	 * 			repository to update/delete ref inside
 	 * @param refName
 	 * 			name of the ref to update/delete
-	 * @param newCommitHash 
-	 * 			new commit hash of the ref, or <tt>null</tt> if delete a ref
+	 * @param oldCommit
+	 * 			old commit of the ref
+	 * @param newCommit
+	 * 			new commit of the ref
 	 */
-	void onRefUpdate(Depot depot, String refName, @Nullable String newCommitHash);
+	void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit);
 
 }

@@ -22,7 +22,6 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.pmease.commons.git.exception.NotFileException;
@@ -151,7 +150,7 @@ public class FileEdit implements Serializable {
 	 * @param refName
 	 * 			ref name to associate the new commit with
 	 * @param expectedOldCommitId
-	 * 			expected old commit id of above ref, use <tt>null</tt> to expect a non-existent ref
+	 * 			expected old commit id of above ref
 	 * @param parentCommitId
 	 * 			parent commit id of the new commit
 	 * @param authorAndCommitter
@@ -171,7 +170,7 @@ public class FileEdit implements Serializable {
 	 * 			 
 	 */
 	public ObjectId commit(Repository repo, String refName, 
-			@Nullable ObjectId expectedOldCommitId, ObjectId parentCommitId, 
+			ObjectId expectedOldCommitId, ObjectId parentCommitId, 
 			PersonIdent authorAndCommitter, String commitMessage) {
 		
 		try (	RevWalk revWalk = new RevWalk(repo); 
@@ -221,7 +220,7 @@ public class FileEdit implements Serializable {
 	        ru.setExpectedOldObjectId(expectedOldCommitId);
 	        RefUpdate.Result result = ru.update();
 	        if (result == RefUpdate.Result.LOCK_FAILURE 
-	        		&& !Objects.equal(expectedOldCommitId, ru.getOldObjectId())) {
+	        		&& !expectedOldCommitId.equals(ru.getOldObjectId())) {
 	        	throw new ObsoleteCommitException(ru.getOldObjectId());
 	        } else if (result != RefUpdate.Result.FAST_FORWARD) {
 	        	throw new RefUpdateException(result);

@@ -38,6 +38,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -169,7 +170,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private AtomicReference<String> newPathRef;	
 	
-	private final RevisionIndexed trait = new RevisionIndexed();
+	private final CommitIndexed trait = new CommitIndexed();
 	
 	private transient List<QueryHit> queryHits;
 	
@@ -179,7 +180,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public DepotFilePage(final PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasCommits()) 
+		if (!getDepot().git().hasRefs()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 		
 		trait.depotId = getDepot().getId();
@@ -204,12 +205,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
 		}
 		
-		trait.revision = blobIdent.revision;
+		RevCommit commit = getDepot().getRevCommit(blobIdent.revision);
+		trait.commitId = commit.copy();
 		
 		if (blobIdent.path != null) {
 			try (	Repository repository = getDepot().openRepository();
 					RevWalk revWalk = new RevWalk(repository)) {
-				RevTree revTree = getDepot().getRevCommit(getCommitId(), true).getTree();
+				RevTree revTree = commit.getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
 				if (treeWalk == null) {
 					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path
@@ -240,7 +242,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 						null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 				try {
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					queryHits = searchManager.search(depotModel.getObject(), blobIdent.revision, query);
+					queryHits = searchManager.search(depotModel.getObject(), trait.commitId, query);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}								
@@ -250,10 +252,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		clientState = params.get(PARAM_CLIENT_STATE).toString();
 	}
 	
-	private ObjectId getCommitId() {
-		return getDepot().getObjectId(blobIdent.revision);
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -368,8 +366,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				super.onConfigure();
 
 				IndexManager indexManager = GitPlex.getInstance(IndexManager.class);
-				if (!indexManager.isIndexed(getDepot(), blobIdent.revision)) {
-					GitPlex.getInstance(IndexManager.class).index(getDepot(), blobIdent.revision);
+				if (!indexManager.isIndexed(getDepot(), trait.commitId)) {
+					GitPlex.getInstance(IndexManager.class).index(getDepot(), trait.commitId);
 					setVisible(true);
 				} else {
 					setVisible(false);
@@ -529,14 +527,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							getDepot().getObjectId(blobIdent.revision), mark, clientState) {
  
 				@Override
-				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
-					depot.cacheObjectId(branch, newCommitId);
+					depot.cacheObjectId(branch, newCommit);
 					BlobIdent committed = new BlobIdent(
 							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 		    		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-		    			listener.onRefUpdate(depot, refName, newCommitId.name());
+		    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
 
 		    		HistoryState state = getState();
 	    			state.blobIdent = committed;
@@ -577,13 +575,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					null, getDepot().getObjectId(blobIdent.revision), cancelListener) {
 
 				@Override
-				protected void onCommitted(AjaxRequestTarget target, ObjectId newCommitId) {
+				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
-					depot.cacheObjectId(branch, newCommitId);
+					depot.cacheObjectId(branch, newCommit);
 					try (	Repository repository = depot.openRepository();
 							RevWalk revWalk = new RevWalk(repository)) {
-						RevTree revTree = getDepot().getRevCommit(newCommitId, true).getTree();
+						RevTree revTree = getDepot().getRevCommit(newCommit).getTree();
 						String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
 						while (TreeWalk.forPath(repository, parentPath, revTree) == null) {
 							if (parentPath.contains("/")) {
@@ -594,7 +592,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 							}
 						}
 						for (RefListener listener: GitPlex.getExtensions(RefListener.class))
-			    			listener.onRefUpdate(depot, refName, newCommitId.name());
+			    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
 						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 						HistoryState state = getState();
 						state.blobIdent = parentBlobIdent;
@@ -723,7 +721,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			newSearchResult(target, null);
 		
 		setState(state);
-		trait.revision = blobIdent.revision;
+		trait.commitId = getDepot().getRevCommit(blobIdent.revision).getId();
 
 		newRevisionPicker(target);
 		
@@ -823,18 +821,18 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		setResponsePage(DepotFilePage.class, paramsOf(depot));
 	}
 	
-	private static class RevisionIndexed implements WebSocketTrait {
+	private static class CommitIndexed implements WebSocketTrait {
 
 		Long depotId;
 		
-		volatile String revision;
+		volatile ObjectId commitId;
 		
 		@Override
 		public boolean is(WebSocketTrait trait) {
-			if (trait == null || !(trait instanceof RevisionIndexed))  
+			if (trait == null || !(trait instanceof CommitIndexed))  
 				return false;  
-			RevisionIndexed other = (RevisionIndexed) trait;  
-		    return Objects.equal(depotId, other.depotId) && Objects.equal(revision, other.revision);
+			CommitIndexed other = (CommitIndexed) trait;  
+		    return Objects.equal(depotId, other.depotId) && Objects.equal(commitId, other.commitId);
 		}
 		
 	}
@@ -850,10 +848,10 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public static class IndexedListener implements IndexListener {
 
 		@Override
-		public void commitIndexed(Depot depot, String revision) {
-			RevisionIndexed trait = new RevisionIndexed();
+		public void commitIndexed(Depot depot, ObjectId commit) {
+			CommitIndexed trait = new CommitIndexed();
 			trait.depotId = depot.getId();
-			trait.revision = revision;
+			trait.commitId = commit;
 			WebSocketRenderBehavior.requestToRender(trait);
 		}
 

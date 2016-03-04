@@ -24,7 +24,7 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -77,10 +77,8 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	}
 
 	@Override
-	public List<QueryHit> search(Depot depot, String revision, final BlobQuery query) 
+	public List<QueryHit> search(Depot depot, ObjectId commit, final BlobQuery query) 
 			throws InterruptedException {
-		AnyObjectId commitId = depot.getObjectId(revision);
-		
 		final List<QueryHit> hits = new ArrayList<>();
 
 		SearcherManager searcherManager = getSearcherManager(depot);
@@ -90,7 +88,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 				try {
 					try (	Repository repository = depot.openRepository(); 
 							RevWalk revWalk = new RevWalk(repository)){
-						final RevTree revTree = revWalk.parseCommit(commitId).getTree();
+						final RevTree revTree = revWalk.parseCommit(commit).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
 						searcher.search(query.asLuceneQuery(), new Collector() {
@@ -145,7 +143,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 	}
 
 	@Override
-	public void commitIndexed(Depot depot, String revision) {
+	public void commitIndexed(Depot depot, ObjectId commit) {
 		try {
 			getSearcherManager(depot).maybeRefresh();
 		} catch (InterruptedException | IOException e) {

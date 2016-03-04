@@ -295,7 +295,7 @@ public abstract class EditSavePanel extends Panel {
 							}
 						}
 						if (newCommitId != null)
-							onCommitted(target, newCommitId);
+							onCommitted(target, prevCommitId, newCommitId);
 						else
 							newChangedContainer(target);
 					}
@@ -370,7 +370,7 @@ public abstract class EditSavePanel extends Panel {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
-	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId newCommitId);
+	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId oldCommitId, ObjectId newCommitId);
 	
 	public void onNewPathChange(AjaxRequestTarget target) {
 		String script = String.format("gitplex.editsave.onPathChange('%s', '%s', %b);", 

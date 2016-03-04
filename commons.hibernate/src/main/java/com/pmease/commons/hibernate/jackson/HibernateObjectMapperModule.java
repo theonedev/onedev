@@ -28,11 +28,11 @@ import com.pmease.commons.hibernate.dao.Dao;
 @Singleton
 public class HibernateObjectMapperModule extends Module {
 
-	private final Dao generalDao;
+	private final Dao dao;
 	
 	@Inject
     public HibernateObjectMapperModule(Dao generalDao) {
-		this.generalDao = generalDao;
+		this.dao = generalDao;
     }
     
 	@SuppressWarnings("unchecked")
@@ -93,7 +93,7 @@ public class HibernateObjectMapperModule extends Module {
 				if (AbstractEntity.class.isAssignableFrom(beanDesc.getBeanClass())) {
 					Class<? extends AbstractEntity> entityClass = (Class<? extends AbstractEntity>) beanDesc.getBeanClass();
 					BeanDeserializer defaultDeserializer = (BeanDeserializer) deserializer;
-					return new EntityDeserializer(entityClass, defaultDeserializer, generalDao);
+					return new EntityDeserializer(entityClass, defaultDeserializer, dao);
 				} else {
 					return super.modifyDeserializer(config, beanDesc, deserializer);
 				}

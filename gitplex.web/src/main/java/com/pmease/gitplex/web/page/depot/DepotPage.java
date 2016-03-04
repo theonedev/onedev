@@ -93,7 +93,7 @@ public abstract class DepotPage extends AccountPage {
 		
 		if (!(this instanceof NoCommitsPage) 
 				&& !(this instanceof DepotSettingPage) 
-				&& !getDepot().git().hasCommits()) { 
+				&& !getDepot().git().hasRefs()) { 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 		}
 	}

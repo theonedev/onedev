@@ -14,6 +14,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -331,8 +332,8 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 
 	@Transactional
 	@Override
-	public void onRefUpdate(Depot depot, String refName, String newCommitHash) {
-		if (newCommitHash == null) {
+	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
+		if (newCommit.equals(ObjectId.zeroId())) {
 			String branch = GitUtils.ref2branch(refName);
 			for (Depot each: all()) {
 				if (branch != null) {

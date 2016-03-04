@@ -254,7 +254,7 @@ public class DepotBranchesPage extends DepotPage {
 		
 		baseBranch = params.get(PARAM_BASE).toString();
 		
-		if (!getDepot().git().hasCommits()) 
+		if (!getDepot().git().hasRefs()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 	}
 	

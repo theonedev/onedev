@@ -96,7 +96,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 	public RequestDetailPage(final PageParameters params) {
 		super(params);
 		
-		if (!getDepot().git().hasCommits()) 
+		if (!getDepot().git().hasRefs()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 
 		requestModel = new LoadableDetachableModel<PullRequest>() {
