@@ -66,7 +66,13 @@
     		top += offset;
     		
     	if (top < borderTop || top + height > borderBottom) {
-    		// flip  to see if height can fit into screen
+    		var exceeded = 0;
+    		if (top < borderTop)
+    			exceeded += borderTop - top;
+    		if (top+height > borderBottom)
+    			exceeded += top+height-borderBottom;
+    		
+    		// flip  to see if situation is better
     		anchor = targetHeight*(100-alignment.placement.targetY)/100.0 + targetTop;
     		top = anchor - (100 - alignment.placement.y) * height / 100.0;
 
@@ -76,13 +82,21 @@
         		top -= offset;
     		
     		if (top < borderTop || top + height> borderBottom) {
-    			// does not fit even flipped, so we revert back
-    			anchor = targetHeight*alignment.placement.targetY/100.0 + targetTop;
-    			top = anchor - alignment.placement.y*height/100.0;
-    	    	if (alignment.placement.targetY == 0 && alignment.placement.y == 100)
-    	    		top -= offset;
-    	    	else if (alignment.placement.targetY == 100 && alignment.placement.y == 0)
-    	    		top += offset;
+        		var exceededAfterFlip = 0;
+        		if (top < borderTop)
+        			exceededAfterFlip += borderTop - top;
+        		if (top+height > borderBottom)
+        			exceededAfterFlip += top+height-borderBottom;
+
+        		if (exceededAfterFlip > exceeded) {
+	    			// situation is even worse after flip, so we revert back
+	    			anchor = targetHeight*alignment.placement.targetY/100.0 + targetTop;
+	    			top = anchor - alignment.placement.y*height/100.0;
+	    	    	if (alignment.placement.targetY == 0 && alignment.placement.y == 100)
+	    	    		top -= offset;
+	    	    	else if (alignment.placement.targetY == 100 && alignment.placement.y == 0)
+	    	    		top += offset;
+        		}
     		}
     		
     		if (alignment.placement.targetX==100 && alignment.placement.x==0 
@@ -110,7 +124,13 @@
     		left += offset;
     		
     	if (left < borderLeft || left + width > borderRight) {
-    		// flip  to see if width can fit into screen
+    		var exceeded = 0;
+    		if (left < borderLeft)
+    			exceeded += borderLeft-left;
+    		if (left+width > borderRight)
+    			exceeded += left+width-borderRight;
+    		
+    		// flip to see if situation is better
     		anchor = targetWidth*(100-alignment.placement.targetX)/100.0 + targetLeft;
     		left = anchor - (100 - alignment.placement.x) * width / 100.0;
 
@@ -120,13 +140,21 @@
         		left -= offset;
     		
     		if (left < borderLeft || left + width > borderRight) {
-    			// does not fit even flipped, so we revert back
-    			anchor = targetWidth*alignment.placement.targetX/100.0 + targetLeft;
-    			left = anchor - alignment.placement.x*width/100.0;
-    	    	if (alignment.placement.targetX == 0 && alignment.placement.x == 100)
-    	    		left -= offset;
-    	    	else if (alignment.placement.targetX == 100 && alignment.placement.x == 0)
-    	    		left += offset;
+        		var exceededAfterFlip = 0;
+        		if (left < borderLeft)
+        			exceededAfterFlip += borderLeft-left;
+        		if (left+width > borderRight)
+        			exceededAfterFlip += left+width-borderRight;
+        		
+    			// situation is even worse after flip, so we revert back
+        		if (exceededAfterFlip > exceeded) {
+        			anchor = targetWidth*alignment.placement.targetX/100.0 + targetLeft;
+        			left = anchor - alignment.placement.x*width/100.0;
+        	    	if (alignment.placement.targetX == 0 && alignment.placement.x == 100)
+        	    		left -= offset;
+        	    	else if (alignment.placement.targetX == 100 && alignment.placement.x == 0)
+        	    		left += offset;
+        		}
     		}
     		
     		if (alignment.placement.targetY==100 && alignment.placement.y==0 
