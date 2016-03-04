@@ -43,7 +43,7 @@ import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.repopicker.RepositorySelector;
+import com.pmease.gitplex.web.component.repopicker.DepotSelector;
 import com.pmease.gitplex.web.model.DepotModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
@@ -181,7 +181,7 @@ public abstract class DepotPage extends AccountPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RepositorySelector(id, new LoadableDetachableModel<List<Depot>>() {
+				return new DepotSelector(id, new LoadableDetachableModel<List<Depot>>() {
 
 					@Override
 					protected List<Depot> load() {

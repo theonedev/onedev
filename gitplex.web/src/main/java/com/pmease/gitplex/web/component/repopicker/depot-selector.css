@@ -1,32 +1,32 @@
-.repository-selector {
+.depot-selector {
 	padding: 8px;
 }
-.repository-selector .search input {
+.depot-selector .search input {
 	border-radius: 0;
 }
-.repository-selector ul.accounts {
+.depot-selector ul.accounts {
 	max-width: 600px;
 	max-height: 100px;
 	overflow: auto;
 	margin: 8px 0 0 0;
 }
-.repository-selector li.account>div {
+.depot-selector li.account>div {
 	font-size: 16px;
 	line-height: 30px;
 }
-.repository-selector li.account .avatar {
+.depot-selector li.account .avatar {
 	margin-top: -6px;
 }
-.repository-selector ul.repositories {
+.depot-selector ul.depots {
 	margin: 0 0 8px 24px;
 }
-.repository-selector li.repository {
+.depot-selector li.depot {
 	position: relative;
 }
-.repository-selector li.repository a {
+.depot-selector li.depot a {
 	padding-left: 20px;
 }
-.repository-selector a.current:before {
+.depot-selector a.current:before {
 	font-family: "FontAwesome"; 
 	content: "\f00c"; 
 	margin-right: 4px;	

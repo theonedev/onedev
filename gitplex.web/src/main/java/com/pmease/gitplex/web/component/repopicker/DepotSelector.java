@@ -36,39 +36,39 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
-public abstract class RepositorySelector extends Panel {
+public abstract class DepotSelector extends Panel {
 
-	private final IModel<List<Depot>> reposModel;
+	private final IModel<List<Depot>> depotsModel;
 	
-	private final Long currentRepoId;
+	private final Long currentDepotId;
 	
 	private String accountSearch = "";
 	
-	private String repoSearch = "";
+	private String depotSearch = "";
 	
-	public RepositorySelector(String id, IModel<List<Depot>> reposModel, Long currentRepoId) {
+	public DepotSelector(String id, IModel<List<Depot>> depotsModel, Long currentDepotId) {
 		super(id);
 		
-		this.reposModel = reposModel;
-		this.currentRepoId = currentRepoId;
+		this.depotsModel = depotsModel;
+		this.currentDepotId = currentDepotId;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final WebMarkupContainer dataContainer = new WebMarkupContainer("data") {
+		WebMarkupContainer dataContainer = new WebMarkupContainer("data") {
 
 			@Override
 			protected void onDetach() {
-				reposModel.detach();
+				depotsModel.detach();
 				
 				super.onDetach();
 			}
@@ -77,7 +77,7 @@ public abstract class RepositorySelector extends Panel {
 		dataContainer.setOutputMarkupId(true);
 		add(dataContainer);
 		
-		final TextField<String> accountSearchField = new TextField<String>("searchAccount", Model.of(""));
+		TextField<String> accountSearchField = new TextField<String>("searchAccount", Model.of(""));
 		add(accountSearchField);
 		accountSearchField.add(new FormComponentInputBehavior() {
 			
@@ -105,7 +105,7 @@ public abstract class RepositorySelector extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				String script = String.format("gitplex.repositorySelector.init('%s', %s)", 
+				String script = String.format("gitplex.depotSelector.init('%s', %s)", 
 						accountSearchField.getMarkupId(true), 
 						getCallbackFunction(CallbackParameter.explicit("id")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
@@ -113,22 +113,22 @@ public abstract class RepositorySelector extends Panel {
 			
 		});
 		
-		final TextField<String> repoSearchField = new TextField<String>("searchRepo", Model.of(""));
-		add(repoSearchField);
-		repoSearchField.add(new FormComponentInputBehavior() {
+		TextField<String> depotSearchField = new TextField<String>("searchDepot", Model.of(""));
+		add(depotSearchField);
+		depotSearchField.add(new FormComponentInputBehavior() {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target) {
-				repoSearch = repoSearchField.getInput();
-				if (repoSearch != null)
-					repoSearch = repoSearch.trim().toLowerCase();
+				depotSearch = depotSearchField.getInput();
+				if (depotSearch != null)
+					depotSearch = depotSearch.trim().toLowerCase();
 				else
-					repoSearch = "";
+					depotSearch = "";
 				target.add(dataContainer);
 			}
 			
 		});
-		repoSearchField.add(new AbstractDefaultAjaxBehavior() {
+		depotSearchField.add(new AbstractDefaultAjaxBehavior() {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -141,8 +141,8 @@ public abstract class RepositorySelector extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				String script = String.format("gitplex.repositorySelector.init('%s', %s)", 
-						repoSearchField.getMarkupId(true), 
+				String script = String.format("gitplex.depotSelector.init('%s', %s)", 
+						depotSearchField.getMarkupId(true), 
 						getCallbackFunction(CallbackParameter.explicit("id")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
@@ -160,12 +160,12 @@ public abstract class RepositorySelector extends Panel {
 					if (!account.getName().toLowerCase().contains(accountSearch)) {
 						it.remove();
 					} else {
-						int repoCount = 0;
-						for (Depot repo: reposModel.getObject()) {
-							if (repo.getName().contains(repoSearch) && repo.getOwner().equals(account))
-								repoCount++;
+						int depotCount = 0;
+						for (Depot depot: depotsModel.getObject()) {
+							if (depot.getName().contains(depotSearch) && depot.getOwner().equals(account))
+								depotCount++;
 						}
-						if (repoCount == 0)
+						if (depotCount == 0)
 							it.remove();
 					}
 				}
@@ -187,24 +187,24 @@ public abstract class RepositorySelector extends Panel {
 				userItem.add(new Avatar("avatar", userItem.getModelObject(), null));
 				userItem.add(new Label("name", userItem.getModelObject().getName()));
 				
-				userItem.add(new ListView<Depot>("repositories", new LoadableDetachableModel<List<Depot>>() {
+				userItem.add(new ListView<Depot>("depots", new LoadableDetachableModel<List<Depot>>() {
 
 					@Override
 					protected List<Depot> load() {
-						List<Depot> repositories = new ArrayList<>();
-						for (Depot repo: reposModel.getObject()) {
-							if (repo.getName().contains(repoSearch) && repo.getOwner().equals(userItem.getModelObject()))
-								repositories.add(repo);
+						List<Depot> depots = new ArrayList<>();
+						for (Depot depot: depotsModel.getObject()) {
+							if (depot.getName().contains(depotSearch) && depot.getOwner().equals(userItem.getModelObject()))
+								depots.add(depot);
 						}
-						Collections.sort(repositories, new Comparator<Depot>() {
+						Collections.sort(depots, new Comparator<Depot>() {
 
 							@Override
-							public int compare(Depot repo1, Depot repo2) {
-								return repo1.getName().compareTo(repo2.getName());
+							public int compare(Depot depot1, Depot depot2) {
+								return depot1.getName().compareTo(depot2.getName());
 							}
 							
 						});
-						return repositories;
+						return depots;
 					}
 					
 				}) {
@@ -231,7 +231,7 @@ public abstract class RepositorySelector extends Panel {
 							
 						};
 						link.add(new Label("label", depot.getName()));
-						if (depot.getId().equals(currentRepoId)) 
+						if (depot.getId().equals(currentDepotId)) 
 							link.add(AttributeAppender.append("class", " current"));
 						depotItem.add(link);
 						
@@ -247,7 +247,7 @@ public abstract class RepositorySelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		reposModel.detach();
+		depotsModel.detach();
 		
 		super.onDetach();
 	}
@@ -259,9 +259,9 @@ public abstract class RepositorySelector extends Panel {
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(RepositorySelector.class, "repository-selector.js")));
+				new JavaScriptResourceReference(DepotSelector.class, "depot-selector.js")));
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RepositorySelector.class, "repository-selector.css")));
+				new CssResourceReference(DepotSelector.class, "depot-selector.css")));
 	}
 	
 	protected abstract void onSelect(AjaxRequestTarget target, Depot depot);

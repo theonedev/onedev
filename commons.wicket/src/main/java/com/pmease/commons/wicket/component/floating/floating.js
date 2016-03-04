@@ -32,8 +32,13 @@ pmease.commons.floating = {
 		
 		$floating.data("alignment", alignment);
 		
+		var openTriggered = false;
 		$floating.data("elementReplaced", function() {
-			$floating.show().align($floating.data("alignment")).trigger("open");
+			$floating.align($floating.data("alignment"));
+			if (!openTriggered) {
+				$floating.trigger("open");
+				openTriggered = true;
+			}
 		});
 		$(document).on("elementReplaced", $floating.data("elementReplaced"));
 	}, 

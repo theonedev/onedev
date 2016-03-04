@@ -208,6 +208,12 @@ public abstract class InstantSearchPanel extends Panel {
 		searchHint = new FloatingPanel(target, new ComponentTarget(searchField), AlignPlacement.bottom(0)) {
 
 			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(AttributeAppender.append("class", "instant-search-dropdown"));
+			}
+
+			@Override
 			protected Component newContent(String id) {
 				WebMarkupContainer searchResult = new Fragment(id, "resultFrag", InstantSearchPanel.this);
 				searchResult.setOutputMarkupId(true);

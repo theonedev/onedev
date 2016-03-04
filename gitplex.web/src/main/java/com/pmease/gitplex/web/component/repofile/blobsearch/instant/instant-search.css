@@ -21,3 +21,6 @@
 	color: #666; 
 	font-size: 12px;
 }
+.instant-search-dropdown.floating {
+	max-width: 600px;
+}

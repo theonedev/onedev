@@ -1,11 +1,11 @@
 <wicket:panel>
-	<div class="repository-selector">
+	<div class="depot-selector">
 		<div class="search clearfix">
 			<div class="account pull-left">
 				<input wicket:id="searchAccount" class="form-control input-sm" placeholder="Search account"></input>
 			</div>
-			<div class="repository pull-left">
-				<input wicket:id="searchRepo" class="form-control input-sm" placeholder="Search repository"></input>
+			<div class="depot pull-left">
+				<input wicket:id="searchDepot" class="form-control input-sm" placeholder="Search repository"></input>
 			</div>
 		</div>
 		<ul wicket:id="data" class="accounts list-unstyled">
@@ -14,8 +14,8 @@
 					<img wicket:id="avatar" class="avatar"></img>
 					<span wicket:id="name" class="name"></span>
 				</div>
-				<ul class="repositories list-unstyled">
-					<li wicket:id="repositories" class="repository selectable">
+				<ul class="depots list-unstyled">
+					<li wicket:id="depots" class="depot selectable">
 						<input wicket:id="id" type="text" class="hidden"/><a wicket:id="link"><span wicket:id="label"></span></a>
 					</li>
 				</ul>

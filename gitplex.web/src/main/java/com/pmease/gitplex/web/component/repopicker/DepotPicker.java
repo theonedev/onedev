@@ -13,28 +13,28 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 
 @SuppressWarnings("serial")
-public abstract class RepositoryPicker extends DropdownLink {
+public abstract class DepotPicker extends DropdownLink {
 
-	private final IModel<List<Depot>> reposModel; 
+	private final IModel<List<Depot>> depotsModel; 
 	
-	private Long currentRepoId;
+	private Long currentDepotId;
 	
-	public RepositoryPicker(String id, IModel<List<Depot>> reposModel, Long currentRepoId) {
+	public DepotPicker(String id, IModel<List<Depot>> depotsModel, Long currentDepotId) {
 		super(id);
 	
-		this.reposModel = reposModel;
-		this.currentRepoId = currentRepoId;
+		this.depotsModel = depotsModel;
+		this.currentDepotId = currentDepotId;
 	}
 
 	@Override
 	protected Component newContent(String id) {
-		return new RepositorySelector(id, reposModel, currentRepoId) {
+		return new DepotSelector(id, depotsModel, currentDepotId) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot) {
 				close(target);
-				target.add(RepositoryPicker.this);
-				RepositoryPicker.this.onSelect(target, depot);
+				target.add(DepotPicker.this);
+				DepotPicker.this.onSelect(target, depot);
 			}
 			
 		};
@@ -49,15 +49,15 @@ public abstract class RepositoryPicker extends DropdownLink {
 
 	@Override
 	public IModel<?> getBody() {
-		Depot currentRepo = GitPlex.getInstance(Dao.class).load(Depot.class, currentRepoId);
-		return Model.of(String.format("<i class='fa fa-ext fa-repo'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", currentRepo.getFQN()));
+		Depot currentDepot = GitPlex.getInstance(Dao.class).load(Depot.class, currentDepotId);
+		return Model.of(String.format("<i class='fa fa-ext fa-repo'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", currentDepot.getFQN()));
 	}
 
 	@Override
 	protected void onDetach() {
-		reposModel.detach();
+		depotsModel.detach();
 		super.onDetach();
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, Depot repository);
+	protected abstract void onSelect(AjaxRequestTarget target, Depot depot);
 }
