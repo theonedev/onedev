@@ -4,14 +4,17 @@
 		<div class="body">
 			<div class="revisions clearfix">
 				<div class="revision pull-left">
-					<label>Base</label>
+					<label class="pull-left">Left side</label>
+					<input type="checkbox"></input> 
+					<span>common ancestor</span>
+					<a wicket:id="tooltip"><i class="fa fa-question-circle"></i></a>
 					<div wicket:id="target"></div>
 				</div>
 				<div class="action pull-left">
-					<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-ellipsis-h"></i></a>
+					<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-arrows-h"></i></a>
 				</div>
 				<div class="revision pull-left">
-					<label>Compare</label>
+					<label>Right side</label>
 					<div wicket:id="source"></div>
 				</div>
 			</div>

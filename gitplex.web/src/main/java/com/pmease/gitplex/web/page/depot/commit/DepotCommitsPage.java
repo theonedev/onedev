@@ -2,12 +2,7 @@ package com.pmease.gitplex.web.page.depot.commit;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -39,16 +34,11 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.java.JavaEscape;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
@@ -57,16 +47,18 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
-import com.pmease.commons.wicket.assets.snapsvg.SnapSvgResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.assets.commitgraph.CommitGraphResourceReference;
+import com.pmease.gitplex.web.assets.commitgraph.CommitGraphUtils;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
+import com.pmease.gitplex.web.model.CommitRefsModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.CriteriaContext;
 import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.QueryContext;
@@ -145,13 +137,13 @@ public class DepotCommitsPage extends DepotPage {
 			for (int i=0; i<lastMaxCount; i++) 
 				commits.last.add(logCommits.get(i));
 			
-			sort(commits.last, 0);
+			CommitGraphUtils.sort(commits.last, 0);
 			
 			commits.current = new ArrayList<>(commits.last);
 			for (int i=lastMaxCount; i<logCommits.size(); i++)
 				commits.current.add(logCommits.get(i));
 			
-			sort(commits.current, lastMaxCount);
+			CommitGraphUtils.sort(commits.current, lastMaxCount);
 
 			commits.last = separateByDate(commits.last);
 			commits.current = separateByDate(commits.current);
@@ -161,26 +153,7 @@ public class DepotCommitsPage extends DepotPage {
 		
 	};
 	
-	private IModel<Map<String, List<String>>> labelsModel = new LoadableDetachableModel<Map<String, List<String>>>() {
-
-		@Override
-		protected Map<String, List<String>> load() {
-			Map<String, List<String>> labels = new HashMap<>();
-			List<Ref> refs = getDepot().getBranchRefs();
-			refs.addAll(getDepot().getTagRefs());
-			for (Ref ref: refs) {
-				RevCommit commit = getDepot().getRevCommit(ref.getObjectId());
-				List<String> commitLabels = labels.get(commit.name());
-				if (commitLabels == null) {
-					commitLabels = new ArrayList<>();
-					labels.put(commit.name(), commitLabels);
-				}
-				commitLabels.add(FileRepository.shortenRefName(ref.getName()));
-			}
-			return labels;
-		}
-		
-	};
+	private CommitRefsModel labelsModel = new CommitRefsModel(depotModel);
 	
 	public DepotCommitsPage(PageParameters params) {
 		super(params);
@@ -188,50 +161,6 @@ public class DepotCommitsPage extends DepotPage {
 		state = new HistoryState(params);
 	}
 	
-	private void sort(List<Commit> commits, int from) {
-		final Map<String, Long> hash2index = new HashMap<>();
-		Map<String, Commit> hash2commit = new HashMap<>();
-		for (int i=0; i<commits.size(); i++) {
-			Commit commit = commits.get(i);
-			hash2index.put(commit.getHash(), 1L*i*commits.size());
-			hash2commit.put(commit.getHash(), commit);
-		}
-
-		Stack<Commit> stack = new Stack<>();
-		
-		for (int i=commits.size()-1; i>=from; i--)
-			stack.push(commits.get(i));
-
-		// commits are nearly ordered, so this should be fast
-		while (!stack.isEmpty()) {
-			Commit commit = stack.pop();
-			long commitIndex = hash2index.get(commit.getHash());
-			int count = 1;
-			for (String parentHash: commit.getParentHashes()) {
-				Long parentIndex = hash2index.get(parentHash);
-				if (parentIndex != null && parentIndex.longValue()<commitIndex) {
-					stack.push(hash2commit.get(parentHash));
-					hash2index.put(parentHash, commitIndex+(count++));
-				}
-			}
-		}
-		
-		Collections.sort(commits, new Comparator<Commit>() {
-
-			@Override
-			public int compare(Commit o1, Commit o2) {
-				long value = hash2index.get(o1.getHash()) - hash2index.get(o2.getHash());
-				if (value < 0)
-					return -1;
-				else if (value > 0)
-					return 1;
-				else
-					return 0;
-			}
-			
-		});
-	}
-
 	private Component replaceItem(AjaxRequestTarget target, int index) {
 		Component item = commitsView.get(index);
 		Component newItem = newCommitItem(item.getId(), index);
@@ -372,8 +301,7 @@ public class DepotCommitsPage extends DepotPage {
 				target.prependJavaScript(builder);
 				target.add(feedback);
 				target.add(foot);
-				String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
-				target.appendJavaScript(script);
+				target.appendJavaScript(renderCommitGraph());
 				pushState(target);
 			}
 
@@ -402,12 +330,8 @@ public class DepotCommitsPage extends DepotPage {
 		target.add(feedback);
 		body.replace(commitsView = newCommitsView());
 		target.add(body);
-
 		target.add(foot);
-		
-		String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
-		target.appendJavaScript(script);
-		
+		target.appendJavaScript(renderCommitGraph());
 		pushState(target);
 	}
 	
@@ -511,7 +435,8 @@ public class DepotCommitsPage extends DepotPage {
 			if (state.getCompareWith() != null) {
 				PageParameters params = RevisionComparePage.paramsOf(getDepot(), 
 						new DepotAndRevision(getDepot(), commit.getHash()), 
-						new DepotAndRevision(getDepot(), state.getCompareWith()), path);
+						new DepotAndRevision(getDepot(), state.getCompareWith()), 
+						true, path);
 				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
@@ -556,11 +481,14 @@ public class DepotCommitsPage extends DepotPage {
 		
 		body.replace(commitsView = newCommitsView());
 		target.add(body);
-		
 		target.add(foot);
-
-		String script = String.format("gitplex.repocommits.onCommitsLoaded(%s);", getCommitsJson());
-		target.appendJavaScript(script);
+		
+		target.appendJavaScript(renderCommitGraph());
+	}
+	
+	private String renderCommitGraph() {
+		String jsonOfCommits = CommitGraphUtils.asJSON(commitsModel.getObject().current);
+		return String.format("gitplex.commitgraph.render('%s', %s);", body.getMarkupId(), jsonOfCommits);
 	}
 
 	@Override
@@ -571,34 +499,6 @@ public class DepotCommitsPage extends DepotPage {
 		super.onDetach();
 	}
 
-	private String getCommitsJson() {
-		List<Commit> commits = commitsModel.getObject().current;
-		Map<String, Integer> hash2index = new HashMap<>();
-		int commitIndex = 0;
-		for (int i=0; i<commits.size(); i++) { 
-			Commit commit = commits.get(i);
-			if (commit != null)
-				hash2index.put(commit.getHash(), commitIndex++);
-		}
-		List<List<Integer>> commitIndexes = new ArrayList<>();
-		for (Commit commit: commits) {
-			if (commit != null) {
-				List<Integer> parentIndexes = new ArrayList<>();
-				for (String parentHash: commit.getParentHashes()) {
-					Integer parentIndex = hash2index.get(parentHash);
-					if (parentIndex != null)
-						parentIndexes.add(parentIndex);
-				}
-				commitIndexes.add(parentIndexes);
-			}
-		}
-		try {
-			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commitIndexes);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	private List<Commit> separateByDate(List<Commit> commits) {
 		List<Commit> separated = new ArrayList<>();
 		DateTime groupTime = null;
@@ -619,14 +519,13 @@ public class DepotCommitsPage extends DepotPage {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(ClearableResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(SnapSvgResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(CommitGraphResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(DepotCommitsPage.class, "depot-commits.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(DepotCommitsPage.class, "depot-commits.css")));
 		
-		String script = String.format("gitplex.repocommits.init(%s);", getCommitsJson());
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		response.render(OnDomReadyHeaderItem.forScript(renderCommitGraph()));
 	}
 	
 	/*

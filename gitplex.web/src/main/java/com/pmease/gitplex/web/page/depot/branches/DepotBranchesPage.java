@@ -477,7 +477,8 @@ public class DepotBranchesPage extends DepotPage {
 							PageParameters params = RevisionComparePage.paramsOf(
 									getDepot(),
 									new DepotAndBranch(getDepot(), branch),
-									new DepotAndBranch(getDepot(), getBaseBranch()), 
+									new DepotAndBranch(getDepot(), getBaseBranch()),
+									true,
 									null); 
 							setResponsePage(RevisionComparePage.class, params);
 						}
@@ -538,6 +539,7 @@ public class DepotBranchesPage extends DepotPage {
 									getDepot(), 
 									new DepotAndBranch(getDepot(), getBaseBranch()),
 									new DepotAndBranch(getDepot(), branch), 
+									true,
 									null);
 							setResponsePage(RevisionComparePage.class, params);
 						}

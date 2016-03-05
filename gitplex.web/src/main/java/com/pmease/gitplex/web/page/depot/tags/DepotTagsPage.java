@@ -327,7 +327,7 @@ public class DepotTagsPage extends DepotPage {
 							}
 							DepotAndRevision source = new DepotAndRevision(getDepot(), 
 									GitUtils.ref2tag(item.getModelObject().getName()));
-							PageParameters params = RevisionComparePage.paramsOf(getDepot(), target, source, null);
+							PageParameters params = RevisionComparePage.paramsOf(getDepot(), target, source, true, null);
 							setResponsePage(RevisionComparePage.class, params);
 						} catch (IOException e) {
 							throw new RuntimeException(e);

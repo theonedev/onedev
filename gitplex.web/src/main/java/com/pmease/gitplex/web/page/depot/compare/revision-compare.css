@@ -26,6 +26,13 @@
 	color: #888;
 	font-weight: normal;
 }
+#revision-compare>.body>.revisions>.revision>input {
+	margin-left: 16px;
+}
+#revision-compare>.body>.revisions>.revision>span {
+	vertical-align: top;
+	color: #888;
+}
 #revision-compare>.body>.nav-tabs {
 	margin-bottom: 20px;
 }

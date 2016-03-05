@@ -2,15 +2,21 @@ package com.pmease.gitplex.web.component.commitlist;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -19,10 +25,13 @@ import org.joda.time.DateTime;
 import com.pmease.commons.git.Commit;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.assets.commitgraph.CommitGraphResourceReference;
+import com.pmease.gitplex.web.assets.commitgraph.CommitGraphUtils;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
 import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
+import com.pmease.gitplex.web.model.CommitRefsModel;
 
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
@@ -31,10 +40,38 @@ public class CommitListPanel extends Panel {
 	
 	private final IModel<List<Commit>> commitsModel;
 	
+	private final IModel<Map<String, List<String>>> labelsModel = new CommitRefsModel(new AbstractReadOnlyModel<Depot>() {
+
+		@Override
+		public Depot getObject() {
+			return depotModel.getObject();
+		}
+		
+	});
+	
+	private WebMarkupContainer container;
+	
 	public CommitListPanel(String id, IModel<Depot> depotModel, IModel<List<Commit>> commitsModel) {
 		super(id);
 		this.depotModel = depotModel;
-		this.commitsModel = commitsModel;
+		this.commitsModel = new LoadableDetachableModel<List<Commit>>() {
+
+			@Override
+			protected List<Commit> load() {
+				List<Commit> commits = commitsModel.getObject();
+				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
+					commits = commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
+				CommitGraphUtils.sort(commits, 0);
+				return separateByDate(commits);
+			}
+
+			@Override
+			protected void onDetach() {
+				commitsModel.detach();
+				super.onDetach();
+			}
+			
+		};
 	}
 
 	@Override
@@ -52,41 +89,52 @@ public class CommitListPanel extends Panel {
 			}
 			
 		});
-		add(new ListView<Commit>("commits", new LoadableDetachableModel<List<Commit>>() {
+		container = new WebMarkupContainer("container");
+		container.setOutputMarkupId(true);
+		add(container);
+		container.add(new ListView<Commit>("commits", commitsModel) {
 
-			@Override
-			protected List<Commit> load() {
-				List<Commit> commits = commitsModel.getObject();
-				if (commits.size() > Constants.MAX_DISPLAY_COMMITS)
-					commits = commits.subList(commits.size()-Constants.MAX_DISPLAY_COMMITS, commits.size());
-				return separateByDate(commits);
-			}
+			private int itemIndex;
 			
-		}) {
+			@Override
+			protected void onBeforeRender() {
+				itemIndex = 0;
+				super.onBeforeRender();
+			}
 
 			@Override
 			protected void populateItem(ListItem<Commit> item) {
 				Commit commit = item.getModelObject();
 				
+				Fragment fragment;
 				if (commit != null) {
-					Fragment fragment = new Fragment("commit", "commitFrag", CommitListPanel.this);
+					fragment = new Fragment("commit", "commitFrag", CommitListPanel.this);
 					fragment.add(new ContributorAvatars("avatar", commit.getAuthor(), commit.getCommitter()));
+
 					fragment.add(new CommitMessagePanel("message", depotModel, item.getModel()));
+
+					RepeatingView labelsView = new RepeatingView("labels");
+
+					List<String> commitLabels = labelsModel.getObject().get(commit.getHash());
+					if (commitLabels == null)
+						commitLabels = new ArrayList<>();
+					for (String label: commitLabels) 
+						labelsView.add(new Label(labelsView.newChildId(), label));
+					fragment.add(labelsView);
+					
 					fragment.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 					fragment.add(new HashAndCodePanel("hashAndCode", depotModel, commit.getHash()));
-					fragment.add(AttributeAppender.append("class", "commit clearfix"));
-					
-					item.add(fragment);
+					item.add(AttributeAppender.append("class", "commit clearfix commit-item-" + itemIndex++));
 				} else {
-					Fragment fragment = new Fragment("commit", "dateFrag", CommitListPanel.this);
+					fragment = new Fragment("commit", "dateFrag", CommitListPanel.this);
 					DateTime dateTime = new DateTime(getModelObject().get(item.getIndex()+1).getCommitter().getWhen());
 					fragment.add(new Label("date", Constants.DATE_FORMATTER.print(dateTime)));
 					if (item.getIndex() == 0)
-						fragment.add(AttributeAppender.append("class", "date first"));
+						item.add(AttributeAppender.append("class", "date first"));
 					else
-						fragment.add(AttributeAppender.append("class", "date"));
-					item.add(fragment);
+						item.add(AttributeAppender.append("class", "date"));
 				}				
+				item.add(fragment);
 			}
 			
 		});
@@ -112,8 +160,13 @@ public class CommitListPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		response.render(JavaScriptHeaderItem.forReference(CommitGraphResourceReference.INSTANCE));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(CommitListPanel.class, "commit-list.css")));
+		
+		String jsonOfCommits = CommitGraphUtils.asJSON(commitsModel.getObject());
+		String script = String.format("gitplex.commitgraph.render('%s', %s);", container.getMarkupId(), jsonOfCommits);
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	@Override
