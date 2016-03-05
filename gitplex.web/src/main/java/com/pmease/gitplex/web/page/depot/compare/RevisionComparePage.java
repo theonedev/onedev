@@ -9,10 +9,12 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -23,12 +25,14 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -51,8 +55,6 @@ import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 
-import jersey.repackaged.com.google.common.collect.Lists;
-
 @SuppressWarnings("serial")
 public class RevisionComparePage extends DepotPage {
 
@@ -72,9 +74,9 @@ public class RevisionComparePage extends DepotPage {
 	
 	private IModel<String> mergeBaseModel;
 
-	private DepotAndRevision rightSide;
-	
 	private DepotAndRevision leftSide;
+	
+	private DepotAndRevision rightSide;
 	
 	private DiffOptionPanel diffOption;
 	
@@ -82,15 +84,15 @@ public class RevisionComparePage extends DepotPage {
 	
 	private AjaxActionTab filesTab;
 	
-	private boolean compareWithMergeBase; 
+	private boolean compareWithMergeBase;
 	
 	private String path;
 	
-	public static PageParameters paramsOf(Depot depot, DepotAndRevision target, 
-			DepotAndRevision source, boolean compareWithMergeBase, @Nullable String path) {
+	public static PageParameters paramsOf(Depot depot, DepotAndRevision leftSide, 
+			DepotAndRevision rightSide, boolean compareWithMergeBase, @Nullable String path) {
 		PageParameters params = paramsOf(depot);
-		params.set(PARAM_LEFT, target.toString());
-		params.set(PARAM_RIGHT, source.toString());
+		params.set(PARAM_LEFT, leftSide.toString());
+		params.set(PARAM_RIGHT, rightSide.toString());
 		params.set(PARAM_COMPARE_WITH_MERGE_BASE, compareWithMergeBase);
 		if (path != null)
 			params.set(PARAM_PATH, path);
@@ -105,16 +107,16 @@ public class RevisionComparePage extends DepotPage {
 
 		String str = params.get(PARAM_RIGHT).toString();
 		if (str != null) {
-			leftSide = new DepotAndRevision(str);
+			rightSide = new DepotAndRevision(str);
 		} else {
-			leftSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
+			rightSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
 		
 		str = params.get(PARAM_LEFT).toString();
 		if (str != null) {
-			rightSide = new DepotAndRevision(str);
+			leftSide = new DepotAndRevision(str);
 		} else {
-			rightSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
+			leftSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
 		
 		compareWithMergeBase = params.get(PARAM_COMPARE_WITH_MERGE_BASE).toBoolean(false);
@@ -125,9 +127,9 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			protected PullRequest load() {
-				DepotAndBranch target = new DepotAndBranch(rightSide.toString());
-				DepotAndBranch source = new DepotAndBranch(leftSide.toString());
-				return GitPlex.getInstance(PullRequestManager.class).findOpen(target, source);
+				DepotAndBranch left = new DepotAndBranch(leftSide.toString());
+				DepotAndBranch right = new DepotAndBranch(rightSide.toString());
+				return GitPlex.getInstance(PullRequestManager.class).findOpen(left, right);
 			}
 			
 		};
@@ -136,20 +138,20 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			protected String load() {
-				Depot targetDepot = rightSide.getDepot();
-				Depot sourceDepot = leftSide.getDepot();
-				if (!targetDepot.equals(sourceDepot)) {
+				Depot leftDepot = leftSide.getDepot();
+				Depot rightDepot = rightSide.getDepot();
+				if (!leftDepot.equals(rightDepot)) {
 					Git sandbox = new Git(FileUtils.createTempDir());
 					try {
-						sandbox.clone(targetDepot.git(), false, true, true, rightSide.getRevision());
+						sandbox.clone(leftDepot.git(), false, true, true, leftSide.getRevision());
 						sandbox.reset(null, null);
-						sandbox.fetch(sourceDepot.git(), leftSide.getRevision());
-						return sandbox.calcMergeBase(rightSide.getCommit().name(), leftSide.getCommit().name());
+						sandbox.fetch(rightDepot.git(), rightSide.getRevision());
+						return sandbox.calcMergeBase(leftSide.getCommit().name(), rightSide.getCommit().name());
 					} finally {
 						FileUtils.deleteDir(sandbox.depotDir());
 					}
 				} else {
-					return targetDepot.getMergeBase(rightSide.getRevision(), leftSide.getRevision()).name();
+					return leftDepot.getMergeBase(leftSide.getRevision(), rightSide.getRevision()).name();
 				}
 			}
 			
@@ -163,13 +165,12 @@ public class RevisionComparePage extends DepotPage {
 				LogCommand log = new LogCommand(sourceDepot.git().depotDir());
 				List<Commit> commits;
 				if (!compareWithMergeBase) {
-					String revisions = rightSide.getRevision() + "..." + leftSide.getRevision();
+					String revisions = leftSide.getRevision() + "..." + rightSide.getRevision();
 					commits = log.revisions(Lists.newArrayList(revisions)).call();
 					commits.add(sourceDepot.git().showRevision(mergeBaseModel.getObject()));
 				} else {
-					commits = sourceDepot.git().log(rightSide.getRevision(), leftSide.getRevision(), null, 0, 0, false);
+					commits = sourceDepot.git().log(leftSide.getRevision(), rightSide.getRevision(), null, 0, 0, false);
 				}
-				
 				return commits;
 			}
 			
@@ -183,22 +184,33 @@ public class RevisionComparePage extends DepotPage {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalRevisionPicker("target", rightSide.getDepotId(), rightSide.getRevision()) { 
+		add(new AffinalRevisionPicker("leftSide", leftSide.getDepotId(), leftSide.getRevision()) { 
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				PageParameters params = paramsOf(getDepot(), new DepotAndRevision(depot, revision), 
-						leftSide, compareWithMergeBase, path);
+				PageParameters params = paramsOf(getDepot(), new DepotAndRevision(depot, revision), rightSide, compareWithMergeBase, path);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		});
+		add(new CheckBox("compareWithMergeBase", Model.of(compareWithMergeBase)).add(new OnChangeAjaxBehavior() {
 
-		add(new AffinalRevisionPicker("source", leftSide.getDepotId(), leftSide.getRevision()) { 
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				PageParameters params = RevisionComparePage.paramsOf(depotModel.getObject(), 
+						leftSide, rightSide, !compareWithMergeBase, path);
+				setResponsePage(RevisionComparePage.class, params);
+			}
+			
+		}));
+		String tooltip = "Check this to compare \"right side\" with common ancestor of left and right";
+		add(new WebMarkupContainer("tooltip").add(new TooltipBehavior(Model.of(tooltip))));
+
+		add(new AffinalRevisionPicker("rightSide", rightSide.getDepotId(), rightSide.getRevision()) { 
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				PageParameters params = paramsOf(getDepot(), rightSide, 
+				PageParameters params = paramsOf(getDepot(), leftSide, 
 						new DepotAndRevision(depot, revision), compareWithMergeBase, path);
 				setResponsePage(RevisionComparePage.class, params);
 			}
@@ -209,8 +221,8 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), 
-						leftSide, rightSide, compareWithMergeBase, path));
+				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), rightSide, leftSide, 
+						compareWithMergeBase, path));
 			}
 
 		});
@@ -219,16 +231,16 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			public void onClick() {
-				DepotAndBranch target = new DepotAndBranch(rightSide.toString());
-				DepotAndBranch source = new DepotAndBranch(leftSide.toString());
-				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(target.getDepot(), target, source));
+				DepotAndBranch left = new DepotAndBranch(leftSide.toString());
+				DepotAndBranch right = new DepotAndBranch(rightSide.toString());
+				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(left.getDepot(), left, right));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (rightSide.getBranch()!=null && leftSide.getBranch()!=null && compareWithMergeBase) {
+				if (leftSide.getBranch()!=null && rightSide.getBranch()!=null && compareWithMergeBase) {
 					PullRequest request = requestModel.getObject();
 					setVisible(request == null && !isIntegrated());
 				} else {
@@ -243,7 +255,7 @@ public class RevisionComparePage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(leftSide.equals(rightSide));
+				setVisible(rightSide.equals(leftSide));
 			}
 			
 		});
@@ -305,7 +317,7 @@ public class RevisionComparePage extends DepotPage {
 				
 				setVisible(!leftSide.equals(rightSide) 
 						&& compareWithMergeBase 
-						&& mergeBaseModel.getObject().equals(leftSide.getCommit().name()));
+						&& mergeBaseModel.getObject().equals(rightSide.getCommit().name()));
 			}
 
 		});
@@ -350,7 +362,7 @@ public class RevisionComparePage extends DepotPage {
 	}
 	
 	private boolean isIntegrated() {
-		return mergeBaseModel.getObject().equals(leftSide.getCommit().name());
+		return mergeBaseModel.getObject().equals(rightSide.getCommit().name());
 	}
 	
 	@Override
@@ -380,7 +392,7 @@ public class RevisionComparePage extends DepotPage {
 					return getDepot();
 				}
 				
-			}, leftSide.getRevision()) {
+			}, rightSide.getRevision()) {
 
 				@Override
 				protected void onSelectPath(AjaxRequestTarget target, String path) {
@@ -431,8 +443,8 @@ public class RevisionComparePage extends DepotPage {
 	private void newRevDiffPanel(final WebMarkupContainer tabPanel, @Nullable AjaxRequestTarget target) {
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
 				new Model<PullRequest>(null), new Model<Comment>(null), 
-				compareWithMergeBase?mergeBaseModel.getObject():rightSide.getRevision(), 
-				leftSide.getRevision(), 
+				compareWithMergeBase?mergeBaseModel.getObject():leftSide.getRevision(), 
+				rightSide.getRevision(), 
 				StringUtils.isBlank(path)?null:path, null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
@@ -454,8 +466,8 @@ public class RevisionComparePage extends DepotPage {
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getDepot(), rightSide, leftSide, 
-				compareWithMergeBase, path);
+		PageParameters params = paramsOf(getDepot(), leftSide, 
+				rightSide, compareWithMergeBase, path);
 		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
 		pushState(target, url.toString(), path);
 	}
@@ -482,5 +494,4 @@ public class RevisionComparePage extends DepotPage {
 		setResponsePage(DepotBranchesPage.class, paramsOf(depot));
 	}
 
-	
 }
