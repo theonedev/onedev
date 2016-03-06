@@ -1,5 +1,7 @@
 package com.pmease.commons.git;
 
+import com.pmease.commons.git.jackson.GitObjectMapperConfigurator;
+import com.pmease.commons.jackson.ObjectMapperConfigurator;
 import com.pmease.commons.loader.AbstractPluginModule;
 
 /**
@@ -13,6 +15,7 @@ public class GitModule extends AbstractPluginModule {
 		super.configure();
 		
 		// put your guice bindings here
+		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	}
 
 }
