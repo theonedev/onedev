@@ -6,9 +6,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.pmease.commons.git.jackson.ObjectIdDeserializer;
-import com.pmease.commons.git.jackson.ObjectIdSerializer;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -22,14 +20,10 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-		        ObjectMapper mapper = new ObjectMapper();
-		        SimpleModule module = new SimpleModule();
-				module.addSerializer(ObjectId.class, new ObjectIdSerializer());
-				module.addDeserializer(ObjectId.class, new ObjectIdDeserializer());
-		        mapper.registerModule(module);
+		        ObjectMapper mapper = GitPlex.getInstance(ObjectMapper.class);
 				try {
 					System.out.println(mapper.writeValueAsString(ObjectId.zeroId()));
-					System.out.println(mapper.readValue(ObjectId.zeroId().name(), ObjectId.class));
+					System.out.println(mapper.readValue(mapper.writeValueAsString(ObjectId.zeroId()), ObjectId.class));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
