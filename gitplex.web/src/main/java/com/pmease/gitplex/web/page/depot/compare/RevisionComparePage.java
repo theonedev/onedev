@@ -50,7 +50,6 @@ import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.revisionpicker.AffinalRevisionPicker;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.DepotPage;
-import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -509,7 +508,7 @@ public class RevisionComparePage extends DepotPage {
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
-		setResponsePage(DepotBranchesPage.class, paramsOf(depot));
+		setResponsePage(RevisionComparePage.class, paramsOf(depot));
 	}
 
 }
