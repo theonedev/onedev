@@ -1,6 +1,6 @@
 grammar IncludeExclude;
 
-match: criteria (' ' (criteria|' '*))* ' '* EOF;
+match: ' '* criteria (' '+ criteria)* ' '* EOF;
 
 criteria: includeMatch | excludeMatch;
 

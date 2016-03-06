@@ -174,12 +174,28 @@ public abstract class CodeAssist implements Serializable {
 		 * remove duplicate suggestions
 		 */
 		Set<String> suggestedContents = new HashSet<>();
+		
+		boolean hasNonWhitespaceSuggestions = false;
 		for (Iterator<InputCompletion> it = inputCompletions.iterator(); it.hasNext();) {
-			String content = it.next().complete(inputStatus).getContent();
+			InputCompletion completion = it.next();
+			if (!StringUtils.isWhitespace(completion.getReplaceContent()))
+				hasNonWhitespaceSuggestions = true;
+			String content = completion.complete(inputStatus).getContent();
 			if (suggestedContents.contains(content))
 				it.remove();
 			else
 				suggestedContents.add(content);
+		}
+
+		/*
+		 * Preserve whitespace suggestions if there are no other suggestions as we may need to 
+		 * insert a white space for other suggestions to appear
+		 */
+		if (hasNonWhitespaceSuggestions) {
+			for (Iterator<InputCompletion> it = inputCompletions.iterator(); it.hasNext();) {
+				if (it.next().getReplaceContent().trim().length() == 0)
+					it.remove();
+			}
 		}
 		return inputCompletions;
 	}
