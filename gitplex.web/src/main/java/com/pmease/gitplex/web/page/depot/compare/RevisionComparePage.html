@@ -18,23 +18,16 @@
 					<div wicket:id="rightSide"></div>
 				</div>
 			</div>
-			<div wicket:id="sameRevision" class="alert alert-warning status">
-				<div class="summary">
-					<span class="fa fa-lg fa-warning"></span>
-					<span>Please select different revisions to compare.</span>
-				</div>
-			</div>		
-			<div wicket:id="openedRequest" class="alert alert-info status">
-				<div class="summary">
-					<a wicket:id="view">Pull request #<span wicket:id="no"></span></a> is already open for this comparison: 
-				</div>
-				<div wicket:id="title" class="detail"></div>
+			<div wicket:id="openedRequest" class="alert alert-info">
+				<div>Pull request #<span wicket:id="no"></span> is already open for this comparison:</div> 
+				<b><a wicket:id="link"><span wicket:id="label"></span></a></b>
 			</div>
-			<div wicket:id="upToDate" class="alert alert-success status">
-				<div class="summary">
-					<span class="fa fa-lg fa-check-circle"></span>
-					Target revision is up to date with all commits from source revision.
-				</div>
+			<div wicket:id="noChanges" class="alert alert-warning">
+				No changes between left side and right side
+			</div>		
+			<div wicket:id="leftAhead" class="alert alert-warning">
+				Left side has new commits since the branching point, <a wicket:id="compareWithMergeBase">tick the common ancestor option</a> 
+				to compare right side against the original branching point   
 			</div>		
 			<div>
 				<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>

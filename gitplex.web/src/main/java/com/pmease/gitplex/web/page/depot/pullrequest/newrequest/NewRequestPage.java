@@ -370,16 +370,23 @@ public class NewRequestPage extends PullRequestPage {
 
 	private Fragment newOpenedFrag() {
 		Fragment fragment = new Fragment("status", "openedFrag", this);
-		fragment.add(new Link<Void>("view") {
+		fragment.add(new Label("no", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPullRequest().getId().toString();
+			}
+		}));
+		fragment.add(new Link<Void>("link") {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("no", new AbstractReadOnlyModel<String>() {
+				add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						return getPullRequest().getId().toString();
+						return getPullRequest().getTitle();
 					}
 				}));
 			}
@@ -391,14 +398,6 @@ public class NewRequestPage extends PullRequestPage {
 			}
 			
 		});
-		
-		fragment.add(new Label("title", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getPullRequest().getTitle();
-			}
-		}));
 		
 		return fragment;
 	}

@@ -35,7 +35,6 @@
 }
 #revision-compare>.body>.revisions>.revision>a {
 	color: #666;
-	vertical-align: top;
 }
 
 #revision-compare>.body>.nav-tabs {

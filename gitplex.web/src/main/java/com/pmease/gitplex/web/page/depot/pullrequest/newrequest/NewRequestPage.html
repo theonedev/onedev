@@ -23,10 +23,8 @@
 	</div>
 	<wicket:fragment wicket:id="openedFrag">
 		<div class="alert alert-info">
-			<div class="summary">
-				<a wicket:id="view">Pull request #<span wicket:id="no"></span></a> is already open for this comparison: 
-			</div>
-			<div wicket:id="title" class="detail"></div>
+			<div>Pull request #<span wicket:id="no"></span> is already open for this comparison:</div> 
+			<b><a wicket:id="link"><span wicket:id="label"></span></a></b>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sameBranchFrag">

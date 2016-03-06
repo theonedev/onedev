@@ -242,7 +242,7 @@ public class RevisionComparePage extends DepotPage {
 				
 				if (leftSide.getBranch()!=null && rightSide.getBranch()!=null && compareWithMergeBase) {
 					PullRequest request = requestModel.getObject();
-					setVisible(request == null && !isIntegrated());
+					setVisible(request == null && !mergeBaseModel.getObject().equals(rightSide.getCommit().name()));
 				} else {
 					setVisible(false);
 				}
@@ -250,15 +250,6 @@ public class RevisionComparePage extends DepotPage {
 			
 		});
 		
-		add(new WebMarkupContainer("sameRevision") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(rightSide.equals(leftSide));
-			}
-			
-		});
 		add(new WebMarkupContainer("openedRequest") {
 
 			@Override
@@ -277,16 +268,23 @@ public class RevisionComparePage extends DepotPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new Link<Void>("view") {
+				add(new Label("no", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return requestModel.getObject().getId().toString();
+					}
+				}));
+				add(new Link<Void>("link") {
 
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						add(new Label("no", new AbstractReadOnlyModel<String>() {
+						add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 							@Override
 							public String getObject() {
-								return requestModel.getObject().getId().toString();
+								return requestModel.getObject().getTitle();
 							}
 						}));
 					}
@@ -299,25 +297,42 @@ public class RevisionComparePage extends DepotPage {
 					
 				});
 				
-				add(new Label("title", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return requestModel.getObject().getTitle();
-					}
-				}));
 			}
 			
 		});
-		add(new WebMarkupContainer("upToDate") {
+		add(new WebMarkupContainer("noChanges") {
 			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
+
+				setVisible(!hasChanges());
+			}
+
+		});
+		add(new WebMarkupContainer("leftAhead") {
+			
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
 				
-				setVisible(!leftSide.equals(rightSide) 
-						&& compareWithMergeBase 
-						&& mergeBaseModel.getObject().equals(rightSide.getCommit().name()));
+				add(new Link<Void>("compareWithMergeBase") {
+
+					@Override
+					public void onClick() {
+						PageParameters params = paramsOf(getDepot(), leftSide, rightSide, true, path);
+						setResponsePage(RevisionComparePage.class, params);
+					}
+					
+				});
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(!compareWithMergeBase 
+						&& !mergeBaseModel.getObject().equals(leftSide.getCommit().name()));
 			}
 
 		});
@@ -351,7 +366,7 @@ public class RevisionComparePage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!isIntegrated());
+				setVisible(hasChanges());
 			}
 
 		});
@@ -361,8 +376,12 @@ public class RevisionComparePage extends DepotPage {
 		add(new BackToTop("backToTop"));
 	}
 	
-	private boolean isIntegrated() {
-		return mergeBaseModel.getObject().equals(rightSide.getCommit().name());
+	private boolean hasChanges() {
+		if (compareWithMergeBase) {
+			return !mergeBaseModel.getObject().equals(rightSide.getCommit().name());
+		} else {
+			return !leftSide.getCommit().name().equals(rightSide.getCommit().name());
+		}
 	}
 	
 	@Override
@@ -373,14 +392,14 @@ public class RevisionComparePage extends DepotPage {
 	}
 
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {
-		final WebMarkupContainer tabPanel;
+		WebMarkupContainer tabPanel;
 		if (path != null) {
 			tabPanel = new Fragment(TAB_PANEL_ID, "compareFrag", this) {
 
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!isIntegrated());
+					setVisible(hasChanges());
 				}
 				
 			};
@@ -423,8 +442,7 @@ public class RevisionComparePage extends DepotPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					
-					setVisible(!isIntegrated());
+					setVisible(hasChanges());
 				}
 				
 			};
