@@ -1,6 +1,6 @@
 grammar FullBranchMatch;
 
-match: criteria+ EOF;
+match: ' '* criteria (' '+ criteria)* ' '* EOF;
 
 criteria: includeMatch | excludeMatch;
 
@@ -19,5 +19,3 @@ Value: (ESCAPE|~[:() \\])+;
 
 fragment
 ESCAPE: '\\'[:()\\];
-
-WS: [ \t\r\n]+ -> skip;

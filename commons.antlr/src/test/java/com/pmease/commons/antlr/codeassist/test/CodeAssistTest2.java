@@ -24,14 +24,14 @@ public class CodeAssistTest2 {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected List<InputSuggestion> suggest(final ParentedElement element, String matchWith, int count) {
+		protected List<InputSuggestion> suggest(ParentedElement element, String matchWith, int count) {
 			if (element.getSpec() instanceof LexerRuleRefElementSpec) {
 				LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) element.getSpec();
 				if (spec.getRuleName().equals("Value")) {
 					return new FenceAware(codeAssist.getGrammar(), "(", ")") {
 
 						@Override
-						protected List<InputSuggestion> match(String matchWith) {
+						protected List<InputSuggestion> match(String matchWith, int count) {
 							if (element.getRoot().getLastMatchedToken().getType() == CodeAssistTest2Lexer.BRANCH) {
 								List<InputSuggestion> suggestions = new ArrayList<>();
 								for (String value: BRANCHS) {
@@ -44,7 +44,7 @@ public class CodeAssistTest2 {
 							}
 						}
 						
-					}.suggest(element.getSpec(), matchWith);
+					}.suggest(element.getSpec(), matchWith, count);
 				}
 			}
 			return null;

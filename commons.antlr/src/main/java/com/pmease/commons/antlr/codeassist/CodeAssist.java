@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -75,79 +77,97 @@ public abstract class CodeAssist implements Serializable {
 		}
 		return new ArrayList<>(hints);
 	}
+
+	private String appendMandatories(InputStatus inputStatus, ElementCompletion completion) {
+		String inputContent = inputStatus.getContent();
+		String content = inputContent.substring(0, completion.getReplaceBegin()) 
+				+ completion.getReplaceContent();
+		if (completion.isComplete() && completion.getReplaceEnd() == inputStatus.getCaret()) {
+			ParentedElement parentElement = completion.getExpectedElement().getParent();
+			ElementSpec elementSpec = completion.getExpectedElement().getSpec();
+			for (String mandatory: getMandatoriesAfter(parentElement, elementSpec)) {
+				String prevContent = content;
+				content += mandatory;
+				
+				if (grammar.getTokenTypeByLiteral(mandatory) != null) {
+					/*
+					 * if mandatory can be appended without space, the last token 
+					 * position should remain unchanged in concatenated content
+					 */
+					List<Token> tokens = grammar.lex(content);
+					if (!tokens.isEmpty()) {
+						Token lastToken = tokens.get(tokens.size()-1);
+						if (lastToken.getStartIndex() != content.length() - mandatory.length()
+								|| lastToken.getStopIndex() != content.length()-1) {
+							content = prevContent + " " + mandatory;
+						}
+					} else {
+						content = prevContent + " " + mandatory;
+					}
+				}
+			}
+		}
+		return content + inputContent.substring(completion.getReplaceEnd());
+	}
 	
 	public List<InputCompletion> suggest(InputStatus inputStatus, String ruleName, int count) {
 		RuleSpec rule = Preconditions.checkNotNull(grammar.getRule(ruleName));
 		
-		String inputContent = inputStatus.getContent();
 		List<InputCompletion> inputCompletions = new ArrayList<>();
 
-		Set<String> labels = new HashSet<>();
+		Map<String, List<ElementCompletion>> label2completions = new LinkedHashMap<>();
 		for (ElementCompletion completion: suggest(rule, inputStatus, count)) {
-			if (!labels.contains(completion.getLabel())) {
-				labels.add(completion.getLabel());
-				String content = inputContent.substring(0, completion.getReplaceBegin()) 
-						+ completion.getReplaceContent();
-				boolean mandatoriesAdded = false;
-				if (completion.isComplete() && completion.getReplaceEnd() == inputStatus.getCaret()) {
+			List<ElementCompletion> completionsWithLabel = label2completions.get(completion.getLabel());
+			if (completionsWithLabel == null) {
+				completionsWithLabel = new ArrayList<>();
+				label2completions.put(completion.getLabel(), completionsWithLabel);
+			}
+			completionsWithLabel.add(completion);
+		}
+		String inputContent = inputStatus.getContent();
+		for (Map.Entry<String, List<ElementCompletion>> entry: label2completions.entrySet()) {
+			ElementCompletion completion = entry.getValue().get(0);
+			String content = appendMandatories(inputStatus, completion);
+			for (int i=1; i<entry.getValue().size(); i++) {
+				String eachContent = appendMandatories(inputStatus, entry.getValue().get(i));
+				if (!eachContent.equals(content)) { 
+					// we have multiple mandatories attached to same label, so they are no longer 
+					// mandatories any more
+					content = completion.complete(inputStatus).getContent();
+					break;
+				}
+			}
+			
+			/*
+			 * Adjust caret to move it to next place expecting user input if suggestion is 
+			 * complete, that is, we move it after all mandatory tokens after the replacement, 
+			 * unless user puts caret explicitly in the middle of replacement via suggestion, 
+			 * indicating the replacement has some place holders expecting user input. 
+			 */
+			int caret = completion.getCaret();
+			if (completion.isComplete() && caret == -1) {
+				// caret is not at the middle of replacement, so we need to move it to 
+				// be after mandatory tokens if provided suggestion is complete
+				caret = content.length() - inputContent.length() + completion.getReplaceEnd(); 
+				if (content.equals(completion.complete(inputStatus).getContent())) { 
+					// in case mandatory tokens are not added after replacement, 
+					// we skip existing mandatory tokens in current input
+					String contentAfterCaret = content.substring(caret);
 					ParentedElement parentElement = completion.getExpectedElement().getParent();
 					ElementSpec elementSpec = completion.getExpectedElement().getSpec();
-					for (String mandatory: getMandatoriesAfter(parentElement, elementSpec)) {
-						String prevContent = content;
-						content += mandatory;
-						mandatoriesAdded = true;
-						
-						if (grammar.getTokenTypeByLiteral(mandatory) != null) {
-							/*
-							 * if mandatory can be appended without space, the last token 
-							 * position should remain unchanged in concatenated content
-							 */
-							List<Token> tokens = grammar.lex(content);
-							if (!tokens.isEmpty()) {
-								Token lastToken = tokens.get(tokens.size()-1);
-								if (lastToken.getStartIndex() != content.length() - mandatory.length()
-										|| lastToken.getStopIndex() != content.length()-1) {
-									content = prevContent + " " + mandatory;
-								}
-							} else {
-								content = prevContent + " " + mandatory;
-							}
-						}
-					}
+					caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(parentElement, elementSpec));
 				}
-				content += inputContent.substring(completion.getReplaceEnd());
-
-				/*
-				 * Adjust caret to move it to next place expecting user input if suggestion is 
-				 * complete, that is, we move it after all mandatory tokens after the replacement, 
-				 * unless user puts caret explicitly in the middle of replacement via suggestion, 
-				 * indicating the replacement has some place holders expecting user input. 
-				 */
-				int caret = completion.getCaret();
-				if (completion.isComplete() && caret == -1) {
-					// caret is not at the middle of replacement, so we need to move it to 
-					// be after mandatory tokens if provided suggestion is complete
-					caret = content.length() - inputContent.length() + completion.getReplaceEnd(); 
-					if (!mandatoriesAdded) { 
-						// in case mandatory tokens are not added after replacement, 
-						// we skip existing mandatory tokens in current input
-						String contentAfterCaret = content.substring(caret);
-						ParentedElement parentElement = completion.getExpectedElement().getParent();
-						ElementSpec elementSpec = completion.getExpectedElement().getSpec();
-						caret += skipMandatories(contentAfterCaret, getMandatoriesAfter(parentElement, elementSpec));
-					}
-				} else {
-					if (caret == -1)
-						caret = completion.getReplaceContent().length();
-					caret += completion.getReplaceBegin();
-				}
-				
-				String replaceContent = content.substring(completion.getReplaceBegin(), 
-						content.length()-inputContent.length()+completion.getReplaceEnd());
-				inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
-						completion.getReplaceEnd(), replaceContent, caret, completion.getLabel(), 
-						completion.getDescription(), completion.getMatchRange()));
+			} else {
+				if (caret == -1)
+					caret = completion.getReplaceContent().length();
+				caret += completion.getReplaceBegin();
 			}
+			
+			String replaceContent = content.substring(completion.getReplaceBegin(), 
+					content.length()-inputContent.length()+completion.getReplaceEnd());
+			inputCompletions.add(new InputCompletion(completion.getReplaceBegin(), 
+					completion.getReplaceEnd(), replaceContent, caret, completion.getLabel(), 
+					completion.getDescription(), completion.getMatchRange()));
 		}
 		
 		/*
@@ -253,11 +273,18 @@ public abstract class CodeAssist implements Serializable {
 	private String getMatchWith(Chart chart, InputStatus inputStatus) {
 		String matchWith;
 		Token token = chart.getOriginatingToken();
+		int endCharIndex;
 		if (token != null) {
-			int endCharIndex = token.getStopIndex()+1;
-			matchWith = inputStatus.getContent().substring(endCharIndex, inputStatus.getCaret());
+			endCharIndex = token.getStopIndex()+1;
 		} else {
-			matchWith = inputStatus.getContentBeforeCaret();
+			endCharIndex = 0;
+		}
+		matchWith = inputStatus.getContent().substring(endCharIndex, inputStatus.getCaret());
+		for (Token each: chart.getParser().getTokens()) {
+			if (each.getStartIndex() == endCharIndex) {
+				// we can not trim leading space as it is not optional
+				return matchWith;
+			}
 		}
 		return StringUtils.trimStart(matchWith);
 	}
@@ -529,7 +556,10 @@ public abstract class CodeAssist implements Serializable {
 	@Nullable
 	protected InputSuggestion wrapAsSuggestion(ParentedElement expectedElement, 
 			String suggestedLiteral, boolean complete) {
-		return new InputSuggestion(suggestedLiteral, -1, complete, null, null);
+		if (StringUtils.isNotBlank(suggestedLiteral))
+			return new InputSuggestion(suggestedLiteral, -1, complete, null, null);
+		else
+			return new InputSuggestion(suggestedLiteral, -1, complete, "space", null);
 	}
 	
 }

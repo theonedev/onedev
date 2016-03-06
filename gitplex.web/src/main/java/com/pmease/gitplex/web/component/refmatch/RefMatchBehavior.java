@@ -44,14 +44,14 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, final int count) {
+	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, int count) {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
 				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
+					protected List<InputSuggestion> match(String unfencedMatchWith, int count) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
 
 						Depot depot = depotModel.getObject();
@@ -80,7 +80,9 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 							}
 						}
 
-						if (!unfencedMatchWith.contains(VALUE_CLOSE) && unfencedMatchWith.length() != 0) {
+						if (numSuggestions++<count 
+								&& !unfencedMatchWith.contains(VALUE_CLOSE) 
+								&& unfencedMatchWith.length() != 0) {
 							String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
 							Range matchRange = new Range(0, fenced.length());
 							suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
@@ -93,7 +95,7 @@ public class RefMatchBehavior extends ANTLRAssistBehavior {
 						return "value needs to be enclosed in brackets";
 					}
 					
-				}.suggest(expectedElement.getSpec(), matchWith);
+				}.suggest(expectedElement.getSpec(), matchWith, count);
 			}
 		} 
 		return null;

@@ -52,9 +52,7 @@ class LastCommitPanel extends Panel {
 				String commitHash = depotModel.getObject().getObjectId(blobIdent.revision).name();
 				state.setCompareWith(commitHash);
 				if (blobIdent.path != null) 
-					state.setQuery(String.format("id(%s) path(%s)", commitHash, blobIdent.path));
-				else
-					state.setQuery(String.format("id(%s)", commitHash));
+					state.setQuery(String.format("path(%s)", blobIdent.path));
 				setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(depotModel.getObject(), state));
 			}
 			

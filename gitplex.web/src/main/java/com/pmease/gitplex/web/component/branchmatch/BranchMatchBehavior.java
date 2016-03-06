@@ -37,14 +37,14 @@ public class BranchMatchBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, final int count) {
+	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, int count) {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
 				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
+					protected List<InputSuggestion> match(String unfencedMatchWith, int count) {
 						return SuggestionUtils.suggestBranch(depotModel.getObject(), unfencedMatchWith, count, 
 								null, "any branch");
 					}
@@ -54,7 +54,7 @@ public class BranchMatchBehavior extends ANTLRAssistBehavior {
 						return "value needs to be enclosed in brackets";
 					}
 					
-				}.suggest(expectedElement.getSpec(), matchWith);
+				}.suggest(expectedElement.getSpec(), matchWith, count);
 			}
 		} 
 		return null;

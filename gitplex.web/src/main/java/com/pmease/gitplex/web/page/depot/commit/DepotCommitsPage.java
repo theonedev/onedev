@@ -65,6 +65,7 @@ import com.pmease.gitplex.web.page.depot.commit.CommitQueryParser.QueryContext;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public class DepotCommitsPage extends DepotPage {
@@ -623,8 +624,11 @@ public class DepotCommitsPage extends DepotPage {
 			logCommand.count(step*COUNT);
 
 			QueryContext parseTree = getParseTree();
-			if (parseTree != null) 
+			if (parseTree != null) { 
 				new ParseTreeWalker().walk(new LogCommandFiller(logCommand), parseTree);
+				if (logCommand.revisions().isEmpty() && compareWith != null)
+					logCommand.revisions(Lists.newArrayList(compareWith));
+			}
 		}
 		
 	}

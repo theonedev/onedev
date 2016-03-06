@@ -51,14 +51,14 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 	}
 
 	@Override
-	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, final int count) {
+	protected List<InputSuggestion> suggest(final ParentedElement expectedElement, String matchWith, int count) {
 		if (expectedElement.getSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) expectedElement.getSpec();
 			if (spec.getRuleName().equals("Value")) {
 				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
+					protected List<InputSuggestion> match(String unfencedMatchWith, int count) {
 						int tokenType = expectedElement.getRoot().getLastMatchedToken().getType();
 						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
 						List<InputSuggestion> suggestions = new ArrayList<>();
@@ -99,12 +99,17 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								if (unfencedMatchWith.length() != 0) {
 									String fenced = VALUE_OPEN + unfencedMatchWith + VALUE_CLOSE; 
 									Range matchRange = new Range(0, fenced.length());
-									suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
+									if (suggestions.size() < count)
+										suggestions.add(new InputSuggestion(fenced, -1, true, getFencingDescription(), matchRange));
 								}
-								suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
-								suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
-								for (String dateExample: DATE_EXAMPLES) 
-									suggestions.add(new InputSuggestion(dateExample));
+								if (suggestions.size() < count)
+									suggestions.add(new InputSuggestion(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis())));
+								if (suggestions.size() < count)
+									suggestions.add(new InputSuggestion(Constants.DATE_FORMATTER.print(System.currentTimeMillis())));
+								for (String dateExample: DATE_EXAMPLES) { 
+									if (suggestions.size() < count)
+										suggestions.add(new InputSuggestion(dateExample));
+								}
 							}
 							break;
 						case CommitQueryParser.PATH:
@@ -119,7 +124,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						return "value needs to be enclosed in brackets";
 					}
 					
-				}.suggest(expectedElement.getSpec(), matchWith);
+				}.suggest(expectedElement.getSpec(), matchWith, count);
 			}
 		} 
 		return null;
@@ -194,6 +199,9 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 		case "..":
 		case "...":
 			description = "revision range";
+			break;
+		case " ":
+			description = "space";
 			break;
 		default:
 			description = null;

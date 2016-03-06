@@ -36,13 +36,13 @@ public abstract class FenceAware {
 		}
 	}
 	
-	public List<InputSuggestion> suggest(ElementSpec spec, String matchWith) {
+	public List<InputSuggestion> suggest(ElementSpec spec, String matchWith, int count) {
 		String unfencedMatchWith = matchWith;
 		if (matchWith.startsWith(open))
 			unfencedMatchWith = unfencedMatchWith.substring(open.length());
 		unfencedMatchWith = unfencedMatchWith.trim();
 		
-		List<InputSuggestion> suggestions = match(unfencedMatchWith);
+		List<InputSuggestion> suggestions = match(unfencedMatchWith, count);
 		if (suggestions != null) {
 			List<InputSuggestion> checkedSuggestions = new ArrayList<>();
 			
@@ -99,5 +99,5 @@ public abstract class FenceAware {
 	 * 			instead of an empty list
 	 */
 	@Nullable
-	protected abstract List<InputSuggestion> match(String unfencedMatchWith);
+	protected abstract List<InputSuggestion> match(String unfencedMatchWith, int count);
 }

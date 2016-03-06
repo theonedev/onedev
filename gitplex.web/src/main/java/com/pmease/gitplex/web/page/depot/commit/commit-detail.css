@@ -41,8 +41,8 @@
 	border-bottom: 1px solid #DDD;
 }
 #commit-detail>.info>.refs .branch:before {
-	font-family: FontExt;
-	content: "\f221";
+	font-family: Fontawesome;
+	content: "\f126";
 	color: #444;
 }
 #commit-detail>.info>.refs .tag:before {

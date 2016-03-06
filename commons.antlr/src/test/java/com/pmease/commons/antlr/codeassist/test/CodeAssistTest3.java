@@ -32,7 +32,7 @@ public class CodeAssistTest3 {
 					return new FenceAware(codeAssist.getGrammar(), "\"", "\"") {
 
 						@Override
-						protected List<InputSuggestion> match(String matchWith) {
+						protected List<InputSuggestion> match(String matchWith, int count) {
 							List<InputSuggestion> suggestions = new ArrayList<>();
 							Element criteriaElement = element.findParentByRule("criteria");
 							if (criteriaElement.getFirstMatchedToken().getText().equals("author")) {
@@ -44,7 +44,7 @@ public class CodeAssistTest3 {
 							return suggestions;
 						}
 						
-					}.suggest(element.getSpec(), matchWith);
+					}.suggest(element.getSpec(), matchWith, count);
 				}
 			}
 			return null;
