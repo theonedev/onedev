@@ -11,7 +11,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.*;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -73,13 +73,11 @@ public abstract class RevisionSelector extends Panel {
 	
 	private String feedbackMessage;
 	
-	private AbstractDefaultAjaxBehavior keyBehavior;
-	
 	private TextField<String> revField;
 	
-	private WebMarkupContainer refsContainer;
+	private WebMarkupContainer itemsContainer;
 	
-	private RepeatingView refsView;
+	private RepeatingView itemsView;
 
 	private List<String> refs;
 	
@@ -103,13 +101,11 @@ public abstract class RevisionSelector extends Panel {
 	private void onSelectTab(AjaxRequestTarget target) {
 		refs = findRefs();
 		page = 1;
-		itemValues = getItemValues();
+		itemValues = getItemValues(null);
 		revField.setModel(Model.of(""));
-		revField.clearInput();
 		target.add(revField);
-		newRefsView(target);
-		String script = String.format("gitplex.revisionSelector.bindInputKeys('%s', %s);", 
-				getMarkupId(true), keyBehavior.getCallbackFunction(CallbackParameter.explicit("key")));
+		newItemsView(target);
+		String script = String.format("gitplex.revisionSelector.bindInputKeys('%s');", getMarkupId(true));
 		target.appendJavaScript(script);
 		target.focusComponent(revField);
 	}
@@ -132,7 +128,7 @@ public abstract class RevisionSelector extends Panel {
 		branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
 		
 		refs = findRefs();
-		itemValues = new ArrayList<>(refs);
+		itemValues = getItemValues(null);
 	}
 	
 	public RevisionSelector(String id, IModel<Depot> depotModel, String revision) {
@@ -179,7 +175,7 @@ public abstract class RevisionSelector extends Panel {
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 		
-		keyBehavior = new AbstractDefaultAjaxBehavior() {
+		add(new AbstractDefaultAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -202,15 +198,15 @@ public abstract class RevisionSelector extends Panel {
 					}
 				} else if (key.equals("load")) {
 					page++;
-					List<String> itemValues = getItemValues();
+					List<String> itemValues = getItemValues(revField.getInput());
 					if (itemValues.size() > RevisionSelector.this.itemValues.size()) {
 						List<String> additionalItemValues = 
 								itemValues.subList(RevisionSelector.this.itemValues.size(), itemValues.size());
 						for (String itemValue: additionalItemValues) {
-							Component item = newItem(refsView.newChildId(), itemValue);
-							refsView.add(item);
-							String script = String.format("$('#%s>ul').append('<tr id=\"%s\"></tr>');", 
-									refsContainer.getMarkupId(), item.getMarkupId());
+							Component item = newItem(itemsView.newChildId(), itemValue);
+							itemsView.add(item);
+							String script = String.format("$('#%s').append('<li id=\"%s\"></li>');", 
+									itemsContainer.getMarkupId(), item.getMarkupId());
 							target.prependJavaScript(script);
 							target.add(item);
 						}
@@ -226,20 +222,19 @@ public abstract class RevisionSelector extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				String script = String.format("gitplex.revisionSelector.init('%s', %s);", 
-						getMarkupId(true), getCallbackFunction(CallbackParameter.explicit("key")));
+						getMarkupId(true), getCallbackFunction(explicit("key"), explicit("value")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
-		};
-		add(keyBehavior);
+		});
 		
 		revField.add(new FormComponentInputBehavior() {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target) {
 				page = 1;
-				itemValues = getItemValues();
-				newRefsView(target);
+				itemValues = getItemValues(revField.getInput());
+				newItemsView(target);
 			}
 			
 		});
@@ -272,8 +267,10 @@ public abstract class RevisionSelector extends Panel {
 		
 		add(new Tabbable("tabs", tabs));
 		
-		refsContainer = new WebMarkupContainer("refs");
-		newRefsView(null);
+		itemsContainer = new WebMarkupContainer("items");
+		itemsContainer.setOutputMarkupId(true);
+		add(itemsContainer);
+		newItemsView(null);
 		
 		setOutputMarkupId(true);
 	}
@@ -283,20 +280,19 @@ public abstract class RevisionSelector extends Panel {
 		return null;
 	}
 	
-	private List<String> getItemValues() {
+	private List<String> getItemValues(String revInput) {
 		List<String> itemValues = new ArrayList<>();
 		int count = page*PAGE_SIZE;
-		String revInput = revField.getInput();
 		if (StringUtils.isNotBlank(revInput)) {
 			revInput = revInput.trim().toLowerCase();
 			boolean found = false;
 			for (String ref: refs) {
 				if (ref.equalsIgnoreCase(revInput))
 					found = true;
-				if (ref.toLowerCase().contains(revInput))
+				if (itemValues.size() < count && ref.toLowerCase().contains(revInput))
 					itemValues.add(ref);
 			}
-			if (!found) {
+			if (itemValues.size() < count && !found) {
 				Depot depot = depotModel.getObject();
 				if (depot.getRevCommit(revInput, false) != null) {
 					itemValues.add(COMMIT_FLAG + revInput);
@@ -319,8 +315,12 @@ public abstract class RevisionSelector extends Panel {
 				}
 			}
 		} else {
-			itemValues.addAll(refs);
+			if (refs.size() > count)
+				itemValues.addAll(refs.subList(0, count));
+			else
+				itemValues.addAll(refs);
 		}
+		return itemValues;
 	}
 	
 	private void onCreateRef(AjaxRequestTarget target, final String refName) {
@@ -421,16 +421,22 @@ public abstract class RevisionSelector extends Panel {
 		return item;
 	}
 	
-	private void newRefsView(@Nullable AjaxRequestTarget target) {
-		refsView = new RepeatingView("refs");
-		for (String itemValue: itemValues) {
-			refsView.add(newItem(refsView.newChildId(), itemValue));
+	private void newItemsView(@Nullable AjaxRequestTarget target) {
+		itemsView = new RepeatingView("items");
+		for (int i=0; i<itemValues.size(); i++) {
+			Component item = newItem(itemsView.newChildId(), itemValues.get(i));
+			if (i == 0)
+				item.add(AttributeAppender.append("class", "active"));
+			itemsView.add(item);
 		}
 		if (target != null) {
-			refsContainer.replace(refsView);
-			target.add(refsContainer);
+			itemsContainer.replace(itemsView);
+			target.add(itemsContainer);
+			String script = String.format("gitplex.revisionSelector.setupInfiniteScroll('%s');", 
+					getMarkupId(true));
+			target.appendJavaScript(script);
 		} else {
-			refsContainer.add(refsView);
+			itemsContainer.add(itemsView);
 		}
 	}
 	

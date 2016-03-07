@@ -18,14 +18,14 @@ div.revision-selector .nav-tabs>li.active>a {
 div.revision-selector {
 	padding: 12px;
 }
-div.revision-selector ul.refs {
+div.revision-selector ul.items {
 	margin-bottom: 0;
 	max-height: 400px;
 }
-div.revision-selector ul.refs>li {
+div.revision-selector ul.items>li {
 	position: relative;
 }
-div.revision-selector ul.refs>li>a {
+div.revision-selector ul.items>li>a {
 	padding-left: 20px;
 }
 div.revision-selector .feedback {
@@ -53,7 +53,7 @@ div.revision-selector a.commit:before {
 div.revision-selector a.add:before {
 	content: "\f067"; 
 }   
-div.revision-selector ul.refs>li>a .revision {
+div.revision-selector ul.items>li>a .revision {
 	font-size: 13px;
 	margin-top: 2px;
 	color: #666;
