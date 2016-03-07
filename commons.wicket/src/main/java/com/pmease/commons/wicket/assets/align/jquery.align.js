@@ -13,6 +13,10 @@
     	var autoSize = this.find(".autosize");
     	if (autoSize.length == 0)
     		autoSize = this;
+    	
+    	var scrollTop = autoSize.scrollTop();
+    	var scrollLeft = autoSize.scrollLeft();
+    	
     	// reset width and height as otherwise the dimension will not change
     	// even if enclosed content changes
     	autoSize.css("width", "auto");
@@ -184,6 +188,9 @@
 
     	if (autoSize.height() < autoSize[0].scrollHeight)
     		autoSize.outerWidth(autoSize.outerWidth()+scrollbarWidth);
+    	
+    	autoSize.scrollTop(scrollTop);
+    	autoSize.scrollLeft(scrollLeft);
     	
     	return this;
     };
