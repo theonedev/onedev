@@ -102,7 +102,6 @@ public class GitPostReceiveCallback extends HttpServlet {
         	else
         		fields.set(pos, field);
         }
-    	
 	}
 
 }

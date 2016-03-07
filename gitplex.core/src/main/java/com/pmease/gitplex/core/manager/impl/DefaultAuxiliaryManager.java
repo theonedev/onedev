@@ -70,7 +70,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
 public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener, 
-RefListener, LifecycleListener {
+		RefListener, LifecycleListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultAuxiliaryManager.class);
 	
@@ -121,7 +121,8 @@ RefListener, LifecycleListener {
 	}
 	
 	private void doCollect(Depot depot, ObjectId commit) {
-		logger.debug("Collecting auxiliary information of repository {}...", depot.getFQN());
+		logger.info("Collecting auxiliary information (repository: {}, commit: {})", 
+				depot.getFQN(), commit.name());
 		Environment env = getEnv(depot);
 		final Store defaultStore = getStore(env, DEFAULT_STORE);
 		final Store commitsStore = getStore(env, COMMITS_STORE);
@@ -297,7 +298,7 @@ RefListener, LifecycleListener {
 			}
 		});
 		
-		logger.debug("Auxiliary information collected for repository {}.", depot.getFQN());		
+		logger.info("Auxiliary information collected (repository: {}, commit: {})", depot.getFQN(), commit.name());		
 	}
 	
 	@Override
@@ -621,8 +622,9 @@ RefListener, LifecycleListener {
 
 	@Override
 	public void onRefUpdate(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		if (!newCommit.equals(ObjectId.zeroId()))
+		if (!newCommit.equals(ObjectId.zeroId())) {
 			collect(depot, newCommit);
+		}
 	}
 
 	@Override

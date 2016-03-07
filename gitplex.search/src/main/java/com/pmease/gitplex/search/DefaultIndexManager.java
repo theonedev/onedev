@@ -287,7 +287,7 @@ public class DefaultIndexManager implements IndexManager {
 							}
 						}
 					} catch (ExtractException e) {
-						logger.debug("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
+						logger.error("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
 			} else {
@@ -334,7 +334,7 @@ public class DefaultIndexManager implements IndexManager {
 								@Override
 								public IndexResult call() throws Exception {
 									Depot depot = dao.load(Depot.class, depotId);
-									logger.debug("Indexing commit '{}' of repository '{}'...", commit.getName(), depot.getFQN());
+									logger.info("Indexing commit (repository: {}, commit: {})", depot.getFQN(), commit.getName());
 									IndexResult indexResult;
 									File indexDir = storageManager.getIndexDir(depot);
 									try (Directory directory = FSDirectory.open(indexDir)) {
@@ -363,8 +363,8 @@ public class DefaultIndexManager implements IndexManager {
 											}
 										}
 									}
-									logger.debug("Commit {} indexed for repository {} (checked blobs: {}, indexed blobs: {})", 
-											commit.name(), depot.getFQN(), indexResult.getChecked(), indexResult.getIndexed());
+									logger.info("Commit indexed (repository: {}, commit: {}, checked blobs: {}, indexed blobs: {})", 
+											depot.getFQN(), commit.name(), indexResult.getChecked(), indexResult.getIndexed());
 									
 									for (IndexListener listener: listeners)
 										listener.commitIndexed(depot, commit);
