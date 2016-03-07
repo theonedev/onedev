@@ -22,9 +22,8 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -53,6 +52,8 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
+
+	private static final int PAGE_SIZE = 25;
 	
 	private final IModel<Depot> depotModel;
 	
@@ -68,10 +69,6 @@ public abstract class RevisionSelector extends Panel {
 
 	private boolean branchesActive;
 	
-	private int activeRefIndex;
-	
-	private String revInput;
-	
 	private Label feedback;
 	
 	private String feedbackMessage;
@@ -79,10 +76,16 @@ public abstract class RevisionSelector extends Panel {
 	private AbstractDefaultAjaxBehavior keyBehavior;
 	
 	private TextField<String> revField;
+	
+	private WebMarkupContainer refsContainer;
+	
+	private RepeatingView refsView;
 
 	private List<String> refs;
 	
-	private List<String> filteredRefs;
+	private List<String> itemValues;
+	
+	private int page = 1;
 	
 	private List<String> findRefs() {
 		List<String> names = new ArrayList<>();
@@ -98,16 +101,13 @@ public abstract class RevisionSelector extends Panel {
 	}
 	
 	private void onSelectTab(AjaxRequestTarget target) {
-		refs.clear();
-		refs.addAll(findRefs());
-		filteredRefs.clear();
-		filteredRefs.addAll(refs);
+		refs = findRefs();
+		page = 1;
+		itemValues = getItemValues();
 		revField.setModel(Model.of(""));
-		activeRefIndex = 0;
-		Component revisionList = newRefList(filteredRefs);
-		replace(revisionList);
-		target.add(revisionList);
+		revField.clearInput();
 		target.add(revField);
+		newRefsView(target);
 		String script = String.format("gitplex.revisionSelector.bindInputKeys('%s', %s);", 
 				getMarkupId(true), keyBehavior.getCallbackFunction(CallbackParameter.explicit("key")));
 		target.appendJavaScript(script);
@@ -132,7 +132,7 @@ public abstract class RevisionSelector extends Panel {
 		branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
 		
 		refs = findRefs();
-		filteredRefs = new ArrayList<>(refs);
+		itemValues = new ArrayList<>(refs);
 	}
 	
 	public RevisionSelector(String id, IModel<Depot> depotModel, String revision) {
@@ -187,23 +187,36 @@ public abstract class RevisionSelector extends Panel {
 				String key = params.getParameterValue("key").toString();
 				
 				if (key.equals("return")) {
-					if (!filteredRefs.isEmpty()) {
-						String activeRef = filteredRefs.get(activeRefIndex);
-						if (activeRef.startsWith(COMMIT_FLAG)) {
-							selectRevision(target, activeRef.substring(COMMIT_FLAG.length()));
-						} else if (activeRef.startsWith(ADD_FLAG)) {
-							activeRef = activeRef.substring(ADD_FLAG.length());
-							onCreateRef(target, activeRef);
+					String value = params.getParameterValue("value").toString();
+					if (StringUtils.isNotBlank(value)) {
+						if (value.startsWith(COMMIT_FLAG)) {
+							selectRevision(target, value.substring(COMMIT_FLAG.length()));
+						} else if (value.startsWith(ADD_FLAG)) {
+							value = value.substring(ADD_FLAG.length());
+							onCreateRef(target, value);
 						} else {
-							selectRevision(target, activeRef);
+							selectRevision(target, value);
 						}
-					} else if (revInput != null) { 
-						selectRevision(target, revInput);
+					} else if (StringUtils.isNotBlank(revField.getInput())) { 
+						selectRevision(target, revField.getInput().trim());
 					}
-				} else if (key.equals("up")) {
-					activeRefIndex--;
-				} else if (key.equals("down")) {
-					activeRefIndex++;
+				} else if (key.equals("load")) {
+					page++;
+					List<String> itemValues = getItemValues();
+					if (itemValues.size() > RevisionSelector.this.itemValues.size()) {
+						List<String> additionalItemValues = 
+								itemValues.subList(RevisionSelector.this.itemValues.size(), itemValues.size());
+						for (String itemValue: additionalItemValues) {
+							Component item = newItem(refsView.newChildId(), itemValue);
+							refsView.add(item);
+							String script = String.format("$('#%s>ul').append('<tr id=\"%s\"></tr>');", 
+									refsContainer.getMarkupId(), item.getMarkupId());
+							target.prependJavaScript(script);
+							target.add(item);
+						}
+						RevisionSelector.this.itemValues = itemValues;
+					}
+					
 				} else {
 					throw new IllegalStateException("Unrecognized key: " + key);
 				}
@@ -224,47 +237,9 @@ public abstract class RevisionSelector extends Panel {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target) {
-				revInput = revField.getInput();
-				filteredRefs.clear();
-				if (StringUtils.isNotBlank(revInput)) {
-					revInput = revInput.trim().toLowerCase();
-					boolean found = false;
-					for (String ref: refs) {
-						if (ref.equalsIgnoreCase(revInput))
-							found = true;
-						if (ref.toLowerCase().contains(revInput))
-							filteredRefs.add(ref);
-					}
-					if (!found) {
-						Depot depot = depotModel.getObject();
-						if (depot.getRevCommit(revInput, false) != null) {
-							filteredRefs.add(COMMIT_FLAG + revInput);
-						} else if (branchesActive) {
-							if (canCreateBranch) {
-								String refName = Constants.R_HEADS + revInput;
-								if (Repository.isValidRefName(refName) 
-										&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
-									filteredRefs.add(ADD_FLAG + revInput);
-								}
-							}
-						} else {
-							if (canCreateTag) {
-								String refName = Constants.R_TAGS + revInput;
-								if (Repository.isValidRefName(refName) 
-										&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
-									filteredRefs.add(ADD_FLAG + revInput);
-								}
-							}
-						}
-					}
-				} else {
-					revInput = null;
-					filteredRefs.addAll(refs);
-				}
-				
-				if (activeRefIndex >= filteredRefs.size())
-					activeRefIndex = 0;
-				target.add(get("refs"));
+				page = 1;
+				itemValues = getItemValues();
+				newRefsView(target);
 			}
 			
 		});
@@ -296,7 +271,9 @@ public abstract class RevisionSelector extends Panel {
 			tagsTab.setSelected(true);
 		
 		add(new Tabbable("tabs", tabs));
-		add(newRefList(filteredRefs));
+		
+		refsContainer = new WebMarkupContainer("refs");
+		newRefsView(null);
 		
 		setOutputMarkupId(true);
 	}
@@ -304,6 +281,46 @@ public abstract class RevisionSelector extends Panel {
 	@Nullable
 	protected String getRevisionUrl(String revision) {
 		return null;
+	}
+	
+	private List<String> getItemValues() {
+		List<String> itemValues = new ArrayList<>();
+		int count = page*PAGE_SIZE;
+		String revInput = revField.getInput();
+		if (StringUtils.isNotBlank(revInput)) {
+			revInput = revInput.trim().toLowerCase();
+			boolean found = false;
+			for (String ref: refs) {
+				if (ref.equalsIgnoreCase(revInput))
+					found = true;
+				if (ref.toLowerCase().contains(revInput))
+					itemValues.add(ref);
+			}
+			if (!found) {
+				Depot depot = depotModel.getObject();
+				if (depot.getRevCommit(revInput, false) != null) {
+					itemValues.add(COMMIT_FLAG + revInput);
+				} else if (branchesActive) {
+					if (canCreateBranch) {
+						String refName = Constants.R_HEADS + revInput;
+						if (Repository.isValidRefName(refName) 
+								&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+							itemValues.add(ADD_FLAG + revInput);
+						}
+					}
+				} else {
+					if (canCreateTag) {
+						String refName = Constants.R_TAGS + revInput;
+						if (Repository.isValidRefName(refName) 
+								&& SecurityUtils.canPushRef(depot, refName, ObjectId.zeroId(), depot.getRevCommit(revision))) { 
+							itemValues.add(ADD_FLAG + revInput);
+						}
+					}
+				}
+			}
+		} else {
+			itemValues.addAll(refs);
+		}
 	}
 	
 	private void onCreateRef(AjaxRequestTarget target, final String refName) {
@@ -340,76 +357,81 @@ public abstract class RevisionSelector extends Panel {
 		
 	}
 	
-	private Component newRefList(List<String> refs) {
-		WebMarkupContainer refsContainer = new WebMarkupContainer("refs");
-		refsContainer.add(new ListView<String>("refs", refs) {
+	private Component newItem(String itemId, String itemValue) {
+		String ref;
+		if (itemValue.startsWith(COMMIT_FLAG))
+			ref = itemValue.substring(COMMIT_FLAG.length());
+		else if (itemValue.startsWith(ADD_FLAG))
+			ref = itemValue.substring(ADD_FLAG.length());
+		else
+			ref = itemValue;
+		
+		AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 			@Override
-			protected void populateItem(final ListItem<String> item) {
-				final String ref;
-				if (item.getModelObject().startsWith(COMMIT_FLAG))
-					ref = item.getModelObject().substring(COMMIT_FLAG.length());
-				else if (item.getModelObject().startsWith(ADD_FLAG))
-					ref = item.getModelObject().substring(ADD_FLAG.length());
-				else
-					ref = item.getModelObject();
-				
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-					}
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						if (item.getModelObject().startsWith(ADD_FLAG)) {
-							onCreateRef(target, ref);
-						} else {
-							selectRevision(target, ref);
-						}
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						
-						if (!item.getModelObject().startsWith(ADD_FLAG)) {
-							String url = getRevisionUrl(ref);
-							if (url != null)
-								tag.put("href", url);
-						}
-					}
-					
-				};
-				if (item.getModelObject().startsWith(COMMIT_FLAG)) {
-					link.add(new Label("label", ref));
-					link.add(AttributeAppender.append("class", "icon commit"));
-				} else if (item.getModelObject().startsWith(ADD_FLAG)) {
-					String label;
-					if (branchesActive)
-						label = "<div class='name'>Create branch <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
-					else
-						label = "<div class='name'>Create tag <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
-					label += "<div class='revision'>from " + HtmlEscape.escapeHtml5(revision) + "</div>";
-					link.add(new Label("label", label).setEscapeModelStrings(false));
-					link.add(AttributeAppender.append("class", "icon add"));
-				} else if (ref.equals(revision)) {
-					link.add(new Label("label", ref));
-					link.add(AttributeAppender.append("class", "icon current"));
-				} else {
-					link.add(new Label("label", ref));
-				}
-				item.add(link);
-				
-				if (activeRefIndex == item.getIndex())
-					item.add(AttributeAppender.append("class", " active"));
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
 			}
 			
-		});
-		refsContainer.setOutputMarkupId(true);
-		return refsContainer;
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				if (itemValue.startsWith(ADD_FLAG)) {
+					onCreateRef(target, ref);
+				} else {
+					selectRevision(target, ref);
+				}
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				if (!itemValue.startsWith(ADD_FLAG)) {
+					String url = getRevisionUrl(ref);
+					if (url != null)
+						tag.put("href", url);
+				}
+			}
+			
+		};
+		if (itemValue.startsWith(COMMIT_FLAG)) {
+			link.add(new Label("label", ref));
+			link.add(AttributeAppender.append("class", "icon commit"));
+		} else if (itemValue.startsWith(ADD_FLAG)) {
+			String label;
+			if (branchesActive)
+				label = "<div class='name'>Create branch <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
+			else
+				label = "<div class='name'>Create tag <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
+			label += "<div class='revision'>from " + HtmlEscape.escapeHtml5(revision) + "</div>";
+			link.add(new Label("label", label).setEscapeModelStrings(false));
+			link.add(AttributeAppender.append("class", "icon add"));
+		} else if (ref.equals(revision)) {
+			link.add(new Label("label", ref));
+			link.add(AttributeAppender.append("class", "icon current"));
+		} else {
+			link.add(new Label("label", ref));
+		}
+		WebMarkupContainer item = new WebMarkupContainer(itemId);
+		item.setOutputMarkupId(true);
+		item.add(AttributeAppender.append("data-value", HtmlEscape.escapeHtml5(itemValue)));
+		item.add(link);
+		
+		return item;
+	}
+	
+	private void newRefsView(@Nullable AjaxRequestTarget target) {
+		refsView = new RepeatingView("refs");
+		for (String itemValue: itemValues) {
+			refsView.add(newItem(refsView.newChildId(), itemValue));
+		}
+		if (target != null) {
+			refsContainer.replace(refsView);
+			target.add(refsContainer);
+		} else {
+			refsContainer.add(refsView);
+		}
 	}
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
