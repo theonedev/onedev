@@ -68,7 +68,6 @@ import com.pmease.gitplex.web.component.repofile.blobsearch.advanced.AdvancedSea
 import com.pmease.gitplex.web.component.repofile.blobsearch.instant.InstantSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
-import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.source.SourceViewPanel;
@@ -78,6 +77,7 @@ import com.pmease.gitplex.web.component.repofile.fileedit.FileEditPanel;
 import com.pmease.gitplex.web.component.repofile.filelist.FileListPanel;
 import com.pmease.gitplex.web.component.repofile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
+import com.pmease.gitplex.web.extensionpoint.BlobRenderer;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
@@ -311,7 +311,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		});
 		
 		newDownloadLink(null);
-		newHistoryLink(null);
 		
 		newRevisionPicker(null);
 		
@@ -681,29 +680,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
-	private void newHistoryLink(AjaxRequestTarget target) {
-		Link<Void> link = new Link<Void>("history") {
-
-			@Override
-			public void onClick() {
-				DepotCommitsPage.HistoryState state = new DepotCommitsPage.HistoryState();
-				String commitHash = depotModel.getObject().getObjectId(blobIdent.revision).name();
-				state.setCompareWith(commitHash);
-				if (blobIdent.path != null) 
-					state.setQuery(String.format("path(%s)", blobIdent.path));
-				setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(depotModel.getObject(), state));
-			}
-			
-		};
-		link.setOutputMarkupId(true);
-		if (target != null) {
-			replace(link);
-			target.add(link);
-		} else {
-			add(link);
-		}
-	}
-	
 	private void applyState(AjaxRequestTarget target, HistoryState state) {
 		if (!state.blobIdent.revision.equals(blobIdent.revision))
 			newSearchResult(target, null);
@@ -714,7 +690,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		newRevisionPicker(target);
 		
 		newDownloadLink(target);
-		newHistoryLink(target);
 		
 		target.add(commentContext);
 		

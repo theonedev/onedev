@@ -1,11 +1,11 @@
 package com.pmease.gitplex.web.component.repofile.blobview.markdown;
 
 import com.pmease.commons.git.Blob;
-import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.source.SourceViewPanel;
+import com.pmease.gitplex.web.extensionpoint.BlobRenderer;
 
 public class MarkdownRenderer implements BlobRenderer {
 

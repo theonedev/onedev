@@ -24,13 +24,17 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.Constants;
@@ -46,6 +50,7 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -53,8 +58,12 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
+import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
+import com.pmease.gitplex.web.resource.BlobResource;
+import com.pmease.gitplex.web.resource.BlobResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class FileNavigator extends Panel {
@@ -331,6 +340,83 @@ public abstract class FileNavigator extends Panel {
 			lastSegment.add(new Label("label", blobName));
 		}
 		add(lastSegment);
+		
+		add(new DropdownLink("fileMenu") {
+
+			@Override
+			protected Component newContent(String id) {
+				Fragment fragment = new Fragment(id, "fileMenuFrag", FileNavigator.this);
+				fragment.add(new Link<Void>("history") {
+
+					@Override
+					public void onClick() {
+						DepotCommitsPage.HistoryState state = new DepotCommitsPage.HistoryState();
+						String commitHash = depotModel.getObject().getObjectId(file.revision).name();
+						state.setCompareWith(commitHash);
+						if (file.path != null) 
+							state.setQuery(String.format("path(%s)", file.path));
+						setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(depotModel.getObject(), state));
+					}
+					
+				});
+				PageParameters rawParams = BlobResource.paramsOf(depotModel.getObject(), file);
+				fragment.add(new ResourceLink<Void>("raw", new BlobResourceReference(), rawParams) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!file.isTree());
+					}
+					
+				});
+				fragment.add(new ClientStateAwareAjaxLink<Void>("blame") {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						
+						add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								if (context.getMode() == Mode.BLAME)
+									return " active";
+								else
+									return " ";
+							}
+							
+						}));
+						
+						HistoryState state = new HistoryState();
+						state.blobIdent = context.getBlobIdent();
+						state.mode = context.getMode()==null?Mode.BLAME:null;
+						state.mark = context.getMark();
+						PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
+						add(AttributeAppender.replace("href", url.toString()));
+						
+						setOutputMarkupId(true);
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target, @Nullable String clientState) {
+						context.onBlameChange(target, clientState);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						setVisible(depotModel.getObject().getBlob(file).getText() != null);
+					}
+					
+				});
+				
+				
+				return fragment;
+			}
+			
+		});
 		
 		setOutputMarkupId(true);
 	}

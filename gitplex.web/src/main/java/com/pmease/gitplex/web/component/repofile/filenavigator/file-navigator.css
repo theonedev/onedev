@@ -24,3 +24,8 @@
 .file-navigator span.add em {
 	color: #BBB;
 }
+.file-navigator .file-menu {
+	margin: 1px 0 0 8px;
+	font-size: 18px;
+	line-height: 18px;
+}

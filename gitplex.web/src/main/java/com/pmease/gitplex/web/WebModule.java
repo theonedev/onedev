@@ -23,8 +23,8 @@ import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
 import com.pmease.gitplex.web.component.comment.MentionTransformer;
 import com.pmease.gitplex.web.component.comment.PullRequestTransformer;
 import com.pmease.gitplex.web.component.diff.blob.DiffRenderer;
-import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
+import com.pmease.gitplex.web.extensionpoint.BlobRenderer;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
 

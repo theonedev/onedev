@@ -7,6 +7,7 @@
 			<a wicket:id="subtreeDropdownTrigger" class="subtree-dropdown-trigger pull-left"></a>
 		</div>
 		<div wicket:id="lastSegment" class="pull-left last-segment"></div>
+		<a wicket:id="fileMenu" class="pull-left file-menu"><i class="fa fa-angle-down"></i></a>
 	</div>
 	<wicket:fragment wicket:id="blobNameFrag">
 		<span wicket:id="label" class="name"></span>
@@ -21,5 +22,17 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="treeNodeFrag">
 		<i wicket:id="icon"></i> <a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="fileMenuFrag">
+		<ul class="file-menu">
+			<li><a wicket:id="history" class="history">History</a></li>
+			<li><a wicket:id="raw" class="raw">Raw</a></li>
+			<li><a wicket:id="blame" class="blame">Blame</a>
+			<li><a wicket:id="outline" class="outline">Outline</a>
+			<li wicket:id="separator" class="separator"></li>
+			<li><a wicket:id="add" class="add">Create new file</a>
+			<li><a wicket:id="edit" class="edit">Edit file</a>
+			<li><a wicket:id="delete" class="delete">Delete file</a>
+		</ul>	
 	</wicket:fragment>
 </wicket:panel>
