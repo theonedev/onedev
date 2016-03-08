@@ -12,24 +12,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
-import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -84,6 +80,7 @@ import com.pmease.gitplex.web.component.repofile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.resource.ArchiveResource;
 import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
@@ -119,8 +116,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private static final String REVISION_PICKER_ID = "revisionPicker";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
-	
-	private static final String LAST_COMMIT_ID = "lastCommit";
 	
 	private static final String FILE_VIEWER_ID = "fileViewer";
 	
@@ -316,6 +311,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		});
 		
 		newDownloadLink(null);
+		newHistoryLink(null);
 		
 		newRevisionPicker(null);
 		
@@ -376,7 +372,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 		});
 
-		newLastCommit(null);
 		newFileViewer(null, clientState);
 
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
@@ -472,36 +467,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			target.add(fileNavigator);
 		} else {
 			add(fileNavigator);
-		}
-	}
-	
-	private void newLastCommit(@Nullable AjaxRequestTarget target) {
-		Component lastCommit = new AjaxLazyLoadPanel(LAST_COMMIT_ID) {
-			
-			@Override
-			public Component getLoadingComponent(String markupId) {
-				IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractDefaultAjaxBehavior.INDICATOR);
-				String html = "<img src='" + RequestCycle.get().urlFor(handler) + "' class='loading'/> Loading latest commit...";
-				return new Label(markupId, html).setEscapeModelStrings(false);
-			}
-
-			@Override
-			protected void onComponentLoaded(Component component, AjaxRequestTarget target) {
-				super.onComponentLoaded(component, target);
-				resizeWindow(target);
-			}
-
-			@Override
-			public Component getLazyLoadComponent(String markupId) {
-				return new LastCommitPanel(markupId, depotModel, blobIdent);
-			}
-
-		};
-		if (target != null) {
-			replace(lastCommit);
-			target.add(lastCommit);
-		} else {
-			add(lastCommit);
 		}
 	}
 	
@@ -716,6 +681,29 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
+	private void newHistoryLink(AjaxRequestTarget target) {
+		Link<Void> link = new Link<Void>("history") {
+
+			@Override
+			public void onClick() {
+				DepotCommitsPage.HistoryState state = new DepotCommitsPage.HistoryState();
+				String commitHash = depotModel.getObject().getObjectId(blobIdent.revision).name();
+				state.setCompareWith(commitHash);
+				if (blobIdent.path != null) 
+					state.setQuery(String.format("path(%s)", blobIdent.path));
+				setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(depotModel.getObject(), state));
+			}
+			
+		};
+		link.setOutputMarkupId(true);
+		if (target != null) {
+			replace(link);
+			target.add(link);
+		} else {
+			add(link);
+		}
+	}
+	
 	private void applyState(AjaxRequestTarget target, HistoryState state) {
 		if (!state.blobIdent.revision.equals(blobIdent.revision))
 			newSearchResult(target, null);
@@ -726,6 +714,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		newRevisionPicker(target);
 		
 		newDownloadLink(target);
+		newHistoryLink(target);
 		
 		target.add(commentContext);
 		
@@ -733,7 +722,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		target.add(revisionIndexing);
 		
-		newLastCommit(target);
 		newFileViewer(target, null);
 	}
 	
@@ -900,7 +888,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			mode = null;
 			
 			newFileNavigator(target);
-			newLastCommit(target);
 			newFileViewer(target, null);
 			
 			resizeWindow(target);

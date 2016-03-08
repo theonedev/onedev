@@ -87,36 +87,6 @@
 	color: #8a6d3b;
 	font-size: 13px;
 }
-#repo-file>.last-commit {
-	padding: 6px 12px;
-	background: #F2F2F2;
-	max-height: 600px;
-	overflow: auto;
-}
-#repo-file>.last-commit img.loading {
-	padding: 4px 0;
-}
-#repo-file>.last-commit .pull-left {
-	margin-right: 12px;
-}
-#repo-file>.last-commit span.message {
-	margin-top: 2px;
-}
-#repo-file>.last-commit div.message {
-	display: none;
-	margin-top: 6px;
-}
-#repo-file>.last-commit .summary {
-	font-weight: bold;
-	color: #555;
-}
-#repo-file>.last-commit .commit-hash {
-	border-radius: 4px 0 0 4px;
-	border-right: none;
-}
-#repo-file>.last-commit .history {
-	border-radius: 0 4px 4px 0;
-}
 #repo-file>.search-result {
 	height: 200px;
 	border-top: 1px solid #DDD;

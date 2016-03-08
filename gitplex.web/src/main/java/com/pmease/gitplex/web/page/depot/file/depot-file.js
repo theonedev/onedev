@@ -33,7 +33,7 @@ $(window).load(function() {
 		var headWidth = $("#repository").width() - $("#repository>.sidebar>table>tbody>tr>td.nav").outerWidth();
 		
 		// below code moves file navigator to bottom if it is too wide
-		var maxWidth = headWidth - $revisionPicker.outerWidth() - 80;
+		var maxWidth = headWidth - $revisionPicker.outerWidth() - 100;
 		var maxHeight = $head.height();
 
 		var $fileNavigator = $head.find(">.file-navigator");
@@ -45,28 +45,6 @@ $(window).load(function() {
 			if ($fileNavigator.outerWidth() <= maxWidth && $fileNavigator.outerHeight() <= maxHeight) {
 				$fileNavigator.insertAfter($revisionPicker);
 				$("#repo-file>.file-navigator").hide();
-			}
-		}
-		
-		// below code moves last commit message to bottom if it is too wide
-		var $lastCommit = $("#repo-file>.last-commit");
-		if ($lastCommit.length != 0) {
-			// why calculate width this way, see above comment when handling file navigator 
-			maxWidth = headWidth - ($lastCommit.outerWidth()-$lastCommit.width()) 
-					- $lastCommit.find(".author").outerWidth(true) 
-					- $lastCommit.find(".hash").outerWidth(true)
-					- $lastCommit.find(".history").outerWidth(true);
-			maxHeight = $lastCommit.find(".author").outerHeight();
-			var $message = $lastCommit.find(".last-commit>span.message");
-			if ($message.length != 0) {
-				if ($message.outerWidth(true) > maxWidth || $message.outerHeight() > maxHeight)
-					$lastCommit.find("div.message").show().append($message);
-			} else {
-				$message = $lastCommit.find("div.message>span");
-				if ($message.outerWidth(true) <= maxWidth && $message.outerHeight() <= maxHeight) {
-					$message.insertAfter($lastCommit.find(".author"));
-					$lastCommit.find("div.message").hide();
-				}
 			}
 		}
 		
