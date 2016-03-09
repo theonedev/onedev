@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.component.repofile.blobview;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.FileUtils;
@@ -27,6 +30,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
+import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
@@ -142,8 +147,6 @@ public abstract class BlobViewPanel extends Panel {
 			
 		});
 		
-		add(newRightActions("rightActions"));
-		
 		WebMarkupContainer changeActions = new WebMarkupContainer("changeActions") {
 			
 			@Override
@@ -257,8 +260,8 @@ public abstract class BlobViewPanel extends Panel {
 		return new WebMarkupContainer(id);
 	}
 	
-	protected WebMarkupContainer newRightActions(String id) {
-		return new WebMarkupContainer(id);
+	public List<MenuItem> getMenuItems(MenuLink menuLink) {
+		return new ArrayList<>();
 	}
 	
 	@Override

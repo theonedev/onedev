@@ -18,6 +18,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -30,15 +31,13 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.wicket.component.menu.CheckItem;
-import com.pmease.commons.wicket.component.menu.LinkItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.BranchLink;
@@ -87,50 +86,118 @@ public class RequestListPage extends PullRequestPage {
 				Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 				if (currentUser != null) {
 					final String userName = currentUser.getName();
-					menuItems.add(new LinkItem("Open requests assigned to me") {
+					menuItems.add(new MenuItem() {
 
 						@Override
-						public void onClick() {
-							searchOption = new SearchOption();
-							searchOption.setStatus(Status.OPEN);
-							searchOption.setAssigneeName(userName);
-							
-							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+						public String getIconClass() {
+							return null;
+						}
+
+						@Override
+						public String getLabel() {
+							return "Open requests assigned to me";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									searchOption = new SearchOption();
+									searchOption.setStatus(Status.OPEN);
+									searchOption.setAssigneeName(userName);
+									
+									setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+								}
+								
+							};
 						}
 						
 					});
-					menuItems.add(new LinkItem("Open requests submitted by me") {
+					menuItems.add(new MenuItem() {
 
 						@Override
-						public void onClick() {
-							searchOption = new SearchOption();
-							searchOption.setStatus(Status.OPEN);
-							searchOption.setSubmitterName(userName);
+						public String getIconClass() {
+							return null;
+						}
 
-							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+						@Override
+						public String getLabel() {
+							return "Open requests submitted by me";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									searchOption = new SearchOption();
+									searchOption.setStatus(Status.OPEN);
+									searchOption.setSubmitterName(userName);
+
+									setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+								}
+								
+							};
 						}
 						
 					});
 				}
-				menuItems.add(new LinkItem("All open requests") {
+				menuItems.add(new MenuItem() {
 
 					@Override
-					public void onClick() {
-						searchOption = new SearchOption();
-						searchOption.setStatus(Status.OPEN);
-						
-						setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+					public String getIconClass() {
+						return null;
+					}
+
+					@Override
+					public String getLabel() {
+						return "All open requests";
+					}
+
+					@Override
+					public AbstractLink newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								searchOption = new SearchOption();
+								searchOption.setStatus(Status.OPEN);
+								
+								setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+							}
+							
+						};
 					}
 					
 				});
-				menuItems.add(new LinkItem("All closed requests") {
+				menuItems.add(new MenuItem() {
 
 					@Override
-					public void onClick() {
-						searchOption = new SearchOption();
-						searchOption.setStatus(Status.CLOSED);
-						
-						setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+					public String getIconClass() {
+						return null;
+					}
+
+					@Override
+					public String getLabel() {
+						return "All closed requests";
+					}
+
+					@Override
+					public AbstractLink newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								searchOption = new SearchOption();
+								searchOption.setStatus(Status.CLOSED);
+								
+								setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
+							}
+							
+						};
 					}
 					
 				});
@@ -148,21 +215,31 @@ public class RequestListPage extends PullRequestPage {
 				for (Map.Entry<SortOption, String> entry: sortNames.entrySet()) {
 					final SortOption sortOption = entry.getKey();
 					final String displayName = entry.getValue();
-					menuItems.add(new CheckItem() {
+					menuItems.add(new MenuItem() {
 
 						@Override
-						public void onClick(AjaxRequestTarget target) {
-							setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));
-						}
-
-						@Override
-						protected String getLabel() {
+						public String getLabel() {
 							return displayName;
 						}
 
 						@Override
-						protected boolean isChecked() {
-							return RequestListPage.this.sortOption.equals(sortOption);
+						public String getIconClass() {
+							if (RequestListPage.this.sortOption.equals(sortOption))
+								return "fa fa-check";
+							else
+								return null;
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									setResponsePage(RequestListPage.class, paramsOf(getDepot(), searchOption, sortOption));									
+								}
+								
+							};
 						}
 						
 					});

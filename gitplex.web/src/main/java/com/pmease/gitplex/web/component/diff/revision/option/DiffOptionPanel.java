@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -26,7 +27,6 @@ import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.menu.CheckItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.Depot;
@@ -72,30 +72,40 @@ public abstract class DiffOptionPanel extends Panel {
 				List<MenuItem> menuItems = new ArrayList<>();
 				
 				for (final LineProcessOption option: LineProcessOption.values()) {
-					menuItems.add(new CheckItem() {
+					menuItems.add(new MenuItem() {
 
 						@Override
-						protected String getLabel() {
+						public String getLabel() {
 							return option.getName();
 						}
 
 						@Override
-						protected boolean isChecked() {
-							return lineProcessor == option;
+						public String getIconClass() {
+							if (lineProcessor == option)
+								return "fa fa-checked";
+							else
+								return null;
 						}
 
 						@Override
-						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-							if (getDirtyContainer() != null)
-								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
-						}
+						public AbstractLink newLink(String id) {
+							return new AjaxLink<Void>(id) {
 
-						@Override
-						protected void onClick(AjaxRequestTarget target) {
-							lineProcessor = option;
-							onLineProcessorChange(target);
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									lineProcessor = option;
+									onLineProcessorChange(target);
+								}
+
+								@Override
+								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+									super.updateAjaxAttributes(attributes);
+									attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+									if (getDirtyContainer() != null)
+										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
+								}
+								
+							};
 						}
 						
 					});
@@ -149,7 +159,7 @@ public abstract class DiffOptionPanel extends Panel {
 					
 					@Override
 					protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
-						close(target);
+						close();
 						target.add(DiffOptionPanel.this);
 						onSelectPath(target, blobIdent.path);
 					}

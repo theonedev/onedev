@@ -7,25 +7,6 @@ gitplex.sourceview = {
 		var $sourceView = $code.closest(".source-view");
 		$sourceView.closest(".body").css("overflow", "hidden");
 		
-		var $outlineToggle = $(".outline-toggle");
-		var $outline = $sourceView.find(">.outline");
-		var cookieKey = "sourceView.outline";
-		if ($outlineToggle.length != 0) {
-			if (Cookies.get(cookieKey) === "no") {
-				$outline.hide();
-				$outlineToggle.removeClass("active");
-			}
-			$outlineToggle.click(function() {
-				$outline.toggle();
-				$outlineToggle.toggleClass("active");
-				if ($outline.is(":visible")) 
-					Cookies.set(cookieKey, "yes", {expires: Infinity});
-				else 
-					Cookies.set(cookieKey, "no", {expires: Infinity});
-				$sourceView.trigger("autofit", [$sourceView.outerWidth(), $sourceView.outerHeight()]);
-			});
-		}
-		
 		$sourceView.on("autofit", function(event, width, height) {
 			event.stopPropagation();
 			$sourceView.outerWidth(width);
@@ -129,7 +110,6 @@ gitplex.sourceview = {
 				pmease.commons.codemirror.initState(cm, cmState);
 		});
 	}, 
-
 	mark: function(codeId, mark) {
 		var cm = $("#"+ codeId + ">.CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.mark(cm, mark);

@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
@@ -47,7 +48,7 @@ public abstract class FloatingPanel extends Panel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				FloatingPanel.this.remove();
-				onClosed(target);
+				onClosed();
 			}
 			
 			@Override
@@ -77,16 +78,17 @@ public abstract class FloatingPanel extends Panel {
 		return get(CONTENT_ID); 
 	}
 	
-	public final void close(AjaxRequestTarget target) {
-		String script = String.format("pmease.commons.floating.close($('#%s'), false);", getMarkupId(true));
-		target.appendJavaScript(script);
-		
+	public final void close() {
+		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+		if (target != null) {
+			String script = String.format("pmease.commons.floating.close($('#%s'), false);", getMarkupId(true));
+			target.appendJavaScript(script);
+		} 
 		remove();
-		
-		onClosed(target);
+		onClosed();
 	}
 	
-	protected void onClosed(AjaxRequestTarget target) {
+	protected void onClosed() {
 		
 	}
 }

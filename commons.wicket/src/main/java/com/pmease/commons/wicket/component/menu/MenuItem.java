@@ -2,11 +2,19 @@ package com.pmease.commons.wicket.component.menu;
 
 import java.io.Serializable;
 
-import org.apache.wicket.Component;
+import javax.annotation.Nullable;
+
+import org.apache.wicket.markup.html.link.AbstractLink;
 
 public abstract class MenuItem implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public abstract Component newContent(String componentId);
+	@Nullable
+	public abstract String getIconClass();
+	
+	public abstract String getLabel();
+	
+	public abstract AbstractLink newLink(String id);
+	
 }

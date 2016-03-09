@@ -19,7 +19,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -49,6 +48,8 @@ import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
+import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
@@ -80,7 +81,6 @@ import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.extensionpoint.BlobRenderer;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
-import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.resource.ArchiveResource;
 import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
@@ -442,12 +442,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			callback = null;
 		}
 		
-		Component fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, depotModel, requestModel, blobIdent, callback) {
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
-				DepotFilePage.this.onSelect(target, file, null);
-			}
+		Component fileNavigator = new FileNavigator(FILE_NAVIGATOR_ID, this, callback) {
 
 			@Override
 			protected void onNewFile(AjaxRequestTarget target) {
@@ -918,6 +913,18 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				&& blobIdent.revision.equals(request.getSource().getObjectName(false)); 
 	}
 
+	@Override
+	public List<MenuItem> getMenuItems(MenuLink menuLink) {
+		if (mode != Mode.EDIT && mode != Mode.DELETE) {
+			Component fileViewer = get(FILE_VIEWER_ID);
+			if (fileViewer instanceof BlobViewPanel) {
+				BlobViewPanel blobViewPanel = (BlobViewPanel) fileViewer;
+				return blobViewPanel.getMenuItems(menuLink);
+			}
+		}
+		return new ArrayList<>();
+	}
+
 	public static class HistoryState implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
@@ -936,4 +943,5 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		public transient String clientState;		
 	}
+
 }

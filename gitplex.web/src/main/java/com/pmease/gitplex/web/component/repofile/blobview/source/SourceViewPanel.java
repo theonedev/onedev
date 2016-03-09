@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
@@ -24,6 +25,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -32,6 +34,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -57,6 +61,8 @@ import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
+import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Comment;
@@ -75,8 +81,8 @@ import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
-import com.pmease.gitplex.web.util.DateUtils;
 import com.pmease.gitplex.web.page.depot.file.Mark;
+import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -84,6 +90,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 public class SourceViewPanel extends BlobViewPanel {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
+	
+	private static final String COOKIE_OUTLINE = "sourceView.outline";
 	
 	private static final String INLINE_COMMENT_ID = "inlineComment";
 	
@@ -165,10 +173,49 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 	
 	@Override
-	protected WebMarkupContainer newRightActions(String id) {
-		Fragment fragment = new Fragment(id, "rightActionsFrag", this);
-		fragment.setVisible(!symbols.isEmpty());
-		return fragment;
+	public List<MenuItem> getMenuItems(MenuLink menuLink) {
+		List<MenuItem> menuItems = new ArrayList<>();
+		if (!symbols.isEmpty()) {
+			menuItems.add(new MenuItem() {
+
+				@Override
+				public String getLabel() {
+					return "Outline";
+				}
+
+				@Override
+				public String getIconClass() {
+					return outlinePanel.isVisible()?"fa fa-check":null;
+				}
+
+				@Override
+				public AbstractLink newLink(String id) {
+					return new AjaxLink<Void>(id) {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							menuLink.close();
+							WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+							if (outlinePanel.isVisible()) {
+								response.addCookie(new Cookie(COOKIE_OUTLINE, "no"));
+							} else {
+								response.addCookie(new Cookie(COOKIE_OUTLINE, "yes"));
+							}
+							target.add(outlinePanel);
+							
+							String script = String.format(""
+									+ "var $sourceView = $('#' + %s).closest('.source-view');"
+									+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()])", 
+									codeContainer.getMarkupId());
+							target.appendJavaScript(script);
+						}
+						
+					};
+				}
+				
+			});
+		} 
+		return menuItems;
 	}
 
 	public void mark(AjaxRequestTarget target, Mark mark) {
@@ -192,7 +239,16 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		});
-		outlinePanel.setVisible(!symbols.isEmpty());
+		if (!symbols.isEmpty()) {
+			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
+			if (cookie!=null && cookie.getValue().equals("yes"))
+				outlinePanel.setVisible(true);
+			else
+				outlinePanel.setVisible(false);
+		} else {
+			outlinePanel.setVisible(false);
+		}
 		
 		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip", new AbstractReadOnlyModel<Depot>() {
 

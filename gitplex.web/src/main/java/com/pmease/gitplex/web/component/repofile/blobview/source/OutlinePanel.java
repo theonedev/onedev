@@ -104,7 +104,7 @@ abstract class OutlinePanel extends Panel {
 		for (Symbol root: getChildSymbols(null))
 			tree.expand(root);
 		
-		setOutputMarkupId(true);
+		setOutputMarkupPlaceholderTag(true);
 	}
 	
 	protected abstract void onSelect(AjaxRequestTarget target, Symbol symbol);

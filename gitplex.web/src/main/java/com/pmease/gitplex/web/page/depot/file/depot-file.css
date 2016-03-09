@@ -24,7 +24,7 @@
 #repo-file>.head>a.revision-picker, #repo-file>.head>.file-navigator, #repo-file>.file-navigator>div {
 	padding: 5px 8px;
 }
-#repo-file .file-navigator .last-segment {
+#repo-file .file-navigator .last-segment.input {
 	height: 20px;
 	margin-left: 2px;
 	margin-top: -1px;

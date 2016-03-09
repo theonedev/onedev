@@ -4,7 +4,7 @@ import org.apache.tika.mime.MediaType;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.commons.git.BlobChange;
-import com.pmease.gitplex.web.component.diff.blob.DiffRenderer;
+import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 
 public class ImageDiffRenderer implements DiffRenderer {
 

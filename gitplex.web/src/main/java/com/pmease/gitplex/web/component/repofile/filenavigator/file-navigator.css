@@ -25,7 +25,8 @@
 	color: #BBB;
 }
 .file-navigator .file-menu {
-	margin: 1px 0 0 8px;
+	margin: 1px 0 0 4px;
 	font-size: 18px;
-	line-height: 18px;
+	line-height: 16px;
+	color: #333;
 }

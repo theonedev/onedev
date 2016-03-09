@@ -24,20 +24,20 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -54,10 +54,12 @@ import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
-import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -70,21 +72,14 @@ public abstract class FileNavigator extends Panel {
 
 	private final static String LAST_SEGMENT_ID = "lastSegment";
 	
-	private final IModel<PullRequest> requestModel;
-	
-	private final IModel<Depot> depotModel;
-	
-	private final BlobIdent file;
+	private final BlobViewContext context;
 	
 	private final BlobNameChangeCallback callback;
 	
-	public FileNavigator(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			BlobIdent file, @Nullable BlobNameChangeCallback callback) {
+	public FileNavigator(String id, BlobViewContext context, @Nullable BlobNameChangeCallback callback) {
 		super(id);
 
-		this.depotModel = depotModel;
-		this.requestModel = requestModel;
-		this.file = file;
+		this.context = context;
 		this.callback = callback;
 	}
 
@@ -96,6 +91,7 @@ public abstract class FileNavigator extends Panel {
 
 			@Override
 			protected List<BlobIdent> load() {
+				BlobIdent file = context.getBlobIdent();
 				List<BlobIdent> treeSegments = new ArrayList<>();
 				treeSegments.add(new BlobIdent(file.revision, null, FileMode.TREE.getBits()));
 				
@@ -132,7 +128,7 @@ public abstract class FileNavigator extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						onSelect(target, blobIdent);
+						context.onSelect(target, blobIdent, null);
 					}
 
 					@Override
@@ -140,13 +136,13 @@ public abstract class FileNavigator extends Panel {
 						super.onComponentTag(tag);
 						HistoryState state = new HistoryState();
 						state.blobIdent = blobIdent;
-						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
+						state.requestId = PullRequest.idOf(context.getPullRequest());
+						PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 						tag.put("href", urlFor(DepotFilePage.class, params));
 					}
 					
 				};
-				link.setEnabled(!file.isTree() || item.getIndex() != getViewSize()-1);
+				link.setEnabled(!context.getBlobIdent().isTree() || item.getIndex() != getViewSize()-1);
 				
 				if (blobIdent.path != null) {
 					if (blobIdent.path.indexOf('/') != -1)
@@ -154,7 +150,7 @@ public abstract class FileNavigator extends Panel {
 					else
 						link.add(new Label("label", blobIdent.path));
 				} else {
-					link.add(new Label("label", depotModel.getObject().getName()));
+					link.add(new Label("label", context.getDepot().getName()));
 				}
 				
 				item.add(link);
@@ -177,7 +173,7 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
-								try (	Repository repository = depotModel.getObject().openRepository();
+								try (	Repository repository = context.getDepot().openRepository();
 										RevWalk revWalk = new RevWalk(repository)) {
 									RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
@@ -192,7 +188,7 @@ public abstract class FileNavigator extends Panel {
 									
 									List<BlobIdent> roots = new ArrayList<>();
 									while (treeWalk.next()) 
-										roots.add(new BlobIdent(file.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
+										roots.add(new BlobIdent(context.getBlobIdent().revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
 									Collections.sort(roots);
 									return roots.iterator();
 								} catch (IOException e) {
@@ -249,8 +245,8 @@ public abstract class FileNavigator extends Panel {
 									
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										onSelect(target, model.getObject());
-										close(target);
+										context.onSelect(target, model.getObject(), null);
+										close();
 									}
 
 									@Override
@@ -259,8 +255,8 @@ public abstract class FileNavigator extends Panel {
 										
 										HistoryState state = new HistoryState();
 										state.blobIdent = model.getObject();
-										state.requestId = PullRequest.idOf(requestModel.getObject());
-										PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
+										state.requestId = PullRequest.idOf(context.getPullRequest());
+										PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
 										tag.put("href", urlFor(DepotFilePage.class, params));
 									}
 									
@@ -283,6 +279,7 @@ public abstract class FileNavigator extends Panel {
 		});
 		
 		WebMarkupContainer lastSegment;
+		BlobIdent file = context.getBlobIdent();
 		if (callback != null) {
 			lastSegment = new Fragment(LAST_SEGMENT_ID, "nameEditFrag", this);
 			
@@ -304,119 +301,322 @@ public abstract class FileNavigator extends Panel {
 				}
 				
 			});
-		} else if (file.isTree()) {
-			lastSegment = new Fragment(LAST_SEGMENT_ID, "addFileFrag", this);
-			lastSegment.add(new AjaxLink<Void>("addFile") {
-
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					
-					setEnabled(depotModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision));
-				}
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					
-					if (!depotModel.getObject().getRefs(Constants.R_HEADS).containsKey(file.revision))
-						tag.put("title", "Must on a branch to add or propose add of a file");
-					else
-						tag.put("title", "Create new file here");
-				}
-				
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					onNewFile(target);
-				}
-				
-			});
-		} else {
+			lastSegment.add(AttributeAppender.append("class", "input"));
+		} else if (file.isFile()) {
 			lastSegment = new Fragment(LAST_SEGMENT_ID, "blobNameFrag", this);
 			
 			String blobName = file.path;
 			if (blobName.contains("/"))
 				blobName = StringUtils.substringAfterLast(blobName, "/");
 			lastSegment.add(new Label("label", blobName));
+		} else {
+			lastSegment = new WebMarkupContainer(LAST_SEGMENT_ID);
 		}
 		add(lastSegment);
 		
-		add(new DropdownLink("fileMenu") {
+		if (callback == null) {
+			add(new MenuLink("fileMenu") {
 
-			@Override
-			protected Component newContent(String id) {
-				Fragment fragment = new Fragment(id, "fileMenuFrag", FileNavigator.this);
-				fragment.add(new Link<Void>("history") {
-
-					@Override
-					public void onClick() {
-						DepotCommitsPage.HistoryState state = new DepotCommitsPage.HistoryState();
-						String commitHash = depotModel.getObject().getObjectId(file.revision).name();
-						state.setCompareWith(commitHash);
-						if (file.path != null) 
-							state.setQuery(String.format("path(%s)", file.path));
-						setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(depotModel.getObject(), state));
-					}
-					
-				});
-				PageParameters rawParams = BlobResource.paramsOf(depotModel.getObject(), file);
-				fragment.add(new ResourceLink<Void>("raw", new BlobResourceReference(), rawParams) {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!file.isTree());
-					}
-					
-				});
-				fragment.add(new ClientStateAwareAjaxLink<Void>("blame") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
+				@Override
+				protected List<MenuItem> getMenuItems() {
+					List<MenuItem> menuItems = new ArrayList<>();
+					menuItems.add(new MenuItem() {
 						
-						add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+						@Override
+						public String getIconClass() {
+							return null;
+						}
 
+						@Override
+						public String getLabel() {
+							return "History";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									DepotCommitsPage.HistoryState state = new DepotCommitsPage.HistoryState();
+									String commitHash = context.getDepot().getObjectId(file.revision).name();
+									state.setCompareWith(commitHash);
+									if (file.path != null) 
+										state.setQuery(String.format("path(%s)", file.path));
+									setResponsePage(DepotCommitsPage.class, DepotCommitsPage.paramsOf(context.getDepot(), state));
+								}
+								
+							};
+						}
+						
+					});
+					if (file.isFile()) {
+						menuItems.add(new MenuItem() {
+		
 							@Override
-							public String getObject() {
-								if (context.getMode() == Mode.BLAME)
-									return " active";
-								else
-									return " ";
+							public String getIconClass() {
+								return null;
+							}
+		
+							@Override
+							public String getLabel() {
+								return "Raw";
+							}
+		
+							@Override
+							public AbstractLink newLink(String id) {
+								return new ResourceLink<Void>(id, new BlobResourceReference(), 
+										BlobResource.paramsOf(context.getDepot(), file)) {
+		
+									@Override
+									protected CharSequence getOnClickScript(CharSequence url) {
+										return getCloseScript() + super.getOnClickScript(url);
+									}
+									
+								};
 							}
 							
-						}));
-						
-						HistoryState state = new HistoryState();
-						state.blobIdent = context.getBlobIdent();
-						state.mode = context.getMode()==null?Mode.BLAME:null;
-						state.mark = context.getMark();
-						PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
-						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
-						add(AttributeAppender.replace("href", url.toString()));
-						
-						setOutputMarkupId(true);
+						});
+					}
+					if (file.isFile() && context.getDepot().getBlob(file).getText() != null) {
+						menuItems.add(new MenuItem() {
+							
+							@Override
+							public String getIconClass() {
+								return context.getMode() == Mode.BLAME?"fa fa-check":null;
+							}
+
+							@Override
+							public String getLabel() {
+								return "Blame";
+							}
+
+							@Override
+							public AbstractLink newLink(String id) {
+								return new ClientStateAwareAjaxLink<Void>(id) {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+									}
+
+									@Override
+									protected void onClick(AjaxRequestTarget target, String clientState) {
+										close();
+										context.onBlameChange(target, clientState);									
+									}
+									
+								};
+							}
+							
+						});
+					}
+					if (file.isTree() && context.isOnBranch()) {
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public String getIconClass() {
+								return null;
+							}
+
+							@Override
+							public String getLabel() {
+								return "Create new file";
+							}
+
+							@Override
+							public AbstractLink newLink(String id) {
+								return new AjaxLink<Void>(id) {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+									}
+									
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										close();
+										onNewFile(target);
+									}
+									
+								};
+							}
+							
+						});
 					}
 
-					@Override
-					public void onClick(AjaxRequestTarget target, @Nullable String clientState) {
-						context.onBlameChange(target, clientState);
+					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
+							&& context.isAtSourceBranchHead()) {
+						menuItems.add(new MenuItem() {
+		
+							@Override
+							public String getIconClass() {
+								return null;
+							}
+		
+							@Override
+							public String getLabel() {
+								return "Edit";
+							}
+		
+							@Override
+							public AbstractLink newLink(String id) {
+								HistoryState state = new HistoryState();
+								state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+								state.blobIdent.path = context.getBlobIdent().path;
+								state.mode = Mode.EDIT;
+								state.mark = context.getMark();
+								PageParameters params = DepotFilePage.paramsOf(context.getPullRequest().getSourceDepot(), state);
+								
+								AbstractLink link = new BookmarkablePageLink<Void>(id, DepotFilePage.class, params) {
+
+									@Override
+									protected CharSequence getOnClickScript(CharSequence url) {
+										return getCloseScript() + super.getOnClickScript(url);
+									}
+									
+								};
+								
+								// open in a new tab by default to make sure user can continue to add reply to 
+								// comments on current page after committing code
+								link.add(AttributeAppender.append("target", "_blank"));
+								
+								return link;
+							}
+							
+						});
+					}
+					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
+							&& context.isOnBranch()) {
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public String getIconClass() {
+								return null;
+							}
+
+							@Override
+							public String getLabel() {
+								return "Edit";
+							}
+
+							@Override
+							public AbstractLink newLink(String id) {
+								AbstractLink link = new ClientStateAwareAjaxLink<Void>(id) {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+									}
+									
+									@Override
+									public void onClick(AjaxRequestTarget target, String clientState) {
+										close();
+										context.onEdit(target, clientState);
+									}
+								};
+								
+								PageParameters params;
+								HistoryState state = new HistoryState();
+								state.blobIdent = context.getBlobIdent();
+								state.mode = Mode.EDIT;
+								state.mark = context.getMark();
+								params = DepotFilePage.paramsOf(context.getDepot(), state);
+								CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
+								link.add(AttributeAppender.replace("href", url.toString()));
+								return link;
+							}
+							
+						});
 					}
 
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						setVisible(depotModel.getObject().getBlob(file).getText() != null);
-					}
+					if (file.isFile() && context.isAtSourceBranchHead()) {
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public String getIconClass() {
+								return null;
+							}
+
+							@Override
+							public String getLabel() {
+								return "Delete";
+							}
+
+							@Override
+							public AbstractLink newLink(String id) {
+								HistoryState state = new HistoryState();
+								state.blobIdent.revision = context.getPullRequest().getSourceBranch();
+								state.blobIdent.path = context.getBlobIdent().path;
+								state.mode = Mode.DELETE;
+								PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+								AbstractLink link = new BookmarkablePageLink<Void>(id, DepotFilePage.class, params) {
+
+									@Override
+									protected CharSequence getOnClickScript(CharSequence url) {
+										return getCloseScript() + super.getOnClickScript(url);
+									}
+									
+								};
+								link.add(AttributeAppender.append("target", "_blank"));
+								return link;
+							}
+							
+						});
+					} 
+					if (file.isFile() && context.isOnBranch()) {
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public String getIconClass() {
+								return null;
+							}
+
+							@Override
+							public String getLabel() {
+								return "Delete";
+							}
+
+							@Override
+							public AbstractLink newLink(String id) {
+								AbstractLink link = new AjaxLink<Void>(id) {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+									}
+									
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										close();
+										context.onDelete(target);
+									}
+
+								};
+								HistoryState state = new HistoryState();
+								state.blobIdent = context.getBlobIdent();
+								state.mode = Mode.EDIT;
+								PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+								CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
+								link.add(AttributeAppender.replace("href", url.toString()));
+								return link;
+							}
+							
+						});
+					} 
 					
-				});
+					menuItems.addAll(context.getMenuItems(this));
+					return menuItems;
+				}
 				
-				
-				return fragment;
-			}
-			
-		});
+			});			
+		} else {
+			add(new WebMarkupContainer("fileMenu").setVisible(false));
+		}
 		
 		setOutputMarkupId(true);
 	}
@@ -426,7 +626,7 @@ public abstract class FileNavigator extends Panel {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(FileNavigator.class, "file-navigator.css")));
 		
-		if (file.isTree()) {
+		if (context.getBlobIdent().isTree()) {
 			String script = String.format("$('#%s input[type=text]').focus();", getMarkupId());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		}
@@ -436,15 +636,13 @@ public abstract class FileNavigator extends Panel {
 	}
 
 	private ObjectId getCommitId() {
-		return depotModel.getObject().getObjectId(file.revision);
+		return context.getDepot().getObjectId(context.getBlobIdent().revision);
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
-	
 	protected abstract void onNewFile(AjaxRequestTarget target);
 	
 	private List<BlobIdent> getChildren(BlobIdent blobIdent) {
-		try (	Repository repository = depotModel.getObject().openRepository(); 
+		try (	Repository repository = context.getDepot().openRepository(); 
 				RevWalk revWalk = new RevWalk(repository)) {
 			RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
@@ -453,7 +651,7 @@ public abstract class FileNavigator extends Panel {
 			
 			List<BlobIdent> children = new ArrayList<>();
 			while (treeWalk.next()) 
-				children.add(new BlobIdent(file.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
+				children.add(new BlobIdent(context.getBlobIdent().revision, treeWalk.getPathString(), treeWalk.getRawMode(0)));
 			Collections.sort(children);
 			return children;
 		} catch (IOException e) {
@@ -461,12 +659,4 @@ public abstract class FileNavigator extends Panel {
 		}
 	}
 
-	@Override
-	protected void onDetach() {
-		depotModel.detach();
-		requestModel.detach();
-		
-		super.onDetach();
-	}
-	
 }

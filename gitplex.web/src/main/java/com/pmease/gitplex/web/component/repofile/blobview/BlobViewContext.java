@@ -9,6 +9,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
+import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -48,4 +50,6 @@ public interface BlobViewContext extends Serializable {
 	
 	void onEdit(AjaxRequestTarget target, @Nullable String clientState);
 
+	List<MenuItem> getMenuItems(MenuLink menuLink);
+	
 }

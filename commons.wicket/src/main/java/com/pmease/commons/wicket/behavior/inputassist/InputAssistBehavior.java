@@ -141,8 +141,8 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 						}
 
 						@Override
-						protected void onClosed(AjaxRequestTarget target) {
-							super.onClosed(target);
+						protected void onClosed() {
+							super.onClosed();
 							dropdown = null;
 						}
 						
@@ -166,16 +166,16 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 					target.appendJavaScript(script);
 				}
 			} else if (dropdown != null) {
-				dropdown.close(target);
+				dropdown.close();
 			}
 		} else if (dropdown != null) {
-			dropdown.close(target);
+			dropdown.close();
 		}
 	}
 	
-	public void close(AjaxRequestTarget target) {
+	public void close() {
 		if (dropdown != null)
-			dropdown.close(target);
+			dropdown.close();
 	}
 	
 	Component getInputField() {

@@ -159,7 +159,7 @@ public abstract class InstantSearchPanel extends Panel {
 						textHits = new ArrayList<>();
 						
 						if (searchHint != null)
-							searchHint.close(target);
+							searchHint.close();
 					}
 					activeHitIndex = 0;
 				} else if (key.equals("return")) {
@@ -322,7 +322,7 @@ public abstract class InstantSearchPanel extends Panel {
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
-								close(target);
+								close();
 							}
 							
 						});
@@ -430,7 +430,7 @@ public abstract class InstantSearchPanel extends Panel {
 								} catch (InterruptedException e) {
 									throw new RuntimeException(e);
 								}								
-								close(target);
+								close();
 							}
 							
 						});
@@ -463,8 +463,8 @@ public abstract class InstantSearchPanel extends Panel {
 			}
 
 			@Override
-			protected void onClosed(AjaxRequestTarget target) {
-				super.onClosed(target);
+			protected void onClosed() {
+				super.onClosed();
 				searchHint = null;
 			}
 			
@@ -511,7 +511,7 @@ public abstract class InstantSearchPanel extends Panel {
 
 	private void selectHit(AjaxRequestTarget target, QueryHit hit) {
 		target.appendJavaScript(String.format("$('#%s').hide();", searchField.getMarkupId(true)));
-		searchHint.close(target);
+		searchHint.close();
 		onSelect(target, hit);
 	}
 	

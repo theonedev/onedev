@@ -8,6 +8,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
@@ -70,12 +71,15 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 				}
 	
 				@Override
-				protected void onClosed(AjaxRequestTarget target) {
-					super.onClosed(target);
+				protected void onClosed() {
+					super.onClosed();
 	
-					String script = String.format("pmease.commons.dropdownhover.closed('%s', '%s');", 
-							getComponent().getMarkupId(true), getMarkupId(true));
-					target.appendJavaScript(script);
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					if (target != null) {
+						String script = String.format("pmease.commons.dropdownhover.closed('%s', '%s');", 
+								getComponent().getMarkupId(true), getMarkupId(true));
+						target.appendJavaScript(script);
+					}
 					
 					dropdown = null;
 				}
@@ -87,9 +91,9 @@ public abstract class DropdownHover extends AbstractDefaultAjaxBehavior {
 		}
 	}
 
-	public void close(AjaxRequestTarget target) {
+	public void close() {
 		if (dropdown != null) 
-			dropdown.close(target);
+			dropdown.close();
 	}
 	
 	@Override

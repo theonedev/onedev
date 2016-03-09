@@ -39,7 +39,7 @@ public abstract class MenuLink extends DropdownLink {
 
 	@Override
 	protected Component newContent(String id) {
-		return new ContentPanel(id) {
+		return new MenuPanel(id) {
 
 			@Override
 			protected List<MenuItem> getMenuItems() {

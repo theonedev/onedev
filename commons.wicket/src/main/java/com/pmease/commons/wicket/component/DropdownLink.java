@@ -93,12 +93,15 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 				}
 
 				@Override
-				protected void onClosed(AjaxRequestTarget target) {
-					super.onClosed(target);
+				protected void onClosed() {
+					super.onClosed();
 
-					String script = String.format("$('#%s').removeClass('dropdown-open');", 
-							DropdownLink.this.getMarkupId(true));
-					target.appendJavaScript(script);
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					if (target != null) {
+						String script = String.format("$('#%s').removeClass('dropdown-open');", 
+								DropdownLink.this.getMarkupId(true));
+						target.appendJavaScript(script);
+					}
 					
 					dropdown = null;
 				}
@@ -110,13 +113,21 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 					getMarkupId(), dropdown.getMarkupId(), getMarkupId());
 			target.appendJavaScript(script);
 		} else {
-			dropdown.close(target);
+			dropdown.close();
 		}
 	}
 
-	public void close(AjaxRequestTarget target) {
+	public void close() {
 		if (dropdown != null)
-			dropdown.close(target);
+			dropdown.close();
+	}
+	
+	public String getCloseScript() {
+		if (dropdown != null) {
+			return String.format("pmease.commons.floating.close($('#%s'), true);", dropdown.getMarkupId());
+		} else {
+			return "";
+		}
 	}
 	
 	@Override

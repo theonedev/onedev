@@ -23,6 +23,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -274,7 +275,7 @@ public class RequestComparePage extends RequestDetailPage {
 						state.commentId = null;
 						state.oldRev = getRevision(oldCommitHash);
 						state.newRev = getRevision(newCommitHash);
-						close(target);
+						close();
 						onStateChange(target);
 					}
 					
@@ -319,7 +320,7 @@ public class RequestComparePage extends RequestDetailPage {
 						state.commentId = null;
 						state.oldRev = getRevision(oldCommitHash);
 						state.newRev = getRevision(newCommitHash);
-						close(target);
+						close();
 						onStateChange(target);
 					}
 					
@@ -357,7 +358,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target) {
-						close(target);
+						close();
 						
 						state.commentId = null;
 						state.oldRev = REV_BASE;
@@ -376,7 +377,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target) {
-								close(target);
+								close();
 								
 								state.commentId = null;
 								state.oldRev = REV_TARGET_BRANCH;
@@ -402,7 +403,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target) {
-							close(target);
+							close();
 
 							state.commentId = null;
 							state.oldRev = REV_UPDATE_PREFIX + (updateNo-1);
@@ -684,12 +685,19 @@ public class RequestComparePage extends RequestDetailPage {
 			this.label = label;
 		}
 
-		protected abstract void onSelect(AjaxRequestTarget target);
+		@Override
+		public String getIconClass() {
+			return null;
+		}
 
 		@Override
-		public Component newContent(String componentId) {
-			Fragment fragment = new Fragment(componentId, "comparisonChoiceFrag", RequestComparePage.this);
-			AjaxLink<Void> link = new AjaxLink<Void>("link") {
+		public String getLabel() {
+			return label;
+		}
+
+		@Override
+		public AbstractLink newLink(String id) {
+			return new AjaxLink<Void>(id) {
 
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -704,12 +712,9 @@ public class RequestComparePage extends RequestDetailPage {
 				}
 				
 			};
-			fragment.add(link);
-			
-			link.add(new Label("label", label));
-			
-			return fragment;
 		}
+
+		protected abstract void onSelect(AjaxRequestTarget target);
 	}
 
 	@Override

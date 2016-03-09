@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -17,7 +18,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.behavior.dropdown.DropdownHover;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
-import com.pmease.commons.wicket.component.menu.LinkItem;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -125,19 +125,53 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				protected List<MenuItem> getMenuItems() {
 					List<MenuItem> menuItems = new ArrayList<>();
-					menuItems.add(new LinkItem("Profile") {
+					menuItems.add(new MenuItem() {
 
 						@Override
-						public void onClick() {
-							setResponsePage(ProfileEditPage.class, ProfileEditPage.paramsOf(user));
+						public String getIconClass() {
+							return null;
+						}
+
+						@Override
+						public String getLabel() {
+							return "Profile";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									setResponsePage(ProfileEditPage.class, ProfileEditPage.paramsOf(user));									
+								}
+								
+							};
 						}
 						
 					});
-					menuItems.add(new LinkItem("Logout") {
+					menuItems.add(new MenuItem() {
 
 						@Override
-						public void onClick() {
-							setResponsePage(LogoutPage.class);
+						public String getIconClass() {
+							return null;
+						}
+
+						@Override
+						public String getLabel() {
+							return "Logout";
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new Link<Void>(id) {
+
+								@Override
+								public void onClick() {
+									setResponsePage(LogoutPage.class);									
+								}
+								
+							};
 						}
 						
 					});
