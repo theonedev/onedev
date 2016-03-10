@@ -24,7 +24,7 @@ import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Review.Result;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;

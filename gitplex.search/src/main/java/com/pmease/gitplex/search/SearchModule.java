@@ -1,8 +1,8 @@
 package com.pmease.gitplex.search;
 
 import com.pmease.commons.loader.AbstractPluginModule;
-import com.pmease.gitplex.core.extensionpoint.DepotListener;
-import com.pmease.gitplex.core.extensionpoint.RefListener;
+import com.pmease.gitplex.core.listener.DepotListener;
+import com.pmease.gitplex.core.listener.RefListener;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

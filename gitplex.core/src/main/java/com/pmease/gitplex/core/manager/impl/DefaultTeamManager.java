@@ -12,8 +12,8 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.entity.component.Team;
-import com.pmease.gitplex.core.extensionpoint.DepotListener;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
+import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 

@@ -319,12 +319,12 @@ public abstract class FileNavigator extends Panel {
 
 				@Override
 				protected List<MenuItem> getMenuItems() {
-					List<MenuItem> menuItems = new ArrayList<>();
-					menuItems.add(new MenuItem() {
+					List<MenuItem> generalItems = new ArrayList<>();
+					generalItems.add(new MenuItem() {
 						
 						@Override
 						public String getIconClass() {
-							return null;
+							return "fa-history";
 						}
 
 						@Override
@@ -351,11 +351,11 @@ public abstract class FileNavigator extends Panel {
 						
 					});
 					if (file.isFile()) {
-						menuItems.add(new MenuItem() {
+						generalItems.add(new MenuItem() {
 		
 							@Override
 							public String getIconClass() {
-								return null;
+								return "fa-file-text-o";
 							}
 		
 							@Override
@@ -379,7 +379,7 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 					if (file.isFile() && context.getDepot().getBlob(file).getText() != null) {
-						menuItems.add(new MenuItem() {
+						generalItems.add(new MenuItem() {
 							
 							@Override
 							public String getIconClass() {
@@ -412,12 +412,14 @@ public abstract class FileNavigator extends Panel {
 							
 						});
 					}
+					
+					List<MenuItem> changeItems = new ArrayList<>();
 					if (file.isTree() && context.isOnBranch()) {
-						menuItems.add(new MenuItem() {
+						changeItems.add(new MenuItem() {
 
 							@Override
 							public String getIconClass() {
-								return null;
+								return "fa-plus";
 							}
 
 							@Override
@@ -449,11 +451,11 @@ public abstract class FileNavigator extends Panel {
 
 					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
 							&& context.isAtSourceBranchHead()) {
-						menuItems.add(new MenuItem() {
+						changeItems.add(new MenuItem() {
 		
 							@Override
 							public String getIconClass() {
-								return null;
+								return "fa-pencil";
 							}
 		
 							@Override
@@ -490,11 +492,11 @@ public abstract class FileNavigator extends Panel {
 					}
 					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
 							&& context.isOnBranch()) {
-						menuItems.add(new MenuItem() {
+						changeItems.add(new MenuItem() {
 
 							@Override
 							public String getIconClass() {
-								return null;
+								return "fa-pencil";
 							}
 
 							@Override
@@ -534,11 +536,11 @@ public abstract class FileNavigator extends Panel {
 					}
 
 					if (file.isFile() && context.isAtSourceBranchHead()) {
-						menuItems.add(new MenuItem() {
+						changeItems.add(new MenuItem() {
 
 							@Override
 							public String getIconClass() {
-								return null;
+								return "fa-trash";
 							}
 
 							@Override
@@ -568,11 +570,11 @@ public abstract class FileNavigator extends Panel {
 						});
 					} 
 					if (file.isFile() && context.isOnBranch()) {
-						menuItems.add(new MenuItem() {
+						changeItems.add(new MenuItem() {
 
 							@Override
 							public String getIconClass() {
-								return null;
+								return "fa-trash";
 							}
 
 							@Override
@@ -609,7 +611,19 @@ public abstract class FileNavigator extends Panel {
 						});
 					} 
 					
-					menuItems.addAll(context.getMenuItems(this));
+					List<MenuItem> customItems = context.getMenuItems(this);
+					
+					List<MenuItem> menuItems = new ArrayList<>(generalItems);
+					if (!changeItems.isEmpty()) {
+						if (!menuItems.isEmpty()) 
+							menuItems.add(null); // add separator
+						menuItems.addAll(changeItems);
+					}
+					if (!customItems.isEmpty()) {
+						if (!menuItems.isEmpty()) 
+							menuItems.add(null); // add separator
+						menuItems.addAll(customItems);
+					}
 					return menuItems;
 				}
 				

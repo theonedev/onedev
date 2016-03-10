@@ -16,7 +16,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Config;
 import com.pmease.gitplex.core.entity.Config.Key;
-import com.pmease.gitplex.core.extensionpoint.ConfigListener;
+import com.pmease.gitplex.core.listener.ConfigListener;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.setting.MailSetting;
 import com.pmease.gitplex.core.setting.SystemSetting;

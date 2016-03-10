@@ -15,7 +15,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 
 @Singleton

@@ -24,7 +24,7 @@
 #repo-file>.head>a.revision-picker, #repo-file>.head>.file-navigator, #repo-file>.file-navigator>div {
 	padding: 5px 8px;
 }
-#repo-file .file-navigator .last-segment.input {
+#repo-file>.head>.file-navigator .last-segment.input {
 	height: 20px;
 	margin-left: 2px;
 	margin-top: -1px;
@@ -38,6 +38,9 @@
 	margin-top: -4px;
 	padding-left: 0px 8px;
 	width: 160px;
+}
+#repo-file>.file-navigator {
+	border-bottom: 1px solid #BBB;
 }
 #repo-file>.file-navigator input.name {
 	border-top: 1px solid #BBB;

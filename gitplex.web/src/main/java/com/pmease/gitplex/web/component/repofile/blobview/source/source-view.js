@@ -5,7 +5,7 @@ gitplex.sourceview = {
 		
 		var $code = $("#" + codeId);
 		var $sourceView = $code.closest(".source-view");
-		$sourceView.closest(".body").css("overflow", "hidden");
+		$sourceView.closest(".content").css("overflow", "hidden");
 		
 		$sourceView.on("autofit", function(event, width, height) {
 			event.stopPropagation();

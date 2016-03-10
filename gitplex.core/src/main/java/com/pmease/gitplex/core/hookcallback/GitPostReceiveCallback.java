@@ -23,8 +23,8 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.extensionpoint.RefListener;
 
 @SuppressWarnings("serial")
 @Singleton

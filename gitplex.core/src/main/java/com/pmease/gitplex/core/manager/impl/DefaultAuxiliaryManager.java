@@ -48,9 +48,9 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.extensionpoint.DepotListener;
-import com.pmease.gitplex.core.extensionpoint.LifecycleListener;
-import com.pmease.gitplex.core.extensionpoint.RefListener;
+import com.pmease.gitplex.core.listener.DepotListener;
+import com.pmease.gitplex.core.listener.LifecycleListener;
+import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
@@ -121,7 +121,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	}
 	
 	private void doCollect(Depot depot, ObjectId commit) {
-		logger.info("Collecting auxiliary information (repository: {}, commit: {})", 
+		logger.info("Collecting auxiliary information (repository: {}, until commit: {})", 
 				depot.getFQN(), commit.name());
 		Environment env = getEnv(depot);
 		final Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -298,7 +298,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 			}
 		});
 		
-		logger.info("Auxiliary information collected (repository: {}, commit: {})", depot.getFQN(), commit.name());		
+		logger.info("Auxiliary information collected (repository: {}, until commit: {})", depot.getFQN(), commit.name());		
 	}
 	
 	@Override

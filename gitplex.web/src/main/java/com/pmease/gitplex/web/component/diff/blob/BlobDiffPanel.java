@@ -19,10 +19,10 @@ import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.diff.DiffRenderer;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
-import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {

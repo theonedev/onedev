@@ -26,7 +26,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -79,8 +78,6 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.page.depot.file.Mark;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -159,20 +156,6 @@ public class SourceViewPanel extends BlobViewPanel {
 	}
 	
 	@Override
-	protected WebMarkupContainer newLeftActions(String id) {
-		Fragment fragment = new Fragment(id, "leftActionsFrag", this);
-		
-		HistoryState state = new HistoryState();
-		state.blobIdent = context.getBlobIdent();
-		state.requestId = PullRequest.idOf(context.getPullRequest());
-		PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
-		String url = RequestCycle.get().urlFor(DepotFilePage.class, params).toString();
-		fragment.add(new WebMarkupContainer("selectionPermalink")
-				.add(AttributeAppender.replace("href", url)));
-		return fragment;
-	}
-	
-	@Override
 	public List<MenuItem> getMenuItems(MenuLink menuLink) {
 		List<MenuItem> menuItems = new ArrayList<>();
 		if (!symbols.isEmpty()) {
@@ -198,14 +181,16 @@ public class SourceViewPanel extends BlobViewPanel {
 							WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 							if (outlinePanel.isVisible()) {
 								response.addCookie(new Cookie(COOKIE_OUTLINE, "no"));
+								outlinePanel.setVisible(false);
 							} else {
 								response.addCookie(new Cookie(COOKIE_OUTLINE, "yes"));
+								outlinePanel.setVisible(true);
 							}
 							target.add(outlinePanel);
 							
 							String script = String.format(""
-									+ "var $sourceView = $('#' + %s).closest('.source-view');"
-									+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()])", 
+									+ "var $sourceView = $('#%s').closest('.source-view');"
+									+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);", 
 									codeContainer.getMarkupId());
 							target.appendJavaScript(script);
 						}

@@ -15,8 +15,8 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
+import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
 
 public class PullRequestChangeBroadcaster implements PullRequestListener {
 	

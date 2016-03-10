@@ -14,7 +14,7 @@ import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.commons.markdown.extensionpoint.MarkdownExtension;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.commons.wicket.editable.EditSupport;
-import com.pmease.gitplex.core.extensionpoint.PullRequestListener;
+import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 import com.pmease.gitplex.search.IndexListener;
@@ -22,16 +22,9 @@ import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.avatar.DefaultAvatarManager;
 import com.pmease.gitplex.web.component.comment.MentionTransformer;
 import com.pmease.gitplex.web.component.comment.PullRequestTransformer;
-import com.pmease.gitplex.web.component.diff.blob.image.ImageDiffRenderer;
-import com.pmease.gitplex.web.component.repofile.blobview.binary.BinaryRenderer;
-import com.pmease.gitplex.web.component.repofile.blobview.gitlink.GitLinkRenderer;
-import com.pmease.gitplex.web.component.repofile.blobview.image.ImageRenderer;
-import com.pmease.gitplex.web.component.repofile.blobview.markdown.MarkdownRenderer;
-import com.pmease.gitplex.web.component.repofile.blobview.source.SourceRenderer;
-import com.pmease.gitplex.web.component.repofile.blobview.symbollink.SymbolLinkRenderer;
+import com.pmease.gitplex.web.component.diff.DiffRenderer;
+import com.pmease.gitplex.web.component.repofile.blobview.BlobRenderer;
 import com.pmease.gitplex.web.editable.EditSupportLocator;
-import com.pmease.gitplex.web.extensionpoint.BlobRenderer;
-import com.pmease.gitplex.web.extensionpoint.DiffRenderer;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.websocket.PullRequestChangeBroadcaster;
 
@@ -59,13 +52,8 @@ public class WebModule extends AbstractPluginModule {
 		contribute(PullRequestListener.class, PullRequestChangeBroadcaster.class);
 		contribute(IndexListener.class, DepotFilePage.IndexedListener.class);
 		
-		contribute(DiffRenderer.class, ImageDiffRenderer.class);
-		contribute(BlobRenderer.class, BinaryRenderer.class);
-		contribute(BlobRenderer.class, GitLinkRenderer.class);
-		contribute(BlobRenderer.class, ImageRenderer.class);
-		contribute(BlobRenderer.class, MarkdownRenderer.class);
-		contribute(BlobRenderer.class, SourceRenderer.class);
-		contribute(BlobRenderer.class, SymbolLinkRenderer.class);
+		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
+		contributeFromPackage(BlobRenderer.class, BlobRenderer.class);
 		
 		contribute(MarkdownExtension.class, new MarkdownExtension() {
 			

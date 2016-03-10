@@ -1,11 +1,9 @@
 .source-view>.outline {
+	font-size: 13px;
 	overflow: auto; 
 	background: white; 
 	padding-left: 4px; 
 	border-left: 1px solid #DDD;
-}
-.source-view>.outline {
-	font-size: 13px;
 }
 .source-view>.outline .tree-node {
 	line-height: 1.6;
@@ -13,15 +11,6 @@
 .source-view .new-comment>.feedback .alert {
 	margin-bottom: 8px;
 }
-.selection-permalink {
-	margin-left: 16px;
-	display: none;
-	color: #333;
-}
-.selection-permalink:hover {
-	color: #333;
-}
-
 .CodeMirror-annotations {
 	width: 240px;
 }

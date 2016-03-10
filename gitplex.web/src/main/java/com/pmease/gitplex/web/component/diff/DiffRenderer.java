@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.extensionpoint;
+package com.pmease.gitplex.web.component.diff;
 
 import javax.annotation.Nullable;
 
