@@ -7,7 +7,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 public class GitLinkRenderer implements BlobRenderer {
 
 	@Override
-	public BlobViewPanel render(String panelId, BlobViewContext context, String clientState) {
+	public BlobViewPanel render(String panelId, BlobViewContext context, String viewState) {
 		if (context.getBlobIdent().isGitLink())
 			return new GitLinkPanel(panelId, context);
 		else

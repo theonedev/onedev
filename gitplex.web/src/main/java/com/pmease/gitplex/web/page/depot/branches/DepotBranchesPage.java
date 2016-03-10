@@ -551,7 +551,7 @@ public class DepotBranchesPage extends DepotPage {
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
-						if (aheadOpenRequestsModel.getObject().get(item.getModelObject()) != null)
+						if (aheadOpenRequestsModel.getObject().get(branch) != null)
 							add(AttributeAppender.append("class", " request"));
 					}
 

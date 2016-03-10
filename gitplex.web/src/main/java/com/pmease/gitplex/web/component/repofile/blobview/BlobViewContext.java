@@ -44,11 +44,11 @@ public interface BlobViewContext extends Serializable {
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
-	void onBlameChange(AjaxRequestTarget target, @Nullable String clientState);
+	void onBlameChange(AjaxRequestTarget target, @Nullable String viewState);
 	
 	void onDelete(AjaxRequestTarget target);
 	
-	void onEdit(AjaxRequestTarget target, @Nullable String clientState);
+	void onEdit(AjaxRequestTarget target, @Nullable String viewState);
 
 	List<MenuItem> getMenuItems(MenuLink menuLink);
 	

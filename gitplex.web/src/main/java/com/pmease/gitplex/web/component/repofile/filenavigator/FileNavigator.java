@@ -50,8 +50,9 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.component.ClientStateAwareAjaxLink;
+import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -370,7 +371,7 @@ public abstract class FileNavigator extends Panel {
 		
 									@Override
 									protected CharSequence getOnClickScript(CharSequence url) {
-										return getCloseScript() + super.getOnClickScript(url);
+										return closeBeforeClick(super.getOnClickScript(url));
 									}
 									
 								};
@@ -393,7 +394,7 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public AbstractLink newLink(String id) {
-								return new ClientStateAwareAjaxLink<Void>(id) {
+								AbstractLink link = new ViewStateAwareAjaxLink<Void>(id) {
 
 									@Override
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -402,12 +403,14 @@ public abstract class FileNavigator extends Panel {
 									}
 
 									@Override
-									protected void onClick(AjaxRequestTarget target, String clientState) {
+									protected void onClick(AjaxRequestTarget target, String viewState) {
 										close();
-										context.onBlameChange(target, clientState);									
+										context.onBlameChange(target, viewState);									
 									}
 									
 								};
+								link.add(new ViewStateAwareBehavior());
+								return link;
 							}
 							
 						});
@@ -476,11 +479,11 @@ public abstract class FileNavigator extends Panel {
 
 									@Override
 									protected CharSequence getOnClickScript(CharSequence url) {
-										return getCloseScript() + super.getOnClickScript(url);
+										return closeBeforeClick(super.getOnClickScript(url));
 									}
 									
 								};
-								
+								link.add(new ViewStateAwareBehavior());
 								// open in a new tab by default to make sure user can continue to add reply to 
 								// comments on current page after committing code
 								link.add(AttributeAppender.append("target", "_blank"));
@@ -506,7 +509,7 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public AbstractLink newLink(String id) {
-								AbstractLink link = new ClientStateAwareAjaxLink<Void>(id) {
+								AbstractLink link = new ViewStateAwareAjaxLink<Void>(id) {
 
 									@Override
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -515,9 +518,9 @@ public abstract class FileNavigator extends Panel {
 									}
 									
 									@Override
-									public void onClick(AjaxRequestTarget target, String clientState) {
+									public void onClick(AjaxRequestTarget target, String viewState) {
 										close();
-										context.onEdit(target, clientState);
+										context.onEdit(target, viewState);
 									}
 								};
 								
@@ -529,6 +532,7 @@ public abstract class FileNavigator extends Panel {
 								params = DepotFilePage.paramsOf(context.getDepot(), state);
 								CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
 								link.add(AttributeAppender.replace("href", url.toString()));
+								link.add(new ViewStateAwareBehavior());
 								return link;
 							}
 							
@@ -559,7 +563,7 @@ public abstract class FileNavigator extends Panel {
 
 									@Override
 									protected CharSequence getOnClickScript(CharSequence url) {
-										return getCloseScript() + super.getOnClickScript(url);
+										return closeBeforeClick(super.getOnClickScript(url));
 									}
 									
 								};

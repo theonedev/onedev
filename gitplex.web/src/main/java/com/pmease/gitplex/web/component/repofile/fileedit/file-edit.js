@@ -1,5 +1,5 @@
 gitplex.fileedit = {
-	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, mark, cmState) {
+	init: function(containerId, filePath, fileContent, previewCallback, saveCallback, mark, viewState) {
 		var $container = $("#" + containerId);
 		var $fileEdit = $container.find(">.file-edit");
 		var $head = $fileEdit.find(">.head");
@@ -79,7 +79,7 @@ gitplex.fileedit = {
 					cm.setOption("fullScreen", false);
 				cm.setSize($edit.width(), $edit.height());
 				if (initState)
-					pmease.commons.codemirror.initState(cm, cmState);
+					pmease.commons.codemirror.initState(cm, viewState);
 			} else {
 				$body.css("overflow", "auto");
 			}

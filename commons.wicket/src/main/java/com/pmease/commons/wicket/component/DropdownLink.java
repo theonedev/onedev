@@ -130,6 +130,10 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 		}
 	}
 	
+	public String closeBeforeClick(CharSequence onClickScript) {
+		return getCloseScript() + (onClickScript!=null?onClickScript:"");
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

@@ -94,7 +94,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
-	private final String clientState;
+	private final String viewState;
 	
 	private final IModel<List<Comment>> commentsModel = new LoadableDetachableModel<List<Comment>>() {
 
@@ -137,7 +137,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
-	public SourceViewPanel(String id, BlobViewContext context, @Nullable String clientState) {
+	public SourceViewPanel(String id, BlobViewContext context, @Nullable String viewState) {
 		super(id, context);
 		
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
@@ -152,7 +152,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 		}
 		
-		this.clientState = clientState;
+		this.viewState = viewState;
 	}
 	
 	@Override
@@ -439,7 +439,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				blameCommitsJson, 
 				context.getComment()!=null?context.getComment().getId():-1,
 				addCommentCallback, 
-				clientState!=null?"'"+clientState+"'":"undefined");
+				viewState!=null?"JSON.parse('"+viewState+"')":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

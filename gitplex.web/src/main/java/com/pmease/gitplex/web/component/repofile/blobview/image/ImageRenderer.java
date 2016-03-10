@@ -8,7 +8,7 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 public class ImageRenderer implements BlobRenderer {
 
 	@Override
-	public BlobViewPanel render(String panelId, BlobViewContext context, String clientState) {
+	public BlobViewPanel render(String panelId, BlobViewContext context, String viewState) {
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		if (blob.getMediaType().getType().equalsIgnoreCase("image"))
 			return new ImageViewPanel(panelId, context);

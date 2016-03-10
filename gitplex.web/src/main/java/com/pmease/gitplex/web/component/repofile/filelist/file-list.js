@@ -8,15 +8,15 @@ gitplex.filelist = {
 			$fileList.outerWidth(width);
 			$fileList.outerHeight(height);
 
-			var scroll = pmease.commons.history.getScroll();
-			if (scroll) {
-			    $fileList.scrollLeft(scroll.left);
-			    $fileList.scrollTop(scroll.top);
+			var viewState = pmease.commons.history.getViewState();
+			if (viewState) {
+			    $fileList.scrollLeft(viewState.scroll.left);
+			    $fileList.scrollTop(viewState.scroll.top);
 			}
 		});
 
 		$fileList.scroll(function() {
-	    	pmease.commons.history.setScroll({left: $fileList.scrollLeft(), top: $fileList.scrollTop()});
+	    	pmease.commons.history.setViewState({scroll:{left: $fileList.scrollLeft(), top: $fileList.scrollTop()}});
 		});
 
 		$.ajax({

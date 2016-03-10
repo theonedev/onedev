@@ -109,7 +109,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final String PARAM_CLIENT_STATE = "client_state";
+	private static final String PARAM_VIEW_STATE = "view_state";
 	
 	private static final String PARAM_MARK = "mark";
 	
@@ -170,7 +170,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private transient List<QueryHit> queryHits;
 	
 	// client state holding CodeMirror cursor, scroll, marks, etc.
-	private transient String clientState;
+	private transient String viewState;
 
 	public DepotFilePage(final PageParameters params) {
 		super(params);
@@ -244,7 +244,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 		}
 		
-		clientState = params.get(PARAM_CLIENT_STATE).toString();
+		viewState = params.get(PARAM_VIEW_STATE).toString();
 	}
 	
 	@Override
@@ -371,7 +371,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 		});
 
-		newFileViewer(null, clientState);
+		newFileViewer(null, viewState);
 
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
 		
@@ -464,9 +464,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
-	private BlobViewPanel renderBlobViewer(String panelId, @Nullable String clientState) {
+	private BlobViewPanel renderBlobViewer(String panelId, @Nullable String viewState) {
 		for (BlobRenderer renderer: GitPlex.getExtensions(BlobRenderer.class)) {
-			BlobViewPanel panel = renderer.render(panelId, this, clientState);
+			BlobViewPanel panel = renderer.render(panelId, this, viewState);
 			if (panel != null)
 				return panel;
 		}
@@ -474,7 +474,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		throw new IllegalStateException("No applicable blob renderer found.");
 	}
 	
-	private void newFileViewer(@Nullable AjaxRequestTarget target, @Nullable String clientState) {
+	private void newFileViewer(@Nullable AjaxRequestTarget target, @Nullable String viewState) {
 		Component fileViewer;
 		if (mode == Mode.EDIT) {
 			final String refName = GitUtils.branch2ref(blobIdent.revision);
@@ -483,7 +483,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					FILE_VIEWER_ID, depotModel, refName, 
 					blobIdent.isTree()?null:blobIdent.path, 
 					blobIdent.isTree()?"":getDepot().getBlob(blobIdent).getText().getContent(), 
-							getDepot().getObjectId(blobIdent.revision), mark, clientState) {
+							getDepot().getObjectId(blobIdent.revision), mark, viewState) {
  
 				@Override
 				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
@@ -575,7 +575,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				
 			};
 		} else {
-			fileViewer = renderBlobViewer(FILE_VIEWER_ID, clientState);
+			fileViewer = renderBlobViewer(FILE_VIEWER_ID, viewState);
 		}
 		if (target != null) {
 			replace(fileViewer);
@@ -725,8 +725,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			params.set(PARAM_MODE, state.mode.name().toLowerCase());
 		if (state.query != null)
 			params.set(PARAM_QUERY, state.query);
-		if (state.clientState != null)
-			params.set(PARAM_CLIENT_STATE, state.clientState);
+		if (state.viewState != null)
+			params.set(PARAM_VIEW_STATE, state.viewState);
 		return params;
 	}
 	
@@ -872,12 +872,12 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onBlameChange(AjaxRequestTarget target, @Nullable String cmState) {
+	public void onBlameChange(AjaxRequestTarget target, @Nullable String viewState) {
 		if (mode == null)
 			mode = Mode.BLAME;
 		else
 			mode = null;
-		newFileViewer(target, cmState);
+		newFileViewer(target, viewState);
 		pushState(target);
 		resizeWindow(target);
 	}
@@ -892,11 +892,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onEdit(AjaxRequestTarget target, @Nullable String cmState) {
+	public void onEdit(AjaxRequestTarget target, @Nullable String viewState) {
 		mode = Mode.EDIT;
 		
 		newFileNavigator(target);
-		newFileViewer(target, cmState);
+		newFileViewer(target, viewState);
 		pushState(target);
 		resizeWindow(target);
 	}
@@ -941,7 +941,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		public transient String query;
 		
-		public transient String clientState;		
+		public transient String viewState;		
 	}
 
 }

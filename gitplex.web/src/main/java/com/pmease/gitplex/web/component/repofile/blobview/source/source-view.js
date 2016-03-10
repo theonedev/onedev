@@ -1,6 +1,6 @@
 gitplex.sourceview = {
 	init: function(codeId, fileContent, filePath, mark, symbolTooltipId, revision, 
-			blameCommits, commentId, addCommentCallback, cmState) {
+			blameCommits, commentId, addCommentCallback, viewState) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -107,7 +107,7 @@ gitplex.sourceview = {
 				cm.setOption("fullScreen", false);
 			cm.setSize($code.width(), $code.height());
 			if (initState)
-				pmease.commons.codemirror.initState(cm, cmState);
+				pmease.commons.codemirror.initState(cm, viewState);
 		});
 	}, 
 	mark: function(codeId, mark) {

@@ -111,7 +111,7 @@ public class TestPage extends BasePage {
 
 							@Override
 							protected CharSequence getOnClickScript(CharSequence url) {
-								return getCloseScript() + super.getOnClickScript(url);
+								return closeBeforeClick(super.getOnClickScript(url));
 							}
 							
 						};

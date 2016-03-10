@@ -8,12 +8,12 @@ import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
 public class SourceRenderer implements BlobRenderer {
 
 	@Override
-	public BlobViewPanel render(String panelId, BlobViewContext context, String clientState) {
+	public BlobViewPanel render(String panelId, BlobViewContext context, String viewState) {
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		if (context.getBlobIdent().isFile() 
 				&& blob.getText() != null 
 				&& !context.getBlobIdent().path.endsWith(".md")) {
-			return new SourceViewPanel(panelId, context, clientState);
+			return new SourceViewPanel(panelId, context, viewState);
 		} else {
 			return null;
 		}

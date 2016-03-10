@@ -64,7 +64,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final Mark mark;
 	
-	private final String clientState;
+	private final String viewState;
 	
 	private AbstractDefaultAjaxBehavior previewBehavior;
 	
@@ -74,7 +74,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	public FileEditPanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
-			@Nullable Mark mark, @Nullable String clientState) {
+			@Nullable Mark mark, @Nullable String viewState) {
 		super(id);
 		this.depotModel = depotModel;
 		this.refName = refName;
@@ -82,7 +82,7 @@ public abstract class FileEditPanel extends Panel {
 		this.content = content;
 		this.prevCommitId = prevCommitId;
 		this.mark = mark;
-		this.clientState = clientState;
+		this.viewState = viewState;
 		
 		newPath = this.oldPath;
 	}
@@ -228,7 +228,7 @@ public abstract class FileEditPanel extends Panel {
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				mark!=null?mark.toJSON():"undefined",
-				clientState!=null?"'"+clientState+"'":"undefined");
+				viewState!=null?"JSON.parse('"+viewState+"')":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

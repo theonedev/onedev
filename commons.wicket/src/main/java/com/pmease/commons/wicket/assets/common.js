@@ -516,37 +516,20 @@ pmease.commons = {
 			history.replaceState(state, '', url);
 			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:'');
 		},
-		setScroll: function(scroll) {
+		setViewState: function(viewState) {
 			var state = history.state;
 			if (!state)
 				state = {};
-			var newState = {scroll: scroll, cursor: state.cursor, data: state.data};
+			var newState = {viewState: viewState, data: state.data};
 			history.replaceState(newState, '', window.location.href );
 			pmease.commons.history.current = {
 				state: newState,
 				url: window.location.href
 			};
 		}, 
-		setCursor: function(cursor) {
-			var state = history.state;
-			if (!state)
-				state = {};
-			var newState = {cursor: cursor, scroll: state.scroll, data: state.data};
-			history.replaceState(newState, '', window.location.href );
-			pmease.commons.history.current = {
-				state: newState,
-				url: window.location.href
-			};
-		}, 
-		getScroll: function() {
-			if (history.state && history.state.scroll)
-				return history.state.scroll;
-			else
-				return undefined;
-		},
-		getCursor: function() {
-			if (history.state && history.state.cursor)
-				return history.state.cursor;
+		getViewState: function() {
+			if (history.state && history.state.viewState)
+				return history.state.viewState;
 			else
 				return undefined;
 		}
