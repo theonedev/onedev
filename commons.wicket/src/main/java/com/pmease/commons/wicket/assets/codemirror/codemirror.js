@@ -54,8 +54,10 @@ pmease.commons.codemirror = {
 
 	    var viewState = pmease.commons.history.getViewState();
 	    if (viewState) {
-	    	cm.setCursor(viewState.cursor);
-	    	cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
+	    	if (viewState.cursor)
+	    		cm.setCursor(viewState.cursor);
+	    	if (viewState.scroll)
+	    		cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
 	    }
 	    
 	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";

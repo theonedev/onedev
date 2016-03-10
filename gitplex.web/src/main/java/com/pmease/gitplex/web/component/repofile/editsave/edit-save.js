@@ -13,7 +13,7 @@ gitplex.editsave = {
 			$editSave.outerHeight(height);
 			
 			var viewState = pmease.commons.history.getViewState();
-			if (viewState) {
+			if (viewState && viewState.scroll) {
 				$editSave.scrollLeft(viewState.scroll.left);
 				$editSave.scrollTop(viewState.scroll.top);
 			}

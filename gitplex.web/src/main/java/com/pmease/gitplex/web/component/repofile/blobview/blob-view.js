@@ -15,7 +15,7 @@ gitplex.blobView = function(containerId) {
 		$content.closestDescendant(".autofit:visible").trigger("autofit", [$content.width(), $content.height()]);
 
 		var viewState = pmease.commons.history.getViewState();
-		if (viewState) {
+		if (viewState && viewState.scroll) {
 		    $content.scrollLeft(viewState.scroll.left);
 		    $content.scrollTop(viewState.scroll.top);
 		}

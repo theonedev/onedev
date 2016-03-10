@@ -9,7 +9,7 @@ gitplex.filelist = {
 			$fileList.outerHeight(height);
 
 			var viewState = pmease.commons.history.getViewState();
-			if (viewState) {
+			if (viewState && viewState.scroll) {
 			    $fileList.scrollLeft(viewState.scroll.left);
 			    $fileList.scrollTop(viewState.scroll.top);
 			}
