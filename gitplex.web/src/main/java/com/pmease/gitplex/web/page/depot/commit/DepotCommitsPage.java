@@ -106,7 +106,7 @@ public class DepotCommitsPage extends DepotPage {
 		protected Commits load() {
 			Commits commits = new Commits();
 			
-			final LogCommand logCommand = new LogCommand(getDepot().git().depotDir());
+			LogCommand logCommand = new LogCommand(getDepot().git().depotDir());
 			logCommand.ignoreCase(true);
 			
 			List<Commit> logCommits;

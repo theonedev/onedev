@@ -35,6 +35,8 @@ public class LogCommand extends GitCommand<List<Commit>> {
     
     private boolean ignoreCase;
     
+    private boolean reparents;
+    
     private boolean listChangedFiles;
     
     private List<String> messages = new ArrayList<>();
@@ -91,6 +93,15 @@ public class LogCommand extends GitCommand<List<Commit>> {
 	public LogCommand before(Date before) {
 		this.before = DateFormatUtils.ISO_DATE_FORMAT.format(before);		
 		return this;
+	}
+	
+	public LogCommand reparents(boolean reparents) {
+		this.reparents = reparents;
+		return this;
+	}
+	
+	public boolean reparents() {
+		return reparents;
 	}
 
 	public int count() {
@@ -193,6 +204,9 @@ public class LogCommand extends GitCommand<List<Commit>> {
         
         if (ignoreCase)
         	cmd.addArgs("-i");
+        
+        if (reparents)
+        	cmd.addArgs("--parents");
         
         cmd.addArgs("--");
         
