@@ -684,7 +684,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
     	}
     	
     	Query query = getSession().createQuery("update PullRequest set sourceDepot=null where "
-    			+ "sourceDepot = :depot and targetDepot != :depot");
+    			+ "sourceDepot=:depot");
     	query.setParameter("depot", depot);
     	query.executeUpdate();
 	}
