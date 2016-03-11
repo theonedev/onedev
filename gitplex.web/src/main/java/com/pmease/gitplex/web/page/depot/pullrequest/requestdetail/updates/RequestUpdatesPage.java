@@ -131,7 +131,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 								super.onConfigure();
 								
 								setEnabled(getPullRequest().isOpen() 
-										&& (item.getModelObject().getReviewer().equals(getCurrentUser()) 
+										&& (item.getModelObject().getReviewer().equals(getLoginUser()) 
 												|| SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotAdmin(getDepot()))));
 							}
 

@@ -26,7 +26,7 @@ import jersey.repackaged.com.google.common.collect.Sets;
 public class RegisterPage extends BasePage {
 	
 	public RegisterPage() {
-		if (getCurrentUser() != null)
+		if (getLoginUser() != null)
 			throw new IllegalStateException("Can not sign up an account while signed in.");
 	}
 	

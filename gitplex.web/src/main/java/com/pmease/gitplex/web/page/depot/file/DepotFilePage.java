@@ -914,6 +914,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
+	protected boolean isFootVisible() {
+		return false;
+	}
+
+	@Override
 	public List<MenuItem> getMenuItems(MenuLink menuLink) {
 		if (mode != Mode.EDIT && mode != Mode.DELETE) {
 			Component fileViewer = get(FILE_VIEWER_ID);

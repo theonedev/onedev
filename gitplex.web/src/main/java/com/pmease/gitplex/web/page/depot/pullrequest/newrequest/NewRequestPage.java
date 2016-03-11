@@ -126,7 +126,7 @@ public class NewRequestPage extends PullRequestPage {
 			}
 		}
 
-		Account currentUser = getCurrentUser();
+		Account currentUser = getLoginUser();
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		

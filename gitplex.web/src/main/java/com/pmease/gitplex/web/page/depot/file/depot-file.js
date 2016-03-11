@@ -51,7 +51,7 @@ $(window).load(function() {
 		var $fileViewer = $("#repo-file>.file-viewer");
 		var width = $(window).width()-$("#repo-file").parent().prev().outerWidth();
 		var height = $(window).height()-$fileViewer.offset().top;
-		if ($("#main>.foot").is(":visible")) 
+		if ($("#main>.foot").length != 0) 
 			height -= $("#main>.foot").outerHeight();
 		if ($searchResult.is(":visible")) {
 			$searchResult.outerWidth(width);

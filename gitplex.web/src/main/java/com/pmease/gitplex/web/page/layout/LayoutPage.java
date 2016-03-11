@@ -48,34 +48,34 @@ public abstract class LayoutPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer mainHead = new WebMarkupContainer("mainHead");
-		add(mainHead);
+		WebMarkupContainer head = new WebMarkupContainer("mainHead");
+		add(head);
 		
-		mainHead.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
-		mainHead.add(newContextHead("context"));
-		mainHead.add(new BookmarkablePageLink<Void>("administration", UserListPage.class)
+		head.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
+		head.add(newContextHead("context"));
+		head.add(new BookmarkablePageLink<Void>("administration", UserListPage.class)
 					.setVisible(SecurityUtils.canManageSystem()));
 
-		final Account user = getCurrentUser();
+		Account user = getLoginUser();
 		boolean signedIn = user != null;
 
-		mainHead.add(new BookmarkablePageLink<Void>("login", LoginPage.class).setVisible(!signedIn));
-		mainHead.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
-		mainHead.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
+		head.add(new BookmarkablePageLink<Void>("login", LoginPage.class).setVisible(!signedIn));
+		head.add(new BookmarkablePageLink<Void>("register", RegisterPage.class).setVisible(!signedIn));
+		head.add(new BookmarkablePageLink<Void>("logout", LogoutPage.class).setVisible(signedIn));
 		if (user != null) {
-			mainHead.add(new BookmarkablePageLink<Void>("notification", 
+			head.add(new BookmarkablePageLink<Void>("notification", 
 					AccountNotificationsPage.class, 
 					AccountNotificationsPage.paramsOf(user)) {
 	
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!getCurrentUser().getRequestNotifications().isEmpty());
+					setVisible(!getLoginUser().getRequestNotifications().isEmpty());
 				}
 				
 			});
 		} else {
-			mainHead.add(new WebMarkupContainer("notification").setVisible(false));
+			head.add(new WebMarkupContainer("notification").setVisible(false));
 		}
 		
 		if (signedIn) {
@@ -92,7 +92,7 @@ public abstract class LayoutPage extends BasePage {
 					
 				};
 				prevLink.add(new Avatar("avatar", prevUser, null));
-				mainHead.add(prevLink);
+				head.add(prevLink);
 
 				// Use dropdown panel to mimic tooltip as the bootstrap tooltip has the issue 
 				// of disappearing when we adjust margin property when hover over the link
@@ -116,11 +116,11 @@ public abstract class LayoutPage extends BasePage {
 				WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
 				prevLink.add(new WebMarkupContainer("avatar"));
 				prevLink.setVisible(false);
-				mainHead.add(prevLink);
-				mainHead.add(new WebMarkupContainer("tooltip").setVisible(false));
+				head.add(prevLink);
+				head.add(new WebMarkupContainer("tooltip").setVisible(false));
 			}
-			mainHead.add(new AvatarLink("user", user, null));
-			mainHead.add(new MenuLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
+			head.add(new AvatarLink("user", user, null));
+			head.add(new MenuLink("userMenuTrigger", new AlignPlacement(50, 100, 50, 0, 8)) {
 
 				@Override
 				protected List<MenuItem> getMenuItems() {
@@ -183,11 +183,21 @@ public abstract class LayoutPage extends BasePage {
 			WebMarkupContainer prevLink = new WebMarkupContainer("prevUser");
 			prevLink.add(new WebMarkupContainer("avatar"));
 			prevLink.setVisible(false);
-			mainHead.add(prevLink);
-			mainHead.add(new WebMarkupContainer("user").setVisible(false));
-			mainHead.add(new WebMarkupContainer("userMenuTrigger").setVisible(false));
-			mainHead.add(new WebMarkupContainer("userMenu").setVisible(false));
+			head.add(prevLink);
+			head.add(new WebMarkupContainer("user").setVisible(false));
+			head.add(new WebMarkupContainer("userMenuTrigger").setVisible(false));
+			head.add(new WebMarkupContainer("userMenu").setVisible(false));
 		}
+		
+		add(new WebMarkupContainer("mainFoot") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(isFootVisible());
+			}
+			
+		});
 	}
 
 	protected Component newContextHead(String componentId) {
@@ -195,7 +205,7 @@ public abstract class LayoutPage extends BasePage {
 	}
 	
 	protected boolean isLoggedIn() {
-		return getCurrentUser() != null;
+		return getLoginUser() != null;
 	}
 	
 	protected boolean isRemembered() {
@@ -206,6 +216,10 @@ public abstract class LayoutPage extends BasePage {
 		return SecurityUtils.getSubject().isAuthenticated();
 	}
 
+	protected boolean isFootVisible() {
+		return true;
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

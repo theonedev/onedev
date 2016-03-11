@@ -197,7 +197,7 @@ public class DepotTagsPage extends DepotPage {
 							target.focusComponent(nameInput);
 							target.add(form);
 						} else {
-							getDepot().tag(tagName, tagRevision, getCurrentUser().asPerson(), tagMessage);
+							getDepot().tag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
 							close(target);
 							target.add(tagsContainer);
 							target.add(pagingNavigator);

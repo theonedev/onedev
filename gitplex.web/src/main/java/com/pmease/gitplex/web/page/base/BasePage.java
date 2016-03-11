@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.page.base;
 
+import javax.annotation.Nullable;
+
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.markup.ComponentTag;
@@ -42,7 +44,8 @@ public abstract class BasePage extends CommonPage {
 		return true;
 	}
 	
-	protected final Account getCurrentUser() {
+	@Nullable
+	protected final Account getLoginUser() {
 		return GitPlex.getInstance(AccountManager.class).getCurrent();
 	}
 	
@@ -51,7 +54,7 @@ public abstract class BasePage extends CommonPage {
 		super.onInitialize();
 
 		if (!isPermitted()) {
-			if (getCurrentUser() != null) 
+			if (getLoginUser() != null) 
 				throw new UnauthorizedException();
 			else 
 				throw new RestartResponseAtInterceptPageException(LoginPage.class);

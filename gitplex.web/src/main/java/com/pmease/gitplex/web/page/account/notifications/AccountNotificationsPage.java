@@ -62,7 +62,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 		
 		List<IColumn<Notification, String>> columns = new ArrayList<>();
 		selectionColumn = new SelectionColumn<Notification, String>();
-		if (getAccount().equals(getCurrentUser()))
+		if (getAccount().equals(getLoginUser()))
 			columns.add(selectionColumn);
 		columns.add(new AbstractColumn<Notification, String>(Model.of("Pull Request"), "request") {
 
@@ -167,7 +167,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAccount().equals(getCurrentUser()));
+				setVisible(getAccount().equals(getLoginUser()));
 			}
 			
 		});

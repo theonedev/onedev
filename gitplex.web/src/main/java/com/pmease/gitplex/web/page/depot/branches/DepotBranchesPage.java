@@ -235,7 +235,7 @@ public class DepotBranchesPage extends DepotPage {
 		protected Map<String, BranchWatch> load() {
 			Map<String, BranchWatch> requestWatches = new HashMap<>();
 			for (BranchWatch watch: GitPlex.getInstance(BranchWatchManager.class).findBy(
-					Preconditions.checkNotNull(getCurrentUser()), getDepot()))
+					Preconditions.checkNotNull(getLoginUser()), getDepot()))
 				requestWatches.put(watch.getBranch(), watch);
 			return requestWatches;
 		}
@@ -582,7 +582,7 @@ public class DepotBranchesPage extends DepotPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getCurrentUser() != null 
+						setVisible(getLoginUser() != null 
 								&& branchWatchesModel.getObject().containsKey(item.getModelObject()));
 					}
 
@@ -594,7 +594,7 @@ public class DepotBranchesPage extends DepotPage {
 						BranchWatch watch = new BranchWatch();
 						watch.setDepot(getDepot());
 						watch.setBranch(branch);
-						watch.setUser(getCurrentUser());
+						watch.setUser(getLoginUser());
 						GitPlex.getInstance(Dao.class).persist(watch);
 						target.add(actionsContainer);
 					}
@@ -602,7 +602,7 @@ public class DepotBranchesPage extends DepotPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getCurrentUser() != null 
+						setVisible(getLoginUser() != null 
 								&& !branchWatchesModel.getObject().containsKey(item.getModelObject()));
 					}
 

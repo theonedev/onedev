@@ -241,7 +241,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					// onDetach can be called multiple times at end of a request cycle
 					RequestCycle.get().setMetaData(RENDERED_ACTIVITY, null);
 					
-					Account user = getCurrentUser();
+					Account user = getLoginUser();
 					if (user != null) {
 						PullRequestVisit visit = getPullRequest().getVisit(user);
 						if (visit == null) {
@@ -477,7 +477,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getCurrentUser() != null);
+				setVisible(getLoginUser() != null);
 			}
 
 		};
@@ -488,7 +488,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 			@Override
 			protected WatchStatus load() {
-				PullRequestWatch watch = getPullRequest().getWatch(getCurrentUser());
+				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
 				if (watch != null) {
 					if (watch.isIgnore())
 						return WatchStatus.IGNORE;
@@ -523,7 +523,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				PullRequestWatch watch = getPullRequest().getWatch(getCurrentUser());
+				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
 				Dao dao = GitPlex.getInstance(Dao.class);
 				if (optionModel.getObject() == WatchStatus.WATCHING) {
 					if (watch != null) {
@@ -532,7 +532,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					} else {
 						watch = new PullRequestWatch();
 						watch.setRequest(getPullRequest());
-						watch.setUser(getCurrentUser());
+						watch.setUser(getLoginUser());
 						getPullRequest().getWatches().add(watch);
 					}
 					dao.persist(watch);
@@ -547,7 +547,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 					} else {
 						watch = new PullRequestWatch();
 						watch.setRequest(getPullRequest());
-						watch.setUser(getCurrentUser());
+						watch.setUser(getLoginUser());
 						watch.setIgnore(true);
 						getPullRequest().getWatches().add(watch);
 					}
@@ -562,7 +562,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 			@Override
 			protected String load() {
-				PullRequestWatch watch = getPullRequest().getWatch(getCurrentUser());
+				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
 				if (watch != null) {
 					if (watch.isIgnore()) {
 						return "Ignore notifications irrelevant to me.";
@@ -586,7 +586,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		
 		Fragment assigneeContainer;
 		Account assignee = request.getAssignee();
-		Account currentUser = getCurrentUser();
+		Account currentUser = getLoginUser();
 		boolean canChangeAssignee = request.isOpen() 
 				&& (currentUser != null && currentUser.equals(request.getSubmitter()) 
 					|| SecurityUtils.canManage(getDepot()));
