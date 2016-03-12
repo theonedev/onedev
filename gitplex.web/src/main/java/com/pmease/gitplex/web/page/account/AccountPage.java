@@ -18,21 +18,21 @@ import com.pmease.gitplex.web.page.layout.LayoutPage;
 @SuppressWarnings("serial")
 public abstract class AccountPage extends LayoutPage {
 	
-	private static final String PARAM_USER = "user";
+	private static final String PARAM_ACCOUNT = "account";
 	
 	protected final IModel<Account> accountModel;
 	
 	public AccountPage(PageParameters params) {
 		super(params);
 		
-		String name = params.get(PARAM_USER).toString();
+		String name = params.get(PARAM_ACCOUNT).toString();
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
 		
-		Account user = GitPlex.getInstance(AccountManager.class).findByName(name);
-		if (user == null) 
-			throw (new EntityNotFoundException("User " + name + " not found"));
+		Account account = GitPlex.getInstance(AccountManager.class).findByName(name);
+		if (account == null) 
+			throw (new EntityNotFoundException("Account " + name + " not found"));
 		
-		accountModel = new UserModel(user);
+		accountModel = new UserModel(account);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public abstract class AccountPage extends LayoutPage {
 
 	public static PageParameters paramsOf(String accountName) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_USER, accountName);
+		params.set(PARAM_ACCOUNT, accountName);
 		return params;
 	}
 	

@@ -11,6 +11,7 @@ import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
@@ -42,17 +43,18 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final Long ROOT_ID = 1L;
+	public static final Long ADMINISTRATOR_ID = 1L;
 
 	private boolean organization;
 	
 	private String fullName;
 	
 	/* used by user account */
+	@Column(unique=true)
 	private String email;
 	
 	/* used by user account */
-	private boolean admin;
+	private int reviewEffort;
 	
 	/* used by organization account */
 	private String description;
@@ -70,8 +72,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private String noSpaceFullName;
 	
 	private Date avatarUploadDate;
-	
-	private int reviewEffort;
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -190,18 +190,9 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.description = description;
 	}
 
-	@Editable(name="Administrator", order=360, description="Check this if you want this user to be "
-			+ "administrator of this GitPlex installation")
-	public boolean isAdmin() {
-		return admin;
-	}
-
-	public void setAdmin(boolean admin) {
-		this.admin = admin;
-	}
-
 	@Editable(order=370, description="Members will have this minimal privilege on all repositories "
 			+ "in this organization")
+	@NotNull
 	public DepotPrivilege getDefaultPrivilege() {
 		return defaultPrivilege;
 	}
@@ -230,7 +221,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 		return organizationMemberships;
 	}
 
-	public void setOrganizationMemberships(Collection<Membership> organizationMemberships) {
+	public void setOrganizations(Collection<Membership> organizationMemberships) {
 		this.organizationMemberships = organizationMemberships;
 	}
 
@@ -238,7 +229,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 		return userMemberships;
 	}
 
-	public void setUserMemberships(Collection<Membership> userMemberships) {
+	public void setUsers(Collection<Membership> userMemberships) {
 		this.userMemberships = userMemberships;
 	}
 
@@ -369,8 +360,8 @@ public class Account extends AbstractUser implements ProtectedObject {
 			return getName();
 	}
 
-	public boolean isRoot() {
-		return ROOT_ID.equals(getId());
+	public boolean isAdministrator() {
+		return ADMINISTRATOR_ID.equals(getId());
 	}
 
 	public String getNoSpaceName() {

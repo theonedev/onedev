@@ -17,11 +17,11 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 
 @SuppressWarnings("serial")
-public class NewAccountDepotPage extends AccountLayoutPage {
+public class NewDepotPage extends AccountLayoutPage {
 
 	private final Depot depot;
 	
-	public NewAccountDepotPage(Depot depot) {
+	public NewDepotPage(Depot depot) {
 		super(paramsOf(depot.getOwner()));
 		
 		this.depot = depot;
@@ -52,7 +52,7 @@ public class NewAccountDepotPage extends AccountLayoutPage {
 				} else {
 					depotManager.save(depot, null, null);
 					Session.get().success("New repository created");
-					setResponsePage(AccountDepotsPage.class, paramsOf(getAccount()));
+					setResponsePage(DepotListPage.class, paramsOf(getAccount()));
 				}
 			}
 			
@@ -63,7 +63,7 @@ public class NewAccountDepotPage extends AccountLayoutPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(AccountDepotsPage.class, paramsOf(getAccount()));
+				setResponsePage(DepotListPage.class, paramsOf(getAccount()));
 			}
 			
 		});
@@ -74,7 +74,7 @@ public class NewAccountDepotPage extends AccountLayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				AccountDepotsPage.class, "account-depots.css")));
+				NewDepotPage.class, "depot-list.css")));
 	}
 
 }

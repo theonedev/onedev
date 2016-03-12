@@ -23,8 +23,8 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.ConfigManager;
 
 @Singleton
 public class DefaultAvatarManager implements AvatarManager {
@@ -35,53 +35,51 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	private final ConfigManager configManager;
 	
-	private final AccountManager userManager;
+	private final AccountManager accountManager;
 	
 	@Inject
-	public DefaultAvatarManager(ConfigManager configManager, AccountManager userManager) {
+	public DefaultAvatarManager(ConfigManager configManager, AccountManager accountManager) {
 		this.configManager = configManager;
-		this.userManager = userManager;
+		this.accountManager = accountManager;
 	}
 	
 	@Transactional
 	@Override
-	public String getAvatarUrl(Account user) {
-		if (user == null) 
+	public String getAvatarUrl(Account account) {
+		if (account == null) 
 			return AVATARS_BASE_URL + "default.png";
 		
-		if (user.getAvatarUploadDate() != null) { 
-			File avatarFile = new File(Bootstrap.getSiteDir(), "avatars/" + user.getId());
+		if (account.getAvatarUploadDate() != null) { 
+			File avatarFile = new File(Bootstrap.getSiteDir(), "avatars/" + account.getId());
 			if (avatarFile.exists()) { 
-				return AVATARS_BASE_URL + user.getId() + "?version=" + user.getAvatarUploadDate().getTime();
+				return AVATARS_BASE_URL + account.getId() + "?version=" + account.getAvatarUploadDate().getTime();
 			} else {
-				user.setAvatarUploadDate(null);
-				userManager.save(user, null);
+				account.setAvatarUploadDate(null);
+				accountManager.save(account, null);
 			}
 		} 
 		
-		if (configManager.getSystemSetting().isGravatarEnabled())
-			return Gravatar.getURL(user.getEmail(), GRAVATAR_SIZE);
+		if (configManager.getSystemSetting().isGravatarEnabled() && !account.isOrganization())
+			return Gravatar.getURL(account.getEmail(), GRAVATAR_SIZE);
 		else 
-			return generateAvatar(user.getDisplayName(), user.getEmail());
+			return generateAvatar(account.getDisplayName(), account.getEmail());
 	}
 	
-	private String generateAvatar(String name, String email) {
-		String encoded = encode(name, email, AvatarGenerator.version());
+	private String generateAvatar(String primaryName, String secondaryName) {
+		String encoded = Hex.encodeHexString((primaryName + ":" + AvatarGenerator.version()).getBytes());
+		
+		if (StringUtils.isBlank(primaryName))
+			primaryName = "?";
+		if (StringUtils.isBlank(secondaryName))
+			secondaryName = primaryName;
 		
 		File avatarFile = new File(Bootstrap.getSiteDir(), "avatars/" + encoded);
 		if (!avatarFile.exists()) {
 			Lock avatarLock = LockUtils.getLock("avatars:" + encoded);
 			avatarLock.lock();
 			try {
-				String letters;
-				if (StringUtils.isNotBlank(name))
-					letters = getLetter(name);
-				else if (StringUtils.isNotBlank(email))
-					letters = getLetter(email);
-				else
-					letters = "?";
-				
-				BufferedImage bi = AvatarGenerator.generate(letters, email);
+				String letters = getLetter(primaryName);
+				BufferedImage bi = AvatarGenerator.generate(letters, secondaryName);
 				ImageIO.write(bi, "PNG", avatarFile);
 			} catch (NoSuchAlgorithmException | IOException e) {
 				throw new RuntimeException(e);
@@ -91,11 +89,6 @@ public class DefaultAvatarManager implements AvatarManager {
 		}
 		
 		return RequestCycle.get().getUrlRenderer().renderContextRelativeUrl(AVATARS_BASE_URL + encoded);
-	}
-	
-	private String encode(String name, String email, int version) {
-		String concatenated = name + ":" + email + ":" + version;
-		return Hex.encodeHexString(concatenated.getBytes());
 	}
 	
 	@Override
@@ -123,22 +116,22 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	@Transactional
 	@Override
-	public void useAvatar(Account user, FileUpload upload) {
+	public void useAvatar(Account account, FileUpload upload) {
 		if (upload != null) {
-			Lock avatarLock = LockUtils.getLock("avatars:" + user.getId());
+			Lock avatarLock = LockUtils.getLock("avatars:" + account.getId());
 			avatarLock.lock();
 			try {
-				upload.writeTo(new File(Bootstrap.getSiteDir(), "avatars/" + user.getId()));
+				upload.writeTo(new File(Bootstrap.getSiteDir(), "avatars/" + account.getId()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			} finally {
 				avatarLock.unlock();
 			}
-			user.setAvatarUploadDate(new Date());
+			account.setAvatarUploadDate(new Date());
 		} else {
-			user.setAvatarUploadDate(null);
+			account.setAvatarUploadDate(null);
 		}
-		userManager.save(user, null);
+		accountManager.save(account, null);
 	}
 
 }

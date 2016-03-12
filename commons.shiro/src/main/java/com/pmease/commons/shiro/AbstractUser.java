@@ -95,12 +95,4 @@ public abstract class AbstractUser extends AbstractEntity implements Authenticat
         return new SimplePrincipalCollection(userId, "");
     }
     
-    public static Long getPreviousId() {
-    	PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
-    	if (prevPrincipals != null)
-    		return (Long) Preconditions.checkNotNull(prevPrincipals.getPrimaryPrincipal());
-    	else
-    		return 0L;
-    }
-    
 }

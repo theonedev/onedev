@@ -1,0 +1,46 @@
+<wicket:extend>
+	<section class="organization-list">
+		<div class="head clearfix">
+			<div class="pull-left search">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input wicket:id="searchOrganizations" class="form-control" placeholder="Search organizations"></input>
+				</div>
+			</div>
+			<div class="pull-left actions">
+				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+			</div>
+			<ul wicket:id="pageNav" class="pull-right"></ul>
+		</div>
+		<table wicket:id="organizations" class="organizations table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">Name</th>
+					<th class="fullName">Full Name</th>
+					<th class="role">Role</th>
+					<th class="actions">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="organizations">
+					<td class="name">
+						<img wicket:id="avatar"></img> 
+						<a wicket:id="link"><span wicket:id="name"></span></a>
+					</td>
+					<td class="full-name">
+						<span wicket:id="fullName"></span>
+					</td>
+					<td class="role">
+						<span wicket:id="role"></span>
+					</td>
+					<td class="actions">
+						<a wicket:id="join" class="fa fa-enter" title="Request to join this organization"></a>
+						<a wicket:id="leave" class="fa fa-leave" title="Leave this organization"></a>
+						<a wicket:id="delete" class="fa fa-trash" title="Delete this organization"></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div wicket:id="noOrganizations" class="alert alert-info">No any organizations found</div>	
+	</section>
+</wicket:extend>

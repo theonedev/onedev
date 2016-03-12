@@ -16,8 +16,8 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
-import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
+import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteDepotModal;
+import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 
 @SuppressWarnings("serial")
@@ -88,11 +88,11 @@ public class GeneralSettingPage extends DepotSettingPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				new ConfirmDeleteRepoModal(target) {
+				new ConfirmDeleteDepotModal(target) {
 					
 					@Override
 					protected void onDeleted(AjaxRequestTarget target) {
-						setResponsePage(AccountDepotsPage.class, paramsOf(getAccount()));						
+						setResponsePage(DepotListPage.class, paramsOf(getAccount()));						
 					}
 					
 					@Override

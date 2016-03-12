@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.setting;
+package com.pmease.gitplex.web.page.user.setting;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -8,18 +8,21 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.editable.DefaultBeanDescriptor;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.web.page.account.setting.AccountSettingPage;
 
 @SuppressWarnings("serial")
 public class PasswordEditPage extends AccountSettingPage {
 	
 	public PasswordEditPage(PageParameters params) {
 		super(params);
+		Preconditions.checkState(!getAccount().isOrganization());
 	}
 
 	@Override

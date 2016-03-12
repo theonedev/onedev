@@ -16,12 +16,12 @@ import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.web.component.userchoice.UserMultiChoice;
+import com.pmease.gitplex.web.component.accountchoice.AccountMultiChoice;
 
 @SuppressWarnings("serial")
 public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
-	private UserMultiChoice input;
+	private AccountMultiChoice input;
 	
 	public UserMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
@@ -42,7 +42,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 		} 
 		
-		input = new UserMultiChoice("input", new Model((Serializable)users));
+		input = new AccountMultiChoice("input", new Model((Serializable)users));
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.userchoice;
+package com.pmease.gitplex.web.component.accountchoice;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +21,7 @@ import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
-public class UserChoiceProvider extends ChoiceProvider<Account> {
+public class AccountChoiceProvider extends ChoiceProvider<Account> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -32,13 +32,13 @@ public class UserChoiceProvider extends ChoiceProvider<Account> {
 		Criterion criterion = Restrictions.and(Restrictions.or(
 				Restrictions.ilike("name", term, MatchMode.ANYWHERE),
 				Restrictions.ilike("fullName", term, MatchMode.ANYWHERE)));
-		List<Account> users = dao.query(EntityCriteria.of(Account.class)
+		List<Account> accounts = dao.query(EntityCriteria.of(Account.class)
 				.add(criterion).addOrder(Order.asc("name")), first, Constants.DEFAULT_SELECT2_PAGE_SIZE + 1);
 
-		if (users.size() <= Constants.DEFAULT_SELECT2_PAGE_SIZE) {
-			response.addAll(users);
+		if (accounts.size() <= Constants.DEFAULT_SELECT2_PAGE_SIZE) {
+			response.addAll(accounts);
 		} else {
-			response.addAll(users.subList(0, Constants.DEFAULT_SELECT2_PAGE_SIZE));
+			response.addAll(accounts.subList(0, Constants.DEFAULT_SELECT2_PAGE_SIZE));
 			response.setHasMore(true);
 		}
 	}
@@ -52,14 +52,14 @@ public class UserChoiceProvider extends ChoiceProvider<Account> {
 
 	@Override
 	public Collection<Account> toChoices(Collection<String> ids) {
-		List<Account> users = Lists.newArrayList();
+		List<Account> accounts = Lists.newArrayList();
 		Dao dao = GitPlex.getInstance(Dao.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			users.add(dao.load(Account.class, id));
+			accounts.add(dao.load(Account.class, id));
 		}
 
-		return users;
+		return accounts;
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.notifications;
+package com.pmease.gitplex.web.page.user.notifications;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
@@ -33,10 +34,12 @@ import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public class AccountNotificationsPage extends AccountLayoutPage {
+public class NotificationListPage extends AccountLayoutPage {
 
-	public AccountNotificationsPage(PageParameters params) {
+	public NotificationListPage(PageParameters params) {
 		super(params);
+		
+		Preconditions.checkState(!getAccount().isOrganization());
 	}
 	
 	@Override
@@ -161,7 +164,7 @@ public class AccountNotificationsPage extends AccountLayoutPage {
 					for (IModel<Notification> model: selectionColumn.getSelections())
 						GitPlex.getInstance(Dao.class).remove(model.getObject());
 				}
-				setResponsePage(AccountNotificationsPage.class, AccountNotificationsPage.paramsOf(getAccount()));
+				setResponsePage(NotificationListPage.class, NotificationListPage.paramsOf(getAccount()));
 			}
 
 			@Override

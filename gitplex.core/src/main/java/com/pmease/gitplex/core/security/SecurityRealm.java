@@ -55,7 +55,7 @@ public class SecurityRealm extends AbstractRealm {
 	                    Account user = accountManager.get(userId);
 	                    if (user != null) {
 		                    // administrator can do anything
-		                    if (user.isRoot() || user.isAdmin())
+		                    if (user.isAdministrator())
 		                    	return true;
 
 		                    Account checkAccount = getAccount(objectPermission);

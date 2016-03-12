@@ -20,7 +20,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
@@ -28,11 +27,10 @@ import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -40,11 +38,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {
 
-	private PageableListView<Account> accountsView;
+	private PageableListView<Account> usersView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
-	private WebMarkupContainer accountsContainer; 
+	private WebMarkupContainer usersContainer; 
 	
 	private TextField<String> searchInput;
 	
@@ -59,27 +57,27 @@ public class DashboardPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(searchInput = new ClearableTextField<String>("searchAccounts", Model.of("")));
+		add(searchInput = new ClearableTextField<String>("searchUsers", Model.of("")));
 		searchInput.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(accountsContainer);
+				target.add(usersContainer);
 				target.add(pagingNavigator);
 			}
 
 		});
 		
-		accountsContainer = new WebMarkupContainer("accountsContainer");
-		accountsContainer.setOutputMarkupId(true);
-		add(accountsContainer);
+		usersContainer = new WebMarkupContainer("usersContainer");
+		usersContainer.setOutputMarkupId(true);
+		add(usersContainer);
 		
-		accountsContainer.add(accountsView = new PageableListView<Account>("accounts", new LoadableDetachableModel<List<Account>>() {
+		usersContainer.add(usersView = new PageableListView<Account>("users", new LoadableDetachableModel<List<Account>>() {
 
 			@Override
 			protected List<Account> load() {
-				Dao dao = GitPlex.getInstance(Dao.class);
-				List<Account> users = dao.allOf(Account.class);
+				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				List<Account> users = accountManager.allUsers();
 				
 				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
@@ -110,42 +108,21 @@ public class DashboardPage extends LayoutPage {
 				Account user = item.getModelObject();
 
 				item.add(new Avatar("avatar", item.getModelObject(), null));
-				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountDepotsPage.class, AccountPage.paramsOf(user)); 
-				link.add(new Label("accountName", user.getName()));
+				Link<Void> link = new BookmarkablePageLink<>("link", AccountOverviewPage.class, AccountPage.paramsOf(user)); 
+				link.add(new Label("name", user.getName()));
 				item.add(link);
 						
 				item.add(new MultilineLabel("fullName", user.getFullName()));
-				
-				item.add(new Link<Void>("runAs") {
-
-					@Override
-					public void onClick() {
-						Account account = item.getModelObject();
-						SecurityUtils.getSubject().runAs(account.getPrincipals());
-						setResponsePage(getPage().getClass(), getPageParameters());
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-						Account account = item.getModelObject();
-						Account currentUser = userManager.getCurrent();
-						setVisible(!account.equals(currentUser) && SecurityUtils.canManage(account));
-					}
-					
-				});
 			}
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("accountsPageNav", accountsView) {
+		add(pagingNavigator = new BootstrapPagingNavigator("usersPageNav", usersView) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(accountsView.getPageCount() > 1);
+				setVisible(usersView.getPageCount() > 1);
 			}
 			
 		});

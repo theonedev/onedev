@@ -49,12 +49,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		Account rootUser = dao.get(Account.class, Account.ROOT_ID);		
+		Account rootUser = dao.get(Account.class, Account.ADMINISTRATOR_ID);		
 		if (rootUser == null) {
 			rootUser = new Account();
-			rootUser.setId(Account.ROOT_ID);
+			rootUser.setId(Account.ADMINISTRATOR_ID);
 			manualConfigs.add(new ManualConfig("Create Administator Account", rootUser, 
-					Sets.newHashSet("description", "admin", "defaultPrivilege")) {
+					Sets.newHashSet("description", "defaultPrivilege")) {
 
 				@Override
 				public Skippable getSkippable() {

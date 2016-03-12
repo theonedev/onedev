@@ -1,19 +1,19 @@
 #administration.sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }
-#accounts .operations {
+#users .operations {
 	margin-bottom: 20px;
 }
-#accounts .operations .search {
+#users .operations .search {
 	width: 250px;
 }
-#accounts .operations>.pull-left {
+#users .operations>.pull-left {
 	margin-right: 20px;
 }
-#accounts .pagination {
+#users .pagination {
 	margin: 0;
 }
-#accounts .actions .fa {
+#users .actions .fa {
 	font-size: 18px;
 	color: #666;
 }

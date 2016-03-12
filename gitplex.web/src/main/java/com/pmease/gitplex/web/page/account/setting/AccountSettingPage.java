@@ -13,6 +13,7 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountTab;
+import com.pmease.gitplex.web.page.user.setting.PasswordEditPage;
 
 @SuppressWarnings("serial")
 public class AccountSettingPage extends AccountLayoutPage {
@@ -32,8 +33,10 @@ public class AccountSettingPage extends AccountLayoutPage {
 		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new AccountTab("Profile", "", ProfileEditPage.class));
-		tabs.add(new AccountTab("Password", "", PasswordEditPage.class));
 		tabs.add(new AccountTab("Avatar", "", AvatarEditPage.class));
+		
+		if (!getAccount().isOrganization())
+			tabs.add(new AccountTab("Password", "", PasswordEditPage.class));
 		
 		add(new Tabbable("accountSettingTabs", tabs));
 	}

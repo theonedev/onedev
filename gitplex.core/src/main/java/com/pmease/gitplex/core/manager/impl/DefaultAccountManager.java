@@ -1,10 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -14,15 +11,15 @@ import javax.inject.Singleton;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
+import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
@@ -38,7 +35,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     
     private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     		
-	private final Map<String, Set<Long>> emailToIds = new HashMap<>();
+	private final BiMap<String, Long> emailToId = HashBiMap.create();
 	
 	private final BiMap<String, Long> nameToId = HashBiMap.create();
 	
@@ -52,12 +49,9 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     @Transactional
     @Override
 	public void save(Account account, String oldName) {
-    	boolean isNew;
-    	if (account.isRoot()) {
-    		isNew = get(Account.ROOT_ID) == null;
+    	if (account.isAdministrator()) {
     		getSession().replicate(account, ReplicationMode.OVERWRITE);
     	} else {
-    		isNew = account.isNew();
     		persist(account);
     	}
 
@@ -78,14 +72,9 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 			public void run() {
 				idLock.writeLock().lock();
 				try {
-					Set<Long> ids = emailToIds.get(account.getEmail());
-					if (ids == null) {
-						ids = new HashSet<>();
-						emailToIds.put(account.getEmail(), ids);
-					}
-					ids.add(account.getId());
-					if (isNew)
-						nameToId.inverse().put(account.getId(), account.getName());
+					nameToId.inverse().put(account.getId(), account.getName());
+					if (account.getEmail() != null)
+						emailToId.inverse().put(account.getId(), account.getEmail());
 				} finally {
 					idLock.writeLock().unlock();
 				}
@@ -97,7 +86,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     @Sessional
     @Override
     public Account getRoot() {
-    	return load(Account.ROOT_ID);
+    	return load(Account.ADMINISTRATOR_ID);
     }
 
     @Transactional
@@ -108,7 +97,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update PullRequest set assignee.id=:rootId where assignee=:assignee");
-    	query.setParameter("rootId", Account.ROOT_ID);
+    	query.setParameter("rootId", Account.ADMINISTRATOR_ID);
     	query.setParameter("assignee", account);
     	query.executeUpdate();
     	
@@ -154,12 +143,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 			public void run() {
 				idLock.writeLock().lock();
 				try {
-					for (Iterator<Map.Entry<String, Set<Long>>> it = emailToIds.entrySet().iterator(); it.hasNext();) {
-						Map.Entry<String, Set<Long>> entry = it.next();
-						entry.getValue().remove(account.getId());
-						if (entry.getValue().isEmpty())
-							it.remove();
-					}
+					emailToId.inverse().remove(account.getId());
 					nameToId.inverse().remove(account.getId());
 				} finally {
 					idLock.writeLock().unlock();
@@ -189,40 +173,11 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     public Account findByPerson(PersonIdent person) {
     	idLock.readLock().lock();
     	try {
-    		Set<Long> ids = emailToIds.get(person.getEmailAddress());
-    		if (ids != null) {
-    			if (ids.size() > 1) {
-    				String personName = person.getName().toLowerCase();
-    				int minDistance = Integer.MAX_VALUE;
-    				Account minDistanceUser = null;
-	    			for (Long id: ids) {
-	    				Account user = load(id);
-	    				int distance;
-	    				if (user.getFullName() != null) {
-	    					int distance1 = StringUtils.calcLevenshteinDistance(personName, user.getFullName().toLowerCase());
-	    					if (distance1 == 0)
-	    						return user;
-	    					int distance2 = StringUtils.calcLevenshteinDistance(personName, user.getName().toLowerCase());
-	    					if (distance2 == 0)
-	    						return user;
-	    					distance = distance1<distance2?distance1:distance2;
-	    				}  else {
-	    					distance = StringUtils.calcLevenshteinDistance(personName, user.getName().toLowerCase());
-	    					if (distance == 0)
-	    						return user;
-	    				}
-	    				if (distance<minDistance) {
-	    					distance = minDistance;
-	    					minDistanceUser = user;
-	    				}
-	    			}
-	    			return Preconditions.checkNotNull(minDistanceUser);
-    			} else {
-    				return load(ids.iterator().next());
-    			}
-    		} else {
+    		Long id = emailToId.get(person.getEmailAddress());
+    		if (id != null)
+    			return load(id);
+    		else
     			return null;
-    		}
     	} finally {
     		idLock.readLock().unlock();
     	}
@@ -239,28 +194,12 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 		return null;
 	}
 
-	@Override
-	public Account getPrevious() {
-		Long userId = Account.getPreviousId();
-		if (userId != 0L) {
-			Account user = get(userId);
-			if (user != null)
-				return user;
-		}
-		return null;
-	}
-
 	@Sessional
 	@Override
 	public void systemStarting() {
         for (Account user: all()) {
-        	Set<Long> ids = emailToIds.get(user.getEmail());
-        	if (ids == null) {
-        		ids = new HashSet<>();
-        		emailToIds.put(user.getEmail(), ids);
-        	}
-        	ids.add(user.getId());
-        	
+        	if (user.getEmail() != null)
+        		emailToId.inverse().put(user.getId(), user.getEmail());
         	nameToId.inverse().put(user.getId(), user.getName());
         }
 	}
@@ -275,6 +214,20 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 
 	@Override
 	public void systemStopped() {
+	}
+
+	@Override
+	public List<Account> allUsers() {
+		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
+		criteria.add(Restrictions.eq("organization", false));
+		return query(criteria, 0, 0);
+	}
+
+	@Override
+	public List<Account> allOrganizations() {
+		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
+		criteria.add(Restrictions.eq("organization", true));
+		return query(criteria, 0, 0);
 	}
 
 }

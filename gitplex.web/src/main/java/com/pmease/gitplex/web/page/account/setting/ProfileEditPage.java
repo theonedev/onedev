@@ -1,6 +1,8 @@
 package com.pmease.gitplex.web.page.account.setting;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -10,7 +12,6 @@ import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
@@ -34,7 +35,15 @@ public class ProfileEditPage extends AccountSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
+		Set<String> excludedProperties = new HashSet<>();
+		excludedProperties.add("password");
+		if (getAccount().isOrganization()) {
+			excludedProperties.add("email");
+		} else {
+			excludedProperties.add("description");
+			excludedProperties.add("defaultPrivilege");
+		}
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
 			@Override
@@ -53,7 +62,7 @@ public class ProfileEditPage extends AccountSettingPage {
 				editor.getBeanDescriptor().copyProperties(object, getAccount());
 			}
 			
-		}, Sets.newHashSet("admin", "description", "defaultPrivilege", "password"));
+		}, excludedProperties);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -67,13 +76,13 @@ public class ProfileEditPage extends AccountSettingPage {
 				super.onSubmit();
 				
 				Account account = getAccount();
-				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = userManager.findByName(account.getName());
+				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				Account accountWithSameName = accountManager.findByName(account.getName());
 				if (accountWithSameName != null && !accountWithSameName.equals(account)) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
 				} else {
-					userManager.save(account, oldName);
+					accountManager.save(account, oldName);
 					Session.get().success("Profile has been updated");
 					setResponsePage(ProfileEditPage.class, AccountPage.paramsOf(account));
 				}
@@ -89,7 +98,7 @@ public class ProfileEditPage extends AccountSettingPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(!getAccount().isRoot());
+				setVisible(!getAccount().isAdministrator());
 			}
 
 			@Override

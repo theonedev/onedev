@@ -36,7 +36,7 @@ public class RegisterPage extends BasePage {
 	
 		final Account account = new Account();
 		final BeanEditor<?> editor = BeanContext.editBean("editor", account, 
-				Sets.newHashSet("admin", "description", "defaultPrivilege"));
+				Sets.newHashSet("description", "defaultPrivilege"));
 		
 		Form<?> form = new Form<Void>("form") {
 

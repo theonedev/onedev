@@ -46,7 +46,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.repopicker.DepotSelector;
 import com.pmease.gitplex.web.model.DepotModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
+import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
@@ -163,7 +163,7 @@ public abstract class DepotPage extends AccountPage {
 		Fragment fragment = new Fragment(componentId, "contextHeadFrag", this);
 		WebMarkupContainer accountAndRepo = new WebMarkupContainer("accountAndRepo");
 		fragment.add(accountAndRepo);
-		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", AccountDepotsPage.class, paramsOf(getAccount()));
+		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", DepotListPage.class, paramsOf(getAccount()));
 		accountLink.add(new Label("accountName", getAccount().getName()));
 		accountAndRepo.add(accountLink);
 		

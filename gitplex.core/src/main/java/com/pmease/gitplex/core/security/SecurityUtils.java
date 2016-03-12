@@ -94,7 +94,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	public static boolean canManageSystem() {
 		Account currentUser = getAccount();
-		return currentUser != null && (currentUser.isRoot() || currentUser.isAdmin());
+		return currentUser != null && currentUser.isAdministrator();
 	}
 	
 }

@@ -21,15 +21,13 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteRepoModal;
+import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteDepotModal;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
@@ -37,7 +35,7 @@ import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
-public class AccountDepotsPage extends AccountLayoutPage {
+public class DepotListPage extends AccountLayoutPage {
 
 	private PageableListView<Depot> depotsView;
 	
@@ -45,9 +43,11 @@ public class AccountDepotsPage extends AccountLayoutPage {
 	
 	private WebMarkupContainer depotsContainer; 
 	
+	private WebMarkupContainer noDepotsContainer;
+	
 	private String searchInput = "";
 	
-	public AccountDepotsPage(PageParameters params) {
+	public DepotListPage(PageParameters params) {
 		super(params);
 	}
 
@@ -62,12 +62,13 @@ public class AccountDepotsPage extends AccountLayoutPage {
 		
 		final TextField<String> searchField;
 		
-		add(searchField = new ClearableTextField<String>("searchRepos", Model.of("")));
+		add(searchField = new ClearableTextField<String>("searchDepots", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
 				target.add(depotsContainer);
+				target.add(noDepotsContainer);
 				target.add(pagingNavigator);
 			}
 			
@@ -85,20 +86,40 @@ public class AccountDepotsPage extends AccountLayoutPage {
 			public void onClick() {
 				Depot depot = new Depot();
 				depot.setOwner(getAccount());
-				setResponsePage(new NewAccountDepotPage(depot));
+				setResponsePage(new NewDepotPage(depot));
 			}
 			
 		});
 		
-		depotsContainer = new WebMarkupContainer("reposContainer");
-		depotsContainer.setOutputMarkupId(true);
+		depotsContainer = new WebMarkupContainer("depotsContainer") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!depotsView.getModelObject().isEmpty());
+			}
+			
+		};
+		depotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(depotsContainer);
 		
-		depotsContainer.add(depotsView = new PageableListView<Depot>("repositories", new LoadableDetachableModel<List<Depot>>() {
+		noDepotsContainer = new WebMarkupContainer("noDepotsContainer") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(depotsView.getModelObject().isEmpty());
+			}
+			
+		};
+		noDepotsContainer.setOutputMarkupPlaceholderTag(true);
+		add(noDepotsContainer);
+		
+		depotsContainer.add(depotsView = new PageableListView<Depot>("depots", new LoadableDetachableModel<List<Depot>>() {
 
 			@Override
 			protected List<Depot> load() {
-				List<Depot> repositories = new ArrayList<>();
+				List<Depot> depots = new ArrayList<>();
 				
 				searchInput = searchField.getInput();
 				if (searchInput != null)
@@ -106,20 +127,20 @@ public class AccountDepotsPage extends AccountLayoutPage {
 				else
 					searchInput = "";
 				
-				for (Depot repo: getAccount().getDepots()) {
-					if (repo.getName().toLowerCase().contains(searchInput) && SecurityUtils.canPull(repo))
-						repositories.add(repo);
+				for (Depot depot: getAccount().getDepots()) {
+					if (depot.getName().toLowerCase().contains(searchInput) && SecurityUtils.canPull(depot))
+						depots.add(depot);
 				}
 				
-				Collections.sort(repositories, new Comparator<Depot>() {
+				Collections.sort(depots, new Comparator<Depot>() {
 
 					@Override
-					public int compare(Depot repository1, Depot repository2) {
-						return repository1.getName().compareTo(repository2.getName());
+					public int compare(Depot depot1, Depot depot2) {
+						return depot1.getName().compareTo(depot2.getName());
 					}
 					
 				});
-				return repositories;
+				return depots;
 			}
 			
 		}, Constants.DEFAULT_PAGE_SIZE) {
@@ -128,8 +149,8 @@ public class AccountDepotsPage extends AccountLayoutPage {
 			protected void populateItem(final ListItem<Depot> item) {
 				Depot depot = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<>("repoLink", DepotFilePage.class, DepotFilePage.paramsOf(depot)); 
-				link.add(new Label("repoName", depot.getName()));
+				Link<Void> link = new BookmarkablePageLink<>("depotLink", DepotFilePage.class, DepotFilePage.paramsOf(depot)); 
+				link.add(new Label("depotName", depot.getName()));
 				item.add(link);
 						
 				item.add(new MultilineLabel("description", depot.getDescription()));
@@ -150,8 +171,7 @@ public class AccountDepotsPage extends AccountLayoutPage {
 					
 				});
 				
-				final Long repositoryId = depot.getId();
-				item.add(new AjaxLink<Void>("deleteRepo") {
+				item.add(new AjaxLink<Void>("deleteDepot") {
 
 					@Override
 					protected void onConfigure() {
@@ -162,16 +182,16 @@ public class AccountDepotsPage extends AccountLayoutPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						new ConfirmDeleteRepoModal(target) {
+						new ConfirmDeleteDepotModal(target) {
 
 							@Override
 							protected void onDeleted(AjaxRequestTarget target) {
-								setResponsePage(AccountDepotsPage.this);
+								setResponsePage(DepotListPage.this);
 							}
 
 							@Override
 							protected Depot getDepot() {
-								return GitPlex.getInstance(Dao.class).load(Depot.class, repositoryId);
+								return item.getModelObject();
 							}
 							
 						};
@@ -182,7 +202,7 @@ public class AccountDepotsPage extends AccountLayoutPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("reposPageNav", depotsView) {
+		add(pagingNavigator = new BootstrapPagingNavigator("depotsPageNav", depotsView) {
 
 			@Override
 			protected void onConfigure() {
@@ -198,7 +218,7 @@ public class AccountDepotsPage extends AccountLayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				AccountDepotsPage.class, "account-depots.css")));
+				DepotListPage.class, "depot-list.css")));
 	}
 
 }

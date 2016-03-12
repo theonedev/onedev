@@ -35,6 +35,7 @@ import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.MailManager;
+import com.pmease.gitplex.core.manager.MembershipManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
@@ -55,6 +56,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDepotManager;
 import com.pmease.gitplex.core.manager.impl.DefaultMailManager;
+import com.pmease.gitplex.core.manager.impl.DefaultMembershipManager;
 import com.pmease.gitplex.core.manager.impl.DefaultNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
@@ -162,6 +164,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WorkManager.class).to(DefaultWorkManager.class);
 		bind(SequentialWorkManager.class).to(DefaultSequentialWorkManager.class);
 		bind(TeamManager.class).to(DefaultTeamManager.class);
+		bind(MembershipManager.class).to(DefaultMembershipManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 

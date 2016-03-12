@@ -1,22 +1,22 @@
 <wicket:extend>
-	<section id="accounts">
+	<section id="users">
 		<div class="head">
-			All Accounts
+			All Users
 		</div>
 		<div class="body">
 			<div class="operations clearfix">
 				<div class="pull-left search">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="fa fa-search"></i></span>
-						<input wicket:id="searchAccounts" class="form-control" placeholder="Search accounts"></input>
+						<input wicket:id="searchUsers" class="form-control" placeholder="Search users"></input>
 					</div>
 				</div>
 				<div class="pull-left actions">
 					<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 				</div>
-				<ul wicket:id="accountsPageNav" class="pull-right"></ul>
+				<ul wicket:id="usersPageNav" class="pull-right"></ul>
 			</div>
-			<table wicket:id="accountsContainer" class="accounts table table-hover">
+			<table wicket:id="usersContainer" class="users table table-hover">
 				<thead>
 					<tr>
 						<th class="name">Name</th>
@@ -25,18 +25,17 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr wicket:id="accounts">
+					<tr wicket:id="users">
 						<td class="name">
 							<img wicket:id="avatar" class="avatar"></img>
-							<a wicket:id="accountLink"><span wicket:id="accountName"></span></a>
+							<a wicket:id="userLink"><span wicket:id="userName"></span></a>
 						</td>
 						<td class="full-name">
 							<span wicket:id="fullName"></span>
 						</td>
 						<td class="actions">
-							<a wicket:id="setting" class="fa fa-cog" title="Account settings"></a>
-							<a wicket:id="runAs" class="fa fa-sign-in" title="Run as this account"></a>
-							<a wicket:id="delete" class="fa fa-trash" title="Delete this account"></a>
+							<a wicket:id="setting" class="fa fa-cog" title="User settings"></a>
+							<a wicket:id="delete" class="fa fa-trash" title="Delete this user"></a>
 						</td>
 					</tr>
 				</tbody>

@@ -18,7 +18,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
@@ -31,7 +30,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteAccountModal;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.depots.AccountDepotsPage;
+import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -39,11 +38,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 @SuppressWarnings("serial")
 public class UserListPage extends AdministrationPage {
 
-	private PageableListView<Account> accountsView;
+	private PageableListView<Account> usersView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
-	private WebMarkupContainer accountsContainer; 
+	private WebMarkupContainer usersContainer; 
 	
 	private TextField<String> searchInput;
 	
@@ -58,12 +57,12 @@ public class UserListPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(searchInput = new ClearableTextField<String>("searchAccounts", Model.of("")));
+		add(searchInput = new ClearableTextField<String>("searchUsers", Model.of("")));
 		searchInput.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(accountsContainer);
+				target.add(usersContainer);
 				target.add(pagingNavigator);
 			}
 
@@ -84,24 +83,30 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		accountsContainer = new WebMarkupContainer("accountsContainer");
-		accountsContainer.setOutputMarkupId(true);
-		add(accountsContainer);
+		usersContainer = new WebMarkupContainer("usersContainer");
+		usersContainer.setOutputMarkupId(true);
+		add(usersContainer);
 		
-		accountsContainer.add(accountsView = new PageableListView<Account>("accounts", new LoadableDetachableModel<List<Account>>() {
+		usersContainer.add(usersView = new PageableListView<Account>("users", new LoadableDetachableModel<List<Account>>() {
 
 			@Override
 			protected List<Account> load() {
-				Dao dao = GitPlex.getInstance(Dao.class);
-				List<Account> users = dao.allOf(Account.class);
+				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+				List<Account> users = accountManager.allUsers();
 				
 				searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
 					for (Iterator<Account> it = users.iterator(); it.hasNext();) {
 						Account user = it.next();
-						if (!user.getName().toLowerCase().contains(searchFor))
+						String fullName = user.getFullName();
+						if (fullName == null)
+							fullName = "";
+						else
+							fullName = fullName.toLowerCase();
+						if (!user.getName().toLowerCase().contains(searchFor) && !fullName.contains(searchFor)) {
 							it.remove();
+						}
 					}
 				} else {
 					searchFor = null;
@@ -120,12 +125,12 @@ public class UserListPage extends AdministrationPage {
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(final ListItem<Account> item) {
+			protected void populateItem(ListItem<Account> item) {
 				Account user = item.getModelObject();
 
 				item.add(new Avatar("avatar", item.getModelObject(), null));
-				Link<Void> link = new BookmarkablePageLink<>("accountLink", AccountDepotsPage.class, AccountPage.paramsOf(user)); 
-				link.add(new Label("accountName", user.getName()));
+				Link<Void> link = new BookmarkablePageLink<>("userLink", DepotListPage.class, AccountPage.paramsOf(user)); 
+				link.add(new Label("userName", user.getName()));
 				item.add(link);
 						
 				item.add(new MultilineLabel("fullName", user.getFullName()));
@@ -140,28 +145,6 @@ public class UserListPage extends AdministrationPage {
 
 				});
 				
-				item.add(new Link<Void>("runAs") {
-
-					@Override
-					public void onClick() {
-						Account account = item.getModelObject();
-						SecurityUtils.getSubject().runAs(account.getPrincipals());
-						setResponsePage(AccountDepotsPage.class, AccountDepotsPage.paramsOf(account));
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						
-						AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-						Account account = item.getModelObject();
-						Account currentUser = userManager.getCurrent();
-						setVisible(!account.equals(currentUser));
-					}
-					
-				});
-				
-				final Long accountId = user.getId();
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -175,9 +158,17 @@ public class UserListPage extends AdministrationPage {
 							
 							@Override
 							protected Account getAccount() {
-								return GitPlex.getInstance(Dao.class).load(Account.class, accountId);
+								return item.getModelObject();
 							}
 						};
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						Account user = item.getModelObject();
+						setVisible(SecurityUtils.canManage(user) && !user.equals(getLoginUser()));
 					}
 
 				});
@@ -185,12 +176,12 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("accountsPageNav", accountsView) {
+		add(pagingNavigator = new BootstrapPagingNavigator("usersPageNav", usersView) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(accountsView.getPageCount() > 1);
+				setVisible(usersView.getPageCount() > 1);
 			}
 			
 		});

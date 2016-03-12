@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
@@ -61,13 +63,7 @@ public interface AccountManager extends EntityDao<Account> {
 	 */
 	@Nullable Account getCurrent();
 	
-	/**
-	 * Get previous user in case current user is a run-as user
-	 * 
-	 * @return
-	 * 			previous user if current user is a run-as user, or <tt>null</tt> 
-	 * 			if current user is not a run-as user. 
-	 */
-	@Nullable Account getPrevious();
-
+	List<Account> allUsers();
+	
+	List<Account> allOrganizations();
 }

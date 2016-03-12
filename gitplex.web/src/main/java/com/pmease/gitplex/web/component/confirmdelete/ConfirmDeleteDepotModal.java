@@ -7,9 +7,9 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 
 @SuppressWarnings("serial")
-public abstract class ConfirmDeleteRepoModal extends ConfirmDeleteModal {
+public abstract class ConfirmDeleteDepotModal extends ConfirmDeleteModal {
 
-	public ConfirmDeleteRepoModal(AjaxRequestTarget target) {
+	public ConfirmDeleteDepotModal(AjaxRequestTarget target) {
 		super(target);
 	}
 

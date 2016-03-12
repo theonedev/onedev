@@ -1,11 +1,8 @@
 package com.pmease.gitplex.web.page.admin;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -18,17 +15,17 @@ import com.pmease.gitplex.core.manager.AccountManager;
 @SuppressWarnings("serial")
 public class NewUserPage extends AdministrationPage {
 
-	private final Account account;
+	private final Account user;
 	
-	public NewUserPage(Account account) {
-		this.account = account;
+	public NewUserPage(Account user) {
+		this.user = user;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor<?> editor = BeanContext.editBean("editor", account, 
+		BeanEditor<?> editor = BeanContext.editBean("editor", user, 
 				Sets.newHashSet("defaultPrivilege", "description"));
 		
 		Form<?> form = new Form<Void>("form") {
@@ -38,13 +35,13 @@ public class NewUserPage extends AdministrationPage {
 				super.onSubmit();
 				
 				AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-				Account accountWithSameName = userManager.findByName(account.getName());
+				Account accountWithSameName = userManager.findByName(user.getName());
 				if (accountWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
 				} else {
-					userManager.save(account, null);
-					Session.get().success("New account created");
+					userManager.save(user, null);
+					Session.get().success("New user account created");
 					setResponsePage(UserListPage.class);
 				}
 			}
@@ -61,12 +58,6 @@ public class NewUserPage extends AdministrationPage {
 			
 		});
 		add(form);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(UserListPage.class, "accounts.css")));
 	}
 
 }

@@ -34,9 +34,6 @@
 	color: #666;
 	display: block;
 }
-#account.sidebar>table>tbody>tr>td.nav>.run-as .fa {
-	font-size: 18px;
-}
 #account.sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }

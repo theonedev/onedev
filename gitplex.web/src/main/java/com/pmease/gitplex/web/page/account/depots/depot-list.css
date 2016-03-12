@@ -1,0 +1,12 @@
+.depot-list .head {
+	margin-bottom: 20px;
+}
+.depot-list .head .search {
+	width: 250px;
+}
+.depot-list .head>.pull-left {
+	margin-right: 20px;
+}
+.depot-list .pagination {
+	margin: 0;
+}

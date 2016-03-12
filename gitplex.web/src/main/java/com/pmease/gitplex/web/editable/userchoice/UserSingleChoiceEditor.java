@@ -11,12 +11,12 @@ import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.web.component.userchoice.UserSingleChoice;
+import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 
 @SuppressWarnings("serial")
 public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
-	private UserSingleChoice input;
+	private AccountSingleChoice input;
 	
 	public UserSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
@@ -32,7 +32,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			user = null;
 		
-    	input = new UserSingleChoice("input", Model.of(user), !getPropertyDescriptor().isPropertyRequired());
+    	input = new AccountSingleChoice("input", Model.of(user), !getPropertyDescriptor().isPropertyRequired());
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);

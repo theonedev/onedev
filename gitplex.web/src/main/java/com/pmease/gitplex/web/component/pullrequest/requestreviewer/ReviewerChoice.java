@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.assets.userchoice.UserChoiceResourceReference;
+import com.pmease.gitplex.web.assets.accountchoice.AccountChoiceResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
@@ -56,7 +56,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(UserChoiceResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
 	}
 	
 	@Override
