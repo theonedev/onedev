@@ -44,10 +44,6 @@ public class UserListPage extends AdministrationPage {
 	
 	private WebMarkupContainer usersContainer; 
 	
-	private TextField<String> searchInput;
-	
-	private String searchFor;
-	
 	@Override
 	protected String getPageTitle() {
 		return "Dashboard";
@@ -57,8 +53,9 @@ public class UserListPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(searchInput = new ClearableTextField<String>("searchUsers", Model.of("")));
-		searchInput.add(new OnTypingDoneBehavior(100) {
+		TextField<String> searchField;
+		add(searchField = new ClearableTextField<String>("searchUsers", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
@@ -94,9 +91,9 @@ public class UserListPage extends AdministrationPage {
 				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
 				List<Account> users = accountManager.allUsers();
 				
-				searchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(searchFor)) {
-					searchFor = searchFor.trim().toLowerCase();
+				String searchInput = searchField.getInput();
+				if (StringUtils.isNotBlank(searchInput)) {
+					searchInput = searchInput.trim().toLowerCase();
 					for (Iterator<Account> it = users.iterator(); it.hasNext();) {
 						Account user = it.next();
 						String fullName = user.getFullName();
@@ -104,12 +101,12 @@ public class UserListPage extends AdministrationPage {
 							fullName = "";
 						else
 							fullName = fullName.toLowerCase();
-						if (!user.getName().toLowerCase().contains(searchFor) && !fullName.contains(searchFor)) {
+						if (!user.getName().toLowerCase().contains(searchInput) && !fullName.contains(searchInput)) {
 							it.remove();
 						}
 					}
 				} else {
-					searchFor = null;
+					searchInput = null;
 				}
 				Collections.sort(users, new Comparator<Account>() {
 

@@ -11,9 +11,6 @@
 #repo-tags>.body>.options>div.search .input-group {
 	width: 240px;
 }
-#repo-tags>.body>.options .pagination {
-	margin: 0;
-}
 #repo-tags>.body>table td {
 	white-space: nowrap;
 }

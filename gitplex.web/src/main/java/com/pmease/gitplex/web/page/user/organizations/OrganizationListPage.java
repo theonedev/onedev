@@ -46,8 +46,6 @@ public class OrganizationListPage extends AccountLayoutPage {
 	
 	private WebMarkupContainer noOrganizationsContainer; 
 	
-	private String searchInput = "";
-	
 	public OrganizationListPage(PageParameters params) {
 		super(params);
 		
@@ -128,7 +126,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 			protected List<Account> load() {
 				List<Account> organizations = new ArrayList<>();
 				
-				searchInput = searchField.getInput();
+				String searchInput = searchField.getInput();
 				if (searchInput != null)
 					searchInput = searchInput.toLowerCase().trim();
 				else

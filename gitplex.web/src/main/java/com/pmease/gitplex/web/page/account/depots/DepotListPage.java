@@ -45,8 +45,6 @@ public class DepotListPage extends AccountLayoutPage {
 	
 	private WebMarkupContainer noDepotsContainer;
 	
-	private String searchInput = "";
-	
 	public DepotListPage(PageParameters params) {
 		super(params);
 	}
@@ -121,7 +119,7 @@ public class DepotListPage extends AccountLayoutPage {
 			protected List<Depot> load() {
 				List<Depot> depots = new ArrayList<>();
 				
-				searchInput = searchField.getInput();
+				String searchInput = searchField.getInput();
 				if (searchInput != null)
 					searchInput = searchInput.toLowerCase().trim();
 				else

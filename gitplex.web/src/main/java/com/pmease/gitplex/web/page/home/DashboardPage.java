@@ -44,10 +44,6 @@ public class DashboardPage extends LayoutPage {
 	
 	private WebMarkupContainer usersContainer; 
 	
-	private TextField<String> searchInput;
-	
-	private String searchFor;
-	
 	@Override
 	protected String getPageTitle() {
 		return "Dashboard";
@@ -57,6 +53,7 @@ public class DashboardPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		TextField<String> searchInput;
 		add(searchInput = new ClearableTextField<String>("searchUsers", Model.of("")));
 		searchInput.add(new OnTypingDoneBehavior(100) {
 
@@ -79,7 +76,7 @@ public class DashboardPage extends LayoutPage {
 				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
 				List<Account> users = accountManager.allUsers();
 				
-				searchFor = searchInput.getInput();
+				String searchFor = searchInput.getInput();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
 					for (Iterator<Account> it = users.iterator(); it.hasNext();) {

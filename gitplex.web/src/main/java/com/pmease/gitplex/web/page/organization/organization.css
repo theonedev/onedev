@@ -1,0 +1,10 @@
+.member-list .head {
+	margin-bottom: 20px;
+}
+.member-list .head .search {
+	width: 250px;
+}
+.member-list .head>.pull-left {
+	margin-right: 20px;
+}
+

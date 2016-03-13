@@ -106,10 +106,14 @@ pmease.commons = {
 		 * when sorting the elements inside a form. 
 		 */
 		markDirty: function($forms) {
-			$forms.addClass("dirty").find(".dirty-aware").removeAttr("disabled");
+			$forms.addClass("dirty").each(function() {
+				pmease.commons.form.dirtyStateChanged($(this));
+			});
 		},
 		markClean: function($forms) {
-			$forms.removeClass("dirty").find(".dirty-aware").attr("disabled", "disabled");
+			$forms.removeClass("dirty").each(function() {
+				pmease.commons.form.dirtyStateChanged($(this));
+			});
 		},
 		removeDirty: function(triggerId, $forms) {
 			$(function() {
@@ -135,7 +139,7 @@ pmease.commons = {
 		trackDirty: function(form) {
 			var $form = $(form);
 			var $dirtyAware = $form.find(".dirty-aware");
-
+			
 			if ($dirtyAware.length != 0) {
 				$form.addClass("ays-inited");
 				$dirtyAware.attr("disabled", "disabled");
@@ -144,15 +148,32 @@ pmease.commons = {
 					"silent": !$form.hasClass("leave-confirm"),
 					"addRemoveFieldsMarksDirty": true,
 					change: function() {
-						if ($(this).hasClass("dirty")) {
-							$(this).find(".dirty-aware").removeAttr("disabled");
-						} else {
-							$(this).find(".dirty-aware").attr("disabled", "disabled")
-						}
+						pmease.commons.form.dirtyStateChanged($(this));
 					}
 				});
 			} else if ($form.hasClass("leave-confirm")) {
 				$form.areYouSure({"addRemoveFieldsMarksDirty": true});
+			}
+		},
+		dirtyStateChanged: function($form) {
+			$dirtyAware = $form.find(".dirty-aware");
+			if ($dirtyAware.length != 0) {
+				if ($form.hasClass("dirty")) {
+					$dirtyAware.removeAttr("disabled");
+					$("body").append("<div class='dirty-alert'><span>There are unsaved changes</span> <a class='btn btn-sm btn-default'>Save</a></div>");
+					var $confirm = $("body>.dirty-alert");
+					$confirm.width($(window).width());
+					$confirm.css({left: 0, top: $(window).height()-$confirm.height()});
+					$confirm.find("a").click(function() {
+						if ($._data($dirtyAware[0], 'events').click)
+							$dirtyAware.trigger("click");
+						else
+							$form.submit();
+					});
+				} else {
+					$dirtyAware.attr("disabled", "disabled");
+					$("body>.dirty-alert").remove();
+				}
 			}
 		},
 		setupDirtyCheck: function() {
@@ -189,6 +210,12 @@ pmease.commons = {
 					processAjaxResponse.call(this, data, textStatus, jqXHR, context);					
 				}
 			}
+			$(window).resize(function() {
+				$("body>.dirty-alert").each(function() {
+					$(this).css({top: $(window).height()-$confirm.height()});
+					$(this).width($(window).width());
+				});
+			});
 		},
 		confirmLeave: function(containerId) {
 			var $container;

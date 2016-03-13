@@ -10,9 +10,6 @@
 #users .operations>.pull-left {
 	margin-right: 20px;
 }
-#users .pagination {
-	margin: 0;
-}
 #users .actions .fa {
 	font-size: 18px;
 	color: #666;

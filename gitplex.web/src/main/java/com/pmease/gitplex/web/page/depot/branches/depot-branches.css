@@ -14,9 +14,6 @@
 #repo-branches>.body>.options>div.search .input-group {
 	width: 240px;
 }
-#repo-branches>.body>.options .pagination {
-	margin: 0;
-}
 #repo-branches>.body>table td {
 	white-space: nowrap;
 }

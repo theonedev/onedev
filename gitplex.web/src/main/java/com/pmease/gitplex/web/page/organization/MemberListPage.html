@@ -7,12 +7,14 @@
 					<input wicket:id="searchMembers" class="form-control" placeholder="Search members"></input>
 				</div>
 			</div>
+			<div class="pull-left filter">
+				<input wicket:id="filterBy" type="hidden" placeholder="Filter by role" class="form-control"></input>
+			</div>
 			<div class="pull-left actions">
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 			</div>
-			<ul wicket:id="membersPageNav" class="pull-right"></ul>
 		</div>
-		<table wicket:id="membersContainer" class="members table table-hover table-condensed">
+		<table wicket:id="members" class="members table table-hover table-condensed">
 			<thead>
 				<tr>
 					<th class="name">Name</th>
@@ -31,7 +33,7 @@
 						<span wicket:id="fullName"></span>
 					</td>
 					<td class="role">
-						<span wicket:id="role"></span>
+						<select wicket:id="role" class="form-control"></select>
 					</td>
 					<td class="actions">
 						<a wicket:id="remove" class="fa fa-minus-circle" title="Remove from organization"></a>
@@ -39,5 +41,6 @@
 				</tr>
 			</tbody>
 		</table>	
+		<div class="center"><ul wicket:id="membersPageNav"></ul></div>
 	</section>
 </wicket:extend>

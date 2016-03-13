@@ -10,7 +10,6 @@
 			<div class="pull-left actions">
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 			</div>
-			<ul wicket:id="pageNav" class="pull-right"></ul>
 		</div>
 		<table wicket:id="organizations" class="organizations table table-hover table-condensed">
 			<thead>
@@ -41,6 +40,7 @@
 				</tr>
 			</tbody>
 		</table>
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
 		<div wicket:id="noOrganizations" class="alert alert-info">No any organizations found</div>	
 	</section>
 </wicket:extend>

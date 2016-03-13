@@ -69,8 +69,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class DepotTagsPage extends DepotPage {
 
-	private TextField<String> searchInput;
-	
 	private WebMarkupContainer tagsContainer;
 	
 	private PagingNavigator pagingNavigator;
@@ -91,6 +89,7 @@ public class DepotTagsPage extends DepotPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		TextField<String> searchInput;
 		add(searchInput = new ClearableTextField<String>("searchTags", Model.of("")));
 		searchInput.add(new OnTypingDoneBehavior(200) {
 
