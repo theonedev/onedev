@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.userchoice;
+package com.pmease.gitplex.web.editable.accountchoice;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,11 +19,11 @@ import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.accountchoice.AccountMultiChoice;
 
 @SuppressWarnings("serial")
-public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
+public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private AccountMultiChoice input;
 	
-	public UserMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
+	public AccountMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 

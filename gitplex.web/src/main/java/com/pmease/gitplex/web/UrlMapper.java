@@ -39,6 +39,9 @@ import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
+import com.pmease.gitplex.web.page.organization.MemberListPage;
+import com.pmease.gitplex.web.page.organization.MembershipPage;
+import com.pmease.gitplex.web.page.organization.NewMembersPage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
@@ -60,6 +63,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		addAdministrationPages();
 		addAccountPages();
 		addDepotPages();
+		addOrganizationPages();
 		addSecurityPages();
 		
 		add(new MountedMapper("/test", TestPage.class));
@@ -144,6 +148,12 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("${account}/setting/password", PasswordEditPage.class));
 	}
 
+	private void addOrganizationPages() {
+		add(new MountedMapper("${account}/members", MemberListPage.class));
+		add(new MountedMapper("${account}/members/${membership}", MembershipPage.class));
+		add(new MountedMapper("${account}/members/new", NewMembersPage.class));
+	}
+	
 	private void addDepotPages() {
 		add(new MountedMapper("${account}/${depot}", DepotFilePage.class) {
 

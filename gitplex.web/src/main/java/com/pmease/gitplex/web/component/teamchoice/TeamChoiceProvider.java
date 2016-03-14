@@ -28,19 +28,20 @@ public class TeamChoiceProvider extends ChoiceProvider<String> {
 	public void query(String term, int page, Response<String> response) {
 		term = term.toLowerCase();
 		Account organization = organizationModel.getObject();
-		List<String> matchedTeams = new ArrayList<>();
+		List<String> teams = new ArrayList<>();
 		for (String teamName: organization.getTeams().keySet()) {
 			if (teamName.toLowerCase().contains(term)) {
-				matchedTeams.add(teamName);
+				teams.add(teamName);
 			}
 		}
 		int from = page*PAGE_SIZE;
 		int to = from + PAGE_SIZE;
-		if (to > matchedTeams.size())
-			to = matchedTeams.size();
+		if (to > teams.size())
+			to = teams.size();
 		if (from > to)
 			from = to;
-		response.addAll(matchedTeams.subList(page*PAGE_SIZE, (page+1)*PAGE_SIZE));
+		response.addAll(teams.subList(from, to));
+		response.setHasMore(teams.size()>to);
 	}
 
 	@Override

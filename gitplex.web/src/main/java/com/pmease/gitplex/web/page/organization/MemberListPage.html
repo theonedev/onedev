@@ -7,11 +7,13 @@
 					<input wicket:id="searchMembers" class="form-control" placeholder="Search members"></input>
 				</div>
 			</div>
-			<div class="pull-left filter">
-				<input wicket:id="filterBy" type="hidden" placeholder="Filter by role" class="form-control"></input>
+			<div wicket:id="filter" class="pull-left filter btn-group">
+				<a wicket:id="selection" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="clear" class="btn btn-default" title="Clear role filter"><i class="fa fa-times"></i></a>
 			</div>
 			<div class="pull-left actions">
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
 			</div>
 		</div>
 		<table wicket:id="members" class="members table table-hover table-condensed">
@@ -33,14 +35,16 @@
 						<span wicket:id="fullName"></span>
 					</td>
 					<td class="role">
-						<select wicket:id="role" class="form-control"></select>
+						<a wicket:id="role" class="btn btn-default btn-sm"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
 					</td>
 					<td class="actions">
-						<a wicket:id="remove" class="fa fa-minus-circle" title="Remove from organization"></a>
+						<a wicket:id="remove" title="Remove from organization"><i class="fa fa-times"></i></a>
+						<span wicket:id="pendingRemoval">Pending removal</span>
+						<a wicket:id="undoRemove" title="Do not remove"><i class="fa fa-undo"></i></a>
 					</td>
 				</tr>
 			</tbody>
 		</table>	
-		<div class="center"><ul wicket:id="membersPageNav"></ul></div>
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
 	</section>
 </wicket:extend>

@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.user.notifications;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
@@ -24,6 +25,7 @@ import com.pmease.commons.wicket.component.datatable.DefaultDataTable;
 import com.pmease.commons.wicket.component.datatable.EntityDataProvider;
 import com.pmease.commons.wicket.component.datatable.SelectionColumn;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Notification;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
@@ -31,6 +33,7 @@ import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
+import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -174,6 +177,14 @@ public class NotificationListPage extends AccountLayoutPage {
 			}
 			
 		});
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		if (account.isOrganization())
+			setResponsePage(AccountOverviewPage.class, paramsOf(account));
+		else
+			setResponsePage(NotificationListPage.class, paramsOf(account));
 	}
 
 }

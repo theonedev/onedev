@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.account.depots;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
@@ -11,6 +12,7 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -75,6 +77,11 @@ public class NewDepotPage extends AccountLayoutPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
 				NewDepotPage.class, "depot-list.css")));
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		setResponsePage(DepotListPage.class, paramsOf(account));
 	}
 
 }

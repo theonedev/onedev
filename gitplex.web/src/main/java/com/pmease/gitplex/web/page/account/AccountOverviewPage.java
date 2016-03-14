@@ -1,7 +1,9 @@
 package com.pmease.gitplex.web.page.account;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.page.organization.OrganizationOverviewPanel;
 import com.pmease.gitplex.web.page.user.UserOverviewPanel;
 
@@ -20,6 +22,11 @@ public class AccountOverviewPage extends AccountLayoutPage {
 			add(new OrganizationOverviewPanel("content", accountModel));
 		else
 			add(new UserOverviewPanel("content", accountModel));
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		setResponsePage(AccountOverviewPage.class, paramsOf(account));
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.user.organizations;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
@@ -82,6 +83,14 @@ public class NewOrganizationPage extends AccountLayoutPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
 				NewOrganizationPage.class, "organization-list.css")));
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		if (account.isOrganization())
+			setResponsePage(AccountOverviewPage.class, paramsOf(account));
+		else
+			setResponsePage(OrganizationListPage.class, paramsOf(account));
 	}
 
 }

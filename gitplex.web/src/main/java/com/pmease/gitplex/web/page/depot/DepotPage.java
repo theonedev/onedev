@@ -195,7 +195,6 @@ public abstract class DepotPage extends AccountPage {
 					
 				}, depotModel.getObject().getId()) {
 					
-
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Depot depot) {
 						DepotPage.this.onSelect(target, depot);

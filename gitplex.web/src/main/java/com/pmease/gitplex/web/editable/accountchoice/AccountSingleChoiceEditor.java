@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.userchoice;
+package com.pmease.gitplex.web.editable.accountchoice;
 
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -14,11 +14,11 @@ import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 
 @SuppressWarnings("serial")
-public class UserSingleChoiceEditor extends PropertyEditor<String> {
+public class AccountSingleChoiceEditor extends PropertyEditor<String> {
 
 	private AccountSingleChoice input;
 	
-	public UserSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public AccountSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 

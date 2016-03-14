@@ -20,6 +20,7 @@ import org.apache.wicket.util.upload.FileUploadException;
 
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.avatar.AvatarChanged;
 
@@ -108,6 +109,11 @@ public class AvatarEditPage extends AccountSettingPage {
 		
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(AvatarEditPage.class, "avatar-edit.css")));
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		setResponsePage(AvatarEditPage.class, paramsOf(account));
 	}
 	
 }

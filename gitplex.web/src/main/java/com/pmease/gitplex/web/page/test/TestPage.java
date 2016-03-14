@@ -1,6 +1,9 @@
 package com.pmease.gitplex.web.page.test;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxIndicatorAppender;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxLink;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
@@ -44,6 +47,31 @@ public class TestPage extends BasePage {
 					}
 					
 				}));
+				add(new AjaxButton("update") {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						target.add(form);
+					}
+					
+				}.add(new AjaxIndicatorAppender()));
+				
+				setOutputMarkupId(true);
+			}
+			
+		});
+		
+		add(new IndicatingAjaxLink<Void>("test") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 		});

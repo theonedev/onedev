@@ -83,9 +83,6 @@ textarea {
 #session-feedback li {
 	list-style: none;
 }
-form>.test-feedback {
-	margin-top: 16px;
-}
 
 /* Table navigator */
 table .navigator {
@@ -199,6 +196,22 @@ a.wicket_orderDown:AFTER {
 	padding-top: 16px;
 }
 
+/* Forms */
+form .required {
+	font-size: 16px; 
+	color: #B94A48;
+}
+form .form-group ul.feedbackPanel {
+	margin: 4px 0 0 -8px; 
+	padding-bottom: 0;
+}
+form .form-group li.feedbackPanelERROR {
+	color: #AA0000;
+}
+form>.test-feedback {
+	margin-top: 16px;
+}
+
 /* Editor and Viewer */
 .editable table.list {
 	margin-bottom: 0;
@@ -299,17 +312,6 @@ a.wicket_orderDown:AFTER {
 	margin-bottom: 12px;
 }
 
-.editor .required {
-	font-size: 16px; 
-	color: #B94A48;
-}
-.editor ul.feedbackPanel {
-	margin: 4px 0 0 -8px; 
-	padding-bottom: 0;
-}
-.editor li.feedbackPanelERROR {
-	color: #AA0000;
-}
 .editor .password-confirm {
 	margin-top: 12px;
 }

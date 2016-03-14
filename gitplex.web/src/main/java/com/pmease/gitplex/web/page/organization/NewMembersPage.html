@@ -1,0 +1,22 @@
+<wicket:extend>
+	<section class="member-add">
+		<div class="head">Add New Members</div>
+		<div class="body">
+			<form wicket:id="form">
+				<div wicket:id="users" class="form-group">
+					<label>Select Users</label> <span class="required">*</span>
+					<input wicket:id="users" type="hidden" class="form-control"></input>
+					<div wicket:id="feedback"></div>
+				</div>
+				<div wicket:id="role" class="role form-group"></div>
+				<div class="form-group">
+					<label>Optionally Add to Teams</label>
+					<input wicket:id="teams" type="hidden" class="form-control"></input>
+				</div>
+				<div class="actions">
+					<input type="submit" class="btn btn-primary" value="Add"></input>
+				</div>
+			</form>
+		</div>
+	</section>
+</wicket:extend>

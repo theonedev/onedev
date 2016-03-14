@@ -7,4 +7,30 @@
 .member-list .head>.pull-left {
 	margin-right: 20px;
 }
-
+.member-list table td.role {
+	width: 64px;
+}
+.role-selection {
+	padding: 8px;
+}
+.role-selection a {
+	padding: 4px;
+	display: block;
+	color: #666;
+	text-decoration: none;
+}
+.role-selection a .title {
+	font-weight: bold;
+	margin-bottom: 4px;
+}
+.role-selection>a:FIRST-CHILD {
+	margin-bottom: 8px;
+}
+.role-selection a:hover {
+	background: #F0F0F0;
+}
+.member-add .role label {
+	font-weight: normal;
+	margin-left: 8px;
+	vertical-align: middle;
+} 

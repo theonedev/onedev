@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -15,6 +16,7 @@ import com.pmease.commons.wicket.editable.reflection.ReflectionBeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.AccountSettingPage;
 
 @SuppressWarnings("serial")
@@ -73,6 +75,14 @@ public class PasswordEditPage extends AccountSettingPage {
 			}
 		}
 		
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		if (account.isOrganization())
+			setResponsePage(AccountOverviewPage.class, paramsOf(account));
+		else
+			setResponsePage(PasswordEditPage.class, paramsOf(account));
 	}
 	
 }

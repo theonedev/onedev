@@ -44,7 +44,9 @@ form>.actions>.btn {
 form>.actions>:last-child {
 	margin-right: 0;
 }
-.actions>a {margin-right: 8px;}
+.actions>a {
+	margin-right: 8px;
+}
 
 .nav-tabs>li>a {
 	color: #777;

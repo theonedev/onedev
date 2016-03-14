@@ -46,6 +46,11 @@ public abstract class AbstractEntityDao<T extends AbstractEntity> implements Ent
 	}
 
 	@Override
+	public EntityCriteria<T> newCriteria() {
+		return EntityCriteria.<T>of(entityClass);
+	}
+
+	@Override
 	public List<T> query(EntityCriteria<T> criteria, int firstResult, int maxResults) {
 		return dao.query(criteria, firstResult, maxResults);
 	}

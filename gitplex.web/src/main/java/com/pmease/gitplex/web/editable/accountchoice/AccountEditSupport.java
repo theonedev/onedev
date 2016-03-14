@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.editable.userchoice;
+package com.pmease.gitplex.web.editable.accountchoice;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -21,7 +21,7 @@ import com.pmease.commons.wicket.editable.PropertyViewer;
 import com.pmease.gitplex.core.annotation.UserChoice;
 
 @SuppressWarnings("serial")
-public class UserEditSupport implements EditSupport {
+public class AccountEditSupport implements EditSupport {
 
 	@Override
 	public BeanContext<?> getBeanEditContext(Class<?> beanClass, Set<String> excludeProperties) {
@@ -56,7 +56,7 @@ public class UserEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
-						return new UserMultiChoiceEditor(componentId, this, model);
+						return new AccountMultiChoiceEditor(componentId, this, model);
 					}
         			
         		};
@@ -81,12 +81,12 @@ public class UserEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new UserSingleChoiceEditor(componentId, this, model);
+						return new AccountSingleChoiceEditor(componentId, this, model);
 					}
         			
         		};
         	} else {
-        		throw new RuntimeException("Annotation 'UserChoice' should be applied to property with type 'Long' or 'List<Long>'.");
+        		throw new RuntimeException("Annotation 'UserChoice' should be applied to property with type 'String' or 'List<String>'.");
         	}
         } else {
             return null;

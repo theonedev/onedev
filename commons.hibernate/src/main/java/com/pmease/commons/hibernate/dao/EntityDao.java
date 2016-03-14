@@ -73,6 +73,8 @@ public interface EntityDao<T extends AbstractEntity> {
 	
 	List<T> all();
 	
+	EntityCriteria<T> newCriteria();
+	
 	/**
 	 * This method expects to lookup a single entity with specified criteria
 	 * 

@@ -7,13 +7,13 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
-import com.vaynberg.wicket.select2.ChoiceProvider;
+import com.pmease.gitplex.core.entity.Account;
 
 @SuppressWarnings("serial")
 public class TeamMultiChoice extends Select2MultiChoice<String> {
 
-	public TeamMultiChoice(String id, IModel<Collection<String>> model, ChoiceProvider<String> provider) {
-		super(id, model, provider);
+	public TeamMultiChoice(String id, IModel<Account> organizationModel, IModel<Collection<String>> teamsModel) {
+		super(id, teamsModel, new TeamChoiceProvider(organizationModel));
 	}
 
 	@Override

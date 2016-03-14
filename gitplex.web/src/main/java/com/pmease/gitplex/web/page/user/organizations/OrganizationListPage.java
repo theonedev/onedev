@@ -246,4 +246,12 @@ public class OrganizationListPage extends AccountLayoutPage {
 				OrganizationListPage.class, "organization-list.css")));
 	}
 
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		if (account.isOrganization())
+			setResponsePage(AccountOverviewPage.class, paramsOf(account));
+		else
+			setResponsePage(OrganizationListPage.class, paramsOf(account));
+	}
+
 }

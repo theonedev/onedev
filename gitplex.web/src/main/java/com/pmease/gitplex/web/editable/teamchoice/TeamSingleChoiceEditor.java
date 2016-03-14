@@ -10,7 +10,6 @@ import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamSingleChoice;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
@@ -27,17 +26,15 @@ public class TeamSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-    	TeamChoiceProvider teamProvider = new TeamChoiceProvider(new AbstractReadOnlyModel<Account>() {
+    	String team = getModelObject();
+    	input = new TeamSingleChoice("input", new AbstractReadOnlyModel<Account>() {
 
 			@Override
 			public Account getObject() {
 				return ((AccountPage)getPage()).getAccount();
 			}
-    		
-    	});
-
-    	String team = getModelObject();
-    	input = new TeamSingleChoice("input", Model.of(team), teamProvider, !getPropertyDescriptor().isPropertyRequired());
+			
+    	}, Model.of(team), !getPropertyDescriptor().isPropertyRequired());
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);

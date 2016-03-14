@@ -1,5 +1,8 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Collection;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import com.pmease.commons.hibernate.Transactional;
@@ -25,6 +28,20 @@ public class DefaultMembershipManager extends AbstractEntityDao<Membership> impl
 		if (membership.getOrganization().isNew())
 			accountManager.save(membership.getOrganization(), null);
 		persist(membership);
+	}
+
+	@Transactional
+	@Override
+	public void delete(Set<Membership> memberships) {
+		for (Membership membership: memberships)
+			remove(membership);
+	}
+
+	@Transactional
+	@Override
+	public void save(Collection<Membership> memberships) {
+		for (Membership membership: memberships)
+			persist(membership);
 	}
 
 }

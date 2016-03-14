@@ -16,7 +16,7 @@ import com.pmease.gitplex.web.page.account.AccountTab;
 import com.pmease.gitplex.web.page.user.setting.PasswordEditPage;
 
 @SuppressWarnings("serial")
-public class AccountSettingPage extends AccountLayoutPage {
+public abstract class AccountSettingPage extends AccountLayoutPage {
 
 	public AccountSettingPage(PageParameters params) {
 		super(params);
@@ -45,7 +45,8 @@ public class AccountSettingPage extends AccountLayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(AccountSettingPage.class, "account-setting.css")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(AccountSettingPage.class, "account-setting.css")));
 	}
 
 }

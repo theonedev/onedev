@@ -24,6 +24,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
@@ -217,6 +218,11 @@ public class DepotListPage extends AccountLayoutPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
 				DepotListPage.class, "depot-list.css")));
+	}
+
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		setResponsePage(DepotListPage.class, paramsOf(account));
 	}
 
 }

@@ -123,4 +123,9 @@ public class ProfileEditPage extends AccountSettingPage {
 		add(form);
 	}
 
+	@Override
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		setResponsePage(ProfileEditPage.class, paramsOf(account));
+	}
+
 }

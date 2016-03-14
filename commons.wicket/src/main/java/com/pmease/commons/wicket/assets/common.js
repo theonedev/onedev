@@ -142,7 +142,7 @@ pmease.commons = {
 			
 			if ($dirtyAware.length != 0) {
 				$form.addClass("ays-inited");
-				$dirtyAware.attr("disabled", "disabled");
+				pmease.commons.form.dirtyStateChanged($form);
 
 				$form.areYouSure({
 					"silent": !$form.hasClass("leave-confirm"),
@@ -160,11 +160,18 @@ pmease.commons = {
 			if ($dirtyAware.length != 0) {
 				if ($form.hasClass("dirty")) {
 					$dirtyAware.removeAttr("disabled");
-					$("body").append("<div class='dirty-alert'><span>There are unsaved changes</span> <a class='btn btn-sm btn-default'>Save</a></div>");
-					var $confirm = $("body>.dirty-alert");
-					$confirm.width($(window).width());
-					$confirm.css({left: 0, top: $(window).height()-$confirm.height()});
-					$confirm.find("a").click(function() {
+					if ($dirtyAware.is(":visible")) {
+						$("body").append("<div class='dirty-alert'><span>There are unsaved changes</span> <a class='btn btn-sm btn-default'>Save</a></div>");
+					} else {
+						var label = $dirtyAware.val();
+						if (label == "")
+							label = $dirtyAware.html();
+						$("body").append("<div class='dirty-alert'><a class='btn btn-sm btn-default'>" + label + "</a></div>");
+					}
+					var $dirtyAlert = $("body>.dirty-alert");
+					$dirtyAlert.width($(window).width());
+					$dirtyAlert.css({left: 0, top: $(window).height()-$dirtyAlert.height()});
+					$dirtyAlert.find("a").click(function() {
 						if ($._data($dirtyAware[0], 'events').click)
 							$dirtyAware.trigger("click");
 						else
@@ -189,7 +196,6 @@ pmease.commons = {
 				$forms.each(function() {
 					pmease.commons.form.trackDirty(this);
 				});
-				
 				$component.closest("form.ays-inited").not($component).trigger("checkform.areYouSure");
 			});
 			
@@ -212,7 +218,7 @@ pmease.commons = {
 			}
 			$(window).resize(function() {
 				$("body>.dirty-alert").each(function() {
-					$(this).css({top: $(window).height()-$confirm.height()});
+					$(this).css({top: $(window).height()-$(this).height()});
 					$(this).width($(window).width());
 				});
 			});
