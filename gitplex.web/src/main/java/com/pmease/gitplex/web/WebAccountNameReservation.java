@@ -20,14 +20,14 @@ import com.pmease.commons.jetty.JettyPlugin;
 import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
 
-public class WebUserNameReservation implements AccountNameReservation {
+public class WebAccountNameReservation implements AccountNameReservation {
 
 	private final JettyPlugin jettyPlugin;
 	
 	private final WicketConfig webApp;
 	
 	@Inject
-	public WebUserNameReservation(JettyPlugin jettyPlugin, WicketConfig webApp) {
+	public WebAccountNameReservation(JettyPlugin jettyPlugin, WicketConfig webApp) {
 		this.jettyPlugin = jettyPlugin;
 		this.webApp = webApp;
 	}

@@ -11,22 +11,22 @@ import org.json.JSONWriter;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
+import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.model.AffinalDepotsModel;
+import com.vaynberg.wicket.select2.ChoiceProvider;
+import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
-public class AffinalDepotChoiceProvider extends ListChoiceProvider<Depot> {
+public class AffinalDepotChoiceProvider extends ChoiceProvider<Depot> {
 
 	private final Long depotId;
 	
 	private IModel<List<Depot>> affinalDepotsModel;
 
 	public AffinalDepotChoiceProvider(Long repoId) {
-		super(Constants.DEFAULT_PAGE_SIZE);
-	
 		this.depotId = repoId;
 		affinalDepotsModel = new AffinalDepotsModel(repoId);
 	}
@@ -73,14 +73,14 @@ public class AffinalDepotChoiceProvider extends ListChoiceProvider<Depot> {
 	}
 
 	@Override
-	protected List<Depot> filterList(String term) {
+	public void query(String term, int page, Response<Depot> response) {
 		term = term.toLowerCase();
 		List<Depot> depots = new ArrayList<>();
 		for (Depot depot: getAffinalDepots()) {
 			if (depot.getOwner().getName().toLowerCase().startsWith(term))
 				depots.add(depot);
 		}
-		return depots;
+		new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
 	}
 	
 }

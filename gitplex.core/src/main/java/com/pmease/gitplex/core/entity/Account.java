@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
@@ -358,6 +359,16 @@ public class Account extends AbstractUser implements ProtectedObject {
 			return getFullName();
 		else
 			return getName();
+	}
+	
+	public boolean matches(@Nullable String searchTerm) {
+		if (searchTerm == null)
+			searchTerm = "";
+		else
+			searchTerm = searchTerm.toLowerCase().trim();
+		
+		return getName().toLowerCase().contains(searchTerm) 
+				|| fullName!=null && fullName.toLowerCase().contains(searchTerm);
 	}
 
 	public boolean isAdministrator() {

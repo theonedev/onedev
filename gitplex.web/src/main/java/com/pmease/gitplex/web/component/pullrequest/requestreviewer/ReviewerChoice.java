@@ -45,11 +45,10 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		// getSettings().setMinimumInputLength(1);
 		getSettings().setPlaceholder(PLACEHOLDER);
-		getSettings().setFormatResult("gitplex.userChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("gitplex.userChoiceFormatter.formatSelection");
-		getSettings().setEscapeMarkup("gitplex.userChoiceFormatter.escapeMarkup");
+		getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
+		getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
+		getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");
 	}
 
 	@Override

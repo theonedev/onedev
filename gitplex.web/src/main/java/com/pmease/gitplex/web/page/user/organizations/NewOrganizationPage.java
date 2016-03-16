@@ -6,6 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -27,10 +28,15 @@ public class NewOrganizationPage extends AccountLayoutPage {
 
 	private final Membership membership;
 	
-	public NewOrganizationPage(Membership membership) {
-		super(paramsOf(membership.getUser()));
+	public NewOrganizationPage(PageParameters params) {
+		super(params);
 		
-		this.membership = membership;
+		Account organization = new Account();
+		organization.setOrganization(true);
+		membership = new Membership();
+		membership.setAdmin(true);
+		membership.setUser(getAccount());
+		membership.setOrganization(organization);
 	}
 
 	@Override

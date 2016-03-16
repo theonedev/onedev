@@ -12,6 +12,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Membership;
@@ -50,17 +51,7 @@ public class NonMemberChoiceProvider extends AccountChoiceProvider {
 				nonMembers.add(user);
 		}
 
-		int from = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
-		int to = from + Constants.DEFAULT_SELECT2_PAGE_SIZE;
-		
-		if (to > nonMembers.size()) {
-			to = nonMembers.size();
-		} 
-		if (from > to) {
-			from = to;
-		}
-		response.addAll(nonMembers.subList(from, to));
-		response.setHasMore(to<nonMembers.size());
+		new ResponseFiller<Account>(response).fill(nonMembers, page, Constants.DEFAULT_PAGE_SIZE);
 	}
 
 	@Override

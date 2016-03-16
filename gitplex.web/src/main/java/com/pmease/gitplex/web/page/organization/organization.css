@@ -1,14 +1,15 @@
-.member-list .head {
+.memberlist .head, .team-list .head {
 	margin-bottom: 20px;
 }
-.member-list .head .search {
+.member-list .head .search, .team-list .head .search {
 	width: 250px;
 }
-.member-list .head>.pull-left {
+.member-list .head>.pull-left, .team-list .head>.pull-left {
 	margin-right: 20px;
 }
-.member-list table td.role {
-	width: 64px;
+.member-list table td.actions, .team-list table td.actions {
+	width: 130px;
+	white-space: nowrap;
 }
 .role-selection {
 	padding: 8px;
@@ -34,3 +35,4 @@
 	margin-left: 8px;
 	vertical-align: middle;
 } 
+

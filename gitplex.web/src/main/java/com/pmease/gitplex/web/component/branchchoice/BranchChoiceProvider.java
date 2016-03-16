@@ -39,8 +39,8 @@ public class BranchChoiceProvider extends ChoiceProvider<String> {
 		
 		Collections.sort(branches);
 
-		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
-		int last = first + Constants.DEFAULT_SELECT2_PAGE_SIZE;
+		int first = page * Constants.DEFAULT_PAGE_SIZE;
+		int last = first + Constants.DEFAULT_PAGE_SIZE;
 		response.setHasMore(last<branches.size());
 		if (last > branches.size())
 			last = branches.size();

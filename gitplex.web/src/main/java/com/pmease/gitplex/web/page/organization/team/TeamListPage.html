@@ -1,0 +1,39 @@
+<wicket:extend>
+	<section class="team-list">
+		<div class="head clearfix">
+			<div class="pull-left search">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input wicket:id="searchTeams" class="form-control" placeholder="Search teams"></input>
+				</div>
+			</div>
+			<div class="pull-left actions">
+				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+			</div>
+		</div>
+		<table wicket:id="teams" class="teams table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">Name</th>
+					<th class="members">Members</th>
+					<th class="actions"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="teams">
+					<td class="name">
+						<a wicket:id="link"><span wicket:id="name"></span></a>
+					</td>
+					<td class="members">
+						<span wicket:id="members"><span wicket:id="avatar"></span> </span> <a wicket:id="more">and more</a>
+					</td>
+					<td class="actions">
+						<a wicket:id="delete" title="Delete this team"><i class="fa fa-trash"></i></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>	
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
+		<div wicket:id="noTeams" class="alert alert-info">No teams found</div>
+	</section>
+</wicket:extend>

@@ -40,32 +40,20 @@ public class DefaultTeamManager implements TeamManager, DepotListener {
 
 	@Transactional
 	@Override
-	public void rename(Account organization, String oldTeamName, String newTeamName) {
-		if (!oldTeamName.equals(newTeamName)) {
-			if (!organization.getTeams().containsKey(oldTeamName)) {
-				throw new RuntimeException("Unable to find team to rename: " + oldTeamName);
+	public void save(Account organization, Team team, String oldTeamName) {
+		if (oldTeamName != null && !oldTeamName.equals(team.getName())) {
+			if (organization.getTeams().remove(oldTeamName) == null) {
+				throw new RuntimeException("Unable to find original team: " + oldTeamName);
 			}
-			if (organization.getTeams().containsKey(newTeamName)) {
-				throw new RuntimeException("Team with name '" + newTeamName + "' already exists");
+			if (organization.getTeams().put(team.getName(), team) != null) {
+				throw new RuntimeException("Team with name '" + team.getName() + "' already exists");				
 			}
-			
-			LinkedHashMap<String, Team> teams = new LinkedHashMap<>();
-			for (Map.Entry<String, Team> entry: organization.getTeams().entrySet()) {
-				if (entry.getKey().equals(oldTeamName)) {
-					Team team = entry.getValue();
-					team.setName(newTeamName);
-					teams.put(newTeamName, team);
-				} else {
-					teams.put(entry.getKey(), entry.getValue());
-				}
-			}
-			organization.setTeams(teams);
 
 			for (Membership membership: organization.getUserMemberships()) {
 				LinkedHashSet<String> joinedTeams = new LinkedHashSet<>();
 				for (String teamName: membership.getJoinedTeams()) {
 					if (teamName.equals(oldTeamName))
-						joinedTeams.add(newTeamName);
+						joinedTeams.add(team.getName());
 					else
 						joinedTeams.add(teamName);
 				}
@@ -74,8 +62,12 @@ public class DefaultTeamManager implements TeamManager, DepotListener {
 			
 			for (Depot depot: organization.getDepots()) {
 				for (GateKeeper gateKeeper: depot.getGateKeepers()) {
-					gateKeeper.onTeamRename(oldTeamName, newTeamName);
+					gateKeeper.onTeamRename(oldTeamName, team.getName());
 				}
+			}
+		} else {
+			if (organization.getTeams().put(team.getName(), team) != null) {
+				throw new RuntimeException("Team with name '" + team.getName() + "' already exists");
 			}
 		}
 	}

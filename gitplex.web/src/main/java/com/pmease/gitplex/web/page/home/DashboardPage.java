@@ -34,6 +34,7 @@ import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {
@@ -114,7 +115,7 @@ public class DashboardPage extends LayoutPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("usersPageNav", usersView) {
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("usersPageNav", usersView) {
 
 			@Override
 			protected void onConfigure() {

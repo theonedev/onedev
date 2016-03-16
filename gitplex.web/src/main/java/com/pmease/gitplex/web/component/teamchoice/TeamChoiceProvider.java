@@ -8,7 +8,9 @@ import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
+import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.web.Constants;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
@@ -16,8 +18,6 @@ public class TeamChoiceProvider extends ChoiceProvider<String> {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int PAGE_SIZE = 10;
-	
 	private final IModel<Account> organizationModel;
 		
 	public TeamChoiceProvider(IModel<Account> organizationModel) {
@@ -34,14 +34,8 @@ public class TeamChoiceProvider extends ChoiceProvider<String> {
 				teams.add(teamName);
 			}
 		}
-		int from = page*PAGE_SIZE;
-		int to = from + PAGE_SIZE;
-		if (to > teams.size())
-			to = teams.size();
-		if (from > to)
-			from = to;
-		response.addAll(teams.subList(from, to));
-		response.setHasMore(teams.size()>to);
+		
+		new ResponseFiller<String>(response).fill(teams, page, Constants.DEFAULT_PAGE_SIZE);
 	}
 
 	@Override

@@ -20,23 +20,23 @@ import org.json.JSONWriter;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.commons.wicket.component.select2.ListChoiceProvider;
+import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
+import com.vaynberg.wicket.select2.ChoiceProvider;
+import com.vaynberg.wicket.select2.Response;
 
 @SuppressWarnings("serial")
-public class DepotChoiceProvider extends ListChoiceProvider<Depot> {
+public class DepotChoiceProvider extends ChoiceProvider<Depot> {
 
 	private final IModel<Account> userModel;
 	
 	private final IModel<List<Depot>> repositoriesModel;
 	
 	public DepotChoiceProvider(final @Nullable IModel<Account> userModel) {
-		super(Constants.DEFAULT_PAGE_SIZE);
-		
 		this.userModel = userModel;
 		
 		repositoriesModel = new LoadableDetachableModel<List<Depot>>() {
@@ -114,7 +114,7 @@ public class DepotChoiceProvider extends ListChoiceProvider<Depot> {
 	}
 
 	@Override
-	protected List<Depot> filterList(String term) {
+	public void query(String term, int page, Response<Depot> response) {
 		term = term.toLowerCase();
 		String userName;
 		String depotName;
@@ -136,7 +136,7 @@ public class DepotChoiceProvider extends ListChoiceProvider<Depot> {
 				depots.add(depot);
 			}
 		}
-		return depots;
+		new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
 	}
 	
 }

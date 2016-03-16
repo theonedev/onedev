@@ -1,6 +1,9 @@
 package com.pmease.gitplex.core.manager;
 
+import javax.annotation.Nullable;
+
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.component.Team;
 
 public interface TeamManager {
 	/**
@@ -14,14 +17,14 @@ public interface TeamManager {
 	void delete(Account organization, String teamName);
 	
 	/**
-	 * Rename specified team in specified organization
+	 * Save specified team in specified organization
 	 * 
 	 * @param organization
 	 * 			organization to rename team in
+	 * @param team
+	 * 			team to save
 	 * @param oldTeamName
 	 * 			old name of the team which should exist in the organization
-	 * @param newTeamName
-	 * 			new name of the team
 	 */
-	void rename(Account organization, String oldTeamName, String newTeamName);
+	void save(Account organization, Team team, @Nullable String oldTeamName);
 }

@@ -34,6 +34,7 @@ import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class UserListPage extends AdministrationPage {
@@ -173,7 +174,7 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("usersPageNav", usersView) {
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("usersPageNav", usersView) {
 
 			@Override
 			protected void onConfigure() {

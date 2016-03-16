@@ -23,7 +23,7 @@ import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.organization.MemberListPage;
 import com.pmease.gitplex.web.page.organization.NewMembersPage;
-import com.pmease.gitplex.web.page.organization.TeamListPage;
+import com.pmease.gitplex.web.page.organization.team.TeamListPage;
 import com.pmease.gitplex.web.page.user.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.user.organizations.OrganizationListPage;
 import com.pmease.gitplex.web.page.user.setting.PasswordEditPage;

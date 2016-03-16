@@ -28,6 +28,13 @@ public class DefaultMembershipManager extends AbstractEntityDao<Membership> impl
 		if (membership.getOrganization().isNew())
 			accountManager.save(membership.getOrganization(), null);
 		persist(membership);
+		
+		/* 
+		 * below statement makes sure that organization is not updated
+		 * while we edit the membership to add users to organization 
+		 * teams 
+		 */
+		persist(membership.getOrganization());
 	}
 
 	@Transactional

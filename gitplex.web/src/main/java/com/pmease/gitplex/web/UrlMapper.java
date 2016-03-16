@@ -11,17 +11,17 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.util.validation.DepotNameValidator;
 import com.pmease.gitplex.core.util.validation.AccountNameValidator;
+import com.pmease.gitplex.core.util.validation.DepotNameValidator;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.admin.UserListPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.admin.NewUserPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
+import com.pmease.gitplex.web.page.admin.UserListPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
@@ -42,6 +42,11 @@ import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.organization.MemberListPage;
 import com.pmease.gitplex.web.page.organization.MembershipPage;
 import com.pmease.gitplex.web.page.organization.NewMembersPage;
+import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
+import com.pmease.gitplex.web.page.organization.team.TeamDepotListPage;
+import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
+import com.pmease.gitplex.web.page.organization.team.TeamListPage;
+import com.pmease.gitplex.web.page.organization.team.TeamMemberListPage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
@@ -152,6 +157,11 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("${account}/members", MemberListPage.class));
 		add(new MountedMapper("${account}/members/${membership}", MembershipPage.class));
 		add(new MountedMapper("${account}/members/new", NewMembersPage.class));
+		add(new MountedMapper("${account}/teams", TeamListPage.class));
+		add(new MountedMapper("${account}/teams/new", NewTeamPage.class));
+		add(new MountedMapper("${account}/teams/{team}/edit", TeamEditPage.class));
+		add(new MountedMapper("${account}/teams/{team}/members", TeamMemberListPage.class));
+		add(new MountedMapper("${account}/teams/{team}/depots", TeamDepotListPage.class));
 	}
 	
 	private void addDepotPages() {

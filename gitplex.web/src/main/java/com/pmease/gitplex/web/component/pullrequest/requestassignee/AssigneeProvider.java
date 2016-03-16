@@ -62,8 +62,8 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 				assignees.add(0, new Assignee(currentUser, "Me"));
 		}
 
-		int first = page * Constants.DEFAULT_SELECT2_PAGE_SIZE;
-		int last = first + Constants.DEFAULT_SELECT2_PAGE_SIZE;
+		int first = page * Constants.DEFAULT_PAGE_SIZE;
+		int last = first + Constants.DEFAULT_PAGE_SIZE;
 		if (last > assignees.size()) {
 			response.addAll(assignees.subList(first, assignees.size()));
 		} else {

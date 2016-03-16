@@ -34,6 +34,7 @@ import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class OrganizationListPage extends AccountLayoutPage {
@@ -85,13 +86,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 
 			@Override
 			public void onClick() {
-				Account organization = new Account();
-				organization.setOrganization(true);
-				Membership membership = new Membership();
-				membership.setAdmin(true);
-				membership.setUser(getAccount());
-				membership.setOrganization(organization);
-				setResponsePage(new NewOrganizationPage(membership));
+				setResponsePage(NewOrganizationPage.class, NewOrganizationPage.paramsOf(getAccount()));
 			}
 			
 		});
@@ -182,20 +177,6 @@ public class OrganizationListPage extends AccountLayoutPage {
 				}
 				item.add(new Label("role", role));
 				
-				item.add(new Link<Void>("join") {
-
-					@Override
-					public void onClick() {
-					}
-					
-				});
-				item.add(new Link<Void>("leave") {
-
-					@Override
-					public void onClick() {
-					}
-					
-				});
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -227,7 +208,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("pageNav", organizationsView) {
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", organizationsView) {
 
 			@Override
 			protected void onConfigure() {

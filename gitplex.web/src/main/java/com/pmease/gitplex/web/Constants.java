@@ -13,8 +13,6 @@ public class Constants {
 
 	public static final int DEFAULT_PAGE_SIZE = 25;
 	
-	public static final int DEFAULT_SELECT2_PAGE_SIZE = 25;
-
 	/* diff constants */
 	public static final int DIFF_EXPAND_SIZE = 15;
 	public static final int MAX_DIFF_FILES = 200;

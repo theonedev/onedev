@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
@@ -52,7 +51,7 @@ public class MembershipPage extends AccountLayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(MembershipPage.class, "organization.css")));
+		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
 	@Override

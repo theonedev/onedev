@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 
 /**
@@ -12,6 +16,7 @@ import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
  * 1+N database calls if the user belongs to N teams.
  *
  */
+@Editable
 public class Team implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -22,6 +27,8 @@ public class Team implements Serializable {
 
 	private Map<String, DepotPrivilege> authorizations = new LinkedHashMap<>();
 
+	@Editable(order=100)
+	@NotEmpty
 	public String getName() {
 		return name;
 	}
@@ -30,6 +37,8 @@ public class Team implements Serializable {
 		this.name = name;
 	}
 
+	@Editable(order=200, description="Optionally describe the team")
+	@Markdown
 	public String getDescription() {
 		return description;
 	}

@@ -25,7 +25,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
@@ -42,6 +41,7 @@ import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
+import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class MemberListPage extends AccountLayoutPage {
@@ -55,6 +55,8 @@ public class MemberListPage extends AccountLayoutPage {
 	private BootstrapPagingNavigator pagingNavigator;
 	
 	private WebMarkupContainer membersContainer; 
+	
+	private WebMarkupContainer noMembersContainer;
 	
 	private String role;
 	
@@ -84,6 +86,7 @@ public class MemberListPage extends AccountLayoutPage {
 			protected void onTypingDone(AjaxRequestTarget target) {
 				target.add(membersContainer);
 				target.add(pagingNavigator);
+				target.add(noMembersContainer);
 			}
 			
 		});
@@ -121,6 +124,7 @@ public class MemberListPage extends AccountLayoutPage {
 						target.add(filterContainer);
 						target.add(membersContainer);
 						target.add(pagingNavigator);
+						target.add(noMembersContainer);
 					}
 
 					@Override
@@ -130,6 +134,7 @@ public class MemberListPage extends AccountLayoutPage {
 						target.add(filterContainer);
 						target.add(membersContainer);
 						target.add(pagingNavigator);
+						target.add(noMembersContainer);
 					}
 					
 				};
@@ -143,6 +148,7 @@ public class MemberListPage extends AccountLayoutPage {
 				target.add(filterContainer);
 				target.add(membersContainer);
 				target.add(pagingNavigator);
+				target.add(noMembersContainer);
 			}
 
 			@Override
@@ -173,16 +179,17 @@ public class MemberListPage extends AccountLayoutPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Set<Membership> membershipsToRemove = new HashSet<>();
-				for (Membership membership: getAccount().getUserMemberships()) {
-					if (pendingRemovals.contains(membership.getId()))
-						membershipsToRemove.add(membership);
+				Set<Membership> memberships = new HashSet<>();
+				MembershipManager membershipManager = GitPlex.getInstance(MembershipManager.class);
+				for (Long pendingRemoval: pendingRemovals) {
+					memberships.add(membershipManager.load(pendingRemoval));
 				}
-				GitPlex.getInstance(MembershipManager.class).delete(membershipsToRemove);
+				GitPlex.getInstance(MembershipManager.class).delete(memberships);
 				pendingRemovals.clear();
 				target.add(this);
 				target.add(pagingNavigator);
 				target.add(membersContainer);
+				target.add(noMembersContainer);
 			}
 
 			@Override
@@ -213,20 +220,9 @@ public class MemberListPage extends AccountLayoutPage {
 			protected List<Membership> load() {
 				List<Membership> memberships = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-				
 				for (Membership membership: getAccount().getUserMemberships()) {
 					Account user = membership.getUser();
-					String fullName = user.getFullName();
-					if (fullName == null)
-						fullName = "";
-					else
-						fullName = fullName.toLowerCase();
-					if ((user.getName().toLowerCase().contains(searchInput) || fullName.contains(searchInput))) {
+					if (user.matches(searchField.getInput())) {
 						if (role == null 
 								|| role.equals(ROLE_ADMIN) && membership.isAdmin() 
 								|| role.equals(ROLE_MEMBER) && !membership.isAdmin()) {
@@ -307,21 +303,21 @@ public class MemberListPage extends AccountLayoutPage {
 							@Override
 							protected void onSelectMember(AjaxRequestTarget target) {
 								close();
-								Membership membership = item.getModelObject();
 								membership.setAdmin(false);
 								GitPlex.getInstance(MembershipManager.class).save(membership);
 								target.add(pagingNavigator);
 								target.add(membersContainer);
+								target.add(noMembersContainer);
 							}
 							
 							@Override
 							protected void onSelectAdmin(AjaxRequestTarget target) {
 								close();
-								Membership membership = item.getModelObject();
 								membership.setAdmin(true);
 								GitPlex.getInstance(MembershipManager.class).save(membership);
 								target.add(pagingNavigator);
 								target.add(membersContainer);
+								target.add(noMembersContainer);
 							}
 							
 						};
@@ -337,7 +333,7 @@ public class MemberListPage extends AccountLayoutPage {
 						Account user = item.getModelObject().getUser();
 						setVisible(SecurityUtils.canManage(getAccount()) 
 								&& !user.equals(getLoginUser())
-								&& pendingRemovals.contains(item.getModelObject().getId()));
+								&& !pendingRemovals.contains(item.getModelObject().getId()));
 					}
 
 					@Override
@@ -373,24 +369,12 @@ public class MemberListPage extends AccountLayoutPage {
 					}
 					
 				});
-
-				item.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						if (pendingRemovals.contains(item.getModelObject().getId()))
-							return "pending-removal";
-						else
-							return "";
-					}
-					
-				}));
 				item.setOutputMarkupId(true);
 			}
 			
 		});
 
-		add(pagingNavigator = new BootstrapPagingNavigator("pageNav", membersView) {
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", membersView) {
 
 			@Override
 			protected void onConfigure() {
@@ -400,13 +384,24 @@ public class MemberListPage extends AccountLayoutPage {
 			
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
+		
+		noMembersContainer = new WebMarkupContainer("noMembers") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(membersView.getModelObject().isEmpty());
+			}
+			
+		};
+		noMembersContainer.setOutputMarkupPlaceholderTag(true);
+		add(noMembersContainer);
 	}
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				MemberListPage.class, "organization.css")));
+		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
 	@Override
