@@ -157,7 +157,6 @@ public class TeamListPage extends AccountLayoutPage {
 			@Override
 			protected void populateItem(ListItem<Team> item) {
 				Team team = item.getModelObject();
-				Long version = getAccount().getVersion();
 				
 				Link<Void> link = new BookmarkablePageLink<>("link", TeamPage.class, 
 						TeamPage.paramsOf(getAccount(), team)); 
@@ -172,7 +171,7 @@ public class TeamListPage extends AccountLayoutPage {
 					}
 				}
 				item.add(membersView);
-				if (count <= MAX_MEMBERS) {
+				if (count > MAX_MEMBERS) {
 					item.add(new Link<Void>("more") {
 	
 						@Override
@@ -204,10 +203,13 @@ public class TeamListPage extends AccountLayoutPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Account organization = getAccount();
-						if (organization.getVersion() != version) {
+						if (organization.getVersion() != accountVersion) {
 							throw new StaleObjectStateException(Account.class.getName(), organization.getId());
 						}
 						GitPlex.getInstance(TeamManager.class).delete(organization, team.getName());
+						target.add(teamsContainer);
+						target.add(noTeamsContainer);
+						target.add(pagingNavigator);
 					}
 					
 				});

@@ -64,12 +64,8 @@ public class TeamMemberListPage extends TeamPage {
 	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
-	private long version;
-	
 	public TeamMemberListPage(PageParameters params) {
 		super(params);
-		
-		version = getAccount().getVersion();
 		
 		Preconditions.checkState(getAccount().isOrganization());
 	}
@@ -183,7 +179,7 @@ public class TeamMemberListPage extends TeamPage {
 			protected void onSelect(AjaxRequestTarget target, Membership selection) {
 				// with below check, it is impossible to add users to a team that has just been 
 				// deleted
-				if (version != selection.getOrganization().getVersion()) {
+				if (accountVersion != selection.getOrganization().getVersion()) {
 					throw new StaleObjectStateException(Membership.class.getName(), selection.getId());
 				}
 				selection.getJoinedTeams().add(team.getName());

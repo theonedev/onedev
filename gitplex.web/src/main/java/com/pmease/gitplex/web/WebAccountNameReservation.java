@@ -45,6 +45,7 @@ public class WebAccountNameReservation implements AccountNameReservation {
 		}
 		
 		reserved.add("wicket");
+		reserved.add("new");
 		
 		for (IRequestMapper mapper: webApp.getRequestMappers()) {
 			Set<String> set = getReservedNames(mapper);

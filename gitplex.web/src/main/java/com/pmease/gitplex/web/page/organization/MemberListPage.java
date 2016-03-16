@@ -250,8 +250,8 @@ public class MemberListPage extends AccountLayoutPage {
 
 				item.add(new Avatar("avatar", membership.getUser()));
 				
-				Link<Void> link = new BookmarkablePageLink<>("link", MembershipPage.class, 
-						MembershipPage.paramsOf(membership)); 
+				Link<Void> link = new BookmarkablePageLink<>("link", MemberPage.class, 
+						MemberPage.paramsOf(membership)); 
 				link.add(new Label("name", membership.getUser().getName()));
 				item.add(link);
 						

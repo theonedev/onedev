@@ -40,11 +40,11 @@ import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPo
 import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.organization.MemberListPage;
-import com.pmease.gitplex.web.page.organization.MembershipPage;
+import com.pmease.gitplex.web.page.organization.MemberPage;
 import com.pmease.gitplex.web.page.organization.NewMembersPage;
 import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
 import com.pmease.gitplex.web.page.organization.team.TeamDepotListPage;
-import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
+import com.pmease.gitplex.web.page.organization.team.TeamSettingPage;
 import com.pmease.gitplex.web.page.organization.team.TeamListPage;
 import com.pmease.gitplex.web.page.organization.team.TeamMemberListPage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
@@ -71,7 +71,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		addOrganizationPages();
 		addSecurityPages();
 		
-		add(new MountedMapper("/test", TestPage.class));
+		add(new MountedMapper("test", TestPage.class));
 		add(new MountedMapper("runmode", RunModePage.class));
 		
 		addResources();
@@ -114,8 +114,8 @@ public class UrlMapper extends CompoundRequestMapper {
 	private void addAdministrationPages() {
 		add(new MountedMapper("administration/users", UserListPage.class));
 		add(new MountedMapper("administration/users/new", NewUserPage.class));
-		add(new MountedMapper("administration/mail-setting", MailSettingPage.class));
-		add(new MountedMapper("administration/system-setting", SystemSettingPage.class));
+		add(new MountedMapper("administration/settings/system", SystemSettingPage.class));
+		add(new MountedMapper("administration/settings/mail", MailSettingPage.class));
 	}
 	
 	public List<String> normalize(List<String> urlSegments) {
@@ -143,25 +143,25 @@ public class UrlMapper extends CompoundRequestMapper {
 
 		});
 		
-		add(new MountedMapper("${account}/depots", DepotListPage.class));
-		add(new MountedMapper("${account}/depots/new", NewDepotPage.class));
-		add(new MountedMapper("${account}/organizations", OrganizationListPage.class));
-		add(new MountedMapper("${account}/organizations/new", NewOrganizationPage.class));
-		add(new MountedMapper("${account}/notifications", NotificationListPage.class));
-		add(new MountedMapper("${account}/setting/profile", ProfileEditPage.class));
-		add(new MountedMapper("${account}/setting/avatar", AvatarEditPage.class));
-		add(new MountedMapper("${account}/setting/password", PasswordEditPage.class));
+		add(new MountedMapper("accounts/${account}/depots", DepotListPage.class));
+		add(new MountedMapper("accounts/${account}/depots/new", NewDepotPage.class));
+		add(new MountedMapper("accounts/${account}/organizations", OrganizationListPage.class));
+		add(new MountedMapper("accounts/${account}/organizations/new", NewOrganizationPage.class));
+		add(new MountedMapper("accounts/${account}/notifications", NotificationListPage.class));
+		add(new MountedMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
+		add(new MountedMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));
+		add(new MountedMapper("accounts/${account}/settings/password", PasswordEditPage.class));
 	}
 
 	private void addOrganizationPages() {
-		add(new MountedMapper("${account}/members", MemberListPage.class));
-		add(new MountedMapper("${account}/members/${membership}", MembershipPage.class));
-		add(new MountedMapper("${account}/members/new", NewMembersPage.class));
-		add(new MountedMapper("${account}/teams", TeamListPage.class));
-		add(new MountedMapper("${account}/teams/new", NewTeamPage.class));
-		add(new MountedMapper("${account}/teams/{team}/edit", TeamEditPage.class));
-		add(new MountedMapper("${account}/teams/{team}/members", TeamMemberListPage.class));
-		add(new MountedMapper("${account}/teams/{team}/depots", TeamDepotListPage.class));
+		add(new MountedMapper("accounts/${account}/members", MemberListPage.class));
+		add(new MountedMapper("accounts/${account}/members/${member}", MemberPage.class));
+		add(new MountedMapper("accounts/${account}/members/new", NewMembersPage.class));
+		add(new MountedMapper("accounts/${account}/teams", TeamListPage.class));
+		add(new MountedMapper("accounts/${account}/teams/new", NewTeamPage.class));
+		add(new MountedMapper("accounts/${account}/teams/${team}/setting", TeamSettingPage.class));
+		add(new MountedMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
+		add(new MountedMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
 	}
 	
 	private void addDepotPages() {
@@ -202,10 +202,9 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper(
 				"${account}/${depot}/pulls/${request}/attachments", RequestAttachmentsPage.class));
 
-		add(new MountedMapper("${account}/${depot}/setting", GeneralSettingPage.class));
-		add(new MountedMapper("${account}/${depot}/setting/general", GeneralSettingPage.class));
-		add(new MountedMapper("${account}/${depot}/setting/gate-keeper", GateKeeperPage.class));
-		add(new MountedMapper("${account}/${depot}/setting/integration-policy", IntegrationPolicyPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
 		
 		add(new MountedMapper("${account}/${depot}/no-commits", NoCommitsPage.class));
 	}

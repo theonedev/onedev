@@ -10,13 +10,18 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.StaleObjectStateException;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.wicket.ConfirmOnClick;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.component.Team;
+import com.pmease.gitplex.core.manager.TeamManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
@@ -25,12 +30,12 @@ import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 public abstract class TeamPage extends AccountLayoutPage {
 
 	private static final String PARAM_TEAM = "team";
-	
+
 	protected final Team team;
 	
 	public TeamPage(PageParameters params) {
 		super(params);
-	
+
 		String teamName = params.get(PARAM_TEAM).toString();
 		team = Preconditions.checkNotNull(getAccount().getTeams().get(teamName));
 		Preconditions.checkState(getAccount().isOrganization());
@@ -48,15 +53,42 @@ public abstract class TeamPage extends AccountLayoutPage {
 
 		add(new Label("teamName", team.getName()));
 		add(new MarkdownViewer("teamDescription", Model.of(team.getDescription()), false));
-		add(new Link<Void>("editTeam") {
+		add(new Link<Void>("teamSetting") {
 
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				setVisible(SecurityUtils.canManage(getAccount()));
+			}
+			
 			@Override
 			public void onClick() {
 				Account organization = getAccount();
-				setResponsePage(TeamEditPage.class, TeamEditPage.paramsOf(organization, team));
+				setResponsePage(TeamSettingPage.class, TeamSettingPage.paramsOf(organization, team));
 			}
 			
 		});
+		add(new Link<Void>("deleteTeam") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				setVisible(SecurityUtils.canManage(getAccount()));
+			}
+			
+			@Override
+			public void onClick() {
+				Account organization = getAccount();
+				if (organization.getVersion() != accountVersion) {
+					throw new StaleObjectStateException(Account.class.getName(), organization.getId());
+				}
+				GitPlex.getInstance(TeamManager.class).delete(organization, team.getName());
+				setResponsePage(TeamListPage.class, TeamListPage.paramsOf(getAccount()));
+			}
+
+		}.add(new ConfirmOnClick("Do you really want to delete this team?")));
 		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new PageTab(Model.of("Members"), TeamMemberListPage.class));

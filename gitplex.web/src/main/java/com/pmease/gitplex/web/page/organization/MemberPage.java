@@ -11,26 +11,30 @@ import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.MembershipManager;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 
 @SuppressWarnings("serial")
-public class MembershipPage extends AccountLayoutPage {
+public class MemberPage extends AccountLayoutPage {
 
-	private static final String PARAM_MEMBERSHIP = "membership";
+	private static final String PARAM_MEMBER = "member";
 	
 	private final IModel<Membership> membershipModel;
 	
-	public MembershipPage(PageParameters params) {
+	public MemberPage(PageParameters params) {
 		super(params);
 		
 		Preconditions.checkState(getAccount().isOrganization());
+		
+		String userName = params.get(PARAM_MEMBER).toString();
+		Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).findByName(userName));
 		membershipModel = new LoadableDetachableModel<Membership>() {
 
 			@Override
 			protected Membership load() {
-				return GitPlex.getInstance(MembershipManager.class).load(params.get(PARAM_MEMBERSHIP).toLong());
+				return Preconditions.checkNotNull(GitPlex.getInstance(MembershipManager.class).find(getAccount(), user));
 			}
 			
 		};
@@ -38,7 +42,7 @@ public class MembershipPage extends AccountLayoutPage {
 
 	public static PageParameters paramsOf(Membership membership) {
 		PageParameters params = paramsOf(membership.getOrganization());
-		params.set(PARAM_MEMBERSHIP, membership.getId());
+		params.set(PARAM_MEMBER, membership.getUser().getName());
 		return params;
 	}
 	

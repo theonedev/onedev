@@ -5,9 +5,13 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.hibernate.criterion.Restrictions;
+
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.MembershipManager;
@@ -49,6 +53,13 @@ public class DefaultMembershipManager extends AbstractEntityDao<Membership> impl
 	public void save(Collection<Membership> memberships) {
 		for (Membership membership: memberships)
 			persist(membership);
+	}
+
+	@Override
+	public Membership find(Account organization, Account user) {
+		EntityCriteria<Membership> criteria = newCriteria();
+		criteria.add(Restrictions.eq("organization", organization)).add(Restrictions.eq("user", user));
+		return find(criteria);
 	}
 
 }

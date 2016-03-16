@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.util.validation.DepotName;
 
 /**
  * Team and its authorizations are designed as serializable objects living in 
@@ -28,6 +29,7 @@ public class Team implements Serializable {
 	private Map<String, DepotPrivilege> authorizations = new LinkedHashMap<>();
 
 	@Editable(order=100)
+	@DepotName
 	@NotEmpty
 	public String getName() {
 		return name;

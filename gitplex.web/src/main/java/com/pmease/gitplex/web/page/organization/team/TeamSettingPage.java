@@ -22,7 +22,7 @@ import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 
 @SuppressWarnings("serial")
-public class TeamEditPage extends AccountLayoutPage {
+public class TeamSettingPage extends AccountLayoutPage {
 
 	private static final String PARAM_TEAM = "team";
 	
@@ -36,7 +36,7 @@ public class TeamEditPage extends AccountLayoutPage {
 		return params;
 	}
 	
-	public TeamEditPage(PageParameters params) {
+	public TeamSettingPage(PageParameters params) {
 		super(params);
 
 		version = getAccount().getVersion();

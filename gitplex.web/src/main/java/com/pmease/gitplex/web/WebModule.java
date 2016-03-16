@@ -17,6 +17,7 @@ import com.pmease.commons.wicket.editable.EditSupport;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.util.validation.AccountNameReservation;
+import com.pmease.gitplex.core.util.validation.DepotNameReservation;
 import com.pmease.gitplex.core.util.validation.TeamNameReservation;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.web.avatar.AvatarManager;
@@ -47,6 +48,7 @@ public class WebModule extends AbstractPluginModule {
 		
 		contribute(ServletConfigurator.class, WebServletConfigurator.class);
 		contribute(AccountNameReservation.class, WebAccountNameReservation.class);
+		contribute(DepotNameReservation.class, WebDepotNameReservation.class);
 		contribute(TeamNameReservation.class, WebTeamNameReservation.class);
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
