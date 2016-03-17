@@ -44,7 +44,7 @@ import com.pmease.gitplex.web.page.organization.MemberPage;
 import com.pmease.gitplex.web.page.organization.NewMembersPage;
 import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
 import com.pmease.gitplex.web.page.organization.team.TeamDepotListPage;
-import com.pmease.gitplex.web.page.organization.team.TeamSettingPage;
+import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
 import com.pmease.gitplex.web.page.organization.team.TeamListPage;
 import com.pmease.gitplex.web.page.organization.team.TeamMemberListPage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
@@ -159,7 +159,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("accounts/${account}/members/new", NewMembersPage.class));
 		add(new MountedMapper("accounts/${account}/teams", TeamListPage.class));
 		add(new MountedMapper("accounts/${account}/teams/new", NewTeamPage.class));
-		add(new MountedMapper("accounts/${account}/teams/${team}/setting", TeamSettingPage.class));
+		add(new MountedMapper("accounts/${account}/teams/${team}/setting", TeamEditPage.class));
 		add(new MountedMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
 		add(new MountedMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
 	}

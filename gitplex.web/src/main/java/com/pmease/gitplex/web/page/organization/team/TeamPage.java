@@ -3,10 +3,13 @@ package com.pmease.gitplex.web.page.organization.team;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -16,6 +19,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ConfirmOnClick;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
+import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
@@ -52,8 +56,12 @@ public abstract class TeamPage extends AccountLayoutPage {
 		super.onInitialize();
 
 		add(new Label("teamName", team.getName()));
-		add(new MarkdownViewer("teamDescription", Model.of(team.getDescription()), false));
-		add(new Link<Void>("teamSetting") {
+		if (team.getDescription() != null) {
+			add(new MarkdownViewer("teamDescription", Model.of(team.getDescription()), false));
+		} else {
+			add(new Label("teamDescription", "<i>No description</i>").setEscapeModelStrings(false));
+		}
+		add(new Link<Void>("editTeam") {
 
 			@Override
 			protected void onConfigure() {
@@ -65,7 +73,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 			@Override
 			public void onClick() {
 				Account organization = getAccount();
-				setResponsePage(TeamSettingPage.class, TeamSettingPage.paramsOf(organization, team));
+				setResponsePage(TeamEditPage.class, TeamEditPage.paramsOf(organization, team));
 			}
 			
 		});
@@ -91,8 +99,38 @@ public abstract class TeamPage extends AccountLayoutPage {
 		}.add(new ConfirmOnClick("Do you really want to delete this team?")));
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new PageTab(Model.of("Members"), TeamMemberListPage.class));
-		tabs.add(new PageTab(Model.of("Repositories"), TeamDepotListPage.class));
+		tabs.add(new PageTab(Model.of("Members"), TeamMemberListPage.class) {
+
+			@Override
+			public Component render(String componentId) {
+				return new PageTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						return new BookmarkablePageLink<Void>(linkId, TeamMemberListPage.class, 
+								TeamMemberListPage.paramsOf(getAccount(), team));
+					}
+					
+				};
+			}
+			
+		});
+		tabs.add(new PageTab(Model.of("Repositories"), TeamDepotListPage.class) {
+
+			@Override
+			public Component render(String componentId) {
+				return new PageTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						return new BookmarkablePageLink<Void>(linkId, TeamDepotListPage.class, 
+								TeamDepotListPage.paramsOf(getAccount(), team));
+					}
+					
+				};
+			}
+			
+		});
 		add(new Tabbable("teamTabs", tabs));
 	}
 

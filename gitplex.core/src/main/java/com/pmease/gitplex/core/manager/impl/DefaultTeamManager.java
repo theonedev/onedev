@@ -66,9 +66,7 @@ public class DefaultTeamManager implements TeamManager, DepotListener {
 				}
 			}
 		} else {
-			if (organization.getTeams().put(team.getName(), team) != null) {
-				throw new RuntimeException("Team with name '" + team.getName() + "' already exists");
-			}
+			organization.getTeams().put(team.getName(), team);
 		}
 	}
 

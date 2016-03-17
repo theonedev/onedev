@@ -158,8 +158,8 @@ public class TeamListPage extends AccountLayoutPage {
 			protected void populateItem(ListItem<Team> item) {
 				Team team = item.getModelObject();
 				
-				Link<Void> link = new BookmarkablePageLink<>("link", TeamPage.class, 
-						TeamPage.paramsOf(getAccount(), team)); 
+				Link<Void> link = new BookmarkablePageLink<>("link", TeamMemberListPage.class, 
+						TeamMemberListPage.paramsOf(getAccount(), team)); 
 				link.add(new Label("name", team.getName()));
 				item.add(link);
 						
@@ -167,7 +167,9 @@ public class TeamListPage extends AccountLayoutPage {
 				int count = 0;
 				for (Membership membership: getAccount().getUserMemberships()) {
 					if (membership.getJoinedTeams().contains(team.getName()) && count++<MAX_MEMBERS) {
-						membersView.add(new AvatarLink(membersView.newChildId(), membership.getUser()));
+						WebMarkupContainer child = new WebMarkupContainer(membersView.newChildId());
+						child.add(new AvatarLink("member", membership.getUser()));
+						membersView.add(child);
 					}
 				}
 				item.add(membersView);

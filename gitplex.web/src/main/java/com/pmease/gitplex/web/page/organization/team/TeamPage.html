@@ -1,17 +1,16 @@
 <wicket:extend>
-	<section class="team">
-		<div class="head">Team</div>
-		<div class="body clearfix">
-			<div class="pull-left">
-				<div wicket:id="teamName" class="title"></div>
-				<div wicket:id="teamDescription"></div>
-				<div class="actions">
-					<a wicket:id="teamSetting" class="btn btn-primary"></a>
-					<a wicket:id="deleteTeam" class="btn btn-danger"></a>
-				</div>
+	<section id="team">
+		<div class="general">
+			<div wicket:id="teamName" class="title"></div>
+			<div wicket:id="teamDescription"></div>
+			<div class="actions">
+				<a wicket:id="editTeam" class="btn btn-primary">Edit</a>
+				<a wicket:id="deleteTeam" class="btn btn-danger">Delete</a>
 			</div>
-			<div class="pull-right">
-				<ul wicket:id="teamTabs" class="tabs list-unstyled"></ul>
+		</div>
+		<div class="members-and-depots">
+			<ul wicket:id="teamTabs" class="nav nav-tabs"></ul>
+			<div class="tab-panel">
 				<wicket:child></wicket:child>
 			</div>
 		</div>

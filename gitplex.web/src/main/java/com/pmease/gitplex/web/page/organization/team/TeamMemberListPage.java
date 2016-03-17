@@ -14,9 +14,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -39,6 +37,7 @@ import com.pmease.gitplex.core.manager.MembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
+import com.pmease.gitplex.web.component.EmailLink;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
@@ -125,7 +124,7 @@ public class TeamMemberListPage extends TeamPage {
 				term = term.toLowerCase();
 				for (Membership membership: getAccount().getUserMemberships()) {
 					Account user = membership.getUser();
-					if (user.matches(term) && !user.getTeams().containsKey(team.getName())) {
+					if (user.matches(term) && !membership.getJoinedTeams().contains(team.getName())) {
 						memberships.add(membership);
 					}
 				}
@@ -241,13 +240,9 @@ public class TeamMemberListPage extends TeamPage {
 				Account member = item.getModelObject();
 
 				item.add(new Avatar("avatar", member));
-				
-				Link<Void> link = new UserLink("link", member); 
-				link.add(new Label("name", member.getDisplayName()));
-				item.add(link);
+				item.add(new UserLink("link", member));
 						
-				item.add(new Label("email", member.getEmail()));
-				
+				item.add(new EmailLink("email", Model.of(member.getEmail())));
 				item.add(new AjaxLink<Void>("remove") {
 
 					@Override

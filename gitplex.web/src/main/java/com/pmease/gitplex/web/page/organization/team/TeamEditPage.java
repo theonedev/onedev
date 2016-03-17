@@ -22,7 +22,7 @@ import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 
 @SuppressWarnings("serial")
-public class TeamSettingPage extends AccountLayoutPage {
+public class TeamEditPage extends AccountLayoutPage {
 
 	private static final String PARAM_TEAM = "team";
 	
@@ -36,7 +36,7 @@ public class TeamSettingPage extends AccountLayoutPage {
 		return params;
 	}
 	
-	public TeamSettingPage(PageParameters params) {
+	public TeamEditPage(PageParameters params) {
 		super(params);
 
 		version = getAccount().getVersion();
@@ -62,7 +62,7 @@ public class TeamSettingPage extends AccountLayoutPage {
 				if (version != organization.getVersion()) {
 					throw new StaleObjectStateException(Account.class.getName(), organization.getId());
 				}
-				if (organization.getTeams().containsKey(team.getName())) {
+				if (!oldName.equals(team.getName()) && organization.getTeams().containsKey(team.getName())) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another team in the organization");
 				} else {

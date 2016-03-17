@@ -36,6 +36,7 @@ import com.pmease.gitplex.core.entity.Membership;
 import com.pmease.gitplex.core.manager.MembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.EmailLink;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
@@ -252,10 +253,10 @@ public class MemberListPage extends AccountLayoutPage {
 				
 				Link<Void> link = new BookmarkablePageLink<>("link", MemberPage.class, 
 						MemberPage.paramsOf(membership)); 
-				link.add(new Label("name", membership.getUser().getName()));
+				link.add(new Label("name", membership.getUser().getDisplayName()));
 				item.add(link);
 						
-				item.add(new Label("fullName", membership.getUser().getFullName()));
+				item.add(new EmailLink("email", Model.of(membership.getUser().getEmail())));
 				
 				item.add(new DropdownLink("role") {
 
