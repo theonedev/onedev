@@ -194,8 +194,16 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.description = description;
 	}
 
-	@Editable(order=370, description="Members will have this minimal privilege on all repositories "
-			+ "in this organization")
+	@Editable(order=370, description=""
+			+ "Members will have this minimal privilege on all repositories "
+			+ "in this organization. "
+			+ "<ul>"
+			+ "<li>None: No any permissions granted on repositories"
+			+ "<li>Read: Able to pull and browse repositories"
+			+ "<li>Write: Has full read privilege, and can also push to" 
+			+ "repositories unless gate keeper prevents"
+			+ "<li>Admin: Has full write privilege, and can also edit"  
+			+ "settings of repositories")
 	@NotNull
 	public DepotPrivilege getDefaultPrivilege() {
 		return defaultPrivilege;

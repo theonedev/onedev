@@ -131,7 +131,7 @@ public class MemberListPage extends AccountLayoutPage {
 					}
 
 					@Override
-					protected void onSelectMember(AjaxRequestTarget target) {
+					protected void onSelectOrdinary(AjaxRequestTarget target) {
 						close();
 						role = ROLE_MEMBER;
 						target.add(filterContainer);
@@ -312,7 +312,7 @@ public class MemberListPage extends AccountLayoutPage {
 						return new RoleSelectionPanel(id) {
 							
 							@Override
-							protected void onSelectMember(AjaxRequestTarget target) {
+							protected void onSelectOrdinary(AjaxRequestTarget target) {
 								close();
 								membership.setAdmin(false);
 								GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
@@ -407,6 +407,11 @@ public class MemberListPage extends AccountLayoutPage {
 		};
 		noMembersContainer.setOutputMarkupPlaceholderTag(true);
 		add(noMembersContainer);
+	}
+	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccess(getAccount());
 	}
 	
 	@Override

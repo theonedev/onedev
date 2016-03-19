@@ -124,7 +124,7 @@ public class DepotListPage extends AccountLayoutPage {
 					searchInput = "";
 				
 				for (Depot depot: getAccount().getDepots()) {
-					if (depot.getName().toLowerCase().contains(searchInput) && SecurityUtils.canPull(depot))
+					if (depot.getName().toLowerCase().contains(searchInput) && SecurityUtils.canRead(depot))
 						depots.add(depot);
 				}
 				

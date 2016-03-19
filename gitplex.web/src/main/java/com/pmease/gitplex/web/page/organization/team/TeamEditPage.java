@@ -18,6 +18,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.manager.TeamManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
@@ -55,6 +56,11 @@ public class TeamEditPage extends AccountLayoutPage {
 		Preconditions.checkState(getAccount().isOrganization());
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canManage(getAccount());
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

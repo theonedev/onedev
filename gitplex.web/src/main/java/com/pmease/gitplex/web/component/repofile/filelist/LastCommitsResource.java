@@ -60,7 +60,7 @@ class LastCommitsResource extends AbstractResource {
 			public void writeData(Attributes attributes) throws IOException {
 				Depot repo = GitPlex.getInstance(Dao.class).load(Depot.class, repoId);
 				
-				if (!SecurityUtils.canPull(repo))
+				if (!SecurityUtils.canRead(repo))
 					throw new UnauthorizedException();
 				
 				LastCommitsOfChildren lastCommits = repo.getLastCommitsOfChildren(revision, path);

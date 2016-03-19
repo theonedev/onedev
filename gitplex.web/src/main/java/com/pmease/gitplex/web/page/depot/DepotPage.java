@@ -37,11 +37,10 @@ import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.repopicker.DepotSelector;
 import com.pmease.gitplex.web.model.DepotModel;
@@ -142,7 +141,7 @@ public abstract class DepotPage extends AccountPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depotModel.getObject()));
+		return SecurityUtils.canRead(getDepot());
 	}
 	
 	public Depot getDepot() {
@@ -187,7 +186,7 @@ public abstract class DepotPage extends AccountPage {
 					protected List<Depot> load() {
 						List<Depot> repositories = new ArrayList<>(); 
 						for (Depot repo: GitPlex.getInstance(Dao.class).allOf(Depot.class)) {
-							if (SecurityUtils.canPull(repo))
+							if (SecurityUtils.canRead(repo))
 								repositories.add(repo);
 						}
 						return repositories;

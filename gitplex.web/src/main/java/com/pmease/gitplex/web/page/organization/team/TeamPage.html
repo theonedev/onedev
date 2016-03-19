@@ -1,12 +1,14 @@
 <wicket:extend>
-	<section class="team detail">
+	<div class="team detail">
 		<div class="general">
 			<div wicket:id="teamName" class="title"></div>
 			<div wicket:id="teamDescription"></div>
+			<wicket:enclosure child="editTeam">
 			<div class="actions">
 				<a wicket:id="editTeam" class="btn btn-primary">Edit</a>
 				<a wicket:id="deleteTeam" class="btn btn-danger">Delete</a>
 			</div>
+			</wicket:enclosure>
 		</div>
 		<div class="members-and-depots">
 			<ul wicket:id="teamTabs" class="nav nav-tabs"></ul>
@@ -14,5 +16,5 @@
 				<wicket:child></wicket:child>
 			</div>
 		</div>
-	</section>
+	</div>
 </wicket:extend>

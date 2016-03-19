@@ -24,11 +24,11 @@ abstract class RoleSelectionPanel extends Panel {
 			}
 			
 		});
-		add(new AjaxLink<Void>("member") {
+		add(new AjaxLink<Void>("ordinary") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onSelectMember(target);
+				onSelectOrdinary(target);
 			}
 			
 		});
@@ -42,5 +42,5 @@ abstract class RoleSelectionPanel extends Panel {
 
 	protected abstract void onSelectAdmin(AjaxRequestTarget target);
 	
-	protected abstract void onSelectMember(AjaxRequestTarget target);
+	protected abstract void onSelectOrdinary(AjaxRequestTarget target);
 }

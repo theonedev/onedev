@@ -64,7 +64,7 @@ public class BlobResource extends AbstractResource {
 		if (StringUtils.isBlank(path))
 			throw new IllegalArgumentException("path parameter has to be specified");
 
-		if (!SecurityUtils.canPull(depot)) 
+		if (!SecurityUtils.canRead(depot)) 
 			throw new UnauthorizedException();
 
 		final Blob blob = depot.getBlob(new BlobIdent(revision, path, 0));

@@ -419,7 +419,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofDepotPush(getDepot());
+				ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
 				setVisible(SecurityUtils.getSubject().isPermitted(writePermission) && strategies.size() > 1);						
 			}
 			
@@ -442,13 +442,13 @@ public class RequestOverviewPage extends RequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				ObjectPermission writePermission = ObjectPermission.ofDepotPush(getDepot());
+				ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
 				setVisible(!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1);						
 			}
 			
 		});
 
-		ObjectPermission writePermission = ObjectPermission.ofDepotPush(getDepot());
+		ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
 
 		if (!SecurityUtils.getSubject().isPermitted(writePermission) || strategies.size() == 1) {
 			integrationStrategyContainer.add(new WebMarkupContainer("help").add(

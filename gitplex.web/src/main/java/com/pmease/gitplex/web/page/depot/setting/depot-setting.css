@@ -1,0 +1,12 @@
+#depot-setting {
+	padding: 20px;
+}
+#depot-setting>.nav {
+	margin-bottom: 20px;
+}
+#depot-setting .general-setting form.name {
+	margin-bottom: 16px;
+}
+#depot-setting .general-setting form.name .alert {
+	margin-top: 16px;
+}

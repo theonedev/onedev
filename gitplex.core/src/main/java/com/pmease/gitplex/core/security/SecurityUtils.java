@@ -68,7 +68,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canPushRef(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		Account currentUser = getAccount();
 		return currentUser != null 
-				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotPush(depot))	
+				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotWrite(depot))	
 				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassed();
 	}
 	
@@ -80,12 +80,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(ObjectPermission.ofAccountAccess(account));
 	}
 	
-	public static boolean canPull(Depot depot) {
-		return getSubject().isPermitted(ObjectPermission.ofDepotPull(depot));
+	public static boolean canRead(Depot depot) {
+		return getSubject().isPermitted(ObjectPermission.ofDepotRead(depot));
 	}
 	
-	public static boolean canPush(Depot depot) {
-		return getSubject().isPermitted(ObjectPermission.ofDepotPush(depot));
+	public static boolean canWrite(Depot depot) {
+		return getSubject().isPermitted(ObjectPermission.ofDepotWrite(depot));
 	}
 	
 	public static boolean canManage(Depot depot) {

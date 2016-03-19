@@ -69,7 +69,7 @@ public class AttachmentResource extends AbstractResource {
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
-		if (!SecurityUtils.canPull(depot)) 
+		if (!SecurityUtils.canRead(depot)) 
 			throw new UnauthorizedException();
 
 		final File attachmentFile = new File(getAttachmentsDir(request), attachment);

@@ -48,7 +48,7 @@ public class VerificationResource {
     @Path("/{id}")
     public Verification get(@PathParam("id") Long id) {
     	Verification verification  = dao.load(Verification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(verification.getRequest().getTargetDepot())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(verification.getRequest().getTargetDepot())))
     		throw new UnauthorizedException();
     	return verification;
     }
@@ -71,7 +71,7 @@ public class VerificationResource {
 		
     	for (Verification verification: verifications) {
     		if (!SecurityUtils.getSubject().isPermitted(
-    				ObjectPermission.ofDepotPull(verification.getRequest().getTargetDepot()))) {
+    				ObjectPermission.ofDepotRead(verification.getRequest().getTargetDepot()))) {
     			throw new UnauthorizedException("Unauthorized access to verification " 
     					+ verification.getRequest() + "/" + verification.getId());
     		}
@@ -84,7 +84,7 @@ public class VerificationResource {
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
     	Verification verification = dao.load(Verification.class, id);
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPush(verification.getRequest().getTargetDepot())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(verification.getRequest().getTargetDepot())))
     		throw new UnauthorizedException();
     	
     	verificationManager.delete(verification);
@@ -92,7 +92,7 @@ public class VerificationResource {
 
     @POST
     public Long save(@NotNull @Valid Verification verification) {
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPush(verification.getRequest().getTargetDepot())))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotWrite(verification.getRequest().getTargetDepot())))
     		throw new UnauthorizedException();
     	
     	verificationManager.save(verification);

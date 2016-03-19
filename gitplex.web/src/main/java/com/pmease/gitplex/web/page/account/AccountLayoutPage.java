@@ -24,6 +24,7 @@ import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.organization.MemberListPage;
+import com.pmease.gitplex.web.page.organization.MemberPage;
 import com.pmease.gitplex.web.page.organization.NewMembersPage;
 import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
 import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
@@ -70,9 +71,12 @@ public abstract class AccountLayoutPage extends AccountPage {
 		tabs.add(new AccountTab("Overview", "fa fa-fw fa-list-alt", AccountOverviewPage.class));
 		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", DepotListPage.class));
 		if (getAccount().isOrganization()) {
-			tabs.add(new AccountTab("Members", "fa fa-fw fa-user", MemberListPage.class, NewMembersPage.class));
-			tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class, 
-					TeamEditPage.class, NewTeamPage.class));
+			if (SecurityUtils.canAccess(getAccount())) {
+				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", MemberListPage.class, 
+						NewMembersPage.class, MemberPage.class));
+				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class, 
+						TeamEditPage.class, NewTeamPage.class));
+			}
 			if (SecurityUtils.canManage(getAccount())) {
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
 			}

@@ -16,6 +16,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.manager.TeamManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
@@ -64,6 +65,11 @@ public class NewTeamPage extends AccountLayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canManage(getAccount());
 	}
 
 	@Override

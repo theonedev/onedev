@@ -47,7 +47,7 @@ public class RepositoryResource {
     public Depot get(@PathParam("id") Long id) {
     	Depot depot = dao.load(Depot.class, id);
 
-    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depot)))
+    	if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot)))
     		throw new UnauthenticatedException();
     	else
     		return depot;
@@ -74,7 +74,7 @@ public class RepositoryResource {
 		}
 		
 		for (Depot depot: depots) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(depot))) 
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot))) 
 				throw new UnauthorizedException("Unauthorized access to repository " + depot.getFQN());
 		}
 		return depots;

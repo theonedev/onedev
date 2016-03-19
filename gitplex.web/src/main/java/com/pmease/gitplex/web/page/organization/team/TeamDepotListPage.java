@@ -53,7 +53,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class TeamDepotListPage extends TeamPage {
 
-	private static final String ADD_DEPOT_PLACEHOLDER = "Select repository to add to team...";
+	private static final String ADD_DEPOT_PLACEHOLDER = "Select repository to authorize...";
 	
 	private PageableListView<Authorization> depotsView;
 	
@@ -220,6 +220,12 @@ public class TeamDepotListPage extends TeamPage {
 				getSettings().setEscapeMarkup("gitplex.depotChoiceFormatter.escapeMarkup");
 			}
 			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canManage(getAccount()));
+			}
+
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot selection) {
 				Authorization authorization = new Authorization();
@@ -427,6 +433,11 @@ public class TeamDepotListPage extends TeamPage {
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccess(getAccount());
+	}
+	
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
 		if (account.isOrganization())

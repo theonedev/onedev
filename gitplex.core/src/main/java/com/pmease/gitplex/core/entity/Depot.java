@@ -210,7 +210,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		this.description = description;
 	}
 
-	@Editable(order=300, description="Whether or this repository can be read by everyone")
+	@Editable(order=300, name="Public", description="Whether or this repository can be read by everyone")
     public boolean isPublicRead() {
 		return publicRead;
 	}

@@ -149,7 +149,7 @@ public class NewRequestPage extends PullRequestPage {
 			Preconditions.checkState(!strategies.isEmpty());
 			pullRequest.setIntegrationStrategy(strategies.get(0));
 			
-			ObjectPermission writePermission = ObjectPermission.ofDepotPush(getDepot());
+			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(getDepot());
 			if (currentUser.asSubject().isPermitted(writePermission))
 				pullRequest.setAssignee(currentUser);
 			else

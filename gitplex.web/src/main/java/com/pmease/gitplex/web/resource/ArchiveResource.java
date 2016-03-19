@@ -59,7 +59,7 @@ public class ArchiveResource extends AbstractResource {
 		if (StringUtils.isBlank(revision))
 			throw new IllegalArgumentException("revision parameter has to be specified");
 		
-		if (!SecurityUtils.canPull(depot)) 
+		if (!SecurityUtils.canRead(depot)) 
 			throw new UnauthorizedException();
 
 		ResourceResponse response = new ResourceResponse();

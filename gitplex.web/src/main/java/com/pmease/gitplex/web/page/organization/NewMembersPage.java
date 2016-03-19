@@ -24,6 +24,7 @@ import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
@@ -159,6 +160,11 @@ public class NewMembersPage extends AccountLayoutPage {
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canManage(getAccount());
+	}
+	
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
 		if (account.isOrganization())

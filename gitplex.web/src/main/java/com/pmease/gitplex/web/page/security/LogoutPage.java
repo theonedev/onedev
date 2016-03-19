@@ -11,7 +11,7 @@ public class LogoutPage extends BasePage {
 	public LogoutPage() {
 		WebSession.get().logout();
 		
-        getSession().info("You've been logged out");
+        getSession().warn("You've been logged out");
         
         throw new RestartResponseException(getApplication().getHomePage());
 	}

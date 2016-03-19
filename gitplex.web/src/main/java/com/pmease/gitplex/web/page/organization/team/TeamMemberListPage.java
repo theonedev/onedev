@@ -180,6 +180,12 @@ public class TeamMemberListPage extends TeamPage {
 			}
 			
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canManage(getAccount()));
+			}
+			
+			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
@@ -330,6 +336,11 @@ public class TeamMemberListPage extends TeamPage {
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccess(getAccount());
+	}
+	
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
 		if (account.isOrganization())

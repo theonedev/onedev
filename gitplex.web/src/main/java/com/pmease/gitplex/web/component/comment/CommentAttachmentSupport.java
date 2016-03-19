@@ -85,7 +85,7 @@ public class CommentAttachmentSupport implements AttachmentSupport {
 
 	@Override
 	public String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream) {
-		Preconditions.checkState(SecurityUtils.canPull(getRequest().getTargetDepot()));
+		Preconditions.checkState(SecurityUtils.canRead(getRequest().getTargetDepot()));
 		
 		String attachmentName = suggestedAttachmentName;
 		File attachmentsDir = getAttachmentsDir();

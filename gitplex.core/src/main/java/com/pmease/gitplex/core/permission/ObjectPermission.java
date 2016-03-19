@@ -59,11 +59,11 @@ public class ObjectPermission implements Permission {
 		return new ObjectPermission(depot, DepotPrivilege.ADMIN);
 	}
 
-	public static ObjectPermission ofDepotPull(Depot depot) {
+	public static ObjectPermission ofDepotRead(Depot depot) {
 		return new ObjectPermission(depot, DepotPrivilege.READ);
 	}
 
-	public static ObjectPermission ofDepotPush(Depot depot) {
+	public static ObjectPermission ofDepotWrite(Depot depot) {
 		return new ObjectPermission(depot, DepotPrivilege.WRITE);
 	}
 

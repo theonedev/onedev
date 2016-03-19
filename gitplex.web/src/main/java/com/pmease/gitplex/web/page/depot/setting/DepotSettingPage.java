@@ -39,14 +39,14 @@ public class DepotSettingPage extends DepotPage {
 		tabs.add(new DepotSettingTab("Gate Keepers", GateKeeperPage.class));
 		tabs.add(new DepotSettingTab("Integration Policies", IntegrationPolicyPage.class));
 		
-		add(new Tabbable("repoSettingTabs", tabs));
+		add(new Tabbable("depotSettingTabs", tabs));
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new CssResourceReference(DepotSettingPage.class, "repo-setting.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(DepotSettingPage.class, "depot-setting.css")));
 	}
 
 	@Override

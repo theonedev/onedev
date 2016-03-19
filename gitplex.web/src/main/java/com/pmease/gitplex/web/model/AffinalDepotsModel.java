@@ -44,7 +44,7 @@ public class AffinalDepotsModel extends LoadableDetachableModel<List<Depot>> {
 			affinals.add(0, depot.getForkedFrom());
 		affinals.add(0, depot);
 		for (Iterator<Depot> it = affinals.iterator(); it.hasNext();) {
-			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotPull(it.next())))
+			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(it.next())))
 				it.remove();
 		}
 		return affinals;

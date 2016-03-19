@@ -256,6 +256,11 @@ public class TeamListPage extends AccountLayoutPage {
 	}
 
 	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccess(getAccount());
+	}
+	
+	@Override
 	protected void onDetach() {
 		teamMembershipsModel.detach();
 		

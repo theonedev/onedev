@@ -13,6 +13,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 
@@ -58,6 +59,11 @@ public class MemberPage extends AccountLayoutPage {
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccess(getAccount());
+	}
+	
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
 		if (account.isOrganization())
