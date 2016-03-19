@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.web.assets.accountchoice.AccountChoiceResourceReference;
+import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
 
 public class NonMemberChoices extends Select2MultiChoice<Account> {
 

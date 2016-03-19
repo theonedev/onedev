@@ -119,7 +119,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 
 	@Override
 	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
-			Account originalOwner) {
+			Account originalAccount) {
 		return false;
 	}
 	

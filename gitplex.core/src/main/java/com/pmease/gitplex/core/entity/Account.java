@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -29,7 +28,6 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
-import com.pmease.gitplex.core.entity.component.Team;
 import com.pmease.gitplex.core.permission.object.AccountBelonging;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
@@ -64,9 +62,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@Column(nullable=false)
 	private DepotPrivilege defaultPrivilege = DepotPrivilege.NONE;
 	
-	/* used by organization account */
-	private LinkedHashMap<String, Team> teams = new LinkedHashMap<>();
-	
 	@Column(nullable=false)
 	private String noSpaceName;
 	
@@ -83,16 +78,24 @@ public class Account extends AbstractUser implements ProtectedObject {
 	
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Membership> organizationMemberships = new ArrayList<>();
+	private Collection<OrganizationMembership> organizationMemberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="organization")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Membership> userMemberships = new ArrayList<>();
+	private Collection<OrganizationMembership> userMemberships = new ArrayList<>();
 	
-	@OneToMany(mappedBy="owner")
+	@OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<TeamMembership> teamMemberships = new ArrayList<>();
+	
+	@OneToMany(mappedBy="account")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Depot> depots = new ArrayList<>();
 
+	@OneToMany(mappedBy="organization")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<Team> teams = new ArrayList<>();
+	
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<PullRequestReference> requestReferences = new ArrayList<>();
@@ -218,20 +221,28 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.avatarUploadDate = avatarUploadDate;
 	}
 
-	public Collection<Membership> getOrganizationMemberships() {
+	public Collection<OrganizationMembership> getOrganizationMemberships() {
 		return organizationMemberships;
 	}
 
-	public void setOrganizations(Collection<Membership> organizationMemberships) {
+	public void setOrganizationMemberships(Collection<OrganizationMembership> organizationMemberships) {
 		this.organizationMemberships = organizationMemberships;
 	}
 
-	public Collection<Membership> getUserMemberships() {
+	public Collection<OrganizationMembership> getUserMemberships() {
 		return userMemberships;
 	}
 
-	public void setUsers(Collection<Membership> userMemberships) {
+	public void setUserMemberships(Collection<OrganizationMembership> userMemberships) {
 		this.userMemberships = userMemberships;
+	}
+
+	public Collection<TeamMembership> getTeamMemberships() {
+		return teamMemberships;
+	}
+
+	public void setTeamMemberships(Collection<TeamMembership> teamMemberships) {
+		this.teamMemberships = teamMemberships;
 	}
 
 	public int getReviewEffort() {
@@ -250,11 +261,11 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.depots = depots;
 	}
 
-	public LinkedHashMap<String, Team> getTeams() {
+	public Collection<Team> getTeams() {
 		return teams;
 	}
 
-	public void setTeams(LinkedHashMap<String, Team> teams) {
+	public void setTeams(Collection<Team> teams) {
 		this.teams = teams;
 	}
 
@@ -328,7 +339,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 			return user.equals(this);
 		} else if (object instanceof AccountBelonging) {
 			AccountBelonging userBelonging = (AccountBelonging) object;
-			return userBelonging.getOwner().equals(this);
+			return userBelonging.getAccount().equals(this);
 		} else {
 			return false;
 		}

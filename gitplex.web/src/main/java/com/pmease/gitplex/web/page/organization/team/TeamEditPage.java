@@ -6,8 +6,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.StaleObjectStateException;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -15,7 +16,7 @@ import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.component.Team;
+import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
@@ -26,12 +27,14 @@ public class TeamEditPage extends AccountLayoutPage {
 
 	private static final String PARAM_TEAM = "team";
 	
-	private final Team team;
+	private final IModel<Team> teamModel;
 	
-	private final long version;
+	private BeanEditor<?> editor;
 	
-	public static PageParameters paramsOf(Account organization, Team team) {
-		PageParameters params = paramsOf(organization);
+	private String oldName;
+	
+	public static PageParameters paramsOf(Team team) {
+		PageParameters params = paramsOf(team.getOrganization());
 		params.add(PARAM_TEAM, team.getName());
 		return params;
 	}
@@ -39,10 +42,16 @@ public class TeamEditPage extends AccountLayoutPage {
 	public TeamEditPage(PageParameters params) {
 		super(params);
 
-		version = getAccount().getVersion();
 		String teamName = params.get(PARAM_TEAM).toString();
-		team = Preconditions.checkNotNull(getAccount().getTeams().get(teamName));
-		
+		teamModel = new LoadableDetachableModel<Team>() {
+
+			@Override
+			protected Team load() {
+				TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
+				return Preconditions.checkNotNull(teamManager.find(getAccount(), teamName));
+			}
+			
+		};
 		Preconditions.checkState(getAccount().isOrganization());
 	}
 
@@ -50,24 +59,40 @@ public class TeamEditPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String oldName = team.getName();
-		BeanEditor<Serializable> editor = BeanContext.editBean("editor", team);
+		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Serializable getObject() {
+				return teamModel.getObject();
+			}
+
+			@Override
+			public void setObject(Serializable object) {
+				// check contract of TeamManager.save on why we assign oldName here
+				oldName = teamModel.getObject().getName();
+				editor.getBeanDescriptor().copyProperties(object, teamModel.getObject());
+			}
+			
+		});
+		
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 
-				Account organization = getAccount();
-				if (version != organization.getVersion()) {
-					throw new StaleObjectStateException(Account.class.getName(), organization.getId());
-				}
-				if (!oldName.equals(team.getName()) && organization.getTeams().containsKey(team.getName())) {
+				TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
+				Team team = teamModel.getObject();
+				if (!oldName.equals(team.getName()) && teamManager.find(getAccount(), team.getName()) != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another team in the organization");
 				} else {
-					GitPlex.getInstance(TeamManager.class).save(organization, team, oldName);
-					setResponsePage(TeamMemberListPage.class, TeamMemberListPage.paramsOf(getAccount(), team));
+					teamManager.save(team, oldName);
+					setResponsePage(TeamMemberListPage.class, TeamMemberListPage.paramsOf(team));
 				}
 			}
 			
@@ -89,6 +114,12 @@ public class TeamEditPage extends AccountLayoutPage {
 			setResponsePage(TeamListPage.class, paramsOf(account));
 		else
 			setResponsePage(AccountOverviewPage.class, paramsOf(account));
+	}
+
+	@Override
+	protected void onDetach() {
+		teamModel.detach();
+		super.onDetach();
 	}
 
 }

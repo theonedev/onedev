@@ -8,9 +8,9 @@ import com.pmease.gitplex.core.entity.Depot;
 
 public interface DepotManager extends EntityDao<Depot> {
 	
-	@Nullable Depot findBy(String ownerName, String depotName);
+	@Nullable Depot findBy(String accountName, String depotName);
 	
-	@Nullable Depot findBy(Account owner, String depotName);
+	@Nullable Depot findBy(Account account, String depotName);
 
 	@Nullable Depot findBy(String depotFQN);
 
@@ -30,23 +30,23 @@ public interface DepotManager extends EntityDao<Depot> {
 	void checkSanity();
 	
 	/**
-	 * Save specified depot. Note that oldName and oldOwnerId should not be 
+	 * Save specified depot. Note that oldName and oldAccountId should not be 
 	 * specified together, meaning that you should not rename and transfer 
 	 * a depot in a single call
 	 * 
 	 * @param depot
 	 * 			depot to save
-	 * @param oldOwnerId
+	 * @param oldAccountId
 	 * 			in case of transfer, this parameter should hold the id of original 
-	 * 			owner when above depot object is initially loaded to ensure database 
-	 * 			integrity. Use <tt>null</tt> if owner is not changed
+	 * 			account when above depot object is initially loaded to ensure database 
+	 * 			integrity. Use <tt>null</tt> if account is not changed
 	 * @param oldName
 	 * 			in case of rename, this parameter should hold the original name 
 	 * 			when above depot object is initially loaded to ensure database 
 	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
 	 * 			or the name is not changed
 	 */
-	void save(Depot depot, @Nullable Long oldOwnerId, @Nullable String oldName);
+	void save(Depot depot, @Nullable Long oldAccountId, @Nullable String oldName);
 	
 	void delete(Depot depot);
 }

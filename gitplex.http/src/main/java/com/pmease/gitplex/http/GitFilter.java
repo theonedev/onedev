@@ -79,21 +79,21 @@ public class GitFilter implements Filter {
 			throws IOException {
 		depotInfo = StringUtils.stripStart(StringUtils.stripEnd(depotInfo, "/"), "/");
 		
-		String ownerName = StringUtils.substringBefore(depotInfo, "/");
+		String accountName = StringUtils.substringBefore(depotInfo, "/");
 		String repositoryName = StringUtils.substringAfter(depotInfo, "/");
 
-		if (StringUtils.isBlank(ownerName) || StringUtils.isBlank(repositoryName)) {
+		if (StringUtils.isBlank(accountName) || StringUtils.isBlank(repositoryName)) {
 			String url = request.getRequestURL().toString();
 			String urlRoot = url.substring(0, url.length()-getPathInfo(request).length());
-			throw new GitException(String.format("Expecting url of format %s<owner name>/<repository name>", urlRoot));
+			throw new GitException(String.format("Expecting url of format %s<account name>/<repository name>", urlRoot));
 		} 
 		
 		if (repositoryName.endsWith(".git"))
 			repositoryName = repositoryName.substring(0, repositoryName.length()-".git".length());
 		
-		Depot depot = repositoryManager.findBy(ownerName, repositoryName);
+		Depot depot = repositoryManager.findBy(accountName, repositoryName);
 		if (depot == null) {
-			throw new GitException(String.format("Unable to find repository %s owned by %s.", repositoryName, ownerName));
+			throw new GitException(String.format("Unable to find repository %s under account %s.", repositoryName, accountName));
 		}
 		
 		return depot;

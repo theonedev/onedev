@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
@@ -27,7 +27,7 @@ public class MemberChoiceProvider extends AccountChoiceProvider {
 	public void query(String term, int page, Response<Account> response) {
 		List<Account> members = new ArrayList<>();
 		term = term.toLowerCase();
-		for (Membership membership: organizationModel.getObject().getUserMemberships()) { 
+		for (OrganizationMembership membership: organizationModel.getObject().getUserMemberships()) { 
 			Account user = membership.getUser();
 			if (user.getName().toLowerCase().contains(term) 
 					|| user.getFullName()!=null && user.getFullName().toLowerCase().contains(term)) {

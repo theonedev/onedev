@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.assets.accountchoice.AccountChoiceResourceReference;
+import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToAddChoice<Account> {

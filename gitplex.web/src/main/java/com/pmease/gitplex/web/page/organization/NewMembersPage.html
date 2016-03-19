@@ -1,8 +1,8 @@
 <wicket:extend>
-	<section class="member-add">
+	<section class="member add">
 		<div class="head">Add New Members</div>
 		<div class="body">
-			<form wicket:id="form">
+			<form wicket:id="form" class="leave-confirm">
 				<div wicket:id="users" class="form-group">
 					<label>Select Users</label> <span class="required">*</span>
 					<input wicket:id="users" type="hidden" class="form-control"></input>
@@ -14,7 +14,7 @@
 					<input wicket:id="teams" type="hidden" class="form-control"></input>
 				</div>
 				<div class="actions">
-					<input type="submit" class="btn btn-primary" value="Add"></input>
+					<input type="submit" class="btn btn-primary dirty-aware" value="Add"></input>
 				</div>
 			</form>
 		</div>

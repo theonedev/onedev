@@ -1,35 +1,41 @@
 <wicket:extend>
-	<section class="depot-list">
+	<section class="team depot list">
 		<div class="head clearfix">
 			<div class="pull-left search">
 				<div class="input-group">
 					<span class="input-group-addon"><i class="fa fa-search"></i></span>
-					<input wicket:id="searchMembers" class="form-control" placeholder="Search repositories"></input>
+					<input wicket:id="searchDepots" class="form-control" placeholder="Search repositories"></input>
 				</div>
+			</div>
+			<div wicket:id="filter" class="pull-left filter btn-group">
+				<a wicket:id="selection" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="clear" class="btn btn-default" title="Clear privilege filter"><i class="fa fa-times"></i></a>
 			</div>
 			<div class="pull-left">
 				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
 			</div>
+			<div class="pull-right">
+				<input wicket:id="addNew" type="hidden" class="form-control"></input>
+			</div>
 		</div>
-		<table wicket:id="members" class="members table table-hover table-condensed">
+		<table wicket:id="depots" class="depots table table-hover table-condensed">
 			<thead>
 				<tr>
 					<th class="name">Name</th>
-					<th class="full-name">Full Name</th>
+					<th class="privilege">Privilege</th>
 					<th class="actions"></th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr wicket:id="members">
+				<tr wicket:id="depots">
 					<td class="name">
-						<img wicket:id="avatar"></img>
 						<a wicket:id="link"><span wicket:id="name"></span></a>
 					</td>
-					<td class="email">
-						<span wicket:id="email"></span>
+					<td class="privilege">
+						<a wicket:id="privilege" class="btn btn-default btn-xs"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
 					</td>
 					<td class="actions">
-						<a wicket:id="remove" title="Remove from organization"><i class="fa fa-times"></i></a>
+						<a wicket:id="remove" title="Remove from team"><i class="fa fa-times"></i></a>
 						<a wicket:id="undoRemove" title="Do not remove"><i class="fa fa-undo"></i></a>
 						<span wicket:id="pendingRemoval" class="label label-danger">Pending removal</span>
 					</td>
@@ -37,6 +43,6 @@
 			</tbody>
 		</table>	
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
-		<div wicket:id="noMembers" class="alert alert-info">No repositories found</div>
+		<div wicket:id="noDepots" class="alert alert-info">No repositories found</div>
 	</section>
 </wicket:extend>

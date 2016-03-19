@@ -1,55 +1,52 @@
-.member-list .head, .team-list .head, .depot-list .head {
-	margin-bottom: 20px;
-}
-.member-list .head .search, .team-list .head .search, .depot-list .head .search {
-	width: 250px;
-}
-.member-list .head>.pull-left, .team-list .head>.pull-left, .depot-list .head>.pull-left  {
-	margin-right: 20px;
-}
-.member-list table td.actions, .team-list table td.actions, .depot-list table td.actions {
+.list table td.actions {
 	width: 130px;
 	white-space: nowrap;
 }
-.role-selection {
+.selection {
 	padding: 8px;
 }
-.role-selection a {
+.selection>a {
 	padding: 4px;
 	display: block;
 	color: #666;
 	text-decoration: none;
+	max-width: 360px;
 }
-.role-selection a .title {
+.selection>a>.title {
 	font-weight: bold;
 	margin-bottom: 4px;
 }
-.role-selection>a:FIRST-CHILD {
+.selection>a:FIRST-CHILD {
 	margin-bottom: 8px;
 }
-.role-selection a:hover {
+.selection>a:hover {
 	background: #F0F0F0;
 }
-.member-add .role label {
+.teams.table td.members img.avatar {
+	margin-right: 4px;
+}
+.member.add .role label {
 	font-weight: normal;
 	margin-left: 8px;
 	vertical-align: middle;
 }
-#team .general {
+.team.detail .general {
 	border: 1px solid #CCC;
 	padding: 12px;
 	margin-bottom: 20px;
 	border-radius: 4px;
 	background: #F0F0F0;
 } 
-#team .general .title {
+.team.detail .general .title {
 	font-weight: bold;
 	font-size: 18px;
 	margin-bottom: 12px;
 }
-#team .general .actions {
+.team.detail .general .actions {
+	border-top: 1px solid #DDD;
+	padding-top: 12px;
 	margin-top: 16px;
 }
-#team .tab-panel {
+.team.detail .tab-panel {
 	margin-top: 20px;
 }

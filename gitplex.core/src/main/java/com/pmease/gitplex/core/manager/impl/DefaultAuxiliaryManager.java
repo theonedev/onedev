@@ -628,7 +628,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	}
 
 	@Override
-	public void onDepotTransfer(Depot depot, Account oldOwner) {
+	public void onDepotTransfer(Depot depot, Account oldAccount) {
 	}
 
 }

@@ -2,29 +2,26 @@ package com.pmease.gitplex.core.manager;
 
 import javax.annotation.Nullable;
 
+import com.pmease.commons.hibernate.dao.EntityDao;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.component.Team;
+import com.pmease.gitplex.core.entity.Team;
 
-public interface TeamManager {
-	/**
-	 * Delete specified team from specified organization
-	 * 
-	 * @param organization
-	 * 			organization to delete team from
-	 * @param teamName
-	 * 			name of team to delete. Note that this name should exist in the organization
-	 */
-	void delete(Account organization, String teamName);
-	
+public interface TeamManager extends EntityDao<Team> {
 	/**
 	 * Save specified team in specified organization
 	 * 
-	 * @param organization
-	 * 			organization to rename team in
 	 * @param team
 	 * 			team to save
-	 * @param oldTeamName
-	 * 			old name of the team which should exist in the organization
+	 * @param oldName
+	 * 			in case of rename, this parameter should hold the original name 
+	 * 			when above team object is initially loaded to ensure database 
+	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
+	 * 			or the name is not changed
 	 */
-	void save(Account organization, Team team, @Nullable String oldTeamName);
+	void save(Team team, @Nullable String oldName);
+	
+	void delete(Team team);
+	
+	@Nullable
+	Team find(Account organization, String name);
 }

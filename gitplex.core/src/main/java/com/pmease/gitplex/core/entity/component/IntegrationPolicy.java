@@ -193,17 +193,17 @@ public class IntegrationPolicy implements Serializable {
 		return fullBranchMatchContext.getText();
 	}
 	
-	public void onDepotTransfer(Depot transferredDepot, Account originalOwner) {
+	public void onDepotTransfer(Depot transferredDepot, Account originalAccount) {
 		StringBuilder builder = new StringBuilder();
 		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
 			if (criteriaContext.includeMatch() != null) { 
-				String updated = updateDepotOwner(transferredDepot.getName(), 
-						originalOwner.getName(), transferredDepot.getOwner().getName(), 
+				String updated = updateDepotAccount(transferredDepot.getName(), 
+						originalAccount.getName(), transferredDepot.getAccount().getName(), 
 						criteriaContext.includeMatch().fullBranchMatch()); 
 				builder.append(String.format("include(%s) ", updated));
 			} else {
-				String updated = updateDepotOwner(transferredDepot.getName(), 
-						originalOwner.getName(), transferredDepot.getOwner().getName(), 
+				String updated = updateDepotAccount(transferredDepot.getName(), 
+						originalAccount.getName(), transferredDepot.getAccount().getName(), 
 						criteriaContext.excludeMatch().fullBranchMatch()); 
 				builder.append(String.format("exclude(%s) ", updated));
 			}
@@ -211,12 +211,12 @@ public class IntegrationPolicy implements Serializable {
 		sourceBranchMatch = builder.toString().trim();
 	}
 	
-	private static String updateDepotOwner(String depotName, String oldOwnerName, String newOwnerName, 
+	private static String updateDepotAccount(String depotName, String oldAccountName, String newAccountName, 
 			FullBranchMatchContext fullBranchMatchContext) {
 		if (fullBranchMatchContext.fullDepotMatch() != null) {
 			String fullDepotMatch = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());
-			if (fullDepotMatch.equals(oldOwnerName + Depot.FQN_SEPARATOR + depotName)) { 
-				return newOwnerName
+			if (fullDepotMatch.equals(oldAccountName + Depot.FQN_SEPARATOR + depotName)) { 
+				return newAccountName
 						+ Depot.FQN_SEPARATOR 
 						+ depotName 
 						+ DepotAndBranch.SEPARATOR 
@@ -226,15 +226,15 @@ public class IntegrationPolicy implements Serializable {
 		return fullBranchMatchContext.getText();
 	}
 	
-	public void onDepotRename(Account depotOwner, String oldName, String newName) {
+	public void onDepotRename(Account depotAccount, String oldName, String newName) {
 		StringBuilder builder = new StringBuilder();
 		for (CriteriaContext criteriaContext: FullBranchMatchUtils.parse(sourceBranchMatch).criteria()) {
 			if (criteriaContext.includeMatch() != null) { 
-				String updated = updateDepotName(depotOwner, oldName, newName, 
+				String updated = updateDepotName(depotAccount, oldName, newName, 
 						criteriaContext.includeMatch().fullBranchMatch()); 
 				builder.append(String.format("include(%s) ", updated));
 			} else {
-				String updated = updateDepotName(depotOwner, oldName, newName, 
+				String updated = updateDepotName(depotAccount, oldName, newName, 
 						criteriaContext.excludeMatch().fullBranchMatch()); 
 				builder.append(String.format("exclude(%s) ", updated));
 			}
@@ -242,12 +242,12 @@ public class IntegrationPolicy implements Serializable {
 		sourceBranchMatch = builder.toString().trim();
 	}
 	
-	private String updateDepotName(Account depotOwner, String oldName, String newName, 
+	private String updateDepotName(Account depotAccount, String oldName, String newName, 
 			FullBranchMatchContext fullBranchMatchContext) {
 		if (fullBranchMatchContext.fullDepotMatch() != null) {
 			String fullDepot = StringUtils.deleteWhitespace(fullBranchMatchContext.fullDepotMatch().getText());
-			if (fullDepot.equals(depotOwner.getName() + Depot.FQN_SEPARATOR + oldName)) { 
-				return depotOwner.getName() 
+			if (fullDepot.equals(depotAccount.getName() + Depot.FQN_SEPARATOR + oldName)) { 
+				return depotAccount.getName() 
 						+ Depot.FQN_SEPARATOR 
 						+ newName 
 						+ DepotAndBranch.SEPARATOR 

@@ -153,7 +153,7 @@ public class NewRequestPage extends PullRequestPage {
 			if (currentUser.asSubject().isPermitted(writePermission))
 				pullRequest.setAssignee(currentUser);
 			else
-				pullRequest.setAssignee(getDepot().getOwner());
+				pullRequest.setAssignee(getDepot().getAccount());
 
 			if (target.getDepot().equals(source.getDepot())) {
 				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(

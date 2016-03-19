@@ -76,8 +76,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(ObjectPermission.ofAccountAdmin(account));
 	}
 	
-	public static boolean canAccess(Account organization) {
-		return getSubject().isPermitted(ObjectPermission.ofOrganizationAccess(organization));
+	public static boolean canAccess(Account account) {
+		return getSubject().isPermitted(ObjectPermission.ofAccountAccess(account));
 	}
 	
 	public static boolean canPull(Depot depot) {

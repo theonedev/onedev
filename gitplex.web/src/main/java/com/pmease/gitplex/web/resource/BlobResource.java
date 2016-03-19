@@ -101,7 +101,7 @@ public class BlobResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Depot depot, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_USER, depot.getOwner().getName());
+		params.add(PARAM_USER, depot.getAccount().getName());
 		params.set(PARAM_DEPOT, depot.getName());
 		params.set(PARAM_REVISION, blobIdent.revision);
 		params.set(PARAM_PATH, blobIdent.path);

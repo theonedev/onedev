@@ -22,8 +22,6 @@ public abstract class AccountPage extends LayoutPage {
 	
 	protected final IModel<Account> accountModel;
 	
-	protected final long accountVersion;
-	
 	public AccountPage(PageParameters params) {
 		super(params);
 		
@@ -34,7 +32,6 @@ public abstract class AccountPage extends LayoutPage {
 		if (account == null) 
 			throw (new EntityNotFoundException("Account " + name + " not found"));
 		
-		accountVersion = account.getVersion();
 		accountModel = new UserModel(account);
 	}
 

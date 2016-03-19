@@ -14,9 +14,9 @@ import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.manager.MembershipManager;
+import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
@@ -26,14 +26,14 @@ import jersey.repackaged.com.google.common.collect.Sets;
 @SuppressWarnings("serial")
 public class NewOrganizationPage extends AccountLayoutPage {
 
-	private final Membership membership;
+	private final OrganizationMembership membership;
 	
 	public NewOrganizationPage(PageParameters params) {
 		super(params);
 		
 		Account organization = new Account();
 		organization.setOrganization(true);
-		membership = new Membership();
+		membership = new OrganizationMembership();
 		membership.setAdmin(true);
 		membership.setUser(getAccount());
 		membership.setOrganization(organization);
@@ -64,7 +64,7 @@ public class NewOrganizationPage extends AccountLayoutPage {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another account.");
 				} else {
-					GitPlex.getInstance(MembershipManager.class).save(membership);
+					GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
 					Session.get().success("New organization created");
 					setResponsePage(AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
 				}

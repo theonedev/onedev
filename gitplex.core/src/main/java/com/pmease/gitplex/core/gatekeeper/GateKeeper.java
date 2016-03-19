@@ -64,7 +64,7 @@ public interface GateKeeper extends Serializable {
 	
 	boolean onDepotDelete(Depot depot);
 	
-	boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, Account originalOwner);
+	boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, Account originalAccount);
 	
 	void onTeamRename(String oldName, String newName);
 	

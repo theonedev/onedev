@@ -66,7 +66,7 @@ public abstract class DepotPage extends AccountPage {
 	protected final IModel<Depot> depotModel;
 	
 	public static PageParameters paramsOf(Depot depot) {
-		return paramsOf(depot.getOwner(), depot.getName());
+		return paramsOf(depot.getAccount(), depot.getName());
 	}
 	
 	public static PageParameters paramsOf(Account account, String depotName) {

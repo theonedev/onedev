@@ -98,7 +98,7 @@ import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.util.validation.DepotName;
 
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_owner_id", "name"})})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_account_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Depot extends AbstractEntity implements AccountBelonging {
@@ -117,7 +117,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Account owner;
+	private Account account;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
@@ -127,6 +127,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	private String name;
 	
 	private String description;
+	
+	private boolean publicRead;
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -156,6 +158,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Depot> forks = new ArrayList<>();
     
+	@OneToMany(mappedBy="depot")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<Authorization> authorizations = new ArrayList<>();
+	
     private transient Map<BlobIdent, Blob> blobCache;
     
     private transient Map<DiffKey, List<DiffEntry>> diffCache;
@@ -175,12 +181,12 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     private transient String defaultBranch;
     
     @Override
-	public Account getOwner() {
-		return owner;
+	public Account getAccount() {
+		return account;
 	}
 
-	public void setOwner(Account owner) {
-		this.owner = owner;
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 
 	@Editable(order=100)
@@ -194,7 +200,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		this.name = name;
 	}
 
-	@Editable(order=200)
+	@Editable(order=200, description="Optionally describe the repository")
 	@Markdown
 	public String getDescription() {
 		return description;
@@ -204,7 +210,16 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		this.description = description;
 	}
 
-    @NotNull
+	@Editable(order=300, description="Whether or this repository can be read by everyone")
+    public boolean isPublicRead() {
+		return publicRead;
+	}
+
+	public void setPublicRead(boolean publicRead) {
+		this.publicRead = publicRead;
+	}
+
+	@NotNull
 	@Valid
 	public List<GateKeeper> getGateKeepers() {
 		return gateKeepers;
@@ -331,7 +346,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	}
 
 	public String getFQN() {
-		return getOwner().getName() + FQN_SEPARATOR + getName();
+		return getAccount().getName() + FQN_SEPARATOR + getName();
 	}
 	
 	public static String getNameByFQN(String repositoryFQN) {
@@ -464,10 +479,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 			@Override
 			public int compare(Depot repo1, Depot repo2) {
-				if (repo1.getOwner().equals(repo2.getOwner()))
+				if (repo1.getAccount().equals(repo2.getAccount()))
 					return repo1.getName().compareTo(repo2.getName());
 				else
-					return repo1.getOwner().getName().compareTo(repo2.getOwner().getName());
+					return repo1.getAccount().getName().compareTo(repo2.getAccount().getName());
 			}
 			
 		});
@@ -1042,6 +1057,14 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			return Objects.hashCode(oldRev, newRev, paths, detectRenames);
 		}
 		
+	}
+
+	public Collection<Authorization> getAuthorizations() {
+		return authorizations;
+	}
+
+	public void setAuthorizations(Collection<Authorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	public long getVersion() {

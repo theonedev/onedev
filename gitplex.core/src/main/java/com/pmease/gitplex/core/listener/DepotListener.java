@@ -11,6 +11,6 @@ public interface DepotListener {
 
 	void onDepotRename(Depot renamedDepot, String oldName);
 	
-	void onDepotTransfer(Depot depot, Account oldOwner);
+	void onDepotTransfer(Depot depot, Account oldAccount);
 	
 }

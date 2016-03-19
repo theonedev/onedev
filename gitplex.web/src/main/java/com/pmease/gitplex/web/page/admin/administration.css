@@ -1,16 +1,7 @@
 #administration.sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }
-#users .operations {
-	margin-bottom: 20px;
-}
-#users .operations .search {
-	width: 250px;
-}
-#users .operations>.pull-left {
-	margin-right: 20px;
-}
-#users .actions .fa {
+.user.list .actions .fa {
 	font-size: 18px;
 	color: #666;
 }

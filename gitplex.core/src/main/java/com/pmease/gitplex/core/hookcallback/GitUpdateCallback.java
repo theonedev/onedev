@@ -21,15 +21,16 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Passed;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 
 @SuppressWarnings("serial")
@@ -40,13 +41,13 @@ public class GitUpdateCallback extends HttpServlet {
 
 	public static final String PATH = "/git-update-callback";
 
-	private final Dao dao;
+	private final DepotManager depotManager;
 	
 	private final AccountManager userManager;
 	
 	@Inject
-	public GitUpdateCallback(Dao dao, AccountManager userManager) {
-		this.dao = dao;
+	public GitUpdateCallback(DepotManager depotManager, AccountManager userManager) {
+		this.depotManager = depotManager;
 		this.userManager = userManager;
 	}
 	
@@ -62,6 +63,7 @@ public class GitUpdateCallback extends HttpServlet {
 		output.writeLine();
 	}
 	
+	@Transactional
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String clientIp = request.getHeader("X-Forwarded-For");
@@ -76,7 +78,7 @@ public class GitUpdateCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Depot depot = dao.load(Depot.class, Long.valueOf(fields.get(0)));
+        Depot depot = depotManager.load(Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
         

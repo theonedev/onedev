@@ -59,8 +59,8 @@ public class NotGateKeeper extends CompositeGateKeeper {
 
 	@Override
 	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
-			Account origninalOwner) {
-		return gateKeeper.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, origninalOwner);
+			Account origninalAccount) {
+		return gateKeeper.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, origninalAccount);
 	}
 	
 	@Override

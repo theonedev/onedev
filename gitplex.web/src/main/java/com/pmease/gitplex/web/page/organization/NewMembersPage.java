@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.organization;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -21,8 +20,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
-import com.pmease.gitplex.core.manager.MembershipManager;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.TeamMembership;
+import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
+import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
@@ -39,7 +41,7 @@ public class NewMembersPage extends AccountLayoutPage {
 	
 	private String role = ROLES.get(0);
 	
-	private Collection<String> teams;
+	private Collection<Team> teams;
 	
 	public NewMembersPage(PageParameters params) {
 		super(params);
@@ -57,16 +59,23 @@ public class NewMembersPage extends AccountLayoutPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				Collection<Membership> memberships = new ArrayList<>();
+				Collection<OrganizationMembership> organizationMemberships = new ArrayList<>();
+				Collection<TeamMembership> teamMemberships = new ArrayList<>();
 				for (Account user: users) {
-					Membership membership = new Membership();
-					membership.setUser(user);
-					membership.setOrganization(getAccount());
-					membership.setAdmin(!role.equals(ROLES.get(0)));
-					membership.setJoinedTeams(new LinkedHashSet<>(teams));
-					memberships.add(membership);
+					OrganizationMembership organizationMembership = new OrganizationMembership();
+					organizationMembership.setUser(user);
+					organizationMembership.setOrganization(getAccount());
+					organizationMembership.setAdmin(!role.equals(ROLES.get(0)));
+					organizationMemberships.add(organizationMembership);
+					for (Team team: teams) {
+						TeamMembership teamMembership = new TeamMembership();
+						teamMembership.setUser(user);
+						teamMembership.setTeam(team);
+						teamMemberships.add(teamMembership);
+					}
 				}
-				GitPlex.getInstance(MembershipManager.class).save(memberships);
+				
+				GitPlex.getInstance(OrganizationMembershipManager.class).save(organizationMemberships, teamMemberships);
 				setResponsePage(MemberListPage.class, MemberListPage.paramsOf(getAccount()));
 			}
 			
@@ -125,23 +134,23 @@ public class NewMembersPage extends AccountLayoutPage {
 			
 		}, ROLES));
 		
-		form.add(new TeamMultiChoice("teams", accountModel, new IModel<Collection<String>>() {
+		form.add(new TeamMultiChoice("teams", new IModel<Collection<Team>>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Collection<String> getObject() {
+			public Collection<Team> getObject() {
 				return teams;
 			}
 
 			@Override
-			public void setObject(Collection<String> object) {
+			public void setObject(Collection<Team> object) {
 				teams = object;
 			}
 			
-		}));
+		}, new TeamChoiceProvider(accountModel)));
 	}
 
 	@Override

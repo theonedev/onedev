@@ -107,7 +107,7 @@ public class AttachmentResource extends AbstractResource {
 	
 	public static PageParameters paramsOf(PullRequest request, String attachment) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_USER, request.getTargetDepot().getOwner().getName());
+		params.add(PARAM_USER, request.getTargetDepot().getAccount().getName());
 		params.set(PARAM_DEPOT, request.getTargetDepot().getName());
 		params.set(PARAM_REQUEST, request.getId());
 		params.set(PARAM_ATTACHMENT, attachment);

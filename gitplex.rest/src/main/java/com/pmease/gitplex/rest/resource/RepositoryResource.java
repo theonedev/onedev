@@ -67,7 +67,7 @@ public class RepositoryResource {
 				depots.add(depot);
 		} else {
 			if (userId != null)
-				criteria.add(Restrictions.eq("owner.id", userId));
+				criteria.add(Restrictions.eq("account.id", userId));
 			if (name != null)
 				criteria.add(Restrictions.eq("name", name));
 			depots.addAll(dao.query(criteria));

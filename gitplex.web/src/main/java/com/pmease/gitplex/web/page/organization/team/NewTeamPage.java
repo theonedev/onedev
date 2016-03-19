@@ -14,8 +14,8 @@ import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.component.Team;
-import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
@@ -42,14 +42,15 @@ public class NewTeamPage extends AccountLayoutPage {
 			protected void onSubmit() {
 				super.onSubmit();
 
+				TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
 				Account organization = getAccount();
-				if (organization.getTeams().containsKey(team.getName())) {
+				team.setOrganization(organization);
+				if (teamManager.find(organization, team.getName()) != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another team in the organization");
 				} else {
-					organization.getTeams().put(team.getName(), team);
-					GitPlex.getInstance(AccountManager.class).save(organization, null);
-					setResponsePage(TeamMemberListPage.class, TeamMemberListPage.paramsOf(getAccount(), team));
+					GitPlex.getInstance(TeamManager.class).save(team, null);
+					setResponsePage(TeamMemberListPage.class, TeamMemberListPage.paramsOf(team));
 				}
 			}
 			

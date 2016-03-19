@@ -127,3 +127,13 @@ li.selectable.active a, a.selectable.active {
 .ellipsis-expander:hover .fa {
 	color: white;
 }
+
+.list>.head {
+	margin-bottom: 20px;
+}
+.list>.head>.search {
+	width: 250px;
+}
+.list>.head>.pull-left {
+	margin-right: 20px;
+}

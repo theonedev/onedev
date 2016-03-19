@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -20,7 +21,6 @@ import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.StaleObjectStateException;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
@@ -32,13 +32,16 @@ import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
-import com.pmease.gitplex.core.manager.MembershipManager;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
+import com.pmease.gitplex.core.entity.TeamMembership;
+import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
+import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.EmailLink;
 import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
@@ -53,7 +56,7 @@ public class TeamMemberListPage extends TeamPage {
 
 	private static final String ADD_MEMBER_PLACEHOLDER = "Select user to add to team...";
 	
-	private PageableListView<Account> membersView;
+	private PageableListView<TeamMembership> membersView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
@@ -92,14 +95,12 @@ public class TeamMemberListPage extends TeamPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Collection<Membership> memberships = new ArrayList<>();
-				for (Membership membership: getAccount().getUserMemberships()) {
-					if (pendingRemovals.contains(membership.getUser().getId())) {
-						membership.getJoinedTeams().remove(team.getName());
-						memberships.add(membership);
-					}
+				TeamMembershipManager teamMembershipManager = GitPlex.getInstance(TeamMembershipManager.class);
+				Collection<TeamMembership> memberships = new ArrayList<>();
+				for (Long id: pendingRemovals) {
+					memberships.add(teamMembershipManager.load(id));
 				}
-				GitPlex.getInstance(MembershipManager.class).save(memberships);
+				GitPlex.getInstance(TeamMembershipManager.class).delete(memberships);
 				pendingRemovals.clear();
 				target.add(this);
 				target.add(pagingNavigator);
@@ -116,34 +117,38 @@ public class TeamMemberListPage extends TeamPage {
 		});
 		confirmRemoveLink.setOutputMarkupPlaceholderTag(true);
 		
-		add(new SelectToAddChoice<Membership>("addNew", new ChoiceProvider<Membership>() {
+		add(new SelectToAddChoice<OrganizationMembership>("addNew", new ChoiceProvider<OrganizationMembership>() {
 
 			@Override
-			public void query(String term, int page, Response<Membership> response) {
-				List<Membership> memberships = new ArrayList<>();
+			public void query(String term, int page, Response<OrganizationMembership> response) {
+				List<OrganizationMembership> memberships = new ArrayList<>();
 				term = term.toLowerCase();
-				for (Membership membership: getAccount().getUserMemberships()) {
+				Set<Account> teamMembers = new HashSet<>();
+				for (TeamMembership membership: teamModel.getObject().getMemberships()) {
+					teamMembers.add(membership.getUser());
+				}
+				for (OrganizationMembership membership: getAccount().getUserMemberships()) {
 					Account user = membership.getUser();
-					if (user.matches(term) && !membership.getJoinedTeams().contains(team.getName())) {
+					if (user.matches(term) && !teamMembers.contains(user)) {
 						memberships.add(membership);
 					}
 				}
 				
-				Collections.sort(memberships, new Comparator<Membership>() {
+				Collections.sort(memberships, new Comparator<OrganizationMembership>() {
 
 					@Override
-					public int compare(Membership membership1, Membership membership2) {
+					public int compare(OrganizationMembership membership1, OrganizationMembership membership2) {
 						return membership1.getUser().getDisplayName()
 								.compareTo(membership2.getUser().getDisplayName());
 					}
 					
 				});
 				
-				new ResponseFiller<Membership>(response).fill(memberships, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<OrganizationMembership>(response).fill(memberships, page, Constants.DEFAULT_PAGE_SIZE);
 			}
 
 			@Override
-			public void toJson(Membership choice, JSONWriter writer) throws JSONException {
+			public void toJson(OrganizationMembership choice, JSONWriter writer) throws JSONException {
 				String displayName = StringEscapeUtils.escapeHtml4(choice.getUser().getDisplayName()); 
 				writer.key("id").value(choice.getId()).key("name").value(displayName);
 				String avatarUrl = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice.getUser());
@@ -151,9 +156,9 @@ public class TeamMemberListPage extends TeamPage {
 			}
 
 			@Override
-			public Collection<Membership> toChoices(Collection<String> ids) {
-				List<Membership> memberships = Lists.newArrayList();
-				MembershipManager membershipManager = GitPlex.getInstance(MembershipManager.class);
+			public Collection<OrganizationMembership> toChoices(Collection<String> ids) {
+				List<OrganizationMembership> memberships = Lists.newArrayList();
+				OrganizationMembershipManager membershipManager = GitPlex.getInstance(OrganizationMembershipManager.class);
 				for (String each : ids) {
 					Long id = Long.valueOf(each);
 					memberships.add(membershipManager.load(id));
@@ -175,14 +180,18 @@ public class TeamMemberListPage extends TeamPage {
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Membership selection) {
-				// with below check, it is impossible to add users to a team that has just been 
-				// deleted
-				if (accountVersion != selection.getOrganization().getVersion()) {
-					throw new StaleObjectStateException(Membership.class.getName(), selection.getId());
-				}
-				selection.getJoinedTeams().add(team.getName());
-				GitPlex.getInstance(MembershipManager.class).save(selection);
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
+			}
+			
+			@Override
+			protected void onSelect(AjaxRequestTarget target, OrganizationMembership selection) {
+				TeamMembership membership = new TeamMembership();
+				membership.setTeam(teamModel.getObject());
+				membership.setUser(selection.getUser());
+				GitPlex.getInstance(TeamMembershipManager.class).persist(membership);
 				target.add(membersContainer);
 				target.add(pagingNavigator);
 				target.add(noMembersContainer);
@@ -202,12 +211,12 @@ public class TeamMemberListPage extends TeamPage {
 		membersContainer.setOutputMarkupPlaceholderTag(true);
 		add(membersContainer);
 		
-		membersContainer.add(membersView = new PageableListView<Account>("members", 
-				new LoadableDetachableModel<List<Account>>() {
+		membersContainer.add(membersView = new PageableListView<TeamMembership>("members", 
+				new LoadableDetachableModel<List<TeamMembership>>() {
 
 			@Override
-			protected List<Account> load() {
-				List<Account> members = new ArrayList<>();
+			protected List<TeamMembership> load() {
+				List<TeamMembership> memberships = new ArrayList<>();
 				
 				String searchInput = searchField.getInput();
 				if (searchInput != null)
@@ -215,29 +224,29 @@ public class TeamMemberListPage extends TeamPage {
 				else
 					searchInput = "";
 				
-				for (Membership membership: getAccount().getUserMemberships()) {
-					Account user = membership.getUser();
-					if (membership.getJoinedTeams().contains(team.getName()) && user.matches(searchInput)) {
-						members.add(user);
+				for (TeamMembership membership: teamModel.getObject().getMemberships()) {
+					if (membership.getUser().matches(searchInput)) {
+						memberships.add(membership);
 					}
 				}
 				
-				Collections.sort(members, new Comparator<Account>() {
+				Collections.sort(memberships, new Comparator<TeamMembership>() {
 
 					@Override
-					public int compare(Account member1, Account member2) {
-						return member1.getDisplayName().compareTo(member2.getDisplayName());
+					public int compare(TeamMembership membership1, TeamMembership membership2) {
+						return membership1.getUser().getDisplayName()
+								.compareTo(membership2.getUser().getDisplayName());
 					}
 					
 				});
-				return members;
+				return memberships;
 			}
 			
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(ListItem<Account> item) {
-				Account member = item.getModelObject();
+			protected void populateItem(ListItem<TeamMembership> item) {
+				Account member = item.getModelObject().getUser();
 
 				item.add(new Avatar("avatar", member));
 				item.add(new UserLink("link", member));

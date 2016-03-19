@@ -11,9 +11,10 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.StaleObjectStateException;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ConfirmOnClick;
@@ -23,7 +24,7 @@ import com.pmease.commons.wicket.component.tabbable.PageTabLink;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.component.Team;
+import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
@@ -35,18 +36,26 @@ public abstract class TeamPage extends AccountLayoutPage {
 
 	private static final String PARAM_TEAM = "team";
 
-	protected final Team team;
+	protected final IModel<Team> teamModel;
 	
 	public TeamPage(PageParameters params) {
 		super(params);
 
 		String teamName = params.get(PARAM_TEAM).toString();
-		team = Preconditions.checkNotNull(getAccount().getTeams().get(teamName));
+		teamModel = new LoadableDetachableModel<Team>() {
+
+			@Override
+			protected Team load() {
+				TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
+				return Preconditions.checkNotNull(teamManager.find(getAccount(), teamName));
+			}
+			
+		};
 		Preconditions.checkState(getAccount().isOrganization());
 	}
 
-	public static PageParameters paramsOf(Account organization, Team team) {
-		PageParameters params = paramsOf(organization);
+	public static PageParameters paramsOf(Team team) {
+		PageParameters params = paramsOf(team.getOrganization());
 		params.set(PARAM_TEAM, team.getName());
 		return params;
 	}
@@ -55,9 +64,9 @@ public abstract class TeamPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("teamName", team.getName()));
-		if (team.getDescription() != null) {
-			add(new MarkdownViewer("teamDescription", Model.of(team.getDescription()), false));
+		add(new Label("teamName", teamModel.getObject().getName()));
+		if (teamModel.getObject().getDescription() != null) {
+			add(new MarkdownViewer("teamDescription", Model.of(teamModel.getObject().getDescription()), false));
 		} else {
 			add(new Label("teamDescription", "<i>No description</i>").setEscapeModelStrings(false));
 		}
@@ -72,8 +81,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 			
 			@Override
 			public void onClick() {
-				Account organization = getAccount();
-				setResponsePage(TeamEditPage.class, TeamEditPage.paramsOf(organization, team));
+				setResponsePage(TeamEditPage.class, TeamEditPage.paramsOf(teamModel.getObject()));
 			}
 			
 		});
@@ -88,11 +96,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 			
 			@Override
 			public void onClick() {
-				Account organization = getAccount();
-				if (organization.getVersion() != accountVersion) {
-					throw new StaleObjectStateException(Account.class.getName(), organization.getId());
-				}
-				GitPlex.getInstance(TeamManager.class).delete(organization, team.getName());
+				GitPlex.getInstance(TeamManager.class).delete(teamModel.getObject());
 				setResponsePage(TeamListPage.class, TeamListPage.paramsOf(getAccount()));
 			}
 
@@ -108,7 +112,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 						return new BookmarkablePageLink<Void>(linkId, TeamMemberListPage.class, 
-								TeamMemberListPage.paramsOf(getAccount(), team));
+								TeamMemberListPage.paramsOf(teamModel.getObject()));
 					}
 					
 				};
@@ -124,7 +128,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 						return new BookmarkablePageLink<Void>(linkId, TeamDepotListPage.class, 
-								TeamDepotListPage.paramsOf(getAccount(), team));
+								TeamDepotListPage.paramsOf(teamModel.getObject()));
 					}
 					
 				};
@@ -138,6 +142,12 @@ public abstract class TeamPage extends AccountLayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
+	}
+
+	@Override
+	protected void onDetach() {
+		teamModel.detach();
+		super.onDetach();
 	}
 
 	@Override

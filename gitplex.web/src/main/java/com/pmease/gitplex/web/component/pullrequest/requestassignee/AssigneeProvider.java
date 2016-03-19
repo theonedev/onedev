@@ -39,7 +39,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 	@Override
 	public void query(String term, int page, Response<Assignee> response) {
 		List<Assignee> assignees = new ArrayList<>();
-		for (Account user: SecurityUtils.findUsersCan(depotModel.getObject(), DepotPrivilege.PUSH)) {
+		for (Account user: SecurityUtils.findUsersCan(depotModel.getObject(), DepotPrivilege.WRITE)) {
 			if (StringUtils.isBlank(term) 
 					|| user.getName().startsWith(term) 
 					|| user.getDisplayName().startsWith(term)) {
@@ -55,7 +55,7 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 			
 		});
 		if (StringUtils.isBlank(term)) {
-			assignees.add(0, new Assignee(depotModel.getObject().getOwner(), "Repository Owner"));
+			assignees.add(0, new Assignee(depotModel.getObject().getAccount(), "Repository Owner"));
 			ObjectPermission writePermission = ObjectPermission.ofDepotPush(depotModel.getObject());
 			Account currentUser = GitPlex.getInstance(AccountManager.class).getCurrent();
 			if (currentUser != null && currentUser.asSubject().isPermitted(writePermission))

@@ -79,9 +79,9 @@ public class IfThenGateKeeper extends CompositeGateKeeper {
 
 	@Override
 	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
-			Account originalOwner) {
-		return ifGate.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalOwner) 
-				|| thenGate.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalOwner);
+			Account originalAccount) {
+		return ifGate.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalAccount) 
+				|| thenGate.onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalAccount);
 	}
 	
 	@Override

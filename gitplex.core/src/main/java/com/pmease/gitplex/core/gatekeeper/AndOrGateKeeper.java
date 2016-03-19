@@ -49,9 +49,9 @@ public abstract class AndOrGateKeeper extends CompositeGateKeeper {
 
 	@Override
 	public boolean onDepotTransfer(Depot depotDefiningGateKeeper, Depot transferredDepot, 
-			Account originalOwner) {
+			Account originalAccount) {
 		for (Iterator<GateKeeper> it = gateKeepers.iterator(); it.hasNext();) {
-			if (it.next().onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalOwner))
+			if (it.next().onDepotTransfer(depotDefiningGateKeeper, transferredDepot, originalAccount))
 				it.remove();
 		}
 		return gateKeepers.isEmpty();

@@ -66,4 +66,5 @@ public interface AccountManager extends EntityDao<Account> {
 	List<Account> allUsers();
 	
 	List<Account> allOrganizations();
+	
 }

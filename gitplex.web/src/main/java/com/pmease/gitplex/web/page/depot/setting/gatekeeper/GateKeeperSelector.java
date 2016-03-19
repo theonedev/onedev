@@ -23,8 +23,11 @@ import com.pmease.commons.wicket.behavior.CollapseBehavior;
 import com.pmease.commons.wicket.component.AccordionPanel;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.gatekeeper.DefaultGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
+import com.pmease.gitplex.core.gatekeeper.TeamAwareGateKeeper;
+import com.pmease.gitplex.web.page.account.AccountPage;
 
 @SuppressWarnings("serial")
 public abstract class GateKeeperSelector extends Panel {
@@ -42,9 +45,14 @@ public abstract class GateKeeperSelector extends Panel {
 		gateKeeperClasses.put(GateKeeper.CATEGORY_USER, new ArrayList<Class<?>>());
 		gateKeeperClasses.put(GateKeeper.CATEGORY_COMPOSITION, new ArrayList<Class<?>>());
 		
+		Account account = ((AccountPage)getPage()).getAccount();
+		
 		List<Class<?>> implementations = new ArrayList<>();
-		for (Class<?> clazz: GitPlex.getInstance(ImplementationRegistry.class).getImplementations(GateKeeper.class)) 
-			implementations.add(clazz);
+		
+		for (Class<?> clazz: GitPlex.getInstance(ImplementationRegistry.class).getImplementations(GateKeeper.class)) {
+			if (account.isOrganization() || !TeamAwareGateKeeper.class.isAssignableFrom(clazz))
+				implementations.add(clazz);
+		}
 		
 		implementations.remove(DefaultGateKeeper.class);
 		Collections.sort(implementations, new Comparator<Class<?>>() {

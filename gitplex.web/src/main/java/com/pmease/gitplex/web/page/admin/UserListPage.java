@@ -143,6 +143,7 @@ public class UserListPage extends AdministrationPage {
 
 				});
 				
+				Long userId = user.getId();
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -151,12 +152,13 @@ public class UserListPage extends AdministrationPage {
 							
 							@Override
 							protected void onDeleted(AjaxRequestTarget target) {
-								setResponsePage(UserListPage.this);
+								target.add(usersContainer);
+								target.add(pagingNavigator);
 							}
 							
 							@Override
 							protected Account getAccount() {
-								return item.getModelObject();
+								return GitPlex.getInstance(AccountManager.class).load(userId);
 							}
 						};
 					}

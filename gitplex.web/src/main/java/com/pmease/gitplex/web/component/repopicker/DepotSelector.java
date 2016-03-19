@@ -162,7 +162,7 @@ public abstract class DepotSelector extends Panel {
 					} else {
 						int depotCount = 0;
 						for (Depot depot: depotsModel.getObject()) {
-							if (depot.getName().contains(depotSearch) && depot.getOwner().equals(account))
+							if (depot.getName().contains(depotSearch) && depot.getAccount().equals(account))
 								depotCount++;
 						}
 						if (depotCount == 0)
@@ -193,7 +193,7 @@ public abstract class DepotSelector extends Panel {
 					protected List<Depot> load() {
 						List<Depot> depots = new ArrayList<>();
 						for (Depot depot: depotsModel.getObject()) {
-							if (depot.getName().contains(depotSearch) && depot.getOwner().equals(userItem.getModelObject()))
+							if (depot.getName().contains(depotSearch) && depot.getAccount().equals(userItem.getModelObject()))
 								depots.add(depot);
 						}
 						Collections.sort(depots, new Comparator<Depot>() {

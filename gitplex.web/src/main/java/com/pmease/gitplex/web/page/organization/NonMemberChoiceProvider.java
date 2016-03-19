@@ -15,7 +15,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
@@ -41,7 +41,7 @@ public class NonMemberChoiceProvider extends AccountChoiceProvider {
 				Restrictions.eq("organization", false));
 		
 		Set<Account> members = new HashSet<>();
-		for (Membership membership: organizationModel.getObject().getUserMemberships()) 
+		for (OrganizationMembership membership: organizationModel.getObject().getUserMemberships()) 
 			members.add(membership.getUser());
 		
 		List<Account> nonMembers = new ArrayList<>();

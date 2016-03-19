@@ -10,7 +10,7 @@ import org.apache.wicket.model.IModel;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.assets.accountchoice.AbstractAccountChoiceProvider;
+import com.pmease.gitplex.web.component.accountchoice.AbstractAccountChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
 public class ReviewerProvider extends AbstractAccountChoiceProvider {

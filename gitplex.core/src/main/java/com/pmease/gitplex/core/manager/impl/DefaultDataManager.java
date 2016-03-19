@@ -11,7 +11,6 @@ import javax.validation.Validator;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.ManagedSerializedForm;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.commons.util.init.Skippable;
@@ -28,18 +27,15 @@ import com.pmease.gitplex.core.setting.SystemSetting;
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
 
-	private final Dao dao;
-	
-	private final AccountManager userManager;
+	private final AccountManager accountManager;
 	
 	private final ConfigManager configManager;
 	
 	private final Validator validator;
 	
 	@Inject
-	public DefaultDataManager(Dao dao, AccountManager userManager, ConfigManager configManager, Validator validator) {
-		this.dao = dao;
-		this.userManager = userManager;
+	public DefaultDataManager(AccountManager accountManager, ConfigManager configManager, Validator validator) {
+		this.accountManager = accountManager;
 		this.configManager = configManager;
 		this.validator = validator;
 	}
@@ -49,7 +45,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		Account rootUser = dao.get(Account.class, Account.ADMINISTRATOR_ID);		
+		Account rootUser = accountManager.get(Account.ADMINISTRATOR_ID);		
 		if (rootUser == null) {
 			rootUser = new Account();
 			rootUser.setId(Account.ADMINISTRATOR_ID);
@@ -63,7 +59,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					userManager.save((Account) getSetting(), null);
+					accountManager.save((Account) getSetting(), null);
 				}
 				
 			});
@@ -132,6 +128,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(DataManager.class);
-	}	
+	}
 
 }

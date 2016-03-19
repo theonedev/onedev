@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -19,7 +17,6 @@ import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
@@ -84,7 +81,7 @@ public class DepotListPage extends AccountLayoutPage {
 			@Override
 			public void onClick() {
 				Depot depot = new Depot();
-				depot.setOwner(getAccount());
+				depot.setAccount(getAccount());
 				setResponsePage(new NewDepotPage(depot));
 			}
 			
@@ -213,13 +210,6 @@ public class DepotListPage extends AccountLayoutPage {
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				DepotListPage.class, "depot-list.css")));
-	}
-
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
 		setResponsePage(DepotListPage.class, paramsOf(account));

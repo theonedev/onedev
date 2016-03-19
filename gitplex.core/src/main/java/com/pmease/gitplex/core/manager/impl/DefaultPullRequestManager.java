@@ -846,7 +846,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	}
 
 	@Override
-	public void onDepotTransfer(Depot depot, Account oldOwner) {
+	public void onDepotTransfer(Depot depot, Account oldAccount) {
 	}
 
 }

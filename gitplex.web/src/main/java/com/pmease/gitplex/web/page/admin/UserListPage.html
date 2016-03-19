@@ -1,20 +1,17 @@
 <wicket:extend>
-	<section id="users">
-		<div class="head">
-			All Users
-		</div>
-		<div class="body">
-			<div class="operations clearfix">
-				<div class="pull-left search">
-					<div class="input-group">
-						<span class="input-group-addon"><i class="fa fa-search"></i></span>
-						<input wicket:id="searchUsers" class="form-control" placeholder="Search users"></input>
-					</div>
-				</div>
-				<div class="pull-left actions">
-					<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+	<section class="user list">
+		<div class="head clearfix">
+			<div class="pull-left search">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input wicket:id="searchUsers" class="form-control" placeholder="Search users"></input>
 				</div>
 			</div>
+			<div class="pull-left actions">
+				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+			</div>
+		</div>
+		<div class="body">
 			<table wicket:id="usersContainer" class="users table table-hover">
 				<thead>
 					<tr>

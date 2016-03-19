@@ -11,6 +11,7 @@ import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
 import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 
 @SuppressWarnings("serial")
@@ -26,13 +27,14 @@ public class AccountSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Account user;
+		Account account;
 		if (getModelObject() != null)
-			user = GitPlex.getInstance(AccountManager.class).findByName(getModelObject());
+			account = GitPlex.getInstance(AccountManager.class).findByName(getModelObject());
 		else
-			user = null;
+			account = null;
 		
-    	input = new AccountSingleChoice("input", Model.of(user), !getPropertyDescriptor().isPropertyRequired());
+    	input = new AccountSingleChoice("input", Model.of(account), new AccountChoiceProvider(), 
+    			!getPropertyDescriptor().isPropertyRequired());
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);
@@ -45,9 +47,9 @@ public class AccountSingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		Account user = input.getConvertedInput();
-		if (user != null)
-			return user.getName();
+		Account account = input.getConvertedInput();
+		if (account != null)
+			return account.getName();
 		else
 			return null;
 	}

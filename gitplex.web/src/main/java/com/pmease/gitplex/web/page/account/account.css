@@ -5,7 +5,7 @@
 	margin: -20px 0 10px 0;
 	padding: 10px;
 }
-#account.sidebar>table>tbody>tr>td.nav>.head>div>.avatar {
+#account.sidebar>table>tbody>tr>td.nav>.head>div.avatar img {
 	height: 200px;
 	width: 200px;
 	margin-bottom: 10px;

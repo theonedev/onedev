@@ -33,10 +33,10 @@ public class AffinalDepotsModel extends LoadableDetachableModel<List<Depot>> {
 
 			@Override
 			public int compare(Depot repo1, Depot repo2) {
-				if (repo1.getOwner().equals(repo2.getOwner()))
+				if (repo1.getAccount().equals(repo2.getAccount()))
 					return repo1.getName().compareTo(repo2.getName());
 				else
-					return repo1.getOwner().getName().compareTo(repo2.getOwner().getName());
+					return repo1.getAccount().getName().compareTo(repo2.getAccount().getName());
 			}
 			
 		});

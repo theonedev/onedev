@@ -433,7 +433,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public void onDepotTransfer(Depot depot, Account oldOwner) {
+	public void onDepotTransfer(Depot depot, Account oldAccount) {
 	}
 
 }

@@ -25,7 +25,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -127,7 +127,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 				else
 					searchInput = "";
 				
-				for (Membership membership: getAccount().getOrganizationMemberships()) {
+				for (OrganizationMembership membership: getAccount().getOrganizationMemberships()) {
 					Account organization = membership.getOrganization();
 					String fullName = organization.getFullName();
 					if (fullName == null)
@@ -166,7 +166,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 						
 				item.add(new Label("fullName", organization.getFullName()));
 				String role = "Not member";
-				for (Membership membership: getAccount().getOrganizationMemberships()) {
+				for (OrganizationMembership membership: getAccount().getOrganizationMemberships()) {
 					if (membership.getOrganization().equals(organization)) {
 						if (membership.isAdmin())
 							role = "Admin";

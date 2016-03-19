@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.assets.accountchoice;
+package com.pmease.gitplex.web.component.accountchoice;
 
 import java.util.Collection;
 import java.util.List;

@@ -12,7 +12,6 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.assets.accountchoice.AbstractAccountChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
 public class AccountChoiceProvider extends AbstractAccountChoiceProvider {

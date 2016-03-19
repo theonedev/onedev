@@ -97,25 +97,25 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     
     @Transactional
     @Override
-    public void save(Depot depot, Long oldOwnerId, String oldName) {
-    	Preconditions.checkArgument(oldOwnerId==null || oldName==null, 
+    public void save(Depot depot, Long oldAccountId, String oldName) {
+    	Preconditions.checkArgument(oldAccountId==null || oldName==null, 
     			"Can not rename and transfer depot in the same time");
     	
     	boolean isNew = depot.isNew();
     	
     	persist(depot);
 
-    	if (oldOwnerId != null && !depot.getOwner().getId().equals(oldOwnerId)) {
-    		Account oldOwner = userManager.load(oldOwnerId);
+    	if (oldAccountId != null && !depot.getAccount().getId().equals(oldAccountId)) {
+    		Account oldAccount = userManager.load(oldAccountId);
     		for (DepotListener listener: listenersProvider.get())
-    			listener.onDepotTransfer(depot, oldOwner);
+    			listener.onDepotTransfer(depot, oldAccount);
     		
     		for (Depot each: all()) {
     			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
-    				policy.onDepotTransfer(depot, oldOwner);
+    				policy.onDepotTransfer(depot, oldAccount);
     			}
     			for (Iterator<GateKeeper> it = each.getGateKeepers().iterator(); it.hasNext();) {
-    				if (it.next().onDepotTransfer(each, depot, oldOwner))
+    				if (it.next().onDepotTransfer(each, depot, oldAccount))
     					it.remove();
     			}
     		}
@@ -126,7 +126,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     		
     		for (Depot each: all()) {
     			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
-    				integrationPolicy.onDepotRename(depot.getOwner(), oldName, depot.getName());
+    				integrationPolicy.onDepotRename(depot.getAccount(), oldName, depot.getName());
     			}
     			for (GateKeeper gateKeeper: each.getGateKeepers()) {
     				gateKeeper.onDepotRename(depot, oldName);
@@ -144,7 +144,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 			public void run() {
 				idLock.writeLock().lock();
 				try {
-					nameToId.inverse().put(depot.getId(), new Pair<>(depot.getOwner().getId(), depot.getName()));
+					nameToId.inverse().put(depot.getId(), new Pair<>(depot.getAccount().getId(), depot.getName()));
 				} finally {
 					idLock.writeLock().unlock();
 				}
@@ -195,8 +195,8 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     
     @Sessional
     @Override
-    public Depot findBy(String ownerName, String depotName) {
-    	Account user = userManager.findByName(ownerName);
+    public Depot findBy(String accountName, String depotName) {
+    	Account user = userManager.findByName(accountName);
     	if (user != null)
     		return findBy(user, depotName);
     	else
@@ -205,10 +205,10 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 
     @Sessional
     @Override
-    public Depot findBy(Account owner, String depotName) {
+    public Depot findBy(Account account, String depotName) {
     	idLock.readLock().lock();
     	try {
-    		Long id = nameToId.get(new Pair<>(owner.getId(), depotName));
+    		Long id = nameToId.get(new Pair<>(account.getId(), depotName));
     		if (id != null)
     			return load(id);
     		else
@@ -232,7 +232,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     @Transactional
 	@Override
 	public Depot fork(Depot depot, Account user) {
-		if (depot.getOwner().equals(user))
+		if (depot.getAccount().equals(user))
 			return depot;
 		
 		Depot forked = null;
@@ -248,7 +248,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 				existingNames.add(each.getName());
 			
 			forked = new Depot();
-			forked.setOwner(user);
+			forked.setAccount(user);
 			forked.setForkedFrom(depot);
 			if (existingNames.contains(depot.getName())) {
 				int suffix = 1;
@@ -303,7 +303,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	@Override
 	public void systemStarting() {
         for (Depot depot: all()) 
-        	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getOwner().getId(), depot.getName()));
+        	nameToId.inverse().put(depot.getId(), new Pair<>(depot.getAccount().getId(), depot.getName()));
 	}
 	
 	@Transactional

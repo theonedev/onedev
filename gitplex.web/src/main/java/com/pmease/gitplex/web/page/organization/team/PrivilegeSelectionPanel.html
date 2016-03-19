@@ -1,0 +1,18 @@
+<wicket:panel>
+	<div class="privilege selection">
+		<a wicket:id="read">
+			<div class="title">Read</div>
+			<div class="description">Able to pull and browse the repository</div>
+		</a>
+		<a wicket:id="write">
+			<div class="title">Write</div>
+			<div class="description">Has full read privilege, and can also push to 
+			the repository unless gate keeper prevents</div>
+		</a>
+		<a wicket:id="admin">
+			<div class="title">Admin</div>
+			<div class="description">Has full write privilege, and can also edit 
+			settings of the repository</div>
+		</a>
+	</div>
+</wicket:panel>

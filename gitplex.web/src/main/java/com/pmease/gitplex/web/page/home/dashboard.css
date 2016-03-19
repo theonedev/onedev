@@ -5,12 +5,6 @@
 	font-size: 20px;
 	margin-bottom: 20px;
 }
-#dashboard .search {
-	width: 250px;
-}
-#dashboard .head>.pull-left {
-	margin-right: 20px;
-}
 #dashboard .actions .fa {
 	font-size: 18px;
 	color: #666;

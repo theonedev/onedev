@@ -20,11 +20,11 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.listener.RefListener;
-import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.DepotManager;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -32,13 +32,13 @@ public class GitPostReceiveCallback extends HttpServlet {
 
     public static final String PATH = "/git-postreceive-callback";
     
-    private final Dao dao;
+    private final DepotManager depotManager;
     
     private final Provider<Set<RefListener>> listenersProvider;
     
     @Inject
-    public GitPostReceiveCallback(Dao dao, Provider<Set<RefListener>> listenersProvider) {
-    	this.dao = dao;
+    public GitPostReceiveCallback(DepotManager depotManager, Provider<Set<RefListener>> listenersProvider) {
+    	this.depotManager = depotManager;
         this.listenersProvider = listenersProvider;
     }
 
@@ -56,7 +56,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Depot depot = dao.load(Depot.class, Long.valueOf(fields.get(0)));
+        Depot depot = depotManager.load(Long.valueOf(fields.get(0)));
         
         SecurityUtils.getSubject().runAs(Account.asPrincipal(Long.valueOf(fields.get(1))));
         

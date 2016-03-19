@@ -32,8 +32,10 @@ import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
-import com.pmease.gitplex.core.manager.MembershipManager;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
+import com.pmease.gitplex.core.entity.TeamMembership;
+import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
+import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.EmailLink;
@@ -51,7 +53,7 @@ public class MemberListPage extends AccountLayoutPage {
 	
 	private static final String ROLE_MEMBER = "Member";
 	
-	private PageableListView<Membership> membersView;
+	private PageableListView<OrganizationMembership> membersView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
@@ -180,12 +182,20 @@ public class MemberListPage extends AccountLayoutPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Set<Membership> memberships = new HashSet<>();
-				MembershipManager membershipManager = GitPlex.getInstance(MembershipManager.class);
+				Set<OrganizationMembership> organizationMemberships = new HashSet<>();
+				Set<TeamMembership> teamMemberships = new HashSet<>();
+				OrganizationMembershipManager organizationMembershipManager = 
+						GitPlex.getInstance(OrganizationMembershipManager.class);
+				TeamMembershipManager teamMembershipManager = GitPlex.getInstance(TeamMembershipManager.class);
 				for (Long pendingRemoval: pendingRemovals) {
-					memberships.add(membershipManager.load(pendingRemoval));
+					OrganizationMembership organizationMembership = organizationMembershipManager.load(pendingRemoval);
+					organizationMemberships.add(organizationMembership);
+					for (TeamMembership teamMembership: 
+							teamMembershipManager.query(getAccount(), organizationMembership.getUser())) {
+						teamMemberships.add(teamMembership);
+					}
 				}
-				GitPlex.getInstance(MembershipManager.class).delete(memberships);
+				GitPlex.getInstance(OrganizationMembershipManager.class).delete(organizationMemberships, teamMemberships);
 				pendingRemovals.clear();
 				target.add(this);
 				target.add(pagingNavigator);
@@ -214,14 +224,14 @@ public class MemberListPage extends AccountLayoutPage {
 		membersContainer.setOutputMarkupPlaceholderTag(true);
 		add(membersContainer);
 		
-		membersContainer.add(membersView = new PageableListView<Membership>("members", 
-				new LoadableDetachableModel<List<Membership>>() {
+		membersContainer.add(membersView = new PageableListView<OrganizationMembership>("members", 
+				new LoadableDetachableModel<List<OrganizationMembership>>() {
 
 			@Override
-			protected List<Membership> load() {
-				List<Membership> memberships = new ArrayList<>();
+			protected List<OrganizationMembership> load() {
+				List<OrganizationMembership> memberships = new ArrayList<>();
 				
-				for (Membership membership: getAccount().getUserMemberships()) {
+				for (OrganizationMembership membership: getAccount().getUserMemberships()) {
 					Account user = membership.getUser();
 					if (user.matches(searchField.getInput())) {
 						if (role == null 
@@ -232,10 +242,10 @@ public class MemberListPage extends AccountLayoutPage {
 					}
 				}
 				
-				Collections.sort(memberships, new Comparator<Membership>() {
+				Collections.sort(memberships, new Comparator<OrganizationMembership>() {
 
 					@Override
-					public int compare(Membership membership1, Membership membership2) {
+					public int compare(OrganizationMembership membership1, OrganizationMembership membership2) {
 						return membership1.getUser().getName().compareTo(membership2.getUser().getName());
 					}
 					
@@ -246,8 +256,8 @@ public class MemberListPage extends AccountLayoutPage {
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(ListItem<Membership> item) {
-				Membership membership = item.getModelObject();
+			protected void populateItem(ListItem<OrganizationMembership> item) {
+				OrganizationMembership membership = item.getModelObject();
 
 				item.add(new Avatar("avatar", membership.getUser()));
 				
@@ -305,7 +315,7 @@ public class MemberListPage extends AccountLayoutPage {
 							protected void onSelectMember(AjaxRequestTarget target) {
 								close();
 								membership.setAdmin(false);
-								GitPlex.getInstance(MembershipManager.class).save(membership);
+								GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
 								target.add(pagingNavigator);
 								target.add(membersContainer);
 								target.add(noMembersContainer);
@@ -315,7 +325,7 @@ public class MemberListPage extends AccountLayoutPage {
 							protected void onSelectAdmin(AjaxRequestTarget target) {
 								close();
 								membership.setAdmin(true);
-								GitPlex.getInstance(MembershipManager.class).save(membership);
+								GitPlex.getInstance(OrganizationMembershipManager.class).save(membership);
 								target.add(pagingNavigator);
 								target.add(membersContainer);
 								target.add(noMembersContainer);

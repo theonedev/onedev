@@ -16,6 +16,7 @@ import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
 import com.pmease.gitplex.web.component.accountchoice.AccountMultiChoice;
 
 @SuppressWarnings("serial")
@@ -32,17 +33,17 @@ public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<Account> users = new ArrayList<>();
+    	List<Account> accounts = new ArrayList<>();
 		if (getModelObject() != null) {
-			AccountManager userManager = GitPlex.getInstance(AccountManager.class);
-			for (String userName: getModelObject()) {
-				Account user = userManager.findByName(userName);
-				if (user != null)
-					users.add(user);
+			AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
+			for (String accountName: getModelObject()) {
+				Account account = accountManager.findByName(accountName);
+				if (account != null)
+					accounts.add(account);
 			}
 		} 
 		
-		input = new AccountMultiChoice("input", new Model((Serializable)users));
+		input = new AccountMultiChoice("input", new Model((Serializable)accounts), new AccountChoiceProvider());
         input.setConvertEmptyInputStringToNull(true);
         
         add(input);
@@ -55,13 +56,13 @@ public class AccountMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> userNames = new ArrayList<>();
-		Collection<Account> useres = input.getConvertedInput();
-		if (useres != null) {
-			for (Account user: useres)
-				userNames.add(user.getName());
+		List<String> accountNames = new ArrayList<>();
+		Collection<Account> accounts = input.getConvertedInput();
+		if (accounts != null) {
+			for (Account account: accounts)
+				accountNames.add(account.getName());
 		} 
-		return userNames;
+		return accountNames;
 	}
 
 }

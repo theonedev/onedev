@@ -10,19 +10,19 @@ public enum DepotPrivilege implements Privilege {
 		}
 		
 	},
-	PULL("Pull") {
+	READ("Read") {
 
 		@Override
 		public boolean can(Privilege privilege) {
-			return privilege == PULL || NONE.can(privilege);
+			return privilege == READ || NONE.can(privilege);
 		}
 		
 	},
-	PUSH("Push") {
+	WRITE("Write") {
 
 		@Override
 		public boolean can(Privilege privilege) {
-			return privilege == PUSH || PULL.can(privilege);
+			return privilege == WRITE || READ.can(privilege);
 		}
 		
 	},

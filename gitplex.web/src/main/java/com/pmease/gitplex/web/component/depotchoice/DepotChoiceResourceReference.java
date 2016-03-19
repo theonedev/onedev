@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.repochoice;
+package com.pmease.gitplex.web.component.depotchoice;
 
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 

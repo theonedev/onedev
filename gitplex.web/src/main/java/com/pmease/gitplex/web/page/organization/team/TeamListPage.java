@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.organization.team;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,10 +19,10 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.StaleObjectStateException;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
@@ -29,9 +30,10 @@ import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Membership;
-import com.pmease.gitplex.core.entity.component.Team;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.manager.TeamManager;
+import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
@@ -39,13 +41,25 @@ import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class TeamListPage extends AccountLayoutPage {
 
-	private static final int MAX_MEMBERS = 20;
+	private static final int MAX_DISPLAY_MEMBERS = 20;
+	
+	private final IModel<Collection<TeamMembership>> teamMembershipsModel = 
+			new LoadableDetachableModel<Collection<TeamMembership>>() {
+
+		@Override
+		protected Collection<TeamMembership> load() {
+			TeamMembershipManager teamMembershipManager = GitPlex.getInstance(TeamMembershipManager.class);
+			return teamMembershipManager.query(getAccount());
+		}
+		
+	};
 	
 	private PageableListView<Team> teamsView;
 	
@@ -135,7 +149,7 @@ public class TeamListPage extends AccountLayoutPage {
 				else
 					searchInput = "";
 				
-				for (Team team: getAccount().getTeams().values()) {
+				for (Team team: getAccount().getTeams()) {
 					if ((team.getName().toLowerCase().contains(searchInput))) {
 						teams.add(team);
 					}
@@ -159,26 +173,26 @@ public class TeamListPage extends AccountLayoutPage {
 				Team team = item.getModelObject();
 				
 				Link<Void> link = new BookmarkablePageLink<>("link", TeamMemberListPage.class, 
-						TeamMemberListPage.paramsOf(getAccount(), team)); 
+						TeamMemberListPage.paramsOf(team)); 
 				link.add(new Label("name", team.getName()));
 				item.add(link);
 						
 				RepeatingView membersView = new RepeatingView("members");
 				int count = 0;
-				for (Membership membership: getAccount().getUserMemberships()) {
-					if (membership.getJoinedTeams().contains(team.getName()) && count++<MAX_MEMBERS) {
+				for (TeamMembership teamMembership: teamMembershipsModel.getObject()) {
+					if (teamMembership.getTeam().equals(team) && count++<MAX_DISPLAY_MEMBERS) {
 						WebMarkupContainer child = new WebMarkupContainer(membersView.newChildId());
-						child.add(new AvatarLink("member", membership.getUser()));
+						child.add(new AvatarLink("member", teamMembership.getUser(), new TooltipConfig()));
 						membersView.add(child);
 					}
 				}
 				item.add(membersView);
-				if (count > MAX_MEMBERS) {
+				if (count > MAX_DISPLAY_MEMBERS) {
 					item.add(new Link<Void>("more") {
 	
 						@Override
 						public void onClick() {
-							setResponsePage(TeamPage.class, TeamPage.paramsOf(getAccount(), team));
+							setResponsePage(TeamMemberListPage.class, TeamMemberListPage.paramsOf(item.getModelObject()));
 						}
 						
 					});
@@ -192,7 +206,7 @@ public class TeamListPage extends AccountLayoutPage {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						attributes.getAjaxCallListeners().add(new ConfirmListener(
-								"Do you really want to delete team " + team.getName() + "?"));
+								"Do you really want to delete team " + item.getModelObject().getName() + "?"));
 					}
 
 					@Override
@@ -204,11 +218,7 @@ public class TeamListPage extends AccountLayoutPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Account organization = getAccount();
-						if (organization.getVersion() != accountVersion) {
-							throw new StaleObjectStateException(Account.class.getName(), organization.getId());
-						}
-						GitPlex.getInstance(TeamManager.class).delete(organization, team.getName());
+						GitPlex.getInstance(TeamManager.class).delete(item.getModelObject());
 						target.add(teamsContainer);
 						target.add(noTeamsContainer);
 						target.add(pagingNavigator);
@@ -243,6 +253,13 @@ public class TeamListPage extends AccountLayoutPage {
 			setResponsePage(TeamListPage.class, paramsOf(account));
 		else
 			setResponsePage(AccountOverviewPage.class, paramsOf(account));
+	}
+
+	@Override
+	protected void onDetach() {
+		teamMembershipsModel.detach();
+		
+		super.onDetach();
 	}
 
 }

@@ -6,9 +6,8 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
 import com.pmease.gitplex.core.permission.object.SystemObject;
-import com.pmease.gitplex.core.permission.privilege.AccountAdmin;
+import com.pmease.gitplex.core.permission.privilege.AccountPrivilege;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
-import com.pmease.gitplex.core.permission.privilege.OrganizationAccess;
 import com.pmease.gitplex.core.permission.privilege.Privilege;
 import com.pmease.gitplex.core.permission.privilege.SystemAdmin;
 
@@ -61,19 +60,19 @@ public class ObjectPermission implements Permission {
 	}
 
 	public static ObjectPermission ofDepotPull(Depot depot) {
-		return new ObjectPermission(depot, DepotPrivilege.PULL);
+		return new ObjectPermission(depot, DepotPrivilege.READ);
 	}
 
 	public static ObjectPermission ofDepotPush(Depot depot) {
-		return new ObjectPermission(depot, DepotPrivilege.PUSH);
+		return new ObjectPermission(depot, DepotPrivilege.WRITE);
 	}
 
 	public static ObjectPermission ofAccountAdmin(Account account) {
-		return new ObjectPermission(account, new AccountAdmin());
+		return new ObjectPermission(account, AccountPrivilege.ADMIN);
 	}
 	
-	public static ObjectPermission ofOrganizationAccess(Account organization) {
-		return new ObjectPermission(organization, new OrganizationAccess());
+	public static ObjectPermission ofAccountAccess(Account account) {
+		return new ObjectPermission(account, AccountPrivilege.ACCESS);
 	}
 	
 	public static ObjectPermission ofSystemAdmin() {

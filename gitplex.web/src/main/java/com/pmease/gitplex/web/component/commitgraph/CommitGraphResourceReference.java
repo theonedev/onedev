@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.assets.commitgraph;
+package com.pmease.gitplex.web.component.commitgraph;
 
 import java.util.ArrayList;
 import java.util.List;

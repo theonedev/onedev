@@ -180,8 +180,8 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		depot = new Depot();
 		depot.setId(1L);
 		depot.setName("test");
-		depot.setOwner(new Account());
-		depot.getOwner().setName("test");
+		depot.setAccount(new Account());
+		depot.getAccount().setName("test");
         
 		storageManager = mock(StorageManager.class);
 		when(storageManager.getIndexDir(Mockito.any(Depot.class))).thenReturn(indexDir);

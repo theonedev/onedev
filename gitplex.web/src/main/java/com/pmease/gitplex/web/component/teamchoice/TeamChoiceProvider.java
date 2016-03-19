@@ -1,20 +1,20 @@
 package com.pmease.gitplex.web.component.teamchoice;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
-import org.json.JSONException;
-import org.json.JSONWriter;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 
-import com.pmease.commons.wicket.component.select2.ResponseFiller;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.web.Constants;
-import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
-public class TeamChoiceProvider extends ChoiceProvider<String> {
+public class TeamChoiceProvider extends AbstractTeamChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 
@@ -25,27 +25,20 @@ public class TeamChoiceProvider extends ChoiceProvider<String> {
 	}
 
 	@Override
-	public void query(String term, int page, Response<String> response) {
-		term = term.toLowerCase();
-		Account organization = organizationModel.getObject();
-		List<String> teams = new ArrayList<>();
-		for (String teamName: organization.getTeams().keySet()) {
-			if (teamName.toLowerCase().contains(term)) {
-				teams.add(teamName);
-			}
+	public void query(String term, int page, Response<Team> response) {
+		TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
+		int first = page * Constants.DEFAULT_PAGE_SIZE;
+		EntityCriteria<Team> criteria = teamManager.newCriteria();
+		criteria.add(Restrictions.ilike("name", term, MatchMode.ANYWHERE))
+				.add(Restrictions.eq("organization", organizationModel.getObject()));
+		List<Team> teams = teamManager.query(criteria, first, Constants.DEFAULT_PAGE_SIZE + 1);
+
+		if (teams.size() <= Constants.DEFAULT_PAGE_SIZE) {
+			response.addAll(teams);
+		} else {
+			response.addAll(teams.subList(0, Constants.DEFAULT_PAGE_SIZE));
+			response.setHasMore(true);
 		}
-		
-		new ResponseFiller<String>(response).fill(teams, page, Constants.DEFAULT_PAGE_SIZE);
-	}
-
-	@Override
-	public void toJson(String choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice).key("name").value(choice);
-	}
-
-	@Override
-	public Collection<String> toChoices(Collection<String> ids) {
-		return ids;
 	}
 
 	@Override

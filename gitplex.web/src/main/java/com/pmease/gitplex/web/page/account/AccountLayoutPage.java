@@ -7,6 +7,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -16,6 +17,7 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
 import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
@@ -42,10 +44,16 @@ public abstract class AccountLayoutPage extends AccountPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Avatar("accountAvatar", accountModel.getObject(), null));
+		BookmarkablePageLink<Void> avatarLink = new BookmarkablePageLink<Void>("avatar", 
+				AvatarEditPage.class, AvatarEditPage.paramsOf(getAccount()));
+		if (!SecurityUtils.canManage(getAccount()))
+			avatarLink.setEnabled(false);
+		add(avatarLink);
+		avatarLink.add(new Avatar("avatar", accountModel.getObject(), null));
 		
 		IModel<Account> accountModel = Model.of(getAccount());
-		AccountSingleChoice accountChoice = new AccountSingleChoice("accountChoice", accountModel, false);
+		AccountSingleChoice accountChoice = new AccountSingleChoice("accountChoice", accountModel, 
+				new AccountChoiceProvider(), false);
 		
 		accountChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			

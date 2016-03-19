@@ -33,7 +33,7 @@ public class WebUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(Depot depot) {
-		return urlFor(depot.getOwner()) + "/" + depot.getName();
+		return urlFor(depot.getAccount()) + "/" + depot.getName();
 	}
 	
 	@Override
