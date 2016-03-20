@@ -127,7 +127,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 				else
 					searchInput = "";
 				
-				for (OrganizationMembership membership: getAccount().getOrganizationMemberships()) {
+				for (OrganizationMembership membership: getAccount().getOrganizations()) {
 					Account organization = membership.getOrganization();
 					String fullName = organization.getFullName();
 					if (fullName == null)
@@ -166,7 +166,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 						
 				item.add(new Label("fullName", organization.getFullName()));
 				String role = "Not member";
-				for (OrganizationMembership membership: getAccount().getOrganizationMemberships()) {
+				for (OrganizationMembership membership: getAccount().getOrganizations()) {
 					if (membership.getOrganization().equals(organization)) {
 						if (membership.isAdmin())
 							role = "Admin";

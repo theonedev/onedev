@@ -44,7 +44,7 @@ public class PasswordEditPage extends AccountSettingPage {
 		};
 		add(form);
 		
-		final PasswordDescriptor descriptor = new PasswordDescriptor();
+		PasswordDescriptor descriptor = new PasswordDescriptor();
 		form.add(new ReflectionBeanEditor("editor", descriptor, new IModel<Serializable>() {
 
 			@Override

@@ -2,6 +2,7 @@ package com.pmease.gitplex.core.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,6 +49,8 @@ public class Team extends AbstractEntity {
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<TeamMembership> memberships = new ArrayList<>();
 	
+	private transient Collection<Account> members;
+	
 	public Account getOrganization() {
 		return organization;
 	}
@@ -93,4 +96,13 @@ public class Team extends AbstractEntity {
 		this.memberships = memberships;
 	}
 
+	public Collection<Account> getMembers() {
+		if (members == null) {
+			members = new HashSet<>();
+			for (TeamMembership membership: getMemberships()) {
+				members.add(membership.getUser());
+			}
+		}
+		return members;
+	}
 }

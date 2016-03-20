@@ -1,0 +1,36 @@
+<wicket:panel>
+	<div class="greater-privileges">
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close"><span aria-hidden="true">&times;</span></button>	
+			<h4 id="modal-title" class="modal-title">
+				Team members with greater privileges
+			</h4>
+		</div>
+		<div class="modal-body">
+			<div class="description">
+				This team grants <b wicket:id="privilege"></b> access to repository <b wicket:id="depot"></b>, 
+				but below members have greater privileges from other sources
+			</div>
+			<div class="detail">
+				<table class="table table-hover table-condensed">
+					<thead>
+						<tr>
+							<th>Member</th><th>Privilege</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr wicket:id="privileges">
+							<td class="name">
+								<img wicket:id="avatar"></img>
+								<a wicket:id="link"><span wicket:id="name"></span></a>
+							</td>
+							<td name="privilege">
+								<span wicket:id="privilege"></span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</wicket:panel>

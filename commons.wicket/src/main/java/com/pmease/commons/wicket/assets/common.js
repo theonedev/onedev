@@ -107,12 +107,12 @@ pmease.commons = {
 		 */
 		markDirty: function($forms) {
 			$forms.addClass("dirty").each(function() {
-				pmease.commons.form.dirtyStateChanged($(this));
+				pmease.commons.form.dirtyChanged($(this));
 			});
 		},
 		markClean: function($forms) {
 			$forms.removeClass("dirty").each(function() {
-				pmease.commons.form.dirtyStateChanged($(this));
+				pmease.commons.form.dirtyChanged($(this));
 			});
 		},
 		removeDirty: function(triggerId, $forms) {
@@ -138,48 +138,27 @@ pmease.commons = {
 		},
 		trackDirty: function(form) {
 			var $form = $(form);
-			var $dirtyAware = $form.find(".dirty-aware");
-			
-			if ($dirtyAware.length != 0) {
-				$form.addClass("ays-inited");
-				pmease.commons.form.dirtyStateChanged($form);
-
+			if ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm")) {
 				$form.areYouSure({
 					"silent": !$form.hasClass("leave-confirm"),
 					"addRemoveFieldsMarksDirty": true,
 					change: function() {
-						pmease.commons.form.dirtyStateChanged($(this));
+						pmease.commons.form.dirtyChanged($(this));
 					}
 				});
-			} else if ($form.hasClass("leave-confirm")) {
-				$form.areYouSure({"addRemoveFieldsMarksDirty": true});
+				if ($form.find(".has-error").length != 0) {
+					$form.addClass("dirty");
+				}
+				pmease.commons.form.dirtyChanged($form);
 			}
 		},
-		dirtyStateChanged: function($form) {
+		dirtyChanged: function($form) {
 			$dirtyAware = $form.find(".dirty-aware");
 			if ($dirtyAware.length != 0) {
 				if ($form.hasClass("dirty")) {
 					$dirtyAware.removeAttr("disabled");
-					if ($dirtyAware.is(":visible")) {
-						$("body").append("<div class='dirty-alert'><span>There are unsaved changes</span> <a class='btn btn-sm btn-default'>Save</a></div>");
-					} else {
-						var label = $dirtyAware.val();
-						if (label == "")
-							label = $dirtyAware.html();
-						$("body").append("<div class='dirty-alert'><a class='btn btn-sm btn-default'>" + label + "</a></div>");
-					}
-					var $dirtyAlert = $("body>.dirty-alert");
-					$dirtyAlert.width($(window).width());
-					$dirtyAlert.css({left: 0, top: $(window).height()-$dirtyAlert.height()});
-					$dirtyAlert.find("a").click(function() {
-						if ($._data($dirtyAware[0], 'events').click)
-							$dirtyAware.trigger("click");
-						else
-							$form.submit();
-					});
 				} else {
 					$dirtyAware.attr("disabled", "disabled");
-					$("body>.dirty-alert").remove();
 				}
 			}
 		},
@@ -216,12 +195,6 @@ pmease.commons = {
 					processAjaxResponse.call(this, data, textStatus, jqXHR, context);					
 				}
 			}
-			$(window).resize(function() {
-				$("body>.dirty-alert").each(function() {
-					$(this).css({top: $(window).height()-$(this).height()});
-					$(this).width($(window).width());
-				});
-			});
 		},
 		confirmLeave: function(containerId) {
 			var $container;

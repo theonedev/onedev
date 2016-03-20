@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.admin;
 import java.io.Serializable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 import org.slf4j.Logger;
@@ -16,9 +15,9 @@ import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.MailManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.setting.MailSetting;
 
 @SuppressWarnings("serial")
@@ -38,30 +37,19 @@ public class MailSettingPage extends AdministrationPage {
 		if (mailSetting == null)
 			mailSetting = new MailSetting();
 		
-		Form<?> form = new Form<Void>("form");
-		form.add(editor = BeanContext.editBean("editor", mailSetting));
-				
-		// use ajax in order not to clean form dirty state in case there are field errors 
-		form.add(new AjaxButton("update") {
+		Form<?> form = new Form<Void>("form") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit() {
+				super.onSubmit();
 				GitPlex.getInstance(ConfigManager.class).saveMailSetting(mailSetting);
 				getSession().success("Mail setting has been updated");
-				
 				setResponsePage(MailSettingPage.class);
 			}
-
-			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			
+		};
+		form.add(editor = BeanContext.editBean("editor", mailSetting));
 				
-				target.add(editor);
-				getSession().error("Fix errors below");
-			}
-
-		});
 		form.add(new AjaxSubmitLink("test") {
 
 			private TestFormBehavior testBehavior;

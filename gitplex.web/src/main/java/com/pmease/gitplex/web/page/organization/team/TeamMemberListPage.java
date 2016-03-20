@@ -127,7 +127,7 @@ public class TeamMemberListPage extends TeamPage {
 				for (TeamMembership membership: teamModel.getObject().getMemberships()) {
 					teamMembers.add(membership.getUser());
 				}
-				for (OrganizationMembership membership: getAccount().getUserMemberships()) {
+				for (OrganizationMembership membership: getAccount().getOrganizationMembers()) {
 					Account user = membership.getUser();
 					if (user.matches(term) && !teamMembers.contains(user)) {
 						memberships.add(membership);

@@ -42,8 +42,12 @@ public class MemberPage extends AccountLayoutPage {
 	}
 
 	public static PageParameters paramsOf(OrganizationMembership membership) {
-		PageParameters params = paramsOf(membership.getOrganization());
-		params.set(PARAM_MEMBER, membership.getUser().getName());
+		return paramsOf(membership.getOrganization(), membership.getUser().getName());
+	}
+	
+	public static PageParameters paramsOf(Account organization, String userName) {
+		PageParameters params = paramsOf(organization);
+		params.set(PARAM_MEMBER, userName);
 		return params;
 	}
 	

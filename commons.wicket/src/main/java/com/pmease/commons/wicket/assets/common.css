@@ -27,25 +27,6 @@ textarea {
 	margin-bottom: 0;
 }
 
-/* DIRTY TRACK */
-.dirty-alert {
-	position: fixed;
-	background: #FCF7A6;
-	border: 1px solid #D0C608;
-	border-left: none;
-	border-right: none;
-	height: 48px;
-	text-align: center;
-}
-.dirty-alert span {
-	display: inline-block;
-	vertical-align: sub;
-	margin-right: 8px;
-}
-.dirty-alert a {
-	margin: 8px 8px 0 0;
-}
-
 /* FEEDBACK */
 #session-feedback {
 	position:absolute; 
@@ -201,15 +182,20 @@ form .required {
 	font-size: 16px; 
 	color: #B94A48;
 }
-form .form-group ul.feedbackPanel {
+form .form-group ul.feedbackPanel, form td.value ul.feedbackPanel {
 	margin: 4px 0 0 -8px; 
 	padding-bottom: 0;
 }
-form .form-group li.feedbackPanelERROR {
+form .form-group li.feedbackPanelERROR, form td.value li.feedbackPanelERROR {
 	color: #AA0000;
+	list-style: disc;
 }
 form>.test-feedback {
 	margin-top: 16px;
+}
+
+.help-block {
+	font-size: 13px;
 }
 
 /* Editor and Viewer */
@@ -251,6 +237,7 @@ form>.test-feedback {
 }
 .editable>.reflection>table>tbody>tr>td.name {
 	font-weight: bold; 
+	font-size: 13px;
 	background: #F0F0F0; 
 	text-align: right; 
 	white-space: nowrap; 

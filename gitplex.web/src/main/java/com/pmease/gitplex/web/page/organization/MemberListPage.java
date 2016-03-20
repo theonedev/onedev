@@ -231,7 +231,7 @@ public class MemberListPage extends AccountLayoutPage {
 			protected List<OrganizationMembership> load() {
 				List<OrganizationMembership> memberships = new ArrayList<>();
 				
-				for (OrganizationMembership membership: getAccount().getUserMemberships()) {
+				for (OrganizationMembership membership: getAccount().getOrganizationMembers()) {
 					Account user = membership.getUser();
 					if (user.matches(searchField.getInput())) {
 						if (role == null 

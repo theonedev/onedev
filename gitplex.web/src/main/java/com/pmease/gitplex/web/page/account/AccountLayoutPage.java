@@ -21,6 +21,7 @@ import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
 import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
+import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.organization.MemberListPage;
@@ -31,6 +32,7 @@ import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
 import com.pmease.gitplex.web.page.organization.team.TeamListPage;
 import com.pmease.gitplex.web.page.organization.team.TeamPage;
 import com.pmease.gitplex.web.page.user.notifications.NotificationListPage;
+import com.pmease.gitplex.web.page.user.organizations.NewOrganizationPage;
 import com.pmease.gitplex.web.page.user.organizations.OrganizationListPage;
 import com.pmease.gitplex.web.page.user.setting.PasswordEditPage;
 
@@ -69,7 +71,8 @@ public abstract class AccountLayoutPage extends AccountPage {
 		List<PageTab> tabs = new ArrayList<>();
 		
 		tabs.add(new AccountTab("Overview", "fa fa-fw fa-list-alt", AccountOverviewPage.class));
-		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", DepotListPage.class));
+		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", 
+				DepotListPage.class, NewDepotPage.class));
 		if (getAccount().isOrganization()) {
 			if (SecurityUtils.canAccess(getAccount())) {
 				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", MemberListPage.class, 
@@ -81,7 +84,8 @@ public abstract class AccountLayoutPage extends AccountPage {
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
 			}
 		} else {
-			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-sitemap", OrganizationListPage.class));
+			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-sitemap", 
+					OrganizationListPage.class, NewOrganizationPage.class));
 			if (SecurityUtils.canManage(getAccount())) {
 				tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", NotificationListPage.class));
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, 

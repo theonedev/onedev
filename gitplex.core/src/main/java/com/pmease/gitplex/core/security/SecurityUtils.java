@@ -1,17 +1,22 @@
 package com.pmease.gitplex.core.security;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
@@ -95,6 +100,83 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canManageSystem() {
 		Account currentUser = getAccount();
 		return currentUser != null && currentUser.isAdministrator();
+	}
+
+	private static Collection<Team> getAuthorizedTeams(Collection<Authorization> authorizations, 
+			Depot depot, DepotPrivilege privilege) {
+		Collection<Team> teams = new HashSet<>();
+		for (Authorization authorization: authorizations) {
+			if (authorization.getDepot().equals(depot) && authorization.getPrivilege() == privilege) {
+				teams.add(authorization.getTeam());
+			}
+		}
+		return teams;
+	}
+	
+	private static Collection<Account> getTeamMembers(Collection<TeamMembership> memberships, Collection<Team> teams) {
+		Collection<Account> members = new HashSet<>();
+		for (TeamMembership membership: memberships) {
+			if (teams.contains(membership.getTeam()))
+				members.add(membership.getUser());
+		}
+		return members;
+	}
+
+	private static Collection<Account> getDepotAdministrators(Authorization authorization) {
+		Account organization = authorization.getDepot().getAccount();
+		Collection<Account> depotAdministrators = new HashSet<>();
+		for (TeamMembership membership: authorization.getTeam().getMemberships()) {
+			Account user = membership.getUser();
+			if (user.isAdministrator() 
+					|| organization.getOrganizationAdministrators().contains(user)
+					|| organization.getDefaultPrivilege() == DepotPrivilege.ADMIN) {
+				depotAdministrators.add(user);
+			} else {
+				Collection<Team> adminTeams = getAuthorizedTeams(
+						organization.getAllAuthorizationsInOrganization(), 
+						authorization.getDepot(), 
+						DepotPrivilege.ADMIN);
+				Collection<Account> adminTeamMembers = getTeamMembers(
+						organization.getAllTeamMembershipsInOrganiation(), 
+						adminTeams);
+				if (adminTeamMembers.contains(user))
+					depotAdministrators.add(user);
+			}
+		}
+		return depotAdministrators;
+	}
+	
+	public static Map<Account, DepotPrivilege> getGreaterPrivileges(Authorization authorization) {
+		Map<Account, DepotPrivilege> greaterPrivileges = new HashMap<>();
+		Account organization = authorization.getDepot().getAccount();
+		DepotPrivilege privilege = authorization.getPrivilege();
+		if (privilege == DepotPrivilege.WRITE) {
+			for (Account user: getDepotAdministrators(authorization)) {
+				greaterPrivileges.put(user, DepotPrivilege.ADMIN);
+			}
+		} else if (privilege == DepotPrivilege.READ) {
+			Collection<Account> depotWriters = new HashSet<>();
+			for (TeamMembership membership: authorization.getTeam().getMemberships()) {
+				Account user = membership.getUser();
+				if (organization.getDefaultPrivilege() == DepotPrivilege.WRITE) {
+					depotWriters.add(user);
+				} else {
+					Collection<Team> writeTeams = getAuthorizedTeams(organization.getAllAuthorizationsInOrganization(), 
+							authorization.getDepot(), DepotPrivilege.WRITE);
+					Collection<Account> writeTeamMembers = getTeamMembers(organization.getAllTeamMembershipsInOrganiation(), 
+							writeTeams);
+					if (writeTeamMembers.contains(user))
+						depotWriters.add(user);
+				}
+			}
+			for (Account user: depotWriters) {
+				greaterPrivileges.put(user, DepotPrivilege.WRITE);
+			}
+			for (Account user: getDepotAdministrators(authorization)) {
+				greaterPrivileges.put(user, DepotPrivilege.ADMIN);
+			}
+		}
+		return greaterPrivileges;
 	}
 	
 }

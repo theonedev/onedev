@@ -2,11 +2,8 @@ package com.pmease.gitplex.web.page.account.depots;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
@@ -21,12 +18,8 @@ import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 @SuppressWarnings("serial")
 public class NewDepotPage extends AccountLayoutPage {
 
-	private final Depot depot;
-	
-	public NewDepotPage(Depot depot) {
-		super(paramsOf(depot.getAccount()));
-		
-		this.depot = depot;
+	public NewDepotPage(PageParameters params) {
+		super(params);
 	}
 
 	@Override
@@ -38,7 +31,9 @@ public class NewDepotPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final BeanEditor<?> editor = BeanContext.editBean("editor", depot);
+		Depot depot = new Depot();
+		
+		BeanEditor<?> editor = BeanContext.editBean("editor", depot);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -46,8 +41,9 @@ public class NewDepotPage extends AccountLayoutPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
+				depot.setAccount(getAccount());
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
-				Depot repoWithSameName = depotManager.findBy(depot.getAccount(), depot.getName());
+				Depot repoWithSameName = depotManager.findBy(getAccount(), depot.getName());
 				if (repoWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another repository in this account.");
@@ -60,23 +56,7 @@ public class NewDepotPage extends AccountLayoutPage {
 			
 		};
 		form.add(editor);
-		
-		form.add(new Link<Void>("cancel") {
-
-			@Override
-			public void onClick() {
-				setResponsePage(DepotListPage.class, paramsOf(getAccount()));
-			}
-			
-		});
 		add(form);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				NewDepotPage.class, "depot-list.css")));
 	}
 
 	@Override

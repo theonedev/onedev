@@ -27,7 +27,7 @@ public class MemberChoiceProvider extends AccountChoiceProvider {
 	public void query(String term, int page, Response<Account> response) {
 		List<Account> members = new ArrayList<>();
 		term = term.toLowerCase();
-		for (OrganizationMembership membership: organizationModel.getObject().getUserMemberships()) { 
+		for (OrganizationMembership membership: organizationModel.getObject().getOrganizationMembers()) { 
 			Account user = membership.getUser();
 			if (user.getName().toLowerCase().contains(term) 
 					|| user.getFullName()!=null && user.getFullName().toLowerCase().contains(term)) {

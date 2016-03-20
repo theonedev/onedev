@@ -8,7 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 import org.json.JSONException;
@@ -88,6 +90,18 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	}
         	
         };
+
+        add(new AttributeAppender("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (hasError(true))
+					return " has-error";
+				else
+					return "";
+			}
+			
+		}));
 
         add(input);
     }

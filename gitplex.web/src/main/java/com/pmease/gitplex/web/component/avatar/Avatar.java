@@ -22,7 +22,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class Avatar extends WebComponent {
 
-	private final Long userId;
+	private final Long accountId;
 	
 	private String url;
 	
@@ -30,21 +30,21 @@ public class Avatar extends WebComponent {
 	
 	private final TooltipConfig tooltipConfig;
 	
-	public Avatar(String id, @Nullable Account user) {
-		this(id, user, null);
+	public Avatar(String id, @Nullable Account account) {
+		this(id, account, null);
 	}
 	
-	public Avatar(String id, @Nullable Account user, @Nullable TooltipConfig tooltipConfig) {
+	public Avatar(String id, @Nullable Account account, @Nullable TooltipConfig tooltipConfig) {
 		super(id);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		if (user != null) {
-			userId = user.getId();
-			url = avatarManager.getAvatarUrl(user);
-			name = user.getDisplayName();
+		if (account != null) {
+			accountId = account.getId();
+			url = avatarManager.getAvatarUrl(account);
+			name = account.getDisplayName();
 		} else {
-			userId = null;
-			url = avatarManager.getAvatarUrl(user);
+			accountId = null;
+			url = avatarManager.getAvatarUrl(account);
 			name = "Unknown";
 		}
 		this.tooltipConfig = tooltipConfig;
@@ -59,13 +59,13 @@ public class Avatar extends WebComponent {
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		
-		Account user = GitPlex.getInstance(AccountManager.class).findByPerson(person);
-		if (user != null) { 
-			userId = user.getId();
-			url = avatarManager.getAvatarUrl(user);
-			name = user.getDisplayName();
+		Account account = GitPlex.getInstance(AccountManager.class).findByPerson(person);
+		if (account != null) { 
+			accountId = account.getId();
+			url = avatarManager.getAvatarUrl(account);
+			name = account.getDisplayName();
 		} else {
-			userId = null;
+			accountId = null;
 			url = avatarManager.getAvatarUrl(person);
 			name = person.getName();
 		}
@@ -78,7 +78,7 @@ public class Avatar extends WebComponent {
 		
 		if (event.getPayload() instanceof AvatarChanged) {
 			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
-			if (avatarChanged.getUser().getId().equals(userId)) {
+			if (avatarChanged.getUser().getId().equals(accountId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
 				avatarChanged.getTarget().add(this);

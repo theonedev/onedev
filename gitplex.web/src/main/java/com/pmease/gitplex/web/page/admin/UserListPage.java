@@ -76,7 +76,7 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(new NewUserPage(new Account()));
+				setResponsePage(NewUserPage.class);
 			}
 			
 		});

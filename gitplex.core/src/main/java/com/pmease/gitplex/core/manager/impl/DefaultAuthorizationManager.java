@@ -6,10 +6,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.entity.Depot;
@@ -46,6 +48,14 @@ public class DefaultAuthorizationManager extends AbstractEntityDao<Authorization
 	public void delete(Collection<Authorization> authorizations) {
 		for (Authorization authorization: authorizations)
 			remove(authorization);
+	}
+
+	@Transactional
+	@Override
+	public Collection<Authorization> query(Account organization) {
+		EntityCriteria<Authorization> criteria = newCriteria(); 
+		criteria.createCriteria("depot").add(Restrictions.eq("account", organization));
+		return query(criteria);
 	}
 
 }

@@ -41,7 +41,7 @@ public class NonMemberChoiceProvider extends AccountChoiceProvider {
 				Restrictions.eq("organization", false));
 		
 		Set<Account> members = new HashSet<>();
-		for (OrganizationMembership membership: organizationModel.getObject().getUserMemberships()) 
+		for (OrganizationMembership membership: organizationModel.getObject().getOrganizationMembers()) 
 			members.add(membership.getUser());
 		
 		List<Account> nonMembers = new ArrayList<>();

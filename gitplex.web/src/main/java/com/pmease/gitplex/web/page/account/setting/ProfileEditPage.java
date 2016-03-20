@@ -8,7 +8,6 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -67,11 +66,6 @@ public class ProfileEditPage extends AccountSettingPage {
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
-			protected void onError() {
-				super.onError();
-			}
-
-			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				
@@ -90,7 +84,6 @@ public class ProfileEditPage extends AccountSettingPage {
 			
 		};
 		form.add(editor);
-		form.add(new SubmitLink("save"));
 
 		form.add(new AjaxLink<Void>("delete") {
 

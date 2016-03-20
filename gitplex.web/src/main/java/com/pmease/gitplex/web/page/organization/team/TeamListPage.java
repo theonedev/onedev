@@ -149,7 +149,7 @@ public class TeamListPage extends AccountLayoutPage {
 				else
 					searchInput = "";
 				
-				for (Team team: getAccount().getTeams()) {
+				for (Team team: getAccount().getDefinedTeams()) {
 					if ((team.getName().toLowerCase().contains(searchInput))) {
 						teams.add(team);
 					}

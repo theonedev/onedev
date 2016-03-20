@@ -111,10 +111,6 @@
 .gate-keeper.panel.disabled .fa {
 	color: inherit;
 } 
-.gate-keeper td.name {
-	font-weight: normal !important; 
-	background-color: #F0F0F0 !important;
-}
 .gate-keeper table.viewer {
 	font-size: 13px !important; 
 	color: #444444;

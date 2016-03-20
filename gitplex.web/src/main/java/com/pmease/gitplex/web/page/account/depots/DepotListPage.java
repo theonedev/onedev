@@ -80,9 +80,7 @@ public class DepotListPage extends AccountLayoutPage {
 
 			@Override
 			public void onClick() {
-				Depot depot = new Depot();
-				depot.setAccount(getAccount());
-				setResponsePage(new NewDepotPage(depot));
+				setResponsePage(NewDepotPage.class, NewDepotPage.paramsOf(getAccount()));
 			}
 			
 		});

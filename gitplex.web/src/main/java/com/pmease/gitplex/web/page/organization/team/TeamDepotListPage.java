@@ -30,6 +30,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
+import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -299,7 +300,32 @@ public class TeamDepotListPage extends TeamPage {
 						DepotFilePage.paramsOf(authorization.getDepot()));
 				link.add(new Label("name", authorization.getDepot().getName()));
 				item.add(link);
-						
+				
+				WebMarkupContainer greaterPrivileges = new WebMarkupContainer("greaterPrivileges") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!SecurityUtils.getGreaterPrivileges(item.getModelObject()).isEmpty());
+					}
+					
+				};
+				greaterPrivileges.add(new ModalLink("detail") {
+
+					@Override
+					protected Component newContent(String id) {
+						return new GreaterPrivilegesPanel(id, item.getModel()) {
+
+							@Override
+							protected void onClose(AjaxRequestTarget target) {
+								close(target);
+							}
+							
+						};
+					}
+					
+				});
+				item.add(greaterPrivileges);
 				item.add(new DropdownLink("privilege") {
 
 					@Override

@@ -2,7 +2,6 @@ package com.pmease.gitplex.web.page.admin;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
 
 import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -15,15 +14,11 @@ import com.pmease.gitplex.core.manager.AccountManager;
 @SuppressWarnings("serial")
 public class NewUserPage extends AdministrationPage {
 
-	private final Account user;
-	
-	public NewUserPage(Account user) {
-		this.user = user;
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		Account user = new Account();
 		
 		BeanEditor<?> editor = BeanContext.editBean("editor", user, 
 				Sets.newHashSet("defaultPrivilege", "description"));
@@ -48,15 +43,6 @@ public class NewUserPage extends AdministrationPage {
 			
 		};
 		form.add(editor);
-		
-		form.add(new Link<Void>("cancel") {
-
-			@Override
-			public void onClick() {
-				setResponsePage(UserListPage.class);
-			}
-			
-		});
 		add(form);
 	}
 

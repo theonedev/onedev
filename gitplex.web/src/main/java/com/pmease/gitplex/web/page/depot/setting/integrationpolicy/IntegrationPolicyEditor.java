@@ -44,7 +44,7 @@ abstract class IntegrationPolicyEditor extends Panel {
 				super.onError(target, form);
 				target.add(form);
 			}
-
+			
 		});
 		form.add(new AjaxLink<Void>("cancel") {
 

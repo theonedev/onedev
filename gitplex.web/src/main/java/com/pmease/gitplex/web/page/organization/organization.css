@@ -50,3 +50,18 @@
 .team.detail .tab-panel {
 	margin-top: 20px;
 }
+
+.team.depot.list td.name .note {
+	font-size: 12px;
+	color: #888;
+	margin-top: 4px;
+}
+
+.greater-privileges .description {
+	font-size: 13px;
+	margin-bottom: 12px;
+}
+.greater-privileges .detail {
+	overflow: auto;
+	max-height: 500px;
+}

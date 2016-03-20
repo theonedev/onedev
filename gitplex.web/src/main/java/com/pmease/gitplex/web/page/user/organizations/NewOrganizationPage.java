@@ -26,17 +26,8 @@ import jersey.repackaged.com.google.common.collect.Sets;
 @SuppressWarnings("serial")
 public class NewOrganizationPage extends AccountLayoutPage {
 
-	private final OrganizationMembership membership;
-	
 	public NewOrganizationPage(PageParameters params) {
 		super(params);
-		
-		Account organization = new Account();
-		organization.setOrganization(true);
-		membership = new OrganizationMembership();
-		membership.setAdmin(true);
-		membership.setUser(getAccount());
-		membership.setOrganization(organization);
 	}
 
 	@Override
@@ -47,6 +38,13 @@ public class NewOrganizationPage extends AccountLayoutPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		Account organization = new Account();
+		organization.setOrganization(true);
+		OrganizationMembership membership = new OrganizationMembership();
+		membership.setAdmin(true);
+		membership.setUser(getAccount());
+		membership.setOrganization(organization);
 		
 		BeanEditor<?> editor = BeanContext.editBean("editor", membership.getOrganization(), 
 				Sets.newHashSet("email", "password"));
