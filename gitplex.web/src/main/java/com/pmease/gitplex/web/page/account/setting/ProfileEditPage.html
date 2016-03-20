@@ -1,14 +1,11 @@
 <wicket:extend>
-	<section class="profile-edit">
-		<div class="head">Account Profile</div>
-		<div class="body">
-			<form wicket:id="form" class="leave-confirm">
-				<div wicket:id="editor"></div>
-				<div class="actions">
-					<input class="btn btn-primary dirty-aware" value="Update" type="submit"></input>
-					<a wicket:id="delete" class="btn btn-danger pull-right">Delete this Account</a>
-				</div>
-			</form>
-		</div>
-	</section>
+	<div class="profile-edit">
+		<form wicket:id="form" class="leave-confirm">
+			<div wicket:id="editor"></div>
+			<div class="actions">
+				<input class="btn btn-primary dirty-aware" value="Update" type="submit"></input>
+				<a wicket:id="delete" class="btn btn-danger pull-right">Delete this Account</a>
+			</div>
+		</form>
+	</div>
 </wicket:extend>
