@@ -6,30 +6,30 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.commons.wicket.component.select2.Select2Choice;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
 
 @SuppressWarnings("serial")
 public class AccountSingleChoice extends Select2Choice<Account> {
 
-	private final boolean allowEmpty;
-	
 	public AccountSingleChoice(String id, IModel<Account> model, 
-			AbstractAccountChoiceProvider choiceProvider, boolean allowEmpty) {
+			AbstractAccountChoiceProvider choiceProvider) {
 		super(id, model, choiceProvider);
-		
-		this.allowEmpty = allowEmpty;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setAllowClear(allowEmpty);
 		getSettings().setPlaceholder("Choose an account ...");
 		getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");
 	}
 
+	@Override
+	protected void onBeforeRender() {
+		getSettings().setAllowClear(!isRequired());
+		super.onBeforeRender();
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

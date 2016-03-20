@@ -16,6 +16,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
+import com.pmease.commons.util.WordUtils;
 import com.pmease.commons.wicket.component.select2.Select2MultiChoice;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.commons.wicket.editable.ErrorContext;
@@ -25,27 +26,25 @@ import com.pmease.commons.wicket.editable.PropertyEditor;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "unchecked", "rawtypes"})
 public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 
-	private final EnumSet<?> enumSet;
+	private final Class<Enum> enumClass;
 	
 	private Select2MultiChoice<String> input;
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public EnumListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Enum<?>>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
-		Class<Enum> enumClass = (Class<Enum>) EditableUtils.getElementClass(
+		enumClass = (Class<Enum>) EditableUtils.getElementClass(
 				propertyDescriptor.getPropertyGetter().getGenericReturnType());		
-        enumSet = EnumSet.allOf(enumClass);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final List<String> choices = new ArrayList<>();
-        for (Iterator<?> it = enumSet.iterator(); it.hasNext();) {
+		List<String> choices = new ArrayList<>();
+        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
             choices.add(value.toString());
         }
@@ -55,7 +54,6 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	for (Enum<?> each: getModelObject())
         		selections.add(each.toString());
         }
-        @SuppressWarnings({ "unchecked", "rawtypes" })
 		IModel<Collection<String>> model = new Model((Serializable) selections);
         
         input = new Select2MultiChoice<String>("input", model, new ChoiceProvider<String>() {
@@ -81,7 +79,7 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	@Override
         	protected void onInitialize() {
         		super.onInitialize();
-        		getSettings().setPlaceholder("Select strategies...");
+        		getSettings().setPlaceholder("Select " + WordUtils.uncamel(enumClass.getSimpleName()).toLowerCase() + "(s)...");
         		getSettings().setFormatResult("pmease.commons.choiceFormatter.id.formatResult");
         		getSettings().setFormatSelection("pmease.commons.choiceFormatter.id.formatSelection");
         		getSettings().setEscapeMarkup("pmease.commons.choiceFormatter.id.escapeMarkup");
@@ -116,7 +114,7 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 		List<Enum<?>> values = new ArrayList<>();
 		
 		for (String stringValue: input.getConvertedInput()) {
-	        for (Iterator<?> it = enumSet.iterator(); it.hasNext();) {
+	        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
 	            Enum<?> value = (Enum<?>) it.next();
 	            if (value.toString().equals(stringValue)) { 
 	            	values.add(value);

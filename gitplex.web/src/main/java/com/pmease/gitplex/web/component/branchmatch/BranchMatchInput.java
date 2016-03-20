@@ -35,7 +35,7 @@ public class BranchMatchInput extends TextField<String> {
 			public void validate(IValidatable<String> validatable) {
 				try {
 					IncludeExcludeUtils.parse(validatable.getValue()); 
-				} catch (final Exception e) {
+				} catch (Exception e) {
 					validatable.error(new IValidationError() {
 
 						@Override

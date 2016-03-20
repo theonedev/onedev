@@ -44,9 +44,11 @@ public class TeamSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			team = null;
 		
-    	input = new TeamSingleChoice("input", Model.of(team), new TeamChoiceProvider(organizationModel), 
-    			!getPropertyDescriptor().isPropertyRequired());
+    	input = new TeamSingleChoice("input", Model.of(team), new TeamChoiceProvider(organizationModel));
         input.setConvertEmptyInputStringToNull(true);
+
+        // add this to control allowClear flag of select2
+    	input.setRequired(propertyDescriptor.isPropertyRequired());
         
         add(input);
 	}

@@ -34,26 +34,24 @@ public abstract class BeanEditor<T> extends ValueEditor<T> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (findParent(BeanEditor.class) == null) {
-			add(new IValidator<T>() {
-	
-				@Override
-				public void validate(IValidatable<T> validatable) {
-					Validator validator = AppLoader.getInstance(Validator.class);
-					for (ConstraintViolation<T> violation: validator.validate(validatable.getValue())) {
-						ValuePath valuePath = new ValuePath(violation.getPropertyPath());
-						if (!valuePath.getElements().isEmpty()) {
-							PathSegment.Property property = (Property) valuePath.getElements().iterator().next();
-							if (!propertyNames.contains(property.getName()))
-								continue;
-						}
-						ErrorContext errorContext = getErrorContext(valuePath);
-						errorContext.addError(violation.getMessage());
+		add(new IValidator<T>() {
+
+			@Override
+			public void validate(IValidatable<T> validatable) {
+				Validator validator = AppLoader.getInstance(Validator.class);
+				for (ConstraintViolation<T> violation: validator.validate(validatable.getValue())) {
+					ValuePath valuePath = new ValuePath(violation.getPropertyPath());
+					if (!valuePath.getElements().isEmpty()) {
+						PathSegment.Property property = (Property) valuePath.getElements().iterator().next();
+						if (!propertyNames.contains(property.getName()))
+							continue;
 					}
+					ErrorContext errorContext = getErrorContext(valuePath);
+					errorContext.addError(violation.getMessage());
 				}
-				
-			});
-		}
+			}
+			
+		});
 		
 		add(AttributeAppender.append("class", " bean editor editable"));
 	}

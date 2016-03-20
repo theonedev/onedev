@@ -56,7 +56,8 @@ public abstract class AccountLayoutPage extends AccountPage {
 		
 		IModel<Account> accountModel = Model.of(getAccount());
 		AccountSingleChoice accountChoice = new AccountSingleChoice("accountChoice", accountModel, 
-				new AccountChoiceProvider(), false);
+				new AccountChoiceProvider());
+		accountChoice.setRequired(true);
 		
 		accountChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			

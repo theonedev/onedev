@@ -283,7 +283,9 @@ public class DepotBranchesPage extends DepotPage {
 				baseBranch = object;
 			}
 			
-		}, new BranchChoiceProvider(depotModel), false));
+		}, new BranchChoiceProvider(depotModel)));
+		
+		baseChoice.setRequired(true);
 		
 		baseChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			

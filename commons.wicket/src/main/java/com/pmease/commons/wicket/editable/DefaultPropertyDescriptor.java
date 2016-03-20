@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -98,13 +99,10 @@ public class DefaultPropertyDescriptor implements PropertyDescriptor {
 
 	@Override
 	public boolean isPropertyRequired() {
-		if (propertyGetter.getReturnType().isPrimitive()
+		return propertyGetter.getReturnType().isPrimitive()
 				|| propertyGetter.getAnnotation(NotNull.class) != null 
-				|| propertyGetter.getAnnotation(NotEmpty.class) != null) { 
-			return true;
-		} else {
-			return false;
-		}
+				|| propertyGetter.getAnnotation(NotEmpty.class) != null
+				|| propertyGetter.getAnnotation(Size.class) != null && propertyGetter.getAnnotation(Size.class).min()>=1;
 	}
 
 }

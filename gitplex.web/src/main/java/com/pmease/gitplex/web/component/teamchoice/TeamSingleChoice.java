@@ -10,25 +10,26 @@ import com.pmease.gitplex.core.entity.Team;
 @SuppressWarnings("serial")
 public class TeamSingleChoice extends Select2Choice<Team> {
 
-	private final boolean allowEmpty;
-	
 	public TeamSingleChoice(String id, IModel<Team> teamModel, 
-			AbstractTeamChoiceProvider choiceProvider, boolean allowEmpty) {
+			AbstractTeamChoiceProvider choiceProvider) {
 		super(id, teamModel, choiceProvider);
-		
-		this.allowEmpty = allowEmpty;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		getSettings().setAllowClear(allowEmpty);
 		getSettings().setPlaceholder("Choose a team ...");
 		getSettings().setFormatResult("gitplex.teamChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.teamChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.teamChoiceFormatter.escapeMarkup");
 	}
 
+	@Override
+	protected void onBeforeRender() {
+		getSettings().setAllowClear(!isRequired());
+		super.onBeforeRender();
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

@@ -33,9 +33,11 @@ public class AccountSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			account = null;
 		
-    	input = new AccountSingleChoice("input", Model.of(account), new AccountChoiceProvider(), 
-    			!getPropertyDescriptor().isPropertyRequired());
+    	input = new AccountSingleChoice("input", Model.of(account), new AccountChoiceProvider());
         input.setConvertEmptyInputStringToNull(true);
+        
+        // add this to control allowClear flag of select2
+    	input.setRequired(propertyDescriptor.isPropertyRequired());
         
         add(input);
 	}
