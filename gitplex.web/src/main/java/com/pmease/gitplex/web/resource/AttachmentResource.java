@@ -31,7 +31,7 @@ public class AttachmentResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String PARAM_USER = "user";
+	private static final String PARAM_ACCOUNT = "account";
 	
 	private static final String PARAM_DEPOT = "depot";
 	
@@ -43,7 +43,7 @@ public class AttachmentResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String userName = params.get(PARAM_USER).toString();
+		String userName = params.get(PARAM_ACCOUNT).toString();
 		if (StringUtils.isBlank(userName))
 			throw new IllegalArgumentException("account name has to be specified");
 		
@@ -107,7 +107,7 @@ public class AttachmentResource extends AbstractResource {
 	
 	public static PageParameters paramsOf(PullRequest request, String attachment) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_USER, request.getTargetDepot().getAccount().getName());
+		params.add(PARAM_ACCOUNT, request.getTargetDepot().getAccount().getName());
 		params.set(PARAM_DEPOT, request.getTargetDepot().getName());
 		params.set(PARAM_REQUEST, request.getId());
 		params.set(PARAM_ATTACHMENT, attachment);

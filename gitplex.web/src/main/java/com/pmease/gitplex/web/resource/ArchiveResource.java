@@ -29,7 +29,7 @@ public class ArchiveResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String PARAM_USER = "user";
+	private static final String PARAM_ACCOUNT = "account";
 	
 	private static final String PARAM_DEPOT = "depot";
 	
@@ -39,7 +39,7 @@ public class ArchiveResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String userName = params.get(PARAM_USER).toString();
+		String userName = params.get(PARAM_ACCOUNT).toString();
 		if (StringUtils.isBlank(userName))
 			throw new IllegalArgumentException("account name has to be specified");
 		
@@ -96,7 +96,7 @@ public class ArchiveResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Depot depot, String revision) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_USER, depot.getAccount().getName());
+		params.add(PARAM_ACCOUNT, depot.getAccount().getName());
 		params.set(PARAM_DEPOT, depot.getName());
 		params.set(PARAM_REVISION, revision);
 		
