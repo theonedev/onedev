@@ -21,23 +21,23 @@ public class ObjectPermission implements Permission {
 	
 	private ProtectedObject object;
 	
-	private Privilege operation;
+	private Privilege privilege;
 
-	public ObjectPermission(ProtectedObject object, Privilege operation) {
+	public ObjectPermission(ProtectedObject object, Privilege privilege) {
 		this.object = object;
-		this.operation = operation;
+		this.privilege = privilege;
 	}
 	
 	public ProtectedObject getObject() {
 		return object;
 	}
 	
-	public Privilege getOperation() {
-		return operation;
+	public Privilege getPrivilege() {
+		return privilege;
 	}
 
-	public void setOperation(Privilege operation) {
-		this.operation = operation;
+	public void setPrivilege(Privilege privilege) {
+		this.privilege = privilege;
 	}
 
 	public void setObject(ProtectedObject object) {
@@ -49,7 +49,7 @@ public class ObjectPermission implements Permission {
 		if (permission instanceof ObjectPermission) {
 			ObjectPermission objectPermission = (ObjectPermission) permission;
 			return getObject().has(objectPermission.getObject()) 
-					&& getOperation().can(objectPermission.getOperation());
+					&& getPrivilege().can(objectPermission.getPrivilege());
 		} else {
 			return false;
 		}

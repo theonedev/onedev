@@ -12,15 +12,18 @@ import org.apache.shiro.authz.Permission;
 
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.TeamMembership;
+import com.pmease.gitplex.core.entity.UserAuthorization;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
+import com.pmease.gitplex.core.manager.UserAuthorizationManager;
 import com.pmease.gitplex.core.permission.ObjectPermission;
 import com.pmease.gitplex.core.permission.privilege.AccountPrivilege;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
@@ -68,7 +71,7 @@ public class SecurityRealm extends AbstractRealm {
             		Depot checkDepot = getDepot(objectPermission);
             		if (checkDepot != null 
             				&& checkDepot.isPublicRead() 
-            				&& DepotPrivilege.READ.can(objectPermission.getOperation())) {
+            				&& DepotPrivilege.READ.can(objectPermission.getPrivilege())) {
             			return true;
             		}
 	                if (userId != 0L) {
@@ -94,25 +97,35 @@ public class SecurityRealm extends AbstractRealm {
 		                    			accountPrivilege = AccountPrivilege.ADMIN;
 		                    		else
 		                    			accountPrivilege = AccountPrivilege.MEMBER;
-		                    		if (accountPrivilege.can(objectPermission.getOperation()))
+		                    		if (accountPrivilege.can(objectPermission.getPrivilege()))
 		                    			return true;
 		                    	}
-		                    }
-		                    if (checkDepot != null) {
-		                    	if (checkAccount.getDefaultPrivilege().can(objectPermission.getOperation())) {
-		                    		return true;
-		                    	}
-                				Set<Team> teams = new HashSet<>();
-                				for (TeamMembership teamMembership: 
-                						teamMembershipManager.query(checkDepot.getAccount(), user)) {
-                					teams.add(teamMembership.getTeam());
-                				}
-	                			for (TeamAuthorization authorization: checkDepot.getAuthorizedTeams()) {
-	                				if (authorization.getPrivilege().can(objectPermission.getOperation())
-	                						&& teams.contains(authorization.getTeam())) {
-	                					return true;
+			                    if (checkDepot != null) {
+			                    	if (organizationMembership != null 
+			                    			&& checkAccount.getDefaultPrivilege().can(objectPermission.getPrivilege())) {
+			                    		return true;
+			                    	}
+			                    	UserAuthorizationManager userAuthorizationManager = 
+			                    			GitPlex.getInstance(UserAuthorizationManager.class);
+			                    	UserAuthorization userAuthorization = userAuthorizationManager.find(user, checkDepot);
+			                    	if (userAuthorization != null 
+			                    			&& userAuthorization.getPrivilege().can(objectPermission.getPrivilege())) {
+			                    		return true;
+			                    	}
+			                    		
+	                				Set<Team> teams = new HashSet<>();
+	                				for (TeamMembership teamMembership: 
+	                						teamMembershipManager.query(checkAccount, user)) {
+	                					teams.add(teamMembership.getTeam());
 	                				}
-	                			}
+		                			for (TeamAuthorization authorization: checkDepot.getAuthorizedTeams()) {
+		                				if (authorization.getPrivilege().can(objectPermission.getPrivilege())
+		                						&& teams.contains(authorization.getTeam())) {
+		                					return true;
+		                				}
+		                			}
+		                			
+			                    }
 		                    }
 	                    }
 	                }
