@@ -93,7 +93,7 @@ public class SecurityRealm extends AbstractRealm {
 		                    		if (organizationMembership.isAdmin())
 		                    			accountPrivilege = AccountPrivilege.ADMIN;
 		                    		else
-		                    			accountPrivilege = AccountPrivilege.ACCESS;
+		                    			accountPrivilege = AccountPrivilege.MEMBER;
 		                    		if (accountPrivilege.can(objectPermission.getOperation()))
 		                    			return true;
 		                    	}

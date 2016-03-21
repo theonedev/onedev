@@ -65,12 +65,32 @@ public class DefaultOrganizationMembershipManager extends AbstractEntityDao<Orga
 
 	@Transactional
 	@Override
-	public void delete(Collection<OrganizationMembership> organizationMemberships,
-			Collection<TeamMembership> teamMemberships) {
-		for (OrganizationMembership organizationMembership: organizationMemberships)
-			organizationMembershipManager.remove(organizationMembership);
-		for (TeamMembership teamMembership: teamMemberships)
+	public void delete(Collection<OrganizationMembership> organizationMemberships) {
+		for (OrganizationMembership organizationMembership: organizationMemberships) {
+			delete(organizationMembership);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void save(OrganizationMembership organizationMembership, Collection<TeamMembership> teamMembershipsToAdd,
+			Collection<TeamMembership> teamMembershipsToRemove) {
+		persist(organizationMembership);
+		for (TeamMembership teamMembership: teamMembershipsToAdd)
+			teamMembershipManager.persist(teamMembership);
+		for (TeamMembership teamMembership: teamMembershipsToRemove)
 			teamMembershipManager.remove(teamMembership);
-	}	
-	
+	}
+
+	@Transactional
+	@Override
+	public void delete(OrganizationMembership organizationMembership) {
+		Account organization = organizationMembership.getOrganization();
+		Account user = organizationMembership.getUser();
+		for (TeamMembership teamMembership: teamMembershipManager.query(organization, user)) {
+			teamMembershipManager.remove(teamMembership);
+		}
+		remove(organizationMembership);
+	}
+
 }

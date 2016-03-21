@@ -39,9 +39,10 @@ import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
-import com.pmease.gitplex.web.page.organization.MemberListPage;
-import com.pmease.gitplex.web.page.organization.MemberPage;
-import com.pmease.gitplex.web.page.organization.NewMembersPage;
+import com.pmease.gitplex.web.page.organization.member.MemberDepotListPage;
+import com.pmease.gitplex.web.page.organization.member.MemberListPage;
+import com.pmease.gitplex.web.page.organization.member.MemberTeamListPage;
+import com.pmease.gitplex.web.page.organization.member.NewMembersPage;
 import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
 import com.pmease.gitplex.web.page.organization.team.TeamDepotListPage;
 import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
@@ -155,7 +156,8 @@ public class UrlMapper extends CompoundRequestMapper {
 
 	private void addOrganizationPages() {
 		add(new MountedMapper("accounts/${account}/members", MemberListPage.class));
-		add(new MountedMapper("accounts/${account}/members/${member}", MemberPage.class));
+		add(new MountedMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
+		add(new MountedMapper("accounts/${account}/members/${member}/depots", MemberDepotListPage.class));
 		add(new MountedMapper("accounts/${account}/members/new", NewMembersPage.class));
 		add(new MountedMapper("accounts/${account}/teams", TeamListPage.class));
 		add(new MountedMapper("accounts/${account}/teams/new", NewTeamPage.class));

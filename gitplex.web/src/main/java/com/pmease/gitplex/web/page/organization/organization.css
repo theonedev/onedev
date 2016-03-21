@@ -30,24 +30,24 @@
 	margin-left: 8px;
 	vertical-align: middle;
 }
-.team.detail .general {
+.team.detail>.head {
 	border: 1px solid #CCC;
 	padding: 12px;
 	margin-bottom: 20px;
 	border-radius: 4px;
 	background: #F0F0F0;
 } 
-.team.detail .general .title {
+.team.detail>.head .title {
 	font-weight: bold;
 	font-size: 18px;
 	margin-bottom: 12px;
 }
-.team.detail .general .actions {
+.team.detail>.head .actions {
 	border-top: 1px solid #DDD;
 	padding-top: 12px;
 	margin-top: 16px;
 }
-.team.detail .tab-panel {
+.detail .tab-panel {
 	margin-top: 20px;
 }
 
@@ -64,4 +64,24 @@
 .greater-privileges .detail {
 	overflow: auto;
 	max-height: 500px;
+}
+
+.member.detail>.head {
+	padding: 12px;
+	border: 1px solid #CCC;
+	background: #F0F0F0;
+	border-radius: 4px;
+	margin-bottom: 20px;
+}
+.member.detail>.head .avatar {
+	width: 32px;
+	height: 32px;
+}
+.member.detail>.head>a {
+	margin-left: 8px;
+}
+.member.detail>.head>a.name {
+	margin-left: 2px;
+	font-size: 16px;
+	vertical-align: middle;
 }

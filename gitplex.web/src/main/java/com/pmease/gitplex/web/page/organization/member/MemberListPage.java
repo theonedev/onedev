@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.organization;
+package com.pmease.gitplex.web.page.organization.member;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,15 +33,14 @@ import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
-import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
-import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.EmailLink;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
+import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -49,10 +48,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class MemberListPage extends AccountLayoutPage {
 
-	private static final String ROLE_ADMIN = "Admin";
-	
-	private static final String ROLE_MEMBER = "Member";
-	
 	private PageableListView<OrganizationMembership> membersView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
@@ -61,7 +56,7 @@ public class MemberListPage extends AccountLayoutPage {
 	
 	private WebMarkupContainer noMembersContainer;
 	
-	private String role;
+	private String filterRole;
 	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
@@ -107,10 +102,10 @@ public class MemberListPage extends AccountLayoutPage {
 
 					@Override
 					public String getObject() {
-						if (role == null)
+						if (filterRole == null)
 							return "Filter by role";
 						else 
-							return WordUtils.capitalize(role);
+							return WordUtils.capitalize(filterRole);
 					}
 					
 				}));
@@ -123,7 +118,7 @@ public class MemberListPage extends AccountLayoutPage {
 					@Override
 					protected void onSelectAdmin(AjaxRequestTarget target) {
 						close();
-						role = ROLE_ADMIN;
+						filterRole = ROLE_ADMIN;
 						target.add(filterContainer);
 						target.add(membersContainer);
 						target.add(pagingNavigator);
@@ -133,7 +128,7 @@ public class MemberListPage extends AccountLayoutPage {
 					@Override
 					protected void onSelectOrdinary(AjaxRequestTarget target) {
 						close();
-						role = ROLE_MEMBER;
+						filterRole = ROLE_MEMBER;
 						target.add(filterContainer);
 						target.add(membersContainer);
 						target.add(pagingNavigator);
@@ -147,7 +142,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				role = null;
+				filterRole = null;
 				target.add(filterContainer);
 				target.add(membersContainer);
 				target.add(pagingNavigator);
@@ -157,7 +152,7 @@ public class MemberListPage extends AccountLayoutPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(role != null);
+				setVisible(filterRole != null);
 			}
 			
 		});
@@ -183,19 +178,13 @@ public class MemberListPage extends AccountLayoutPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Set<OrganizationMembership> organizationMemberships = new HashSet<>();
-				Set<TeamMembership> teamMemberships = new HashSet<>();
 				OrganizationMembershipManager organizationMembershipManager = 
 						GitPlex.getInstance(OrganizationMembershipManager.class);
-				TeamMembershipManager teamMembershipManager = GitPlex.getInstance(TeamMembershipManager.class);
 				for (Long pendingRemoval: pendingRemovals) {
 					OrganizationMembership organizationMembership = organizationMembershipManager.load(pendingRemoval);
 					organizationMemberships.add(organizationMembership);
-					for (TeamMembership teamMembership: 
-							teamMembershipManager.query(getAccount(), organizationMembership.getUser())) {
-						teamMemberships.add(teamMembership);
-					}
 				}
-				GitPlex.getInstance(OrganizationMembershipManager.class).delete(organizationMemberships, teamMemberships);
+				GitPlex.getInstance(OrganizationMembershipManager.class).delete(organizationMemberships);
 				pendingRemovals.clear();
 				target.add(this);
 				target.add(pagingNavigator);
@@ -234,9 +223,9 @@ public class MemberListPage extends AccountLayoutPage {
 				for (OrganizationMembership membership: getAccount().getOrganizationMembers()) {
 					Account user = membership.getUser();
 					if (user.matches(searchField.getInput())) {
-						if (role == null 
-								|| role.equals(ROLE_ADMIN) && membership.isAdmin() 
-								|| role.equals(ROLE_MEMBER) && !membership.isAdmin()) {
+						if (filterRole == null 
+								|| filterRole.equals(RoleSelectionPanel.ROLE_ADMIN) && membership.isAdmin() 
+								|| filterRole.equals(RoleSelectionPanel.ROLE_MEMBER) && !membership.isAdmin()) {
 							memberships.add(membership);
 						}
 					}
@@ -261,8 +250,8 @@ public class MemberListPage extends AccountLayoutPage {
 
 				item.add(new Avatar("avatar", membership.getUser()));
 				
-				Link<Void> link = new BookmarkablePageLink<>("link", MemberPage.class, 
-						MemberPage.paramsOf(membership)); 
+				Link<Void> link = new BookmarkablePageLink<>("link", MemberTeamListPage.class, 
+						MemberTeamListPage.paramsOf(membership)); 
 				link.add(new Label("name", membership.getUser().getDisplayName()));
 				item.add(link);
 						
@@ -279,9 +268,9 @@ public class MemberListPage extends AccountLayoutPage {
 							@Override
 							public String getObject() {
 								if (membership.isAdmin())
-									return ROLE_ADMIN;
+									return RoleSelectionPanel.ROLE_ADMIN;
 								else
-									return ROLE_MEMBER;
+									return RoleSelectionPanel.ROLE_MEMBER;
 							}
 							
 						}));
@@ -411,7 +400,7 @@ public class MemberListPage extends AccountLayoutPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getAccount());
+		return SecurityUtils.isMemberOf(getAccount());
 	}
 	
 	@Override

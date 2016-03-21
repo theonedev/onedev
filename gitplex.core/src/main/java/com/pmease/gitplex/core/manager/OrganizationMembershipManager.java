@@ -19,7 +19,12 @@ public interface OrganizationMembershipManager extends EntityDao<OrganizationMem
 	void save(Collection<OrganizationMembership> organizationMemberships, 
 			Collection<TeamMembership> teamMemberships);
 	
-	void delete(Collection<OrganizationMembership> organizationMemberships, 
-			Collection<TeamMembership> teamMemberships);
+	void delete(OrganizationMembership organizationMembership);
+	
+	void delete(Collection<OrganizationMembership> organizationMemberships);
 
+	void save(OrganizationMembership organizationMembership, 
+			Collection<TeamMembership> teamMembershipsToAdd, 
+			Collection<TeamMembership> teamMembershipsToRemove);
+	
 }

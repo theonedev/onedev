@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.organization;
+package com.pmease.gitplex.web.page.organization.member;
 
 import java.util.Collection;
 

@@ -1,0 +1,16 @@
+<wicket:extend>
+	<div class="member detail">
+		<div class="head">
+			<a wicket:id="memberAvatar"></a> 
+			<a wicket:id="memberLink" class="name"></a> 
+			<a wicket:id="memberRole" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+			<a wicket:id="removeMember" class="btn btn-danger">Remove</a>
+		</div>
+		<div class="body">
+			<ul wicket:id="memberTabs" class="nav nav-tabs"></ul>
+			<div class="tab-panel">
+				<wicket:child></wicket:child>
+			</div>
+		</div>
+	</div>
+</wicket:extend>

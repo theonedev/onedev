@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.organization;
+package com.pmease.gitplex.web.page.organization.member;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +29,7 @@ import com.pmease.gitplex.web.component.teamchoice.TeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamMultiChoice;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
+import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 
 @SuppressWarnings("serial")
 public class NewMembersPage extends AccountLayoutPage {

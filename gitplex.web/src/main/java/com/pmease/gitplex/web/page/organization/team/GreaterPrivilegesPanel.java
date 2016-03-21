@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.page.organization.team;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,8 +23,8 @@ import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
-import com.pmease.gitplex.web.page.organization.MemberPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
+import com.pmease.gitplex.web.page.organization.member.MemberPage;
 
 @SuppressWarnings("serial")
 abstract class GreaterPrivilegesPanel extends GenericPanel<Authorization> {
@@ -59,35 +58,35 @@ abstract class GreaterPrivilegesPanel extends GenericPanel<Authorization> {
 		add(new Label("privilege", getAuthorization().getPrivilege().toString().toLowerCase()));
 		add(new Label("depot", getAuthorization().getDepot().getName().toLowerCase()));
 		
-		add(new ListView<EffectPrivilege>("privileges", new LoadableDetachableModel<List<EffectPrivilege>>() {
+		add(new ListView<DepotAccess>("privileges", new LoadableDetachableModel<List<DepotAccess>>() {
 
 			@Override
-			protected List<EffectPrivilege> load() {
-				List<EffectPrivilege> effectPrivileges = new ArrayList<>();
+			protected List<DepotAccess> load() {
+				List<DepotAccess> depotAccesses = new ArrayList<>();
 				for (Map.Entry<Account, DepotPrivilege> entry: getGreaterPrivileges().entrySet()) {
-					effectPrivileges.add(new EffectPrivilege(entry.getKey(), entry.getValue()));
+					depotAccesses.add(new DepotAccess(entry.getKey(), entry.getValue()));
 				}
-				Collections.sort(effectPrivileges, new Comparator<EffectPrivilege>() {
+				Collections.sort(depotAccesses, new Comparator<DepotAccess>() {
 
 					@Override
-					public int compare(EffectPrivilege effectPrivilege1, EffectPrivilege effectPrivilege2) {
-						if (effectPrivilege1.getPrivilege() != effectPrivilege2.getPrivilege()) {
-							return effectPrivilege2.getPrivilege().ordinal() - effectPrivilege1.getPrivilege().ordinal();
+					public int compare(DepotAccess depotAccess1, DepotAccess depotAccess2) {
+						if (depotAccess1.getPrivilege() != depotAccess2.getPrivilege()) {
+							return depotAccess2.getPrivilege().ordinal() - depotAccess1.getPrivilege().ordinal();
 						} else {
-							return effectPrivilege1.getUser().getDisplayName()
-									.compareTo(effectPrivilege2.getUser().getDisplayName());
+							return depotAccess1.getUser().getDisplayName()
+									.compareTo(depotAccess2.getUser().getDisplayName());
 						}
 					}
 					
 				});
-				return effectPrivileges;
+				return depotAccesses;
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<EffectPrivilege> item) {
-				EffectPrivilege effectPrivilege = item.getModelObject();
+			protected void populateItem(ListItem<DepotAccess> item) {
+				DepotAccess effectPrivilege = item.getModelObject();
 				item.add(new Avatar("avatar", effectPrivilege.getUser()));
 				BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("link", 
 						MemberPage.class, MemberPage.paramsOf(getAuthorization().getDepot().getAccount(), 
@@ -123,12 +122,13 @@ abstract class GreaterPrivilegesPanel extends GenericPanel<Authorization> {
 	
 	protected abstract void onClose(AjaxRequestTarget target);
 
-	private static class EffectPrivilege implements Serializable {
+	private static class DepotAccess {
+		
 		private final Account user;
 		
 		private final DepotPrivilege privilege;
 
-		public EffectPrivilege(Account user, DepotPrivilege privilege) {
+		public DepotAccess(Account user, DepotPrivilege privilege) {
 			this.user = user;
 			this.privilege = privilege;
 		}

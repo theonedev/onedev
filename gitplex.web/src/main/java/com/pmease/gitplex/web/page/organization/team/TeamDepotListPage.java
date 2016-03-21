@@ -34,7 +34,6 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Authorization;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.AuthorizationManager;
@@ -43,9 +42,9 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.depotchoice.AbstractDepotChoiceProvider;
 import com.pmease.gitplex.web.component.depotchoice.DepotChoiceResourceReference;
-import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
+import com.pmease.gitplex.web.page.organization.PrivilegeSelectionPanel;
 import com.vaynberg.wicket.select2.Response;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -64,7 +63,7 @@ public class TeamDepotListPage extends TeamPage {
 	
 	private WebMarkupContainer noDepotsContainer;
 	
-	private DepotPrivilege privilege;
+	private DepotPrivilege filterPrivilege;
 	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
@@ -105,10 +104,10 @@ public class TeamDepotListPage extends TeamPage {
 
 					@Override
 					public String getObject() {
-						if (privilege == null)
+						if (filterPrivilege == null)
 							return "Filter by privilege";
 						else 
-							return privilege.toString();
+							return filterPrivilege.toString();
 					}
 					
 				}));
@@ -121,7 +120,7 @@ public class TeamDepotListPage extends TeamPage {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
 						close();
-						TeamDepotListPage.this.privilege = privilege;
+						TeamDepotListPage.this.filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(depotsContainer);
 						target.add(pagingNavigator);
@@ -135,7 +134,7 @@ public class TeamDepotListPage extends TeamPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				privilege = null;
+				filterPrivilege = null;
 				target.add(filterContainer);
 				target.add(depotsContainer);
 				target.add(pagingNavigator);
@@ -145,7 +144,7 @@ public class TeamDepotListPage extends TeamPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(privilege != null);
+				setVisible(filterPrivilege != null);
 			}
 			
 		});
@@ -274,7 +273,7 @@ public class TeamDepotListPage extends TeamPage {
 				
 				for (Authorization authorization: teamModel.getObject().getAuthorizations()) {
 					if (authorization.getDepot().getName().toLowerCase().contains(searchInput)
-							&& (privilege == null || privilege == authorization.getPrivilege())) {
+							&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
 						authorizations.add(authorization);
 					}
 				}
@@ -461,15 +460,7 @@ public class TeamDepotListPage extends TeamPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getAccount());
-	}
-	
-	@Override
-	protected void onSelect(AjaxRequestTarget target, Account account) {
-		if (account.isOrganization())
-			setResponsePage(TeamListPage.class, paramsOf(account));
-		else
-			setResponsePage(AccountOverviewPage.class, paramsOf(account));
+		return SecurityUtils.isMemberOf(getAccount());
 	}
 	
 }

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.organization.team;
+package com.pmease.gitplex.web.page.organization.member;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -6,40 +6,35 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 
 @SuppressWarnings("serial")
-abstract class PrivilegeSelectionPanel extends Panel {
+abstract class RoleSelectionPanel extends Panel {
 
-	public PrivilegeSelectionPanel(String id) {
+	public static final String ROLE_ADMIN = "Admin";
+	
+	public static final String ROLE_MEMBER = "Member";
+	
+	public RoleSelectionPanel(String id) {
 		super(id);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new AjaxLink<Void>("read") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onSelect(target, DepotPrivilege.READ);
-			}
-			
-		});
-		add(new AjaxLink<Void>("write") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onSelect(target, DepotPrivilege.WRITE);
-			}
-			
-		});
 		add(new AjaxLink<Void>("admin") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onSelect(target, DepotPrivilege.ADMIN);
+				onSelectAdmin(target);
+			}
+			
+		});
+		add(new AjaxLink<Void>("member") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onSelectOrdinary(target);
 			}
 			
 		});
@@ -51,6 +46,7 @@ abstract class PrivilegeSelectionPanel extends Panel {
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, DepotPrivilege privilege);
+	protected abstract void onSelectAdmin(AjaxRequestTarget target);
 	
+	protected abstract void onSelectOrdinary(AjaxRequestTarget target);
 }

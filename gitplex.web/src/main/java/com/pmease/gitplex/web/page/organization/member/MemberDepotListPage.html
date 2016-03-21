@@ -1,0 +1,36 @@
+<wicket:extend>
+	<section class="member depot list">
+		<div class="head clearfix">
+			<div class="pull-left search">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input wicket:id="searchDepots" class="form-control" placeholder="Search repositories"></input>
+				</div>
+			</div>
+			<div wicket:id="filter" class="pull-left filter btn-group">
+				<a wicket:id="selection" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="clear" class="btn btn-default" title="Clear privilege filter"><i class="fa fa-times"></i></a>
+			</div>
+		</div>
+		<table wicket:id="depots" class="depots table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">Name</th>
+					<th class="privilege">Privilege</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="depots">
+					<td class="name">
+						<i class="fa fa-ext fa-repo"></i> <a wicket:id="depot"><span wicket:id="name"></span></a>
+					</td>
+					<td class="privilege">
+						<a wicket:id="privilege"><span wicket:id="name"></span></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>	
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
+		<div wicket:id="noDepots" class="alert alert-info">No accessible repositories</div>
+	</section>
+</wicket:extend>

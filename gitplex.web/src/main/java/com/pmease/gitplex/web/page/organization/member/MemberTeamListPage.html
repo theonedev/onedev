@@ -1,0 +1,40 @@
+<wicket:extend>
+	<section class="member team list">
+		<div class="head clearfix">
+			<div class="pull-left search">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input wicket:id="searchTeams" class="form-control" placeholder="Search teams"></input>
+				</div>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
+			</div>
+			<div class="pull-right">
+				<input wicket:id="addNew" type="hidden" class="form-control"></input>
+			</div>
+		</div>
+		<table wicket:id="teams" class="members table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">Name</th>
+					<th class="actions"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="teams">
+					<td class="name">
+						<a wicket:id="link"><span wicket:id="name"></span></a>
+					</td>
+					<td class="actions">
+						<a wicket:id="remove" title="Remove from team"><i class="fa fa-times"></i></a>
+						<a wicket:id="undoRemove" title="Do not remove"><i class="fa fa-undo"></i></a>
+						<span wicket:id="pendingRemoval" class="label label-danger">Pending removal</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>	
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
+		<div wicket:id="noTeams" class="alert alert-info">No teams found</div>
+	</section>
+</wicket:extend>

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.organization.team;
+package com.pmease.gitplex.web.page.organization.member;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,14 +8,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -32,18 +34,15 @@ import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.OrganizationMembership;
+import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.entity.TeamMembership;
-import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
+import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.component.EmailLink;
-import com.pmease.gitplex.web.component.UserLink;
-import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
-import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.component.teamchoice.TeamChoiceResourceReference;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
+import com.pmease.gitplex.web.page.organization.team.TeamMemberListPage;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
@@ -51,21 +50,21 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class TeamMemberListPage extends TeamPage {
+public class MemberTeamListPage extends MemberPage {
 
-	private static final String ADD_MEMBER_PLACEHOLDER = "Select user to add to team...";
+	private static final String ADD_TEAM_PLACEHOLDER = "Select team to join...";
 	
-	private PageableListView<TeamMembership> membersView;
+	private PageableListView<TeamMembership> teamsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
-	private WebMarkupContainer membersContainer; 
+	private WebMarkupContainer teamsContainer; 
 	
-	private WebMarkupContainer noMembersContainer;
+	private WebMarkupContainer noTeamsContainer;
 	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
-	public TeamMemberListPage(PageParameters params) {
+	public MemberTeamListPage(PageParameters params) {
 		super(params);
 		
 		Preconditions.checkState(getAccount().isOrganization());
@@ -77,14 +76,14 @@ public class TeamMemberListPage extends TeamPage {
 		
 		TextField<String> searchField;
 		
-		add(searchField = new ClearableTextField<String>("searchMembers", Model.of("")));
+		add(searchField = new ClearableTextField<String>("searchTeams", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(membersContainer);
+				target.add(teamsContainer);
 				target.add(pagingNavigator);
-				target.add(noMembersContainer);
+				target.add(noTeamsContainer);
 			}
 			
 		});
@@ -103,8 +102,8 @@ public class TeamMemberListPage extends TeamPage {
 				pendingRemovals.clear();
 				target.add(this);
 				target.add(pagingNavigator);
-				target.add(membersContainer);
-				target.add(noMembersContainer);
+				target.add(teamsContainer);
+				target.add(noTeamsContainer);
 			}
 
 			@Override
@@ -116,62 +115,62 @@ public class TeamMemberListPage extends TeamPage {
 		});
 		confirmRemoveLink.setOutputMarkupPlaceholderTag(true);
 		
-		add(new SelectToAddChoice<OrganizationMembership>("addNew", new ChoiceProvider<OrganizationMembership>() {
+		add(new SelectToAddChoice<Team>("addNew", new ChoiceProvider<Team>() {
 
 			@Override
-			public void query(String term, int page, Response<OrganizationMembership> response) {
-				List<OrganizationMembership> memberships = new ArrayList<>();
+			public void query(String term, int page, Response<Team> response) {
+				List<Team> teams = new ArrayList<>();
 				term = term.toLowerCase();
-				for (OrganizationMembership membership: getAccount().getOrganizationMembers()) {
-					Account user = membership.getUser();
-					if (user.matches(term) && !teamModel.getObject().getMembers().contains(user)) {
-						memberships.add(membership);
+				Account user = getMembership().getUser();
+				Collection<Team> joinedTeams = new HashSet<>();
+				for (TeamMembership membership: user.getJoinedTeams()) {
+					joinedTeams.add(membership.getTeam());
+				}
+				for (Team team: getAccount().getDefinedTeams()) {
+					if (team.getName().toLowerCase().contains(term) && !joinedTeams.contains(team)) {
+						teams.add(team);
 					}
 				}
 				
-				Collections.sort(memberships, new Comparator<OrganizationMembership>() {
+				Collections.sort(teams, new Comparator<Team>() {
 
 					@Override
-					public int compare(OrganizationMembership membership1, OrganizationMembership membership2) {
-						return membership1.getUser().getDisplayName()
-								.compareTo(membership2.getUser().getDisplayName());
+					public int compare(Team team1, Team team2) {
+						return team1.getName().compareTo(team2.getName());
 					}
 					
 				});
 				
-				new ResponseFiller<OrganizationMembership>(response).fill(memberships, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<Team>(response).fill(teams, page, Constants.DEFAULT_PAGE_SIZE);
 			}
 
 			@Override
-			public void toJson(OrganizationMembership choice, JSONWriter writer) throws JSONException {
-				String displayName = StringEscapeUtils.escapeHtml4(choice.getUser().getDisplayName()); 
-				writer.key("id").value(choice.getId()).key("name").value(displayName);
-				String avatarUrl = GitPlex.getInstance(AvatarManager.class).getAvatarUrl(choice.getUser());
-				writer.key("avatar").value(avatarUrl);
+			public void toJson(Team choice, JSONWriter writer) throws JSONException {
+				writer.key("id").value(choice.getId()).key("name").value(choice.getName());
 			}
 
 			@Override
-			public Collection<OrganizationMembership> toChoices(Collection<String> ids) {
-				List<OrganizationMembership> memberships = Lists.newArrayList();
-				OrganizationMembershipManager membershipManager = GitPlex.getInstance(OrganizationMembershipManager.class);
+			public Collection<Team> toChoices(Collection<String> ids) {
+				List<Team> teams = Lists.newArrayList();
+				TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
 				for (String each : ids) {
 					Long id = Long.valueOf(each);
-					memberships.add(membershipManager.load(id));
+					teams.add(teamManager.load(id));
 				}
 
-				return memberships;
+				return teams;
 			}
 
-		}, ADD_MEMBER_PLACEHOLDER) {
+		}, ADD_TEAM_PLACEHOLDER) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder(ADD_MEMBER_PLACEHOLDER);
-				getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
-				getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
-				getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");
+				getSettings().setPlaceholder(ADD_TEAM_PLACEHOLDER);
+				getSettings().setFormatResult("gitplex.teamChoiceFormatter.formatResult");
+				getSettings().setFormatSelection("gitplex.teamChoiceFormatter.formatSelection");
+				getSettings().setEscapeMarkup("gitplex.teamChoiceFormatter.escapeMarkup");
 			}
 			
 			@Override
@@ -184,35 +183,35 @@ public class TeamMemberListPage extends TeamPage {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(TeamChoiceResourceReference.INSTANCE));
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, OrganizationMembership selection) {
+			protected void onSelect(AjaxRequestTarget target, Team selection) {
 				TeamMembership membership = new TeamMembership();
-				membership.setTeam(teamModel.getObject());
-				membership.setUser(selection.getUser());
+				membership.setTeam(selection);
+				membership.setUser(getMembership().getUser());
 				GitPlex.getInstance(TeamMembershipManager.class).persist(membership);
-				target.add(membersContainer);
+				target.add(teamsContainer);
 				target.add(pagingNavigator);
-				target.add(noMembersContainer);
+				target.add(noTeamsContainer);
 			}
 			
 		});
 		
-		membersContainer = new WebMarkupContainer("members") {
+		teamsContainer = new WebMarkupContainer("teams") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!membersView.getModelObject().isEmpty());
+				setVisible(!teamsView.getModelObject().isEmpty());
 			}
 			
 		};
-		membersContainer.setOutputMarkupPlaceholderTag(true);
-		add(membersContainer);
+		teamsContainer.setOutputMarkupPlaceholderTag(true);
+		add(teamsContainer);
 		
-		membersContainer.add(membersView = new PageableListView<TeamMembership>("members", 
+		teamsContainer.add(teamsView = new PageableListView<TeamMembership>("teams", 
 				new LoadableDetachableModel<List<TeamMembership>>() {
 
 			@Override
@@ -225,8 +224,8 @@ public class TeamMemberListPage extends TeamPage {
 				else
 					searchInput = "";
 				
-				for (TeamMembership membership: teamModel.getObject().getMemberships()) {
-					if (membership.getUser().matches(searchInput)) {
+				for (TeamMembership membership: getMembership().getUser().getJoinedTeams()) {
+					if (membership.getTeam().getName().toLowerCase().contains(searchInput)) {
 						memberships.add(membership);
 					}
 				}
@@ -235,8 +234,7 @@ public class TeamMemberListPage extends TeamPage {
 
 					@Override
 					public int compare(TeamMembership membership1, TeamMembership membership2) {
-						return membership1.getUser().getDisplayName()
-								.compareTo(membership2.getUser().getDisplayName());
+						return membership1.getTeam().getName().compareTo(membership2.getTeam().getName());
 					}
 					
 				});
@@ -247,12 +245,12 @@ public class TeamMemberListPage extends TeamPage {
 
 			@Override
 			protected void populateItem(ListItem<TeamMembership> item) {
-				Account member = item.getModelObject().getUser();
+				Team team = item.getModelObject().getTeam();
 
-				item.add(new Avatar("avatar", member));
-				item.add(new UserLink("link", member));
-						
-				item.add(new EmailLink("email", Model.of(member.getEmail())));
+				Link<Void> teamLink = new BookmarkablePageLink<Void>("link", 
+						TeamMemberListPage.class, TeamMemberListPage.paramsOf(team));
+				teamLink.add(new Label("name", team.getName()));
+				item.add(teamLink);
 				item.add(new AjaxLink<Void>("remove") {
 
 					@Override
@@ -301,28 +299,28 @@ public class TeamMemberListPage extends TeamPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", membersView) {
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", teamsView) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(membersView.getPageCount() > 1);
+				setVisible(teamsView.getPageCount() > 1);
 			}
 			
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 		
-		noMembersContainer = new WebMarkupContainer("noMembers") {
+		noTeamsContainer = new WebMarkupContainer("noTeams") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(membersView.getModelObject().isEmpty());
+				setVisible(teamsView.getModelObject().isEmpty());
 			}
 			
 		};
-		noMembersContainer.setOutputMarkupPlaceholderTag(true);
-		add(noMembersContainer);
+		noTeamsContainer.setOutputMarkupPlaceholderTag(true);
+		add(noTeamsContainer);
 	}
 	
 	@Override

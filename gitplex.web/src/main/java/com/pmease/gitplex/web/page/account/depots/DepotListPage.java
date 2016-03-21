@@ -19,7 +19,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -147,7 +146,7 @@ public class DepotListPage extends AccountLayoutPage {
 				link.add(new Label("depotName", depot.getName()));
 				item.add(link);
 						
-				item.add(new MultilineLabel("description", depot.getDescription()));
+				item.add(new Label("public", depot.isPublicRead()?"yes":"no"));
 				
 				item.add(new Link<Void>("setting") {
 

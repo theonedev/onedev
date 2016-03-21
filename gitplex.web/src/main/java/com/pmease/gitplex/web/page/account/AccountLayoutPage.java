@@ -24,9 +24,9 @@ import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.organization.MemberListPage;
-import com.pmease.gitplex.web.page.organization.MemberPage;
-import com.pmease.gitplex.web.page.organization.NewMembersPage;
+import com.pmease.gitplex.web.page.organization.member.MemberListPage;
+import com.pmease.gitplex.web.page.organization.member.MemberPage;
+import com.pmease.gitplex.web.page.organization.member.NewMembersPage;
 import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
 import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
 import com.pmease.gitplex.web.page.organization.team.TeamListPage;
@@ -75,7 +75,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", 
 				DepotListPage.class, NewDepotPage.class));
 		if (getAccount().isOrganization()) {
-			if (SecurityUtils.canAccess(getAccount())) {
+			if (SecurityUtils.isMemberOf(getAccount())) {
 				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", MemberListPage.class, 
 						NewMembersPage.class, MemberPage.class));
 				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class, 

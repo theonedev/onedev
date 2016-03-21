@@ -257,7 +257,7 @@ public class TeamListPage extends AccountLayoutPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccess(getAccount());
+		return SecurityUtils.isMemberOf(getAccount());
 	}
 	
 	@Override

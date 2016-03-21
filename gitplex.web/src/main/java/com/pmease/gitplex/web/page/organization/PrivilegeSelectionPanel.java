@@ -6,29 +6,39 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 
-@SuppressWarnings("serial")
-abstract class RoleSelectionPanel extends Panel {
+import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 
-	public RoleSelectionPanel(String id) {
+@SuppressWarnings("serial")
+public abstract class PrivilegeSelectionPanel extends Panel {
+
+	public PrivilegeSelectionPanel(String id) {
 		super(id);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		add(new AjaxLink<Void>("read") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onSelect(target, DepotPrivilege.READ);
+			}
+			
+		});
+		add(new AjaxLink<Void>("write") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onSelect(target, DepotPrivilege.WRITE);
+			}
+			
+		});
 		add(new AjaxLink<Void>("admin") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onSelectAdmin(target);
-			}
-			
-		});
-		add(new AjaxLink<Void>("ordinary") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onSelectOrdinary(target);
+				onSelect(target, DepotPrivilege.ADMIN);
 			}
 			
 		});
@@ -40,7 +50,6 @@ abstract class RoleSelectionPanel extends Panel {
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
-	protected abstract void onSelectAdmin(AjaxRequestTarget target);
+	protected abstract void onSelect(AjaxRequestTarget target, DepotPrivilege privilege);
 	
-	protected abstract void onSelectOrdinary(AjaxRequestTarget target);
 }
