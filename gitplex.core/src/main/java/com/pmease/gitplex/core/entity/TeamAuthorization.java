@@ -15,7 +15,7 @@ import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 @Table(uniqueConstraints={
 		@UniqueConstraint(columnNames={"g_team_id", "g_depot_id"})
 })
-public class Authorization extends AbstractEntity {
+public class TeamAuthorization extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 

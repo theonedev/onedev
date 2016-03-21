@@ -10,7 +10,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -102,10 +102,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return currentUser != null && currentUser.isAdministrator();
 	}
 
-	private static Collection<Team> getAuthorizedTeams(Collection<Authorization> authorizations, 
+	private static Collection<Team> getAuthorizedTeams(Collection<TeamAuthorization> authorizations, 
 			Depot depot, DepotPrivilege privilege) {
 		Collection<Team> teams = new HashSet<>();
-		for (Authorization authorization: authorizations) {
+		for (TeamAuthorization authorization: authorizations) {
 			if (authorization.getDepot().equals(depot) && authorization.getPrivilege() == privilege) {
 				teams.add(authorization.getTeam());
 			}
@@ -122,7 +122,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return members;
 	}
 
-	private static Collection<Account> getDepotAdministrators(Authorization authorization) {
+	private static Collection<Account> getDepotAdministrators(TeamAuthorization authorization) {
 		Account organization = authorization.getDepot().getAccount();
 		Collection<Account> depotAdministrators = new HashSet<>();
 		for (TeamMembership membership: authorization.getTeam().getMemberships()) {
@@ -133,7 +133,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				depotAdministrators.add(user);
 			} else {
 				Collection<Team> adminTeams = getAuthorizedTeams(
-						organization.getAllAuthorizationsInOrganization(), 
+						organization.getAllTeamAuthorizationsInOrganization(), 
 						authorization.getDepot(), 
 						DepotPrivilege.ADMIN);
 				Collection<Account> adminTeamMembers = getTeamMembers(
@@ -146,7 +146,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return depotAdministrators;
 	}
 	
-	public static Map<Account, DepotPrivilege> getGreaterPrivileges(Authorization authorization) {
+	public static Map<Account, DepotPrivilege> getGreaterPrivileges(TeamAuthorization authorization) {
 		Map<Account, DepotPrivilege> greaterPrivileges = new HashMap<>();
 		Account organization = authorization.getDepot().getAccount();
 		DepotPrivilege privilege = authorization.getPrivilege();
@@ -161,7 +161,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				if (organization.getDefaultPrivilege() == DepotPrivilege.WRITE) {
 					depotWriters.add(user);
 				} else {
-					Collection<Team> writeTeams = getAuthorizedTeams(organization.getAllAuthorizationsInOrganization(), 
+					Collection<Team> writeTeams = getAuthorizedTeams(organization.getAllTeamAuthorizationsInOrganization(), 
 							authorization.getDepot(), DepotPrivilege.WRITE);
 					Collection<Account> writeTeamMembers = getTeamMembers(organization.getAllTeamMembershipsInOrganiation(), 
 							writeTeams);

@@ -23,7 +23,7 @@ import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
@@ -144,7 +144,7 @@ public class MemberDepotListPage extends MemberPage {
 			private boolean isAuthorized(Depot depot, DepotPrivilege privilege) {
 				Account user = getMembership().getUser();
 				Account organization = getMembership().getOrganization();
-				for (Authorization authorization: organization.getAllAuthorizationsInOrganization()) {
+				for (TeamAuthorization authorization: organization.getAllTeamAuthorizationsInOrganization()) {
 					if (authorization.getPrivilege() == privilege
 							&& authorization.getDepot().equals(depot) 
 							&& authorization.getTeam().getMembers().contains(user)) {

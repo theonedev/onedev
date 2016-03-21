@@ -160,7 +160,11 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     
 	@OneToMany(mappedBy="depot")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Authorization> authorizations = new ArrayList<>();
+	private Collection<TeamAuthorization> authorizedTeams = new ArrayList<>();
+	
+	@OneToMany(mappedBy="depot")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<UserAuthorization> collaborators = new ArrayList<>();
 	
     private transient Map<BlobIdent, Blob> blobCache;
     
@@ -1059,12 +1063,20 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		
 	}
 
-	public Collection<Authorization> getAuthorizations() {
-		return authorizations;
+	public Collection<TeamAuthorization> getAuthorizedTeams() {
+		return authorizedTeams;
 	}
 
-	public void setAuthorizations(Collection<Authorization> authorizations) {
-		this.authorizations = authorizations;
+	public void setAuthorizedTeams(Collection<TeamAuthorization> authorizedTeams) {
+		this.authorizedTeams = authorizedTeams;
+	}
+
+	public Collection<UserAuthorization> getCollaborators() {
+		return collaborators;
+	}
+
+	public void setCollaborators(Collection<UserAuthorization> collaborators) {
+		this.collaborators = collaborators;
 	}
 
 	public long getVersion() {

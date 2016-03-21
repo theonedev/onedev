@@ -19,7 +19,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -27,7 +27,7 @@ import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 import com.pmease.gitplex.web.page.organization.member.MemberPage;
 
 @SuppressWarnings("serial")
-abstract class GreaterPrivilegesPanel extends GenericPanel<Authorization> {
+abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
 
 	private final IModel<Map<Account, DepotPrivilege>> greaterPrivilegesModel = 
 			new LoadableDetachableModel<Map<Account, DepotPrivilege>>() {
@@ -38,7 +38,7 @@ abstract class GreaterPrivilegesPanel extends GenericPanel<Authorization> {
 		}
 		
 	};
-	public GreaterPrivilegesPanel(String id, IModel<Authorization> authorizationModel) {
+	public GreaterPrivilegesPanel(String id, IModel<TeamAuthorization> authorizationModel) {
 		super(id, authorizationModel);
 	}
 
@@ -110,7 +110,7 @@ abstract class GreaterPrivilegesPanel extends GenericPanel<Authorization> {
 		super.onDetach();
 	}
 
-	private Authorization getAuthorization() {
+	private TeamAuthorization getAuthorization() {
 		return getModelObject();
 	}
 	

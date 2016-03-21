@@ -27,7 +27,7 @@ import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.CommentManager;
@@ -50,7 +50,7 @@ import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
-import com.pmease.gitplex.core.manager.impl.DefaultAuthorizationManager;
+import com.pmease.gitplex.core.manager.impl.DefaultTeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuxiliaryManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCommentManager;
@@ -170,13 +170,13 @@ public class CoreModule extends AbstractPluginModule {
 		bind(TeamManager.class).to(DefaultTeamManager.class);
 		bind(OrganizationMembershipManager.class).to(DefaultOrganizationMembershipManager.class);
 		bind(TeamMembershipManager.class).to(DefaultTeamMembershipManager.class);
-		bind(AuthorizationManager.class).to(DefaultAuthorizationManager.class);
+		bind(TeamAuthorizationManager.class).to(DefaultTeamAuthorizationManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 
 		contribute(DepotListener.class, DefaultPullRequestManager.class);
 		contribute(DepotListener.class, DefaultAuxiliaryManager.class);
-		contribute(DepotListener.class, DefaultAuthorizationManager.class);
+		contribute(DepotListener.class, DefaultTeamAuthorizationManager.class);
 		contribute(RefListener.class, DefaultPullRequestManager.class);
 		contribute(RefListener.class, DefaultAuxiliaryManager.class);
 		contribute(RefListener.class, DefaultDepotManager.class);

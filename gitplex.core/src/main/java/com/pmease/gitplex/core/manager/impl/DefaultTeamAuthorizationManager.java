@@ -13,17 +13,17 @@ import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.listener.DepotListener;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 
 @Singleton
-public class DefaultAuthorizationManager extends AbstractEntityDao<Authorization> 
-		implements AuthorizationManager, DepotListener {
+public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAuthorization> 
+		implements TeamAuthorizationManager, DepotListener {
 
 	@Inject
-	public DefaultAuthorizationManager(Dao dao) {
+	public DefaultTeamAuthorizationManager(Dao dao) {
 		super(dao);
 	}
 
@@ -38,22 +38,22 @@ public class DefaultAuthorizationManager extends AbstractEntityDao<Authorization
 	@Transactional
 	@Override
 	public void onDepotTransfer(Depot depot, Account oldAccount) {
-		Query query = getSession().createQuery("delete from Authorization where depot=:depot");
+		Query query = getSession().createQuery("delete from TeamAuthorization where depot=:depot");
 		query.setParameter("depot", depot);
 		query.executeUpdate();
 	}
 
 	@Transactional
 	@Override
-	public void delete(Collection<Authorization> authorizations) {
-		for (Authorization authorization: authorizations)
+	public void delete(Collection<TeamAuthorization> authorizations) {
+		for (TeamAuthorization authorization: authorizations)
 			remove(authorization);
 	}
 
 	@Transactional
 	@Override
-	public Collection<Authorization> query(Account organization) {
-		EntityCriteria<Authorization> criteria = newCriteria(); 
+	public Collection<TeamAuthorization> query(Account organization) {
+		EntityCriteria<TeamAuthorization> criteria = newCriteria(); 
 		criteria.createCriteria("depot").add(Restrictions.eq("account", organization));
 		return query(criteria);
 	}

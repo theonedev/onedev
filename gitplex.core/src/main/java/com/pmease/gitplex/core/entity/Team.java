@@ -43,7 +43,7 @@ public class Team extends AbstractEntity {
 
 	@OneToMany(mappedBy="team")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Authorization> authorizations = new ArrayList<>();
+	private Collection<TeamAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="team")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -80,11 +80,11 @@ public class Team extends AbstractEntity {
 		this.description = description;
 	}
 
-	public Collection<Authorization> getAuthorizations() {
+	public Collection<TeamAuthorization> getAuthorizations() {
 		return authorizations;
 	}
 
-	public void setAuthorizations(Collection<Authorization> authorizations) {
+	public void setAuthorizations(Collection<TeamAuthorization> authorizations) {
 		this.authorizations = authorizations;
 	}
 

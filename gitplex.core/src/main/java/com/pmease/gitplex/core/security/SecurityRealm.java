@@ -13,7 +13,7 @@ import org.apache.shiro.authz.Permission;
 import com.pmease.commons.shiro.AbstractRealm;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.Team;
@@ -107,7 +107,7 @@ public class SecurityRealm extends AbstractRealm {
                 						teamMembershipManager.query(checkDepot.getAccount(), user)) {
                 					teams.add(teamMembership.getTeam());
                 				}
-	                			for (Authorization authorization: checkDepot.getAuthorizations()) {
+	                			for (TeamAuthorization authorization: checkDepot.getAuthorizedTeams()) {
 	                				if (authorization.getPrivilege().can(objectPermission.getOperation())
 	                						&& teams.contains(authorization.getTeam())) {
 	                					return true;

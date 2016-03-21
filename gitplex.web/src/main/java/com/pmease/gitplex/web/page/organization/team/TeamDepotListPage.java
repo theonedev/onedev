@@ -34,9 +34,9 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Authorization;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
@@ -55,7 +55,7 @@ public class TeamDepotListPage extends TeamPage {
 
 	private static final String ADD_DEPOT_PLACEHOLDER = "Select repository to authorize...";
 	
-	private PageableListView<Authorization> depotsView;
+	private PageableListView<TeamAuthorization> depotsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
@@ -154,8 +154,8 @@ public class TeamDepotListPage extends TeamPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Collection<Authorization> authorizations = new HashSet<>();
-				AuthorizationManager authorizationManager = GitPlex.getInstance(AuthorizationManager.class);
+				Collection<TeamAuthorization> authorizations = new HashSet<>();
+				TeamAuthorizationManager authorizationManager = GitPlex.getInstance(TeamAuthorizationManager.class);
 				for (Long id: pendingRemovals) {
 					authorizations.add(authorizationManager.load(id));
 				}
@@ -185,7 +185,7 @@ public class TeamDepotListPage extends TeamPage {
 				for (Depot depot: getAccount().getDepots()) {
 					if (depot.getName().toLowerCase().contains(term)) {
 						boolean authorized = false;
-						for (Authorization authorization: teamModel.getObject().getAuthorizations()) {
+						for (TeamAuthorization authorization: teamModel.getObject().getAuthorizations()) {
 							if (authorization.getDepot().equals(depot)) {
 								authorized = true;
 								break;
@@ -228,10 +228,10 @@ public class TeamDepotListPage extends TeamPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot selection) {
-				Authorization authorization = new Authorization();
+				TeamAuthorization authorization = new TeamAuthorization();
 				authorization.setDepot(selection);
 				authorization.setTeam(teamModel.getObject());
-				GitPlex.getInstance(AuthorizationManager.class).persist(authorization);
+				GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
 				target.add(depotsContainer);
 				target.add(pagingNavigator);
 				target.add(noDepotsContainer);
@@ -258,12 +258,12 @@ public class TeamDepotListPage extends TeamPage {
 		depotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(depotsContainer);
 		
-		depotsContainer.add(depotsView = new PageableListView<Authorization>("depots", 
-				new LoadableDetachableModel<List<Authorization>>() {
+		depotsContainer.add(depotsView = new PageableListView<TeamAuthorization>("depots", 
+				new LoadableDetachableModel<List<TeamAuthorization>>() {
 
 			@Override
-			protected List<Authorization> load() {
-				List<Authorization> authorizations = new ArrayList<>();
+			protected List<TeamAuthorization> load() {
+				List<TeamAuthorization> authorizations = new ArrayList<>();
 				
 				String searchInput = searchField.getInput();
 				if (searchInput != null)
@@ -271,17 +271,17 @@ public class TeamDepotListPage extends TeamPage {
 				else
 					searchInput = "";
 				
-				for (Authorization authorization: teamModel.getObject().getAuthorizations()) {
+				for (TeamAuthorization authorization: teamModel.getObject().getAuthorizations()) {
 					if (authorization.getDepot().getName().toLowerCase().contains(searchInput)
 							&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
 						authorizations.add(authorization);
 					}
 				}
 				
-				Collections.sort(authorizations, new Comparator<Authorization>() {
+				Collections.sort(authorizations, new Comparator<TeamAuthorization>() {
 
 					@Override
-					public int compare(Authorization authorization1, Authorization authorization2) {
+					public int compare(TeamAuthorization authorization1, TeamAuthorization authorization2) {
 						return authorization1.getDepot().getName().compareTo(authorization2.getDepot().getName());
 					}
 					
@@ -292,8 +292,8 @@ public class TeamDepotListPage extends TeamPage {
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(ListItem<Authorization> item) {
-				Authorization authorization = item.getModelObject();
+			protected void populateItem(ListItem<TeamAuthorization> item) {
+				TeamAuthorization authorization = item.getModelObject();
 
 				BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("link", DepotFilePage.class, 
 						DepotFilePage.paramsOf(authorization.getDepot()));
@@ -367,9 +367,9 @@ public class TeamDepotListPage extends TeamPage {
 							@Override
 							protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
 								close();
-								Authorization authorization = item.getModelObject();
+								TeamAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
-								GitPlex.getInstance(AuthorizationManager.class).persist(authorization);
+								GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
 								target.add(pagingNavigator);
 								target.add(depotsContainer);
 								target.add(noDepotsContainer);

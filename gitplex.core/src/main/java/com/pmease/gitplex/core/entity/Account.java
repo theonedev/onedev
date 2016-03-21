@@ -30,7 +30,7 @@ import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuthorizationManager;
+import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.permission.object.AccountBelonging;
 import com.pmease.gitplex.core.permission.object.ProtectedObject;
@@ -92,6 +92,10 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<TeamMembership> joinedTeams = new ArrayList<>();
 	
+	@OneToMany(mappedBy="user")
+	@OnDelete(action=OnDeleteAction.CASCADE)
+	private Collection<UserAuthorization> authorizedDepots = new ArrayList<>();
+	
 	@OneToMany(mappedBy="account")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<Depot> depots = new ArrayList<>();
@@ -146,7 +150,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
     
-    private transient Collection<Authorization> allAuthorizationsInOrganization;
+    private transient Collection<TeamAuthorization> allAuthorizationsInOrganization;
     
     private transient Collection<TeamMembership> allTeamMembershipsInOrganiation;
     
@@ -417,9 +421,17 @@ public class Account extends AbstractUser implements ProtectedObject {
 		return version;
 	}
 
-	public Collection<Authorization> getAllAuthorizationsInOrganization() {
+	public Collection<UserAuthorization> getAuthorizedDepots() {
+		return authorizedDepots;
+	}
+
+	public void setAuthorizedDepots(Collection<UserAuthorization> authorizedDepots) {
+		this.authorizedDepots = authorizedDepots;
+	}
+
+	public Collection<TeamAuthorization> getAllTeamAuthorizationsInOrganization() {
 		if (allAuthorizationsInOrganization == null) {
-			allAuthorizationsInOrganization = GitPlex.getInstance(AuthorizationManager.class).query(this);
+			allAuthorizationsInOrganization = GitPlex.getInstance(TeamAuthorizationManager.class).query(this);
 		}
 		return allAuthorizationsInOrganization;
 	}
