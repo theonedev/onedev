@@ -33,7 +33,7 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.manager.ReviewManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;

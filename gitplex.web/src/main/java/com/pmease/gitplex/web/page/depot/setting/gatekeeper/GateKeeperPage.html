@@ -6,17 +6,16 @@
 			</div>
 			<div wicket:id="gateKeeperDropdownTrigger" class="well gate-keeper-add">Add Gate Keeper <i class="fa fa-lg fa-plus-circle"></i></div>
 		</div>
-		<div class="gate-keeper-tip">
-			<div class="well">
-				Define gate keepers to determine whether or not to accept a pull request or push operation. 
-				Gate keepers plays an important role in GitPlex, for instance, you may use it to:
-				<ul>
-					<li>Control write access to certain branches or directories.</li>
-					<li>Require different user to approve different tree of the repository.</li>
-					<li>Have continuous integration system verifying the code before accepting 
-					the pull request.</li>
-				</ul> 
-			</div>
+		<div class="help-block">
+			<h5>Define gate keepers to determine whether or not to accept a pull request or push operation. 
+			Gate keepers plays an important role in GitPlex, for instance, you may use it to:
+			</h5>
+			<ul>
+				<li>Control write access to certain branches or directories.</li>
+				<li>Require different user to approve different tree of the repository.</li>
+				<li>Have continuous integration system verifying the code before accepting 
+				the pull request.</li>
+			</ul> 
 		</div>
 	</div>
 </wicket:extend>

@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.permission.object;
+package com.pmease.gitplex.core.security.protectedobject;
 
 import com.pmease.gitplex.core.entity.Account;
 

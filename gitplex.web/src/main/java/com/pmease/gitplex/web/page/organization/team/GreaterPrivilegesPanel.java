@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -12,32 +11,26 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.TeamAuthorization;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
-import com.pmease.gitplex.web.page.organization.member.MemberPage;
+import com.pmease.gitplex.web.page.organization.member.MemberPrivilegeSourcePage;
 
 @SuppressWarnings("serial")
 abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
 
-	private final IModel<Map<Account, DepotPrivilege>> greaterPrivilegesModel = 
-			new LoadableDetachableModel<Map<Account, DepotPrivilege>>() {
-
-		@Override
-		protected Map<Account, DepotPrivilege> load() {
-			return SecurityUtils.getGreaterPrivileges(getAuthorization());
-		}
-		
-	};
 	public GreaterPrivilegesPanel(String id, IModel<TeamAuthorization> authorizationModel) {
 		super(id, authorizationModel);
 	}
@@ -55,59 +48,54 @@ abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
 			
 		});
 		
-		add(new Label("privilege", getAuthorization().getPrivilege().toString().toLowerCase()));
-		add(new Label("depot", getAuthorization().getDepot().getName().toLowerCase()));
+		add(new Label("privilege", getAuthorization().getPrivilege()));
+		add(new Label("depot", getAuthorization().getDepot().getName()));
 		
-		add(new ListView<DepotAccess>("privileges", new LoadableDetachableModel<List<DepotAccess>>() {
+		add(new ListView<UserPermission>("privileges", new LoadableDetachableModel<List<UserPermission>>() {
 
 			@Override
-			protected List<DepotAccess> load() {
-				List<DepotAccess> depotAccesses = new ArrayList<>();
-				for (Map.Entry<Account, DepotPrivilege> entry: getGreaterPrivileges().entrySet()) {
-					depotAccesses.add(new DepotAccess(entry.getKey(), entry.getValue()));
+			protected List<UserPermission> load() {
+				List<UserPermission> permissions = new ArrayList<>();
+				for (Account user: getAuthorization().getTeam().getMembers()) {
+					DepotAccess access = new DepotAccess(user, getAuthorization().getDepot());
+					if (SecurityUtils.isGreater(access.getGreatestPrivilege(), getAuthorization().getPrivilege())) {
+						permissions.add(new UserPermission(user, access.getGreatestPrivilege()));
+					}
 				}
-				Collections.sort(depotAccesses, new Comparator<DepotAccess>() {
+				Collections.sort(permissions, new Comparator<UserPermission>() {
 
 					@Override
-					public int compare(DepotAccess depotAccess1, DepotAccess depotAccess2) {
-						if (depotAccess1.getPrivilege() != depotAccess2.getPrivilege()) {
-							return depotAccess2.getPrivilege().ordinal() - depotAccess1.getPrivilege().ordinal();
-						} else {
-							return depotAccess1.getUser().getDisplayName()
-									.compareTo(depotAccess2.getUser().getDisplayName());
-						}
+					public int compare(UserPermission permission1, UserPermission permission2) {
+						return permission1.getUser().getDisplayName()
+								.compareTo(permission2.getUser().getDisplayName());
 					}
 					
 				});
-				return depotAccesses;
+				return permissions;
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<DepotAccess> item) {
-				DepotAccess effectPrivilege = item.getModelObject();
-				item.add(new Avatar("avatar", effectPrivilege.getUser()));
-				BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("link", 
-						MemberPage.class, MemberPage.paramsOf(getAuthorization().getDepot().getAccount(), 
-								effectPrivilege.getUser().getName()));
-				link.add(new Label("name", effectPrivilege.getUser().getDisplayName()));
+			protected void populateItem(ListItem<UserPermission> item) {
+				UserPermission permission = item.getModelObject();
+				PageParameters params = MemberPrivilegeSourcePage.paramsOf(
+						getAuthorization().getDepot().getAccount(), 
+						permission.getUser().getName(), 
+						getAuthorization().getDepot());
+				Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", 
+						MemberPrivilegeSourcePage.class, params);
+				link.add(new Avatar("avatar", permission.getUser()));
+				item.add(link);
+				link = new BookmarkablePageLink<Void>("nameLink", 
+						MemberPrivilegeSourcePage.class, params);
+				link.add(new Label("name", permission.getUser().getDisplayName()));
 				item.add(link);
 				
-				item.add(new Label("privilege", effectPrivilege.getPrivilege().toString()));
+				item.add(new Label("privilege", permission.getPrivilege()));
 			}
 			
 		});
-	}
-
-	private Map<Account, DepotPrivilege> getGreaterPrivileges() {
-		return greaterPrivilegesModel.getObject();
-	}
-	
-	@Override
-	protected void onDetach() {
-		greaterPrivilegesModel.detach();
-		super.onDetach();
 	}
 
 	private TeamAuthorization getAuthorization() {
@@ -122,13 +110,13 @@ abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
 	
 	protected abstract void onClose(AjaxRequestTarget target);
 
-	private static class DepotAccess {
+	private static class UserPermission {
 		
 		private final Account user;
 		
 		private final DepotPrivilege privilege;
 
-		public DepotAccess(Account user, DepotPrivilege privilege) {
+		public UserPermission(Account user, DepotPrivilege privilege) {
 			this.user = user;
 			this.privilege = privilege;
 		}

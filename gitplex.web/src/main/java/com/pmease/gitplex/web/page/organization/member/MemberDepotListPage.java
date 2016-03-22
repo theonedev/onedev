@@ -23,11 +23,10 @@ import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.organization.PrivilegeSelectionPanel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -36,7 +35,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class MemberDepotListPage extends MemberPage {
 
-	private PageableListView<DepotAccess> depotsView;
+	private PageableListView<DepotPermission> depotsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
@@ -138,25 +137,12 @@ public class MemberDepotListPage extends MemberPage {
 		depotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(depotsContainer);
 		
-		depotsContainer.add(depotsView = new PageableListView<DepotAccess>("depots", 
-				new LoadableDetachableModel<List<DepotAccess>>() {
+		depotsContainer.add(depotsView = new PageableListView<DepotPermission>("depots", 
+				new LoadableDetachableModel<List<DepotPermission>>() {
 
-			private boolean isAuthorized(Depot depot, DepotPrivilege privilege) {
-				Account user = getMembership().getUser();
-				Account organization = getMembership().getOrganization();
-				for (TeamAuthorization authorization: organization.getAllTeamAuthorizationsInOrganization()) {
-					if (authorization.getPrivilege() == privilege
-							&& authorization.getDepot().equals(depot) 
-							&& authorization.getTeam().getMembers().contains(user)) {
-						return true;
-					}
-				}
-				return false;
-			}
-			
 			@Override
-			protected List<DepotAccess> load() {
-				List<DepotAccess> accesses = new ArrayList<>();
+			protected List<DepotPermission> load() {
+				List<DepotPermission> permissions = new ArrayList<>();
 				
 				String searchInput = searchField.getInput();
 				if (searchInput != null)
@@ -165,57 +151,41 @@ public class MemberDepotListPage extends MemberPage {
 					searchInput = "";
 
 				Account user = getMembership().getUser();
-				Account organization = getMembership().getOrganization();
 				for (Depot depot: getAccount().getDepots()) {
 					if (depot.getName().toLowerCase().contains(searchInput)) {
-						DepotPrivilege privilege;
-						if (user.isAdministrator() 
-								|| getMembership().isAdmin() 
-								|| organization.getDefaultPrivilege() == DepotPrivilege.ADMIN
-								|| isAuthorized(depot, DepotPrivilege.ADMIN)) {
-							privilege = DepotPrivilege.ADMIN;
-						} else if (organization.getDefaultPrivilege() == DepotPrivilege.WRITE
-								|| isAuthorized(depot, DepotPrivilege.WRITE)) {
-							privilege = DepotPrivilege.WRITE;
-						} else if (organization.getDefaultPrivilege() == DepotPrivilege.READ 
-								|| depot.isPublicRead()
-								|| isAuthorized(depot, DepotPrivilege.READ)) {
-							privilege = DepotPrivilege.READ;
-						} else {
-							privilege = DepotPrivilege.NONE;
-						}
-						if (privilege != DepotPrivilege.NONE && (filterPrivilege == null || filterPrivilege == privilege)) {
-							accesses.add(new DepotAccess(depot, privilege));
+						DepotPrivilege privilege = new DepotAccess(user, depot).getGreatestPrivilege();
+						if (privilege != DepotPrivilege.NONE 
+								&& (filterPrivilege == null || filterPrivilege == privilege)) {
+							permissions.add(new DepotPermission(depot, privilege));
 						}
 					}
 				}
 				
-				Collections.sort(accesses, new Comparator<DepotAccess>() {
+				Collections.sort(permissions, new Comparator<DepotPermission>() {
 
 					@Override
-					public int compare(DepotAccess access1, DepotAccess access2) {
-						return access1.getDepot().getName().compareTo(access2.getDepot().getName());
+					public int compare(DepotPermission permission1, DepotPermission permission2) {
+						return permission1.getDepot().getName().compareTo(permission2.getDepot().getName());
 					}
 					
 				});
-				return accesses;
+				return permissions;
 			}
 			
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(ListItem<DepotAccess> item) {
-				DepotAccess access = item.getModelObject();
+			protected void populateItem(ListItem<DepotPermission> item) {
+				DepotPermission permission = item.getModelObject();
 
-				BookmarkablePageLink<Void> depotLink = new BookmarkablePageLink<Void>("depot", DepotFilePage.class, 
-						DepotFilePage.paramsOf(access.getDepot()));
-				depotLink.add(new Label("name", access.getDepot().getName()));
+				BookmarkablePageLink<Void> depotLink = new BookmarkablePageLink<Void>(
+						"depotLink", 
+						MemberPrivilegeSourcePage.class, 
+						MemberPrivilegeSourcePage.paramsOf(getMembership(), permission.getDepot()));
+				depotLink.add(new Label("name", permission.getDepot().getName()));
 				item.add(depotLink);
 
-				BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("privilege", DepotFilePage.class, 
-						DepotFilePage.paramsOf(access.getDepot()));
-				link.add(new Label("name", access.getPrivilege().toString()));
-				item.add(link);
+				item.add(new Label("privilege", permission.getPrivilege().toString()));
 			}
 			
 		});
@@ -244,13 +214,13 @@ public class MemberDepotListPage extends MemberPage {
 		add(noDepotsContainer);
 	}
 
-	private static class DepotAccess {
+	private static class DepotPermission {
 		
 		private final Depot depot;
 		
 		private final DepotPrivilege privilege;
 		
-		public DepotAccess(Depot depot, DepotPrivilege privilege) {
+		public DepotPermission(Depot depot, DepotPrivilege privilege) {
 			this.depot = depot;
 			this.privilege = privilege;
 		}

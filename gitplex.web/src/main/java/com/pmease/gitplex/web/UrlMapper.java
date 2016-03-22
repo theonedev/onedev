@@ -41,6 +41,7 @@ import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
 import com.pmease.gitplex.web.page.organization.member.MemberDepotListPage;
 import com.pmease.gitplex.web.page.organization.member.MemberListPage;
+import com.pmease.gitplex.web.page.organization.member.MemberPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.organization.member.MemberTeamListPage;
 import com.pmease.gitplex.web.page.organization.member.NewMembersPage;
 import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
@@ -158,6 +159,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("accounts/${account}/members", MemberListPage.class));
 		add(new MountedMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
 		add(new MountedMapper("accounts/${account}/members/${member}/depots", MemberDepotListPage.class));
+		add(new MountedMapper("accounts/${account}/members/${member}/depots/${depot}", MemberPrivilegeSourcePage.class));
 		add(new MountedMapper("accounts/${account}/members/new", NewMembersPage.class));
 		add(new MountedMapper("accounts/${account}/teams", TeamListPage.class));
 		add(new MountedMapper("accounts/${account}/teams/new", NewTeamPage.class));

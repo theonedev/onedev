@@ -24,9 +24,8 @@ import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.manager.UserAuthorizationManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
-import com.pmease.gitplex.core.permission.privilege.AccountPrivilege;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.security.privilege.AccountPrivilege;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
 public class SecurityRealm extends AbstractRealm {

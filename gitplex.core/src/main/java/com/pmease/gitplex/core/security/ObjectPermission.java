@@ -1,15 +1,15 @@
-package com.pmease.gitplex.core.permission;
+package com.pmease.gitplex.core.security;
 
 import org.apache.shiro.authz.Permission;
 
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.permission.object.ProtectedObject;
-import com.pmease.gitplex.core.permission.object.SystemObject;
-import com.pmease.gitplex.core.permission.privilege.AccountPrivilege;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
-import com.pmease.gitplex.core.permission.privilege.Privilege;
-import com.pmease.gitplex.core.permission.privilege.SystemAdmin;
+import com.pmease.gitplex.core.security.privilege.AccountPrivilege;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.security.privilege.Privilege;
+import com.pmease.gitplex.core.security.privilege.SystemAdmin;
+import com.pmease.gitplex.core.security.protectedobject.ProtectedObject;
+import com.pmease.gitplex.core.security.protectedobject.SystemObject;
 
 /**
  * This class represents permissions to operate an account and its belongings.

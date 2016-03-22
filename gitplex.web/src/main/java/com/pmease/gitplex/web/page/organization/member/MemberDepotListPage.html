@@ -22,15 +22,15 @@
 			<tbody>
 				<tr wicket:id="depots">
 					<td class="name">
-						<i class="fa fa-ext fa-repo"></i> <a wicket:id="depot"><span wicket:id="name"></span></a>
+						<i class="fa fa-ext fa-repo"></i> <a wicket:id="depotLink"><span wicket:id="name"></span></a>
 					</td>
 					<td class="privilege">
-						<a wicket:id="privilege"><span wicket:id="name"></span></a>
+						<span wicket:id="privilege"></span>
 					</td>
 				</tr>
 			</tbody>
 		</table>	
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
-		<div wicket:id="noDepots" class="alert alert-info">No accessible repositories</div>
+		<div wicket:id="noDepots" class="alert alert-warning">No accessible repositories</div>
 	</section>
 </wicket:extend>

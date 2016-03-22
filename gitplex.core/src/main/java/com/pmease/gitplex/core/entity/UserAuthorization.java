@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Entity
 @Table(uniqueConstraints={
@@ -36,6 +36,14 @@ public class UserAuthorization extends AbstractEntity {
 
 	public void setDepot(Depot depot) {
 		this.depot = depot;
+	}
+
+	public Account getUser() {
+		return user;
+	}
+
+	public void setUser(Account user) {
+		this.user = user;
 	}
 
 	public DepotPrivilege getPrivilege() {

@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @SuppressWarnings("serial")
 public abstract class PrivilegeSelectionPanel extends Panel {

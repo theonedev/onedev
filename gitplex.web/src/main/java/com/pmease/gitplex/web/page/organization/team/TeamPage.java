@@ -103,7 +103,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 		}.add(new ConfirmOnClick("Do you really want to delete this team?")));
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new PageTab(Model.of("Members"), TeamMemberListPage.class) {
+		tabs.add(new PageTab(Model.of("Team Members"), TeamMemberListPage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -119,7 +119,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 			}
 			
 		});
-		tabs.add(new PageTab(Model.of("Repositories"), TeamDepotListPage.class) {
+		tabs.add(new PageTab(Model.of("Repository Authorizations"), TeamDepotListPage.class) {
 
 			@Override
 			public Component render(String componentId) {

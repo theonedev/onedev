@@ -54,7 +54,8 @@ public abstract class MemberPage extends AccountLayoutPage {
 
 			@Override
 			protected OrganizationMembership load() {
-				return Preconditions.checkNotNull(GitPlex.getInstance(OrganizationMembershipManager.class).find(getAccount(), user));
+				return Preconditions.checkNotNull(
+						GitPlex.getInstance(OrganizationMembershipManager.class).find(getAccount(), user));
 			}
 			
 		};
@@ -169,7 +170,8 @@ public abstract class MemberPage extends AccountLayoutPage {
 			}
 			
 		});
-		tabs.add(new PageTab(Model.of("Accessible Repositories"), MemberDepotListPage.class) {
+		tabs.add(new PageTab(Model.of("Accessible Repositories"), 
+				MemberDepotListPage.class, MemberPrivilegeSourcePage.class) {
 
 			@Override
 			public Component render(String componentId) {

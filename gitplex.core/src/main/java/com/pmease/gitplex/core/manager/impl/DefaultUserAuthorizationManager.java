@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager.impl;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -27,6 +29,13 @@ public class DefaultUserAuthorizationManager extends AbstractEntityDao<UserAutho
 		EntityCriteria<UserAuthorization> criteria = newCriteria();
 		criteria.add(Restrictions.eq("user", user)).add(Restrictions.eq("depot", depot));
 		return find(criteria);
+	}
+
+	@Override
+	public Collection<UserAuthorization> query(Account organization) {
+		EntityCriteria<UserAuthorization> criteria = newCriteria();
+		criteria.createCriteria("depot").add(Restrictions.eq("account", organization));
+		return query(criteria);
 	}
 
 }

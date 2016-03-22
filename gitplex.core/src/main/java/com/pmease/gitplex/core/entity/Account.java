@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -32,9 +31,10 @@ import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
-import com.pmease.gitplex.core.permission.object.AccountBelonging;
-import com.pmease.gitplex.core.permission.object.ProtectedObject;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.manager.UserAuthorizationManager;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
+import com.pmease.gitplex.core.security.protectedobject.AccountBelonging;
+import com.pmease.gitplex.core.security.protectedobject.ProtectedObject;
 import com.pmease.gitplex.core.util.validation.AccountName;
 
 @Entity
@@ -50,6 +50,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	private boolean organization;
 	
+	/* used by user account */
 	private String fullName;
 	
 	/* used by user account */
@@ -150,12 +151,12 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
     
-    private transient Collection<TeamAuthorization> allAuthorizationsInOrganization;
+    private transient Collection<TeamAuthorization> allTeamAuthorizationsInOrganization;
     
     private transient Collection<TeamMembership> allTeamMembershipsInOrganiation;
     
-    private transient Collection<Account> organizationAdministrators;
-
+    private transient Collection<UserAuthorization> allUserAuthorizationsInOrganization;
+    
     @Editable(name="Name", order=100)
 	@AccountName
 	@NotEmpty
@@ -430,12 +431,19 @@ public class Account extends AbstractUser implements ProtectedObject {
 	}
 
 	public Collection<TeamAuthorization> getAllTeamAuthorizationsInOrganization() {
-		if (allAuthorizationsInOrganization == null) {
-			allAuthorizationsInOrganization = GitPlex.getInstance(TeamAuthorizationManager.class).query(this);
+		if (allTeamAuthorizationsInOrganization == null) {
+			allTeamAuthorizationsInOrganization = GitPlex.getInstance(TeamAuthorizationManager.class).query(this);
 		}
-		return allAuthorizationsInOrganization;
+		return allTeamAuthorizationsInOrganization;
 	}
 
+	public Collection<UserAuthorization> getAllUserAuthorizationsInOrganization() {
+		if (allUserAuthorizationsInOrganization == null) {
+			allUserAuthorizationsInOrganization = GitPlex.getInstance(UserAuthorizationManager.class).query(this);
+		}
+		return allUserAuthorizationsInOrganization;
+	}
+	
 	public Collection<TeamMembership> getAllTeamMembershipsInOrganiation() {
 		if (allTeamMembershipsInOrganiation == null) {
 			allTeamMembershipsInOrganiation = GitPlex.getInstance(TeamMembershipManager.class).query(this);
@@ -443,15 +451,4 @@ public class Account extends AbstractUser implements ProtectedObject {
 		return allTeamMembershipsInOrganiation;
 	}
 
-	public Collection<Account> getOrganizationAdministrators() {
-		if (organizationAdministrators == null) {
-			organizationAdministrators = new HashSet<>();
-			for (OrganizationMembership membership: getOrganizationMembers()) {
-				if (membership.isAdmin()) {
-					organizationAdministrators.add(membership.getUser());
-				}
-			}
-		}
-		return organizationAdministrators;
-	}
 }

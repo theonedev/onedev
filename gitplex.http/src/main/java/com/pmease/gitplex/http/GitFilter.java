@@ -38,7 +38,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.WorkManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.setting.ServerConfig;
 
 @Singleton

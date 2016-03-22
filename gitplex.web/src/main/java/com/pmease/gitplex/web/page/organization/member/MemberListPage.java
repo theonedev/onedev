@@ -36,7 +36,6 @@ import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.EmailLink;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
@@ -248,15 +247,16 @@ public class MemberListPage extends AccountLayoutPage {
 			protected void populateItem(ListItem<OrganizationMembership> item) {
 				OrganizationMembership membership = item.getModelObject();
 
-				item.add(new Avatar("avatar", membership.getUser()));
+				Link<Void> link = new BookmarkablePageLink<>("avatarLink", MemberTeamListPage.class, 
+						MemberTeamListPage.paramsOf(membership)); 
+				link.add(new Avatar("avatar", membership.getUser()));
+				item.add(link);
 				
-				Link<Void> link = new BookmarkablePageLink<>("link", MemberTeamListPage.class, 
+				link = new BookmarkablePageLink<>("nameLink", MemberTeamListPage.class, 
 						MemberTeamListPage.paramsOf(membership)); 
 				link.add(new Label("name", membership.getUser().getDisplayName()));
 				item.add(link);
 						
-				item.add(new EmailLink("email", Model.of(membership.getUser().getEmail())));
-				
 				item.add(new DropdownLink("role") {
 
 					@Override

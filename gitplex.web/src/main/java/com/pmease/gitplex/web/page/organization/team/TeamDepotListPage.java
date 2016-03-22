@@ -35,13 +35,16 @@ import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.TeamAuthorization;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Team;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
-import com.pmease.gitplex.core.permission.privilege.DepotPrivilege;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.depotchoice.AbstractDepotChoiceProvider;
 import com.pmease.gitplex.web.component.depotchoice.DepotChoiceResourceReference;
+import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 import com.pmease.gitplex.web.page.organization.PrivilegeSelectionPanel;
@@ -305,7 +308,18 @@ public class TeamDepotListPage extends TeamPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!SecurityUtils.getGreaterPrivileges(item.getModelObject()).isEmpty());
+
+						boolean hasGreaterPrivileges = false;
+						Team team = teamModel.getObject();
+						TeamAuthorization authorization = item.getModelObject();
+						for (Account user: team.getMembers()) {
+							DepotAccess depotAccess = new DepotAccess(user, authorization.getDepot());
+							if (SecurityUtils.isGreater(depotAccess.getGreatestPrivilege(), authorization.getPrivilege())) {
+								hasGreaterPrivileges = true;
+								break;
+							}
+						}
+						setVisible(hasGreaterPrivileges);
 					}
 					
 				};
@@ -450,6 +464,24 @@ public class TeamDepotListPage extends TeamPage {
 		};
 		noDepotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noDepotsContainer);
+		
+		add(new Label("tip", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				StringBuilder builder = new StringBuilder("<i class='fa fa-info-circle'></i> ");
+				if (getAccount().getDefaultPrivilege() == DepotPrivilege.NONE) {
+					builder.append("Grant repository privileges here for the team");
+				} else {
+					builder.append("Grant extra repository privileges here for the team besides the "
+							+ "default <b>" + getAccount().getDefaultPrivilege() + "</b> privilege "
+							+ "in organization setting");
+				}
+				return builder.toString();
+			}
+			
+		}).setEscapeModelStrings(false));
+		
 	}
 	
 	@Override

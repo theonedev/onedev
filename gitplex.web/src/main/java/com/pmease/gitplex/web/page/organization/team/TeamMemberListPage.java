@@ -15,7 +15,10 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -39,11 +42,10 @@ import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.component.EmailLink;
-import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
+import com.pmease.gitplex.web.page.organization.member.MemberTeamListPage;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
@@ -249,10 +251,17 @@ public class TeamMemberListPage extends TeamPage {
 			protected void populateItem(ListItem<TeamMembership> item) {
 				Account member = item.getModelObject().getUser();
 
-				item.add(new Avatar("avatar", member));
-				item.add(new UserLink("link", member));
+				PageParameters params = MemberTeamListPage.paramsOf(getAccount(), member.getName());
+				Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", 
+						MemberTeamListPage.class, params);
+				link.add(new Avatar("avatar", member));
+				item.add(link);
+				
+				link = new BookmarkablePageLink<Void>("nameLink", 
+						MemberTeamListPage.class, params);
+				link.add(new Label("name", member.getDisplayName()));
+				item.add(link);
 						
-				item.add(new EmailLink("email", Model.of(member.getEmail())));
 				item.add(new AjaxLink<Void>("remove") {
 
 					@Override

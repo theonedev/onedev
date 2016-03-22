@@ -24,12 +24,3 @@
 .integration-policy-setting a.add-new .fa {
 	margin-left: 8px;
 }
-.integration-policy-setting>.help-block .fa {
-	position: absolute; 
-	font-size: 20px; 
-	color: #E6AF42; 
-	margin-top: 2px;
-}
-.integration-policy-setting>.help-block p {
-	margin-left: 18px;
-}

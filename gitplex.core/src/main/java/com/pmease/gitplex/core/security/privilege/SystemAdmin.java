@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.permission.privilege;
+package com.pmease.gitplex.core.security.privilege;
 
 public class SystemAdmin implements Privilege {
 

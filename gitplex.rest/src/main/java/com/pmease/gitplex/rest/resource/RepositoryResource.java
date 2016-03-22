@@ -24,7 +24,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.ObjectPermission;
 
 @Path("/repositories")
 @Consumes(MediaType.WILDCARD)

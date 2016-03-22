@@ -11,7 +11,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.ObjectPermission;
 
 @SuppressWarnings("serial")
 public class AffinalDepotsModel extends LoadableDetachableModel<List<Depot>> {

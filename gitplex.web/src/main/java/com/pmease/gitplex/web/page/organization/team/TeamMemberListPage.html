@@ -8,28 +8,24 @@
 				</div>
 			</div>
 			<div class="pull-left">
-				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
-			</div>
-			<div class="pull-right">
 				<input wicket:id="addNew" type="hidden" class="form-control"></input>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
 			</div>
 		</div>
 		<table wicket:id="members" class="members table table-hover table-condensed">
 			<thead>
 				<tr>
 					<th class="name">Name</th>
-					<th class="email">Email</th>
 					<th class="actions"></th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr wicket:id="members">
 					<td class="name">
-						<img wicket:id="avatar"></img>
-						<a wicket:id="link"></a>
-					</td>
-					<td class="email">
-						<a wicket:id="email"></a>
+						<a wicket:id="avatarLink"><img wicket:id="avatar"></img></a>
+						<a wicket:id="nameLink"><span wicket:id="name"></span></a>
 					</td>
 					<td class="actions">
 						<a wicket:id="remove" title="Remove from team"><i class="fa fa-times"></i></a>
@@ -40,6 +36,6 @@
 			</tbody>
 		</table>	
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
-		<div wicket:id="noMembers" class="alert alert-info">No members found</div>
+		<div wicket:id="noMembers" class="alert alert-warning">No members found</div>
 	</section>
 </wicket:extend>

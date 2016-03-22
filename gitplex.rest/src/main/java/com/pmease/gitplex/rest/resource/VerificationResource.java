@@ -26,7 +26,7 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jersey.ValidQueryParams;
 import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.manager.VerificationManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.ObjectPermission;
 
 @Path("/verifications")
 @Consumes(MediaType.WILDCARD)

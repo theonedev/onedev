@@ -12,10 +12,10 @@
 				<a wicket:id="clear" class="btn btn-default" title="Clear privilege filter"><i class="fa fa-times"></i></a>
 			</div>
 			<div class="pull-left">
-				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
-			</div>
-			<div class="pull-right">
 				<input wicket:id="addNew" type="hidden" class="form-control"></input>
+			</div>
+			<div class="pull-left">
+				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
 			</div>
 		</div>
 		<table wicket:id="depots" class="depots table table-hover table-condensed">
@@ -46,7 +46,7 @@
 			</tbody>
 		</table>	
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
-		<div wicket:id="noDepots" class="alert alert-info">Grant extra repository privilege for this team here 
-		besides the default organization level privilege</div>
+		<div wicket:id="noDepots" class="alert alert-warning">No team specific repository authorizations found</div>
+		<div wicket:id="tip" class="help-block"></div>
 	</section>
 </wicket:extend>

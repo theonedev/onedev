@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
+import java.util.Collection;
+
 import javax.annotation.Nullable;
 
 import com.pmease.commons.hibernate.dao.EntityDao;
@@ -11,5 +13,7 @@ public interface UserAuthorizationManager extends EntityDao<UserAuthorization> {
 	
 	@Nullable
 	UserAuthorization find(Account user, Depot depot);
+	
+	Collection<UserAuthorization> query(Account organization);
 	
 }

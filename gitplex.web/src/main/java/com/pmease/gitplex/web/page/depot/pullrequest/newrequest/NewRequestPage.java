@@ -55,7 +55,7 @@ import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.permission.ObjectPermission;
+import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;
 import com.pmease.gitplex.web.component.comment.CommentInput;

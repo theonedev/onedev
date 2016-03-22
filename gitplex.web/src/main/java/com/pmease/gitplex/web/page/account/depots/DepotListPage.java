@@ -96,7 +96,7 @@ public class DepotListPage extends AccountLayoutPage {
 		depotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(depotsContainer);
 		
-		noDepotsContainer = new WebMarkupContainer("noDepotsContainer") {
+		noDepotsContainer = new WebMarkupContainer("noDepots") {
 
 			@Override
 			protected void onConfigure() {
@@ -108,7 +108,8 @@ public class DepotListPage extends AccountLayoutPage {
 		noDepotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noDepotsContainer);
 		
-		depotsContainer.add(depotsView = new PageableListView<Depot>("depots", new LoadableDetachableModel<List<Depot>>() {
+		depotsContainer.add(depotsView = new PageableListView<Depot>("depots", 
+				new LoadableDetachableModel<List<Depot>>() {
 
 			@Override
 			protected List<Depot> load() {

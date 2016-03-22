@@ -1,57 +1,57 @@
-.list table td.actions {
+#account>table>tbody>tr>td.content .list table td.actions {
 	width: 130px;
 	white-space: nowrap;
 }
-.selection {
+#account>table>tbody>tr>td.content .selection {
 	padding: 8px;
 }
-.selection>a {
+#account>table>tbody>tr>td.content .selection>a {
 	padding: 4px;
 	display: block;
 	color: #666;
 	text-decoration: none;
 	max-width: 360px;
 }
-.selection>a>.title {
+#account>table>tbody>tr>td.content .selection>a>.title {
 	font-weight: bold;
 	margin-bottom: 4px;
 }
-.selection>a:FIRST-CHILD {
+#account>table>tbody>tr>td.content .selection>a:FIRST-CHILD {
 	margin-bottom: 8px;
 }
-.selection>a:hover {
+#account>table>tbody>tr>td.content .selection>a:hover {
 	background: #F0F0F0;
 }
-.teams.table td.members img.avatar {
+#account>table>tbody>tr>td.content .teams.table td.members img.avatar {
 	margin-right: 4px;
 }
-.member.add .role label {
+#account>table>tbody>tr>td.content .member.add .role label {
 	font-weight: normal;
 	margin-left: 8px;
 	vertical-align: middle;
 }
-.team.detail>.head {
-	border: 1px solid #CCC;
+#account>table>tbody>tr>td.content .detail>.head {
 	padding: 12px;
-	margin-bottom: 20px;
-	border-radius: 4px;
+	border: 1px dashed #BBB;
 	background: #F0F0F0;
-} 
-.team.detail>.head .title {
+	border-radius: 4px;
+	margin-bottom: 20px;
+}
+#account>table>tbody>tr>td.content .team.detail>.head .title {
 	font-weight: bold;
 	font-size: 18px;
 	margin-bottom: 12px;
 }
-.team.detail>.head .actions {
-	border-top: 1px solid #DDD;
+#account>table>tbody>tr>td.content .team.detail>.head .actions {
+	border-top: 1px dashed #CCC;
 	padding-top: 12px;
 	margin-top: 16px;
 }
-.detail .tab-panel {
+#account>table>tbody>tr>td.content .detail .tab-panel {
 	margin-top: 20px;
 }
 
-.team.depot.list td.name .note {
+#account>table>tbody>tr>td.content .team.depot.list td.name .note {
 	font-size: 12px;
 	color: #888;
 	margin-top: 4px;
@@ -66,21 +66,15 @@
 	max-height: 500px;
 }
 
-.member.detail>.head {
-	padding: 12px;
-	border: 1px solid #CCC;
-	background: #F0F0F0;
-	border-radius: 4px;
-	margin-bottom: 20px;
-}
-.member.detail>.head .avatar {
+#account>table>tbody>tr>td.content .member.detail>.head .avatar {
 	width: 32px;
 	height: 32px;
 }
-.member.detail>.head>a {
+#account>table>tbody>tr>td.content .member.detail>.head>a, 
+#account>table>tbody>tr>td.content .member.detail>.head>span {
 	margin-left: 8px;
 }
-.member.detail>.head>a.name {
+#account>table>tbody>tr>td.content .member.detail>.head>a.name {
 	margin-left: 2px;
 	font-size: 16px;
 	vertical-align: middle;

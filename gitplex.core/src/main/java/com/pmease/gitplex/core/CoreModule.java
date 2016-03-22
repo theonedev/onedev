@@ -47,6 +47,7 @@ import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
+import com.pmease.gitplex.core.manager.UserAuthorizationManager;
 import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
@@ -70,6 +71,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultSequentialWorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultStorageManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamManager;
 import com.pmease.gitplex.core.manager.impl.DefaultTeamMembershipManager;
+import com.pmease.gitplex.core.manager.impl.DefaultUserAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultVerificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultWorkManager;
 import com.pmease.gitplex.core.security.SecurityRealm;
@@ -171,6 +173,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(OrganizationMembershipManager.class).to(DefaultOrganizationMembershipManager.class);
 		bind(TeamMembershipManager.class).to(DefaultTeamMembershipManager.class);
 		bind(TeamAuthorizationManager.class).to(DefaultTeamAuthorizationManager.class);
+		bind(UserAuthorizationManager.class).to(DefaultUserAuthorizationManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 

@@ -200,6 +200,7 @@ public class TeamListPage extends AccountLayoutPage {
 					item.add(new WebMarkupContainer("more").setVisible(false));
 				}
 				
+				Long teamId = team.getId();
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -218,7 +219,8 @@ public class TeamListPage extends AccountLayoutPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						GitPlex.getInstance(TeamManager.class).delete(item.getModelObject());
+						TeamManager teamManager = GitPlex.getInstance(TeamManager.class);
+						teamManager.delete(teamManager.load(teamId));
 						target.add(teamsContainer);
 						target.add(noTeamsContainer);
 						target.add(pagingNavigator);

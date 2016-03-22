@@ -1,4 +1,4 @@
-package com.pmease.gitplex.core.permission.object;
+package com.pmease.gitplex.core.security.protectedobject;
 
 public class SystemObject implements ProtectedObject {
 
