@@ -44,6 +44,8 @@ import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
+import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.*;
+
 @SuppressWarnings("serial")
 public class MemberListPage extends AccountLayoutPage {
 
@@ -112,7 +114,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RoleSelectionPanel(id) {
+				return new RoleSelectionPanel(id, filterRole) {
 
 					@Override
 					protected void onSelectAdmin(AjaxRequestTarget target) {
@@ -223,8 +225,8 @@ public class MemberListPage extends AccountLayoutPage {
 					Account user = membership.getUser();
 					if (user.matches(searchField.getInput())) {
 						if (filterRole == null 
-								|| filterRole.equals(RoleSelectionPanel.ROLE_ADMIN) && membership.isAdmin() 
-								|| filterRole.equals(RoleSelectionPanel.ROLE_MEMBER) && !membership.isAdmin()) {
+								|| filterRole.equals(ROLE_ADMIN) && membership.isAdmin() 
+								|| filterRole.equals(ROLE_MEMBER) && !membership.isAdmin()) {
 							memberships.add(membership);
 						}
 					}
@@ -267,10 +269,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 							@Override
 							public String getObject() {
-								if (membership.isAdmin())
-									return RoleSelectionPanel.ROLE_ADMIN;
-								else
-									return RoleSelectionPanel.ROLE_MEMBER;
+								return membership.isAdmin()?ROLE_ADMIN:ROLE_MEMBER;
 							}
 							
 						}));
@@ -298,7 +297,7 @@ public class MemberListPage extends AccountLayoutPage {
 
 					@Override
 					protected Component newContent(String id) {
-						return new RoleSelectionPanel(id) {
+						return new RoleSelectionPanel(id, item.getModelObject().isAdmin()?ROLE_ADMIN:ROLE_MEMBER) {
 							
 							@Override
 							protected void onSelectOrdinary(AjaxRequestTarget target) {

@@ -1,26 +1,6 @@
 #account>table>tbody>tr>td.content .list table td.actions {
-	width: 130px;
+	width: 20%;
 	white-space: nowrap;
-}
-#account>table>tbody>tr>td.content .selection {
-	padding: 8px;
-}
-#account>table>tbody>tr>td.content .selection>a {
-	padding: 4px;
-	display: block;
-	color: #666;
-	text-decoration: none;
-	max-width: 360px;
-}
-#account>table>tbody>tr>td.content .selection>a>.title {
-	font-weight: bold;
-	margin-bottom: 4px;
-}
-#account>table>tbody>tr>td.content .selection>a:FIRST-CHILD {
-	margin-bottom: 8px;
-}
-#account>table>tbody>tr>td.content .selection>a:hover {
-	background: #F0F0F0;
 }
 #account>table>tbody>tr>td.content .teams.table td.members img.avatar {
 	margin-right: 4px;
@@ -57,15 +37,6 @@
 	margin-top: 4px;
 }
 
-.greater-privileges .description {
-	font-size: 13px;
-	margin-bottom: 12px;
-}
-.greater-privileges .detail {
-	overflow: auto;
-	max-height: 500px;
-}
-
 #account>table>tbody>tr>td.content .member.detail>.head .avatar {
 	width: 32px;
 	height: 32px;
@@ -78,4 +49,39 @@
 	margin-left: 2px;
 	font-size: 16px;
 	vertical-align: middle;
+}
+#account>table>tbody>tr>td.content td.privilege, #account>table>tbody>tr>td.content td.role {
+	width: 20%;
+}
+
+.floating>.content>.selection {
+	padding: 16px;
+}
+.floating>.content>.selection>a {
+	padding: 4px;
+	display: block;
+	color: #666;
+	text-decoration: none;
+	max-width: 360px;
+}
+.floating>.content>.selection>a.active:BEFORE {
+	font-family: "FontAwesome";
+	content: "\f00c";
+	position: absolute;
+	left: 4px;
+}
+.floating>.content>.selection>a>.title {
+	font-weight: bold;
+	margin-bottom: 2px;
+}
+.floating>.content>.selection>a:hover {
+	background: #F0F0F0;
+}
+.modal-content>.greater-privileges .description {
+	font-size: 13px;
+	margin-bottom: 12px;
+}
+.modal-content>.greater-privileges .detail {
+	overflow: auto;
+	max-height: 500px;
 }

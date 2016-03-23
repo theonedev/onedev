@@ -1,7 +1,10 @@
 package com.pmease.gitplex.web.page.organization.member;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -15,14 +18,25 @@ abstract class RoleSelectionPanel extends Panel {
 	
 	public static final String ROLE_MEMBER = "Member";
 	
-	public RoleSelectionPanel(String id) {
+	private final String currentRole;
+	
+	public RoleSelectionPanel(String id, @Nullable String currentRole) {
 		super(id);
+		
+		this.currentRole = currentRole;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		add(new AjaxLink<Void>("admin") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (ROLE_ADMIN.equals(currentRole))
+					add(AttributeAppender.append("class", "active"));
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -32,6 +46,13 @@ abstract class RoleSelectionPanel extends Panel {
 		});
 		add(new AjaxLink<Void>("member") {
 
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (ROLE_MEMBER.equals(currentRole))
+					add(AttributeAppender.append("class", "active"));
+			}
+			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onSelectOrdinary(target);

@@ -9,11 +9,9 @@ import com.vaynberg.wicket.select2.ChoiceProvider;
 @SuppressWarnings("serial")
 public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 
-	private final String placeHolder;
-	
 	private transient T selection;
 	
-	public SelectToAddChoice(String id, ChoiceProvider<T> choiceProvider, String placeHolder) {
+	public SelectToAddChoice(String id, ChoiceProvider<T> choiceProvider) {
 		super(id);
 		
 		setModel(new IModel<T>() {
@@ -24,7 +22,7 @@ public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 
 			@Override
 			public T getObject() {
-				return null;
+				return selection;
 			}
 
 			@Override
@@ -35,8 +33,6 @@ public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 		});
 
 		setProvider(choiceProvider);
-		
-		this.placeHolder = placeHolder;
 	}
 
 	@Override
@@ -49,16 +45,12 @@ public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				target.add(SelectToAddChoice.this);
-				String script = String.format(""
-						+ "var input = $('#%s').prev().find('a.select2-choice'); "
-						+ "input.addClass('select2-default');"
-						+ "input.find('>span').html('%s');", 
-						getMarkupId(), placeHolder);
-				target.appendJavaScript(script);
-				
-				if (selection != null)
+				if (selection != null) {
 					onSelect(target, selection);
+					selection = null;
+				}
+				String script = String.format("$('#%s').select2('data', null);", getMarkupId());
+				target.appendJavaScript(script);
 			}
 					
 		});

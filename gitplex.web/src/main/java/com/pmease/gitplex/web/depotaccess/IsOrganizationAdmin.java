@@ -10,6 +10,8 @@ import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 public class IsOrganizationAdmin implements PrivilegeSource {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final Long membershipId;
 	
 	public IsOrganizationAdmin(OrganizationMembership membership) {

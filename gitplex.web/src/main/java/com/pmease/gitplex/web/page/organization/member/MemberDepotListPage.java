@@ -91,7 +91,7 @@ public class MemberDepotListPage extends MemberPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new PrivilegeSelectionPanel(id) {
+				return new PrivilegeSelectionPanel(id, filterPrivilege) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {

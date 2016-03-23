@@ -55,8 +55,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class TeamMemberListPage extends TeamPage {
 
-	private static final String ADD_MEMBER_PLACEHOLDER = "Select user to add to team...";
-	
 	private PageableListView<TeamMembership> membersView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
@@ -164,13 +162,13 @@ public class TeamMemberListPage extends TeamPage {
 				return memberships;
 			}
 
-		}, ADD_MEMBER_PLACEHOLDER) {
+		}) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder(ADD_MEMBER_PLACEHOLDER);
+				getSettings().setPlaceholder("Select user to add to team...");
 				getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");

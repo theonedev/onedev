@@ -7,6 +7,8 @@ import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 public class IsPublicDepot implements PrivilegeSource {
 
+	private static final long serialVersionUID = 1L;
+	
 	@Override
 	public DepotPrivilege getPrivilege() {
 		return DepotPrivilege.READ;

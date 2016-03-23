@@ -13,6 +13,8 @@ import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 @SuppressWarnings("serial")
 public class IsOrganizationMemberPanel extends Panel {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final IModel<OrganizationMembership> membershipModel;
 	
 	public IsOrganizationMemberPanel(String id, IModel<OrganizationMembership> membershipModel) {

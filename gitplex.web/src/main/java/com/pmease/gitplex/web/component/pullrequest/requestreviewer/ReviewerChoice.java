@@ -20,12 +20,10 @@ import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceRefer
 @SuppressWarnings("serial")
 public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 
-	private static final String PLACEHOLDER = "Select user to add as reviewer...";
-	
 	private final IModel<PullRequest> requestModel;
 	
 	public ReviewerChoice(String id, IModel<PullRequest> requestModel) {
-		super(id, new ReviewerProvider(requestModel), PLACEHOLDER);
+		super(id, new ReviewerProvider(requestModel));
 		
 		this.requestModel = requestModel;
 	}
@@ -45,7 +43,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<Account> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		getSettings().setPlaceholder(PLACEHOLDER);
+		getSettings().setPlaceholder("Select user to add as reviewer...");
 		getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");

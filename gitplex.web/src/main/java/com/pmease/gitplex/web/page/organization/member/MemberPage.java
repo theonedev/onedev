@@ -35,6 +35,7 @@ import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
+import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.*;
 
 @SuppressWarnings("serial")
 public abstract class MemberPage extends AccountLayoutPage {
@@ -82,9 +83,9 @@ public abstract class MemberPage extends AccountLayoutPage {
 					@Override
 					public String getObject() {
 						if (getMembership().isAdmin())
-							return "Role: "+ RoleSelectionPanel.ROLE_ADMIN;
+							return "Role: "+ ROLE_ADMIN;
 						else
-							return "Role: " + RoleSelectionPanel.ROLE_MEMBER;
+							return "Role: " + ROLE_MEMBER;
 					}
 					
 				}));
@@ -112,7 +113,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new RoleSelectionPanel(id) {
+				return new RoleSelectionPanel(id, getMembership().isAdmin()?ROLE_ADMIN:ROLE_MEMBER) {
 					
 					@Override
 					protected void onSelectOrdinary(AjaxRequestTarget target) {

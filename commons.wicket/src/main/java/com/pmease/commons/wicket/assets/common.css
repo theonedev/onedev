@@ -342,6 +342,11 @@ form>.test-feedback {
 	border-radius:0 0 4px 4px;
 }	
 
+.working-indicator {
+	color: #25A305;
+	margin-left: 4px;
+}
+
 /* Ajax Loading Overlay */
 #ajax-loading-overlay {
 	z-index:1; 

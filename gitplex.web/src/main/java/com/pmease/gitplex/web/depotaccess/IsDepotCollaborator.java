@@ -10,6 +10,8 @@ import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 public class IsDepotCollaborator implements PrivilegeSource {
 
+	private static final long serialVersionUID = 1L;
+
 	private final Long authorizationId;
 	
 	private final DepotPrivilege privilege;

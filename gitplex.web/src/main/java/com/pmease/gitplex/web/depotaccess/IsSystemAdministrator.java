@@ -7,6 +7,8 @@ import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 public class IsSystemAdministrator implements PrivilegeSource {
 
+	private static final long serialVersionUID = 1L;
+	
 	@Override
 	public DepotPrivilege getPrivilege() {
 		return DepotPrivilege.ADMIN;

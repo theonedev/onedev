@@ -34,10 +34,10 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
@@ -56,8 +56,6 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class TeamDepotListPage extends TeamPage {
 
-	private static final String ADD_DEPOT_PLACEHOLDER = "Select repository to authorize...";
-	
 	private PageableListView<TeamAuthorization> depotsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
@@ -118,12 +116,12 @@ public class TeamDepotListPage extends TeamPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new PrivilegeSelectionPanel(id) {
+				return new PrivilegeSelectionPanel(id, filterPrivilege) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
 						close();
-						TeamDepotListPage.this.filterPrivilege = privilege;
+						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(depotsContainer);
 						target.add(pagingNavigator);
@@ -211,13 +209,13 @@ public class TeamDepotListPage extends TeamPage {
 				new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
 			}
 
-		}, ADD_DEPOT_PLACEHOLDER) {
+		}) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder(ADD_DEPOT_PLACEHOLDER);
+				getSettings().setPlaceholder("Select repository to authorize...");
 				getSettings().setFormatResult("gitplex.depotChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("gitplex.depotChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("gitplex.depotChoiceFormatter.escapeMarkup");
@@ -376,7 +374,7 @@ public class TeamDepotListPage extends TeamPage {
 
 					@Override
 					protected Component newContent(String id) {
-						return new PrivilegeSelectionPanel(id) {
+						return new PrivilegeSelectionPanel(id, item.getModelObject().getPrivilege()) {
 							
 							@Override
 							protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
