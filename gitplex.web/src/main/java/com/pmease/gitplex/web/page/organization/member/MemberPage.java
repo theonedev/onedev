@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -121,6 +122,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 						getMembership().setAdmin(false);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
 						setResponsePage(getPageClass(), MemberPage.paramsOf(getMembership()));
+						Session.get().success("Role updated");
 					}
 					
 					@Override
@@ -129,6 +131,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 						getMembership().setAdmin(true);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
 						setResponsePage(getPageClass(), MemberPage.paramsOf(getMembership()));
+						Session.get().success("Role updated");
 					}
 					
 				};

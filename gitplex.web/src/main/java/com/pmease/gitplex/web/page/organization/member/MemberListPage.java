@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -307,6 +308,7 @@ public class MemberListPage extends AccountLayoutPage {
 								target.add(pagingNavigator);
 								target.add(membersContainer);
 								target.add(noMembersContainer);
+								Session.get().success("Role updated");
 							}
 							
 							@Override
@@ -317,6 +319,7 @@ public class MemberListPage extends AccountLayoutPage {
 								target.add(pagingNavigator);
 								target.add(membersContainer);
 								target.add(noMembersContainer);
+								Session.get().success("Role updated");
 							}
 							
 						};

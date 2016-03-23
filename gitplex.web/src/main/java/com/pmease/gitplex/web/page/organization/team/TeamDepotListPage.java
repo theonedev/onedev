@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -385,6 +386,7 @@ public class TeamDepotListPage extends TeamPage {
 								target.add(pagingNavigator);
 								target.add(depotsContainer);
 								target.add(noDepotsContainer);
+								Session.get().success("Privilege updated");
 							}
 
 						};
