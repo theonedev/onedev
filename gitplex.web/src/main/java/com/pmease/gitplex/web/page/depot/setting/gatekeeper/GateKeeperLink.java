@@ -10,7 +10,7 @@ import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 
 @SuppressWarnings("serial")
-public abstract class GateKeeperLink extends DropdownLink {
+abstract class GateKeeperLink extends DropdownLink {
 
 	public GateKeeperLink(String id) {
 		super(id, true, new AlignPlacement(50, 50, 50, 50));

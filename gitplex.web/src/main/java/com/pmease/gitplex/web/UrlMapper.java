@@ -34,12 +34,15 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.Reque
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
+import com.pmease.gitplex.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.depot.setting.authorization.DepotTeamListPage;
+import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.pmease.gitplex.web.page.depot.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
-import com.pmease.gitplex.web.page.organization.member.MemberDepotListPage;
+import com.pmease.gitplex.web.page.organization.member.MemberEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.organization.member.MemberListPage;
 import com.pmease.gitplex.web.page.organization.member.MemberPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.organization.member.MemberTeamListPage;
@@ -158,7 +161,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	private void addOrganizationPages() {
 		add(new MountedMapper("accounts/${account}/members", MemberListPage.class));
 		add(new MountedMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
-		add(new MountedMapper("accounts/${account}/members/${member}/depots", MemberDepotListPage.class));
+		add(new MountedMapper("accounts/${account}/members/${member}/depots", MemberEffectivePrivilegePage.class));
 		add(new MountedMapper("accounts/${account}/members/${member}/depots/${depot}", MemberPrivilegeSourcePage.class));
 		add(new MountedMapper("accounts/${account}/members/new", NewMembersPage.class));
 		add(new MountedMapper("accounts/${account}/teams", TeamListPage.class));
@@ -207,6 +210,9 @@ public class UrlMapper extends CompoundRequestMapper {
 				"${account}/${depot}/pulls/${request}/attachments", RequestAttachmentsPage.class));
 
 		add(new MountedMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/authorization/teams", DepotTeamListPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/authorization/users", DepotCollaboratorListPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/authorization/effective", DepotEffectivePrivilegePage.class));
 		add(new MountedMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
 		add(new MountedMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
 		

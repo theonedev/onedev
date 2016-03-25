@@ -15,21 +15,17 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -71,20 +67,6 @@ public class MemberTeamListPage extends MemberPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		TextField<String> searchField;
-		
-		add(searchField = new ClearableTextField<String>("searchTeams", Model.of("")));
-		searchField.add(new OnTypingDoneBehavior(100) {
-
-			@Override
-			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(teamsContainer);
-				target.add(pagingNavigator);
-				target.add(noTeamsContainer);
-			}
-			
-		});
 		
 		AjaxLink<Void> confirmRemoveLink;
 		add(confirmRemoveLink = new AjaxLink<Void>("confirmRemove") {
@@ -216,16 +198,8 @@ public class MemberTeamListPage extends MemberPage {
 			protected List<TeamMembership> load() {
 				List<TeamMembership> memberships = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-				
 				for (TeamMembership membership: getMembership().getUser().getJoinedTeams()) {
-					if (membership.getTeam().getName().toLowerCase().contains(searchInput)) {
-						memberships.add(membership);
-					}
+					memberships.add(membership);
 				}
 				
 				Collections.sort(memberships, new Comparator<TeamMembership>() {

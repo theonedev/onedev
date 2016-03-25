@@ -30,7 +30,7 @@ import com.pmease.gitplex.core.gatekeeper.TeamAwareGateKeeper;
 import com.pmease.gitplex.web.page.account.AccountPage;
 
 @SuppressWarnings("serial")
-public abstract class GateKeeperSelector extends Panel {
+abstract class GateKeeperSelector extends Panel {
 
 	public GateKeeperSelector(String id) {
 		super(id);

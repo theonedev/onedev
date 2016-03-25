@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.annotation.ExcludeValues;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
 
@@ -43,10 +45,19 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		Collection<String> excludeValues = new HashSet<>();
+		ExcludeValues annotation = propertyDescriptor.getPropertyGetter().getAnnotation(ExcludeValues.class);
+		if (annotation != null) {
+			for (String excludeValue: annotation.value()) {
+				excludeValues.add(excludeValue);
+			}
+		}
 		List<String> choices = new ArrayList<>();
         for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
-            choices.add(value.toString());
+            if (!excludeValues.contains(value.name())) {
+            	choices.add(value.toString());
+            }
         }
 
         Collection<String> selections = new ArrayList<>();

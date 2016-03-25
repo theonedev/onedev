@@ -34,6 +34,11 @@ public class DepotAccess {
 		return depot;
 	}
 	
+	/*
+	 * This method utilizes cached information in account level to reduce database query 
+	 * to the minimum. This is important as this method might be called repeatedly for 
+	 * different depot or user  
+	 */
 	public List<PrivilegeSource> getPrivilegeSources() {
 		if (privilegeSources == null) {
 			privilegeSources = new ArrayList<>();

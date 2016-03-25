@@ -10,3 +10,181 @@
 #depot-setting .general-setting form.name .alert {
 	margin-top: 16px;
 }
+
+.integration-policy-setting .handle {
+	cursor: move; 
+	margin-right: 8px;
+}
+.integration-policy-setting .panel-heading a {
+	color: #444; 
+	margin-right: 8px;
+}
+.integration-policy-setting .add-new {
+	display: block; 
+	padding: 16px; 
+	background: #F2F2F2; 
+	border: 1px solid #DDD; 
+	border-radius: 4px; 
+	font-size: 16px; 
+	color: #444; 
+	margin-bottom: 16px;
+}
+.integration-policy-setting a.add-new:hover {
+	text-decoration: none; 
+	background-color: #EBEBEB; 
+	border-color: #ADADAD;
+}
+.integration-policy-setting a.add-new .fa {
+	margin-left: 8px;
+}
+
+.gate-keeper-add.well {
+	font-size:16px;
+}
+.gate-keeper-add .fa {
+	margin-left: 8px;
+}
+.gate-keeper-add:hover, .gate-keeper-add:focus {
+	background-color: #EBEBEB; 
+	border-color: #ADADAD; 
+	cursor: pointer;
+}
+.gate-keeper-selector.floating {
+	border-radius: 0;
+}
+.gate-keeper-selector.floating>.content {
+	width: 600px; 
+}
+.gate-keeper-selector .panel {
+	border: none; 
+	border-radius: 0;
+}
+.gate-keeper-selector .panel-heading {
+	border-top: 1px solid #CCCCCC; 
+	border-radius: 0;
+}
+.gate-keeper-selector .panel-group>.panel:first-child>.panel-heading {
+	border-top: none;
+}
+.gate-keeper-selector .panel-heading.collapsed:hover, .gate-keeper-selector .panel-heading.collapsed:focus {
+	border-color: #999999; 
+	background-color: #E0E0E0; 
+	cursor: pointer;
+}
+.gate-keeper-selector .panel-group .panel + .panel {
+	margin-top: 0px;
+}
+.gate-keeper-selector .fa {
+	width: 20px;
+}
+.gate-keeper-description {
+	font-size: 13px; 
+	color: #888888;
+}
+.gate-keeper-item {
+	margin-bottom: 6px; 
+	padding: 4px; 
+	border: 1px solid white;
+}
+.gate-keeper-item:hover, .gate-keeper-item:focus {
+	background-color: #EBEBEB; 
+	cursor: pointer; 
+	border: 1px solid #ADADAD; 
+	border-radius: 4px;
+}
+.gate-keeper-name {
+	font-size: 15px; 
+	margin-top: -4px;
+}
+.gate-keeper-editor {
+	max-height: 600px; 
+	overflow: auto;
+}
+.gate-keeper-editor .gate-keeper-name {
+	font-weight: bold; 
+	font-size: 16px; 
+	margin-top: 0; 
+	margin-bottom: 4px;
+}
+.gate-keeper-editor .modal-header .fa {
+	width: 20px; 
+	margin-right: 8px; 
+	margin-top: 4px;
+}
+.gate-keeper-editor form>.feedback {
+	margin: 20px 16px -16px 16px;
+}
+.gate-keeper-editor form>.feedback .alert {
+	margin-bottom: 0;
+}
+.gate-keeper .panel-title {
+	font-size: 14px;
+}
+.gate-keeper .panel-heading {
+	padding: 8px;
+}
+.gate-keeper .fa {
+	margin-left: 8px; 
+	cursor: pointer;
+}
+.gate-keeper .gate-keeper-add {
+	margin: 0px; 
+	padding: 8px; 
+	font-size: 14px;
+}
+.gate-keeper .reflection {
+	margin-bottom: 0;
+}
+
+.gate-keeper.panel {
+	border: 1px solid #BBBBBB;
+}
+.gate-keeper.panel>.panel-heading {
+	border-color: #BBBBBB;
+}
+.gate-keeper.panel.disabled, .gate-keeper.panel.disabled .panel {
+	color: #AAA;
+}
+.gate-keeper.panel.disabled>.panel-heading, .gate-keeper.panel.disabled .panel-heading {
+	color: #AAA;
+}
+.gate-keeper.panel.disabled .fa {
+	color: inherit;
+} 
+.gate-keeper table.viewer {
+	font-size: 13px !important; 
+	color: #444444;
+}
+.gate-keeper td.child {
+	padding-right: 12px;
+}
+.gate-keeper table.children>tbody>tr>td.child:last-child {
+	padding-right: 0;
+}
+.gate-keeper.panel .panel-body {
+	overflow:auto;
+}
+.gate-keeper td.ifthen.connector {
+	width:1px;
+}
+.gate-keeper td.ifthen.connector .fa {
+	margin: 0 6px 0 8px; 
+	color: #666666; 
+	font-size: 36px;
+}
+
+#depot-setting .authorization .list table td.actions {
+	width: 20%;
+	white-space: nowrap;
+}
+#depot-setting .authorization .list td.name .note {
+	font-size: 12px;
+	color: #888;
+	margin-top: 4px;
+}
+#depot-setting .authorization .list td.privilege {
+	width: 20%;
+}
+#depot-setting .authorization .nav-buttons {
+	margin-right: 20px;
+}

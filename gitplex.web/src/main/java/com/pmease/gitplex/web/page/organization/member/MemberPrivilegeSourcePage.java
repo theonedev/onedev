@@ -11,6 +11,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.privilegesource.PrivilegeSourcePanel;
 
 @SuppressWarnings("serial")
@@ -62,6 +63,11 @@ public class MemberPrivilegeSourcePage extends MemberPage {
 		PageParameters params = paramsOf(organization, userName);
 		params.add(PARAM_DEPOT, depot.getName());
 		return params;
+	}
+	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canManage(getAccount());
 	}
 	
 	@Override

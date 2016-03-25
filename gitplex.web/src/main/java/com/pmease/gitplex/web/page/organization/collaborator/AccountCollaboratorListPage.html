@@ -1,0 +1,31 @@
+<wicket:extend>
+	<div class="collaborator list">
+		<div class="head clearfix">
+			<div class="pull-left search">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input wicket:id="searchCollaborators" class="form-control" placeholder="Search collaborators"></input>
+				</div>
+			</div>
+		</div>
+		<table wicket:id="collaborators" class="collaborators table table-hover table-condensed">
+			<thead>
+				<tr>
+					<th class="name">Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="collaborators">
+					<td class="name">
+						<a wicket:id="avatarLink"><img wicket:id="avatar"></img></a>
+						<a wicket:id="nameLink"><span wicket:id="name"></span></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>	
+		<div class="center"><ul wicket:id="pageNav"></ul></div>
+		<div wicket:id="noCollaborators" class="alert alert-warning">No collaborators found</div>
+		<div wicket:id="outsideTip" class="help-block"><i class="fa fa-info-circle"></i> Repository collaborators may or may not be an organization member. 
+		Those not being an organization member are listed here as outside collaborators</div>
+	</div>
+</wicket:extend>

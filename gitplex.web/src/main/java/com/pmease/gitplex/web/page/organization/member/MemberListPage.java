@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.page.organization.member;
 
+import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.ROLE_ADMIN;
+import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.ROLE_MEMBER;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,16 +39,16 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
-
-import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.*;
 
 @SuppressWarnings("serial")
 public class MemberListPage extends AccountLayoutPage {
@@ -398,6 +401,34 @@ public class MemberListPage extends AccountLayoutPage {
 		};
 		noMembersContainer.setOutputMarkupPlaceholderTag(true);
 		add(noMembersContainer);
+		
+		add(new BookmarkablePageLink<Void>("organizationProfile", 
+				ProfileEditPage.class, ProfileEditPage.paramsOf(getAccount())) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getAccount().getDefaultPrivilege() != DepotPrivilege.NONE);
+				setEnabled(SecurityUtils.canManage(getAccount()));
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("defaultPrivilege", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return "the default <b>" + getAccount().getDefaultPrivilege() + "</b> privilege"; 
+					}
+					
+				}).setEscapeModelStrings(false));
+				
+				setBeforeDisabledLink("");
+				setAfterDisabledLink("");
+			}
+			
+		});
 	}
 	
 	@Override

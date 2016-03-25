@@ -29,7 +29,7 @@ import com.pmease.gitplex.core.gatekeeper.IfThenGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.NotGateKeeper;
 
 @SuppressWarnings("serial")
-public abstract class GateKeeperPanel extends Panel {
+abstract class GateKeeperPanel extends Panel {
 	
 	private final GateKeeper gateKeeper;
 

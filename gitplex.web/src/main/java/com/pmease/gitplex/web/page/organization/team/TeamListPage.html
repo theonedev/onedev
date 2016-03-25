@@ -1,12 +1,6 @@
 <wicket:extend>
-	<section class="team list">
+	<div class="team list">
 		<div class="head clearfix">
-			<div class="pull-left search">
-				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-search"></i></span>
-					<input wicket:id="searchTeams" class="form-control" placeholder="Search teams"></input>
-				</div>
-			</div>
 			<div class="pull-left actions">
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 			</div>
@@ -35,5 +29,5 @@
 		</table>	
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
 		<div wicket:id="noTeams" class="alert alert-warning">No teams found</div>
-	</section>
+	</div>
 </wicket:extend>

@@ -17,7 +17,7 @@ import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public abstract class GateKeeperEditor extends Panel {
+abstract class GateKeeperEditor extends Panel {
 
 	private GateKeeper gateKeeper;
 	

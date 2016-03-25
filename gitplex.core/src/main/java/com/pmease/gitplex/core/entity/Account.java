@@ -26,6 +26,7 @@ import com.google.common.base.Objects;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
+import com.pmease.commons.wicket.editable.annotation.ExcludeValues;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.GitPlex;
@@ -217,9 +218,8 @@ public class Account extends AbstractUser implements ProtectedObject {
 			+ "<li>None: No any permissions granted on repositories"
 			+ "<li>Read: Able to pull and browse repositories"
 			+ "<li>Write: Has full read privilege, and can also push to" 
-			+ "repositories unless gate keeper prevents"
-			+ "<li>Admin: Has full write privilege, and can also edit"  
-			+ "settings of repositories")
+			+ "repositories unless gate keeper prevents")
+	@ExcludeValues("ADMIN")
 	@NotNull
 	public DepotPrivilege getDefaultPrivilege() {
 		return defaultPrivilege;

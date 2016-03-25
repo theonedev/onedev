@@ -24,6 +24,7 @@ import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
+import com.pmease.gitplex.web.page.organization.collaborator.AccountCollaboratorListPage;
 import com.pmease.gitplex.web.page.organization.member.MemberListPage;
 import com.pmease.gitplex.web.page.organization.member.MemberPage;
 import com.pmease.gitplex.web.page.organization.member.NewMembersPage;
@@ -80,14 +81,16 @@ public abstract class AccountLayoutPage extends AccountPage {
 						NewMembersPage.class, MemberPage.class));
 				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class, 
 						TeamEditPage.class, NewTeamPage.class));
-			}
+			} 
 			if (SecurityUtils.canManage(getAccount())) {
+				tabs.add(new AccountTab("Outside Collaborators", "fa fa-fw fa-user", AccountCollaboratorListPage.class));
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
 			}
 		} else {
 			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-sitemap", 
 					OrganizationListPage.class, NewOrganizationPage.class));
 			if (SecurityUtils.canManage(getAccount())) {
+				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", AccountCollaboratorListPage.class));
 				tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", NotificationListPage.class));
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, 
 						AvatarEditPage.class, PasswordEditPage.class));

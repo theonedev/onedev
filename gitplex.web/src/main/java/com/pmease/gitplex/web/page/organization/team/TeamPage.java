@@ -135,7 +135,7 @@ public abstract class TeamPage extends AccountLayoutPage {
 			}
 			
 		});
-		add(new Tabbable("teamTabs", tabs));
+		add(new Tabbable("teamTabs", tabs).setVisible(SecurityUtils.canManage(getAccount())));
 	}
 
 	@Override

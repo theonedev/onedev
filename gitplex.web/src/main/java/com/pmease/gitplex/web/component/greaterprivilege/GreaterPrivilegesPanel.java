@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.organization.team;
+package com.pmease.gitplex.web.component.greaterprivilege;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.TeamAuthorization;
@@ -25,11 +26,10 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
-import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
 import com.pmease.gitplex.web.page.organization.member.MemberPrivilegeSourcePage;
 
 @SuppressWarnings("serial")
-abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
+public abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
 
 	public GreaterPrivilegesPanel(String id, IModel<TeamAuthorization> authorizationModel) {
 		super(id, authorizationModel);
@@ -105,7 +105,8 @@ abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(
+				GreaterPrivilegesPanel.class, "greater-privileges.css")));
 	}
 	
 	protected abstract void onClose(AjaxRequestTarget target);

@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -24,16 +25,17 @@ import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
-import com.pmease.gitplex.web.page.organization.PrivilegeSelectionPanel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class MemberDepotListPage extends MemberPage {
+public class MemberEffectivePrivilegePage extends MemberPage {
 
 	private PageableListView<DepotPermission> depotsView;
 	
@@ -45,7 +47,7 @@ public class MemberDepotListPage extends MemberPage {
 	
 	private DepotPrivilege filterPrivilege;
 	
-	public MemberDepotListPage(PageParameters params) {
+	public MemberEffectivePrivilegePage(PageParameters params) {
 		super(params);
 	}
 
@@ -91,7 +93,7 @@ public class MemberDepotListPage extends MemberPage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new PrivilegeSelectionPanel(id, filterPrivilege) {
+				return new PrivilegeSelectionPanel(id, true, filterPrivilege) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
@@ -178,7 +180,7 @@ public class MemberDepotListPage extends MemberPage {
 			protected void populateItem(ListItem<DepotPermission> item) {
 				DepotPermission permission = item.getModelObject();
 
-				BookmarkablePageLink<Void> depotLink = new BookmarkablePageLink<Void>(
+				Link<Void> depotLink = new BookmarkablePageLink<Void>(
 						"depotLink", 
 						MemberPrivilegeSourcePage.class, 
 						MemberPrivilegeSourcePage.paramsOf(getMembership(), permission.getDepot()));
@@ -214,6 +216,11 @@ public class MemberDepotListPage extends MemberPage {
 		add(noDepotsContainer);
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canManage(getAccount());
+	}
+	
 	private static class DepotPermission {
 		
 		private final Depot depot;

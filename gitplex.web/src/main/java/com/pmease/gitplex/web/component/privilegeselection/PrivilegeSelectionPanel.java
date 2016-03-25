@@ -1,12 +1,10 @@
-package com.pmease.gitplex.web.page.organization;
+package com.pmease.gitplex.web.component.privilegeselection;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
@@ -14,10 +12,13 @@ import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 @SuppressWarnings("serial")
 public abstract class PrivilegeSelectionPanel extends Panel {
 
+	private final boolean withAdmin;
+	
 	private final DepotPrivilege currentPrivilege;
 	
-	public PrivilegeSelectionPanel(String id, @Nullable DepotPrivilege currentPrivilege) {
+	public PrivilegeSelectionPanel(String id, boolean withAdmin, @Nullable DepotPrivilege currentPrivilege) {
 		super(id);
+		this.withAdmin = withAdmin;
 		this.currentPrivilege = currentPrivilege;
 	}
 
@@ -64,17 +65,17 @@ public abstract class PrivilegeSelectionPanel extends Panel {
 			}
 			
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(withAdmin);
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onSelect(target, DepotPrivilege.ADMIN);
 			}
 			
 		});
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, DepotPrivilege privilege);

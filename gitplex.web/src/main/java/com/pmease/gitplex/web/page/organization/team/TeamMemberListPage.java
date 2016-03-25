@@ -45,6 +45,7 @@ import com.pmease.gitplex.web.avatar.AvatarManager;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
+import com.pmease.gitplex.web.page.organization.member.MemberListPage;
 import com.pmease.gitplex.web.page.organization.member.MemberTeamListPage;
 import com.vaynberg.wicket.select2.ChoiceProvider;
 import com.vaynberg.wicket.select2.Response;
@@ -330,6 +331,17 @@ public class TeamMemberListPage extends TeamPage {
 		};
 		noMembersContainer.setOutputMarkupPlaceholderTag(true);
 		add(noMembersContainer);
+		
+		add(new BookmarkablePageLink<Void>("organizationMembers", 
+				MemberListPage.class, MemberListPage.paramsOf(getAccount())) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canManage(getAccount()));
+			}
+			
+		});
 	}
 	
 	@Override
@@ -338,9 +350,4 @@ public class TeamMemberListPage extends TeamPage {
 		response.render(CssHeaderItem.forReference(OrganizationResourceReference.INSTANCE));
 	}
 
-	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.isMemberOf(getAccount());
-	}
-	
 }

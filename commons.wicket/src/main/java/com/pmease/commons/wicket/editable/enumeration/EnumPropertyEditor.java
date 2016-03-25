@@ -1,7 +1,9 @@
 package com.pmease.commons.wicket.editable.enumeration;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import com.pmease.commons.wicket.editable.ErrorContext;
 import com.pmease.commons.wicket.editable.PathSegment;
 import com.pmease.commons.wicket.editable.PropertyDescriptor;
 import com.pmease.commons.wicket.editable.PropertyEditor;
+import com.pmease.commons.wicket.editable.annotation.ExcludeValues;
 
 @SuppressWarnings("serial")
 public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
@@ -34,11 +37,20 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
+		Collection<String> excludeValues = new HashSet<>();
+		ExcludeValues annotation = propertyDescriptor.getPropertyGetter().getAnnotation(ExcludeValues.class);
+		if (annotation != null) {
+			for (String excludeValue: annotation.value()) {
+				excludeValues.add(excludeValue);
+			}
+		}
 		List<String> choices = new ArrayList<>();
         for (Iterator<?> it = enumSet.iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
-            choices.add(value.toString());
+            if (!excludeValues.contains(value.name())) {
+                choices.add(value.toString());
+            }
         }
 
         String stringValue;

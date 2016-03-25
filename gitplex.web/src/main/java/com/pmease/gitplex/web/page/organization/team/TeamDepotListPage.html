@@ -1,5 +1,5 @@
 <wicket:extend>
-	<section class="team depot list">
+	<div class="team depot list">
 		<div class="head clearfix">
 			<div class="pull-left search">
 				<div class="input-group">
@@ -21,7 +21,7 @@
 		<table wicket:id="depots" class="depots table table-hover table-condensed">
 			<thead>
 				<tr>
-					<th class="name">Name</th>
+					<th class="name">Repository Name</th>
 					<th class="privilege">Privilege</th>
 					<th class="actions"></th>
 				</tr>
@@ -38,7 +38,7 @@
 						<a wicket:id="privilege" class="btn btn-default btn-xs"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
 					</td>
 					<td class="actions">
-						<a wicket:id="remove" title="Remove from team"><i class="fa fa-times"></i></a>
+						<a wicket:id="remove" title="Remove authorization"><i class="fa fa-times"></i></a>
 						<a wicket:id="undoRemove" title="Do not remove"><i class="fa fa-undo"></i></a>
 						<span wicket:id="pendingRemoval" class="label label-danger">Pending removal</span>
 					</td>
@@ -48,5 +48,5 @@
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
 		<div wicket:id="noDepots" class="alert alert-warning">No team specific repository authorizations found</div>
 		<div wicket:id="tip" class="help-block"></div>
-	</section>
+	</div>
 </wicket:extend>

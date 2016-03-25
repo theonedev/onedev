@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.page.organization.member;
 
+import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.ROLE_ADMIN;
+import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.ROLE_MEMBER;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +39,6 @@ import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.organization.OrganizationResourceReference;
-import static com.pmease.gitplex.web.page.organization.member.RoleSelectionPanel.*;
 
 @SuppressWarnings("serial")
 public abstract class MemberPage extends AccountLayoutPage {
@@ -174,8 +176,9 @@ public abstract class MemberPage extends AccountLayoutPage {
 			}
 			
 		});
-		tabs.add(new PageTab(Model.of("Accessible Repositories"), 
-				MemberDepotListPage.class, MemberPrivilegeSourcePage.class) {
+		
+		tabs.add(new PageTab(Model.of("Effective Privileges"), 
+				MemberEffectivePrivilegePage.class, MemberPrivilegeSourcePage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -183,15 +186,15 @@ public abstract class MemberPage extends AccountLayoutPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new BookmarkablePageLink<Void>(linkId, MemberDepotListPage.class, 
-								MemberDepotListPage.paramsOf(getMembership()));
+						return new BookmarkablePageLink<Void>(linkId, MemberEffectivePrivilegePage.class, 
+								MemberEffectivePrivilegePage.paramsOf(getMembership()));
 					}
 					
 				};
 			}
 			
 		});
-		add(new Tabbable("memberTabs", tabs));
+		add(new Tabbable("memberTabs", tabs).setVisible(SecurityUtils.canManage(getAccount())));
 	}
 
 	public static PageParameters paramsOf(OrganizationMembership membership) {

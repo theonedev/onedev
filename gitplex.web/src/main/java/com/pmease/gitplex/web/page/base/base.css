@@ -129,11 +129,65 @@ li.selectable.active a, a.selectable.active {
 }
 
 .list>.head {
-	margin-bottom: 20px;
+	margin-bottom: 16px;
 }
 .list>.head>.search {
 	width: 200px;
 }
 .list>.head>.pull-left {
 	margin-right: 20px;
+}
+
+.floating>.content>.selection {
+	padding: 16px;
+}
+.floating>.content>.selection>a {
+	padding: 4px;
+	display: block;
+	color: #666;
+	text-decoration: none;
+	max-width: 360px;
+}
+.floating>.content>.selection>a.active:BEFORE {
+	font-family: "FontAwesome";
+	content: "\f00c";
+	position: absolute;
+	left: 4px;
+}
+.floating>.content>.selection>a>.title {
+	font-weight: bold;
+	margin-bottom: 2px;
+}
+.floating>.content>.selection>a:hover {
+	background: #F0F0F0;
+}
+.tab-panel {
+	margin-top: 20px;
+}
+
+.nav-buttons {
+	clearfix: left;
+}
+.nav-buttons>li {
+	float: left;
+}
+.nav-buttons>li>a {
+	border: 1px solid #CCC;
+	padding: 6px 12px;
+	color: #777;
+}
+.nav-buttons>li:FIRST-CHILD>a {
+	border: 1px solid #CCC;
+	border-right: none;
+	border-radius: 4px 0 0 4px;
+}
+.nav-buttons>li:LAST-CHILD>a {
+	border: 1px solid #CCC;
+	border-left: none;
+	border-radius: 0 4px 4px 0;
+}
+.nav-buttons>li.active>a {
+	background: #337AB7;
+	border-color: #337AB7;
+	color: white;
 }

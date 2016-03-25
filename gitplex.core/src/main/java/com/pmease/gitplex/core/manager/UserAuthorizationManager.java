@@ -14,6 +14,8 @@ public interface UserAuthorizationManager extends EntityDao<UserAuthorization> {
 	@Nullable
 	UserAuthorization find(Account user, Depot depot);
 	
-	Collection<UserAuthorization> query(Account organization);
+	void delete(Collection<UserAuthorization> authorizations);
+
+	Collection<UserAuthorization> query(Account account);
 	
 }

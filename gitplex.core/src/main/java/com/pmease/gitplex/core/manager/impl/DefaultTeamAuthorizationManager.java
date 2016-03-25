@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -17,6 +18,7 @@ import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
 public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAuthorization> 
@@ -33,6 +35,21 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 
 	@Override
 	public void onDepotRename(Depot renamedDepot, String oldName) {
+	}
+
+	@Transactional
+	@Override
+	public void persist(TeamAuthorization entity) {
+		DepotPrivilege privilege = entity.getPrivilege();
+		
+		/*
+		 * Admin privilege is not allowed for team to make permission management consistent. 
+		 * That is: the person able to administer a depot can also administer the whole 
+		 * account, so that they can edit authorizations either from depot side, or from 
+		 * team side 
+		 */
+		Preconditions.checkArgument(privilege == DepotPrivilege.READ || privilege == DepotPrivilege.WRITE);
+		super.persist(entity);
 	}
 
 	@Transactional

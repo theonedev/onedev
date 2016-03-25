@@ -106,6 +106,11 @@ public class GeneralSettingPage extends DepotSettingPage {
 	}
 
 	@Override
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(GeneralSettingPage.class, GeneralSettingPage.paramsOf(depot));
+	}
+	
+	@Override
 	protected String getPageTitle() {
 		return "General Setting - " + getDepot();
 	}

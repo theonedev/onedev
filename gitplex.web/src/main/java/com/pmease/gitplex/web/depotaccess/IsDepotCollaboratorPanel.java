@@ -1,10 +1,12 @@
 package com.pmease.gitplex.web.depotaccess;
 
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.entity.UserAuthorization;
+import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 
 @SuppressWarnings("serial")
 public class IsDepotCollaboratorPanel extends Panel {
@@ -20,6 +22,8 @@ public class IsDepotCollaboratorPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new BookmarkablePageLink<Void>("collaborator", DepotCollaboratorListPage.class, 
+				DepotCollaboratorListPage.paramsOf(authorizationModel.getObject().getDepot())));
 		add(new Label("privilege", authorizationModel.getObject().getPrivilege()));
 	}
 
