@@ -34,11 +34,11 @@ import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.page.account.AccountPeoplePage;
+import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 @SuppressWarnings("serial")
-public abstract class MemberPage extends AccountPeoplePage {
+public abstract class MemberPage extends AccountLayoutPage {
 
 	private static final String PARAM_MEMBER = "member";
 	

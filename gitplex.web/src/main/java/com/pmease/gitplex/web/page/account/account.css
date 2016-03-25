@@ -67,7 +67,7 @@
 	margin-top: 16px;
 }
 
-#account.sidebar>table>tbody>tr>td.content .team.depot.list td.name .note {
+#account.sidebar>table>tbody>tr>td.content .list td.name .note {
 	font-size: 12px;
 	color: #888;
 	margin-top: 4px;
@@ -85,9 +85,6 @@
 	margin-left: 2px;
 	font-size: 16px;
 	vertical-align: middle;
-}
-#account.sidebar>table>tbody>tr>td.content .user.detail>.body>.nav {
-	margin-right: 20px;
 }
 
 #account.sidebar>table>tbody>tr>td.content td.privilege, 

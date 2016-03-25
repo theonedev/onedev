@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.depot.setting.authorization;
+package com.pmease.gitplex.web.page.account.collaborators;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,95 +16,163 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.UserAuthorization;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.UserAuthorizationManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.accountchoice.AbstractAccountChoiceProvider;
-import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
-import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.component.depotchoice.AbstractDepotChoiceProvider;
+import com.pmease.gitplex.web.component.depotchoice.DepotChoiceResourceReference;
 import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
-import com.pmease.gitplex.web.page.account.collaborators.CollaboratorDepotListPage;
-import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.vaynberg.wicket.select2.Response;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class DepotCollaboratorListPage extends DepotAuthorizationPage {
+public class CollaboratorDepotListPage extends CollaboratorPage {
 
-	private PageableListView<UserAuthorization> usersView;
+	private PageableListView<UserAuthorization> depotsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
-	private WebMarkupContainer usersContainer; 
+	private WebMarkupContainer depotsContainer; 
 	
-	private WebMarkupContainer noUsersContainer;
+	private WebMarkupContainer noDepotsContainer;
 	
+	private DepotPrivilege filterPrivilege;
+
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
-	public DepotCollaboratorListPage(PageParameters params) {
+	public CollaboratorDepotListPage(PageParameters params) {
 		super(params);
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SelectToAddChoice<Account>("addNew", new AbstractAccountChoiceProvider() {
+		TextField<String> searchField;
+		
+		add(searchField = new ClearableTextField<String>("searchDepots", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
-			public void query(String term, int page, Response<Account> response) {
-				List<Account> users = new ArrayList<>();
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(depotsContainer);
+				target.add(pagingNavigator);
+				target.add(noDepotsContainer);
+			}
+			
+		});
+		
+		WebMarkupContainer filterContainer = new WebMarkupContainer("filter");
+		filterContainer.setOutputMarkupId(true);
+		add(filterContainer);
+		
+		filterContainer.add(new DropdownLink("selection") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						if (filterPrivilege == null)
+							return "Filter by privilege";
+						else 
+							return filterPrivilege.toString();
+					}
+					
+				}));
+			}
+
+			@Override
+			protected Component newContent(String id) {
+				return new PrivilegeSelectionPanel(id, false, filterPrivilege) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
+						close();
+						filterPrivilege = privilege;
+						target.add(filterContainer);
+						target.add(depotsContainer);
+						target.add(pagingNavigator);
+						target.add(noDepotsContainer);
+					}
+
+				};
+			}
+		});
+		filterContainer.add(new AjaxLink<Void>("clear") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				filterPrivilege = null;
+				target.add(filterContainer);
+				target.add(depotsContainer);
+				target.add(pagingNavigator);
+				target.add(noDepotsContainer);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(filterPrivilege != null);
+			}
+			
+		});
+		
+		add(new SelectToAddChoice<Depot>("addNew", new AbstractDepotChoiceProvider() {
+
+			@Override
+			public void query(String term, int page, Response<Depot> response) {
+				List<Depot> depots = new ArrayList<>();
 				term = term.toLowerCase();
-				for (Account user: GitPlex.getInstance(AccountManager.class).allUsers()) {
-					/*
-					 * Site administrator and depot owner are not allowed to be added as collaborator
-					 * in order to make sure that permissions displayed in this list are actually the 
-					 * effective permission, so that we does not need the effective permission tab
-					 * for user accounts 
-					 */
-					if (user.matches(term) && !user.equals(getAccount()) && !user.isAdministrator()) {
+				for (Depot depot: getAccount().getDepots()) {
+					if (depot.getName().toLowerCase().contains(term)) {
 						boolean authorized = false;
-						for (UserAuthorization authorization: depotModel.getObject().getAuthorizedUsers()) {
-							if (authorization.getUser().equals(user)) {
+						for (UserAuthorization authorization: collaboratorModel.getObject().getAuthorizedDepots()) {
+							if (authorization.getDepot().equals(depot)) {
 								authorized = true;
 								break;
 							}
 						}
 						if (!authorized)
-							users.add(user);
+							depots.add(depot);
 					}
 				}
 				
-				Collections.sort(users, new Comparator<Account>() {
+				Collections.sort(depots, new Comparator<Depot>() {
 
 					@Override
-					public int compare(Account user1, Account user2) {
-						return user1.getDisplayName().compareTo(user2.getDisplayName());
+					public int compare(Depot depot1, Depot depot2) {
+						return depot1.getName().compareTo(depot2.getName());
 					}
 					
 				});
 				
-				new ResponseFiller<Account>(response).fill(users, page, Constants.DEFAULT_PAGE_SIZE);
+				new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
 			}
 
 		}) {
@@ -113,31 +181,31 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Add collaborator...");
-				getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
-				getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
-				getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");
+				getSettings().setPlaceholder("Add Repository...");
+				getSettings().setFormatResult("gitplex.depotChoiceFormatter.formatResult");
+				getSettings().setFormatSelection("gitplex.depotChoiceFormatter.formatSelection");
+				getSettings().setEscapeMarkup("gitplex.depotChoiceFormatter.escapeMarkup");
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Account selection) {
+			protected void onSelect(AjaxRequestTarget target, Depot selection) {
 				UserAuthorization authorization = new UserAuthorization();
-				authorization.setUser(selection);
-				authorization.setDepot(depotModel.getObject());
+				authorization.setUser(collaboratorModel.getObject());
+				authorization.setDepot(selection);
 				GitPlex.getInstance(UserAuthorizationManager.class).persist(authorization);
-				target.add(usersContainer);
+				target.add(depotsContainer);
 				target.add(pagingNavigator);
-				target.add(noUsersContainer);
+				target.add(noDepotsContainer);
 			}
 			
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				response.render(JavaScriptHeaderItem.forReference(AccountChoiceResourceReference.INSTANCE));
+				response.render(JavaScriptHeaderItem.forReference(DepotChoiceResourceReference.INSTANCE));
 			}
 			
-		});
+		});		
 		
 		AjaxLink<Void> confirmRemoveLink;
 		add(confirmRemoveLink = new AjaxLink<Void>("confirmRemove") {
@@ -153,8 +221,8 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 				pendingRemovals.clear();
 				target.add(this);
 				target.add(pagingNavigator);
-				target.add(usersContainer);
-				target.add(noUsersContainer);
+				target.add(depotsContainer);
+				target.add(noDepotsContainer);
 			}
 
 			@Override
@@ -164,37 +232,41 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 			}
 			
 		});
-		confirmRemoveLink.setOutputMarkupPlaceholderTag(true);
+		confirmRemoveLink.setOutputMarkupPlaceholderTag(true);		
 		
-		usersContainer = new WebMarkupContainer("users") {
+		depotsContainer = new WebMarkupContainer("depots") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!usersView.getModelObject().isEmpty());
+				setVisible(!depotsView.getModelObject().isEmpty());
 			}
 			
 		};
-		usersContainer.setOutputMarkupPlaceholderTag(true);
-		add(usersContainer);
+		depotsContainer.setOutputMarkupPlaceholderTag(true);
+		add(depotsContainer);
 		
-		usersContainer.add(usersView = new PageableListView<UserAuthorization>("users", 
+		depotsContainer.add(depotsView = new PageableListView<UserAuthorization>("depots", 
 				new LoadableDetachableModel<List<UserAuthorization>>() {
 
 			@Override
 			protected List<UserAuthorization> load() {
 				List<UserAuthorization> authorizations = new ArrayList<>();
 				
-				for (UserAuthorization authorization: depotModel.getObject().getAuthorizedUsers()) {
-					/*
-					 * Site administrator and depot owner are not allowed to be added as collaborator
-					 * in order to make sure that permissions displayed in this list are actually the 
-					 * effective permission, so that we does not need the effective permission tab
-					 * for user accounts 
-					 */
-					if (!authorization.getUser().isAdministrator() && 
-							!authorization.getUser().equals(getAccount())) {
-						authorizations.add(authorization);
+				String searchInput = searchField.getInput();
+				if (searchInput != null)
+					searchInput = searchInput.toLowerCase().trim();
+				else
+					searchInput = "";
+
+				for (UserAuthorization authorization: collaboratorModel.getObject().getAuthorizedDepots()) {
+					Depot depot = authorization.getDepot();
+					if (depot.getAccount().equals(getAccount()) 
+							&& depot.getName().toLowerCase().contains(searchInput)) {
+						if (authorization.getPrivilege() != DepotPrivilege.NONE 
+								&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
+							authorizations.add(authorization);
+						}
 					}
 				}
 				
@@ -202,8 +274,7 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 
 					@Override
 					public int compare(UserAuthorization authorization1, UserAuthorization authorization2) {
-						return authorization1.getUser().getDisplayName()
-								.compareTo(authorization2.getUser().getDisplayName());
+						return authorization1.getDepot().getName().compareTo(authorization2.getDepot().getName());
 					}
 					
 				});
@@ -216,16 +287,13 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 			protected void populateItem(ListItem<UserAuthorization> item) {
 				UserAuthorization authorization = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", CollaboratorDepotListPage.class, 
-						CollaboratorDepotListPage.paramsOf(getAccount(), authorization.getUser()));
-				link.add(new Avatar("avatar", authorization.getUser()));
+				Link<Void> link = new BookmarkablePageLink<Void>(
+						"depotLink", 
+						DepotCollaboratorListPage.class, 
+						DepotCollaboratorListPage.paramsOf(authorization.getDepot()));
+				link.add(new Label("name", authorization.getDepot().getName()));
 				item.add(link);
-				
-				link = new BookmarkablePageLink<Void>("nameLink", CollaboratorDepotListPage.class, 
-						CollaboratorDepotListPage.paramsOf(getAccount(), authorization.getUser()));
-				link.add(new Label("name", authorization.getUser().getDisplayName()));
-				item.add(link);
-				
+
 				WebMarkupContainer greaterPrivileges = new WebMarkupContainer("greaterPrivileges") {
 
 					@Override
@@ -233,7 +301,7 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 						super.onConfigure();
 
 						UserAuthorization authorization = item.getModelObject();
-						DepotAccess depotAccess = new DepotAccess(authorization.getUser(), depotModel.getObject());
+						DepotAccess depotAccess = new DepotAccess(authorization.getUser(), authorization.getDepot());
 						setVisible(SecurityUtils.isGreater(depotAccess.getGreatestPrivilege(), authorization.getPrivilege()));
 					}
 					
@@ -271,8 +339,8 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 								authorization.setPrivilege(privilege);
 								GitPlex.getInstance(UserAuthorizationManager.class).persist(authorization);
 								target.add(pagingNavigator);
-								target.add(usersContainer);
-								target.add(noUsersContainer);
+								target.add(depotsContainer);
+								target.add(noDepotsContainer);
 								Session.get().success("Privilege updated");
 							}
 
@@ -328,38 +396,28 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", usersView) {
+		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", depotsView) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(usersView.getPageCount() > 1);
+				setVisible(depotsView.getPageCount() > 1);
 			}
 			
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 		
-		noUsersContainer = new WebMarkupContainer("noUsers") {
+		noDepotsContainer = new WebMarkupContainer("noDepots") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(usersView.getModelObject().isEmpty());
+				setVisible(depotsView.getModelObject().isEmpty());
 			}
 			
 		};
-		noUsersContainer.setOutputMarkupPlaceholderTag(true);
-		add(noUsersContainer);
-	}
-	
-	@Override
-	protected String getPageTitle() {
-		return "Collaborators - " + getDepot();
-	}
-	
-	@Override
-	protected void onSelect(AjaxRequestTarget target, Depot depot) {
-		setResponsePage(DepotCollaboratorListPage.class, DepotCollaboratorListPage.paramsOf(depot));
+		noDepotsContainer.setOutputMarkupPlaceholderTag(true);
+		add(noDepotsContainer);
 	}
 	
 }

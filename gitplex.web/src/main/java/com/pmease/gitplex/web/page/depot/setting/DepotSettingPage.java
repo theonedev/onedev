@@ -41,7 +41,15 @@ public abstract class DepotSettingPage extends DepotPage {
 			tabs.add(new DepotSettingTab("Authorizations", 
 					DepotTeamListPage.class, DepotAuthorizationPage.class));
 		} else {
-			tabs.add(new DepotSettingTab("Authorizations", DepotCollaboratorListPage.class));
+			/*
+			 * Team list page is not applicable for user accounts, and effective privilege
+			 * page does not make sense for user accounts, as permissions assigned in 
+			 * collaborator list page is actually effective as:
+			 * 1. site administrator and depot owner is not allowed to be added as collaborator
+			 * 2. no other source can access user's depot as user account does not have 
+			 * concept of organization member  
+			 */
+			tabs.add(new DepotSettingTab("Collaborators", DepotCollaboratorListPage.class));
 		}
 		tabs.add(new DepotSettingTab("Gate Keepers", GateKeeperPage.class));
 		tabs.add(new DepotSettingTab("Integration Policies", IntegrationPolicyPage.class));

@@ -23,12 +23,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.UserAuthorization;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPanel;
-import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
+import com.pmease.gitplex.web.depotaccess.DepotAccess;
+import com.pmease.gitplex.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -36,7 +38,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 
-	private PageableListView<UserAuthorization> depotsView;
+	private PageableListView<DepotPermission> depotsView;
 	
 	private BootstrapPagingNavigator pagingNavigator;
 	
@@ -49,7 +51,7 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 	public CollaboratorEffectivePrivilegePage(PageParameters params) {
 		super(params);
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -138,12 +140,12 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 		depotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(depotsContainer);
 		
-		depotsContainer.add(depotsView = new PageableListView<UserAuthorization>("depots", 
-				new LoadableDetachableModel<List<UserAuthorization>>() {
+		depotsContainer.add(depotsView = new PageableListView<DepotPermission>("depots", 
+				new LoadableDetachableModel<List<DepotPermission>>() {
 
 			@Override
-			protected List<UserAuthorization> load() {
-				List<UserAuthorization> authorizations = new ArrayList<>();
+			protected List<DepotPermission> load() {
+				List<DepotPermission> permissions = new ArrayList<>();
 				
 				String searchInput = searchField.getInput();
 				if (searchInput != null)
@@ -151,46 +153,46 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 				else
 					searchInput = "";
 
-				for (UserAuthorization authorization: collaboratorModel.getObject().getAuthorizedDepots()) {
-					Depot depot = authorization.getDepot();
-					if (depot.getAccount().equals(getAccount()) 
-							&& depot.getName().toLowerCase().contains(searchInput)) {
-						if (authorization.getPrivilege() != DepotPrivilege.NONE 
-								&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
-							authorizations.add(authorization);
+				Account user = collaboratorModel.getObject();
+				for (Depot depot: getAccount().getDepots()) {
+					if (depot.getName().toLowerCase().contains(searchInput)) {
+						DepotPrivilege privilege = new DepotAccess(user, depot).getGreatestPrivilege();
+						if (privilege != DepotPrivilege.NONE 
+								&& (filterPrivilege == null || filterPrivilege == privilege)) {
+							permissions.add(new DepotPermission(depot, privilege));
 						}
 					}
 				}
 				
-				Collections.sort(authorizations, new Comparator<UserAuthorization>() {
+				Collections.sort(permissions, new Comparator<DepotPermission>() {
 
 					@Override
-					public int compare(UserAuthorization authorization1, UserAuthorization authorization2) {
-						return authorization1.getDepot().getName().compareTo(authorization2.getDepot().getName());
+					public int compare(DepotPermission permission1, DepotPermission permission2) {
+						return permission1.getDepot().getName().compareTo(permission2.getDepot().getName());
 					}
 					
 				});
-				return authorizations;
+				return permissions;
 			}
 			
 		}, Constants.DEFAULT_PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(ListItem<UserAuthorization> item) {
-				UserAuthorization authorization = item.getModelObject();
+			protected void populateItem(ListItem<DepotPermission> item) {
+				DepotPermission permission = item.getModelObject();
 
 				Link<Void> link = new BookmarkablePageLink<Void>(
 						"depotLink", 
-						DepotCollaboratorListPage.class, 
-						DepotCollaboratorListPage.paramsOf(authorization.getDepot()));
-				link.add(new Label("name", authorization.getDepot().getName()));
+						DepotEffectivePrivilegePage.class, 
+						DepotEffectivePrivilegePage.paramsOf(permission.getDepot()));
+				link.add(new Label("name", permission.getDepot().getName()));
 				item.add(link);
 
 				link = new BookmarkablePageLink<Void>(
 						"privilegeLink", 
 						CollaboratorPrivilegeSourcePage.class, 
-						CollaboratorPrivilegeSourcePage.paramsOf(authorization.getUser(), authorization.getDepot()));
-				link.add(new Label("privilege", authorization.getPrivilege()));
+						CollaboratorPrivilegeSourcePage.paramsOf(permission.getDepot(), collaboratorModel.getObject()));
+				link.add(new Label("privilege", permission.getPrivilege().toString()));
 				item.add(link);
 			}
 			
@@ -219,5 +221,31 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 		noDepotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noDepotsContainer);
 	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canManage(getAccount());
+	}
 	
+	private static class DepotPermission {
+		
+		private final Depot depot;
+		
+		private final DepotPrivilege privilege;
+		
+		public DepotPermission(Depot depot, DepotPrivilege privilege) {
+			this.depot = depot;
+			this.privilege = privilege;
+		}
+
+		public Depot getDepot() {
+			return depot;
+		}
+
+		public DepotPrivilege getPrivilege() {
+			return privilege;
+		}
+		
+	}
+
 }

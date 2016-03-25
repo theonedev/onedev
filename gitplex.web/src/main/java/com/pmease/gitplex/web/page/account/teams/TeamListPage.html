@@ -1,10 +1,12 @@
 <wicket:extend>
 	<div class="team list">
+		<wicket:enclosure child="addNew">
 		<div class="head clearfix">
 			<div class="pull-left actions">
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 			</div>
 		</div>
+		</wicket:enclosure>
 		<table wicket:id="teams" class="teams table table-hover table-condensed">
 			<thead>
 				<tr>

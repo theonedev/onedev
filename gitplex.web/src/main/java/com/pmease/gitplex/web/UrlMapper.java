@@ -13,6 +13,10 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.util.validation.AccountNameValidator;
 import com.pmease.gitplex.core.util.validation.DepotNameValidator;
+import com.pmease.gitplex.web.page.account.collaborators.AccountCollaboratorListPage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorDepotListPage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
 import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
@@ -166,6 +170,17 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("accounts/${account}/teams/${team}/setting", TeamEditPage.class));
 		add(new MountedMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
 		add(new MountedMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
+
+		add(new MountedMapper("accounts/${account}/collaborators", AccountCollaboratorListPage.class));
+		add(new MountedMapper(
+				"accounts/${account}/collaborators/${collaborator}/depots", 
+				CollaboratorDepotListPage.class));
+		add(new MountedMapper(
+				"accounts/${account}/collaborators/${collaborator}/effective", 
+				CollaboratorEffectivePrivilegePage.class));
+		add(new MountedMapper(
+				"accounts/${account}/collaborators/${collaborator}/effective/${depot}", 
+				CollaboratorPrivilegeSourcePage.class));
 	}
 
 	private void addDepotPages() {

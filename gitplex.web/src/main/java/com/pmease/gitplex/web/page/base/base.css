@@ -129,7 +129,7 @@ li.selectable.active a, a.selectable.active {
 }
 
 .list>.head {
-	margin-bottom: 16px;
+	margin-bottom: 20px;
 }
 .list>.head>.search {
 	width: 200px;
@@ -161,12 +161,13 @@ li.selectable.active a, a.selectable.active {
 .floating>.content>.selection>a:hover {
 	background: #F0F0F0;
 }
-.tab-panel {
-	margin-top: 20px;
-}
 
+.nav-tabs {
+	margin-bottom: 20px;
+}
 .nav-buttons {
 	clearfix: left;
+	margin-right: 20px;
 }
 .nav-buttons>li {
 	float: left;

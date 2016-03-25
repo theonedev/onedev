@@ -1,5 +1,6 @@
 <wicket:extend>
 	<div class="member team list">
+		<wicket:enclosure child="addNew">
 		<div class="head clearfix">
 			<div class="pull-left">
 				<input wicket:id="addNew" type="hidden" class="form-control"></input>
@@ -8,6 +9,7 @@
 				<a wicket:id="confirmRemove" class="btn btn-danger"><i class="fa fa-times"></i> Confirm Remove</a>
 			</div>
 		</div>
+		</wicket:enclosure>
 		<table wicket:id="teams" class="members table table-hover table-condensed">
 			<thead>
 				<tr>

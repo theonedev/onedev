@@ -28,14 +28,14 @@ import com.pmease.gitplex.core.manager.UserAuthorizationManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
-import com.pmease.gitplex.web.page.account.AccountPeoplePage;
+import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class AccountCollaboratorListPage extends AccountPeoplePage {
+public class AccountCollaboratorListPage extends AccountLayoutPage {
 
 	private PageableListView<Account> collaboratorsView;
 	
@@ -94,8 +94,7 @@ public class AccountCollaboratorListPage extends AccountPeoplePage {
 				UserAuthorizationManager userAuthorizationManager = 
 						GitPlex.getInstance(UserAuthorizationManager.class);
 				for (UserAuthorization authorization: userAuthorizationManager.query(getAccount())) {
-					if (authorization.getUser().matches(searchField.getInput()) 
-							&& !getAccount().getOrganizationMembersMap().containsKey(authorization.getUser())) {
+					if (authorization.getUser().matches(searchField.getInput())) {
 						setOfCollaborators.add(authorization.getUser());
 					}
 				}
@@ -119,14 +118,14 @@ public class AccountCollaboratorListPage extends AccountPeoplePage {
 				Account collaborator = item.getModelObject();
 
 				Link<Void> link = new BookmarkablePageLink<>("avatarLink", 
-						CollaboratorEffectivePrivilegePage.class, 
-						CollaboratorEffectivePrivilegePage.paramsOf(getAccount(), collaborator)); 
+						CollaboratorDepotListPage.class, 
+						CollaboratorDepotListPage.paramsOf(getAccount(), collaborator)); 
 				link.add(new Avatar("avatar", collaborator));
 				item.add(link);
 				
 				link = new BookmarkablePageLink<>("nameLink", 
-						CollaboratorEffectivePrivilegePage.class, 
-						CollaboratorEffectivePrivilegePage.paramsOf(getAccount(), collaborator)); 
+						CollaboratorDepotListPage.class, 
+						CollaboratorDepotListPage.paramsOf(getAccount(), collaborator)); 
 				link.add(new Label("name", collaborator.getDisplayName()));
 				item.add(link);
 						
@@ -157,8 +156,6 @@ public class AccountCollaboratorListPage extends AccountPeoplePage {
 		};
 		noCollaboratorsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noCollaboratorsContainer);
-		
-		add(new WebMarkupContainer("outsideTip").setVisible(getAccount().isOrganization()));
 	}
 	
 	@Override

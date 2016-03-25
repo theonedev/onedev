@@ -40,7 +40,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
-import com.pmease.gitplex.web.page.account.AccountPeoplePage;
+import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.collaborators.AccountCollaboratorListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
@@ -49,7 +49,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagi
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class MemberListPage extends AccountPeoplePage {
+public class MemberListPage extends AccountLayoutPage {
 
 	private PageableListView<OrganizationMembership> membersView;
 	

@@ -35,7 +35,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
-import com.pmease.gitplex.web.page.account.collaborators.CollaboratorEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorDepotListPage;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
@@ -223,24 +223,24 @@ public class DepotEffectivePrivilegePage extends DepotAuthorizationPage {
 					link.add(new Label("privilege", permission.getPrivilege().toString()));
 					item.add(link);
 				} else {
-					PageParameters params = CollaboratorEffectivePrivilegePage.paramsOf(
+					PageParameters params = CollaboratorDepotListPage.paramsOf(
 							getAccount(), permission.getUser());
 	 
 					Link<Void> link = new BookmarkablePageLink<Void>(
 							"avatarLink", 
-							CollaboratorEffectivePrivilegePage.class, 
+							CollaboratorDepotListPage.class, 
 							params);
 					link.add(new Avatar("avatar", permission.getUser()));
 					item.add(link);
 					
 					link = new BookmarkablePageLink<Void>(
 							"nameLink", 
-							CollaboratorEffectivePrivilegePage.class, 
+							CollaboratorDepotListPage.class, 
 							params);
 					link.add(new Label("name", permission.getUser().getDisplayName()));
 					item.add(link);
 
-					params = CollaboratorPrivilegeSourcePage.paramsOf(permission.getUser(), depotModel.getObject());
+					params = CollaboratorPrivilegeSourcePage.paramsOf(depotModel.getObject(), permission.getUser());
 					link = new BookmarkablePageLink<Void>(
 							"privilegeLink", 
 							CollaboratorPrivilegeSourcePage.class, 

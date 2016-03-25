@@ -41,7 +41,7 @@ public class CollaboratorPrivilegeSourcePage extends CollaboratorPage {
 		add(new PrivilegeSourcePanel("privilegeSource", collaboratorModel, depotModel));
 	}
 
-	public static PageParameters paramsOf(Account collaborator, Depot depot) {
+	public static PageParameters paramsOf(Depot depot, Account collaborator) {
 		PageParameters params = paramsOf(depot.getAccount(), collaborator);
 		params.add(PARAM_DEPOT, depot.getName());
 		return params;

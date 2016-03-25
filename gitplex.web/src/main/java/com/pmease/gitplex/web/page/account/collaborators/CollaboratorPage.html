@@ -5,7 +5,10 @@
 			<a wicket:id="collaboratorName" class="name"></a> 
 		</div>
 		<div class="body">
-			<wicket:child></wicket:child>
+			<ul wicket:id="collaboratorTabs" class="nav nav-tabs"></ul>
+			<div class="tab-panel">
+				<wicket:child></wicket:child>
+			</div>
 		</div>
 	</div>
 </wicket:extend>
