@@ -13,11 +13,25 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.gitplex.core.util.validation.AccountNameValidator;
 import com.pmease.gitplex.core.util.validation.DepotNameValidator;
-import com.pmease.gitplex.web.page.account.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
+import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.members.MemberListPage;
+import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.account.members.MemberTeamListPage;
+import com.pmease.gitplex.web.page.account.members.NewMembersPage;
+import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
+import com.pmease.gitplex.web.page.account.organizations.NewOrganizationPage;
+import com.pmease.gitplex.web.page.account.organizations.OrganizationListPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
+import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
+import com.pmease.gitplex.web.page.account.teams.NewTeamPage;
+import com.pmease.gitplex.web.page.account.teams.TeamDepotListPage;
+import com.pmease.gitplex.web.page.account.teams.TeamEditPage;
+import com.pmease.gitplex.web.page.account.teams.TeamListPage;
+import com.pmease.gitplex.web.page.account.teams.TeamMemberListPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
 import com.pmease.gitplex.web.page.admin.NewUserPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
@@ -42,26 +56,12 @@ import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
-import com.pmease.gitplex.web.page.organization.member.MemberEffectivePrivilegePage;
-import com.pmease.gitplex.web.page.organization.member.MemberListPage;
-import com.pmease.gitplex.web.page.organization.member.MemberPrivilegeSourcePage;
-import com.pmease.gitplex.web.page.organization.member.MemberTeamListPage;
-import com.pmease.gitplex.web.page.organization.member.NewMembersPage;
-import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
-import com.pmease.gitplex.web.page.organization.team.TeamDepotListPage;
-import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
-import com.pmease.gitplex.web.page.organization.team.TeamListPage;
-import com.pmease.gitplex.web.page.organization.team.TeamMemberListPage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
 import com.pmease.gitplex.web.page.test.RunModePage;
 import com.pmease.gitplex.web.page.test.TestPage;
-import com.pmease.gitplex.web.page.user.notifications.NotificationListPage;
-import com.pmease.gitplex.web.page.user.organizations.NewOrganizationPage;
-import com.pmease.gitplex.web.page.user.organizations.OrganizationListPage;
-import com.pmease.gitplex.web.page.user.setting.PasswordEditPage;
 import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.resource.AttachmentResourceReference;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
@@ -73,7 +73,6 @@ public class UrlMapper extends CompoundRequestMapper {
 		addAdministrationPages();
 		addAccountPages();
 		addDepotPages();
-		addOrganizationPages();
 		addSecurityPages();
 		
 		add(new MountedMapper("test", TestPage.class));
@@ -156,9 +155,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
 		add(new MountedMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));
 		add(new MountedMapper("accounts/${account}/settings/password", PasswordEditPage.class));
-	}
 
-	private void addOrganizationPages() {
 		add(new MountedMapper("accounts/${account}/members", MemberListPage.class));
 		add(new MountedMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
 		add(new MountedMapper("accounts/${account}/members/${member}/depots", MemberEffectivePrivilegePage.class));
@@ -170,7 +167,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new MountedMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
 		add(new MountedMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
 	}
-	
+
 	private void addDepotPages() {
 		add(new MountedMapper("${account}/${depot}", DepotFilePage.class) {
 
@@ -211,7 +208,7 @@ public class UrlMapper extends CompoundRequestMapper {
 
 		add(new MountedMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
 		add(new MountedMapper("${account}/${depot}/settings/authorization/teams", DepotTeamListPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/authorization/users", DepotCollaboratorListPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/authorization/collaborators", DepotCollaboratorListPage.class));
 		add(new MountedMapper("${account}/${depot}/settings/authorization/effective", DepotEffectivePrivilegePage.class));
 		add(new MountedMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
 		add(new MountedMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));

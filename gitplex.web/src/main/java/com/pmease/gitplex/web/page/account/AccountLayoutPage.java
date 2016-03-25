@@ -20,22 +20,22 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
 import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.page.account.collaborators.AccountCollaboratorListPage;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
+import com.pmease.gitplex.web.page.account.members.MemberListPage;
+import com.pmease.gitplex.web.page.account.members.NewMembersPage;
+import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
+import com.pmease.gitplex.web.page.account.organizations.NewOrganizationPage;
+import com.pmease.gitplex.web.page.account.organizations.OrganizationListPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
+import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.organization.collaborator.AccountCollaboratorListPage;
-import com.pmease.gitplex.web.page.organization.member.MemberListPage;
-import com.pmease.gitplex.web.page.organization.member.MemberPage;
-import com.pmease.gitplex.web.page.organization.member.NewMembersPage;
-import com.pmease.gitplex.web.page.organization.team.NewTeamPage;
-import com.pmease.gitplex.web.page.organization.team.TeamEditPage;
-import com.pmease.gitplex.web.page.organization.team.TeamListPage;
-import com.pmease.gitplex.web.page.organization.team.TeamPage;
-import com.pmease.gitplex.web.page.user.notifications.NotificationListPage;
-import com.pmease.gitplex.web.page.user.organizations.NewOrganizationPage;
-import com.pmease.gitplex.web.page.user.organizations.OrganizationListPage;
-import com.pmease.gitplex.web.page.user.setting.PasswordEditPage;
+import com.pmease.gitplex.web.page.account.teams.NewTeamPage;
+import com.pmease.gitplex.web.page.account.teams.TeamEditPage;
+import com.pmease.gitplex.web.page.account.teams.TeamListPage;
+import com.pmease.gitplex.web.page.account.teams.TeamPage;
 
 @SuppressWarnings("serial")
 public abstract class AccountLayoutPage extends AccountPage {
@@ -76,21 +76,22 @@ public abstract class AccountLayoutPage extends AccountPage {
 		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", 
 				DepotListPage.class, NewDepotPage.class));
 		if (getAccount().isOrganization()) {
-			if (SecurityUtils.isMemberOf(getAccount())) {
-				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", MemberListPage.class, 
-						NewMembersPage.class, MemberPage.class));
+			if (SecurityUtils.canManage(getAccount())) {
+				tabs.add(new AccountTab("People", "fa fa-fw fa-user", MemberListPage.class, 
+						AccountPeoplePage.class, NewMembersPage.class));
 				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class, 
 						TeamEditPage.class, NewTeamPage.class));
-			} 
-			if (SecurityUtils.canManage(getAccount())) {
-				tabs.add(new AccountTab("Outside Collaborators", "fa fa-fw fa-user", AccountCollaboratorListPage.class));
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
-			}
+			} else if (SecurityUtils.isMemberOf(getAccount())) {
+				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", MemberListPage.class, AccountPeoplePage.class));
+				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class));
+			} 
 		} else {
 			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-sitemap", 
 					OrganizationListPage.class, NewOrganizationPage.class));
 			if (SecurityUtils.canManage(getAccount())) {
-				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", AccountCollaboratorListPage.class));
+				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 
+						AccountCollaboratorListPage.class, AccountPeoplePage.class));
 				tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", NotificationListPage.class));
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, 
 						AvatarEditPage.class, PasswordEditPage.class));

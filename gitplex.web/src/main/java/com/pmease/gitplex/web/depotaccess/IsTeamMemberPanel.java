@@ -8,8 +8,8 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
-import com.pmease.gitplex.web.page.organization.team.TeamDepotListPage;
-import com.pmease.gitplex.web.page.organization.team.TeamMemberListPage;
+import com.pmease.gitplex.web.page.account.teams.TeamDepotListPage;
+import com.pmease.gitplex.web.page.account.teams.TeamMemberListPage;
 
 @SuppressWarnings("serial")
 public class IsTeamMemberPanel extends Panel {

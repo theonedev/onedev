@@ -3,6 +3,8 @@ package com.pmease.gitplex.core.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -157,6 +159,8 @@ public class Account extends AbstractUser implements ProtectedObject {
     private transient Collection<TeamMembership> allTeamMembershipsInOrganiation;
     
     private transient Collection<UserAuthorization> allUserAuthorizationsInOrganization;
+    
+    private transient Map<Account, OrganizationMembership> organizationMembersMap;
     
     @Editable(name="Name", order=100)
 	@AccountName
@@ -451,4 +455,13 @@ public class Account extends AbstractUser implements ProtectedObject {
 		return allTeamMembershipsInOrganiation;
 	}
 
+	public Map<Account, OrganizationMembership> getOrganizationMembersMap() {
+		if (organizationMembersMap == null) {
+			organizationMembersMap = new HashMap<>();
+			for (OrganizationMembership membership: getOrganizationMembers()) {
+				organizationMembersMap.put(membership.getUser(), membership);
+			}
+		}
+		return organizationMembersMap;
+	}
 }

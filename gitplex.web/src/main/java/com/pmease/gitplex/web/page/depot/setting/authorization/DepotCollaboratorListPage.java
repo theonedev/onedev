@@ -30,6 +30,7 @@ import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.UserAuthorization;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.UserAuthorizationManager;
@@ -38,9 +39,13 @@ import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.accountchoice.AbstractAccountChoiceProvider;
 import com.pmease.gitplex.web.component.accountchoice.AccountChoiceResourceReference;
+import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
-import com.pmease.gitplex.web.page.organization.member.MemberEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
 import com.vaynberg.wicket.select2.Response;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -201,10 +206,29 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 			protected void populateItem(ListItem<UserAuthorization> item) {
 				UserAuthorization authorization = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>("link", MemberEffectivePrivilegePage.class, 
-						MemberEffectivePrivilegePage.paramsOf(getAccount(), authorization.getUser().getName()));
-				link.add(new Label("name", authorization.getUser().getDisplayName()));
-				item.add(link);
+				OrganizationMembership membership = 
+						getAccount().getOrganizationMembersMap().get(authorization.getUser());
+				if (membership != null) {
+					Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", MemberEffectivePrivilegePage.class, 
+							MemberEffectivePrivilegePage.paramsOf(membership));
+					link.add(new Avatar("avatar", authorization.getUser()));
+					item.add(link);
+					
+					link = new BookmarkablePageLink<Void>("nameLink", MemberEffectivePrivilegePage.class, 
+							MemberEffectivePrivilegePage.paramsOf(membership));
+					link.add(new Label("name", authorization.getUser().getDisplayName()));
+					item.add(link);
+				} else {
+					Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", CollaboratorEffectivePrivilegePage.class, 
+							CollaboratorEffectivePrivilegePage.paramsOf(getAccount(), authorization.getUser()));
+					link.add(new Avatar("avatar", authorization.getUser()));
+					item.add(link);
+					
+					link = new BookmarkablePageLink<Void>("nameLink", CollaboratorEffectivePrivilegePage.class, 
+							CollaboratorEffectivePrivilegePage.paramsOf(getAccount(), authorization.getUser()));
+					link.add(new Label("name", authorization.getUser().getDisplayName()));
+					item.add(link);
+				}
 				
 				WebMarkupContainer greaterPrivileges = new WebMarkupContainer("greaterPrivileges") {
 
@@ -219,9 +243,15 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 					
 				};
 				
-				greaterPrivileges.add(new BookmarkablePageLink<Void>("detail", 
-						UserPrivilegeSourcePage.class, 
-						UserPrivilegeSourcePage.paramsOf(getDepot(), authorization.getUser())));
+				if (membership != null) {
+					greaterPrivileges.add(new BookmarkablePageLink<Void>("detail", 
+							MemberPrivilegeSourcePage.class, 
+							MemberPrivilegeSourcePage.paramsOf(membership, getDepot())));
+				} else {
+					greaterPrivileges.add(new BookmarkablePageLink<Void>("detail", 
+							CollaboratorPrivilegeSourcePage.class, 
+							CollaboratorPrivilegeSourcePage.paramsOf(authorization.getUser(), getDepot())));
+				}
 				
 				item.add(greaterPrivileges);
 				item.add(new DropdownLink("privilege") {

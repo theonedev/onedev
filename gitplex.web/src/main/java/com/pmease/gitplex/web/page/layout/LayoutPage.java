@@ -19,13 +19,13 @@ import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.admin.UserListPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
-import com.pmease.gitplex.web.page.user.notifications.NotificationListPage;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {

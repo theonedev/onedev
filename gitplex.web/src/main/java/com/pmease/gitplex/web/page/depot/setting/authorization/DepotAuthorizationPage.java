@@ -59,8 +59,7 @@ public abstract class DepotAuthorizationPage extends DepotSettingPage {
 			}
 			
 		});
-		tabs.add(new PageTab(Model.of("Effective Privileges"), 
-				DepotEffectivePrivilegePage.class, UserPrivilegeSourcePage.class) {
+		tabs.add(new PageTab(Model.of("Effective Privileges"), DepotEffectivePrivilegePage.class) {
 
 			@Override
 			public Component render(String componentId) {

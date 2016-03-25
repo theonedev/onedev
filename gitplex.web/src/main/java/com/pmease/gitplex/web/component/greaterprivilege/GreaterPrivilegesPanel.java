@@ -20,13 +20,16 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
-import com.pmease.gitplex.web.page.organization.member.MemberPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
 
 @SuppressWarnings("serial")
 public abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorization> {
@@ -79,20 +82,25 @@ public abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorizat
 			@Override
 			protected void populateItem(ListItem<UserPermission> item) {
 				UserPermission permission = item.getModelObject();
-				PageParameters params = MemberPrivilegeSourcePage.paramsOf(
-						getAuthorization().getDepot().getAccount(), 
-						permission.getUser().getName(), 
-						getAuthorization().getDepot());
+				Account organization = getAuthorization().getDepot().getAccount();
+				OrganizationMembership membership = 
+						Preconditions.checkNotNull(organization.getOrganizationMembersMap().get(permission.getUser()));
+				PageParameters params = MemberEffectivePrivilegePage.paramsOf(membership);
 				Link<Void> link = new BookmarkablePageLink<Void>("avatarLink", 
-						MemberPrivilegeSourcePage.class, params);
+						MemberEffectivePrivilegePage.class, params);
 				link.add(new Avatar("avatar", permission.getUser()));
 				item.add(link);
 				link = new BookmarkablePageLink<Void>("nameLink", 
-						MemberPrivilegeSourcePage.class, params);
+						MemberEffectivePrivilegePage.class, params);
 				link.add(new Label("name", permission.getUser().getDisplayName()));
 				item.add(link);
 				
-				item.add(new Label("privilege", permission.getPrivilege()));
+				params = MemberPrivilegeSourcePage.paramsOf(
+						membership, getAuthorization().getDepot());
+				link = new BookmarkablePageLink<Void>("privilegeLink", 
+						MemberPrivilegeSourcePage.class, params);
+				link.add(new Label("privilege", permission.getPrivilege()));
+				item.add(link);
 			}
 			
 		});

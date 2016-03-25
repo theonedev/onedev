@@ -13,7 +13,6 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.AccountTab;
-import com.pmease.gitplex.web.page.user.setting.PasswordEditPage;
 
 @SuppressWarnings("serial")
 public abstract class AccountSettingPage extends AccountLayoutPage {

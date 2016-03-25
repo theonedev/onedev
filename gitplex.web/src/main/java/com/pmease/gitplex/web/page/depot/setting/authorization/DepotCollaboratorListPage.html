@@ -1,5 +1,5 @@
 <wicket:extend>
-	<div class="user list">
+	<div class="collaborator list">
 		<div class="head clearfix">
 			<div class="pull-left">
 				<input wicket:id="addNew" type="hidden" class="form-control"></input>
@@ -19,9 +19,10 @@
 			<tbody>
 				<tr wicket:id="users">
 					<td class="name">
-						<a wicket:id="link"><span wicket:id="name"></span></a>
+						<a wicket:id="avatarLink"><img wicket:id="avatar"></img></a>
+						<a wicket:id="nameLink"><img wicket:id="name"></img></a>
 						<div wicket:id="greaterPrivileges" class="note">
-							This user has greater privileges from other sources. <a wicket:id="detail">View details</a>
+							This user has greater privileges from <a wicket:id="detail">other sources</a>.
 						</div>
 					</td>
 					<td class="privilege">

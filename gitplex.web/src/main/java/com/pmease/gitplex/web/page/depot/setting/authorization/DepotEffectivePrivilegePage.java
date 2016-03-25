@@ -35,7 +35,10 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPanel;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
-import com.pmease.gitplex.web.page.organization.member.MemberPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
+import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
@@ -194,26 +197,57 @@ public class DepotEffectivePrivilegePage extends DepotAuthorizationPage {
 			protected void populateItem(ListItem<UserPermission> item) {
 				UserPermission permission = item.getModelObject();
 
-				PageParameters params = MemberPrivilegeSourcePage.paramsOf(
-						getAccount(),
-						permission.getUser().getName(), 
-						depotModel.getObject());
- 
-				Link<Void> link = new BookmarkablePageLink<Void>(
-						"avatarLink", 
-						MemberPrivilegeSourcePage.class, 
-						params);
-				link.add(new Avatar("avatar", permission.getUser()));
-				item.add(link);
-				
-				link = new BookmarkablePageLink<Void>(
-						"nameLink", 
-						MemberPrivilegeSourcePage.class, 
-						params);
-				link.add(new Label("name", permission.getUser().getDisplayName()));
-				item.add(link);
+				OrganizationMembership membership = 
+						getAccount().getOrganizationMembersMap().get(permission.getUser());
+				if (membership != null) {
+					PageParameters params = MemberEffectivePrivilegePage.paramsOf(membership);
+					Link<Void> link = new BookmarkablePageLink<Void>(
+							"avatarLink", 
+							MemberEffectivePrivilegePage.class, 
+							params);
+					link.add(new Avatar("avatar", permission.getUser()));
+					item.add(link);
+					
+					link = new BookmarkablePageLink<Void>(
+							"nameLink", 
+							MemberEffectivePrivilegePage.class, 
+							params);
+					link.add(new Label("name", permission.getUser().getDisplayName()));
+					item.add(link);
 
-				item.add(new Label("privilege", permission.getPrivilege().toString()));
+					params = MemberPrivilegeSourcePage.paramsOf(membership, depotModel.getObject());
+					link = new BookmarkablePageLink<Void>(
+							"privilegeLink", 
+							MemberPrivilegeSourcePage.class, 
+							params);
+					link.add(new Label("privilege", permission.getPrivilege().toString()));
+					item.add(link);
+				} else {
+					PageParameters params = CollaboratorEffectivePrivilegePage.paramsOf(
+							getAccount(), permission.getUser());
+	 
+					Link<Void> link = new BookmarkablePageLink<Void>(
+							"avatarLink", 
+							CollaboratorEffectivePrivilegePage.class, 
+							params);
+					link.add(new Avatar("avatar", permission.getUser()));
+					item.add(link);
+					
+					link = new BookmarkablePageLink<Void>(
+							"nameLink", 
+							CollaboratorEffectivePrivilegePage.class, 
+							params);
+					link.add(new Label("name", permission.getUser().getDisplayName()));
+					item.add(link);
+
+					params = CollaboratorPrivilegeSourcePage.paramsOf(permission.getUser(), depotModel.getObject());
+					link = new BookmarkablePageLink<Void>(
+							"privilegeLink", 
+							CollaboratorPrivilegeSourcePage.class, 
+							params);
+					link.add(new Label("privilege", permission.getPrivilege().toString()));
+					item.add(link);
+				}
 			}
 			
 		});
