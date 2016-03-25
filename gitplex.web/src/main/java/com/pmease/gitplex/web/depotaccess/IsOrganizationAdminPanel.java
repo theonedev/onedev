@@ -1,10 +1,12 @@
 package com.pmease.gitplex.web.depotaccess;
 
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.entity.OrganizationMembership;
+import com.pmease.gitplex.web.page.account.members.MemberTeamListPage;
 
 @SuppressWarnings("serial")
 public class IsOrganizationAdminPanel extends Panel {
@@ -20,6 +22,8 @@ public class IsOrganizationAdminPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new BookmarkablePageLink<Void>("member", 
+				MemberTeamListPage.class, MemberTeamListPage.paramsOf(membershipModel.getObject())));
 		add(new Label("organizationName", membershipModel.getObject().getOrganization().getName()));
 	}
 
