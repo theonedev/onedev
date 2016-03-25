@@ -95,19 +95,6 @@
 			</snapshots>
 			<url>http://artifact.pmease.com/</url>
 		</repository>
-
-		<repository>
-			<id>local-repo</id>
-			<name>Local Closure Repo</name>
-			<releases>
-				<enabled>true</enabled>
-				<checksumPolicy>ignore</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<url>file://${project.basedir}/repo</url>
-		</repository>
 	</repositories>
 
 	<properties>
