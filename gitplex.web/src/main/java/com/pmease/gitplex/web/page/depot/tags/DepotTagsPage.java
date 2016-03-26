@@ -73,6 +73,8 @@ public class DepotTagsPage extends DepotPage {
 	
 	private PagingNavigator pagingNavigator;
 	
+	private WebMarkupContainer noTagsContainer;
+	
 	public DepotTagsPage(PageParameters params) {
 		super(params);
 		
@@ -89,14 +91,15 @@ public class DepotTagsPage extends DepotPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		TextField<String> searchInput;
-		add(searchInput = new ClearableTextField<String>("searchTags", Model.of("")));
-		searchInput.add(new OnTypingDoneBehavior(200) {
+		TextField<String> searchField;
+		add(searchField = new ClearableTextField<String>("searchTags", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(200) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
 				target.add(tagsContainer);
 				target.add(pagingNavigator);
+				target.add(noTagsContainer);
 			}
 			
 		});
@@ -200,8 +203,9 @@ public class DepotTagsPage extends DepotPage {
 							close(target);
 							target.add(tagsContainer);
 							target.add(pagingNavigator);
-							searchInput.setModelObject(null);
-							target.add(searchInput);
+							target.add(noTagsContainer);
+							searchField.setModelObject(null);
+							target.add(searchField);
 						}
 					}
 
@@ -220,17 +224,12 @@ public class DepotTagsPage extends DepotPage {
 			
 		});
 		
-		tagsContainer = new WebMarkupContainer("tagsContainer");
-		tagsContainer.setOutputMarkupId(true);
-		add(tagsContainer);
-		
-		final PageableListView<Ref> tagsView;
-		final IModel<List<Ref>> tagsModel = new AbstractReadOnlyModel<List<Ref>>() {
+		IModel<List<Ref>> tagsModel = new AbstractReadOnlyModel<List<Ref>>() {
 
 			@Override
 			public List<Ref> getObject() {
 				List<Ref> refs = getDepot().getTagRefs();
-				String searchFor = searchInput.getModelObject();
+				String searchFor = searchField.getModelObject();
 				if (StringUtils.isNotBlank(searchFor)) {
 					searchFor = searchFor.trim().toLowerCase();
 					for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
@@ -244,6 +243,20 @@ public class DepotTagsPage extends DepotPage {
 			
 		}; 
 		
+		tagsContainer = new WebMarkupContainer("tagsContainer") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!tagsModel.getObject().isEmpty());
+			}
+			
+		};
+		tagsContainer.setOutputMarkupId(true);
+		add(tagsContainer);
+		
+		PageableListView<Ref> tagsView;
+
 		tagsContainer.add(tagsView = new PageableListView<Ref>("tags", tagsModel, 
 				com.pmease.gitplex.web.Constants.DEFAULT_PAGE_SIZE) {
 
@@ -351,6 +364,7 @@ public class DepotTagsPage extends DepotPage {
 						getDepot().deleteTag(tagName);
 						target.add(tagsContainer);
 						target.add(pagingNavigator);
+						target.add(noTagsContainer);
 					}
 
 					@Override
@@ -377,6 +391,16 @@ public class DepotTagsPage extends DepotPage {
 			
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
+		
+		add(noTagsContainer = new WebMarkupContainer("noTags") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(tagsModel.getObject().isEmpty());
+			}
+			
+		});
 	}
 	
 	@Override

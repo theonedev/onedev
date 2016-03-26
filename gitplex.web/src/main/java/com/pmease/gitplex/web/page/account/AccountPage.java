@@ -5,6 +5,7 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -25,6 +26,7 @@ public abstract class AccountPage extends LayoutPage {
 	public AccountPage(PageParameters params) {
 		super(params);
 		
+		System.out.println(RequestCycle.get().getRequest().getUrl());
 		String name = params.get(PARAM_ACCOUNT).toString();
 		Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
 		

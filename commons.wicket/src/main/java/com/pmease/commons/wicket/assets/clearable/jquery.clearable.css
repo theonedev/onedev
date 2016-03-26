@@ -14,3 +14,9 @@ input.clearable::-ms-clear {
 @-moz-document url-prefix() {
     .input-clear {top: 7px;}
 }
+input.clearable {
+	border-radius: 4px !important;
+}
+.input-group>input.clearable {
+	border-radius: 0 4px 4px 0 !important;
+}

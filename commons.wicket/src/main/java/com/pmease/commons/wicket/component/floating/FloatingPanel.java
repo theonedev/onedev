@@ -26,10 +26,10 @@ public abstract class FloatingPanel extends Panel {
 	private final AlignPlacement placement;
 	
 	public FloatingPanel(AjaxRequestTarget target, AlignTarget alignTarget, AlignPlacement placement) {
-		super(((CommonPage)target.getPage()).getStandalones().newChildId());
+		super(((CommonPage)target.getPage()).getRootComponents().newChildId());
 		
 		CommonPage page = (CommonPage) target.getPage(); 
-		page.getStandalones().add(this);
+		page.getRootComponents().add(this);
 		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		target.add(this);
 

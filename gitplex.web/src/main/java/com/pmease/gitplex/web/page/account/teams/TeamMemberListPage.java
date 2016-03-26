@@ -167,7 +167,7 @@ public class TeamMemberListPage extends TeamPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Select user to add to team...");
+				getSettings().setPlaceholder("Add user to team...");
 				getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");

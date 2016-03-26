@@ -214,7 +214,7 @@ public class TeamDepotListPage extends TeamPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Select repository to authorize...");
+				getSettings().setPlaceholder("Add repository...");
 				getSettings().setFormatResult("gitplex.depotChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("gitplex.depotChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("gitplex.depotChoiceFormatter.escapeMarkup");

@@ -35,7 +35,7 @@ public abstract class CommonPage extends WebPage {
 
 	private FeedbackPanel sessionFeedback;
 	
-	private RepeatingView standalones;
+	private RepeatingView rootComponents;
 	
 	public CommonPage() {
 	}
@@ -89,7 +89,7 @@ public abstract class CommonPage extends WebPage {
 		add(new WebMarkupContainer("keepSessionAlive").add(
 				new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
 		
-		add(standalones = new RepeatingView("components"));
+		add(rootComponents = new RepeatingView("rootComponents"));
 	}
 	
 	public FeedbackPanel getSessionFeedback() {
@@ -99,7 +99,7 @@ public abstract class CommonPage extends WebPage {
 	@Override
 	protected void onBeforeRender() {
 		WebSocketRenderBehavior.onPageRender(getPageId());
-		standalones.removeAll();
+		rootComponents.removeAll();
 		super.onBeforeRender();
 	}
 
@@ -124,8 +124,8 @@ public abstract class CommonPage extends WebPage {
 		
 	}
 	
-	public RepeatingView getStandalones() {
-		return standalones;
+	public RepeatingView getRootComponents() {
+		return rootComponents;
 	}
 
 }

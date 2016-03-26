@@ -78,6 +78,9 @@ public abstract class MemberPage extends AccountLayoutPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
+				setBeforeDisabledLink("");
+				setAfterDisabledLink("");
+				
 				add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -92,16 +95,6 @@ public abstract class MemberPage extends AccountLayoutPage {
 				Account user = getMembership().getUser();
 				if (!SecurityUtils.canManage(getAccount()) || user.equals(getLoginUser()))
 					add(AttributeAppender.append("disabled", "disabled"));
-			}
-
-			@Override
-			public String getAfterDisabledLink() {
-				return null;
-			}
-
-			@Override
-			public String getBeforeDisabledLink() {
-				return null;
 			}
 
 			@Override
@@ -120,7 +113,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 						close();
 						getMembership().setAdmin(false);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
-						setResponsePage(getPageClass(), MemberPage.paramsOf(getMembership()));
+						setResponsePage(getPageClass(), getPageParameters());
 						Session.get().success("Role updated");
 					}
 					
@@ -129,7 +122,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 						close();
 						getMembership().setAdmin(true);
 						GitPlex.getInstance(OrganizationMembershipManager.class).save(getMembership());
-						setResponsePage(getPageClass(), MemberPage.paramsOf(getMembership()));
+						setResponsePage(getPageClass(), getPageParameters());
 						Session.get().success("Role updated");
 					}
 					

@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.annotation.TeamChoice;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Team;
@@ -21,6 +22,7 @@ public abstract class TeamAwareGateKeeper extends AbstractGateKeeper {
 	private String teamName;
 
     @Editable(name="Team", order=100)
+    @TeamChoice
     @NotEmpty
 	public String getTeamName() {
 		return teamName;

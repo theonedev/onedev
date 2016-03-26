@@ -27,12 +27,12 @@ public abstract class ModalPanel extends Panel {
 	}
 	
 	public ModalPanel(AjaxRequestTarget target, Size size) {
-		super(((CommonPage)target.getPage()).getStandalones().newChildId());
+		super(((CommonPage)target.getPage()).getRootComponents().newChildId());
 		
 		this.size = size;
 		
 		CommonPage page = (CommonPage) target.getPage(); 
-		page.getStandalones().add(this);
+		page.getRootComponents().add(this);
 		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		target.add(this);
 	}
