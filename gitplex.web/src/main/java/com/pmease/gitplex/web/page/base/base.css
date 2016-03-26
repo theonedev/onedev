@@ -39,10 +39,7 @@ form>.actions {
 	margin-top: 20px;
 }
 form>.actions>.btn {
-	margin-right: 8px;
-}
-form>.actions>:last-child {
-	margin-right: 0;
+	margin-right: 20px;
 }
 .actions>a {
 	margin-right: 8px;

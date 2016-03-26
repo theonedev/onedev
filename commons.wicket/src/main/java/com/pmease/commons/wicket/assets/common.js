@@ -139,8 +139,9 @@ pmease.commons = {
 		trackDirty: function(form) {
 			var $form = $(form);
 			if ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm")) {
+				var silent = !$form.hasClass("leave-confirm");
 				$form.areYouSure({
-					"silent": !$form.hasClass("leave-confirm"),
+					"silent": silent,
 					"addRemoveFieldsMarksDirty": true,
 					change: function() {
 						pmease.commons.form.dirtyChanged($(this));

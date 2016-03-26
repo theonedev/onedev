@@ -157,7 +157,8 @@
     if (!settings.silent && !window.aysUnloadSet) {
       window.aysUnloadSet = true;
       $(window).bind('beforeunload', function() {
-        $dirtyForms = $("form").filter('.' + settings.dirtyClass);
+    	 // added by robin to only ask for confirmation for leave-confirm forms
+        $dirtyForms = $("form").filter('.leave-confirm.' + settings.dirtyClass);
         if ($dirtyForms.length == 0) {
           return;
         }

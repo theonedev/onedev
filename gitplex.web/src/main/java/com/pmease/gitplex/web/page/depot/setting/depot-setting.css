@@ -4,11 +4,8 @@
 #depot-setting>.nav {
 	margin-bottom: 20px;
 }
-#depot-setting .general-setting form.name {
-	margin-bottom: 16px;
-}
-#depot-setting .general-setting form.name .alert {
-	margin-top: 16px;
+#depot-setting .general-setting form .delete {
+	margin-right: 0;
 }
 
 .integration-policy-setting .handle {
@@ -184,4 +181,9 @@
 }
 #depot-setting .authorization .list td.privilege {
 	width: 20%;
+}
+
+.modal .transfer-depot .message {
+	font-size: 13px;
+	margin-bottom: 20px;
 }

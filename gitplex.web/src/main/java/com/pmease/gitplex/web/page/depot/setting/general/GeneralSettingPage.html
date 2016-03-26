@@ -4,8 +4,34 @@
 			<div wicket:id="editor"></div>
 			<div class="actions">
 				<input class="btn btn-primary dirty-aware" value="Update" type="submit"></input>
-				<a wicket:id="delete" class="btn btn-danger pull-right">Delete this Repository</a>
+				<a wicket:id="delete" class="delete btn btn-danger pull-right">Delete</a>
+				<a wicket:id="transfer" class="transfer btn btn-danger pull-right">Transfer</a>
 			</div>
 		</form>
 	</div>
+	<wicket:fragment wicket:id="transferFrag">
+		<div class="transfer-depot">
+			<!-- Add form tag so that the default delete button can be triggered when user hits return -->
+			<form wicket:id="form">
+				<div class="modal-header">
+					<h4 id="modal-title" class="modal-title">
+						Transfer repository to another account
+					</h4>
+				</div>
+				<div class="modal-body">
+					<div class="message">You can only transfer repository to accounts you have administrative 
+					rights on. Also note that original team references in repository 
+					authorization and gate keeper definition will be removed after transferring as teams are local to account.</div>
+					<div class="form-group">
+						<input wicket:id="account" type="hidden" class="form-control" placeholder="Select destination account..."></input>
+						<div wicket:id="feedback"></div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<input wicket:id="transfer" type="submit" class="btn btn-danger dirty-aware" value="Transfer"></input>
+					<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</wicket:fragment>
 </wicket:extend>

@@ -3,10 +3,7 @@ package com.pmease.gitplex.web.page.account.setting;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -38,14 +35,6 @@ public abstract class AccountSettingPage extends AccountLayoutPage {
 			tabs.add(new AccountTab("Password", "", PasswordEditPage.class));
 		
 		add(new Tabbable("accountSettingTabs", tabs));
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AccountSettingPage.class, "account-setting.css")));
 	}
 
 }
