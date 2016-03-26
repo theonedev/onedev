@@ -1,8 +1,8 @@
 package com.pmease.gitplex.web.page.admin;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,7 +18,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
@@ -89,25 +88,10 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			protected List<Account> load() {
-				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-				List<Account> users = accountManager.allUsers();
-				
-				String searchInput = searchField.getInput();
-				if (StringUtils.isNotBlank(searchInput)) {
-					searchInput = searchInput.trim().toLowerCase();
-					for (Iterator<Account> it = users.iterator(); it.hasNext();) {
-						Account user = it.next();
-						String fullName = user.getFullName();
-						if (fullName == null)
-							fullName = "";
-						else
-							fullName = fullName.toLowerCase();
-						if (!user.getName().toLowerCase().contains(searchInput) && !fullName.contains(searchInput)) {
-							it.remove();
-						}
-					}
-				} else {
-					searchInput = null;
+				List<Account> users = new ArrayList<>();
+				for (Account user: GitPlex.getInstance(AccountManager.class).allUsers()) {
+					if (user.matches(searchField.getInput()))
+						users.add(user);
 				}
 				Collections.sort(users, new Comparator<Account>() {
 

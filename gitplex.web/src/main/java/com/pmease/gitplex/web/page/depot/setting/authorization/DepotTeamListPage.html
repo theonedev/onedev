@@ -1,6 +1,16 @@
 <wicket:extend>
 	<div class="authorization list">
 		<div class="head clearfix">
+			<div class="pull-left search">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input wicket:id="searchTeams" class="form-control" placeholder="Search teams"></input>
+				</div>
+			</div>
+			<div wicket:id="filter" class="pull-left filter btn-group">
+				<a wicket:id="selection" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="clear" class="btn btn-default" title="Clear privilege filter"><i class="fa fa-times"></i></a>
+			</div>
 			<div class="pull-left">
 				<input wicket:id="addNew" type="hidden" class="form-control"></input>
 			</div>

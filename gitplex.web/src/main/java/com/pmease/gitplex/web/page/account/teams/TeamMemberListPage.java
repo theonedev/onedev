@@ -218,14 +218,8 @@ public class TeamMemberListPage extends TeamPage {
 			protected List<TeamMembership> load() {
 				List<TeamMembership> memberships = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-				
 				for (TeamMembership membership: teamModel.getObject().getMemberships()) {
-					if (membership.getUser().matches(searchInput)) {
+					if (membership.getUser().matches(searchField.getInput())) {
 						memberships.add(membership);
 					}
 				}

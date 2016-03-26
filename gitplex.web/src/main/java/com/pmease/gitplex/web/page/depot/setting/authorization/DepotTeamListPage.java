@@ -16,15 +16,19 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
@@ -59,6 +63,8 @@ public class DepotTeamListPage extends DepotAuthorizationPage {
 	
 	private WebMarkupContainer noTeamsContainer;
 	
+	private DepotPrivilege filterPrivilege;
+	
 	private Set<Long> pendingRemovals = new HashSet<>();
 	
 	public DepotTeamListPage(PageParameters params) {
@@ -69,41 +75,85 @@ public class DepotTeamListPage extends DepotAuthorizationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AjaxLink<Void> confirmRemoveLink;
-		add(confirmRemoveLink = new AjaxLink<Void>("confirmRemove") {
+		TextField<String> searchField;
+		
+		add(searchField = new ClearableTextField<String>("searchTeams", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(100) {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(teamsContainer);
+				target.add(pagingNavigator);
+				target.add(noTeamsContainer);
+			}
+			
+		});
+		
+		WebMarkupContainer filterContainer = new WebMarkupContainer("filter");
+		filterContainer.setOutputMarkupId(true);
+		add(filterContainer);
+		
+		filterContainer.add(new DropdownLink("selection") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						if (filterPrivilege == null)
+							return "Filter by privilege";
+						else 
+							return filterPrivilege.toString();
+					}
+					
+				}));
+			}
+
+			@Override
+			protected Component newContent(String id) {
+				return new PrivilegeSelectionPanel(id, false, filterPrivilege) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, DepotPrivilege privilege) {
+						close();
+						filterPrivilege = privilege;
+						target.add(filterContainer);
+						target.add(teamsContainer);
+						target.add(pagingNavigator);
+						target.add(noTeamsContainer);
+					}
+
+				};
+			}
+		});
+		filterContainer.add(new AjaxLink<Void>("clear") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Collection<TeamAuthorization> authorizations = new HashSet<>();
-				TeamAuthorizationManager authorizationManager = GitPlex.getInstance(TeamAuthorizationManager.class);
-				for (Long id: pendingRemovals) {
-					authorizations.add(authorizationManager.load(id));
-				}
-				authorizationManager.delete(authorizations);
-				pendingRemovals.clear();
-				target.add(this);
-				target.add(pagingNavigator);
+				filterPrivilege = null;
+				target.add(filterContainer);
 				target.add(teamsContainer);
+				target.add(pagingNavigator);
 				target.add(noTeamsContainer);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!pendingRemovals.isEmpty());
+				setVisible(filterPrivilege != null);
 			}
 			
 		});
-		confirmRemoveLink.setOutputMarkupPlaceholderTag(true);
 		
 		add(new SelectToAddChoice<Team>("addNew", new AbstractTeamChoiceProvider() {
 
 			@Override
 			public void query(String term, int page, Response<Team> response) {
 				List<Team> teams = new ArrayList<>();
-				term = term.toLowerCase();
 				for (Team team: getAccount().getDefinedTeams()) {
-					if (team.getName().toLowerCase().contains(term)) {
+					if (team.matches(term)) {
 						boolean authorized = false;
 						for (TeamAuthorization authorization: depotModel.getObject().getAuthorizedTeams()) {
 							if (authorization.getTeam().equals(team)) {
@@ -160,6 +210,33 @@ public class DepotTeamListPage extends DepotAuthorizationPage {
 			
 		});
 		
+		AjaxLink<Void> confirmRemoveLink;
+		add(confirmRemoveLink = new AjaxLink<Void>("confirmRemove") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				Collection<TeamAuthorization> authorizations = new HashSet<>();
+				TeamAuthorizationManager authorizationManager = GitPlex.getInstance(TeamAuthorizationManager.class);
+				for (Long id: pendingRemovals) {
+					authorizations.add(authorizationManager.load(id));
+				}
+				authorizationManager.delete(authorizations);
+				pendingRemovals.clear();
+				target.add(this);
+				target.add(pagingNavigator);
+				target.add(teamsContainer);
+				target.add(noTeamsContainer);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!pendingRemovals.isEmpty());
+			}
+			
+		});
+		confirmRemoveLink.setOutputMarkupPlaceholderTag(true);
+		
 		teamsContainer = new WebMarkupContainer("teams") {
 
 			@Override
@@ -180,7 +257,10 @@ public class DepotTeamListPage extends DepotAuthorizationPage {
 				List<TeamAuthorization> authorizations = new ArrayList<>();
 				
 				for (TeamAuthorization authorization: depotModel.getObject().getAuthorizedTeams()) {
-					authorizations.add(authorization);
+					if (authorization.getTeam().matches(searchField.getInput()) 
+							&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
+						authorizations.add(authorization);
+					}
 				}
 				
 				Collections.sort(authorizations, new Comparator<TeamAuthorization>() {

@@ -14,17 +14,21 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
+import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -66,6 +70,20 @@ public class MemberTeamListPage extends MemberPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		TextField<String> searchField;
+		
+		add(searchField = new ClearableTextField<String>("searchTeams", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(100) {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(teamsContainer);
+				target.add(pagingNavigator);
+				target.add(noTeamsContainer);
+			}
+			
+		});
+		
 		AjaxLink<Void> confirmRemoveLink;
 		add(confirmRemoveLink = new AjaxLink<Void>("confirmRemove") {
 
@@ -98,14 +116,13 @@ public class MemberTeamListPage extends MemberPage {
 			@Override
 			public void query(String term, int page, Response<Team> response) {
 				List<Team> teams = new ArrayList<>();
-				term = term.toLowerCase();
 				Account user = getMembership().getUser();
 				Collection<Team> joinedTeams = new HashSet<>();
 				for (TeamMembership membership: user.getJoinedTeams()) {
 					joinedTeams.add(membership.getTeam());
 				}
 				for (Team team: getAccount().getDefinedTeams()) {
-					if (team.getName().toLowerCase().contains(term) && !joinedTeams.contains(team)) {
+					if (team.matches(term) && !joinedTeams.contains(team)) {
 						teams.add(team);
 					}
 				}
@@ -197,7 +214,9 @@ public class MemberTeamListPage extends MemberPage {
 				List<TeamMembership> memberships = new ArrayList<>();
 				
 				for (TeamMembership membership: getMembership().getUser().getJoinedTeams()) {
-					memberships.add(membership);
+					if (membership.getTeam().matches(searchField.getInput())) {
+						memberships.add(membership);
+					}
 				}
 				
 				Collections.sort(memberships, new Comparator<TeamMembership>() {

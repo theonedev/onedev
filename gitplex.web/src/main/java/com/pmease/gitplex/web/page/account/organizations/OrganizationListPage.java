@@ -118,20 +118,9 @@ public class OrganizationListPage extends AccountLayoutPage {
 			protected List<Account> load() {
 				List<Account> organizations = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-				
 				for (OrganizationMembership membership: getAccount().getOrganizations()) {
 					Account organization = membership.getOrganization();
-					String fullName = organization.getFullName();
-					if (fullName == null)
-						fullName = "";
-					else
-						fullName = fullName.toLowerCase();
-					if ((organization.getName().toLowerCase().contains(searchInput) || fullName.contains(searchInput)) 
+					if (organization.matches(searchField.getInput()) 
 							&& (getAccount().equals(getLoginUser()) || membership.isAdmin())) {
 						organizations.add(organization);
 					}

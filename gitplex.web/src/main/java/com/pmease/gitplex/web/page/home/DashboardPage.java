@@ -1,8 +1,8 @@
 package com.pmease.gitplex.web.page.home;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -20,7 +20,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.MultilineLabel;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
@@ -54,9 +53,9 @@ public class DashboardPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		TextField<String> searchInput;
-		add(searchInput = new ClearableTextField<String>("searchUsers", Model.of("")));
-		searchInput.add(new OnTypingDoneBehavior(100) {
+		TextField<String> searchField;
+		add(searchField = new ClearableTextField<String>("searchUsers", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
@@ -74,19 +73,11 @@ public class DashboardPage extends LayoutPage {
 
 			@Override
 			protected List<Account> load() {
-				AccountManager accountManager = GitPlex.getInstance(AccountManager.class);
-				List<Account> users = accountManager.allUsers();
-				
-				String searchFor = searchInput.getInput();
-				if (StringUtils.isNotBlank(searchFor)) {
-					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<Account> it = users.iterator(); it.hasNext();) {
-						Account user = it.next();
-						if (!user.getName().toLowerCase().contains(searchFor))
-							it.remove();
+				List<Account> users = new ArrayList<>();
+				for (Account user: GitPlex.getInstance(AccountManager.class).allUsers()) {
+					if (user.matches(searchField.getInput())) {
+						users.add(user);
 					}
-				} else {
-					searchFor = null;
 				}
 				Collections.sort(users, new Comparator<Account>() {
 

@@ -1083,4 +1083,13 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		return version;
 	}
 
+	public boolean matches(@Nullable String searchTerm) {
+		if (searchTerm == null)
+			searchTerm = "";
+		else
+			searchTerm = searchTerm.toLowerCase().trim();
+		
+		return getName().toLowerCase().contains(searchTerm);
+	}
+	
 }

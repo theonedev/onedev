@@ -155,12 +155,6 @@ public class DepotEffectivePrivilegePage extends DepotAuthorizationPage {
 			protected List<UserPermission> load() {
 				List<UserPermission> permissions = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-
 				Depot depot = depotModel.getObject();
 				Collection<Account> users = new HashSet<>();
 				for (OrganizationMembership membership: getAccount().getOrganizationMembers()) {
@@ -170,7 +164,7 @@ public class DepotEffectivePrivilegePage extends DepotAuthorizationPage {
 					users.add(authorization.getUser());
 				}
 				for (Account user: users) {
-					if (user.matches(searchInput)) {
+					if (user.matches(searchField.getInput())) {
 						DepotPrivilege privilege = new DepotAccess(user, depot).getGreatestPrivilege();
 						if (privilege != DepotPrivilege.NONE 
 								&& (filterPrivilege == null || filterPrivilege == privilege)) {

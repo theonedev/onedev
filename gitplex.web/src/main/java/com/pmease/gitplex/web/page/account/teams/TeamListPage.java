@@ -11,6 +11,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -18,10 +19,13 @@ import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
+import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
+import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Team;
@@ -77,6 +81,20 @@ public class TeamListPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		TextField<String> searchField;
+		
+		add(searchField = new ClearableTextField<String>("searchTeams", Model.of("")));
+		searchField.add(new OnTypingDoneBehavior(100) {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(teamsContainer);
+				target.add(pagingNavigator);
+				target.add(noTeamsContainer);
+			}
+			
+		});
+		
 		add(new Link<Void>("addNew") {
 
 			@Override
@@ -123,7 +141,9 @@ public class TeamListPage extends AccountLayoutPage {
 				List<Team> teams = new ArrayList<>();
 				
 				for (Team team: getAccount().getDefinedTeams()) {
-					teams.add(team);
+					if (team.matches(searchField.getInput())) {
+						teams.add(team);
+					}
 				}
 				
 				Collections.sort(teams, new Comparator<Team>() {

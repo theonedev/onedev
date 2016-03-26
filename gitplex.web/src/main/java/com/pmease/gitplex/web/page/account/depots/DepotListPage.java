@@ -55,7 +55,7 @@ public class DepotListPage extends AccountLayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final TextField<String> searchField;
+		TextField<String> searchField;
 		
 		add(searchField = new ClearableTextField<String>("searchDepots", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
@@ -115,14 +115,8 @@ public class DepotListPage extends AccountLayoutPage {
 			protected List<Depot> load() {
 				List<Depot> depots = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-				
 				for (Depot depot: getAccount().getDepots()) {
-					if (depot.getName().toLowerCase().contains(searchInput) && SecurityUtils.canRead(depot))
+					if (depot.matches(searchField.getInput()) && SecurityUtils.canRead(depot))
 						depots.add(depot);
 				}
 				

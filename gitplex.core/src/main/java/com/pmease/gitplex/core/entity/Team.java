@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -96,6 +97,15 @@ public class Team extends AbstractEntity {
 		this.memberships = memberships;
 	}
 
+	public boolean matches(@Nullable String searchTerm) {
+		if (searchTerm == null)
+			searchTerm = "";
+		else
+			searchTerm = searchTerm.toLowerCase().trim();
+		
+		return getName().toLowerCase().contains(searchTerm);
+	}
+	
 	public Collection<Account> getMembers() {
 		if (members == null) {
 			members = new HashSet<>();

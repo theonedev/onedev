@@ -182,9 +182,8 @@ public class TeamDepotListPage extends TeamPage {
 			@Override
 			public void query(String term, int page, Response<Depot> response) {
 				List<Depot> depots = new ArrayList<>();
-				term = term.toLowerCase();
 				for (Depot depot: getAccount().getDepots()) {
-					if (depot.getName().toLowerCase().contains(term)) {
+					if (depot.matches(term)) {
 						boolean authorized = false;
 						for (TeamAuthorization authorization: teamModel.getObject().getAuthorizations()) {
 							if (authorization.getDepot().equals(depot)) {
@@ -260,14 +259,8 @@ public class TeamDepotListPage extends TeamPage {
 			protected List<TeamAuthorization> load() {
 				List<TeamAuthorization> authorizations = new ArrayList<>();
 				
-				String searchInput = searchField.getInput();
-				if (searchInput != null)
-					searchInput = searchInput.toLowerCase().trim();
-				else
-					searchInput = "";
-				
 				for (TeamAuthorization authorization: teamModel.getObject().getAuthorizations()) {
-					if (authorization.getDepot().getName().toLowerCase().contains(searchInput)
+					if (authorization.getDepot().matches(searchField.getInput())
 							&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
 						authorizations.add(authorization);
 					}
