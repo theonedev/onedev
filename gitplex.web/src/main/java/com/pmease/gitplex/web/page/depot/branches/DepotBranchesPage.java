@@ -35,7 +35,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -94,12 +93,12 @@ public class DepotBranchesPage extends DepotPage {
 	
 	private String baseBranch;
 	
-	private IModel<List<Ref>> branchesModel = new AbstractReadOnlyModel<List<Ref>>() {
+	private IModel<List<Ref>> branchesModel = new LoadableDetachableModel<List<Ref>>() {
 
 		@Override
-		public List<Ref> getObject() {
+		protected List<Ref> load() {
 			List<Ref> refs = getDepot().getBranchRefs();
-			String searchFor = searchInput.getModelObject();
+			String searchFor = searchField.getModelObject();
 			if (StringUtils.isNotBlank(searchFor)) {
 				searchFor = searchFor.trim().toLowerCase();
 				for (Iterator<Ref> it = refs.iterator(); it.hasNext();) {
@@ -121,7 +120,9 @@ public class DepotBranchesPage extends DepotPage {
 	
 	private WebMarkupContainer branchesContainer; 
 	
-	private TextField<String> searchInput;
+	private WebMarkupContainer noBranchesContainer;
+	
+	private TextField<String> searchField;
 	
 	private final IModel<Map<ObjectId, AheadBehind>> aheadBehindsModel = 
 			new LoadableDetachableModel<Map<ObjectId, AheadBehind>>() {
@@ -293,16 +294,17 @@ public class DepotBranchesPage extends DepotPage {
 			protected void onUpdate(AjaxRequestTarget target) {
 				target.add(branchesContainer);
 				target.add(pagingNavigator);
-				searchInput.setModelObject(null);
-				target.add(searchInput);
+				target.add(noBranchesContainer);
+				searchField.setModelObject(null);
+				target.add(searchField);
 				
 				pushState(target);
 			}
 			
 		});
 		
-		add(searchInput = new ClearableTextField<String>("searchBranches", Model.of("")));
-		searchInput.add(new OnSearchingBehavior());
+		add(searchField = new ClearableTextField<String>("searchBranches", Model.of("")));
+		searchField.add(new OnSearchingBehavior());
 
 		add(new ModalLink("createBranch") {
 
@@ -384,8 +386,9 @@ public class DepotBranchesPage extends DepotPage {
 							close(target);
 							target.add(branchesContainer);
 							target.add(pagingNavigator);
-							searchInput.setModelObject(null);
-							target.add(searchInput);
+							target.add(noBranchesContainer);
+							searchField.setModelObject(null);
+							target.add(searchField);
 						}
 					}
 
@@ -404,9 +407,16 @@ public class DepotBranchesPage extends DepotPage {
 			
 		});
 		
-		branchesContainer = new WebMarkupContainer("branchesContainer");
-		branchesContainer.setOutputMarkupId(true);
-		add(branchesContainer);
+		add(branchesContainer = new WebMarkupContainer("branches") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!branchesModel.getObject().isEmpty());
+			}
+			
+		});
+		branchesContainer.setOutputMarkupPlaceholderTag(true);
 		
 		branchesContainer.add(branchesView = new PageableListView<Ref>("branches", branchesModel, PAGE_SIZE) {
 
@@ -629,6 +639,7 @@ public class DepotBranchesPage extends DepotPage {
 						}
 						target.add(pagingNavigator);
 						target.add(branchesContainer);
+						target.add(noBranchesContainer);
 					}
 
 					@Override
@@ -669,6 +680,17 @@ public class DepotBranchesPage extends DepotPage {
 			
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
+		
+		add(noBranchesContainer = new WebMarkupContainer("noBranches") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(branchesModel.getObject().isEmpty());
+			}
+			
+		});
+		noBranchesContainer.setOutputMarkupPlaceholderTag(true);
 	}
 	
 	private String getBaseBranch() {
@@ -707,6 +729,7 @@ public class DepotBranchesPage extends DepotPage {
 		protected void onTypingDone(AjaxRequestTarget target) {
 			target.add(branchesContainer);
 			target.add(pagingNavigator);
+			target.add(noBranchesContainer);
 		}
 
 		@Override
@@ -728,6 +751,7 @@ public class DepotBranchesPage extends DepotPage {
 		baseBranch = (String) data;
 		target.add(baseChoice);
 		target.add(branchesContainer);
+		target.add(noBranchesContainer);
 		target.add(pagingNavigator);
 	}
 

@@ -243,7 +243,7 @@ public class DepotTagsPage extends DepotPage {
 			
 		}; 
 		
-		tagsContainer = new WebMarkupContainer("tagsContainer") {
+		add(tagsContainer = new WebMarkupContainer("tagsContainer") {
 
 			@Override
 			protected void onConfigure() {
@@ -251,9 +251,8 @@ public class DepotTagsPage extends DepotPage {
 				setVisible(!tagsModel.getObject().isEmpty());
 			}
 			
-		};
-		tagsContainer.setOutputMarkupId(true);
-		add(tagsContainer);
+		});
+		tagsContainer.setOutputMarkupPlaceholderTag(true);
 		
 		PageableListView<Ref> tagsView;
 
@@ -401,6 +400,7 @@ public class DepotTagsPage extends DepotPage {
 			}
 			
 		});
+		noTagsContainer.setOutputMarkupPlaceholderTag(true);
 	}
 	
 	@Override

@@ -16,7 +16,7 @@
 				</div>
 				<a wicket:id="createBranch" class="pull-left btn btn-default"><i class="fa fa-plus"></i> Create Branch</a>
 			</div>
-			<table wicket:id="branchesContainer" class="table table-hover table-condensed">
+			<table wicket:id="branches" class="table table-hover table-condensed">
 				<tr wicket:id="branches">
 					<td class="detail">
 						<a wicket:id="branchLink" class="name"><span wicket:id="name"></span></a> <span class="label label-default" wicket:id="default">default</span>
@@ -53,6 +53,7 @@
 				</tr>
 			</table>		
 			<div class="center"><ul wicket:id="branchesPageNav"></ul></div>
+			<div wicket:id="noBranches" class="alert alert-warning">No branches found</div>
 			<div class="help-block">
 				<i class="fa fa-info-circle"></i> Yellow bars 
 				<span class="bar request">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> 
