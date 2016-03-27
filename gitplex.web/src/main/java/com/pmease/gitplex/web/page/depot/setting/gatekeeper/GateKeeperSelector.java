@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.depot.setting.gatekeeper;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,14 +53,7 @@ abstract class GateKeeperSelector extends Panel {
 		}
 		
 		implementations.remove(DefaultGateKeeper.class);
-		Collections.sort(implementations, new Comparator<Class<?>>() {
-
-			@Override
-			public int compare(Class<?> o1, Class<?> o2) {
-				return EditableUtils.getOrder(o1) - EditableUtils.getOrder(o2);
-			}
-			
-		});
+		implementations.sort((o1, o2) -> EditableUtils.getOrder(o1) - EditableUtils.getOrder(o2));
 		
 		for (Class<?> implementation: implementations) {
 			List<Class<?>> categoryClasses = null;

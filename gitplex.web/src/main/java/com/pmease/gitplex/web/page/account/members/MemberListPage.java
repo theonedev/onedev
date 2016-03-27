@@ -4,8 +4,6 @@ import static com.pmease.gitplex.web.page.account.members.RoleSelectionPanel.ROL
 import static com.pmease.gitplex.web.page.account.members.RoleSelectionPanel.ROLE_MEMBER;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -234,14 +232,8 @@ public class MemberListPage extends AccountLayoutPage {
 					}
 				}
 				
-				Collections.sort(memberships, new Comparator<OrganizationMembership>() {
-
-					@Override
-					public int compare(OrganizationMembership membership1, OrganizationMembership membership2) {
-						return membership1.getUser().getName().compareTo(membership2.getUser().getName());
-					}
-					
-				});
+				memberships.sort((membership1, membership2) 
+						-> membership1.getUser().getName().compareTo(membership2.getUser().getName()));
 				return memberships;
 			}
 			

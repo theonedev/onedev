@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.account.teams;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -196,14 +194,7 @@ public class TeamDepotListPage extends TeamPage {
 					}
 				}
 				
-				Collections.sort(depots, new Comparator<Depot>() {
-
-					@Override
-					public int compare(Depot depot1, Depot depot2) {
-						return depot1.getName().compareTo(depot2.getName());
-					}
-					
-				});
+				depots.sort((depot1, depot2) -> depot1.getName().compareTo(depot2.getName()));
 				
 				new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
 			}
@@ -266,14 +257,8 @@ public class TeamDepotListPage extends TeamPage {
 					}
 				}
 				
-				Collections.sort(authorizations, new Comparator<TeamAuthorization>() {
-
-					@Override
-					public int compare(TeamAuthorization authorization1, TeamAuthorization authorization2) {
-						return authorization1.getDepot().getName().compareTo(authorization2.getDepot().getName());
-					}
-					
-				});
+				authorizations.sort((authorization1, authorization2) 
+						-> authorization1.getDepot().getName().compareTo(authorization2.getDepot().getName()));
 				return authorizations;
 			}
 			
@@ -450,6 +435,11 @@ public class TeamDepotListPage extends TeamPage {
 		
 	}
 	
+	/*
+	 * Team authorization page is only visible to administrator as it contains repository 
+	 * authorization information and we do not want to expose that information to ordinary members 
+	 * as repository name might also be a secret
+	 */
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canManage(getAccount());

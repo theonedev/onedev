@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,14 +96,7 @@ public class SuggestionUtils {
 			if (applied != null) 
 				allApplied.add(applied);
 		}
-		Collections.sort(allApplied, new Comparator<WildcardApplied>() {
-
-			@Override
-			public int compare(WildcardApplied o1, WildcardApplied o2) {
-				return o1.getMatchRange().getFrom() - o2.getMatchRange().getFrom();
-			}
-			
-		});
+		allApplied.sort((o1, o2) -> o1.getMatchRange().getFrom() - o2.getMatchRange().getFrom());
 
 		suggestedInputs = new LinkedHashMap<>();
 		for (WildcardApplied applied: allApplied) {

@@ -6,8 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -153,16 +151,11 @@ public class Bootstrap {
 		}
 
 		// load our jars first so that we can override classes in third party jars if necessary. 
-		Collections.sort(libFiles, new Comparator<File>() {
+		libFiles.sort((file1, file2) -> {
+			Boolean result1 = file1.isDirectory() || file1.getName().startsWith("com.pmease");
+			Boolean result2 = file2.isDirectory() || file2.getName().startsWith("com.pmease");
 
-			@Override
-			public int compare(File file1, File file2) {
-				Boolean result1 = file1.isDirectory() || file1.getName().startsWith("com.pmease");
-				Boolean result2 = file2.isDirectory() || file2.getName().startsWith("com.pmease");
-
-				return result2.compareTo(result1);
-			}
-			
+			return result2.compareTo(result1);
 		});
 		
 		List<URL> urls = new ArrayList<URL>();

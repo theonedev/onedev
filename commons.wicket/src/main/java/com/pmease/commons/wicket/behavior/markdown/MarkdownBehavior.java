@@ -5,8 +5,6 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,14 +77,7 @@ public class MarkdownBehavior extends AbstractDefaultAjaxBehavior {
 					if (emojiName.toLowerCase().contains(emojiQuery))
 						emojiNames.add(emojiName);
 				}
-				Collections.sort(emojiNames, new Comparator<String>() {
-
-					@Override
-					public int compare(String name1, String name2) {
-						return name1.length() - name2.length();
-					}
-					
-				});
+				emojiNames.sort((name1, name2) -> name1.length() - name2.length());
 			} else {
 				emojiNames.add("smile");
 				emojiNames.add("worried");

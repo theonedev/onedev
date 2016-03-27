@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.commitgraph;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,19 +41,14 @@ public class CommitGraphUtils {
 			}
 		}
 		
-		Collections.sort(commits, new Comparator<Commit>() {
-
-			@Override
-			public int compare(Commit o1, Commit o2) {
-				long value = hash2index.get(o1.getHash()) - hash2index.get(o2.getHash());
-				if (value < 0)
-					return -1;
-				else if (value > 0)
-					return 1;
-				else
-					return 0;
-			}
-			
+		commits.sort((o1, o2) -> {
+			long value = hash2index.get(o1.getHash()) - hash2index.get(o2.getHash());
+			if (value < 0)
+				return -1;
+			else if (value > 0)
+				return 1;
+			else
+				return 0;
 		});
 	}
 	

@@ -6,8 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -132,13 +130,7 @@ public class EditableUtils {
 	 *			annotated elements to be sorted 
 	 */
 	public static <T extends AnnotatedElement> void sortAnnotatedElements(List<T> annotatedElements) {
-		Collections.sort(annotatedElements, new Comparator<T>(){
-
-			public int compare(T element1, T element2) {
-				return getOrder(element1) - getOrder(element2);
-			}
-			
-		});
+		annotatedElements.sort((element1, element2) -> getOrder(element1) - getOrder(element2));
 	}
 	
 	public static Class<?> getElementClass(Type listType) {

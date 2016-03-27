@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -407,14 +406,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 						List<Path> paths = new ArrayList<>();
 						for (String file: (Set<String>)SerializationUtils.deserialize(bytes))
 							paths.add(Paths.get(file));
-						Collections.sort(paths, new Comparator<Path>() {
-
-							@Override
-							public int compare(Path path1, Path path2) {
-								return path1.compareTo(path2);
-							}
-							
-						});
+						paths.sort((path1, path2) -> path1.compareTo(path2));
 						List<String> files = new ArrayList<>();
 						for (Path path: paths)
 							files.add(path.toString().replace('\\', '/'));

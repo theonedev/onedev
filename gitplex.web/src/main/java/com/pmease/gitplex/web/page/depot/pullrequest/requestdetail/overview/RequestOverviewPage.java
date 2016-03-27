@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -40,9 +38,11 @@ import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
 import com.pmease.gitplex.core.entity.PullRequestReference;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
@@ -50,11 +50,9 @@ import com.pmease.gitplex.core.entity.PullRequestVisit;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -210,20 +208,15 @@ public class RequestOverviewPage extends RequestDetailPage {
 			}
 		}
 		
-		Collections.sort(renderableActivities, new Comparator<RenderableActivity>() {
-
-			@Override
-			public int compare(RenderableActivity o1, RenderableActivity o2) {
-				if (o1.getDate().before(o2.getDate()))
-					return -1;
-				else if (o1.getDate().after(o2.getDate()))
-					return 1;
-				else if (o1 instanceof OpenPullRequest || o1 instanceof CommentPullRequest)
-					return -1;
-				else
-					return 1;
-			}
-			
+		renderableActivities.sort((o1, o2) -> {
+			if (o1.getDate().before(o2.getDate()))
+				return -1;
+			else if (o1.getDate().after(o2.getDate()))
+				return 1;
+			else if (o1 instanceof OpenPullRequest || o1 instanceof CommentPullRequest)
+				return -1;
+			else
+				return 1;
 		});
 		
 		return renderableActivities;

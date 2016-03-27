@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.account.collaborators;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -163,14 +161,7 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 					}
 				}
 				
-				Collections.sort(depots, new Comparator<Depot>() {
-
-					@Override
-					public int compare(Depot depot1, Depot depot2) {
-						return depot1.getName().compareTo(depot2.getName());
-					}
-					
-				});
+				depots.sort((depot1, depot2) -> depot1.getName().compareTo(depot2.getName()));
 				
 				new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
 			}
@@ -270,14 +261,8 @@ public class CollaboratorDepotListPage extends CollaboratorPage {
 					}
 				}
 				
-				Collections.sort(authorizations, new Comparator<UserAuthorization>() {
-
-					@Override
-					public int compare(UserAuthorization authorization1, UserAuthorization authorization2) {
-						return authorization1.getDepot().getName().compareTo(authorization2.getDepot().getName());
-					}
-					
-				});
+				authorizations.sort((authorization1, authorization2) 
+						-> authorization1.getDepot().getName().compareTo(authorization2.getDepot().getName()));
 				return authorizations;
 			}
 			

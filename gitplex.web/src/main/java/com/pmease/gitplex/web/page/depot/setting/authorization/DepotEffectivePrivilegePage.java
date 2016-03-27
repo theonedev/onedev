@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.depot.setting.authorization;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -173,15 +171,8 @@ public class DepotEffectivePrivilegePage extends DepotAuthorizationPage {
 					}
 				}
 				
-				Collections.sort(permissions, new Comparator<UserPermission>() {
-
-					@Override
-					public int compare(UserPermission permission1, UserPermission permission2) {
-						return permission1.getUser().getDisplayName()
-								.compareTo(permission2.getUser().getDisplayName());
-					}
-					
-				});
+				permissions.sort((permission1, permission2) 
+						-> permission1.getUser().getDisplayName().compareTo(permission2.getUser().getDisplayName()));
 				return permissions;
 			}
 			

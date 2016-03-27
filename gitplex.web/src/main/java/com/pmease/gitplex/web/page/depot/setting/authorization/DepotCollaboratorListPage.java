@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.depot.setting.authorization;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -167,14 +165,7 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 					}
 				}
 				
-				Collections.sort(collaborators, new Comparator<Account>() {
-
-					@Override
-					public int compare(Account user1, Account user2) {
-						return user1.getDisplayName().compareTo(user2.getDisplayName());
-					}
-					
-				});
+				collaborators.sort((user1, user2) -> user1.getDisplayName().compareTo(user2.getDisplayName()));
 				
 				new ResponseFiller<Account>(response).fill(collaborators, page, Constants.DEFAULT_PAGE_SIZE);
 			}
@@ -266,15 +257,8 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 					}
 				}
 				
-				Collections.sort(authorizations, new Comparator<UserAuthorization>() {
-
-					@Override
-					public int compare(UserAuthorization authorization1, UserAuthorization authorization2) {
-						return authorization1.getUser().getDisplayName()
-								.compareTo(authorization2.getUser().getDisplayName());
-					}
-					
-				});
+				authorizations.sort((authorization1, authorization2) 
+						-> authorization1.getUser().getDisplayName().compareTo(authorization2.getUser().getDisplayName()));
 				return authorizations;
 			}
 			

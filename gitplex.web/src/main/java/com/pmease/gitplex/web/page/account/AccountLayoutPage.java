@@ -75,6 +75,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 		tabs.add(new AccountTab("Overview", "fa fa-fw fa-list-alt", AccountOverviewPage.class));
 		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", 
 				DepotListPage.class, NewDepotPage.class));
+		
 		if (getAccount().isOrganization()) {
 			if (SecurityUtils.isMemberOf(getAccount())) {
 				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", 

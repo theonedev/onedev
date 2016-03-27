@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.repopicker;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -169,14 +167,7 @@ public abstract class DepotSelector extends Panel {
 							it.remove();
 					}
 				}
-				Collections.sort(users, new Comparator<Account>() {
-
-					@Override
-					public int compare(Account user1, Account user2) {
-						return user1.getName().compareTo(user2.getName());
-					}
-					
-				});
+				users.sort((user1, user2) -> user1.getName().compareTo(user2.getName()));
 				return users;
 			}
 			
@@ -196,14 +187,7 @@ public abstract class DepotSelector extends Panel {
 							if (depot.getName().contains(depotSearch) && depot.getAccount().equals(userItem.getModelObject()))
 								depots.add(depot);
 						}
-						Collections.sort(depots, new Comparator<Depot>() {
-
-							@Override
-							public int compare(Depot depot1, Depot depot2) {
-								return depot1.getName().compareTo(depot2.getName());
-							}
-							
-						});
+						depots.sort((depot1, depot2) -> depot1.getName().compareTo(depot2.getName()));
 						return depots;
 					}
 					

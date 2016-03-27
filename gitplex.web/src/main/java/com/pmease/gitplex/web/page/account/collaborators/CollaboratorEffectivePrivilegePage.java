@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.account.collaborators;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -164,14 +162,8 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 					}
 				}
 				
-				Collections.sort(permissions, new Comparator<DepotPermission>() {
-
-					@Override
-					public int compare(DepotPermission permission1, DepotPermission permission2) {
-						return permission1.getDepot().getName().compareTo(permission2.getDepot().getName());
-					}
-					
-				});
+				permissions.sort((permission1, permission2) 
+						-> permission1.getDepot().getName().compareTo(permission2.getDepot().getName()));
 				return permissions;
 			}
 			

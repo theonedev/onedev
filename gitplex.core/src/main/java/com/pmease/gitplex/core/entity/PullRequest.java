@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -712,29 +711,24 @@ public class PullRequest extends AbstractEntity {
 		 * 2. If user is already a reviewer, it will be considered first.
 		 * 3. Otherwise pick user with least reviews.
 		 */
-		Collections.sort(pickList, new Comparator<Account>() {
-
-			@Override
-			public int compare(Account user1, Account user2) {
-				if (firstChoices.containsKey(user1)) {
-					if (firstChoices.containsKey(user2)) 
-						return user1.getReviewEffort() - user2.getReviewEffort();
-					else
-						return -1;
-				} else if (firstChoices.containsKey(user2)) {
-					return 1;
-				} else if (secondChoices.containsKey(user1)) {
-					if (secondChoices.containsKey(user2)) 
-						return secondChoices.get(user1).compareTo(secondChoices.get(user2));
-					else
-						return 1;
-				} else if (secondChoices.containsKey(user2)) {
-					return -1;
-				} else {
+		pickList.sort((user1, user2) -> {
+			if (firstChoices.containsKey(user1)) {
+				if (firstChoices.containsKey(user2)) 
 					return user1.getReviewEffort() - user2.getReviewEffort();
-				}
+				else
+					return -1;
+			} else if (firstChoices.containsKey(user2)) {
+				return 1;
+			} else if (secondChoices.containsKey(user1)) {
+				if (secondChoices.containsKey(user2)) 
+					return secondChoices.get(user1).compareTo(secondChoices.get(user2));
+				else
+					return 1;
+			} else if (secondChoices.containsKey(user2)) {
+				return -1;
+			} else {
+				return user1.getReviewEffort() - user2.getReviewEffort();
 			}
-			
 		});
 
 		List<Account> picked;

@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.repofile.blobsearch.result;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,14 +90,7 @@ public abstract class SearchResultPanel extends Panel {
 		
 		blobs = new ArrayList<>(hitsByBlob.values());
 		for (MatchedBlob blob: blobs) {
-			Collections.sort(blob.getHits(), new Comparator<QueryHit>() {
-
-				@Override
-				public int compare(QueryHit hit1, QueryHit hit2) {
-					return hit1.getTokenPos().getLine() - hit2.getTokenPos().getLine();
-				}
-				
-			});
+			blob.getHits().sort((hit1, hit2) -> hit1.getTokenPos().getLine() - hit2.getTokenPos().getLine());
 		}
 	}
 

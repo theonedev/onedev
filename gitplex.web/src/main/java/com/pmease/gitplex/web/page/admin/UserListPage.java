@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.admin;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -44,6 +42,8 @@ public class UserListPage extends AdministrationPage {
 	
 	private WebMarkupContainer usersContainer; 
 	
+	private WebMarkupContainer noUsersContainer;
+	
 	@Override
 	protected String getPageTitle() {
 		return "Dashboard";
@@ -61,6 +61,7 @@ public class UserListPage extends AdministrationPage {
 			protected void onTypingDone(AjaxRequestTarget target) {
 				target.add(usersContainer);
 				target.add(pagingNavigator);
+				target.add(noUsersContainer);
 			}
 
 		});
@@ -80,8 +81,16 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		usersContainer = new WebMarkupContainer("usersContainer");
-		usersContainer.setOutputMarkupId(true);
+		usersContainer = new WebMarkupContainer("users") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!usersView.getModelObject().isEmpty());
+			}
+			
+		};
+		usersContainer.setOutputMarkupPlaceholderTag(true);
 		add(usersContainer);
 		
 		usersContainer.add(usersView = new PageableListView<Account>("users", new LoadableDetachableModel<List<Account>>() {
@@ -93,14 +102,7 @@ public class UserListPage extends AdministrationPage {
 					if (user.matches(searchField.getInput()))
 						users.add(user);
 				}
-				Collections.sort(users, new Comparator<Account>() {
-
-					@Override
-					public int compare(Account user1, Account user2) {
-						return user1.getName().compareTo(user2.getName());
-					}
-					
-				});
+				users.sort((user1, user2) -> user1.getName().compareTo(user2.getName()));
 				return users;
 			}
 			
@@ -138,6 +140,7 @@ public class UserListPage extends AdministrationPage {
 							protected void onDeleted(AjaxRequestTarget target) {
 								target.add(usersContainer);
 								target.add(pagingNavigator);
+								target.add(noUsersContainer);
 							}
 							
 							@Override
@@ -170,6 +173,17 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
+		
+		add(noUsersContainer = new WebMarkupContainer("noUsers") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(usersView.getModelObject().isEmpty());
+			}
+			
+		});
+		noUsersContainer.setOutputMarkupPlaceholderTag(true);
 	}
 
 }

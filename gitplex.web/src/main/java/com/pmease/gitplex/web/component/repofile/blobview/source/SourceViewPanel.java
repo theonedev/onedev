@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.repofile.blobview.source;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -111,14 +109,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							comments.add(comment);
 					}
 				}
-				Collections.sort(comments, new Comparator<Comment>() {
-	
-					@Override
-					public int compare(Comment comment1, Comment comment2) {
-						return comment1.getDate().compareTo(comment2.getDate());
-					}
-					
-				});
+				comments.sort((comment1, comment2) -> comment1.getDate().compareTo(comment2.getDate()));
 			}
 			return comments;
 		}

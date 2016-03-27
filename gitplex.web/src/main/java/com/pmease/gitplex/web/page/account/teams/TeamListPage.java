@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.account.teams;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -146,14 +144,7 @@ public class TeamListPage extends AccountLayoutPage {
 					}
 				}
 				
-				Collections.sort(teams, new Comparator<Team>() {
-
-					@Override
-					public int compare(Team team1, Team team2) {
-						return team1.getName().compareTo(team2.getName());
-					}
-					
-				});
+				teams.sort((team1, team2) -> team1.getName().compareTo(team2.getName()));
 				return teams;
 			}
 			

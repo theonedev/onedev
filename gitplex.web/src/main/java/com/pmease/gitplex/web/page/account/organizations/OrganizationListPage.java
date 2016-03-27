@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.account.organizations;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -126,14 +124,7 @@ public class OrganizationListPage extends AccountLayoutPage {
 					}
 				}
 				
-				Collections.sort(organizations, new Comparator<Account>() {
-
-					@Override
-					public int compare(Account account1, Account account2) {
-						return account1.getName().compareTo(account2.getName());
-					}
-					
-				});
+				organizations.sort((account1, account2) -> account1.getName().compareTo(account2.getName()));
 				return organizations;
 			}
 			

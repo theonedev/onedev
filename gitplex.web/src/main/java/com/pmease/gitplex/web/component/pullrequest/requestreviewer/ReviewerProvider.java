@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.component.pullrequest.requestreviewer;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,14 +31,7 @@ public class ReviewerProvider extends AbstractAccountChoiceProvider {
 				it.remove();
 		}
 		
-		Collections.sort(reviewers, new Comparator<Account>() {
-
-			@Override
-			public int compare(Account user1, Account user2) {
-				return user1.getDisplayName().compareTo(user2.getDisplayName());
-			}
-			
-		});
+		reviewers.sort((user1, user2) -> user1.getDisplayName().compareTo(user2.getDisplayName()));
 
 		int first = page * Constants.DEFAULT_PAGE_SIZE;
 		int last = first + Constants.DEFAULT_PAGE_SIZE;

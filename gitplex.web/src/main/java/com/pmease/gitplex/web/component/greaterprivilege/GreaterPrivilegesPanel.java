@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.greaterprivilege;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -65,15 +63,8 @@ public abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorizat
 						permissions.add(new UserPermission(user, access.getGreatestPrivilege()));
 					}
 				}
-				Collections.sort(permissions, new Comparator<UserPermission>() {
-
-					@Override
-					public int compare(UserPermission permission1, UserPermission permission2) {
-						return permission1.getUser().getDisplayName()
-								.compareTo(permission2.getUser().getDisplayName());
-					}
-					
-				});
+				permissions.sort((permission1, permission2) 
+						-> permission1.getUser().getDisplayName().compareTo(permission2.getUser().getDisplayName()));
 				return permissions;
 			}
 			

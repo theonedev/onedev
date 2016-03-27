@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.account.members;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -164,14 +162,8 @@ public class MemberEffectivePrivilegePage extends MemberPage {
 					}
 				}
 				
-				Collections.sort(permissions, new Comparator<DepotPermission>() {
-
-					@Override
-					public int compare(DepotPermission permission1, DepotPermission permission2) {
-						return permission1.getDepot().getName().compareTo(permission2.getDepot().getName());
-					}
-					
-				});
+				permissions.sort((permission1, permission2) 
+						-> permission1.getDepot().getName().compareTo(permission2.getDepot().getName()));
 				return permissions;
 			}
 			
@@ -222,6 +214,11 @@ public class MemberEffectivePrivilegePage extends MemberPage {
 		add(noDepotsContainer);
 	}
 
+	/*
+	 * Member effective privilege page is only visible to administrator as it contains repository 
+	 * authorization information and we do not want to expose that information to ordinary members 
+	 * as repository name might also be a secret
+	 */
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canManage(getAccount());

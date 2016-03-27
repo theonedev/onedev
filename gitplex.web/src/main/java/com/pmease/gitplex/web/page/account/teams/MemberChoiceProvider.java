@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.account.teams;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
@@ -34,14 +32,7 @@ public class MemberChoiceProvider extends AccountChoiceProvider {
 				members.add(user);
 			}
 		}
-		Collections.sort(members, new Comparator<Account>() {
-
-			@Override
-			public int compare(Account user1, Account user2) {
-				return user1.getName().compareTo(user2.getName());
-			}
-			
-		});
+		members.sort((user1, user2) -> user1.getName().compareTo(user2.getName()));
 		
 		int from = page * Constants.DEFAULT_PAGE_SIZE;
 		int to = from + Constants.DEFAULT_PAGE_SIZE;

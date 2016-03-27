@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.component.diff.blob.text;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -102,14 +100,8 @@ public class TextDiffPanel extends Panel {
 							listOfCommentAndPos.add(commentAndPos);
 					}
 				}
-				Collections.sort(listOfCommentAndPos, new Comparator<CommentAndPos>() {
-	
-					@Override
-					public int compare(CommentAndPos commentAndPos1, CommentAndPos commentAndPos2) {
-						return commentAndPos1.comment.getDate().compareTo(commentAndPos2.comment.getDate());
-					}
-					
-				});
+				listOfCommentAndPos.sort((commentAndPos1, commentAndPos2) 
+						-> commentAndPos1.comment.getDate().compareTo(commentAndPos2.comment.getDate()));
 			}
 			return listOfCommentAndPos;
 		}

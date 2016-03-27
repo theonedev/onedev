@@ -96,9 +96,14 @@ public abstract class CollaboratorPage extends AccountLayoutPage {
 			}
 			
 		});
-		add(new Tabbable("collaboratorTabs", tabs).setVisible(SecurityUtils.canManage(getAccount())));		
+		add(new Tabbable("collaboratorTabs", tabs));		
 	}
 
+	/*
+	 * Collaborators page is only visible to administrator as it contains repository 
+	 * authorization information and we do not want to expose that information to 
+	 * normal users as repository name might also be a secret
+	 */
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canManage(getAccount());

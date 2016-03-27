@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.model;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,16 +27,11 @@ public class AffinalDepotsModel extends LoadableDetachableModel<List<Depot>> {
 		affinals.remove(depot);
 		if (depot.getForkedFrom() != null)
 			affinals.remove(depot.getForkedFrom());
-		Collections.sort(affinals, new Comparator<Depot>() {
-
-			@Override
-			public int compare(Depot repo1, Depot repo2) {
-				if (repo1.getAccount().equals(repo2.getAccount()))
-					return repo1.getName().compareTo(repo2.getName());
-				else
-					return repo1.getAccount().getName().compareTo(repo2.getAccount().getName());
-			}
-			
+		affinals.sort((repo1, repo2) -> {
+			if (repo1.getAccount().equals(repo2.getAccount()))
+				return repo1.getName().compareTo(repo2.getName());
+			else
+				return repo1.getAccount().getName().compareTo(repo2.getAccount().getName());
 		});
 		if (depot.getForkedFrom() != null)
 			affinals.add(0, depot.getForkedFrom());

@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.home;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -44,6 +42,8 @@ public class DashboardPage extends LayoutPage {
 	
 	private WebMarkupContainer usersContainer; 
 	
+	private WebMarkupContainer noUsersContainer;
+	
 	@Override
 	protected String getPageTitle() {
 		return "Dashboard";
@@ -61,12 +61,21 @@ public class DashboardPage extends LayoutPage {
 			protected void onTypingDone(AjaxRequestTarget target) {
 				target.add(usersContainer);
 				target.add(pagingNavigator);
+				target.add(noUsersContainer);
 			}
 
 		});
 		
-		usersContainer = new WebMarkupContainer("usersContainer");
-		usersContainer.setOutputMarkupId(true);
+		usersContainer = new WebMarkupContainer("users") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!usersView.getModelObject().isEmpty());
+			}
+			
+		};
+		usersContainer.setOutputMarkupPlaceholderTag(true);
 		add(usersContainer);
 		
 		usersContainer.add(usersView = new PageableListView<Account>("users", new LoadableDetachableModel<List<Account>>() {
@@ -79,14 +88,7 @@ public class DashboardPage extends LayoutPage {
 						users.add(user);
 					}
 				}
-				Collections.sort(users, new Comparator<Account>() {
-
-					@Override
-					public int compare(Account user1, Account user2) {
-						return user1.getName().compareTo(user2.getName());
-					}
-					
-				});
+				users.sort((user1, user2) -> user1.getName().compareTo(user2.getName()));
 				return users;
 			}
 			
@@ -116,6 +118,17 @@ public class DashboardPage extends LayoutPage {
 			
 		});
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
+		
+		add(noUsersContainer = new WebMarkupContainer("noUsers") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(usersView.getModelObject().isEmpty());
+			}
+			
+		});
+		noUsersContainer.setOutputMarkupPlaceholderTag(true);
 	}
 
 	@Override

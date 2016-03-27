@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.component.pullrequest.requestassignee;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -15,8 +13,8 @@ import org.json.JSONWriter;
 import com.google.common.collect.Lists;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -46,14 +44,8 @@ public class AssigneeProvider extends ChoiceProvider<Assignee> {
 				assignees.add(new Assignee(user, null));
 			}
 		}
-		Collections.sort(assignees, new Comparator<Assignee>() {
-
-			@Override
-			public int compare(Assignee assignee1, Assignee assignee2) {
-				return assignee1.getUser().getDisplayName().compareTo(assignee2.getUser().getDisplayName());
-			}
-			
-		});
+		assignees.sort((assignee1, assignee2) 
+				-> assignee1.getUser().getDisplayName().compareTo(assignee2.getUser().getDisplayName()));
 		if (StringUtils.isBlank(term)) {
 			assignees.add(0, new Assignee(depotModel.getObject().getAccount(), "Repository Owner"));
 			ObjectPermission writePermission = ObjectPermission.ofDepotWrite(depotModel.getObject());

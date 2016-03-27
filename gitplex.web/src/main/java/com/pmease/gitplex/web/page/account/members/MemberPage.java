@@ -184,9 +184,8 @@ public abstract class MemberPage extends AccountLayoutPage {
 			}
 			
 		});
-		boolean visible = SecurityUtils.canManage(getAccount()) 
-				&& !(getPage() instanceof MemberPrivilegeSourcePage);
-		add(new Tabbable("memberTabs", tabs).setVisible(visible));
+		
+		add(new Tabbable("memberTabs", tabs).setVisible(SecurityUtils.canManage(getAccount())));
 	}
 
 	public static PageParameters paramsOf(OrganizationMembership membership) {

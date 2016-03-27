@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.component.comment;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,9 +41,9 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.CommentReplyManager;
-import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
@@ -76,14 +74,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		@Override
 		protected List<CommentReply> load() {
 			List<CommentReply> replies = new ArrayList<>(getComment().getReplies());
-			Collections.sort(replies, new Comparator<CommentReply>() {
-
-				@Override
-				public int compare(CommentReply reply1, CommentReply reply2) {
-					return reply1.getDate().compareTo(reply2.getDate());
-				}
-				
-			});
+			replies.sort((reply1, reply2) -> reply1.getDate().compareTo(reply2.getDate()));
 			return replies;
 		}
 		

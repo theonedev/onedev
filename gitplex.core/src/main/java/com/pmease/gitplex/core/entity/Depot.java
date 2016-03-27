@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -292,20 +290,15 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	public List<Ref> getBranchRefs() {
 		List<Ref> refs = new ArrayList<Ref>(getRefs(Constants.R_HEADS).values());
-		Collections.sort(refs, new Comparator<Ref>() {
-
-    		@Override
-    		public int compare(Ref o1, Ref o2) {
-    			if (o1.getObjectId().equals(o2.getObjectId())) {
-    				return o1.getName().compareTo(o2.getName());
-    			} else {
-    				RevCommit commit1 = getRevCommit(o1.getObjectId());
-    				RevCommit commit2 = getRevCommit(o2.getObjectId());
-    				return commit2.getCommitTime() - commit1.getCommitTime();
-    			}
-    		}
-    		
-    	});
+		refs.sort((o1, o2) -> {
+			if (o1.getObjectId().equals(o2.getObjectId())) {
+				return o1.getName().compareTo(o2.getName());
+			} else {
+				RevCommit commit1 = getRevCommit(o1.getObjectId());
+				RevCommit commit2 = getRevCommit(o2.getObjectId());
+				return commit2.getCommitTime() - commit1.getCommitTime();
+			}
+		});
 		return refs;
     }
 	
@@ -315,27 +308,22 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			if (getRevCommit(ref.getObjectId(), false) != null) 
 				refs.add(ref);
 		}
-		Collections.sort(refs, new Comparator<Ref>() {
-
-    		@Override
-    		public int compare(Ref o1, Ref o2) {
-    			RevObject obj1 = getRevObject(o1.getObjectId());
-    			RevObject obj2 = getRevObject(o2.getObjectId());
-    			if (obj1 instanceof RevTag && obj2 instanceof RevTag) {
-    				RevTag tag1 = (RevTag) obj1;
-    				RevTag tag2 = (RevTag) obj2;
-    				if (tag1.getTaggerIdent() != null && tag2.getTaggerIdent() != null)
-    					return tag2.getTaggerIdent().getWhen().compareTo(tag1.getTaggerIdent().getWhen());
-    			}  
-    			RevCommit commit1 = getRevCommit(o1.getObjectId());
-    			RevCommit commit2 = getRevCommit(o2.getObjectId());
-    			if (commit1.getId().equals(commit2.getId()))
-    				return o1.getName().compareTo(o2.getName());
-    			else
-    				return commit2.getCommitTime() - commit1.getCommitTime();
-    		}
-    		
-    	});
+		refs.sort((o1, o2) -> {
+			RevObject obj1 = getRevObject(o1.getObjectId());
+			RevObject obj2 = getRevObject(o2.getObjectId());
+			if (obj1 instanceof RevTag && obj2 instanceof RevTag) {
+				RevTag tag1 = (RevTag) obj1;
+				RevTag tag2 = (RevTag) obj2;
+				if (tag1.getTaggerIdent() != null && tag2.getTaggerIdent() != null)
+					return tag2.getTaggerIdent().getWhen().compareTo(tag1.getTaggerIdent().getWhen());
+			}  
+			RevCommit commit1 = getRevCommit(o1.getObjectId());
+			RevCommit commit2 = getRevCommit(o2.getObjectId());
+			if (commit1.getId().equals(commit2.getId()))
+				return o1.getName().compareTo(o2.getName());
+			else
+				return commit2.getCommitTime() - commit1.getCommitTime();
+		});
 		return refs;
     }
 
@@ -479,16 +467,11 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			affinals.add(this);
 			affinals.addAll(findForkDescendants());
 		}
-		Collections.sort(affinals, new Comparator<Depot>() {
-
-			@Override
-			public int compare(Depot repo1, Depot repo2) {
-				if (repo1.getAccount().equals(repo2.getAccount()))
-					return repo1.getName().compareTo(repo2.getName());
-				else
-					return repo1.getAccount().getName().compareTo(repo2.getAccount().getName());
-			}
-			
+		affinals.sort((repo1, repo2) -> {
+			if (repo1.getAccount().equals(repo2.getAccount()))
+				return repo1.getName().compareTo(repo2.getName());
+			else
+				return repo1.getAccount().getName().compareTo(repo2.getAccount().getName());
 		});
 		return affinals;
 	}

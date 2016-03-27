@@ -2,8 +2,6 @@ package com.pmease.gitplex.web.page.account.members;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -127,14 +125,7 @@ public class MemberTeamListPage extends MemberPage {
 					}
 				}
 				
-				Collections.sort(teams, new Comparator<Team>() {
-
-					@Override
-					public int compare(Team team1, Team team2) {
-						return team1.getName().compareTo(team2.getName());
-					}
-					
-				});
+				teams.sort((team1, team2) -> team1.getName().compareTo(team2.getName()));
 				
 				new ResponseFiller<Team>(response).fill(teams, page, Constants.DEFAULT_PAGE_SIZE);
 			}
@@ -219,14 +210,8 @@ public class MemberTeamListPage extends MemberPage {
 					}
 				}
 				
-				Collections.sort(memberships, new Comparator<TeamMembership>() {
-
-					@Override
-					public int compare(TeamMembership membership1, TeamMembership membership2) {
-						return membership1.getTeam().getName().compareTo(membership2.getTeam().getName());
-					}
-					
-				});
+				memberships.sort((membership1, membership2) 
+						-> membership1.getTeam().getName().compareTo(membership2.getTeam().getName()));
 				return memberships;
 			}
 			

@@ -1,8 +1,6 @@
 package com.pmease.gitplex.web.page.account.collaborators;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,14 +98,8 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 				}
 
 				List<Account> listOfCollaborators = new ArrayList<>(setOfCollaborators);
-				Collections.sort(listOfCollaborators, new Comparator<Account>() {
-
-					@Override
-					public int compare(Account collaborator1, Account collaborator2) {
-						return collaborator1.getDisplayName().compareTo(collaborator2.getDisplayName());
-					}
-					
-				});
+				listOfCollaborators.sort((collaborator1, collaborator2) 
+						-> collaborator1.getDisplayName().compareTo(collaborator2.getDisplayName()));
 				return listOfCollaborators;
 			}
 			
@@ -158,6 +150,11 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 		add(noCollaboratorsContainer);
 	}
 	
+	/*
+	 * Collaborators page is only visible to administrator as it contains repository 
+	 * authorization information and we do not want to expose that information to 
+	 * normal users as repository name might also be a secret
+	 */
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canManage(getAccount());
