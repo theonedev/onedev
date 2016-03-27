@@ -1,20 +1,18 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<section id="repo-branches">
-		<div class="body">
-			<div class="options clearfix">
-				<div class="pull-left base">
-					<div class="input-group">
-						<span class="input-group-addon">Base</span> <input wicket:id="baseBranch" type="hidden" class="form-control select2-container"></input>					
-					</div>
+	<div id="repo-branches">
+		<div class="list">
+			<div class="head clearfix">
+				<div class="input-group pull-left base">
+					<span class="input-group-addon">Base</span> 
+					<input wicket:id="baseBranch" type="hidden" class="form-control"></input>					
 				</div>
-				<div class="pull-left search">
-					<div class="input-group">
-						<span class="input-group-addon"><i class="fa fa-search"></i></span>
-						<input wicket:id="searchBranches" class="form-control" placeholder="Search branches"></input>
-					</div>
+				<div class="pull-left">
+					<input wicket:id="searchBranches" class="form-control search" placeholder="Search branches"></input>
 				</div>
-				<a wicket:id="createBranch" class="pull-left btn btn-default"><i class="fa fa-plus"></i> Create Branch</a>
+				<div class="pull-left">
+					<a wicket:id="createBranch" class="btn btn-default"><i class="fa fa-plus"></i> Create Branch</a>
+				</div>
 			</div>
 			<table wicket:id="branches" class="table table-hover table-condensed">
 				<tr wicket:id="branches">
@@ -65,7 +63,7 @@
 				</wicket:link>
 			</div>
 		</div>
-	</section>
+	</div>
 	<wicket:fragment wicket:id="createBranchFrag">
 		<form wicket:id="form" class="create-branch">
 			<div class="modal-header">

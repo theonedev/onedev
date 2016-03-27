@@ -1,15 +1,14 @@
 <html xmlns:wicket>
 <wicket:extend>
-	<section id="repo-tags">
-		<div class="body">
-			<div class="options clearfix">
-				<div class="pull-left search">
-					<div class="input-group">
-						<span class="input-group-addon"><i class="fa fa-search"></i></span>
-						<input wicket:id="searchTags" class="form-control" placeholder="Search tags"></input>
-					</div>
+	<div id="repo-tags">
+		<div class="list">
+			<div class="head clearfix">
+				<div class="pull-left">
+					<input wicket:id="searchTags" class="form-control search" placeholder="Search tags"></input>
 				</div>
-				<a wicket:id="createTag" class="btn btn-default"><i class="fa fa-plus"></i> Create Tag</a>
+				<div class="pull-left">
+					<a wicket:id="createTag" class="btn btn-default"><i class="fa fa-plus"></i> Create Tag</a>
+				</div>
 			</div>
 			<table wicket:id="tagsContainer" class="table table-hover table-condensed">
 				<tr wicket:id="tags">
@@ -35,7 +34,7 @@
 			<div class="center"><ul wicket:id="tagsPageNav"></ul></div>
 			<div wicket:id="noTags" class="alert alert-warning">No tags found</div>
 		</div>
-	</section>
+	</div>
 	<wicket:fragment wicket:id="annotatedFrag">
 		<wicket:enclosure child="date">
 		<span class="middot"></span>

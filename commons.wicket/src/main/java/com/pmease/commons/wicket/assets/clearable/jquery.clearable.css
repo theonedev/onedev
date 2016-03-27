@@ -3,9 +3,8 @@ input.clearable::-ms-clear {
 }
 .input-clear {
 	background: url("clear.png") no-repeat; 
-	margin-left: -20px; 
 	z-index: 1000; 
-	position: relative; 
+	position: absolute;
 	cursor: pointer; 
 	top: 8px; 
 	color: #333; 

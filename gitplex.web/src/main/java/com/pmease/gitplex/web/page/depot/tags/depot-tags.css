@@ -1,17 +1,8 @@
 #repo-tags {
 	padding: 20px;
 }
-#repo-tags>.body>.options {
-	margin-bottom: 16px;
-}
-#repo-tags>.body>.options>div {
-	margin-right: 24px;
-}
 
-#repo-tags>.body>.options>div.search .input-group {
-	width: 240px;
-}
-#repo-tags>.body>table td {
+#repo-tags>.list>table td {
 	white-space: nowrap;
 }
 #repo-tags .tag a.name {
@@ -35,25 +26,25 @@
 #repo-tags .commit input {
 	border: 1px dotted #999;	
 }
-#repo-tags>.body>table td.actions {
+#repo-tags>.list>table td.actions {
 	width: 1%;
 	text-align: right;
 }
-#repo-tags>.body>table td.actions .fa.fa-times {
+#repo-tags>.list>table td.actions .fa.fa-times {
 	color: red;
 }
-#repo-tags>.body>table td.actions .fa.fa-download {
+#repo-tags>.list>table td.actions .fa.fa-download {
 	font-size: 15px;
 	vertical-align: middle;
 }
-#repo-tags>.body>table td.actions span.fa.fa-times {
+#repo-tags>.list>table td.actions span.fa.fa-times {
 	color: #888;
 }
-#repo-tags>.body>table td.detail>div, 
-#repo-tags>.body>table td.detail>div .name a {
+#repo-tags>.list>table td.detail>div, 
+#repo-tags>.list>table td.detail>div .name a {
 	font-size: 13px; 
 	color: #666;
 }
-#repo-tags>.body>table td.detail .commit {
+#repo-tags>.list>table td.detail .commit {
 	margin: 8px 0;
 }

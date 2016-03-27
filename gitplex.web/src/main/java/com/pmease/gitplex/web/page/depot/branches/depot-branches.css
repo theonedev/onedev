@@ -1,88 +1,79 @@
 #repo-branches {
 	padding: 20px;
 }
-#repo-branches>.body>.options {
-	margin-bottom: 16px;
-}
-#repo-branches>.body>.options>div {
-	margin-right: 24px;
-}
 
-#repo-branches>.body>.options>div.base .input-group {
+#repo-branches>.list>.head>.base {
 	width: 240px;
 }
-#repo-branches>.body>.options>div.search .input-group {
-	width: 240px;
-}
-#repo-branches>.body>table td {
+#repo-branches>.list>table td {
 	white-space: nowrap;
 }
-#repo-branches>.body>table td.actions {
+#repo-branches>.list>table td.actions {
 	width: 1%;
 	padding-top: 12px;
 }
-#repo-branches>.body>table td.actions .fa.fa-times {
+#repo-branches>.list>table td.actions .fa.fa-times {
 	color: red; margin-left: 8px;
 }
-#repo-branches>.body>table td.actions span.fa.fa-times {
+#repo-branches>.list>table td.actions span.fa.fa-times {
 	color: #888;
 }
-#repo-branches>.body>table td.behind {
+#repo-branches>.list>table td.behind {
 	padding-right: 0;
 }
-#repo-branches>.body>table td.ahead {
+#repo-branches>.list>table td.ahead {
 	padding-left: 0;
 }
-#repo-branches>.body>table td.behind>div {
+#repo-branches>.list>table td.behind>div {
 	border-right: 2px solid #BBB;
 }
-#repo-branches>.body>table td.behind-ahead div.text {
+#repo-branches>.list>table td.behind-ahead div.text {
 	margin: 0 8px;
 }
-#repo-branches>.body>table td.behind-ahead em {
+#repo-branches>.list>table td.behind-ahead em {
 	font-style: normal;
 	color: #666;
 }
-#repo-branches>.body>table td.behind-ahead {
+#repo-branches>.list>table td.behind-ahead {
 	font-size: 13px;
 	padding-top: 12px;
 }
-#repo-branches>.body>table .bar {
+#repo-branches>.list>table .bar {
 	height: 6px;
 }
-#repo-branches>.body>table .ahead .bar {
+#repo-branches>.list>table .ahead .bar {
 	background: #ccc;
 	border-radius: 0 2px 2px 0;
 }
-#repo-branches>.body>table .ahead .bar.request {
+#repo-branches>.list>table .ahead .bar.request {
 	background: #F1D763;
 }
-#repo-branches>.body>table .behind .bar {
+#repo-branches>.list>table .behind .bar {
 	background: #ccc;
 	border-radius: 2px 0 0 2px;
 }
-#repo-branches>.body>table .behind .bar.request {
+#repo-branches>.list>table .behind .bar.request {
 	background: #F1D763;
 }
-#repo-branches>.body>.help-block .bar.request {
+#repo-branches>.list>.help-block .bar.request {
 	background: #F1D763; 
 	font-size: 6px;
 	border-radius: 2px;
 	vertical-align: middle;
 }
-#repo-branches>.body>table td.detail a.name {
+#repo-branches>.list>table td.detail a.name {
 	font-weight: bold;
 	font-size: 16px;
 }
-#repo-branches>.body>table td.detail .commit {
+#repo-branches>.list>table td.detail .commit {
 	margin: 8px 0;
 	font-size: 12px;
 	color: #666;
 }
-#repo-branches>.body>table td.detail .commit .fa {
+#repo-branches>.list>table td.detail .commit .fa {
 	color: #666;
 }
-#repo-branches>.body>table td.detail input.commit-hash {
+#repo-branches>.list>table td.detail input.commit-hash {
 	border: 1px dotted #999;
 }
 #searching-branches {

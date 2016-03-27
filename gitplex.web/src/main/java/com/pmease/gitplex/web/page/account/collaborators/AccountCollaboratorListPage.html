@@ -1,12 +1,7 @@
 <wicket:extend>
 	<div class="collaborator list">
-		<div class="head clearfix">
-			<div class="pull-left search">
-				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-search"></i></span>
-					<input wicket:id="searchCollaborators" class="form-control" placeholder="Search collaborators"></input>
-				</div>
-			</div>
+		<div class="head">
+			<input wicket:id="searchCollaborators" class="form-control search" placeholder="Search collaborators"></input>
 		</div>
 		<table wicket:id="collaborators" class="collaborators table table-hover table-condensed">
 			<thead>

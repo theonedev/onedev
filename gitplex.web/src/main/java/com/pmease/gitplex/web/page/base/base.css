@@ -125,11 +125,14 @@ li.selectable.active a, a.selectable.active {
 	color: white;
 }
 
+input.search {
+	background: url("search.gif") no-repeat 4px 50%;
+	padding-left: 24px;
+	width: 200px;
+}
+
 .list>.head {
 	margin-bottom: 20px;
-}
-.list>.head>.search {
-	width: 200px;
 }
 .list>.head>.pull-left {
 	margin-right: 20px;
