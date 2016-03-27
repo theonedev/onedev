@@ -17,6 +17,9 @@ input.clearable::-ms-clear {
 input.clearable {
 	border-radius: 4px !important;
 }
-.input-group>input.clearable {
+.input-group-addon+input.clearable {
 	border-radius: 0 4px 4px 0 !important;
+}
+.input-group>input.clearable:FIRST-CHILD {
+	border-radius: 4px 0 0 4px !important;
 }

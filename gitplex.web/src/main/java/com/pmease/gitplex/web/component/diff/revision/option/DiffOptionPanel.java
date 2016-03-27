@@ -93,6 +93,7 @@ public abstract class DiffOptionPanel extends Panel {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
+									close();
 									lineProcessor = option;
 									onLineProcessorChange(target);
 								}
