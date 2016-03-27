@@ -127,7 +127,7 @@ public class IfVerifiedByBuilds extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckPush(Account user, Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
-		if (!newCommit.equals(ObjectId.zeroId())) {
+		if (!oldCommit.equals(ObjectId.zeroId()) && !newCommit.equals(ObjectId.zeroId())) {
 			if (blockMode) {
 				return blocking(Lists.newArrayList("Has to be verified by builds"));
 			} else {
