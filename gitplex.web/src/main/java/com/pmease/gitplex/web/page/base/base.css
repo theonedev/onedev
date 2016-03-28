@@ -1,12 +1,12 @@
 html, body {
-	background: white;
+	background: #F7F6F2;
 }
 
 .center-box { 
 	padding: 50px; 
 	width: 600px; 
 	margin: 0 auto; 
-	background: #F5F5F5;
+	background: white;
 	border: 8px solid #DDD;
 	margin-top: 100px;
 	margin-bottom: 20px;

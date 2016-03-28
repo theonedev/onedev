@@ -1,8 +1,8 @@
 html, body {
-	background: #f0f2f4; 
+	background: #F7F6F2; 
 }
 #main>.head {
-	background: #303845;
+	background: #010203;
 	padding: 8px 16px;
 }
 #main>.head>div {
@@ -19,6 +19,19 @@ html, body {
 #main>.head>.context, #main>.head>.context a {
 	color: #EEE;
 	font-size: 20px;
+}
+#main>.head>.search {
+	padding-top: 2px;
+}
+#main>.head>.search input {
+	background: #333;
+	border: 1px solid #333;
+	box-shadow: none;
+	transition: none;
+}
+#main>.head>.search input:FOCUS {
+	background: #DDD;
+	border-color: #DDD;
 }
 #main>.head>.actions {
 	padding-top: 7px;
@@ -51,15 +64,14 @@ html, body {
 }
 
 #main>.body {
-	background: white;
 	border-bottom: 1px solid #BBB;
+	background: white;
 }
 
 .sidebar>table>tbody>tr>td.nav {
 	padding: 20px 0;
 	width: 1px;
-	border-right: 1px solid #BBB;
-	background: #F8F8F8;
+	border-right: 1px solid #DDD;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs {
 	margin-bottom: 0;
@@ -69,8 +81,9 @@ html, body {
 	display: block;
 	text-decoration: none;
 	padding: 12px;
+	padding-right: 8px;
 	white-space: nowrap;
-	border-left: 4px solid white;
+	border-right: 4px solid white;
 	width: 180px;
 	font-family: monospace;
 }
@@ -79,14 +92,12 @@ html, body {
 	margin-right: 4px;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li:hover>a {
-	color: #303845;
-	background: #EEE;
-	border-left-color: #EEE;
+	color: #010203;
+	border-right-color: #777;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li.active>a {
-	color: #303845;
-	background: #DDD;
-	border-left-color: #69B7F7;
+	color: #010203;
+	border-right-color: #010203;
 	font-weight: bold;
 }
 #main>.foot {
