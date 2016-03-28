@@ -6,24 +6,28 @@ html, body {
 	padding: 8px 16px;
 }
 #main>.head>div {
-	margin-right: 16px;
+	margin-right: 20px;
 }
 #main>.head a {
 	text-decoration: none;
-	color: #EEE;
+	color: #CCC;
 }
 #main>.head>.logo .fa {
 	font-size: 28px;
-	color: #69B7F7; 
+	color: #EEE;
 }
-#main>.head>.context {
+#main>.head>.context, #main>.head>.context a {
 	color: #EEE;
 	font-size: 20px;
-	margin-left: 40px;
 }
-#main>.head>.administration a {
-	font-size: 30px;
-	line-height: 20px;
+#main>.head>.actions {
+	padding-top: 7px;
+}
+#main>.head>.actions>a {
+	margin-right: 20px;
+}
+#main>.head>.actions a .fa {
+	font-size: 18px;
 }
 #main>.head>.account {
 	margin-right: 0;
@@ -44,19 +48,6 @@ html, body {
 #main>.head>.account .avatar {
 	width: 32px;
 	height: 32px;
-	box-shadow: -1px 0px 3px 0px #333, 
-				1px 0px 3px 0px #333, 
-				0px -1px 3px 0px #333, 
-				0px 1px 3px 0px #333;
-}
-#main>.head>.account a.previous .avatar {
-	margin-right: -24px;
-}
-#main>.head>.account a.previous:hover .avatar {
-	margin-right: -12px;
-}
-#runas-tooltip {
-	padding: 4px 8px;
 }
 
 #main>.body {
@@ -68,6 +59,7 @@ html, body {
 	padding: 20px 0;
 	width: 1px;
 	border-right: 1px solid #BBB;
+	background: #F8F8F8;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs {
 	margin-bottom: 0;
@@ -76,11 +68,11 @@ html, body {
 	color: #666;
 	display: block;
 	text-decoration: none;
-	padding: 8px;
-	height: 36px;
+	padding: 12px;
 	white-space: nowrap;
 	border-left: 4px solid white;
 	width: 180px;
+	font-family: monospace;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a .fa {
 	font-size: 16px;

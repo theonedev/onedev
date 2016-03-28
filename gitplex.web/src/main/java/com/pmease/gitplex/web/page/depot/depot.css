@@ -1,28 +1,8 @@
-#repository-head>.nav .separator {
+#repository-head .separator {
 	margin: 0 6px;
 }
-#repository-head>.nav .open a {
+#repository-head .open a {
 	background: inherit;
-}
-#repository-head>.clone {
-	color: #DDD;
-	margin: 4px 20px 0 40px;
-	font-size: 14px;
-}
-#repository-head>.clone>label {
-	font-weight: normal;
-	margin-right: 4px;
-}
-#repository-head>.clone>input {
-	background: #666;
-	font-size: 12px;
-	width: 200px;
-	border: 1px solid #666;
-	border-radius: 3px;
-	padding-left: 4px;
-	padding-right: 4px;
-	height: 22px;
-	color: #DDD;
 }
 
 #repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle {
@@ -30,7 +10,7 @@
 	margin-top: -20px;
 	text-align: right;
 	font-size: 20px;
-	padding-right: 16px;
+	padding-right: 20px;
 	border-bottom: 1px solid #BBB;
 	text-decoration: none;
 	color: #666;

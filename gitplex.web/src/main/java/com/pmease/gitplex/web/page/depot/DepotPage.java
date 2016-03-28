@@ -15,7 +15,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -40,7 +39,6 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.repopicker.DepotSelector;
 import com.pmease.gitplex.web.model.DepotModel;
@@ -204,10 +202,6 @@ public abstract class DepotPage extends AccountPage {
 			
 		});
 
-		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
-		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getDepot()));
-		fragment.add(new TextField<String>("cloneUrl", cloneUrlModel));
-		
 		return fragment;
 	}
 	

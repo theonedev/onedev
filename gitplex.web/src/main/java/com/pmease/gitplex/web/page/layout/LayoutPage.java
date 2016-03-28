@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
@@ -48,6 +49,22 @@ public abstract class LayoutPage extends BasePage {
 		head.add(newContextHead("context"));
 		head.add(new BookmarkablePageLink<Void>("administration", UserListPage.class)
 					.setVisible(SecurityUtils.canManageSystem()));
+		head.add(new DropdownLink("organizations") {
+
+			@Override
+			protected Component newContent(String id) {
+				return null;
+			}
+			
+		});
+		head.add(new DropdownLink("repositories") {
+
+			@Override
+			protected Component newContent(String id) {
+				return null;
+			}
+			
+		});
 
 		Account user = getLoginUser();
 		boolean signedIn = user != null;

@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
@@ -17,8 +14,6 @@ import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.accountchoice.AccountChoiceProvider;
-import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.collaborators.AccountCollaboratorListPage;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPage;
@@ -54,21 +49,6 @@ public abstract class AccountLayoutPage extends AccountPage {
 			avatarLink.setEnabled(false);
 		add(avatarLink);
 		avatarLink.add(new Avatar("avatar", accountModel.getObject(), null));
-		
-		IModel<Account> accountModel = Model.of(getAccount());
-		AccountSingleChoice accountChoice = new AccountSingleChoice("accountChoice", accountModel, 
-				new AccountChoiceProvider());
-		accountChoice.setRequired(true);
-		
-		accountChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				AccountLayoutPage.this.onSelect(target, accountModel.getObject());
-			}
-			
-		});
-		add(accountChoice);
 		
 		List<PageTab> tabs = new ArrayList<>();
 		
