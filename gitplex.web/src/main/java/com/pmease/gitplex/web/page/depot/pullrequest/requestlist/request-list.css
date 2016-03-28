@@ -1,6 +1,7 @@
 #request-list>.head {
 	padding: 12px 20px;
-	border-bottom: 1px solid #BBB;
+	border-bottom: 1px solid #DDD;
+	background: white;
 }
 #request-list>.head>a {
 	margin-right: 16px;
@@ -9,7 +10,7 @@
 #request-list td.filter {
 	width: 200px;
 	padding: 20px;
-	border-right: 1px solid #BBB;
+	border-right: 1px solid #EEE;
 }
 #request-list td.filter form button.top {
 	margin-bottom: 10px;

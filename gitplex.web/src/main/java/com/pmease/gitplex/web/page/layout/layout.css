@@ -1,5 +1,5 @@
 html, body {
-	background: #F7F6F2; 
+	background: #F7F6F2;
 }
 #main>.head {
 	background: #010203;
@@ -22,16 +22,19 @@ html, body {
 }
 #main>.head>.search {
 	padding-top: 2px;
+	position: relative;
 }
 #main>.head>.search input {
 	background: #333;
 	border: 1px solid #333;
 	box-shadow: none;
 	transition: none;
+	color: #CCC;
 }
 #main>.head>.search input:FOCUS {
 	background: #DDD;
 	border-color: #DDD;
+	color: #333;
 }
 #main>.head>.actions {
 	padding-top: 7px;
