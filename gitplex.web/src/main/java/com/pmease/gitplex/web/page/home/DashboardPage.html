@@ -1,35 +1,54 @@
 <wicket:extend>
 	<div id="dashboard">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="panel-title">Users</div>
-			</div>
-			<div class="panel-body user list">
-				<div class="head">
-					<input wicket:id="searchUsers" class="form-control search" placeholder="Search users"></input>
-				</div>
-				<table wicket:id="users" class="users table table-hover">
-					<thead>
-						<tr>
-							<th class="name">Name</th>
-							<th class="full-name">Full Name</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr wicket:id="users">
-							<td class="name">
-								<img wicket:id="avatar" class="avatar"></img>
-								<a wicket:id="link"><span wicket:id="name"></span></a>
-							</td>
-							<td class="full-name">
-								<span wicket:id="fullName"></span>
-							</td>
-						</tr>
-					</tbody>
-				</table>	
-				<div class="center"><ul wicket:id="usersPageNav"></ul></div>
-				<div wicket:id="noUsers" class="alert alert-warning">No users found</div>
-			</div>
-		</div>
+		<table>
+			<tr>
+				<td class="left">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="panel-title">Accessible Repositories</div>
+						</div>
+						<div class="panel-body depot list">
+							<div class="head">
+								<input wicket:id="searchDepots" class="form-control search" placeholder="Search..."></input>
+							</div>
+							<table wicket:id="depots" class="depots table">
+								<tbody>
+									<tr wicket:id="depots">
+										<td class="name">
+											<i class="fa fa-ext fa-repo"></i> <a wicket:id="link"><span wicket:id="name"></span></a> 
+										</td>
+									</tr>
+								</tbody>
+							</table>	
+							<div class="center"><ul wicket:id="depotsPageNav"></ul></div>
+							<div wicket:id="noDepots" class="alert alert-warning">No repositories found</div>
+						</div>
+					</div>
+				</td>
+				<td class="right">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="panel-title">Joined Organizations</div>
+						</div>
+						<div class="panel-body user list">
+							<div class="head">
+								<input wicket:id="searchOrganizations" class="form-control search" placeholder="Search..."></input>
+							</div>
+							<table wicket:id="organizations" class="organizations table">
+								<tbody>
+									<tr wicket:id="organizations">
+										<td class="name">
+											<a wicket:id="avatarLink"></a> <a wicket:id="nameLink"></a>
+										</td>
+									</tr>
+								</tbody>
+							</table>	
+							<div class="center"><ul wicket:id="organizationsPageNav"></ul></div>
+							<div wicket:id="noOrganizations" class="alert alert-warning">No organizations found</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
 	</div>
 </wicket:extend>

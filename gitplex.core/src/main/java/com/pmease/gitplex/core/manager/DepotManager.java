@@ -1,5 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
+import java.util.Collection;
+
 import javax.annotation.Nullable;
 
 import com.pmease.commons.hibernate.dao.EntityDao;
@@ -49,4 +51,7 @@ public interface DepotManager extends EntityDao<Depot> {
 	void save(Depot depot, @Nullable Long oldAccountId, @Nullable String oldName);
 	
 	void delete(Depot depot);
+	
+	Collection<Depot> getAccessibles(@Nullable Account user);
+	
 }

@@ -127,7 +127,7 @@ public class TeamMemberListPage extends TeamPage {
 				}
 				
 				memberships.sort((membership1, membership2) 
-						-> membership1.getUser().getDisplayName().compareTo(membership2.getUser().getDisplayName()));
+						-> membership1.getUser().compareTo(membership2.getUser()));
 				
 				new ResponseFiller<OrganizationMembership>(response).fill(memberships, page, Constants.DEFAULT_PAGE_SIZE);
 			}

@@ -1,5 +1,6 @@
 package com.pmease.gitplex.web.model;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.security.ObjectPermission;
 
 @SuppressWarnings("serial")
-public class AffinalDepotsModel extends LoadableDetachableModel<List<Depot>> {
+public class AffinalDepotsModel extends LoadableDetachableModel<Collection<Depot>> {
 
 	private final Long repoId;
 	
@@ -21,7 +22,7 @@ public class AffinalDepotsModel extends LoadableDetachableModel<List<Depot>> {
 	}
 	
 	@Override
-	protected List<Depot> load() {
+	protected Collection<Depot> load() {
 		Depot depot = GitPlex.getInstance(Dao.class).load(Depot.class, repoId);;
 		List<Depot> affinals = depot.findAffinals();
 		affinals.remove(depot);

@@ -21,7 +21,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 
@@ -59,7 +59,7 @@ public abstract class CollaboratorPage extends AccountLayoutPage {
 		super.onInitialize();
 		
 		add(new AvatarLink("collaboratorAvatar", collaboratorModel.getObject()));
-		add(new UserLink("collaboratorName", collaboratorModel.getObject()));
+		add(new AccountLink("collaboratorName", collaboratorModel.getObject()));
 		
 		List<PageTab> tabs = new ArrayList<>();
 		tabs.add(new PageTab(Model.of("Collaborating Repositories"), CollaboratorDepotListPage.class) {

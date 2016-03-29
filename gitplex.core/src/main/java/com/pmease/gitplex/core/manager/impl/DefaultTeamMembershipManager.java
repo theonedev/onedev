@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -24,6 +25,7 @@ public class DefaultTeamMembershipManager extends AbstractEntityDao<TeamMembersh
 		super(dao);
 	}
 
+	@Sessional
 	@Override
 	public Collection<TeamMembership> query(Account organization, Account user) {
 		EntityCriteria<TeamMembership> criteria = newCriteria();
@@ -32,6 +34,7 @@ public class DefaultTeamMembershipManager extends AbstractEntityDao<TeamMembersh
 		return query(criteria);
 	}
 
+	@Sessional
 	@Override
 	public Collection<TeamMembership> query(Account organization) {
 		EntityCriteria<TeamMembership> criteria = newCriteria();

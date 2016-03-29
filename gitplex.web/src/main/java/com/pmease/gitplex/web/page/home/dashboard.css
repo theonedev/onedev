@@ -1,11 +1,6 @@
 #dashboard {
 	padding: 20px;
 }
-#dashboard>.head {
-	font-size: 20px;
-	margin-bottom: 20px;
-}
-#dashboard .actions .fa {
-	font-size: 18px;
-	color: #666;
+#dashboard .left {
+	padding-right: 20px;
 }

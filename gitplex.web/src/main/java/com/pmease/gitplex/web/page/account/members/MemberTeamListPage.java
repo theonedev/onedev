@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.account.members;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -125,7 +126,7 @@ public class MemberTeamListPage extends MemberPage {
 					}
 				}
 				
-				teams.sort((team1, team2) -> team1.getName().compareTo(team2.getName()));
+				Collections.sort(teams);
 				
 				new ResponseFiller<Team>(response).fill(teams, page, Constants.DEFAULT_PAGE_SIZE);
 			}

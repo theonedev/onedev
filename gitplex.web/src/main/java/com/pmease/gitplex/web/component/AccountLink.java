@@ -13,26 +13,26 @@ import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
 
 @SuppressWarnings("serial")
-public class UserLink extends BookmarkablePageLink<Void> {
+public class AccountLink extends BookmarkablePageLink<Void> {
 
 	private final PageParameters params;
 	
 	private final String name;
 	
-	public UserLink(String id, Account user) {
+	public AccountLink(String id, Account account) {
 		super(id, DepotListPage.class);
 
-		params = AccountPage.paramsOf(user);
-		name = user.getDisplayName();
+		params = AccountPage.paramsOf(account);
+		name = account.getDisplayName();
 	}
 	
-	public UserLink(String id, PersonIdent person) {
+	public AccountLink(String id, PersonIdent person) {
 		super(id, DepotListPage.class);
 		
-		Account user = GitPlex.getInstance(AccountManager.class).findByPerson(person);
-		if (user != null) { 
-			params = AccountPage.paramsOf(user);
-			name = user.getDisplayName();
+		Account account = GitPlex.getInstance(AccountManager.class).findByPerson(person);
+		if (account != null) { 
+			params = AccountPage.paramsOf(account);
+			name = account.getDisplayName();
 		} else {
 			params = new PageParameters();
 			name = person.getName();

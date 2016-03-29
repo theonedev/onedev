@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.account.depots;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -118,7 +119,7 @@ public class DepotListPage extends AccountLayoutPage {
 						depots.add(depot);
 				}
 				
-				depots.sort((depot1, depot2) -> depot1.getName().compareTo(depot2.getName()));
+				Collections.sort(depots);
 				return depots;
 			}
 			

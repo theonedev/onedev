@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.depot.setting.authorization;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -165,7 +166,7 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 					}
 				}
 				
-				collaborators.sort((user1, user2) -> user1.getDisplayName().compareTo(user2.getDisplayName()));
+				Collections.sort(collaborators);
 				
 				new ResponseFiller<Account>(response).fill(collaborators, page, Constants.DEFAULT_PAGE_SIZE);
 			}

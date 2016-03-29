@@ -25,6 +25,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
+import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.shiro.AbstractUser;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.editable.annotation.Editable;
@@ -464,4 +465,15 @@ public class Account extends AbstractUser implements ProtectedObject {
 		}
 		return organizationMembersMap;
 	}
+
+	@Override
+	public int compareTo(AbstractEntity entity) {
+		Account account = (Account) entity;
+		if (getDisplayName().equals(account.getDisplayName())) {
+			return getId().compareTo(entity.getId());
+		} else {
+			return getDisplayName().compareTo(account.getDisplayName());
+		}
+	}
+	
 }

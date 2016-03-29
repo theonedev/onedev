@@ -25,7 +25,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig
 @SuppressWarnings("serial")
 public class AvatarLink extends BookmarkablePageLink<Void> {
 
-	private final Long userId;
+	private final Long accountId;
 	
 	private final PageParameters params;
 	
@@ -39,20 +39,20 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 		this(id, user, null);
 	}
 	
-	public AvatarLink(String id, @Nullable Account user, @Nullable TooltipConfig tooltipConfig) {
+	public AvatarLink(String id, @Nullable Account account, @Nullable TooltipConfig tooltipConfig) {
 		super(id, DepotListPage.class);
 
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
-		if (user != null) {
-			userId = user.getId();
-			params = AccountPage.paramsOf(user);
-			name = user.getDisplayName();
+		if (account != null) {
+			accountId = account.getId();
+			params = AccountPage.paramsOf(account);
+			name = account.getDisplayName();
 		} else {
-			userId = null;
+			accountId = null;
 			params = new PageParameters();
 			name = "Unknown";
 		}
-		url = avatarManager.getAvatarUrl(user);
+		url = avatarManager.getAvatarUrl(account);
 		this.tooltipConfig = tooltipConfig;
 	}
 	
@@ -65,14 +65,14 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 		
 		AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 		
-		Account user = GitPlex.getInstance(AccountManager.class).findByPerson(person);
-		if (user != null) { 
-			userId = user.getId();
-			params = AccountPage.paramsOf(user);
-			url = avatarManager.getAvatarUrl(user);
-			name = user.getDisplayName();
+		Account account = GitPlex.getInstance(AccountManager.class).findByPerson(person);
+		if (account != null) { 
+			accountId = account.getId();
+			params = AccountPage.paramsOf(account);
+			url = avatarManager.getAvatarUrl(account);
+			name = account.getDisplayName();
 		} else {
-			userId = null;
+			accountId = null;
 			params = new PageParameters();
 			url = avatarManager.getAvatarUrl(person);
 			name = person.getName();
@@ -96,7 +96,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 		
 		if (event.getPayload() instanceof AvatarChanged) {
 			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
-			if (avatarChanged.getUser().getId().equals(userId)) {
+			if (avatarChanged.getUser().getId().equals(accountId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
 				avatarChanged.getTarget().add(this);

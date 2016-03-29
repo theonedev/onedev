@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.layout;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -21,16 +22,19 @@ import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.accountselector.AccountSelector;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.entityselector.AccountSelector;
+import com.pmease.gitplex.web.component.entityselector.DepotSelector;
 import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
-import com.pmease.gitplex.web.page.admin.UserListPage;
+import com.pmease.gitplex.web.page.admin.account.AccountListPage;
 import com.pmease.gitplex.web.page.base.BasePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
@@ -56,33 +60,36 @@ public abstract class LayoutPage extends BasePage {
 		
 		head.add(new BookmarkablePageLink<Void>("home", getApplication().getHomePage()));
 		head.add(newContextHead("context"));
-		head.add(new BookmarkablePageLink<Void>("administration", UserListPage.class)
-					.setVisible(SecurityUtils.canManageSystem()));
+		
 		head.add(new DropdownLink("organizations") {
 
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLoginUser() != null);
+			}
+
+			@Override
 			protected Component newContent(String id) {
-				return new AccountSelector(id, new LoadableDetachableModel<List<Account>>() {
+				return new AccountSelector(id, new LoadableDetachableModel<Collection<Account>>() {
 
 					@Override
-					protected List<Account> load() {
-						List<Account> organizations = new ArrayList<>();
+					protected Collection<Account> load() {
+						Collection<Account> organizations = new ArrayList<>();
 						
 						for (OrganizationMembership membership: getLoginUser().getOrganizations()) {
 							Account organization = membership.getOrganization();
 							organizations.add(organization);
 						}
 						
-						organizations.sort((account1, account2) -> account1.getName().compareTo(account2.getName()));
 						return organizations;
 					}
 					
 				}, Account.idOf(getAccount())) {
 
 					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getLoginUser() != null && !getLoginUser().getOrganizations().isEmpty());
+					protected String getNotFoundMessage() {
+						return "No organizations found";
 					}
 
 					@Override
@@ -98,11 +105,27 @@ public abstract class LayoutPage extends BasePage {
 
 			@Override
 			protected Component newContent(String id) {
-				return null;
+				return new DepotSelector(id, new LoadableDetachableModel<Collection<Depot>>() {
+
+					@Override
+					protected Collection<Depot> load() {
+						return GitPlex.getInstance(DepotManager.class).getAccessibles(getLoginUser());
+					}
+					
+				}, Depot.idOf(getDepot())) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Depot depot) {
+						LayoutPage.this.onSelect(target, depot);
+					}
+					
+				};
 			}
 			
 		});
-
+		head.add(new BookmarkablePageLink<Void>("administration", AccountListPage.class)
+				.setVisible(SecurityUtils.canManageSystem()));
+		
 		Account user = getLoginUser();
 		boolean signedIn = user != null;
 

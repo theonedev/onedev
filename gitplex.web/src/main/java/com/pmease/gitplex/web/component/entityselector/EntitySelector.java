@@ -1,7 +1,11 @@
-package com.pmease.gitplex.web.component.accountselector;
+package com.pmease.gitplex.web.component.entityselector;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -25,39 +29,71 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import com.pmease.commons.hibernate.AbstractEntity;
+import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.web.component.avatar.Avatar;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 @SuppressWarnings("serial")
-public abstract class AccountSelector extends Panel {
+public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 
-	private final IModel<List<Account>> accountsModel;
+	private final IModel<Collection<T>> entitiesModel;
 	
-	private final Long currentAccountId;
+	private final Class<T> entityClass;
 	
-	public AccountSelector(String id, IModel<List<Account>> accountsModel, Long currentAccountId) {
+	private final Long currentEntityId;
+
+	private ListView<T> entitiesView;
+	
+	@SuppressWarnings("unchecked")
+	public EntitySelector(String id, IModel<Collection<T>> entitiesModel, Long currentEntityId) {
 		super(id);
 		
-		this.accountsModel = accountsModel;
-		this.currentAccountId = currentAccountId;
+		this.entitiesModel = entitiesModel;
+		this.currentEntityId = currentEntityId;
+		
+		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(EntitySelector.class, getClass());
+		if (typeArguments.size() == 1 && AbstractEntity.class.isAssignableFrom(typeArguments.get(0))) {
+			entityClass = (Class<T>) typeArguments.get(0);
+		} else {
+			throw new RuntimeException("Super class of entity selector implementation must "
+					+ "be EntitySelector and must realize the type argument <T>");
+		}
+		
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer accountsContainer = new WebMarkupContainer("accounts");
-		accountsContainer.setOutputMarkupId(true);
-		add(accountsContainer);
+		WebMarkupContainer entitiesContainer = new WebMarkupContainer("entities") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!entitiesView.getModelObject().isEmpty());
+			}
+			
+		};
+		entitiesContainer.setOutputMarkupPlaceholderTag(true);
+		add(entitiesContainer);
+		
+		Label noEntitiesLabel = new Label("noEntities", getNotFoundMessage()) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(entitiesView.getModelObject().isEmpty());
+			}
+			
+		};
+		noEntitiesLabel.setOutputMarkupPlaceholderTag(true);
+		add(noEntitiesLabel);
 		
 		TextField<String> searchField = new TextField<String>("search", Model.of(""));
 		add(searchField);
@@ -65,7 +101,8 @@ public abstract class AccountSelector extends Panel {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target) {
-				target.add(accountsContainer);
+				target.add(entitiesContainer);
+				target.add(noEntitiesLabel);
 			}
 			
 		});
@@ -75,14 +112,14 @@ public abstract class AccountSelector extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				Long id = params.getParameterValue("id").toLong();
-				onSelect(target, GitPlex.getInstance(AccountManager.class).load(id));
+				onSelect(target, GitPlex.getInstance(Dao.class).load(entityClass, id));
 			}
 
 			@Override
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				String script = String.format("gitplex.accountSelector.init('%s', %s)", 
+				String script = String.format("gitplex.entitySelector.init('%s', %s)", 
 						searchField.getMarkupId(true), 
 						getCallbackFunction(CallbackParameter.explicit("id")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
@@ -90,24 +127,27 @@ public abstract class AccountSelector extends Panel {
 			
 		});
 		
-		accountsContainer.add(new ListView<Account>("accounts", new LoadableDetachableModel<List<Account>>() {
+		entitiesContainer.add(entitiesView = new ListView<T>("entities", 
+				new LoadableDetachableModel<List<T>>() {
 
 			@Override
-			protected List<Account> load() {
-				List<Account> accounts = new ArrayList<>();
-				for (Account account: accountsModel.getObject()) {
-					if (account.matches(searchField.getInput())) {
-						accounts.add(account);
+			protected List<T> load() {
+				List<T> entities = new ArrayList<>();
+				for (T entity: entitiesModel.getObject()) {
+					if (matches(entity, searchField.getInput())) {
+						entities.add(entity);
 					}
 				}
-				return accounts;
+				Collections.sort(entities);
+				
+				return entities;
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(final ListItem<Account> item) {
-				Account account = item.getModelObject();
+			protected void populateItem(ListItem<T> item) {
+				T entity = item.getModelObject();
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
@@ -119,20 +159,18 @@ public abstract class AccountSelector extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						PageParameters params = AccountOverviewPage.paramsOf(item.getModelObject());
-						tag.put("href", urlFor(AccountOverviewPage.class, params));
+						tag.put("href", getUrl(item.getModelObject()));
 					}
 					
 				};
-				link.add(new Avatar("avatar", item.getModelObject(), null));
-				link.add(new Label("name", item.getModelObject().getName()));
-				if (account.getId().equals(currentAccountId)) 
+				if (entity.getId().equals(currentEntityId)) 
 					link.add(AttributeAppender.append("class", " current"));
+				link.add(renderEntity("entity", item.getModel()));
 				item.add(link);
 				
 				if (item.getIndex() == 0)
 					item.add(AttributeAppender.append("class", "active"));
-				item.add(AttributeAppender.append("data-id", account.getId()));
+				item.add(AttributeAppender.append("data-id", entity.getId()));
 			}
 			
 		});
@@ -140,7 +178,7 @@ public abstract class AccountSelector extends Panel {
 
 	@Override
 	protected void onDetach() {
-		accountsModel.detach();
+		entitiesModel.detach();
 		
 		super.onDetach();
 	}
@@ -152,10 +190,18 @@ public abstract class AccountSelector extends Panel {
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(AccountSelector.class, "account-selector.js")));
+				new JavaScriptResourceReference(EntitySelector.class, "entity-selector.js")));
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(AccountSelector.class, "account-selector.css")));
+				new CssResourceReference(EntitySelector.class, "entity-selector.css")));
 	}
 	
-	protected abstract void onSelect(AjaxRequestTarget target, Account account);
+	protected abstract String getUrl(T entity);
+	
+	protected abstract void onSelect(AjaxRequestTarget target, T entity);
+	
+	protected abstract String getNotFoundMessage();
+	
+	protected abstract Component renderEntity(String componentId, IModel<T> entityModel);
+	
+	protected abstract boolean matches(T entity, @Nullable String searchTerm);
 }

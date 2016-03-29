@@ -58,6 +58,9 @@ html, body {
 #main>.head>.account>.logged-in>.menu {
 	margin-right: 8px;
 }
+#main>.head>.account>.logged-out {
+	padding-top: 4px;
+}
 #main>.head>.account>.logged-out a {
 	font-size: 16px;
 }

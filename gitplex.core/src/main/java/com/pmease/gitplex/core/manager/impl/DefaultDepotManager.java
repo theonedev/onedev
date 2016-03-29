@@ -3,16 +3,23 @@ package com.pmease.gitplex.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Query;
@@ -32,8 +39,11 @@ import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.Team;
+import com.pmease.gitplex.core.entity.TeamAuthorization;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.listener.DepotListener;
@@ -44,6 +54,8 @@ import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.StorageManager;
+import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
+import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 
 @Singleton
 public class DefaultDepotManager extends AbstractEntityDao<Depot> implements DepotManager, LifecycleListener, RefListener {
@@ -60,6 +72,8 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
    
     private final PullRequestManager pullRequestManager;
     
+    private final TeamAuthorizationManager teamAuthorizationManager;
+    
     private final String gitUpdateHook;
     
     private final String gitPostReceiveHook;
@@ -69,13 +83,15 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
     
     @Inject
-    public DefaultDepotManager(Dao dao, AccountManager userManager,
+    public DefaultDepotManager(Dao dao, AccountManager userManager, 
+    		TeamAuthorizationManager teamAuthorizationManager,
     		StorageManager storageManager, AuxiliaryManager auxiliaryManager, 
     		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
     	super(dao);
     	
         this.storageManager = storageManager;
         this.userManager = userManager;
+        this.teamAuthorizationManager = teamAuthorizationManager;
         this.auxiliaryManager = auxiliaryManager;
         this.pullRequestManager = pullRequestManager;
         this.listenersProvider = listenersProvider;
@@ -347,6 +363,64 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 						it.remove();
 				}
 			}
+		}
+	}
+
+	@Sessional
+	@Override
+	public Collection<Depot> getAccessibles(Account user) {
+		Collection<Depot> all = GitPlex.getInstance(DepotManager.class).all();
+		if (user == null) {
+			return all.stream().filter((depot)->depot.isPublicRead()).collect(Collectors.toList());
+		} else if (user.isAdministrator()) {
+			return all;
+		} else {
+			List<Depot> accessibles = new ArrayList<>();
+			Collection<Depot> authorizedDepots = user.getAuthorizedDepots()
+					.stream()
+					.map((authorization)->authorization.getDepot())
+					.collect(Collectors.toSet());
+			Collection<Team> joinedTeams = user.getJoinedTeams()
+					.stream()
+					.map((membership)->membership.getTeam())
+					.collect(Collectors.toSet());
+			Collection<Account> adminOrganizations = user.getOrganizations()
+					.stream()
+					.filter((membership)->membership.isAdmin())
+					.map((membership)->membership.getOrganization())
+					.collect(Collectors.toSet());
+			Collection<Account> memberOrganizations = user.getOrganizations()
+					.stream()
+					.filter((membership)->!membership.isAdmin())
+					.map((membership)->membership.getOrganization())
+					.collect(Collectors.toSet());
+			Map<Depot, Set<Team>> authorizedTeams = new HashMap<>();
+			for (TeamAuthorization authorization: teamAuthorizationManager.all()) {
+				Set<Team> teams = authorizedTeams.get(authorization.getDepot());
+				if (teams == null) {
+					teams = new HashSet<>();
+					authorizedTeams.put(authorization.getDepot(), teams);
+				}
+				teams.add(authorization.getTeam());
+			}
+			for (Depot depot: all) {
+				if (depot.isPublicRead()) {
+					accessibles.add(depot);
+				} else if (authorizedDepots.contains(depot)) {
+					accessibles.add(depot);
+				} else if (adminOrganizations.contains(depot.getAccount())) {
+					accessibles.add(depot);
+				} else if (memberOrganizations.contains(depot.getAccount()) 
+						&& depot.getAccount().getDefaultPrivilege() != DepotPrivilege.NONE) {
+					accessibles.add(depot);
+				} else {
+					Set<Team> teams = authorizedTeams.get(depot);
+					if (teams != null && CollectionUtils.containsAny(teams, joinedTeams)) {
+						accessibles.add(depot);
+					}
+				}
+			}
+			return accessibles;
 		}
 	}
 

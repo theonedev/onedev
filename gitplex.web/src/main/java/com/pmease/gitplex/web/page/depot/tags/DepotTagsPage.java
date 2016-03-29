@@ -50,7 +50,7 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -276,7 +276,7 @@ public class DepotTagsPage extends DepotPage {
 					RevTag revTag = (RevTag) revObject;
 					Fragment fragment = new Fragment("annotated", "annotatedFrag", DepotTagsPage.this);
 					if (revTag.getTaggerIdent() != null) {
-						fragment.add(new UserLink("author", revTag.getTaggerIdent()));
+						fragment.add(new AccountLink("author", revTag.getTaggerIdent()));
 						fragment.add(new Label("date", DateUtils.formatDate(revTag.getTaggerIdent().getWhen())));
 					} else {
 						fragment.add(new WebMarkupContainer("author").setVisible(false));

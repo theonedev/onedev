@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -50,7 +51,7 @@ public class DefaultTeamManager extends AbstractEntityDao<Team> implements TeamM
 		remove(team);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public Team find(Account organization, String name) {
 		EntityCriteria<Team> criteria = newCriteria();

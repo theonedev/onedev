@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.page.account.collaborators;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +50,7 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Outside Collaborators - " + getAccount();
+		return "Collaborators - " + getAccount();
 	}
 	
 	@Override
@@ -98,8 +99,7 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 				}
 
 				List<Account> listOfCollaborators = new ArrayList<>(setOfCollaborators);
-				listOfCollaborators.sort((collaborator1, collaborator2) 
-						-> collaborator1.getDisplayName().compareTo(collaborator2.getDisplayName()));
+				Collections.sort(listOfCollaborators);
 				return listOfCollaborators;
 			}
 			

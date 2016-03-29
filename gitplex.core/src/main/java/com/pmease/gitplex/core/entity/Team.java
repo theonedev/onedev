@@ -115,4 +115,11 @@ public class Team extends AbstractEntity {
 		}
 		return members;
 	}
+
+	@Override
+	public int compareTo(AbstractEntity entity) {
+		Team team = (Team) entity;
+		return getName().compareTo(team.getName());
+	}
+	
 }

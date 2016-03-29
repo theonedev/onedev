@@ -1075,4 +1075,23 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		return getName().toLowerCase().contains(searchTerm);
 	}
 	
+	public boolean matchesFQN(@Nullable String searchTerm) {
+		if (searchTerm == null)
+			searchTerm = "";
+		else
+			searchTerm = searchTerm.toLowerCase().trim();
+		
+		return getFQN().toLowerCase().contains(searchTerm);
+	}
+	
+	@Override
+	public int compareTo(AbstractEntity entity) {
+		Depot depot = (Depot) entity;
+		if (getAccount().equals(depot.getAccount())) {
+			return getName().compareTo(depot.getName());
+		} else {
+			return getAccount().compareTo(depot.getAccount());
+		}
+	}
+	
 }

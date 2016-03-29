@@ -1,8 +1,9 @@
 #administration.sidebar>table>tbody>tr>td.content {
 	padding: 20px;
 }
-.user.list .actions .fa {
-	font-size: 18px;
-	color: #666;
+.account.list .type {
+	width: 20%;
 }
-
+.account.list .actions {
+	width: 10%;
+}

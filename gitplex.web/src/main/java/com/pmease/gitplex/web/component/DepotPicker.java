@@ -1,6 +1,6 @@
-package com.pmease.gitplex.web.component.depotpicker;
+package com.pmease.gitplex.web.component;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -11,15 +11,16 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.web.component.entityselector.DepotSelector;
 
 @SuppressWarnings("serial")
 public abstract class DepotPicker extends DropdownLink {
 
-	private final IModel<List<Depot>> depotsModel; 
+	private final IModel<Collection<Depot>> depotsModel; 
 	
 	private Long currentDepotId;
 	
-	public DepotPicker(String id, IModel<List<Depot>> depotsModel, Long currentDepotId) {
+	public DepotPicker(String id, IModel<Collection<Depot>> depotsModel, Long currentDepotId) {
 		super(id);
 	
 		this.depotsModel = depotsModel;

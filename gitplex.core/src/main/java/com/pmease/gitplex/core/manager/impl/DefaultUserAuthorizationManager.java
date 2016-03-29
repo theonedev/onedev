@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -43,6 +44,7 @@ public class DefaultUserAuthorizationManager extends AbstractEntityDao<UserAutho
 		super.persist(entity);
 	}
 	
+	@Sessional
 	@Override
 	public UserAuthorization find(Account user, Depot depot) {
 		EntityCriteria<UserAuthorization> criteria = newCriteria();
@@ -50,6 +52,7 @@ public class DefaultUserAuthorizationManager extends AbstractEntityDao<UserAutho
 		return find(criteria);
 	}
 
+	@Sessional
 	@Override
 	public Collection<UserAuthorization> query(Account account) {
 		EntityCriteria<UserAuthorization> criteria = newCriteria();

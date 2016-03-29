@@ -163,7 +163,7 @@ public class CollaboratorEffectivePrivilegePage extends CollaboratorPage {
 				}
 				
 				permissions.sort((permission1, permission2) 
-						-> permission1.getDepot().getName().compareTo(permission2.getDepot().getName()));
+						-> permission1.getDepot().compareTo(permission2.getDepot()));
 				return permissions;
 			}
 			

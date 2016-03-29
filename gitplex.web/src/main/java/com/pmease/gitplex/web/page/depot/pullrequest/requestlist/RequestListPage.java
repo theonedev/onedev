@@ -40,8 +40,8 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.pullrequest.requestlink.RequestLink;
 import com.pmease.gitplex.web.component.pullrequest.requeststatus.RequestStatusPanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -284,11 +284,11 @@ public class RequestListPage extends PullRequestPage {
 				fragment.add(new Label("id", "#" + request.getId()));
 				fragment.add(new RequestLink("title", rowModel));
 				fragment.add(new RequestStatusPanel("status", rowModel, false));
-				fragment.add(new UserLink("submitter", rowModel.getObject().getSubmitter()));
+				fragment.add(new AccountLink("submitter", rowModel.getObject().getSubmitter()));
 				fragment.add(new BranchLink("targetBranch", request.getTarget()));
 				fragment.add(new BranchLink("source", request.getSource()));
 				fragment.add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
-				fragment.add(new UserLink("assignee", rowModel.getObject().getSubmitter())
+				fragment.add(new AccountLink("assignee", rowModel.getObject().getSubmitter())
 						.setVisible(request.getAssignee() != null));
 				
 				cellItem.add(fragment);

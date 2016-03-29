@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.account.teams;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -194,7 +195,7 @@ public class TeamDepotListPage extends TeamPage {
 					}
 				}
 				
-				depots.sort((depot1, depot2) -> depot1.getName().compareTo(depot2.getName()));
+				Collections.sort(depots);
 				
 				new ResponseFiller<Depot>(response).fill(depots, page, Constants.DEFAULT_PAGE_SIZE);
 			}

@@ -126,8 +126,6 @@ li.selectable.active a, a.selectable.active {
 }
 
 input.search {
-	background: url("search.gif") no-repeat 4px 50%;
-	padding-left: 24px;
 	width: 200px;
 }
 

@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.text.WordUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -106,7 +105,7 @@ public class MemberListPage extends AccountLayoutPage {
 						if (filterRole == null)
 							return "Filter by role";
 						else 
-							return WordUtils.capitalize(filterRole);
+							return filterRole;
 					}
 					
 				}));
@@ -233,7 +232,7 @@ public class MemberListPage extends AccountLayoutPage {
 				}
 				
 				memberships.sort((membership1, membership2) 
-						-> membership1.getUser().getName().compareTo(membership2.getUser().getName()));
+						-> membership1.getUser().compareTo(membership2.getUser()));
 				return memberships;
 			}
 			

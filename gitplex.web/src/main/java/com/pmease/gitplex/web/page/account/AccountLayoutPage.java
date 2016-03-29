@@ -66,7 +66,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
 			} 
 		} else {
-			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-sitemap", 
+			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-group", 
 					OrganizationListPage.class, NewOrganizationPage.class));
 			if (SecurityUtils.canManage(getAccount())) {
 				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 

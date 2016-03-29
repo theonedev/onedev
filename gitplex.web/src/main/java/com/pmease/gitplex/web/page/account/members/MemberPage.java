@@ -32,7 +32,7 @@ import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
@@ -71,7 +71,7 @@ public abstract class MemberPage extends AccountLayoutPage {
 		super.onInitialize();
 		
 		add(new AvatarLink("memberAvatar", getMembership().getUser()));
-		add(new UserLink("memberLink", getMembership().getUser()));
+		add(new AccountLink("memberLink", getMembership().getUser()));
 		add(new DropdownLink("memberRole") {
 
 			@Override

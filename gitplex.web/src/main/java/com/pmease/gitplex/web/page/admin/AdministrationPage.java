@@ -12,6 +12,8 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.page.admin.account.AccountListPage;
+import com.pmease.gitplex.web.page.admin.account.NewUserPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")
@@ -27,7 +29,7 @@ public abstract class AdministrationPage extends LayoutPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new AdministrationTab("All Users", "fa fa-fw fa-users", UserListPage.class, NewUserPage.class));
+		tabs.add(new AdministrationTab("All Accounts", "fa fa-fw fa-users", AccountListPage.class, NewUserPage.class));
 		tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-gear", SystemSettingPage.class));
 		tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
 		
@@ -37,7 +39,8 @@ public abstract class AdministrationPage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(AdministrationPage.class, "administration.css")));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(
+				AdministrationPage.class, "administration.css")));
 	}
 
 	@Override

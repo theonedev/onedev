@@ -1,0 +1,17 @@
+.entity-selector {
+	padding: 20px;
+}
+.entity-selector ul.entities {
+	margin: 12px 0 0 0;
+}
+.entity-selector a.current:before {
+	font-family: "FontAwesome"; 
+	content: "\f00c"; 
+	margin-right: 4px;	
+	position: absolute;
+	left: 4px;
+}
+.entity-selector .alert {
+	margin-top: 12px;
+	margin-bottom: 0;
+}

@@ -216,6 +216,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 	public void systemStopped() {
 	}
 
+	@Sessional
 	@Override
 	public List<Account> allUsers() {
 		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);
@@ -223,6 +224,7 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
 		return query(criteria, 0, 0);
 	}
 
+	@Sessional
 	@Override
 	public List<Account> allOrganizations() {
 		EntityCriteria<Account> criteria = EntityCriteria.of(Account.class);

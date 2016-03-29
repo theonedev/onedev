@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.depotaccess.PrivilegeSource;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -32,7 +32,7 @@ public class PrivilegeSourcePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserLink("userLink", userModel.getObject()));
+		add(new AccountLink("userLink", userModel.getObject()));
 		
 		DepotAccess access = new DepotAccess(userModel.getObject(), depotModel.getObject());
 

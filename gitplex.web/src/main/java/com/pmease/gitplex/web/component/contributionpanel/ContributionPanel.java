@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
@@ -28,12 +28,12 @@ public class ContributionPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserLink("author", author));
+		add(new AccountLink("author", author));
 		if (committer.getEmailAddress().equals(author.getEmailAddress())
 				&& committer.getName().equals(author.getName())) {
 			add(new WebMarkupContainer("committer").setVisible(false));
 		} else {
-			add(new UserLink("committer", committer));
+			add(new AccountLink("committer", committer));
 		}
 		add(new Label("date", DateUtils.formatAge(committer.getWhen())));
 	}

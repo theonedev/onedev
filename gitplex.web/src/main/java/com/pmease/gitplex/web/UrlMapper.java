@@ -37,9 +37,9 @@ import com.pmease.gitplex.web.page.account.teams.TeamEditPage;
 import com.pmease.gitplex.web.page.account.teams.TeamListPage;
 import com.pmease.gitplex.web.page.account.teams.TeamMemberListPage;
 import com.pmease.gitplex.web.page.admin.MailSettingPage;
-import com.pmease.gitplex.web.page.admin.NewUserPage;
 import com.pmease.gitplex.web.page.admin.SystemSettingPage;
-import com.pmease.gitplex.web.page.admin.UserListPage;
+import com.pmease.gitplex.web.page.admin.account.AccountListPage;
+import com.pmease.gitplex.web.page.admin.account.NewUserPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
@@ -120,8 +120,8 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addAdministrationPages() {
-		add(new MountedMapper("administration/users", UserListPage.class));
-		add(new MountedMapper("administration/users/new", NewUserPage.class));
+		add(new MountedMapper("administration/accounts", AccountListPage.class));
+		add(new MountedMapper("administration/accounts/new", NewUserPage.class));
 		add(new MountedMapper("administration/settings/system", SystemSettingPage.class));
 		add(new MountedMapper("administration/settings/mail", MailSettingPage.class));
 	}

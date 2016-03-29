@@ -8,7 +8,6 @@ import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -19,7 +18,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -29,10 +27,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Preconditions;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
@@ -40,7 +35,6 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.depotpicker.DepotSelector;
 import com.pmease.gitplex.web.model.DepotModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
@@ -157,50 +151,13 @@ public abstract class DepotPage extends AccountPage {
 	@Override
 	protected Component newContextHead(String componentId) {
 		Fragment fragment = new Fragment(componentId, "contextHeadFrag", this);
-		WebMarkupContainer accountAndRepo = new WebMarkupContainer("accountAndRepo");
-		fragment.add(accountAndRepo);
 		Link<Void> accountLink = new BookmarkablePageLink<>("accountLink", DepotListPage.class, paramsOf(getAccount()));
 		accountLink.add(new Label("accountName", getAccount().getName()));
-		accountAndRepo.add(accountLink);
+		fragment.add(accountLink);
 		
 		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", DepotFilePage.class, paramsOf(getDepot()));
 		repoLink.add(new Label("repoName", getDepot().getName()));
-		accountAndRepo.add(repoLink);
-		
-		fragment.add(new DropdownLink("repoChoiceTrigger") {
-
-			@Override
-			protected void onInitialize(FloatingPanel dropdown) {
-				super.onInitialize(dropdown);
-				dropdown.add(AttributeAppender.append("class", " repo-choice"));
-			}
-
-			@Override
-			protected Component newContent(String id) {
-				return new DepotSelector(id, new LoadableDetachableModel<List<Depot>>() {
-
-					@Override
-					protected List<Depot> load() {
-						List<Depot> repositories = new ArrayList<>(); 
-						for (Depot repo: GitPlex.getInstance(Dao.class).allOf(Depot.class)) {
-							if (SecurityUtils.canRead(repo))
-								repositories.add(repo);
-						}
-						return repositories;
-					}
-					
-				}, depotModel.getObject().getId()) {
-					
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Depot depot) {
-						DepotPage.this.onSelect(target, depot);
-					}
-					
-				};
-			}
-			
-		});
-
+		fragment.add(repoLink);
 		return fragment;
 	}
 

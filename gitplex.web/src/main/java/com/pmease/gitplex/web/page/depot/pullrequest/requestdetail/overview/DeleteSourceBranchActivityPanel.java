@@ -4,7 +4,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -20,7 +20,7 @@ public class DeleteSourceBranchActivityPanel extends AbstractActivityPanel {
 		super.onInitialize();
 		
 		add(new AvatarLink("avatar", userModel.getObject(), null));
-		add(new UserLink("name", userModel.getObject()));
+		add(new AccountLink("name", userModel.getObject()));
 		
 		add(new Label("age", DateUtils.formatAge(activity.getDate())));
 		

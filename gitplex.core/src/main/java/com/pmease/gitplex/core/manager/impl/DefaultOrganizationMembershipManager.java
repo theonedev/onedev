@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -46,6 +47,7 @@ public class DefaultOrganizationMembershipManager extends AbstractEntityDao<Orga
 		persist(membership);
 	}
 
+	@Sessional
 	@Override
 	public OrganizationMembership find(Account organization, Account user) {
 		EntityCriteria<OrganizationMembership> criteria = newCriteria();

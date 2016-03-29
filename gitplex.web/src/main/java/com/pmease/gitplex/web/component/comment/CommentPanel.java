@@ -45,7 +45,7 @@ import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.CommentReplyManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.comment.event.CommentResized;
@@ -186,7 +186,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		head.setOutputMarkupId(true);
 		add(head);
 		
-		head.add(new UserLink("user", getComment().getUser()));
+		head.add(new AccountLink("user", getComment().getUser()));
 		head.add(newActionComponent("action"));
 		head.add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 
@@ -486,7 +486,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 		head.setOutputMarkupId(true);
 		row.add(head);
 		
-		head.add(new UserLink("user", reply.getUser()));
+		head.add(new AccountLink("user", reply.getUser()));
 		head.add(new Label("age", DateUtils.formatAge(reply.getDate())));
 
 		head.add(new AjaxLink<Void>("edit") {

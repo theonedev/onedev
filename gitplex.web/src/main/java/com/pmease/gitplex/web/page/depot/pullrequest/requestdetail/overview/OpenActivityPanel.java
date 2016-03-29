@@ -23,7 +23,7 @@ import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.UserLink;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -96,7 +96,7 @@ class OpenActivityPanel extends AbstractActivityPanel {
 		head.setOutputMarkupId(true);
 		add(head);
 		
-		head.add(new UserLink("user", userModel.getObject()));
+		head.add(new AccountLink("user", userModel.getObject()));
 		head.add(new Label("age", DateUtils.formatAge(activity.getDate())));
 		
 		head.add(new AjaxLink<Void>("edit") {

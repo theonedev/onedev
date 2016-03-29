@@ -9,6 +9,7 @@ import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
+import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -67,7 +68,7 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 			remove(authorization);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public Collection<TeamAuthorization> query(Account organization) {
 		EntityCriteria<TeamAuthorization> criteria = newCriteria(); 

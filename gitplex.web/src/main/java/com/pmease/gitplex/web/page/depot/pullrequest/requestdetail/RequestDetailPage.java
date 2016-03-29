@@ -68,8 +68,8 @@ import com.pmease.gitplex.core.entity.PullRequest.Status;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.UserLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.EntityModel;
@@ -336,7 +336,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		});
 		
 		if (request.getStatus() == Status.INTEGRATED) {
-			statusAndBranchesContainer.add(new UserLink("user", request.getCloseInfo().getClosedBy())); 
+			statusAndBranchesContainer.add(new AccountLink("user", request.getCloseInfo().getClosedBy())); 
 			
 			int commitCount = 0;
 			for (PullRequestUpdate update: request.getUpdates())
@@ -345,7 +345,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			statusAndBranchesContainer.add(new Label("action", "integrated " + commitCount + " commits"));
 			statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getCloseInfo().getCloseDate())));
 		} else {
-			statusAndBranchesContainer.add(new UserLink("user", request.getSubmitter()));
+			statusAndBranchesContainer.add(new AccountLink("user", request.getSubmitter()));
 			statusAndBranchesContainer.add(new Label("action", "wants to integrate"));
 			statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 		}
