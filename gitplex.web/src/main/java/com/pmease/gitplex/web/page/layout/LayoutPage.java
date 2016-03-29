@@ -3,13 +3,17 @@ package com.pmease.gitplex.web.page.layout;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
@@ -18,12 +22,17 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.component.accountselector.AccountSelector;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.admin.UserListPage;
 import com.pmease.gitplex.web.page.base.BasePage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
 import com.pmease.gitplex.web.page.security.RegisterPage;
@@ -53,7 +62,35 @@ public abstract class LayoutPage extends BasePage {
 
 			@Override
 			protected Component newContent(String id) {
-				return null;
+				return new AccountSelector(id, new LoadableDetachableModel<List<Account>>() {
+
+					@Override
+					protected List<Account> load() {
+						List<Account> organizations = new ArrayList<>();
+						
+						for (OrganizationMembership membership: getLoginUser().getOrganizations()) {
+							Account organization = membership.getOrganization();
+							organizations.add(organization);
+						}
+						
+						organizations.sort((account1, account2) -> account1.getName().compareTo(account2.getName()));
+						return organizations;
+					}
+					
+				}, Account.idOf(getAccount())) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getLoginUser() != null && !getLoginUser().getOrganizations().isEmpty());
+					}
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Account account) {
+						LayoutPage.this.onSelect(target, account);
+					}
+					
+				};
 			}
 			
 		});
@@ -186,6 +223,24 @@ public abstract class LayoutPage extends BasePage {
 		return true;
 	}
 	
+	@Nullable
+	protected Account getAccount() {
+		return getLoginUser();
+	}
+
+	@Nullable
+	protected Depot getDepot() {
+		return null;
+	}
+	
+	protected void onSelect(AjaxRequestTarget target, Account account) {
+		setResponsePage(AccountOverviewPage.class, AccountOverviewPage.paramsOf(account));
+	}
+	
+	protected void onSelect(AjaxRequestTarget target, Depot depot) {
+		setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

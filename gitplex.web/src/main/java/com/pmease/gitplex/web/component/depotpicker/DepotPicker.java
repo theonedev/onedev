@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.repopicker;
+package com.pmease.gitplex.web.component.depotpicker;
 
 import java.util.List;
 

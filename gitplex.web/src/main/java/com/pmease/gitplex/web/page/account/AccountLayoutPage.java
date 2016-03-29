@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.account;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -12,7 +11,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.collaborators.AccountCollaboratorListPage;
@@ -88,5 +86,4 @@ public abstract class AccountLayoutPage extends AccountPage {
 				new CssResourceReference(AccountLayoutPage.class, "account.css")));
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, Account account);
 }

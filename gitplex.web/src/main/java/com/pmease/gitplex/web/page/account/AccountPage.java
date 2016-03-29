@@ -42,6 +42,7 @@ public abstract class AccountPage extends LayoutPage {
 		super.onDetach();
 	}
 	
+	@Override
 	public Account getAccount() {
 		return accountModel.getObject();
 	}

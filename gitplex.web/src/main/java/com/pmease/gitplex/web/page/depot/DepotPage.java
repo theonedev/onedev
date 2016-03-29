@@ -40,7 +40,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.component.repopicker.DepotSelector;
+import com.pmease.gitplex.web.component.depotpicker.DepotSelector;
 import com.pmease.gitplex.web.model.DepotModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.depots.DepotListPage;
@@ -142,6 +142,7 @@ public abstract class DepotPage extends AccountPage {
 		return SecurityUtils.canRead(getDepot());
 	}
 	
+	@Override
 	public Depot getDepot() {
 		return depotModel.getObject();
 	}
@@ -152,8 +153,6 @@ public abstract class DepotPage extends AccountPage {
 		
 		super.onDetach();
 	}
-
-	protected abstract void onSelect(AjaxRequestTarget target, Depot depot);
 
 	@Override
 	protected Component newContextHead(String componentId) {
@@ -204,5 +203,5 @@ public abstract class DepotPage extends AccountPage {
 
 		return fragment;
 	}
-	
+
 }
