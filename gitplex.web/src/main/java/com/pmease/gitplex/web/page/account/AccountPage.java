@@ -59,7 +59,7 @@ public abstract class AccountPage extends LayoutPage {
 	
 	@Override
 	protected Component newContextHead(String componentId) {
-		return new Label(componentId, getAccount().getName());
+		return new Label(componentId, getAccount().getDisplayName());
 	}
 
 }

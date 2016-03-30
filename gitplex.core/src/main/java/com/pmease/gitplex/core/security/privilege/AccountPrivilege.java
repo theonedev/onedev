@@ -10,11 +10,13 @@ public enum AccountPrivilege implements Privilege {
 		}
 		
 	},
-	MEMBER("Member") {
+	
+	// Organization members can access member/team information of organization account 
+	ACCESS("Access") {
 
 		@Override
 		public boolean can(Privilege privilege) {
-			return privilege == MEMBER || NONE.can(privilege);
+			return privilege == ACCESS || NONE.can(privilege);
 		}
 		
 	},
@@ -22,7 +24,7 @@ public enum AccountPrivilege implements Privilege {
 
 		@Override
 		public boolean can(Privilege privilege) {
-			return privilege == ADMIN || MEMBER.can(privilege) || privilege instanceof DepotPrivilege;
+			return privilege == ADMIN || ACCESS.can(privilege) || privilege instanceof DepotPrivilege;
 		}
 		
 	};

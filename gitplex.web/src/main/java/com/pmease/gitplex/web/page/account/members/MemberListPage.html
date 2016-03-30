@@ -43,11 +43,11 @@
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
 		<div wicket:id="noMembers" class="alert alert-warning">No members found</div>
 		<div class="help-block"><i class="fa fa-info-circle"></i> 
-			Organization members can see other members and teams in the organiation, 
-			<wicket:enclosure child="organizationProfile">
-				have <a wicket:id="organizationProfile"><span wicket:id="defaultPrivilege"></span></a> on all organization repositories,
-			</wicket:enclosure>
-			and can be added to teams to gain extra repository privileges
+			<span wicket:id="hasDefaultPrivilege">
+				Organization members have <a wicket:id="organizationProfile"><span wicket:id="defaultPrivilege"></span></a> 
+				on all organization repositories, and can be added to teams to gain extra repository privileges
+			</span>
+			<span wicket:id="noDefaultPrivilege">Organization members can be added to teams to gain repository privileges</span>
 		</div>
 	</div>
 </wicket:extend>

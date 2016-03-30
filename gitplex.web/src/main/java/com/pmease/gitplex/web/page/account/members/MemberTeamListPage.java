@@ -300,7 +300,7 @@ public class MemberTeamListPage extends MemberPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.isMemberOf(getAccount());
+		return SecurityUtils.canAccess(getAccount());
 	}
 	
 }

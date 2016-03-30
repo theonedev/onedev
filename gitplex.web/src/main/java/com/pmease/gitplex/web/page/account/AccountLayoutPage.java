@@ -55,7 +55,7 @@ public abstract class AccountLayoutPage extends AccountPage {
 				DepotListPage.class, NewDepotPage.class));
 		
 		if (getAccount().isOrganization()) {
-			if (SecurityUtils.isMemberOf(getAccount())) {
+			if (SecurityUtils.canAccess(getAccount())) {
 				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", 
 						MemberListPage.class, NewMembersPage.class, MemberPage.class));
 				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class));
@@ -66,9 +66,9 @@ public abstract class AccountLayoutPage extends AccountPage {
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
 			} 
 		} else {
+			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-group", 
+					OrganizationListPage.class, NewOrganizationPage.class));
 			if (SecurityUtils.canManage(getAccount())) {
-				tabs.add(new AccountTab("Organizations", "fa fa-fw fa-group", 
-						OrganizationListPage.class, NewOrganizationPage.class));
 				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 
 						AccountCollaboratorListPage.class, CollaboratorPage.class));
 				tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", NotificationListPage.class));

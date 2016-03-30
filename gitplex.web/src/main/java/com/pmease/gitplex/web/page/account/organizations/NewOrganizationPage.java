@@ -3,7 +3,6 @@ package com.pmease.gitplex.web.page.account.organizations;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -68,14 +67,6 @@ public class NewOrganizationPage extends AccountLayoutPage {
 		};
 		form.add(editor);
 		
-		form.add(new Link<Void>("cancel") {
-
-			@Override
-			public void onClick() {
-				setResponsePage(OrganizationListPage.class, paramsOf(getAccount()));
-			}
-			
-		});
 		add(form);
 	}
 

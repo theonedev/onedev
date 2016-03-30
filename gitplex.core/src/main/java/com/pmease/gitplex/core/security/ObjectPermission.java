@@ -71,8 +71,8 @@ public class ObjectPermission implements Permission {
 		return new ObjectPermission(account, AccountPrivilege.ADMIN);
 	}
 	
-	public static ObjectPermission ofAccountMember(Account account) {
-		return new ObjectPermission(account, AccountPrivilege.MEMBER);
+	public static ObjectPermission ofAccountAccess(Account account) {
+		return new ObjectPermission(account, AccountPrivilege.ACCESS);
 	}
 	
 	public static ObjectPermission ofSystemAdmin() {

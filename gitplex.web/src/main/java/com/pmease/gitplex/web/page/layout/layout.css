@@ -16,9 +16,12 @@ html, body {
 	font-size: 28px;
 	color: #EEE;
 }
-#main>.head>.context, #main>.head>.context a {
-	color: #EEE;
+#main>.head>.context {
+	color: #CCC;
 	font-size: 20px;
+}
+#main>.head>.context a {
+	color: #EEE;
 }
 #main>.head>.search {
 	padding-top: 2px;

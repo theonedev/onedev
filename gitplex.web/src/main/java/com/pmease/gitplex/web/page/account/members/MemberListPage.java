@@ -387,30 +387,53 @@ public class MemberListPage extends AccountLayoutPage {
 		noMembersContainer.setOutputMarkupPlaceholderTag(true);
 		add(noMembersContainer);
 		
-		add(new BookmarkablePageLink<Void>("organizationProfile", 
-				ProfileEditPage.class, ProfileEditPage.paramsOf(getAccount())) {
+		add(new WebMarkupContainer("hasDefaultPrivilege") {
+			
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new BookmarkablePageLink<Void>("organizationProfile", 
+						ProfileEditPage.class, ProfileEditPage.paramsOf(getAccount())) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setEnabled(SecurityUtils.canManage(getAccount()));
+					}
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new Label("defaultPrivilege", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								return "the default <b>" + getAccount().getDefaultPrivilege() + "</b> privilege"; 
+							}
+							
+						}).setEscapeModelStrings(false));
+						
+						setBeforeDisabledLink("");
+						setAfterDisabledLink("");
+					}
+					
+				});
+			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getAccount().getDefaultPrivilege() != DepotPrivilege.NONE);
-				setEnabled(SecurityUtils.canManage(getAccount()));
 			}
-
+			
+		});
+		add(new WebMarkupContainer("noDefaultPrivilege") {
+			
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("defaultPrivilege", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return "the default <b>" + getAccount().getDefaultPrivilege() + "</b> privilege"; 
-					}
-					
-				}).setEscapeModelStrings(false));
-				
-				setBeforeDisabledLink("");
-				setAfterDisabledLink("");
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getAccount().getDefaultPrivilege() == DepotPrivilege.NONE);
 			}
 			
 		});
@@ -418,7 +441,7 @@ public class MemberListPage extends AccountLayoutPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.isMemberOf(getAccount());
+		return SecurityUtils.canAccess(getAccount());
 	}
 	
 	@Override
