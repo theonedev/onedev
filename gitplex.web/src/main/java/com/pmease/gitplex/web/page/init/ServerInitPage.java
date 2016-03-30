@@ -63,11 +63,6 @@ public class ServerInitPage extends BasePage {
 	}
 	
 	@Override
-	protected String getPageTitle() {
-		return "Server Initialization";
-	}
-
-	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(

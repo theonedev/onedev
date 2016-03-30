@@ -49,11 +49,6 @@ public class OrganizationListPage extends AccountLayoutPage {
 	}
 
 	@Override
-	protected String getPageTitle() {
-		return "Organizations - " + getAccount();
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

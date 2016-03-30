@@ -160,7 +160,7 @@ input.search {
 	background: #F0F0F0;
 }
 
-.nav-tabs {
+.nav-tabs, .nav-buttons {
 	margin-bottom: 20px;
 }
 .nav-buttons {

@@ -214,9 +214,4 @@ public class GeneralSettingPage extends DepotSettingPage {
 		setResponsePage(GeneralSettingPage.class, GeneralSettingPage.paramsOf(depot));
 	}
 	
-	@Override
-	protected String getPageTitle() {
-		return "General Setting - " + getDepot();
-	}
-
 }

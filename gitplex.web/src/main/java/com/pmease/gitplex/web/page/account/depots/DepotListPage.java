@@ -46,11 +46,6 @@ public class DepotListPage extends AccountLayoutPage {
 	}
 
 	@Override
-	protected String getPageTitle() {
-		return "Repositories - " + getAccount();
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

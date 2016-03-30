@@ -46,13 +46,14 @@ import com.pmease.gitplex.web.component.privilegeselection.PrivilegeSelectionPan
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorDepotListPage;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 import com.vaynberg.wicket.select2.Response;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class DepotCollaboratorListPage extends DepotAuthorizationPage {
+public class DepotCollaboratorListPage extends DepotSettingPage {
 
 	private PageableListView<UserAuthorization> collaboratorsView;
 	
@@ -403,11 +404,6 @@ public class DepotCollaboratorListPage extends DepotAuthorizationPage {
 		};
 		noCollaboratorsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noCollaboratorsContainer);
-	}
-	
-	@Override
-	protected String getPageTitle() {
-		return "Collaborators - " + getDepot();
 	}
 	
 	@Override

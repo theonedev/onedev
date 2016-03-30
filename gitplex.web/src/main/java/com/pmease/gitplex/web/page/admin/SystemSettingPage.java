@@ -33,8 +33,4 @@ public class SystemSettingPage extends AdministrationPage {
 		add(form);
 	}
 
-	@Override
-	protected String getPageTitle() {
-		return "Administration - System Settings";
-	}
 }

@@ -46,11 +46,6 @@ public class NotificationListPage extends AccountLayoutPage {
 	}
 	
 	@Override
-	protected String getPageTitle() {
-		return "Notifications - " + getAccount();
-	}
-
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 

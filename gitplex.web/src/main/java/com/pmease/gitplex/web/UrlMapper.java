@@ -222,9 +222,9 @@ public class UrlMapper extends CompoundRequestMapper {
 				"${account}/${depot}/pulls/${request}/attachments", RequestAttachmentsPage.class));
 
 		add(new MountedMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/authorization/teams", DepotTeamListPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/authorization/collaborators", DepotCollaboratorListPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/authorization/effective", DepotEffectivePrivilegePage.class));
+		add(new MountedMapper("${account}/${depot}/settings/teams", DepotTeamListPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/collaborators", DepotCollaboratorListPage.class));
+		add(new MountedMapper("${account}/${depot}/settings/effective-privilege", DepotEffectivePrivilegePage.class));
 		add(new MountedMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
 		add(new MountedMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
 		

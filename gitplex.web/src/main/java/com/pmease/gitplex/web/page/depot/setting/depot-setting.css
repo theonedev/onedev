@@ -1,8 +1,27 @@
-#depot-setting {
-	padding: 20px;
+#depot-setting>table>tbody>tr>td.nav {
+	width: 200px;
+	border-right: 1px solid #DDD;
+	white-space: nowrap;
+	padding: 20px 0;
 }
-#depot-setting>.nav {
-	margin-bottom: 20px;
+#depot-setting>table>tbody>tr>td.nav a {
+	display: block;
+	color: #666;
+	text-decoration: none;
+	padding: 6px 12px;
+	font-family: monospace;
+}
+#depot-setting>table>tbody>tr>td.nav li:hover a {
+	background: #F5F5F5;
+	color: #010203;
+}
+#depot-setting>table>tbody>tr>td.nav li.active a {
+	background: #E8E8E8;
+	color: #010203;
+	font-weight: bold;
+}
+#depot-setting>table>tbody>tr>td.content {
+	padding: 20px;
 }
 #depot-setting .general-setting form .delete {
 	margin-right: 0;

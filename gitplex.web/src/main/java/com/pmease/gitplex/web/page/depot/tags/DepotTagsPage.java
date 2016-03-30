@@ -83,11 +83,6 @@ public class DepotTagsPage extends DepotPage {
 	}
 	
 	@Override
-	protected String getPageTitle() {
-		return getDepot() + " - Tags";
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

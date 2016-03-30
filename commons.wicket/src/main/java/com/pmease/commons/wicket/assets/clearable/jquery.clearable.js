@@ -12,7 +12,11 @@
 		var left = $input.offset().left - $input.parent().offset().left;
 		var top = $input.offset().top - $input.parent().offset().top;
 		$input.after("<span class='input-clear'>&nbsp;&nbsp;&nbsp;&nbsp;</span>");
-		$input.next().css({left: left+$input.outerWidth()-20, top: "11px"});
+		if ($input.hasClass("input-sm")) {
+			$input.next().css({left: left+$input.outerWidth()-20, top: "9px"});
+		} else {
+			$input.next().css({left: left+$input.outerWidth()-20, top: "11px"});
+		}
 		$input.next().click(function() {
 			$input.val("");
 			$(this).hide();

@@ -89,7 +89,7 @@ public abstract class BasePage extends CommonPage {
 		});
 	}
 	
-	protected String getPageTitle() {
+	protected final String getPageTitle() {
 		return "GitPlex - Enterprise Git Management System";
 	};
 

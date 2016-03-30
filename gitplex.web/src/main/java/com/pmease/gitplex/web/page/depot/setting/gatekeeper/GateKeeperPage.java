@@ -105,11 +105,6 @@ public class GateKeeperPage extends DepotSettingPage {
 	}
 
 	@Override
-	protected String getPageTitle() {
-		return "Gate Keepers - " + getDepot();
-	}
-
-	@Override
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
 		setResponsePage(GateKeeperPage.class, GateKeeperPage.paramsOf(depot));
 	}

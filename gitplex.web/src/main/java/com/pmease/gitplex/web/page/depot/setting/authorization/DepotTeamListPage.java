@@ -46,13 +46,14 @@ import com.pmease.gitplex.web.component.teamchoice.AbstractTeamChoiceProvider;
 import com.pmease.gitplex.web.component.teamchoice.TeamChoiceResourceReference;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.page.account.teams.TeamDepotListPage;
+import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 import com.vaynberg.wicket.select2.Response;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class DepotTeamListPage extends DepotAuthorizationPage {
+public class DepotTeamListPage extends DepotSettingPage {
 
 	private PageableListView<TeamAuthorization> teamsView;
 	
@@ -419,7 +420,7 @@ public class DepotTeamListPage extends DepotAuthorizationPage {
 			public String getObject() {
 				StringBuilder builder = new StringBuilder("<i class='fa fa-info-circle'></i> ");
 				if (getAccount().getDefaultPrivilege() == DepotPrivilege.NONE) {
-					builder.append("Grant repository privileges here for teams");
+					builder.append("Grant repository privileges to teams");
 				} else {
 					builder.append("Grant extra repository privileges here for teams besides the "
 							+ "default <b>" + getAccount().getDefaultPrivilege() + "</b> privilege "
@@ -430,11 +431,6 @@ public class DepotTeamListPage extends DepotAuthorizationPage {
 			
 		}).setEscapeModelStrings(false));
 		
-	}
-	
-	@Override
-	protected String getPageTitle() {
-		return "Team Authorizations - " + getDepot();
 	}
 	
 	@Override

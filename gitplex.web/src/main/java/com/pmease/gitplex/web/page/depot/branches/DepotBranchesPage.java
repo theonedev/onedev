@@ -260,11 +260,6 @@ public class DepotBranchesPage extends DepotPage {
 	}
 	
 	@Override
-	protected String getPageTitle() {
-		return getDepot() + " - Branches";
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

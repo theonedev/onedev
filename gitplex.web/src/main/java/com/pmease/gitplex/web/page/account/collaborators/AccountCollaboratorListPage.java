@@ -49,11 +49,6 @@ public class AccountCollaboratorListPage extends AccountLayoutPage {
 	}
 
 	@Override
-	protected String getPageTitle() {
-		return "Collaborators - " + getAccount();
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

@@ -1,6 +1,21 @@
-#dashboard {
+#dashboard .repositories {
+	border-right: 1px solid #DDD;
+}
+#dashboard td {
 	padding: 20px;
 }
-#dashboard .left {
-	padding-right: 20px;
+#dashboard .title {
+	font-size: 18px;
+}
+#dashboard td>div, #dashboard td>ul {
+	margin-bottom: 20px;
+} 
+#dashboard ul li a {
+	display: block;
+	text-decoration: none;
+	padding: 6px 12px;
+	color: #333;
+}
+#dashboard ul li a:hover {
+	background: #EEE;
 }

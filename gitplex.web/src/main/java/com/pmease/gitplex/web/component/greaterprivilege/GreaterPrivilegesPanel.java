@@ -64,7 +64,7 @@ public abstract class GreaterPrivilegesPanel extends GenericPanel<TeamAuthorizat
 					}
 				}
 				permissions.sort((permission1, permission2) 
-						-> permission1.getUser().getDisplayName().compareTo(permission2.getUser().getDisplayName()));
+						-> permission1.getUser().compareTo(permission2.getUser()));
 				return permissions;
 			}
 			

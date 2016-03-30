@@ -67,11 +67,6 @@ public class MemberListPage extends AccountLayoutPage {
 	}
 
 	@Override
-	protected String getPageTitle() {
-		return "Members - " + getAccount();
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

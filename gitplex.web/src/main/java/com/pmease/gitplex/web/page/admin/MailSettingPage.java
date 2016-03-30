@@ -97,8 +97,4 @@ public class MailSettingPage extends AdministrationPage {
 		add(form);
 	}
 
-	@Override
-	protected String getPageTitle() {
-		return "Administration - Mail Server";
-	}
 }

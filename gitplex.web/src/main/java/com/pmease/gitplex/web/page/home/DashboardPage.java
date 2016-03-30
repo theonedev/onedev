@@ -27,8 +27,8 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.AccountLink;
-import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.avatar.Avatar;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
@@ -53,11 +53,6 @@ public class DashboardPage extends LayoutPage {
 	private WebMarkupContainer depotsContainer; 
 	
 	private WebMarkupContainer noDepotsContainer;
-	
-	@Override
-	protected String getPageTitle() {
-		return "Dashboard";
-	}
 	
 	@Override
 	protected void onInitialize() {
@@ -95,13 +90,16 @@ public class DashboardPage extends LayoutPage {
 			protected List<Account> load() {
 				List<Account> organizations = new ArrayList<>();
 				
-				for (OrganizationMembership membership: getLoginUser().getOrganizations()) {
-					Account organization = membership.getOrganization();
-					if (organization.matches(searchOrganizations.getInput())) {
-						organizations.add(organization);
+				Account loginUser = getLoginUser();
+				if (loginUser != null) {
+					for (OrganizationMembership membership: loginUser.getOrganizations()) {
+						Account organization = membership.getOrganization();
+						if (organization.matches(searchOrganizations.getInput())) {
+							organizations.add(organization);
+						}
 					}
+					Collections.sort(organizations);
 				}
-				Collections.sort(organizations);
 				return organizations;
 			}
 			
@@ -110,8 +108,11 @@ public class DashboardPage extends LayoutPage {
 			@Override
 			protected void populateItem(ListItem<Account> item) {
 				Account organization = item.getModelObject();
-				item.add(new AvatarLink("avatarLink", organization));
-				item.add(new AccountLink("nameLink", organization));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", 
+						AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
+				link.add(new Avatar("avatar", organization));
+				link.add(new Label("name", organization.getName()));
+				item.add(link);
 			}
 			
 		});

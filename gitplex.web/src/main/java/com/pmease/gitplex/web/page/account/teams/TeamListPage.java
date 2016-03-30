@@ -72,11 +72,6 @@ public class TeamListPage extends AccountLayoutPage {
 	}
 
 	@Override
-	protected String getPageTitle() {
-		return "Teams - " + getAccount();
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

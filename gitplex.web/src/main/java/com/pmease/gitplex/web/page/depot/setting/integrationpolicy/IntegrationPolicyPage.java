@@ -123,9 +123,4 @@ public class IntegrationPolicyPage extends DepotSettingPage {
 		setResponsePage(IntegrationPolicyPage.class, IntegrationPolicyPage.paramsOf(depot));
 	}
 	
-	@Override
-	protected String getPageTitle() {
-		return "Integration Policies - " + getDepot();
-	}
-
 }

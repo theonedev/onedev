@@ -52,11 +52,6 @@ public class AccountListPage extends AdministrationPage {
 	private WebMarkupContainer noAccountsContainer;
 	
 	@Override
-	protected String getPageTitle() {
-		return "All Accounts";
-	}
-	
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		

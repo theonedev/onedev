@@ -27,7 +27,6 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.entity.UserAuthorization;
-import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.core.security.privilege.DepotPrivilege;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.Avatar;
@@ -37,12 +36,13 @@ import com.pmease.gitplex.web.page.account.collaborators.CollaboratorDepotListPa
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
+import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
-public class DepotEffectivePrivilegePage extends DepotAuthorizationPage {
+public class DepotEffectivePrivilegePage extends DepotSettingPage {
 
 	private PageableListView<UserPermission> usersView;
 	
@@ -267,16 +267,6 @@ public class DepotEffectivePrivilegePage extends DepotAuthorizationPage {
 			setResponsePage(DepotEffectivePrivilegePage.class, DepotEffectivePrivilegePage.paramsOf(depot));
 		else
 			setResponsePage(DepotCollaboratorListPage.class, DepotCollaboratorListPage.paramsOf(depot));
-	}
-	
-	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.canManage(getAccount());
-	}
-	
-	@Override
-	protected String getPageTitle() {
-		return "Effective Privileges - " + getDepot();
 	}
 	
 	private static class UserPermission {
