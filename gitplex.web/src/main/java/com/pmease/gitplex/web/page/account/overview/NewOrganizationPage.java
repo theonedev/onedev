@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.organizations;
+package com.pmease.gitplex.web.page.account.overview;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,7 +15,6 @@ import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
-import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 import jersey.repackaged.com.google.common.collect.Sets;
 
@@ -72,10 +71,7 @@ public class NewOrganizationPage extends AccountLayoutPage {
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
-		if (account.isOrganization())
-			setResponsePage(AccountOverviewPage.class, paramsOf(account));
-		else
-			setResponsePage(OrganizationListPage.class, paramsOf(account));
+		setResponsePage(AccountOverviewPage.class, paramsOf(account));
 	}
 
 }

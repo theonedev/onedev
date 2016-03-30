@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.depots;
+package com.pmease.gitplex.web.page.account.overview;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -62,7 +62,7 @@ public class NewDepotPage extends AccountLayoutPage {
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Account account) {
-		setResponsePage(DepotListPage.class, paramsOf(account));
+		setResponsePage(AccountOverviewPage.class, AccountOverviewPage.paramsOf(account));
 	}
 
 }

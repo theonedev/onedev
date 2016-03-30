@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.depots;
+package com.pmease.gitplex.web.page.account.overview;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +12,8 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -22,14 +24,13 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
 
 @SuppressWarnings("serial")
-public class DepotListPage extends AccountLayoutPage {
+public class DepotListPanel extends GenericPanel<Account> {
 
 	private PageableListView<Depot> depotsView;
 	
@@ -39,10 +40,14 @@ public class DepotListPage extends AccountLayoutPage {
 	
 	private WebMarkupContainer noDepotsContainer;
 	
-	public DepotListPage(PageParameters params) {
-		super(params);
+	public DepotListPanel(String id, IModel<Account> accountModel) {
+		super(id, accountModel);
 	}
 
+	private Account getAccount() {
+		return getModelObject();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -159,9 +164,4 @@ public class DepotListPage extends AccountLayoutPage {
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
 	
-	@Override
-	protected void onSelect(AjaxRequestTarget target, Account account) {
-		setResponsePage(DepotListPage.class, paramsOf(account));
-	}
-
 }

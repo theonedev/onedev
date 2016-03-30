@@ -93,21 +93,41 @@
 	width: 20%;
 }
 
-.user-overview .title {
-	font-size: 18px;
-	margin-bottom: 4px;
+#user-overview>div {
+	margin-bottom: 20px;
+	border-bottom: 1px solid #DDD;
+	padding-bottom: 20px;
 }
-.user-overview .subtitle, .user-overview .subtitle a {
+#user-overview>div:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+#user-overview>.head>.title {
+	font-size: 18px;
+	font-weight: bold;
+	margin-bottom: 8px;
+}
+#user-overview>.head>.subtitle, #user-overview>.head>.subtitle a {
 	color: #777;
 }
-.user-overview .subtitle span {
+#user-overview>.head>.subtitle span {
 	margin-right: 8px;
 }
-.user-overview .operations {
-	margin-top: 20px;
-	border-top: 1px solid #E8E8E8;
-	padding-top: 20px;
+
+#user-overview>div>.head {
+	font-size: 18px;
+	margin-bottom: 12px;
 }
-.user-overview .operations a {
-	margin-right: 20px;
+
+#user-overview .organizations ul {
+	margin: 0 12px 0 0;
+}
+#user-overview .organizations a {
+	display: block;
+	margin-right: 8px;
+}
+#user-overview .organizations img {
+	width: 32px;
+	height: 32px;
 }

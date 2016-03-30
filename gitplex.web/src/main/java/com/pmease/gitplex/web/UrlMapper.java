@@ -17,17 +17,15 @@ import com.pmease.gitplex.web.page.account.collaborators.AccountCollaboratorList
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorDepotListPage;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSourcePage;
-import com.pmease.gitplex.web.page.account.depots.DepotListPage;
-import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
 import com.pmease.gitplex.web.page.account.members.MemberEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.account.members.MemberListPage;
 import com.pmease.gitplex.web.page.account.members.MemberPrivilegeSourcePage;
 import com.pmease.gitplex.web.page.account.members.MemberTeamListPage;
 import com.pmease.gitplex.web.page.account.members.NewMembersPage;
 import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
-import com.pmease.gitplex.web.page.account.organizations.NewOrganizationPage;
-import com.pmease.gitplex.web.page.account.organizations.OrganizationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.overview.NewDepotPage;
+import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
@@ -52,9 +50,9 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.Reque
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
+import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotEffectivePrivilegePage;
 import com.pmease.gitplex.web.page.depot.setting.authorization.DepotTeamListPage;
-import com.pmease.gitplex.web.page.depot.setting.authorization.DepotCollaboratorListPage;
 import com.pmease.gitplex.web.page.depot.setting.gatekeeper.GateKeeperPage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
@@ -151,10 +149,8 @@ public class UrlMapper extends CompoundRequestMapper {
 
 		});
 		
-		add(new MountedMapper("accounts/${account}/depots", DepotListPage.class));
-		add(new MountedMapper("accounts/${account}/depots/new", NewDepotPage.class));
-		add(new MountedMapper("accounts/${account}/organizations", OrganizationListPage.class));
-		add(new MountedMapper("accounts/${account}/organizations/new", NewOrganizationPage.class));
+		add(new MountedMapper("accounts/${account}/new-depot", NewDepotPage.class));
+		add(new MountedMapper("accounts/${account}/new-organization", NewOrganizationPage.class));
 		add(new MountedMapper("accounts/${account}/notifications", NotificationListPage.class));
 		add(new MountedMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
 		add(new MountedMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));

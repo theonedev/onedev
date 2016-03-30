@@ -1,12 +1,27 @@
 <wicket:panel>
-	<div class="user-overview">
-		<div wicket:id="title" class="title"></div>
-		<div class="subtitle">
-			<span wicket:id="loginName"></span> <i class="fa fa-envelope-o"></i> <a wicket:id="email"></a>
+	<div id="user-overview">
+		<div class="head">
+			<div wicket:id="title" class="title"></div>
+			<div class="subtitle">
+				<span wicket:id="loginName"></span> <i class="fa fa-envelope-o"></i> <a wicket:id="email"></a>
+			</div>
 		</div>
-		<div class="operations">
-			<a wicket:id="addOrganization" class="btn btn-default"><i class="fa fa-plus"></i> Create Organization</a>
-			<a wicket:id="addDepot" class="btn btn-default"><i class="fa fa-plus"></i> Create Repository</a>
+		<div wicket:id="organizations" class="organizations">
+			<div class="head">Organizations</div>
+			<div class="body clearfix">
+				<ul class="list-unstyled pull-left">
+					<li wicket:id="organizations" class="pull-left">
+						<a wicket:id="organization"></a>
+					</li>
+				</ul>
+				<div class="pull-left">
+					<a wicket:id="addOrganization" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+				</div>
+			</div>
+		</div>
+		<div class="depots">
+			<div class="head">Repositories</div>
+			<div wicket:id="depots" class="body"></div>
 		</div>
 	</div>
 </wicket:panel>

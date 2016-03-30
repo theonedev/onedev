@@ -30,7 +30,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.accountchoice.AbstractAccountChoiceProvider;
 import com.pmease.gitplex.web.component.accountchoice.AccountSingleChoice;
 import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteDepotModal;
-import com.pmease.gitplex.web.page.account.depots.DepotListPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 import com.vaynberg.wicket.select2.Response;
 
@@ -194,7 +194,7 @@ public class GeneralSettingPage extends DepotSettingPage {
 					
 					@Override
 					protected void onDeleted(AjaxRequestTarget target) {
-						setResponsePage(DepotListPage.class, DepotListPage.paramsOf(getAccount()));						
+						setResponsePage(AccountOverviewPage.class, AccountOverviewPage.paramsOf(getAccount()));						
 					}
 					
 					@Override

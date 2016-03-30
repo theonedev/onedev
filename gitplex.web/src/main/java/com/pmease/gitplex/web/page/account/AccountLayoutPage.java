@@ -15,15 +15,13 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.collaborators.AccountCollaboratorListPage;
 import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPage;
-import com.pmease.gitplex.web.page.account.depots.DepotListPage;
-import com.pmease.gitplex.web.page.account.depots.NewDepotPage;
 import com.pmease.gitplex.web.page.account.members.MemberListPage;
 import com.pmease.gitplex.web.page.account.members.MemberPage;
 import com.pmease.gitplex.web.page.account.members.NewMembersPage;
 import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
-import com.pmease.gitplex.web.page.account.organizations.NewOrganizationPage;
-import com.pmease.gitplex.web.page.account.organizations.OrganizationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.overview.NewDepotPage;
+import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.AvatarEditPage;
 import com.pmease.gitplex.web.page.account.setting.PasswordEditPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
@@ -50,10 +48,9 @@ public abstract class AccountLayoutPage extends AccountPage {
 		
 		List<PageTab> tabs = new ArrayList<>();
 		
-		tabs.add(new AccountTab("Overview", "fa fa-fw fa-list-alt", AccountOverviewPage.class));
-		tabs.add(new AccountTab("Repositories", "fa fa-ext fa-fw fa-repo", 
-				DepotListPage.class, NewDepotPage.class));
-		
+		tabs.add(new AccountTab("Overview", "fa fa-fw fa-list-alt", 
+				AccountOverviewPage.class, NewOrganizationPage.class, NewDepotPage.class));
+
 		if (getAccount().isOrganization()) {
 			if (SecurityUtils.canAccess(getAccount())) {
 				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", 
@@ -65,16 +62,12 @@ public abstract class AccountLayoutPage extends AccountPage {
 						AccountCollaboratorListPage.class, CollaboratorPage.class));
 				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
 			} 
-		} else {
-			tabs.add(new AccountTab("Organizations", "fa fa-fw fa-group", 
-					OrganizationListPage.class, NewOrganizationPage.class));
-			if (SecurityUtils.canManage(getAccount())) {
-				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 
-						AccountCollaboratorListPage.class, CollaboratorPage.class));
-				tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", NotificationListPage.class));
-				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, 
-						AvatarEditPage.class, PasswordEditPage.class));
-			}
+		} else if (SecurityUtils.canManage(getAccount())) {
+			tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 
+					AccountCollaboratorListPage.class, CollaboratorPage.class));
+			tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", NotificationListPage.class));
+			tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, 
+					AvatarEditPage.class, PasswordEditPage.class));
 		}
 		add(new Tabbable("accountTabs", tabs));
 	}
