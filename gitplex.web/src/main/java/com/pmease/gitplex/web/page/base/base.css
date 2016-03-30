@@ -160,33 +160,6 @@ input.search {
 	background: #F0F0F0;
 }
 
-.nav-tabs, .nav-buttons {
+.nav-tabs {
 	margin-bottom: 20px;
-}
-.nav-buttons {
-	clearfix: left;
-	margin-right: 20px;
-}
-.nav-buttons>li {
-	float: left;
-}
-.nav-buttons>li>a {
-	border: 1px solid #CCC;
-	padding: 6px 12px;
-	color: #777;
-}
-.nav-buttons>li:FIRST-CHILD>a {
-	border: 1px solid #CCC;
-	border-right: none;
-	border-radius: 4px 0 0 4px;
-}
-.nav-buttons>li:LAST-CHILD>a {
-	border: 1px solid #CCC;
-	border-left: none;
-	border-radius: 0 4px 4px 0;
-}
-.nav-buttons>li.active>a {
-	background: #337AB7;
-	border-color: #337AB7;
-	color: white;
 }

@@ -6,8 +6,7 @@ import org.jsoup.nodes.Element;
 import com.pmease.commons.markdown.extensionpoint.HtmlTransformer;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.util.markdown.MentionParser;
-import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.depots.DepotListPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 public class MentionTransformer extends MentionParser implements HtmlTransformer {
 	
@@ -21,7 +20,7 @@ public class MentionTransformer extends MentionParser implements HtmlTransformer
 	protected String toHtml(Account user) {
 		if (RequestCycle.get() != null) {
 			return String.format("<a href='%s' class='mention'>@%s</a>", 
-				RequestCycle.get().urlFor(DepotListPage.class, AccountPage.paramsOf(user)), user.getName());
+				RequestCycle.get().urlFor(AccountOverviewPage.class, AccountOverviewPage.paramsOf(user)), user.getName());
 		} else {
 			return super.toHtml(user);
 		}

@@ -4,6 +4,10 @@
 			<div class="pull-left">
 				<input wicket:id="searchOrganizations" class="form-control search" placeholder="Search organizations"></input>
 			</div>
+			<div wicket:id="filter" class="pull-left filter btn-group">
+				<a wicket:id="selection" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="clear" class="btn btn-default" title="Clear role filter"><i class="fa fa-times"></i></a>
+			</div>
 			<div class="pull-left">
 				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
 			</div>
@@ -12,7 +16,6 @@
 			<thead>
 				<tr>
 					<th class="name">Name</th>
-					<th class="fullName">Full Name</th>
 					<th class="role">Role</th>
 					<th class="actions"></th>
 				</tr>
@@ -20,22 +23,18 @@
 			<tbody>
 				<tr wicket:id="organizations">
 					<td class="name">
-						<img wicket:id="avatar"></img> 
-						<a wicket:id="link"><span wicket:id="name"></span></a>
-					</td>
-					<td class="full-name">
-						<span wicket:id="fullName"></span>
+						<a wicket:id="avatarLink"></a> <a wicket:id="nameLink"></a>
 					</td>
 					<td class="role">
 						<span wicket:id="role"></span>
 					</td>
 					<td class="actions">
-						<a wicket:id="delete" class="fa fa-trash" title="Delete this organization"></a>
+						<a wicket:id="setting" class="fa fa-cog" title="Organization settings"></a>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 		<div class="center"><ul wicket:id="pageNav"></ul></div>
-		<div wicket:id="noOrganizations" class="alert alert-info">No any organizations found</div>	
+		<div wicket:id="noOrganizations" class="alert alert-warning">No organizations found</div>	
 	</div>
 </wicket:extend>

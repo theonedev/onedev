@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -23,7 +22,6 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
-import com.pmease.gitplex.web.component.confirmdelete.ConfirmDeleteDepotModal;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
@@ -142,34 +140,6 @@ public class DepotListPage extends AccountLayoutPage {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.canManage(item.getModelObject()));
-					}
-					
-				});
-				
-				item.add(new AjaxLink<Void>("deleteDepot") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						setVisible(SecurityUtils.canManage(item.getModelObject()));
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						new ConfirmDeleteDepotModal(target) {
-
-							@Override
-							protected void onDeleted(AjaxRequestTarget target) {
-								setResponsePage(DepotListPage.this);
-							}
-
-							@Override
-							protected Depot getDepot() {
-								return item.getModelObject();
-							}
-							
-						};
 					}
 					
 				});

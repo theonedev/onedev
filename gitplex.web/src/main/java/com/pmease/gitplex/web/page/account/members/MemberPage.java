@@ -1,7 +1,7 @@
 package com.pmease.gitplex.web.page.account.members;
 
-import static com.pmease.gitplex.web.page.account.members.RoleSelectionPanel.ROLE_ADMIN;
-import static com.pmease.gitplex.web.page.account.members.RoleSelectionPanel.ROLE_MEMBER;
+import static com.pmease.gitplex.web.component.roleselection.RoleSelectionPanel.ROLE_ADMIN;
+import static com.pmease.gitplex.web.component.roleselection.RoleSelectionPanel.ROLE_MEMBER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,7 @@ import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.roleselection.RoleSelectionPanel;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 

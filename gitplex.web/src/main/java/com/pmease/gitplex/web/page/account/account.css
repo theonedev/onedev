@@ -92,3 +92,22 @@
 #account.sidebar>table>tbody>tr>td.content td.role {
 	width: 20%;
 }
+
+.user-overview .title {
+	font-size: 18px;
+	margin-bottom: 4px;
+}
+.user-overview .subtitle, .user-overview .subtitle a {
+	color: #777;
+}
+.user-overview .subtitle span {
+	margin-right: 8px;
+}
+.user-overview .operations {
+	margin-top: 20px;
+	border-top: 1px solid #E8E8E8;
+	padding-top: 20px;
+}
+.user-overview .operations a {
+	margin-right: 20px;
+}

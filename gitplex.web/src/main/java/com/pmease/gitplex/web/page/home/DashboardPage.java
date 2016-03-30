@@ -111,7 +111,7 @@ public class DashboardPage extends LayoutPage {
 				Link<Void> link = new BookmarkablePageLink<Void>("link", 
 						AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
 				link.add(new Avatar("avatar", organization));
-				link.add(new Label("name", organization.getName()));
+				link.add(new Label("name", organization.getDisplayName()));
 				item.add(link);
 			}
 			

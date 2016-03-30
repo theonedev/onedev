@@ -19,12 +19,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.avatar.AvatarManager;
-import com.pmease.gitplex.web.page.account.depots.DepotListPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -83,8 +83,8 @@ class LastCommitsResource extends AbstractResource {
 					if (user != null) {
 						info.authorName = HtmlEscape.escapeHtml5(user.getDisplayName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(user);
-						params = DepotListPage.paramsOf(user);
-						info.authorUrl = RequestCycle.get().urlFor(DepotListPage.class, params).toString();
+						params = AccountOverviewPage.paramsOf(user);
+						info.authorUrl = RequestCycle.get().urlFor(AccountOverviewPage.class, params).toString();
 					} else {
 						info.authorName = HtmlEscape.escapeHtml5(author.getName());
 						info.authorAvatarUrl = avatarManager.getAvatarUrl(author);

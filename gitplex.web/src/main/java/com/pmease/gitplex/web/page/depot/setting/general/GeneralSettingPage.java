@@ -194,7 +194,7 @@ public class GeneralSettingPage extends DepotSettingPage {
 					
 					@Override
 					protected void onDeleted(AjaxRequestTarget target) {
-						setResponsePage(DepotListPage.class, paramsOf(getAccount()));						
+						setResponsePage(DepotListPage.class, DepotListPage.paramsOf(getAccount()));						
 					}
 					
 					@Override

@@ -10,7 +10,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.page.account.AccountPage;
-import com.pmease.gitplex.web.page.account.depots.DepotListPage;
+import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 @SuppressWarnings("serial")
 public class AccountLink extends BookmarkablePageLink<Void> {
@@ -20,14 +20,14 @@ public class AccountLink extends BookmarkablePageLink<Void> {
 	private final String name;
 	
 	public AccountLink(String id, Account account) {
-		super(id, DepotListPage.class);
+		super(id, AccountOverviewPage.class);
 
 		params = AccountPage.paramsOf(account);
 		name = account.getDisplayName();
 	}
 	
 	public AccountLink(String id, PersonIdent person) {
-		super(id, DepotListPage.class);
+		super(id, AccountOverviewPage.class);
 		
 		Account account = GitPlex.getInstance(AccountManager.class).findByPerson(person);
 		if (account != null) { 

@@ -39,7 +39,6 @@ public class ProfileEditPage extends AccountSettingPage {
 		excludedProperties.add("password");
 		if (getAccount().isOrganization()) {
 			excludedProperties.add("email");
-			excludedProperties.add("fullName");
 		} else {
 			excludedProperties.add("description");
 			excludedProperties.add("defaultPrivilege");

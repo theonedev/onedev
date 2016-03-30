@@ -44,7 +44,7 @@ public class NewOrganizationPage extends AccountLayoutPage {
 		membership.setOrganization(organization);
 		
 		BeanEditor<?> editor = BeanContext.editBean("editor", membership.getOrganization(), 
-				Sets.newHashSet("fullName", "email", "password"));
+				Sets.newHashSet("email", "password"));
 		
 		Form<?> form = new Form<Void>("form") {
 

@@ -14,6 +14,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
 public class NewDepotPage extends AccountLayoutPage {
@@ -43,14 +44,14 @@ public class NewDepotPage extends AccountLayoutPage {
 				
 				depot.setAccount(getAccount());
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
-				Depot repoWithSameName = depotManager.findBy(getAccount(), depot.getName());
-				if (repoWithSameName != null) {
+				Depot depotWithSameName = depotManager.findBy(getAccount(), depot.getName());
+				if (depotWithSameName != null) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another repository in this account.");
 				} else {
 					depotManager.save(depot, null, null);
 					Session.get().success("New repository created");
-					setResponsePage(DepotListPage.class, paramsOf(getAccount()));
+					setResponsePage(DepotFilePage.class, DepotFilePage.paramsOf(depot));
 				}
 			}
 			

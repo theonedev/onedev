@@ -54,7 +54,6 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	private boolean organization;
 	
-	/* used by user account */
 	private String fullName;
 	
 	/* used by user account */

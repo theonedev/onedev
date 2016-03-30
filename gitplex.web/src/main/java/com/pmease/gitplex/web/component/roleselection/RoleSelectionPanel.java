@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.page.account.members;
+package com.pmease.gitplex.web.component.roleselection;
 
 import javax.annotation.Nullable;
 
@@ -8,7 +8,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.panel.Panel;
 
 @SuppressWarnings("serial")
-abstract class RoleSelectionPanel extends Panel {
+public abstract class RoleSelectionPanel extends Panel {
 
 	public static final String ROLE_ADMIN = "Admin";
 	
