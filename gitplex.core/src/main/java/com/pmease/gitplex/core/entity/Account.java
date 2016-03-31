@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -20,6 +21,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -33,6 +35,7 @@ import com.pmease.commons.wicket.editable.annotation.ExcludeValues;
 import com.pmease.commons.wicket.editable.annotation.Markdown;
 import com.pmease.commons.wicket.editable.annotation.Password;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.component.DepotVisits;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.manager.UserAuthorizationManager;
@@ -76,6 +79,10 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private String noSpaceFullName;
 	
 	private Date avatarUploadDate;
+	
+	@Lob
+	@OptimisticLock(excluded=true)
+	private DepotVisits depotVisits = new DepotVisits();
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -463,6 +470,14 @@ public class Account extends AbstractUser implements ProtectedObject {
 			}
 		}
 		return organizationMembersMap;
+	}
+
+	public DepotVisits getDepotVisits() {
+		return depotVisits;
+	}
+
+	public void setDepotVisits(DepotVisits depotVisits) {
+		this.depotVisits = depotVisits;
 	}
 
 	@Override

@@ -112,8 +112,13 @@ public class DepotListPanel extends GenericPanel<Account> {
 
 			@Override
 			protected List<Depot> load() {
-				List<Depot> depots = new ArrayList<>(GitPlex.getInstance(DepotManager.class)
-						.getAccessibles(getAccount(), SecurityUtils.getAccount()));
+				List<Depot> depots = new ArrayList<>();
+				for (Depot depot: GitPlex.getInstance(DepotManager.class)
+						.getAccessibles(getAccount(), SecurityUtils.getAccount())) {
+					if (depot.matches(searchField.getInput())) {
+						depots.add(depot);
+					}
+				}
 				
 				Collections.sort(depots);
 				return depots;

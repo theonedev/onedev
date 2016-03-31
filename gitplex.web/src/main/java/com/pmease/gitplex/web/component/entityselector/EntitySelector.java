@@ -139,8 +139,7 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 						entities.add(entity);
 					}
 				}
-				Collections.sort(entities);
-				
+				sort(entities);
 				return entities;
 			}
 			
@@ -196,7 +195,13 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 				new CssResourceReference(EntitySelector.class, "entity-selector.css")));
 	}
 	
-	protected abstract boolean isSearchable();
+	protected void sort(List<T> entities) {
+		Collections.sort(entities);
+	}
+	
+	protected boolean isSearchable() {
+		return true;
+	}
 	
 	protected abstract String getUrl(T entity);
 	

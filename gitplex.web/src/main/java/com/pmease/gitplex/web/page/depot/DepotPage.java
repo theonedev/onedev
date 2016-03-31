@@ -35,6 +35,7 @@ import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.model.DepotModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
@@ -90,6 +91,13 @@ public abstract class DepotPage extends AccountPage {
 	}
 	
 	@Override
+	protected void onBeforeRender() {
+		WebSession.get().getDepotVisits().visit(getDepot());
+		
+		super.onBeforeRender();
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
@@ -144,7 +152,6 @@ public abstract class DepotPage extends AccountPage {
 	@Override
 	protected void onDetach() {
 		depotModel.detach();
-		
 		super.onDetach();
 	}
 

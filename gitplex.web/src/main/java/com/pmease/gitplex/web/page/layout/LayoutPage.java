@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.page.layout;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -28,6 +29,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
+import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.entityselector.AccountSelector;
 import com.pmease.gitplex.web.component.entityselector.DepotSelector;
@@ -125,10 +127,10 @@ public abstract class LayoutPage extends BasePage {
 					}
 
 					@Override
-					protected boolean isSearchable() {
-						return true;
+					protected void sort(List<Depot> entities) {
+						Collections.sort(entities, WebSession.get().getDepotVisits().getComparator());
 					}
-					
+
 				};
 			}
 			

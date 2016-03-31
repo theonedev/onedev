@@ -1093,5 +1093,5 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			return getAccount().compareTo(depot.getAccount());
 		}
 	}
-	
+
 }

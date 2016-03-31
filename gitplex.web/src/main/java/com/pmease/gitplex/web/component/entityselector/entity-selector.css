@@ -1,8 +1,8 @@
 .entity-selector {
 	padding: 20px;
 }
-.entity-selector ul.entities {
-	margin: 12px 0 0 0;
+.entity-selector ul {
+	margin: 0;
 }
 .entity-selector a.current:before {
 	font-family: "FontAwesome"; 
@@ -12,6 +12,8 @@
 	left: 4px;
 }
 .entity-selector .alert {
+	margin: 0;
+}
+.entity-selector .search+.entities, .entity-selector .search+ul+.alert {
 	margin-top: 12px;
-	margin-bottom: 0;
 }

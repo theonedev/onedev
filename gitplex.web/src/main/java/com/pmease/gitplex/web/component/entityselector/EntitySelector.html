@@ -1,9 +1,11 @@
 <wicket:panel>
 	<div class="entity-selector">
+		<wicket:enclosure child="search">
 		<div class="search">
 			<input wicket:id="search" class="form-control input-sm" placeholder="Search..."></input>
 		</div>
-		<ul wicket:id="entities" class="entities list-unstyled autosize">
+		</wicket:enclosure>
+		<ul wicket:id="entities" class="list-unstyled entities autosize">
 			<li wicket:id="entities" class="entity selectable">
 				<a wicket:id="link">
 					<span wicket:id="entity"></span>
