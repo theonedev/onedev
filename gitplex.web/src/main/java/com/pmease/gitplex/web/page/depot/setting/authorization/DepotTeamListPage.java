@@ -15,19 +15,15 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
@@ -49,15 +45,10 @@ import com.pmease.gitplex.web.page.account.teams.TeamDepotListPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 import com.vaynberg.wicket.select2.Response;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
-
 @SuppressWarnings("serial")
 public class DepotTeamListPage extends DepotSettingPage {
 
-	private PageableListView<TeamAuthorization> teamsView;
-	
-	private BootstrapPagingNavigator pagingNavigator;
+	private ListView<TeamAuthorization> teamsView;
 	
 	private WebMarkupContainer teamsContainer; 
 	
@@ -74,20 +65,6 @@ public class DepotTeamListPage extends DepotSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		TextField<String> searchField;
-		
-		add(searchField = new ClearableTextField<String>("searchTeams", Model.of("")));
-		searchField.add(new OnTypingDoneBehavior(100) {
-
-			@Override
-			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(teamsContainer);
-				target.add(pagingNavigator);
-				target.add(noTeamsContainer);
-			}
-			
-		});
 		
 		WebMarkupContainer filterContainer = new WebMarkupContainer("filter");
 		filterContainer.setOutputMarkupId(true);
@@ -121,7 +98,6 @@ public class DepotTeamListPage extends DepotSettingPage {
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(teamsContainer);
-						target.add(pagingNavigator);
 						target.add(noTeamsContainer);
 					}
 
@@ -135,7 +111,6 @@ public class DepotTeamListPage extends DepotSettingPage {
 				filterPrivilege = null;
 				target.add(filterContainer);
 				target.add(teamsContainer);
-				target.add(pagingNavigator);
 				target.add(noTeamsContainer);
 			}
 
@@ -190,7 +165,6 @@ public class DepotTeamListPage extends DepotSettingPage {
 				authorization.setDepot(depotModel.getObject());
 				GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
 				target.add(teamsContainer);
-				target.add(pagingNavigator);
 				target.add(noTeamsContainer);
 			}
 			
@@ -216,7 +190,6 @@ public class DepotTeamListPage extends DepotSettingPage {
 				authorizationManager.delete(authorizations);
 				pendingRemovals.clear();
 				target.add(this);
-				target.add(pagingNavigator);
 				target.add(teamsContainer);
 				target.add(noTeamsContainer);
 			}
@@ -242,7 +215,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 		teamsContainer.setOutputMarkupPlaceholderTag(true);
 		add(teamsContainer);
 		
-		teamsContainer.add(teamsView = new PageableListView<TeamAuthorization>("teams", 
+		teamsContainer.add(teamsView = new ListView<TeamAuthorization>("teams", 
 				new LoadableDetachableModel<List<TeamAuthorization>>() {
 
 			@Override
@@ -250,8 +223,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 				List<TeamAuthorization> authorizations = new ArrayList<>();
 				
 				for (TeamAuthorization authorization: depotModel.getObject().getAuthorizedTeams()) {
-					if (authorization.getTeam().matches(searchField.getInput()) 
-							&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())) {
+					if (filterPrivilege == null || filterPrivilege == authorization.getPrivilege()) {
 						authorizations.add(authorization);
 					}
 				}
@@ -260,7 +232,7 @@ public class DepotTeamListPage extends DepotSettingPage {
 				return authorizations;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}) {
 
 			@Override
 			protected void populateItem(ListItem<TeamAuthorization> item) {
@@ -333,7 +305,6 @@ public class DepotTeamListPage extends DepotSettingPage {
 								TeamAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
 								GitPlex.getInstance(TeamAuthorizationManager.class).persist(authorization);
-								target.add(pagingNavigator);
 								target.add(teamsContainer);
 								target.add(noTeamsContainer);
 								Session.get().success("Privilege updated");
@@ -391,17 +362,6 @@ public class DepotTeamListPage extends DepotSettingPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", teamsView) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(teamsView.getPageCount() > 1);
-			}
-			
-		});
-		pagingNavigator.setOutputMarkupPlaceholderTag(true);
-		
 		noTeamsContainer = new WebMarkupContainer("noTeams") {
 
 			@Override

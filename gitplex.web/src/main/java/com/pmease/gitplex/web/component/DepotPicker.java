@@ -37,6 +37,11 @@ public abstract class DepotPicker extends DropdownLink {
 				target.add(DepotPicker.this);
 				DepotPicker.this.onSelect(target, depot);
 			}
+
+			@Override
+			protected boolean isSearchable() {
+				return true;
+			}
 			
 		};
 	}

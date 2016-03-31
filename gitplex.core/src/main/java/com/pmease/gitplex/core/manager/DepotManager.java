@@ -52,6 +52,6 @@ public interface DepotManager extends EntityDao<Depot> {
 	
 	void delete(Depot depot);
 	
-	Collection<Depot> getAccessibles(@Nullable Account user);
+	Collection<Depot> getAccessibles(@Nullable Account account, @Nullable Account user);
 	
 }

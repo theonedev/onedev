@@ -3,13 +3,9 @@ package com.pmease.gitplex.core.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -19,7 +15,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Query;
@@ -368,14 +363,40 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 
 	@Sessional
 	@Override
-	public Collection<Depot> getAccessibles(Account user) {
-		Collection<Depot> all = GitPlex.getInstance(DepotManager.class).all();
+	public Collection<Depot> getAccessibles(Account account, Account user) {
+		Collection<Depot> depots;
+		if (account == null)
+			depots = GitPlex.getInstance(DepotManager.class).all();
+		else
+			depots = account.getDepots();
+		
 		if (user == null) {
-			return all.stream().filter((depot)->depot.isPublicRead()).collect(Collectors.toList());
-		} else if (user.isAdministrator()) {
-			return all;
+			return depots.stream().filter((depot)->depot.isPublicRead()).collect(Collectors.toSet());
+		} else if (user.isAdministrator() || user.equals(account)) {
+			return depots;
 		} else {
-			List<Depot> accessibles = new ArrayList<>();
+			Collection<Account> adminOrganizations = user.getOrganizations()
+					.stream()
+					.filter((membership)->membership.isAdmin())
+					.map((membership)->membership.getOrganization())
+					.collect(Collectors.toSet());
+			
+			// return fast in special cases
+			if (adminOrganizations.contains(account)) {
+				return depots;
+			}
+			
+			Collection<Account> memberOrganizations = user.getOrganizations()
+					.stream()
+					.filter((membership)->!membership.isAdmin())
+					.map((membership)->membership.getOrganization())
+					.collect(Collectors.toSet());
+			
+			// return fast in special cases
+			if (memberOrganizations.contains(account) && account.getDefaultPrivilege() != DepotPrivilege.NONE) {
+				return depots;
+			}
+			
 			Collection<Depot> authorizedDepots = user.getAuthorizedDepots()
 					.stream()
 					.map((authorization)->authorization.getDepot())
@@ -384,43 +405,26 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 					.stream()
 					.map((membership)->membership.getTeam())
 					.collect(Collectors.toSet());
-			Collection<Account> adminOrganizations = user.getOrganizations()
-					.stream()
-					.filter((membership)->membership.isAdmin())
-					.map((membership)->membership.getOrganization())
-					.collect(Collectors.toSet());
-			Collection<Account> memberOrganizations = user.getOrganizations()
-					.stream()
-					.filter((membership)->!membership.isAdmin())
-					.map((membership)->membership.getOrganization())
-					.collect(Collectors.toSet());
-			Map<Depot, Set<Team>> authorizedTeams = new HashMap<>();
-			for (TeamAuthorization authorization: teamAuthorizationManager.all()) {
-				Set<Team> teams = authorizedTeams.get(authorization.getDepot());
-				if (teams == null) {
-					teams = new HashSet<>();
-					authorizedTeams.put(authorization.getDepot(), teams);
-				}
-				teams.add(authorization.getTeam());
+			
+			Collection<TeamAuthorization> authorizations;
+			if (account != null)
+				authorizations = account.getAllTeamAuthorizationsInOrganization();
+			else
+				authorizations = teamAuthorizationManager.all();
+			
+			for (TeamAuthorization authorization: authorizations) {
+				if (joinedTeams.contains(authorization.getTeam()))
+					authorizedDepots.add(authorization.getDepot());
 			}
-			for (Depot depot: all) {
-				if (depot.isPublicRead()) {
-					accessibles.add(depot);
-				} else if (authorizedDepots.contains(depot)) {
-					accessibles.add(depot);
-				} else if (adminOrganizations.contains(depot.getAccount())) {
-					accessibles.add(depot);
-				} else if (memberOrganizations.contains(depot.getAccount()) 
-						&& depot.getAccount().getDefaultPrivilege() != DepotPrivilege.NONE) {
-					accessibles.add(depot);
-				} else {
-					Set<Team> teams = authorizedTeams.get(depot);
-					if (teams != null && CollectionUtils.containsAny(teams, joinedTeams)) {
-						accessibles.add(depot);
-					}
-				}
-			}
-			return accessibles;
+			
+			return depots.stream()
+					.filter((depot->depot.isPublicRead() 
+							|| depot.getAccount().equals(user)
+							|| authorizedDepots.contains(depot)
+							|| adminOrganizations.contains(depot.getAccount())
+							|| memberOrganizations.contains(depot.getAccount()) 
+								&& depot.getAccount().getDefaultPrivilege() != DepotPrivilege.NONE))
+					.collect(Collectors.toSet());
 		}
 	}
 

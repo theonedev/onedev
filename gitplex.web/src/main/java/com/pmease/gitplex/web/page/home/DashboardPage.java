@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -38,9 +39,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.Bootstra
 @SuppressWarnings("serial")
 public class DashboardPage extends LayoutPage {
 
-	private PageableListView<Account> organizationsView;
-	
-	private BootstrapPagingNavigator organizationsPageNav;
+	private ListView<Account> organizationsView;
 	
 	private WebMarkupContainer organizationsContainer; 
 	
@@ -58,86 +57,73 @@ public class DashboardPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		TextField<String> searchOrganizations;
-		add(searchOrganizations = new ClearableTextField<String>("searchOrganizations", Model.of("")));
-		searchOrganizations.add(new OnTypingDoneBehavior(100) {
-
-			@Override
-			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(organizationsContainer);
-				target.add(organizationsPageNav);
-				target.add(noOrganizationsContainer);
-			}
-
-		});
-		
-		organizationsContainer = new WebMarkupContainer("organizations") {
+		add(new WebMarkupContainer("organizations") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!organizationsView.getModelObject().isEmpty());
+				setVisible(getLoginUser() != null);
 			}
-			
-		};
-		organizationsContainer.setOutputMarkupPlaceholderTag(true);
-		add(organizationsContainer);
-		
-		organizationsContainer.add(organizationsView = new PageableListView<Account>("organizations", 
-				new LoadableDetachableModel<List<Account>>() {
 
 			@Override
-			protected List<Account> load() {
-				List<Account> organizations = new ArrayList<>();
+			protected void onInitialize() {
+				super.onInitialize();
 				
-				Account loginUser = getLoginUser();
-				if (loginUser != null) {
-					for (OrganizationMembership membership: loginUser.getOrganizations()) {
-						Account organization = membership.getOrganization();
-						if (organization.matches(searchOrganizations.getInput())) {
-							organizations.add(organization);
-						}
+				organizationsContainer = new WebMarkupContainer("organizations") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!organizationsView.getModelObject().isEmpty());
 					}
-					Collections.sort(organizations);
-				}
-				return organizations;
-			}
-			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+					
+				};
+				organizationsContainer.setOutputMarkupPlaceholderTag(true);
+				add(organizationsContainer);
+				
+				organizationsContainer.add(organizationsView = new ListView<Account>("organizations", 
+						new LoadableDetachableModel<List<Account>>() {
 
-			@Override
-			protected void populateItem(ListItem<Account> item) {
-				Account organization = item.getModelObject();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", 
-						AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
-				link.add(new Avatar("avatar", organization));
-				link.add(new Label("name", organization.getDisplayName()));
-				item.add(link);
+					@Override
+					protected List<Account> load() {
+						List<Account> organizations = new ArrayList<>();
+						
+						Account loginUser = getLoginUser();
+						if (loginUser != null) {
+							for (OrganizationMembership membership: loginUser.getOrganizations()) {
+								organizations.add(membership.getOrganization());
+							}
+							Collections.sort(organizations);
+						}
+						return organizations;
+					}
+					
+				}) {
+
+					@Override
+					protected void populateItem(ListItem<Account> item) {
+						Account organization = item.getModelObject();
+						Link<Void> link = new BookmarkablePageLink<Void>("link", 
+								AccountOverviewPage.class, AccountOverviewPage.paramsOf(organization));
+						link.add(new Avatar("avatar", organization));
+						link.add(new Label("name", organization.getDisplayName()));
+						item.add(link);
+					}
+					
+				});
+				add(noOrganizationsContainer = new WebMarkupContainer("noOrganizations") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(organizationsView.getModelObject().isEmpty());
+					}
+					
+				});
+				noOrganizationsContainer.setOutputMarkupPlaceholderTag(true);
 			}
 			
 		});
-
-		add(organizationsPageNav = new BootstrapAjaxPagingNavigator("organizationsPageNav", organizationsView) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(organizationsView.getPageCount() > 1);
-			}
-			
-		});
-		organizationsPageNav.setOutputMarkupPlaceholderTag(true);
-		
-		add(noOrganizationsContainer = new WebMarkupContainer("noOrganizations") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(organizationsView.getModelObject().isEmpty());
-			}
-			
-		});
-		noOrganizationsContainer.setOutputMarkupPlaceholderTag(true);
 		
 		TextField<String> searchDepots;
 		add(searchDepots = new ClearableTextField<String>("searchDepots", Model.of("")));
@@ -171,7 +157,7 @@ public class DashboardPage extends LayoutPage {
 			protected List<Depot> load() {
 				DepotManager depotManager = GitPlex.getInstance(DepotManager.class);
 				List<Depot> depots = new ArrayList<>();
-				for (Depot depot: depotManager.getAccessibles(getLoginUser())) {
+				for (Depot depot: depotManager.getAccessibles(null, getLoginUser())) {
 					if (depot.matchesFQN(searchDepots.getInput())) {
 						depots.add(depot);
 					}

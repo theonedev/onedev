@@ -96,6 +96,11 @@ public abstract class LayoutPage extends BasePage {
 					protected void onSelect(AjaxRequestTarget target, Account account) {
 						LayoutPage.this.onSelect(target, account);
 					}
+
+					@Override
+					protected boolean isSearchable() {
+						return false;
+					}
 					
 				};
 			}
@@ -109,7 +114,7 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					protected Collection<Depot> load() {
-						return GitPlex.getInstance(DepotManager.class).getAccessibles(getLoginUser());
+						return GitPlex.getInstance(DepotManager.class).getAccessibles(null, getLoginUser());
 					}
 					
 				}, Depot.idOf(getDepot())) {
@@ -117,6 +122,11 @@ public abstract class LayoutPage extends BasePage {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Depot depot) {
 						LayoutPage.this.onSelect(target, depot);
+					}
+
+					@Override
+					protected boolean isSearchable() {
+						return true;
 					}
 					
 				};

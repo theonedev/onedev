@@ -15,17 +15,13 @@
 					<div class="center"><ul wicket:id="depotsPageNav"></ul></div>
 					<div wicket:id="noDepots" class="alert alert-warning">No repositories found</div>
 				</td>
-				<td class="organizations">
+				<td wicket:id="organizations" class="organizations">
 					<div class="title">Joined Organizations</div>
-					<div class="search">
-						<input wicket:id="searchOrganizations" class="form-control" placeholder="Search..."></input>
-					</div>
 					<ul wicket:id="organizations" class="list-unstyled">
 						<li wicket:id="organizations">
 							<a wicket:id="link"><img wicket:id="avatar"><img> <span wicket:id="name"></span></a> 
 						</li>
 					</ul>	
-					<div class="center"><ul wicket:id="organizationsPageNav"></ul></div>
 					<div wicket:id="noOrganizations" class="alert alert-warning">No organizations found</div>
 				</td>
 			</tr>

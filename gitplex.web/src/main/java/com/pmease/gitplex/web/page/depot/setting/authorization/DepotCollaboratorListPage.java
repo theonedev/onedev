@@ -15,19 +15,15 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -49,15 +45,10 @@ import com.pmease.gitplex.web.page.account.collaborators.CollaboratorPrivilegeSo
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
 import com.vaynberg.wicket.select2.Response;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
-
 @SuppressWarnings("serial")
 public class DepotCollaboratorListPage extends DepotSettingPage {
 
-	private PageableListView<UserAuthorization> collaboratorsView;
-	
-	private BootstrapPagingNavigator pagingNavigator;
+	private ListView<UserAuthorization> collaboratorsView;
 	
 	private WebMarkupContainer collaboratorsContainer; 
 	
@@ -74,20 +65,6 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		TextField<String> searchField;
-		
-		add(searchField = new ClearableTextField<String>("searchCollaborators", Model.of("")));
-		searchField.add(new OnTypingDoneBehavior(100) {
-
-			@Override
-			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(collaboratorsContainer);
-				target.add(pagingNavigator);
-				target.add(noCollaboratorsContainer);
-			}
-			
-		});
 		
 		WebMarkupContainer filterContainer = new WebMarkupContainer("filter");
 		filterContainer.setOutputMarkupId(true);
@@ -121,7 +98,6 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 						filterPrivilege = privilege;
 						target.add(filterContainer);
 						target.add(collaboratorsContainer);
-						target.add(pagingNavigator);
 						target.add(noCollaboratorsContainer);
 					}
 
@@ -135,7 +111,6 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 				filterPrivilege = null;
 				target.add(filterContainer);
 				target.add(collaboratorsContainer);
-				target.add(pagingNavigator);
 				target.add(noCollaboratorsContainer);
 			}
 
@@ -191,7 +166,6 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 				authorization.setDepot(depotModel.getObject());
 				GitPlex.getInstance(UserAuthorizationManager.class).persist(authorization);
 				target.add(collaboratorsContainer);
-				target.add(pagingNavigator);
 				target.add(noCollaboratorsContainer);
 			}
 			
@@ -217,7 +191,6 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 				authorizationManager.delete(authorizations);
 				pendingRemovals.clear();
 				target.add(this);
-				target.add(pagingNavigator);
 				target.add(collaboratorsContainer);
 				target.add(noCollaboratorsContainer);
 			}
@@ -243,7 +216,7 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 		collaboratorsContainer.setOutputMarkupPlaceholderTag(true);
 		add(collaboratorsContainer);
 		
-		collaboratorsContainer.add(collaboratorsView = new PageableListView<UserAuthorization>("collaborators", 
+		collaboratorsContainer.add(collaboratorsView = new ListView<UserAuthorization>("collaborators", 
 				new LoadableDetachableModel<List<UserAuthorization>>() {
 
 			@Override
@@ -251,8 +224,7 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 				List<UserAuthorization> authorizations = new ArrayList<>();
 				
 				for (UserAuthorization authorization: depotModel.getObject().getAuthorizedUsers()) {
-					if (authorization.getUser().matches(searchField.getInput()) 
-							&& (filterPrivilege == null || filterPrivilege == authorization.getPrivilege())							
+					if ((filterPrivilege == null || filterPrivilege == authorization.getPrivilege())							
 							&& !authorization.getUser().isAdministrator() 
 							&& !authorization.getUser().equals(getAccount())) {
 						authorizations.add(authorization);
@@ -264,7 +236,7 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 				return authorizations;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}) {
 
 			@Override
 			protected void populateItem(ListItem<UserAuthorization> item) {
@@ -324,7 +296,6 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 								UserAuthorization authorization = item.getModelObject();
 								authorization.setPrivilege(privilege);
 								GitPlex.getInstance(UserAuthorizationManager.class).persist(authorization);
-								target.add(pagingNavigator);
 								target.add(collaboratorsContainer);
 								target.add(noCollaboratorsContainer);
 								Session.get().success("Privilege updated");
@@ -382,17 +353,6 @@ public class DepotCollaboratorListPage extends DepotSettingPage {
 			
 		});
 
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", collaboratorsView) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(collaboratorsView.getPageCount() > 1);
-			}
-			
-		});
-		pagingNavigator.setOutputMarkupPlaceholderTag(true);
-		
 		noCollaboratorsContainer = new WebMarkupContainer("noCollaborators") {
 
 			@Override

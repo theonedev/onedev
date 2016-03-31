@@ -10,21 +10,17 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
-import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Team;
@@ -32,14 +28,11 @@ import com.pmease.gitplex.core.entity.TeamMembership;
 import com.pmease.gitplex.core.manager.TeamManager;
 import com.pmease.gitplex.core.manager.TeamMembershipManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.page.account.AccountLayoutPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
-import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
 
 @SuppressWarnings("serial")
 public class TeamListPage extends AccountLayoutPage {
@@ -57,9 +50,7 @@ public class TeamListPage extends AccountLayoutPage {
 		
 	};
 	
-	private PageableListView<Team> teamsView;
-	
-	private BootstrapPagingNavigator pagingNavigator;
+	private ListView<Team> teamsView;
 	
 	private WebMarkupContainer teamsContainer; 
 	
@@ -74,20 +65,6 @@ public class TeamListPage extends AccountLayoutPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		TextField<String> searchField;
-		
-		add(searchField = new ClearableTextField<String>("searchTeams", Model.of("")));
-		searchField.add(new OnTypingDoneBehavior(100) {
-
-			@Override
-			protected void onTypingDone(AjaxRequestTarget target) {
-				target.add(teamsContainer);
-				target.add(pagingNavigator);
-				target.add(noTeamsContainer);
-			}
-			
-		});
 		
 		add(new Link<Void>("addNew") {
 
@@ -128,23 +105,16 @@ public class TeamListPage extends AccountLayoutPage {
 		noTeamsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noTeamsContainer);
 		
-		teamsContainer.add(teamsView = new PageableListView<Team>("teams", new LoadableDetachableModel<List<Team>>() {
+		teamsContainer.add(teamsView = new ListView<Team>("teams", new LoadableDetachableModel<List<Team>>() {
 
 			@Override
 			protected List<Team> load() {
-				List<Team> teams = new ArrayList<>();
-				
-				for (Team team: getAccount().getDefinedTeams()) {
-					if (team.matches(searchField.getInput())) {
-						teams.add(team);
-					}
-				}
-				
+				List<Team> teams = new ArrayList<>(getAccount().getDefinedTeams());
 				Collections.sort(teams);
 				return teams;
 			}
 			
-		}, Constants.DEFAULT_PAGE_SIZE) {
+		}) {
 
 			@Override
 			protected void populateItem(ListItem<Team> item) {
@@ -201,24 +171,12 @@ public class TeamListPage extends AccountLayoutPage {
 						teamManager.delete(teamManager.load(teamId));
 						target.add(teamsContainer);
 						target.add(noTeamsContainer);
-						target.add(pagingNavigator);
 					}
 					
 				});
 			}
 			
 		});
-
-		add(pagingNavigator = new BootstrapAjaxPagingNavigator("pageNav", teamsView) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(teamsView.getPageCount() > 1);
-			}
-			
-		});
-		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 	}
 	
 	@Override

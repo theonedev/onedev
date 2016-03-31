@@ -20,8 +20,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -110,12 +112,8 @@ public class DepotListPanel extends GenericPanel<Account> {
 
 			@Override
 			protected List<Depot> load() {
-				List<Depot> depots = new ArrayList<>();
-				
-				for (Depot depot: getAccount().getDepots()) {
-					if (depot.matches(searchField.getInput()) && SecurityUtils.canRead(depot))
-						depots.add(depot);
-				}
+				List<Depot> depots = new ArrayList<>(GitPlex.getInstance(DepotManager.class)
+						.getAccessibles(getAccount(), SecurityUtils.getAccount()));
 				
 				Collections.sort(depots);
 				return depots;

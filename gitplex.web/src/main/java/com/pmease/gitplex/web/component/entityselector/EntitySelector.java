@@ -96,6 +96,7 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 		add(noEntitiesLabel);
 		
 		TextField<String> searchField = new TextField<String>("search", Model.of(""));
+		searchField.setVisible(isSearchable());
 		add(searchField);
 		searchField.add(new FormComponentInputBehavior() {
 			
@@ -194,6 +195,8 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(EntitySelector.class, "entity-selector.css")));
 	}
+	
+	protected abstract boolean isSearchable();
 	
 	protected abstract String getUrl(T entity);
 	

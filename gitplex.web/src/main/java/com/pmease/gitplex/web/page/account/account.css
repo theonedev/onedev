@@ -57,77 +57,89 @@
 	border-radius: 4px;
 	margin-bottom: 20px;
 }
-#account.sidebar>table>tbody>tr>td.content .team.detail>.head .title {
+.team.detail>.head .title {
 	font-weight: bold;
 	font-size: 18px;
 	margin-bottom: 12px;
 }
-#account.sidebar>table>tbody>tr>td.content .team.detail>.head .actions {
+.team.detail>.head .description .md-preview {
+	font-size: 14px;
+}
+.team.detail>.head .actions {
 	border-top: 1px dashed #CCC;
 	padding-top: 12px;
 	margin-top: 16px;
 }
 
-#account.sidebar>table>tbody>tr>td.content .list td.name .note {
+.list td.name .note {
 	font-size: 12px;
 	color: #888;
 	margin-top: 4px;
 }
 
-#account.sidebar>table>tbody>tr>td.content .user.detail>.head .avatar {
+.user.detail>.head .avatar {
 	width: 32px;
 	height: 32px;
 }
-#account.sidebar>table>tbody>tr>td.content .user.detail>.head>a, 
-#account.sidebar>table>tbody>tr>td.content .user.detail>.head>span {
+.user.detail>.head>a, 
+.user.detail>.head>span {
 	margin-left: 8px;
 }
-#account.sidebar>table>tbody>tr>td.content .user.detail>.head>a.name {
+.user.detail>.head>a.name {
 	margin-left: 2px;
 	font-size: 16px;
 	vertical-align: middle;
 }
 
-#account.sidebar>table>tbody>tr>td.content td.privilege, 
-#account.sidebar>table>tbody>tr>td.content td.role {
+.list td.privilege, 
+.list td.role {
 	width: 20%;
 }
 
-#user-overview>div {
+.account.overview>div {
 	margin-bottom: 20px;
 	border-bottom: 1px solid #DDD;
 	padding-bottom: 20px;
 }
-#user-overview>div:last-child {
+.account.overview>div:last-child {
 	border-bottom: none;
 	margin-bottom: 0;
 	padding-bottom: 0;
 }
-#user-overview>.head>.title {
+.account.overview>.head>.title {
 	font-size: 18px;
 	font-weight: bold;
-	margin-bottom: 8px;
 }
-#user-overview>.head>.subtitle, #user-overview>.head>.subtitle a {
+.account.overview>.head>.subtitle, .account.overview>.head>.subtitle a {
 	color: #777;
 }
-#user-overview>.head>.subtitle span {
+.account.overview>.head>.description {
+	margin-top: 8px;
+	background: #F5F5F5;
+	padding: 8px;
+	border-radius: 4px;
+}
+.account.overview>.head>.description .md-preview {
+	font-size: 14px;
+}
+
+.account.overview>.head>.subtitle span {
 	margin-right: 8px;
 }
 
-#user-overview>div>.head {
+.account.overview>div>.head {
 	font-size: 18px;
 	margin-bottom: 12px;
 }
 
-#user-overview .organizations ul {
+.account.overview .organizations ul {
 	margin: 0 12px 0 0;
 }
-#user-overview .organizations a {
+.account.overview .organizations a {
 	display: block;
 	margin-right: 8px;
 }
-#user-overview .organizations img {
+.account.overview .organizations img {
 	width: 32px;
 	height: 32px;
 }
