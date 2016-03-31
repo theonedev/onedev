@@ -19,3 +19,6 @@
 #dashboard ul li a:hover {
 	background: #EEE;
 }
+#dashboard .operations>div {
+	margin-right: 20px;
+}

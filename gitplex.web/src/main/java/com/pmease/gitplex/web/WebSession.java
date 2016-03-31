@@ -5,6 +5,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
+import org.apache.wicket.protocol.http.WicketServlet;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.cycle.RequestCycle;
 
@@ -75,7 +76,8 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	}
 	
 	public static WebSession from(HttpSession session) {
-		return (WebSession) session.getAttribute("wicket:DefaultWicketServlet:session");		
+		String attributeName = "wicket:" + GitPlex.getInstance(WicketServlet.class).getServletName() + ":session";
+		return (WebSession) session.getAttribute(attributeName);		
 	}
 	
 }

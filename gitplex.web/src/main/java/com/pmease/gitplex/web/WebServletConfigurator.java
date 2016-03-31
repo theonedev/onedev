@@ -6,6 +6,7 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -38,7 +39,7 @@ public class WebServletConfigurator implements ServletConfigurator {
 			@Override
 			public void sessionDestroyed(HttpSessionEvent se) {
 				SimplePrincipalCollection principals = (SimplePrincipalCollection) se.getSession().getAttribute(
-						"org.apache.shiro.subject.support.DefaultSubjectContext_PRINCIPALS_SESSION_KEY");
+						DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
 				if (principals != null) {
 					Long userId = (Long) principals.getPrimaryPrincipal();
 					if (!userId.equals(0L)) {

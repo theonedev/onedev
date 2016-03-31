@@ -228,7 +228,7 @@ public class Account extends AbstractUser implements ProtectedObject {
 			+ "<ul>"
 			+ "<li>None: No any permissions granted on repositories"
 			+ "<li>Read: Able to pull and browse repositories"
-			+ "<li>Write: Has full read privilege, and can also push to" 
+			+ "<li>Write: Has full read privilege, and can also push to " 
 			+ "repositories unless gate keeper prevents")
 	@ExcludeValues("ADMIN")
 	@NotNull

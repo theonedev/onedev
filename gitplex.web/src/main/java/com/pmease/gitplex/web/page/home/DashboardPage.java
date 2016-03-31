@@ -31,6 +31,8 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
+import com.pmease.gitplex.web.page.account.overview.NewDepotPage;
+import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
@@ -69,6 +71,13 @@ public class DashboardPage extends LayoutPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
+				
+				if (getLoginUser() != null) {
+					add(new BookmarkablePageLink<Void>("addOrganization", NewOrganizationPage.class, 
+							NewOrganizationPage.paramsOf(getLoginUser())));
+				} else {
+					add(new WebMarkupContainer("addOrganization").setVisible(false));
+				}
 				
 				organizationsContainer = new WebMarkupContainer("organizations") {
 
@@ -125,6 +134,13 @@ public class DashboardPage extends LayoutPage {
 			}
 			
 		});
+		
+		if (getLoginUser() != null) {
+			add(new BookmarkablePageLink<Void>("addDepot", NewDepotPage.class, 
+					NewDepotPage.paramsOf(getLoginUser())));
+		} else {
+			add(new WebMarkupContainer("addDepot").setVisible(false));
+		}
 		
 		TextField<String> searchDepots;
 		add(searchDepots = new ClearableTextField<String>("searchDepots", Model.of("")));

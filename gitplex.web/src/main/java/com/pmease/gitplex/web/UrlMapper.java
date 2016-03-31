@@ -58,6 +58,7 @@ import com.pmease.gitplex.web.page.depot.setting.general.GeneralSettingPage;
 import com.pmease.gitplex.web.page.depot.setting.integrationpolicy.IntegrationPolicyPage;
 import com.pmease.gitplex.web.page.depot.tags.DepotTagsPage;
 import com.pmease.gitplex.web.page.init.ServerInitPage;
+import com.pmease.gitplex.web.page.init.WelcomePage;
 import com.pmease.gitplex.web.page.security.ForgetPage;
 import com.pmease.gitplex.web.page.security.LoginPage;
 import com.pmease.gitplex.web.page.security.LogoutPage;
@@ -72,6 +73,7 @@ public class UrlMapper extends CompoundRequestMapper {
 
 	public UrlMapper(WebApplication app) {
 		add(new MountedMapper("init", ServerInitPage.class));
+		add(new MountedMapper("welcome", WelcomePage.class));
 		addAdministrationPages();
 		addAccountPages();
 		addDepotPages();

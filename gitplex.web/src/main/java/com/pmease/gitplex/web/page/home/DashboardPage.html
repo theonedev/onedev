@@ -4,8 +4,13 @@
 			<tr>
 				<td class="repositories">
 					<div class="title">Accessible Repositories</div>
-					<div class="search">
-						<input wicket:id="searchDepots" class="form-control" placeholder="Search..."></input>
+					<div class="operations clearfix">
+						<div class="search pull-left">
+							<input wicket:id="searchDepots" class="form-control" placeholder="Search..."></input>
+						</div>
+						<div class="pull-left">
+							<a wicket:id="addDepot" class="btn btn-default"><i class="fa fa-plus"></i> Add New Repository in My Account</a>
+						</div>
 					</div>
 					<ul wicket:id="depots" class="list-unstyled">
 						<li wicket:id="depots">
@@ -17,6 +22,11 @@
 				</td>
 				<td wicket:id="organizations" class="organizations">
 					<div class="title">Joined Organizations</div>
+					<div class="operations">
+						<div>
+							<a wicket:id="addOrganization" class="btn btn-default"><i class="fa fa-plus"></i> Add New Organization in My Account</a>
+						</div>
+					</div>
 					<ul wicket:id="organizations" class="list-unstyled">
 						<li wicket:id="organizations">
 							<a wicket:id="link"><img wicket:id="avatar"><img> <span wicket:id="name"></span></a> 
