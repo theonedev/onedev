@@ -1,26 +1,23 @@
 .organization-selector {
 	padding: 10px;
 }
-.organization-selector ul {
-	margin: 0;
+.organization-selector ul, .organization-selector .alert {
+	margin: 12px 0 0 0;
 }
-.organization-selector a {
+.organization-selector ul a {
 	padding: 5px 20px;
 	display: block;
 	color: #333;
 	text-decoration: none;
 }
-.organization-selector a.current>span:before {
+.organization-selector ul a.current>span:before {
 	font-family: "FontAwesome"; 
 	content: "\f00c"; 
 	margin-right: 4px;	
 	position: absolute;
 	left: 12px;
 }
-.organization-selector a:hover {
+.organization-selector ul a:hover {
 	background-color: #E0F0FC;
 	border-color: #BBDFF9;
-}
-.organization-selector .alert {
-	margin: 0;
 }

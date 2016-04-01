@@ -19,12 +19,12 @@
 	font-weight: normal; 
 	line-height: 20px; 
 	text-decoration: none; 
-	padding: 6px 20px 6px 28px; 
+	padding: 6px 24px 6px 32px; 
 	white-space: nowrap;
 }
 .floating.menu ul>li>a>.icon {
 	position: absolute;
-	left: 4px;
+	left: 8px;
 	top: 8px;
 	color: #444;
 }

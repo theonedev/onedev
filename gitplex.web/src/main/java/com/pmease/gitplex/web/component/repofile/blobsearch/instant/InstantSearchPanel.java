@@ -119,18 +119,18 @@ public abstract class InstantSearchPanel extends Panel {
 						SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 						ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());
 						try {
-							BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
+							BlobQuery query = new SymbolQuery("*"+searchInput+"*", true, false, 
 									null, null, MAX_QUERY_ENTRIES);
 							symbolHits = searchManager.search(depotModel.getObject(), commit, query);
 							
 							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-								query = new FileQuery(searchInput+"*", false, null, 
+								query = new FileQuery("*"+searchInput+"*", false, null, 
 										MAX_QUERY_ENTRIES-symbolHits.size());
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}
 							
 							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-								query = new SymbolQuery(searchInput+"*", false, false, 
+								query = new SymbolQuery("*"+searchInput+"*", false, false, 
 										null, null, MAX_QUERY_ENTRIES-symbolHits.size());
 								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 							}
@@ -297,7 +297,7 @@ public abstract class InstantSearchPanel extends Panel {
 								try {
 									List<QueryHit> hits = new ArrayList<>();
 
-									BlobQuery query = new SymbolQuery(searchInput+"*", true, false, 
+									BlobQuery query = new SymbolQuery("*"+searchInput+"*", true, false, 
 											null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 
 									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
@@ -305,13 +305,13 @@ public abstract class InstantSearchPanel extends Panel {
 									hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 									
 									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
-										query = new FileQuery(searchInput+"*", false, null, 
+										query = new FileQuery("*"+searchInput+"*", false, null, 
 												SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
 										hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 									}
 									
 									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
-										query = new SymbolQuery(searchInput+"*", false, false, 
+										query = new SymbolQuery("*"+searchInput+"*", false, false, 
 												null, null, SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
 										hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 									}

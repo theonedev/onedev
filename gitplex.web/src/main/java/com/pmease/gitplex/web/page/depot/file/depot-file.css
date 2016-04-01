@@ -24,10 +24,8 @@
 #repo-file>.head>a.revision-picker, #repo-file>.head>.file-navigator, #repo-file>.file-navigator>div {
 	padding: 5px 8px;
 }
-#repo-file>.head>.file-navigator .last-segment.input {
-	height: 20px;
-	margin-left: 2px;
-	margin-top: -1px;
+#repo-file>.head>.file-navigator, #repo-file>.file-navigator>div {
+	padding: 5px 8px 0px 8px;
 }
 #repo-file>.head>.file-navigator input.name {
 	height: 30px;
@@ -35,7 +33,7 @@
 	border-top: none;
 	border-bottom: none;
 	border-radius: 0;
-	margin-top: -4px;
+	margin-top: -5px;
 	padding-left: 0px 8px;
 	width: 160px;
 }

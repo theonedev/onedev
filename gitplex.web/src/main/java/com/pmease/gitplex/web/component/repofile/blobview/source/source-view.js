@@ -166,7 +166,7 @@ gitplex.sourceview = {
             		for (var line = range.from+1; line<range.to; line++) {
             			var $ele = $(document.createElement("div"));
             			$ele.addClass("CodeMirror-annotation");
-                		$ele.append("<span class='same-as-above fa fa-arrow-up' title='same as above'></span>");
+                		$ele.append("<span class='same-as-above'>...</span>");
                 		cm.setGutterMarker(line, "CodeMirror-annotations", $ele[0]);
             		}
         		}
