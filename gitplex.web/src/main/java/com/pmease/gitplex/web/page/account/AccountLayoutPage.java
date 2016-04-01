@@ -48,26 +48,31 @@ public abstract class AccountLayoutPage extends AccountPage {
 		
 		List<PageTab> tabs = new ArrayList<>();
 		
-		tabs.add(new AccountTab("Overview", "fa fa-fw fa-list-alt", 
+		tabs.add(new AccountTab("Overview", "fa fa-fw fa-list-alt", 0, 
 				AccountOverviewPage.class, NewOrganizationPage.class, NewDepotPage.class));
 
 		if (getAccount().isOrganization()) {
 			if (SecurityUtils.canAccess(getAccount())) {
-				tabs.add(new AccountTab("Members", "fa fa-fw fa-user", 
+				tabs.add(new AccountTab("Members", "fa fa-fw fa-user",
+						getAccount().getOrganizationMembers().size(),
 						MemberListPage.class, NewMembersPage.class, MemberPage.class));
-				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", TeamListPage.class, TeamPage.class));
+				tabs.add(new AccountTab("Teams", "fa fa-fw fa-group", 
+						getAccount().getDefinedTeams().size(), TeamListPage.class, TeamPage.class));
 			} 
 			if (SecurityUtils.canManage(getAccount())) {
-				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 
+				tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user",
+						getAccount().getAllUserAuthorizationsInOrganization().size(),
 						AccountCollaboratorListPage.class, CollaboratorPage.class));
-				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, AvatarEditPage.class));
+				tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", 0, ProfileEditPage.class, AvatarEditPage.class));
 			} 
 		} else if (SecurityUtils.canManage(getAccount())) {
 			tabs.add(new AccountTab("Collaborators", "fa fa-fw fa-user", 
+					getAccount().getAllUserAuthorizationsInOrganization().size(),
 					AccountCollaboratorListPage.class, CollaboratorPage.class));
-			tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", NotificationListPage.class));
-			tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", ProfileEditPage.class, 
-					AvatarEditPage.class, PasswordEditPage.class));
+			tabs.add(new AccountTab("Notifications", "fa fa-fw fa-bell-o", 
+					getAccount().getRequestNotifications().size(), NotificationListPage.class));
+			tabs.add(new AccountTab("Setting", "fa fa-fw fa-cog", 0, 
+					ProfileEditPage.class, AvatarEditPage.class, PasswordEditPage.class));
 		}
 		add(new Tabbable("accountTabs", tabs));
 	}

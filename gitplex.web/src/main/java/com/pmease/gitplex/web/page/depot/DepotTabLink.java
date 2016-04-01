@@ -28,6 +28,8 @@ public class DepotTabLink extends Panel {
 		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
 		
 		link.add(new Label("text", tab.getTitleModel()));
+		
+		link.add(new Label("count", tab.getCount()).setVisible(tab.getCount()!=0));
 		add(link);
 	}
 

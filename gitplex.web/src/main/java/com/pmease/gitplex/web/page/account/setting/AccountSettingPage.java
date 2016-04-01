@@ -28,11 +28,11 @@ public abstract class AccountSettingPage extends AccountLayoutPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new AccountTab("Profile", "", ProfileEditPage.class));
-		tabs.add(new AccountTab("Avatar", "", AvatarEditPage.class));
+		tabs.add(new AccountTab("Profile", "", 2, ProfileEditPage.class));
+		tabs.add(new AccountTab("Avatar", "", 0, AvatarEditPage.class));
 		
 		if (!getAccount().isOrganization())
-			tabs.add(new AccountTab("Password", "", PasswordEditPage.class));
+			tabs.add(new AccountTab("Password", "", 0, PasswordEditPage.class));
 		
 		add(new Tabbable("accountSettingTabs", tabs));
 	}

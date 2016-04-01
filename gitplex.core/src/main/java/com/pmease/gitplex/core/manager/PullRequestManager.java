@@ -87,4 +87,6 @@ public interface PullRequestManager extends EntityDao<PullRequest> {
 	Date getLastVisitDate(PullRequest request);
 	
 	void checkSanity();
+	
+	int countOpen(Depot depot);
 }

@@ -95,6 +95,7 @@ html, body {
 	border-right: 4px solid white;
 	width: 180px;
 	font-family: monospace;
+	clear: both;
 }
 .sidebar>table>tbody>tr>td.nav>.tabs>li>a .fa {
 	font-size: 16px;
@@ -108,6 +109,12 @@ html, body {
 	color: #010203;
 	border-right-color: #010203;
 	font-weight: bold;
+}
+.sidebar>table>tbody>tr>td.nav>.tabs>li>a .badge {
+	float: right;
+	margin-right: 4px;
+	color: #888;
+	background: #EEE;
 }
 #main>.foot {
 	font-size: 11px;

@@ -27,6 +27,7 @@ public class AccountTabLink extends Panel {
 				tab.getMainPageClass(), AccountPage.paramsOf(page.getAccount()));
 		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
 		link.add(new Label("label", tab.getTitleModel()));
+		link.add(new Label("count", tab.getCount()).setVisible(tab.getCount()!=0));		
 		add(link);
 	}
 

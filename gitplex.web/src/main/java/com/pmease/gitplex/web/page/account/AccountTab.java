@@ -10,34 +10,40 @@ public class AccountTab extends PageTab {
 
 	private final String iconClass;
 	
-	public AccountTab(String title, String iconClass, Class<? extends AccountPage> mainPageClass) {
+	private final int count;
+	
+	public AccountTab(String title, String iconClass, int count, Class<? extends AccountPage> mainPageClass) {
 		super(Model.of(title), mainPageClass);
 		
 		this.iconClass = iconClass;
+		this.count = count;
 	}
 
-	public AccountTab(String title, String iconClass, Class<? extends AccountPage> mainPageClass, 
+	public AccountTab(String title, String iconClass, int count, Class<? extends AccountPage> mainPageClass, 
 			Class<? extends AccountPage> additionalPageClass1) {
 		super(Model.of(title), mainPageClass, additionalPageClass1);
 		
 		this.iconClass = iconClass;
+		this.count = count;
 	}
 
-	public AccountTab(String title, String iconClass, Class<? extends AccountPage> mainPageClass, 
+	public AccountTab(String title, String iconClass, int count, Class<? extends AccountPage> mainPageClass, 
 			Class<? extends AccountPage> additionalPageClass1, 
 			Class<? extends AccountPage> additionalPageClass2) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2);
 		
 		this.iconClass = iconClass;
+		this.count = count;
 	}
 	
-	public AccountTab(String title, String iconClass, Class<? extends AccountPage> mainPageClass, 
+	public AccountTab(String title, String iconClass, int count, Class<? extends AccountPage> mainPageClass, 
 			Class<? extends AccountPage> additionalPageClass1, 
 			Class<? extends AccountPage> additionalPageClass2, 
 			Class<? extends AccountPage> additionalPageClass3) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2, additionalPageClass3);
 		
 		this.iconClass = iconClass;
+		this.count = count;
 	}
 	
 	@Override
@@ -47,6 +53,10 @@ public class AccountTab extends PageTab {
 
 	public String getIconClass() {
 		return iconClass;
+	}
+
+	public int getCount() {
+		return count;
 	}
 
 }

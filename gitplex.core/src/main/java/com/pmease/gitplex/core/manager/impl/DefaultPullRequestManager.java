@@ -849,4 +849,13 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	public void onDepotTransfer(Depot depot, Account oldAccount) {
 	}
 
+	@Sessional
+	@Override
+	public int countOpen(Depot depot) {
+		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(PullRequest.CriterionHelper.ofOpen());
+		criteria.add(PullRequest.CriterionHelper.ofTargetDepot(depot));
+		return count(criteria);
+	}
+
 }

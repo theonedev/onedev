@@ -771,10 +771,18 @@ public class PullRequest extends AbstractEntity {
 					Restrictions.eq("targetBranch", target.getBranch()));
 		}
 
+		public static Criterion ofTargetDepot(Depot target) {
+			return Restrictions.eq("targetDepot", target);
+		}
+		
 		public static Criterion ofSource(DepotAndBranch source) {
 			return Restrictions.and(
 					Restrictions.eq("sourceDepot", source.getDepot()),
 					Restrictions.eq("sourceBranch", source.getBranch()));
+		}
+		
+		public static Criterion ofSourceDepot(Depot source) {
+			return Restrictions.eq("sourceDepot", source);
 		}
 		
 		public static Criterion ofSubmitter(Account submitter) {

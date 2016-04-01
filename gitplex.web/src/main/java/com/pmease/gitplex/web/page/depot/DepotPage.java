@@ -34,6 +34,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.model.DepotModel;
@@ -102,16 +103,20 @@ public abstract class DepotPage extends AccountPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", DepotFilePage.class));
-		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", DepotCommitsPage.class, CommitDetailPage.class));
-		tabs.add(new DepotTab(Model.of("Branches"), "fa fa-fw fa-code-fork", DepotBranchesPage.class));
-		tabs.add(new DepotTab(Model.of("Tags"), "fa fa-fw fa-tag", DepotTagsPage.class));
+		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, DepotFilePage.class));
+		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0, DepotCommitsPage.class, CommitDetailPage.class));
+		tabs.add(new DepotTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
+				getDepot().getRefs(Constants.R_HEADS).size(), DepotBranchesPage.class));
+		tabs.add(new DepotTab(Model.of("Tags"), "fa fa-fw fa-tag", 
+				getDepot().getRefs(Constants.R_TAGS).size(), DepotTagsPage.class));
+		
+		int openRequests = GitPlex.getInstance(PullRequestManager.class).countOpen(getDepot());
 		tabs.add(new DepotTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-				RequestListPage.class, PullRequestPage.class));
-		tabs.add(new DepotTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", RevisionComparePage.class));
+				openRequests, RequestListPage.class, PullRequestPage.class));
+		tabs.add(new DepotTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
 		
 		if (SecurityUtils.canManage(getDepot()))
-			tabs.add(new DepotTab(Model.of("Setting"), "fa fa-fw fa-cog", GeneralSettingPage.class, DepotSettingPage.class));
+			tabs.add(new DepotTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, DepotSettingPage.class));
 		
 		WebMarkupContainer sidebar = new WebMarkupContainer("sidebar");
 		add(sidebar);

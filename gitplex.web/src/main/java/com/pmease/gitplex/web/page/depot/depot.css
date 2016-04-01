@@ -29,12 +29,16 @@
 #repository>.sidebar>table>tbody>tr>td.nav>.mini-toggle:hover {
 	background: #EEE;
 }
-#repository>.sidebar>table>tbody>tr>td.mini.nav {
-	width: 40px;
+#repository>.sidebar>table>tbody>tr>td.nav>.tabs>li>a {
+	width: 220px;
 }
 #repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a {
 	width: auto;
 }
-#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text {
+#repository>.sidebar>table>tbody>tr>td.mini.nav {
+	width: 40px;
+}
+#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.text,
+#repository>.sidebar>table>tbody>tr>td.mini.nav>.tabs>li>a>.badge {
 	display: none;
 }

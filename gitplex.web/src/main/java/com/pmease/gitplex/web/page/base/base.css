@@ -163,3 +163,6 @@ input.search {
 .nav-tabs {
 	margin-bottom: 20px;
 }
+.nav-tabs>li>a>.badge {
+	margin-left: 8px;
+}
