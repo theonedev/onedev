@@ -2,7 +2,6 @@ package com.pmease.gitplex.web.page.layout;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -15,6 +14,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -26,13 +26,11 @@ import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
-import com.pmease.gitplex.web.WebSession;
+import com.pmease.gitplex.web.component.accountselector.OrganizationSelector;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.component.entityselector.AccountSelector;
-import com.pmease.gitplex.web.component.entityselector.DepotSelector;
+import com.pmease.gitplex.web.component.depotselector.DepotSelector;
 import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
@@ -73,37 +71,20 @@ public abstract class LayoutPage extends BasePage {
 
 			@Override
 			protected Component newContent(String id) {
-				return new AccountSelector(id, new LoadableDetachableModel<Collection<Account>>() {
+				return new OrganizationSelector(id, new AbstractReadOnlyModel<Account>() {
 
 					@Override
-					protected Collection<Account> load() {
-						Collection<Account> organizations = new ArrayList<>();
-						
-						for (OrganizationMembership membership: getLoginUser().getOrganizations()) {
-							Account organization = membership.getOrganization();
-							organizations.add(organization);
-						}
-						
-						return organizations;
+					public Account getObject() {
+						return getLoginUser();
 					}
-					
+
 				}, Account.idOf(getAccount())) {
-
-					@Override
-					protected String getNotFoundMessage() {
-						return "No organizations found";
-					}
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Account account) {
 						LayoutPage.this.onSelect(target, account);
 					}
 
-					@Override
-					protected boolean isSearchable() {
-						return false;
-					}
-					
 				};
 			}
 			
@@ -124,11 +105,6 @@ public abstract class LayoutPage extends BasePage {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Depot depot) {
 						LayoutPage.this.onSelect(target, depot);
-					}
-
-					@Override
-					protected void sort(List<Depot> entities) {
-						Collections.sort(entities, WebSession.get().getDepotVisits().getComparator());
 					}
 
 				};

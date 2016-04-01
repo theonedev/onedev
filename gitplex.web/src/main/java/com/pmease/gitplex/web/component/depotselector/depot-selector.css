@@ -1,0 +1,16 @@
+.depot-selector {
+	padding: 20px;
+}
+.depot-selector ul, .depot-selector .alert {
+	margin: 12px 0 0 0;
+}
+.depot-selector a {
+	padding: 5px 20px !important;
+}
+.depot-selector a.current>span:before {
+	font-family: "FontAwesome"; 
+	content: "\f00c"; 
+	margin-right: 4px;	
+	position: absolute;
+	left: 24px;
+}

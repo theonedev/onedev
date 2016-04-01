@@ -1,11 +1,8 @@
-package com.pmease.gitplex.web.component.entityselector;
+package com.pmease.gitplex.web.component.depotselector;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -29,81 +26,71 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.util.ReflectionUtils;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
+import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.web.WebSession;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
-public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
+public abstract class DepotSelector extends Panel {
 
-	private final IModel<Collection<T>> entitiesModel;
+	private final IModel<Collection<Depot>> depotsModel;
 	
-	private final Class<T> entityClass;
-	
-	private final Long currentEntityId;
+	private final Long currentDepotId;
 
-	private ListView<T> entitiesView;
+	private ListView<Depot> depotsView;
 	
-	@SuppressWarnings("unchecked")
-	public EntitySelector(String id, IModel<Collection<T>> entitiesModel, Long currentEntityId) {
+	public DepotSelector(String id, IModel<Collection<Depot>> depotsModel, Long currentDepotId) {
 		super(id);
 		
-		this.entitiesModel = entitiesModel;
-		this.currentEntityId = currentEntityId;
-		
-		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(EntitySelector.class, getClass());
-		if (typeArguments.size() == 1 && AbstractEntity.class.isAssignableFrom(typeArguments.get(0))) {
-			entityClass = (Class<T>) typeArguments.get(0);
-		} else {
-			throw new RuntimeException("Super class of entity selector implementation must "
-					+ "be EntitySelector and must realize the type argument <T>");
-		}
-		
+		this.depotsModel = depotsModel;
+		this.currentDepotId = currentDepotId;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer entitiesContainer = new WebMarkupContainer("entities") {
+		WebMarkupContainer depotsContainer = new WebMarkupContainer("depots") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!entitiesView.getModelObject().isEmpty());
+				setVisible(!depotsView.getModelObject().isEmpty());
 			}
 			
 		};
-		entitiesContainer.setOutputMarkupPlaceholderTag(true);
-		add(entitiesContainer);
+		depotsContainer.setOutputMarkupPlaceholderTag(true);
+		add(depotsContainer);
 		
-		Label noEntitiesLabel = new Label("noEntities", getNotFoundMessage()) {
+		WebMarkupContainer noDepotsContainer = new WebMarkupContainer("noDepots") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(entitiesView.getModelObject().isEmpty());
+				setVisible(depotsView.getModelObject().isEmpty());
 			}
 			
 		};
-		noEntitiesLabel.setOutputMarkupPlaceholderTag(true);
-		add(noEntitiesLabel);
+		noDepotsContainer.setOutputMarkupPlaceholderTag(true);
+		add(noDepotsContainer);
 		
 		TextField<String> searchField = new TextField<String>("search", Model.of(""));
-		searchField.setVisible(isSearchable());
 		add(searchField);
 		searchField.add(new FormComponentInputBehavior() {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target) {
-				target.add(entitiesContainer);
-				target.add(noEntitiesLabel);
+				target.add(depotsContainer);
+				target.add(noDepotsContainer);
 			}
 			
 		});
@@ -113,14 +100,14 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				Long id = params.getParameterValue("id").toLong();
-				onSelect(target, GitPlex.getInstance(Dao.class).load(entityClass, id));
+				onSelect(target, GitPlex.getInstance(DepotManager.class).load(id));
 			}
 
 			@Override
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				String script = String.format("gitplex.entitySelector.init('%s', %s)", 
+				String script = String.format("gitplex.depotSelector.init('%s', %s)", 
 						searchField.getMarkupId(true), 
 						getCallbackFunction(CallbackParameter.explicit("id")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
@@ -128,26 +115,26 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 			
 		});
 		
-		entitiesContainer.add(entitiesView = new ListView<T>("entities", 
-				new LoadableDetachableModel<List<T>>() {
+		depotsContainer.add(depotsView = new ListView<Depot>("depots", 
+				new LoadableDetachableModel<List<Depot>>() {
 
 			@Override
-			protected List<T> load() {
-				List<T> entities = new ArrayList<>();
-				for (T entity: entitiesModel.getObject()) {
-					if (matches(entity, searchField.getInput())) {
-						entities.add(entity);
+			protected List<Depot> load() {
+				List<Depot> depots = new ArrayList<>();
+				for (Depot depot: depotsModel.getObject()) {
+					if (depot.matchesFQN(searchField.getInput())) {
+						depots.add(depot);
 					}
 				}
-				sort(entities);
-				return entities;
+				depots.sort(WebSession.get().getDepotVisits().getComparator());
+				return depots;
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<T> item) {
-				T entity = item.getModelObject();
+			protected void populateItem(ListItem<Depot> item) {
+				Depot depot = item.getModelObject();
 				AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 					@Override
@@ -159,18 +146,20 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						tag.put("href", getUrl(item.getModelObject()));
+						PageParameters params = DepotFilePage.paramsOf(item.getModelObject());
+						tag.put("href", urlFor(DepotFilePage.class, params).toString());
 					}
 					
 				};
-				if (entity.getId().equals(currentEntityId)) 
+				if (depot.getId().equals(currentDepotId)) 
 					link.add(AttributeAppender.append("class", " current"));
-				link.add(renderEntity("entity", item.getModel()));
+				String label = depot.getAccount().getName() + " " + Depot.FQN_SEPARATOR + " " + depot.getName();
+				link.add(new Label("name", label));
 				item.add(link);
 				
 				if (item.getIndex() == 0)
 					item.add(AttributeAppender.append("class", "active"));
-				item.add(AttributeAppender.append("data-id", entity.getId()));
+				item.add(AttributeAppender.append("data-id", depot.getId()));
 			}
 			
 		});
@@ -178,7 +167,7 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 
 	@Override
 	protected void onDetach() {
-		entitiesModel.detach();
+		depotsModel.detach();
 		
 		super.onDetach();
 	}
@@ -188,28 +177,14 @@ public abstract class EntitySelector<T extends AbstractEntity> extends Panel {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(HotkeysResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(ScrollIntoViewResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(EntitySelector.class, "entity-selector.js")));
+				new JavaScriptResourceReference(DepotSelector.class, "depot-selector.js")));
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(EntitySelector.class, "entity-selector.css")));
+				new CssResourceReference(DepotSelector.class, "depot-selector.css")));
 	}
 	
-	protected void sort(List<T> entities) {
-		Collections.sort(entities);
-	}
+	protected abstract void onSelect(AjaxRequestTarget target, Depot depot);
 	
-	protected boolean isSearchable() {
-		return true;
-	}
-	
-	protected abstract String getUrl(T entity);
-	
-	protected abstract void onSelect(AjaxRequestTarget target, T entity);
-	
-	protected abstract String getNotFoundMessage();
-	
-	protected abstract Component renderEntity(String componentId, IModel<T> entityModel);
-	
-	protected abstract boolean matches(T entity, @Nullable String searchTerm);
 }

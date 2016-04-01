@@ -11,7 +11,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.web.component.entityselector.DepotSelector;
+import com.pmease.gitplex.web.component.depotselector.DepotSelector;
 
 @SuppressWarnings("serial")
 public abstract class DepotPicker extends DropdownLink {
@@ -38,11 +38,6 @@ public abstract class DepotPicker extends DropdownLink {
 				DepotPicker.this.onSelect(target, depot);
 			}
 
-			@Override
-			protected boolean isSearchable() {
-				return true;
-			}
-			
 		};
 	}
 
