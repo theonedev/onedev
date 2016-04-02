@@ -16,7 +16,7 @@ import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.util.match.WildcardApplied;
+import com.pmease.commons.util.match.PatternApplied;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.GitPlex;
@@ -82,7 +82,7 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 								else
 									content = contributor.getName();
 								content = content.trim();
-								WildcardApplied applied = WildcardUtils.applyWildcard(content, unfencedLowerCaseMatchWith, false);
+								PatternApplied applied = WildcardUtils.applyPattern(unfencedLowerCaseMatchWith, content, false);
 								if (applied != null) {
 									suggestedInputs.put(applied.getText(), applied.getMatchRange());
 									if (suggestedInputs.size() == count)

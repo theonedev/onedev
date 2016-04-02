@@ -34,12 +34,22 @@ public class WildcardUtilsTest {
 	}
 
 	@Test
-	public void shouldApplyWildcard() {
-		assertEquals("he*llo:1-4", applyWildcard("hello", "e*l", false).toString());
-		assertEquals(null, applyWildcard("hello world", "*he ld", false));
-		assertEquals("*he*ld 2:0-6", applyWildcard("hello world 2", "*he*ld", false).toString());
-		assertEquals("hello:0-0", applyWildcard("hello", "", false).toString());
-		assertEquals("*:0-1", applyWildcard("hello", "*", false).toString());
-		assertEquals("**:0-2", applyWildcard("hello", "**", false).toString());
+	public void testRangeOfMatch() {
+		assertEquals("1-3", rangeOfMatch("el", "hello").toString());
+		assertEquals(null, rangeOfMatch("tu", "hello"));
+		assertEquals("3-8", rangeOfMatch("lo*wo", "hello world").toString());
+		assertEquals("3-9", rangeOfMatch("lo*w?r", "hello world").toString());
+		assertEquals("12-37", rangeOfMatch("this*my*program", "hello world this is  my first program").toString());
 	}
+	
+	@Test
+	public void shouldApplyPattern() {
+		assertEquals("he*?lo:1-5", applyPattern("E*?l", "hello", false).toString());
+		assertEquals(null, applyPattern("*he ?d", "hello world", false));
+		assertEquals("*he*ld 2:0-6", applyPattern("*hE*ld", "hello world 2", false).toString());
+		assertEquals("hello:0-0", applyPattern("", "hello", false).toString());
+		assertEquals("*:0-1", applyPattern("*", "hello", false).toString());
+		assertEquals("**:0-2", applyPattern("**", "hello", false).toString());
+	}
+	
 }

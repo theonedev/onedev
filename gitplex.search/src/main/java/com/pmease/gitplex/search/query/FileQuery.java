@@ -14,7 +14,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Splitter;
-import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -38,22 +38,24 @@ public class FileQuery extends BlobQuery {
 	@Override
 	public void collect(TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
+		String blobName = blobPath.substring(blobPath.lastIndexOf('/')+1);
 		if (caseSensitive) {
-			String blobName;
-			int index = blobPath.indexOf('/');
-			if (index != -1)
-				blobName = StringUtils.substringAfterLast(blobPath, "/");
-			else
-				blobName = blobPath;
-
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames)) {
-				if (WildcardUtils.matchString(pattern, blobName)) {
-					hits.add(new FileHit(blobPath));
+				Range matchRange = WildcardUtils.rangeOfMatch(pattern, blobName);
+				if (matchRange != null) {
+					hits.add(new FileHit(blobPath, matchRange));
 					break;
 				}
 			}
 		} else {
-			hits.add(new FileHit(blobPath));
+			Range matchRange = null;
+			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase())) {
+				matchRange = WildcardUtils.rangeOfMatch(pattern, blobName.toLowerCase());
+				if (matchRange != null) {
+					break;
+				}
+			}
+			hits.add(new FileHit(blobPath, matchRange));
 		}
 	}
 

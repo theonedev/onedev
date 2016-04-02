@@ -23,6 +23,10 @@ public class Range implements Serializable {
 		return to;
 	}
 	
+	public Range moveBy(int distance) {
+		return new Range(from+distance, to+distance);
+	}
+	
 	@Override
 	public String toString() {
 		return from+ "-" + to;

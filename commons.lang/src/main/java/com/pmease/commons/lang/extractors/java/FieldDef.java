@@ -11,6 +11,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.lang.extractors.java.icons.Icons;
+import com.pmease.commons.util.Range;
 
 public class FieldDef extends JavaSymbol {
 
@@ -44,8 +45,8 @@ public class FieldDef extends JavaSymbol {
 	}
 
 	@Override
-	public Component render(String componentId) {
-		return new FieldDefPanel(componentId, this);
+	public Component render(String componentId, Range matchRange) {
+		return new FieldDefPanel(componentId, this, matchRange);
 	}
 
 	@Override

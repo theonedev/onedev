@@ -26,6 +26,7 @@ import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.ContentDetector;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -85,8 +86,10 @@ public class SymbolQuery extends BlobQuery {
 										else
 											normalizedSymbolName = symbol.getName();
 										
-										if (WildcardUtils.matchString(normalizedTerm, normalizedSymbolName))
-											hits.add(new SymbolHit(blobPath, symbol));
+										Range matchRange = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
+										if (matchRange != null) {
+											hits.add(new SymbolHit(blobPath, symbol, matchRange));
+										}
 									}
 								} else {
 									break;

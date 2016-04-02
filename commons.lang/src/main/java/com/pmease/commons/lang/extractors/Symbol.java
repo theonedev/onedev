@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 
+import com.pmease.commons.util.Range;
+
 public abstract class Symbol implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -44,7 +46,7 @@ public abstract class Symbol implements Serializable {
 		return pos;
 	}
 	
-	public abstract Component render(String componentId);
+	public abstract Component render(String componentId, Range range);
 	
 	public abstract ResourceReference getIcon();
 	

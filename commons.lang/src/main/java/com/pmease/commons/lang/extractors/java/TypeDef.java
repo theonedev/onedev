@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 
@@ -15,6 +14,8 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.lang.extractors.java.icons.Icons;
+import com.pmease.commons.util.Range;
+import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 
 public class TypeDef extends JavaSymbol {
 
@@ -46,8 +47,8 @@ public class TypeDef extends JavaSymbol {
 	}
 
 	@Override
-	public Component render(String componentId) {
-		return new Label(componentId, getName());
+	public Component render(String componentId, Range matchRange) {
+		return new EmphasizeAwareLabel(componentId, getName(), matchRange);
 	}
 
 	public String getPackageName() {

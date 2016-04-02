@@ -1,16 +1,12 @@
 package gitplex.product;
 
-import java.util.List;
-
-import jersey.repackaged.com.google.common.collect.Lists;
+import com.pmease.commons.util.match.WildcardUtils;
 
 public class Test {
 
 	@org.junit.Test
 	public void test() {
-		List<String> lists = Lists.newArrayList("a", "c", "b");
-		lists.sort(String::compareTo);
-		System.out.println(lists);
+		System.out.println(WildcardUtils.rangeOfMatch("hehello  world", "he*llo"));
 	}
 	
 }

@@ -43,10 +43,6 @@
 			<version>5.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.unbescape</groupId>
-			<artifactId>unbescape</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.loader</artifactId>
 			<version>1.0.31</version>

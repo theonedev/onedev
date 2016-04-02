@@ -7,6 +7,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.util.Range;
+import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 
 public class TextHit extends QueryHit {
 
@@ -37,7 +38,7 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return new TextHitPanel(componentId, this);
+		return new EmphasizeAwareLabel(componentId, lineContent, getTokenPos().getRange());
 	}
 
 	@Override

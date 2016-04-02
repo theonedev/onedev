@@ -2,12 +2,10 @@ package com.pmease.commons.lang.tokenizers;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.StringUtils;
-import org.unbescape.html.HtmlEscape;
-
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
+import com.pmease.commons.util.StringUtils;
 
 /**
  * Represents a CodeMirror token
@@ -140,13 +138,7 @@ public class CmToken implements Serializable {
 	}
 
 	public String toHtml(Operation operation) {
-		String escapedText = "";
-		for (int i=0; i<text.length(); i++) {
-			char ch = text.charAt(i);
-			if (ch == ' ' || ch == '\t' || !Character.isWhitespace(ch))
-				escapedText += ch;
-		}
-		escapedText = HtmlEscape.escapeHtml5(escapedText);
+		String escapedText = StringUtils.escapeHtml(text);
 		
 		if (operation == Operation.EQUAL && StringUtils.isBlank(type)) {
 			return escapedText;

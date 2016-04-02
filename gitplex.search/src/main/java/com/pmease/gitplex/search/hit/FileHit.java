@@ -2,16 +2,21 @@ package com.pmease.gitplex.search.hit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+
+import com.pmease.commons.util.Range;
+import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 
 public class FileHit extends QueryHit {
 
 	private static final long serialVersionUID = 1L;
 
-	public FileHit(String blobPath) {
+	private final Range matchRange;
+	
+	public FileHit(String blobPath, Range matchRange) {
 		super(blobPath, null);
+		this.matchRange = matchRange;
 	}
 
 	@Override
@@ -25,7 +30,7 @@ public class FileHit extends QueryHit {
 		if (fileName.contains("/")) 
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		
-		return new Label(componentId, fileName);
+		return new EmphasizeAwareLabel(componentId, fileName, matchRange);
 	}
 
 	@Override
@@ -39,6 +44,10 @@ public class FileHit extends QueryHit {
 			return StringUtils.substringBeforeLast(getBlobPath(), "/");
 		else 
 			return null;
+	}
+
+	public Range getMatchRange() {
+		return matchRange;
 	}
 
 	@Override

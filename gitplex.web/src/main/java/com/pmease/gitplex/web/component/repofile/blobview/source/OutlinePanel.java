@@ -93,7 +93,7 @@ abstract class OutlinePanel extends Panel {
 					}
 					
 				};
-				link.add(symbol.render("label"));
+				link.add(symbol.render("label", null));
 				fragment.add(link);
 				
 				return fragment;

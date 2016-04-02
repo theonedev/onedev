@@ -13,7 +13,7 @@ import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Range;
-import com.pmease.commons.util.match.WildcardApplied;
+import com.pmease.commons.util.match.PatternApplied;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
@@ -88,18 +88,18 @@ public class SuggestionUtils {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
-		List<WildcardApplied> allApplied = new ArrayList<>();
+		List<PatternApplied> allApplied = new ArrayList<>();
 		Map<String, Range> suggestedInputs = new LinkedHashMap<>();
 		AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
 		for (String path: auxiliaryManager.getFiles(depot)) {
-			WildcardApplied applied = WildcardUtils.applyWildcard(path, lowerCaseMatchWith, false);
+			PatternApplied applied = WildcardUtils.applyPattern(lowerCaseMatchWith, path, false);
 			if (applied != null) 
 				allApplied.add(applied);
 		}
 		allApplied.sort((o1, o2) -> o1.getMatchRange().getFrom() - o2.getMatchRange().getFrom());
 
 		suggestedInputs = new LinkedHashMap<>();
-		for (WildcardApplied applied: allApplied) {
+		for (PatternApplied applied: allApplied) {
 			Range matchRange = applied.getMatchRange();
 			String suffix = applied.getText().substring(matchRange.getTo());
 			int index = suffix.indexOf('/');

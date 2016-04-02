@@ -32,6 +32,7 @@ import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.lang.extractors.java.JavaExtractor;
 import com.pmease.commons.loader.AppLoader;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.gitplex.core.entity.Account;
@@ -291,7 +292,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					public Component render(String componentId) {
+					public Component render(String componentId, Range matchRange) {
 						throw new UnsupportedOperationException();
 					}
 

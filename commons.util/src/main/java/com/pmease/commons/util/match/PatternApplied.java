@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.pmease.commons.util.Range;
 
-public class WildcardApplied implements Serializable {
+public class PatternApplied implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class WildcardApplied implements Serializable {
 	
 	private final Range matchRange;
 	
-	public WildcardApplied(String text, Range matchRange) {
+	public PatternApplied(String text, Range matchRange) {
 		this.text = text;
 		this.matchRange = matchRange;
 	}

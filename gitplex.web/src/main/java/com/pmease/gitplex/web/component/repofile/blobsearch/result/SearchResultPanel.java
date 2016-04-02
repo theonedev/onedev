@@ -31,6 +31,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
+import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -84,8 +85,15 @@ public abstract class SearchResultPanel extends Panel {
 				blob = new MatchedBlob(hit.getBlobPath(), new ArrayList<QueryHit>());
 				hitsByBlob.put(hit.getBlobPath(), blob);
 			}
-			if (!(hit instanceof FileHit))
+			if (!(hit instanceof FileHit)) {
 				blob.getHits().add(hit);
+			} else { 
+				FileHit fileHit = (FileHit) hit;
+				if (fileHit.getMatchRange() != null) {
+					int index = blob.getBlobPath().lastIndexOf('/');
+					blob.setMatchRange(fileHit.getMatchRange().moveBy(index+1));
+				}
+			}
 		}
 		
 		blobs = new ArrayList<>(hitsByBlob.values());
@@ -122,7 +130,7 @@ public abstract class SearchResultPanel extends Panel {
 		if (activeHitIndex != -1)
 			hit = activeBlob.getHits().get(activeHitIndex);
 		else 
-			hit = new FileHit(activeBlob.getBlobPath());
+			hit = new FileHit(activeBlob.getBlobPath(), null);
 		
 		BlobIdent selected = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
 				FileMode.REGULAR_FILE.getBits());
@@ -396,7 +404,7 @@ public abstract class SearchResultPanel extends Panel {
 						super.onInitialize();
 						
 						String blobPath = blobItem.getModelObject().getBlobPath();
-						add(new Label("label", blobPath));
+						add(new EmphasizeAwareLabel("label", blobPath, blobItem.getModelObject().getMatchRange()));
 						
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));

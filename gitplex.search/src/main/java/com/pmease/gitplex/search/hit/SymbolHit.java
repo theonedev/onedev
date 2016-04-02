@@ -4,6 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 
 import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.util.Range;
 
 public class SymbolHit extends QueryHit {
 
@@ -11,9 +12,12 @@ public class SymbolHit extends QueryHit {
 
 	private final Symbol symbol;
 	
-	public SymbolHit(String blobPath, Symbol symbol) {
+	private final Range matchRange;
+	
+	public SymbolHit(String blobPath, Symbol symbol, Range matchRange) {
 		super(blobPath, symbol.getPos());
 		this.symbol = symbol;
+		this.matchRange = matchRange;
 	}
 
 	public Symbol getSymbol() {
@@ -27,7 +31,7 @@ public class SymbolHit extends QueryHit {
 
 	@Override
 	public Component render(String componentId) {
-		return symbol.render(componentId);
+		return symbol.render(componentId, matchRange);
 	}
 
 	@Override
