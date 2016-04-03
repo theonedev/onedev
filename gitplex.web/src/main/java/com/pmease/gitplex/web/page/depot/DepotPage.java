@@ -33,6 +33,7 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -45,6 +46,7 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.page.depot.setting.DepotSettingPage;
@@ -103,8 +105,11 @@ public abstract class DepotPage extends AccountPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
+		tabs.add(new DepotTab(Model.of("Overview"), "fa fa-fw fa-list-alt", 0, DepotOverviewPage.class));
 		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, DepotFilePage.class));
-		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0, DepotCommitsPage.class, CommitDetailPage.class));
+		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 
+				GitPlex.getInstance(AuxiliaryManager.class).getCommitCount(getDepot()), 
+				DepotCommitsPage.class, CommitDetailPage.class));
 		tabs.add(new DepotTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
 				getDepot().getRefs(Constants.R_HEADS).size(), DepotBranchesPage.class));
 		tabs.add(new DepotTab(Model.of("Tags"), "fa fa-fw fa-tag", 
@@ -168,7 +173,8 @@ public abstract class DepotPage extends AccountPage {
 		accountLink.add(new Label("accountName", getAccount().getName()));
 		fragment.add(accountLink);
 		
-		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", DepotFilePage.class, paramsOf(getDepot()));
+		Link<Void> repoLink = new BookmarkablePageLink<>("repoLink", 
+				DepotOverviewPage.class, DepotOverviewPage.paramsOf(getDepot()));
 		repoLink.add(new Label("repoName", getDepot().getName()));
 		fragment.add(repoLink);
 		return fragment;

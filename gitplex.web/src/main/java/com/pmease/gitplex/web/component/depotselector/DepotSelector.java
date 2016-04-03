@@ -40,7 +40,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.web.WebSession;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 
 @SuppressWarnings("serial")
 public abstract class DepotSelector extends Panel {
@@ -155,8 +155,8 @@ public abstract class DepotSelector extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						PageParameters params = DepotFilePage.paramsOf(item.getModelObject());
-						tag.put("href", urlFor(DepotFilePage.class, params).toString());
+						PageParameters params = DepotOverviewPage.paramsOf(item.getModelObject());
+						tag.put("href", urlFor(DepotOverviewPage.class, params).toString());
 					}
 					
 				};

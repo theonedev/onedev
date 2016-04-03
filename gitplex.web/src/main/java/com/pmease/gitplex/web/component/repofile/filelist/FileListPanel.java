@@ -44,7 +44,7 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 @SuppressWarnings("serial")
 public abstract class FileListPanel extends Panel {
 
-	private static final String README_NAME = "readme.md";
+	public static final String README_NAME = "readme";
 	
 	private final IModel<Depot> depotModel;
 	
@@ -104,7 +104,8 @@ public abstract class FileListPanel extends Panel {
 		@Override
 		protected BlobIdent load() {
 			for (BlobIdent blobIdent: childrenModel.getObject()) {
-				if (blobIdent.getName().toLowerCase().equals(README_NAME))
+				String readme = StringUtils.substringBefore(blobIdent.getName(), ".");
+				if (readme.equalsIgnoreCase(README_NAME))
 					return blobIdent;
 			}
 			return null;

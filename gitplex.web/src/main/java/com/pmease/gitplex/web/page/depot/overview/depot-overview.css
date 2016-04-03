@@ -1,0 +1,41 @@
+.depot.overview {
+	padding: 20px;
+}
+.depot.overview>div {
+	margin-bottom: 20px;
+}
+.depot.overview>.title {
+	font-size: 30px;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+.depot.overview>.description {
+	border: 1px solid #DDD;
+	padding: 20px 20px 10px 20px;
+	border-radius: 4px;
+	background: #F5F5F5;
+}
+.depot.overview>.metrics a {
+	font-size: 20px;
+	color: #444;
+	margin-right: 20px;
+}
+.depot.overview>.clone {
+	margin-bottom: 30px;
+}
+.depot.overview>.clone input {
+	background: white;
+}
+.depot.overview>.readme {
+	border: 1px solid #DDD;
+	border-radius: 4px;
+	padding: 20px;
+}
+.depot.overview>.readme>.head {
+	font-size: 18px;
+	font-weight: bold;
+	border-bottom: 1px solid #DDD;
+	margin: -20px -20px 20px -20px;
+	padding: 8px 16px;
+	background: #F5F5F5;
+}

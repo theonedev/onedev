@@ -44,6 +44,7 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.attachments.RequestAttachmentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;
@@ -182,7 +183,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addDepotPages() {
-		add(new MountedMapper("${account}/${depot}", DepotFilePage.class) {
+		add(new MountedMapper("${account}/${depot}", DepotOverviewPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -199,7 +200,7 @@ public class UrlMapper extends CompoundRequestMapper {
 
 		});
 
-//		add(new ParameterAwareMountedMapper("${account}/${depot}/browse", RepoFilePage.class));
+		add(new MountedMapper("${account}/${depot}/files", DepotFilePage.class));
 		add(new MountedMapper("${account}/${depot}/commit", CommitDetailPage.class));
 		add(new MountedMapper("${account}/${depot}/commits", DepotCommitsPage.class));
 		add(new MountedMapper("${account}/${depot}/compare", RevisionComparePage.class));

@@ -12,7 +12,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.depotaccess.DepotAccess;
 import com.pmease.gitplex.web.depotaccess.PrivilegeSource;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 
 @SuppressWarnings("serial")
 public class PrivilegeSourcePanel extends Panel {
@@ -39,7 +39,7 @@ public class PrivilegeSourcePanel extends Panel {
 		add(new Label("privilege", access.getGreatestPrivilege()));
 		
 		Link<Void> depotLink = new BookmarkablePageLink<Void>("depotLink", 
-				DepotFilePage.class, DepotFilePage.paramsOf(depotModel.getObject()));
+				DepotOverviewPage.class, DepotOverviewPage.paramsOf(depotModel.getObject()));
 		depotLink.add(new Label("name", depotModel.getObject().getName()));
 		add(depotLink);
 		

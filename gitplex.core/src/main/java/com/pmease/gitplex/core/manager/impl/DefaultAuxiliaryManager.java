@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
@@ -87,6 +88,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	
 	private static final ByteIterable FILES_KEY = new StringByteIterable("files");
 	
+	private static final ByteIterable COMMIT_COUNT_KEY = new StringByteIterable("commitCount");
+	
 	private static final int PRIORITY = 100;
 	
 	private final StorageManager storageManager;
@@ -101,9 +104,11 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	
 	private final Map<Long, Environment> envs = new HashMap<>();
 	
-	private final Map<Long, List<String>> files = new ConcurrentHashMap<>();
+	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
-	private final Map<Long, List<NameAndEmail>> contributors = new ConcurrentHashMap<>();
+	private final Map<Long, Integer> commitCountCache = new ConcurrentHashMap<>();
+	
+	private final Map<Long, List<NameAndEmail>> contributorsCache = new ConcurrentHashMap<>();
 	
 	@Inject
 	public DefaultAuxiliaryManager(DepotManager depotManager, StorageManager storageManager, 
@@ -142,11 +147,21 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 			@Override
 			public void execute(final Transaction txn) {
 				byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
-				final AtomicReference<String> lastCommit;
+				AtomicReference<String> lastCommit;
 				if (bytes != null)
 					lastCommit = new AtomicReference<>(new String(bytes));
 				else
 					lastCommit = new AtomicReference<>(null);
+				
+				bytes = getBytes(defaultStore.get(txn, COMMIT_COUNT_KEY));
+				AtomicInteger commitCount;
+				if (bytes != null)
+					commitCount = new AtomicInteger((int) SerializationUtils.deserialize(bytes));
+				else
+					commitCount = new AtomicInteger(0);
+
+				AtomicBoolean commitCountChanged = new AtomicBoolean(false);
+				
 				Git git = depot.git();
 
 				LogCommand log = new LogCommand(git.depotDir());
@@ -158,11 +173,11 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 					revisions.add(commit.name());
 				}
 				
-				final AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
-				final AtomicBoolean contributorsChanged = new AtomicBoolean(false);
+				AtomicReference<Set<NameAndEmail>> contributors = new AtomicReference<>(null);
+				AtomicBoolean contributorsChanged = new AtomicBoolean(false);
 				
-				final AtomicReference<Set<String>> files = new AtomicReference<>(null);
-				final AtomicBoolean filesChanged = new AtomicBoolean(false);
+				AtomicReference<Set<String>> files = new AtomicReference<>(null);
+				AtomicBoolean filesChanged = new AtomicBoolean(false);
 				
 				log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
 
@@ -191,6 +206,9 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 								System.arraycopy(valueBytes, 0, newValueBytes, 1, valueBytes.length);
 							}
 							commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
+							
+							commitCount.incrementAndGet();
+							commitCountChanged.set(true);
 							
 							for (String parentHash: commit.getParentHashes()) {
 								keyBytes = new byte[20];
@@ -283,16 +301,21 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 				if (contributorsChanged.get()) {
 					bytes = SerializationUtils.serialize((Serializable) contributors.get());
 					defaultStore.put(txn, CONTRIBUTORS_KEY, new ArrayByteIterable(bytes));
-					DefaultAuxiliaryManager.this.contributors.remove(depot.getId());
+					contributorsCache.remove(depot.getId());
 				}
 				if (filesChanged.get()) {
 					bytes = SerializationUtils.serialize((Serializable) files.get());
 					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytes));
-					DefaultAuxiliaryManager.this.files.remove(depot.getId());
+					filesCache.remove(depot.getId());
 				}
 				if (lastCommit.get() != null) {
 					bytes = lastCommit.get().getBytes();
 					defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(bytes));
+				}
+				if (commitCountChanged.get()) {
+					bytes = SerializationUtils.serialize(commitCount.get());
+					defaultStore.put(txn, COMMIT_COUNT_KEY, new ArrayByteIterable(bytes));
+					commitCountCache.put(depot.getId(), commitCount.get());
 				}
 			}
 		});
@@ -363,40 +386,40 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 
 	@Override
 	public List<NameAndEmail> getContributors(Depot depot) {
-		List<NameAndEmail> repoContributors = contributors.get(depot.getId());
-		if (repoContributors == null) {
+		List<NameAndEmail> contributors = contributorsCache.get(depot.getId());
+		if (contributors == null) {
 			Environment env = getEnv(depot);
 			final Store store = getStore(env, DEFAULT_STORE);
 
-			repoContributors = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
+			contributors = env.computeInReadonlyTransaction(new TransactionalComputable<List<NameAndEmail>>() {
 
 				@SuppressWarnings("unchecked")
 				@Override
 				public List<NameAndEmail> compute(Transaction txn) {
 					byte[] bytes = getBytes(store.get(txn, CONTRIBUTORS_KEY));
 					if (bytes != null) { 
-						List<NameAndEmail> repoContributors = 
+						List<NameAndEmail> contributors = 
 								new ArrayList<>((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
-						Collections.sort(repoContributors);
-						return repoContributors;
+						Collections.sort(contributors);
+						return contributors;
 					} else { 
 						return new ArrayList<>();
 					}
 				}
 			});
-			contributors.put(depot.getId(), repoContributors);
+			contributorsCache.put(depot.getId(), contributors);
 		}
-		return repoContributors;	
+		return contributors;	
 	}
 
 	@Override
 	public List<String> getFiles(Depot depot) {
-		List<String> repoFiles = files.get(depot.getId());
-		if (repoFiles == null) {
+		List<String> files = filesCache.get(depot.getId());
+		if (files == null) {
 			Environment env = getEnv(depot);
 			final Store store = getStore(env, DEFAULT_STORE);
 
-			repoFiles = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
+			files = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
 
 				@SuppressWarnings("unchecked")
 				@Override
@@ -416,15 +439,15 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 					}
 				}
 			});
-			files.put(depot.getId(), repoFiles);
+			filesCache.put(depot.getId(), files);
 		}
-		return repoFiles;
+		return files;
 	}
 	
 	@Override
-	public Map<String, Map<NameAndEmail, Long>> getContributions(Depot depot, final Set<String> files) {
+	public Map<String, Map<NameAndEmail, Long>> getContributions(Depot depot, Set<String> files) {
 		Environment env = getEnv(depot);
-		final Store store = getStore(env, CONTRIBUTIONS_STORE);
+		Store store = getStore(env, CONTRIBUTIONS_STORE);
 
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<String, Map<NameAndEmail, Long>>>() {
 
@@ -539,7 +562,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 		Environment env = envs.remove(depot.getId());
 		if (env != null)
 			env.close();
-		files.remove(depot.getId());
+		filesCache.remove(depot.getId());
 		FileUtils.deleteDir(getAuxiliaryDir(depot));
 	}
 	
@@ -621,6 +644,30 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 
 	@Override
 	public void onDepotTransfer(Depot depot, Account oldAccount) {
+	}
+
+	@Override
+	public int getCommitCount(Depot depot) {
+		Integer commitCount = commitCountCache.get(depot.getId());
+		if (commitCount == null) {
+			Environment env = getEnv(depot);
+			Store store = getStore(env, DEFAULT_STORE);
+
+			commitCount = env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
+
+				@Override
+				public Integer compute(Transaction txn) {
+					byte[] bytes = getBytes(store.get(txn, COMMIT_COUNT_KEY));
+					if (bytes != null) {
+						return (Integer) SerializationUtils.deserialize(bytes);
+					} else {
+						return 0;
+					}
+				}
+			});
+			commitCountCache.put(depot.getId(), commitCount);
+		}
+		return commitCount;
 	}
 
 }

@@ -1,0 +1,23 @@
+<wicket:extend>
+	<div class="depot overview">
+		<div wicket:id="title" class="title"></div>
+		<div wicket:id="description" class="description"></div>
+		<div class="metrics">
+			<a wicket:id="commitsLink"><span wicket:id="count"></span></a>
+			<a wicket:id="branchesLink"><span wicket:id="count"></span></a>
+			<a wicket:id="tagsLink"><span wicket:id="count"></span></a>
+		</div>
+		<div class="clone">
+			<div class="input-group">
+		    	<div class="input-group-addon">Clone URL</div>
+				<input wicket:id="cloneUrl" readonly="readonly" class="form-control" onfocus="setTimeout(function(){$('.depot.overview>.clone input').select();}, 100);"/>
+		    </div>		
+		</div>
+		<wicket:enclosure child="readme">
+		<div class="readme">
+			<div class="head">README</div>
+			<div wicket:id="readme" class="body"></div>
+		</div>
+		</wicket:enclosure>
+	</div>
+</wicket:extend>

@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.WebSession;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 import com.pmease.gitplex.web.page.layout.LayoutPage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.BootstrapPagingNavigator;
@@ -173,7 +173,7 @@ public class DashboardPage extends LayoutPage {
 			protected void populateItem(ListItem<Depot> item) {
 				Depot depot = item.getModelObject();
 				Link<Void> link = new BookmarkablePageLink<Void>("link", 
-						DepotFilePage.class, DepotFilePage.paramsOf(depot)); 
+						DepotOverviewPage.class, DepotOverviewPage.paramsOf(depot)); 
 				link.add(new Label("name", depot.getFQN()));
 				item.add(link);
 			}

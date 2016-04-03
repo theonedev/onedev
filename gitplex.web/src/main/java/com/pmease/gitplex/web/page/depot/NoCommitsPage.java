@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 
 @SuppressWarnings("serial")
 public class NoCommitsPage extends DepotPage {
@@ -18,7 +18,7 @@ public class NoCommitsPage extends DepotPage {
 		super(params);
 		
 		if (getDepot().git().hasRefs())
-			throw new RestartResponseException(DepotFilePage.class, paramsOf(getDepot()));
+			throw new RestartResponseException(DepotOverviewPage.class, DepotOverviewPage.paramsOf(getDepot()));
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class NoCommitsPage extends DepotPage {
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
-		setResponsePage(DepotFilePage.class, paramsOf(depot));
+		setResponsePage(DepotOverviewPage.class, DepotOverviewPage.paramsOf(depot));
 	}
 	
 }

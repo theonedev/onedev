@@ -17,6 +17,8 @@ public interface AuxiliaryManager {
 	
 	List<String> getFiles(Depot depot);
 	
+	int getCommitCount(Depot depot);
+	
 	List<NameAndEmail> getContributors(Depot depot);
 	
 	Map<String, Map<NameAndEmail, Long>> getContributions(Depot depot, Set<String> files);
