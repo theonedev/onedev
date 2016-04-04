@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.FileMode;
@@ -59,16 +58,9 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		return (FileMode.TYPE_MASK & mode) == FileMode.TYPE_FILE;
 	}
 	
-	public String getFileName() {
-		return isFile()?path:null;
-	}
-	
 	public String getName() {
 		if (path != null) {
-			if (path.contains("/"))
-				return StringUtils.substringAfterLast(path, "/");
-			else
-				return path;
+			return path.substring(path.lastIndexOf('/')+1);
 		} else {
 			return null;
 		}

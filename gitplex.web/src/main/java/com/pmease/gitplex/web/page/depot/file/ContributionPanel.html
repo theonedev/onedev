@@ -1,0 +1,19 @@
+<wicket:panel>
+	<div class="contribution clearfix">
+		<div class="pull-left avatar">
+			<a wicket:id="avatar"></a> 
+		</div>
+		<div wicket:id="contributor" class="pull-left contributor"></div>
+		<div class="pull-left message"><a wicket:id="messageLink"><span wicket:id="message"></span></a></div>
+		<div class="contributors pull-left">
+			<a wicket:id="contributors" class="btn btn-default btn-xs">Contributors <i class="fa fa-caret-down"></i></a>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="contributorsFrag">
+		<ul class="contributors list-unstyled">
+			<li wicket:id="contributors">
+				<a wicket:id="link"><img wicket:id="avatar"></img> <span wicket:id="name"></span></a>
+			</li>
+		</ul>
+	</wicket:fragment>
+</wicket:panel>

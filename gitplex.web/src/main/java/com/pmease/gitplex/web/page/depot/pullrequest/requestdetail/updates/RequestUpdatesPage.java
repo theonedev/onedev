@@ -38,7 +38,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.avatar.RemoveableAvatar;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
+import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
@@ -194,7 +194,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							
 						}));
 
-						commitItem.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
+						commitItem.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 						
 						commitItem.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Depot>() {
 

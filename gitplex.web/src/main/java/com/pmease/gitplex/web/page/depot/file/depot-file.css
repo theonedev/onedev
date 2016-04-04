@@ -80,7 +80,21 @@
 	display: none;
 	padding: 2px 0 3px 0;
 }
-
+#repo-file>.contribution {
+	padding: 6px 12px;
+	background: #F9F9F9;
+	border-bottom: 1px solid #DDD; 
+}
+#repo-file>.contribution img.loading {
+	padding: 4px 0;
+}
+#repo-file>.contribution .pull-left {
+	margin-right: 12px;
+}
+#repo-file>.contribution .message a {
+	font-weight: bold;
+	color: #555;
+}
 #repo-file>.revision-indexing {
 	padding: 8px 8px 9px 8px;
 	background: #fcf8e3;
@@ -96,4 +110,18 @@
     background: #EEE url("hgrabber.gif") no-repeat scroll center top;
     cursor: n-resize;
     height: 4px;
+}
+
+.floating>.content>ul.contributors {
+	margin: 0;
+	padding: 8px 0;
+}
+.floating>.content>ul.contributors>li>a {
+	display: block;
+	padding: 4px 8px;
+	text-decoration: none;
+	color: #666;
+}
+.floating>.content>ul.contributors>li>a:hover {
+	background: #EEE;
 }

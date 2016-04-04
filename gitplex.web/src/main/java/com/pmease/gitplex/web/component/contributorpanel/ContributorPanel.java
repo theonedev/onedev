@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web.component.contributionpanel;
+package com.pmease.gitplex.web.component.contributorpanel;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -12,13 +12,13 @@ import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
-public class ContributionPanel extends Panel {
+public class ContributorPanel extends Panel {
 
 	private final PersonIdent author;
 	
 	private final PersonIdent committer;
 	
-	public ContributionPanel(String id, PersonIdent author, PersonIdent committer) {
+	public ContributorPanel(String id, PersonIdent author, PersonIdent committer) {
 		super(id);
 		this.author = author;
 		this.committer = committer;
@@ -42,7 +42,7 @@ public class ContributionPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CssResourceReference(
-				ContributionPanel.class, "contribution.css")));
+				ContributorPanel.class, "contributor.css")));
 	}
 
 }

@@ -29,7 +29,7 @@ import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphResourceReference;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphUtils;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
+import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.model.CommitRefsModel;
 
@@ -122,7 +122,7 @@ public class CommitListPanel extends Panel {
 						labelsView.add(new Label(labelsView.newChildId(), label));
 					fragment.add(labelsView);
 					
-					fragment.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
+					fragment.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 					fragment.add(new HashAndCodePanel("hashAndCode", depotModel, commit.getHash()));
 					item.add(AttributeAppender.append("class", "commit clearfix commit-item-" + itemIndex++));
 				} else {

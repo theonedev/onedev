@@ -56,7 +56,7 @@ import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphResourceReference;
 import com.pmease.gitplex.web.component.commitgraph.CommitGraphUtils;
 import com.pmease.gitplex.web.component.commitmessage.CommitMessagePanel;
-import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
+import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.model.CommitRefsModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -409,7 +409,7 @@ public class DepotCommitsPage extends DepotPage {
 				labelsView.add(new Label(labelsView.newChildId(), label));
 			item.add(labelsView);
 			
-			item.add(new ContributionPanel("contribution", commit.getAuthor(), commit.getCommitter()));
+			item.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter()));
 			
 			/*
 			 * If we query a single definitive path, let's record it to be used for 

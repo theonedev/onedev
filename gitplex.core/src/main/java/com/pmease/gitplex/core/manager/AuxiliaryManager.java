@@ -23,6 +23,8 @@ public interface AuxiliaryManager {
 	
 	Map<String, Map<NameAndEmail, Long>> getContributions(Depot depot, Set<String> files);
 
+	Map<NameAndEmail, Long> getContributions(Depot depot, String file);
+	
 	/**
 	 * Given an ancestor commit, get all its descendant commits known to this auxiliary. 
 	 * The result might be incomplete if some commits have not be collected yet

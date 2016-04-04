@@ -239,15 +239,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 									contributorsChanged.set(true);
 								}
 							}
-							if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
-									|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
-								NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
-								if (!contributors.get().contains(contributor)) {
-									contributors.get().add(contributor);
-									contributorsChanged.set(true);
-								}
-							}
-							
+
 							if (files.get() == null) {
 								byte[] bytes = getBytes(defaultStore.get(txn, FILES_KEY));
 								if (bytes != null)
@@ -273,15 +265,6 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 										fileContributions.put(contributor, contributionTime);
 								}													
 
-								if (StringUtils.isNotBlank(commit.getCommitter().getName()) 
-										|| StringUtils.isNotBlank(commit.getCommitter().getEmailAddress())) {
-									NameAndEmail contributor = new NameAndEmail(commit.getCommitter());
-									long contributionTime = commit.getCommitter().getWhen().getTime();
-									Long lastContributionTime = fileContributions.get(contributor);
-									if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
-										fileContributions.put(contributor, contributionTime);
-								}
-								
 								bytes = SerializationUtils.serialize((Serializable) fileContributions);
 								contributionsStore.put(txn, fileKey, new ArrayByteIterable(bytes));
 								
@@ -470,6 +453,26 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 		});
 	}
 
+	@Override
+	public Map<NameAndEmail, Long> getContributions(Depot depot, String file) {
+		Environment env = getEnv(depot);
+		Store store = getStore(env, CONTRIBUTIONS_STORE);
+
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<NameAndEmail, Long>>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Map<NameAndEmail, Long> compute(Transaction txn) {
+				ByteIterable fileKey = new StringByteIterable(file);
+				byte[] value = getBytes(store.get(txn, fileKey));
+				if (value != null)
+					return (Map<NameAndEmail, Long>) SerializationUtils.deserialize(value);
+				else
+					return new HashMap<>();
+			}
+		});
+	}
+	
 	@Override
 	public Set<ObjectId> getDescendants(Depot depot, final ObjectId ancestor) {
 		Environment env = getEnv(depot);

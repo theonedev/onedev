@@ -1,7 +1,7 @@
-.contribution {
+.contributor {
 	color: #666;
 }
-.contribution .contributor {
+.contributor .name {
 	color: #666;
 	font-weight: bold;
 }

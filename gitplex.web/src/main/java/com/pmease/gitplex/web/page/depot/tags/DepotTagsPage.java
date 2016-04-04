@@ -21,7 +21,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
@@ -51,6 +50,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
+import com.pmease.gitplex.web.component.archivemenulink.ArchiveMenuLink;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -59,8 +59,6 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
-import com.pmease.gitplex.web.resource.ArchiveResource;
-import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -297,8 +295,14 @@ public class DepotTagsPage extends DepotPage {
 				link.add(new Label("shortMessage", commit.getShortMessage()));
 				item.add(link);
 				
-				item.add(new ResourceLink<Void>("download", new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(getDepot(), tagName)));
+				item.add(new ArchiveMenuLink("download", depotModel) {
+
+					@Override
+					protected String getRevision() {
+						return tagName;
+					}
+					
+				});
 				
 				link = new Link<Void>("compare") {
 

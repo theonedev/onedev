@@ -14,6 +14,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.api.ArchiveCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.archive.TgzFormat;
 import org.eclipse.jgit.archive.ZipFormat;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
@@ -35,6 +36,12 @@ public class ArchiveResource extends AbstractResource {
 	
 	private static final String PARAM_REVISION = "revision";
 	
+	private static final String PARAM_FORMAT = "format";
+	
+	public static final String FORMAT_ZIP = "zip";
+	
+	public static final String FORMAT_TGZ = "tgz";
+	
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
@@ -50,14 +57,19 @@ public class ArchiveResource extends AbstractResource {
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		final Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
+		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
 		
 		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
 		
-		final String revision = params.get(PARAM_REVISION).toString();
+		String revision = params.get(PARAM_REVISION).toString();
 		if (StringUtils.isBlank(revision))
 			throw new IllegalArgumentException("revision parameter has to be specified");
+		
+		String format = params.get(PARAM_FORMAT).toString();
+		if (!FORMAT_ZIP.equals(format) && !FORMAT_TGZ.equals(format)) {
+			throw new IllegalArgumentException("format parameter should be specified either zip or tar.gz");
+		}
 		
 		if (!SecurityUtils.canRead(depot)) 
 			throw new UnauthorizedException();
@@ -68,7 +80,12 @@ public class ArchiveResource extends AbstractResource {
 		response.disableCaching();
 		
 		try {
-			response.setFileName(URLEncoder.encode(revision+".zip", Charsets.UTF_8.name()));
+			String fileName;
+			if (FORMAT_ZIP.equals(format))
+				fileName = revision + ".zip";
+			else
+				fileName = revision + ".tar.gz";
+			response.setFileName(URLEncoder.encode(fileName, Charsets.UTF_8.name()));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
@@ -76,17 +93,20 @@ public class ArchiveResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				ArchiveCommand.registerFormat("zip", new ZipFormat());
+				if (format.equals("zip"))
+					ArchiveCommand.registerFormat(format, new ZipFormat());
+				else
+					ArchiveCommand.registerFormat(format, new TgzFormat());
 				try (Repository repository = depot.openRepository()) {
 					ArchiveCommand archive = Git.wrap(repository).archive();
-					archive.setFormat("zip");
+					archive.setFormat(format);
 					archive.setTree(depot.getRevCommit(revision).getId());
 					archive.setOutputStream(attributes.getResponse().getOutputStream());
 					archive.call();
 				} catch (GitAPIException e) {
 					throw new RuntimeException(e);
 				} finally {
-					ArchiveCommand.unregisterFormat("zip");
+					ArchiveCommand.unregisterFormat(format);
 				}
 			}				
 		});
@@ -94,11 +114,12 @@ public class ArchiveResource extends AbstractResource {
 		return response;
 	}
 
-	public static PageParameters paramsOf(Depot depot, String revision) {
+	public static PageParameters paramsOf(Depot depot, String revision, String format) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_ACCOUNT, depot.getAccount().getName());
 		params.set(PARAM_DEPOT, depot.getName());
 		params.set(PARAM_REVISION, revision);
+		params.set(PARAM_FORMAT, format);
 		
 		return params;
 	}

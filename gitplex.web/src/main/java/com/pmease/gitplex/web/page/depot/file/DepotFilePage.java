@@ -12,19 +12,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
+import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
@@ -65,6 +69,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.WebSession;
+import com.pmease.gitplex.web.component.archivemenulink.ArchiveMenuLink;
 import com.pmease.gitplex.web.component.repofile.blobsearch.advanced.AdvancedSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.instant.InstantSearchPanel;
 import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
@@ -81,8 +86,6 @@ import com.pmease.gitplex.web.component.repofile.filenavigator.FileNavigator;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
-import com.pmease.gitplex.web.resource.ArchiveResource;
-import com.pmease.gitplex.web.resource.ArchiveResourceReference;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
@@ -116,7 +119,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private static final String REVISION_PICKER_ID = "revisionPicker";
 	
 	private static final String FILE_NAVIGATOR_ID = "fileNavigator";
-	
+
+	private static final String CONTRIBUTION_ID = "contribution";
+
 	private static final String FILE_VIEWER_ID = "fileViewer";
 	
 	private static final String SEARCH_RESULD_ID = "searchResult";
@@ -310,7 +315,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 		});
 		
-		newDownloadLink(null);
+		add(new ArchiveMenuLink("download", depotModel) {
+
+			@Override
+			protected String getRevision() {
+				return blobIdent.revision;
+			}
+
+		});
 		
 		newRevisionPicker(null);
 		
@@ -371,6 +383,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 		});
 
+		newContributionPanel(null);
 		newFileViewer(null, viewState);
 
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
@@ -449,6 +462,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				mode = Mode.EDIT;
 				
 				newFileNavigator(target);
+				newContributionPanel(target);
 				newFileViewer(target, null);
 				
 				pushState(target);
@@ -461,6 +475,42 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			target.add(fileNavigator);
 		} else {
 			add(fileNavigator);
+		}
+	}
+	
+	private void newContributionPanel(@Nullable AjaxRequestTarget target) {
+		Component contributionPanel;
+		if (mode != Mode.EDIT) {
+			contributionPanel = new AjaxLazyLoadPanel(CONTRIBUTION_ID) {
+				
+				@Override
+				public Component getLoadingComponent(String markupId) {
+					IRequestHandler handler = new ResourceReferenceRequestHandler(AbstractDefaultAjaxBehavior.INDICATOR);
+					String html = "<img src='" + RequestCycle.get().urlFor(handler) + "' class='loading'/> Loading latest commit...";
+					return new Label(markupId, html).setEscapeModelStrings(false);
+				}
+	
+				@Override
+				protected void onComponentLoaded(Component component, AjaxRequestTarget target) {
+					super.onComponentLoaded(component, target);
+					resizeWindow(target);
+				}
+	
+				@Override
+				public Component getLazyLoadComponent(String markupId) {
+					return new ContributionPanel(markupId, depotModel, blobIdent);
+				}
+	
+			};
+		} else {
+			contributionPanel = new WebMarkupContainer(CONTRIBUTION_ID).setVisible(false);
+		}
+		contributionPanel.setOutputMarkupPlaceholderTag(true);
+		if (target != null) {
+			replace(contributionPanel);
+			target.add(contributionPanel);
+		} else {
+			add(contributionPanel);
 		}
 	}
 	
@@ -507,6 +557,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				protected void onCancel(AjaxRequestTarget target) {
 					mode = null;
 					newFileNavigator(target);
+					newContributionPanel(target);
 					newFileViewer(target, null);
 					pushState(target);
 					resizeWindow(target);
@@ -663,18 +714,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
-	private void newDownloadLink(AjaxRequestTarget target) {
-		ResourceLink<Void> link = new ResourceLink<Void>("download", new ArchiveResourceReference(), 
-				ArchiveResource.paramsOf(getDepot(), blobIdent.revision));
-		link.setOutputMarkupId(true);
-		if (target != null) { 
-			replace(link);
-			target.add(link);
-		} else {
-			add(link);
-		}
-	}
-	
 	private void applyState(AjaxRequestTarget target, HistoryState state) {
 		if (!state.blobIdent.revision.equals(blobIdent.revision))
 			newSearchResult(target, null);
@@ -684,14 +723,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 		newRevisionPicker(target);
 		
-		newDownloadLink(target);
-		
 		target.add(commentContext);
 		
 		newFileNavigator(target);
 		
 		target.add(revisionIndexing);
 		
+		newContributionPanel(target);
 		newFileViewer(target, null);
 	}
 	
@@ -858,6 +896,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			mode = null;
 			
 			newFileNavigator(target);
+			newContributionPanel(target);
 			newFileViewer(target, null);
 			
 			resizeWindow(target);
@@ -896,6 +935,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		mode = Mode.EDIT;
 		
 		newFileNavigator(target);
+		newContributionPanel(target);
 		newFileViewer(target, viewState);
 		pushState(target);
 		resizeWindow(target);

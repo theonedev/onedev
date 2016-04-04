@@ -47,7 +47,7 @@ $(window).load(function() {
 				$("#repo-file>.file-navigator").hide();
 			}
 		}
-		
+
 		var $fileViewer = $("#repo-file>.file-viewer");
 		var width = $(window).width()-$("#repo-file").parent().prev().outerWidth();
 		var height = $(window).height()-$fileViewer.offset().top;

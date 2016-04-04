@@ -47,7 +47,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
-import com.pmease.gitplex.web.component.contributionpanel.ContributionPanel;
+import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
 import com.pmease.gitplex.web.component.createtag.CreateTagLink;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
@@ -223,7 +223,7 @@ public class CommitDetailPage extends DepotPage {
 		});
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
-		add(new ContributionPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
+		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 
 		final WebMarkupContainer parentsContainer = new WebMarkupContainer("parents");
 		parentsContainer.setOutputMarkupId(true);
@@ -349,12 +349,12 @@ public class CommitDetailPage extends DepotPage {
 				CommitDetailPage.class, "commit-detail.css")));
 	}
 
-	public static PageParameters paramsOf(Depot repository, String revision) {
-		return paramsOf(repository, revision, new HistoryState());
+	public static PageParameters paramsOf(Depot depot, String revision) {
+		return paramsOf(depot, revision, new HistoryState());
 	}
 	
-	public static PageParameters paramsOf(Depot repository, String revision, HistoryState state) {
-		PageParameters params = paramsOf(repository);
+	public static PageParameters paramsOf(Depot depot, String revision, HistoryState state) {
+		PageParameters params = paramsOf(depot);
 		params.set(PARAM_REVISION, revision);
 		if (state.compareWith != null)
 			params.set(PARAM_COMPARE_WITH, state.compareWith);
