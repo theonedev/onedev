@@ -91,7 +91,10 @@ public class UrlMapper extends CompoundRequestMapper {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
-				return 3;
+				if (isDepotUrl(request.getUrl()))
+					return 3;
+				else
+					return 0;
 			}
 			
 		});
@@ -99,15 +102,22 @@ public class UrlMapper extends CompoundRequestMapper {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
-				return 3;
+				if (isDepotUrl(request.getUrl()))
+					return 3;
+				else
+					return 0;
 			}
 			
 		});
-		add(new ResourceMapper("${account}/${depot}/pulls/${request}/attachments/${attachment}", new AttachmentResourceReference()) {
+		add(new ResourceMapper("${account}/${depot}/pulls/${request}/attachments/${attachment}", 
+				new AttachmentResourceReference()) {
 
 			@Override
 			public int getCompatibilityScore(Request request) {
-				return 8;
+				if (isDepotUrl(request.getUrl()))
+					return 8;
+				else
+					return 0;
 			}
 			
 		});
@@ -137,17 +147,21 @@ public class UrlMapper extends CompoundRequestMapper {
 		return normalized;
 	}
 
+	private boolean isAccountUrl(Url url) {
+		List<String> urlSegments = normalize(url.getSegments());
+		if (urlSegments.size() < 1)
+			return false;
+		String accountName = urlSegments.get(0);
+		
+		return !AccountNameValidator.getReservedNames().contains(accountName);
+	}
+	
 	private void addAccountPages() {
 		add(new MountedMapper("${account}", AccountOverviewPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> urlSegments = normalize(url.getSegments());
-				if (urlSegments.size() < 1)
-					return false;
-				String accountName = urlSegments.get(0);
-				
-				return !AccountNameValidator.getReservedNames().contains(accountName);
+				return isAccountUrl(url);
 			}
 
 		});
@@ -182,20 +196,25 @@ public class UrlMapper extends CompoundRequestMapper {
 				CollaboratorPrivilegeSourcePage.class));
 	}
 
+	private boolean isDepotUrl(Url url) {
+		List<String> urlSegments = normalize(url.getSegments());
+		if (urlSegments.size() < 2)
+			return false;
+		
+		String accountName = urlSegments.get(0);
+		if (AccountNameValidator.getReservedNames().contains(accountName))
+			return false;
+
+		String depotName = urlSegments.get(1);
+		return !DepotNameValidator.getReservedNames().contains(depotName);
+	}
+	
 	private void addDepotPages() {
 		add(new MountedMapper("${account}/${depot}", DepotOverviewPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
-				List<String> urlSegments = normalize(url.getSegments());
-				if (urlSegments.size() < 2)
-					return false;
-				String accountName = urlSegments.get(0);
-				if (AccountNameValidator.getReservedNames().contains(accountName))
-					return false;
-
-				String depotName = urlSegments.get(1);
-				return !DepotNameValidator.getReservedNames().contains(depotName);
+				return isDepotUrl(url);
 			}
 
 		});
