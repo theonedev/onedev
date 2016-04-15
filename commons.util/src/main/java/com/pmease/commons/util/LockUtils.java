@@ -7,17 +7,16 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.commons.collections.map.AbstractReferenceMap;
-import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.apache.commons.collections4.map.ReferenceMap;
 
-@SuppressWarnings("unchecked")
 public class LockUtils {
 	
     private final static Map<String, Lock> locks = 
-    		new ReferenceMap(AbstractReferenceMap.HARD, AbstractReferenceMap.WEAK);
+    		new ReferenceMap<String, Lock>(ReferenceStrength.HARD, ReferenceStrength.WEAK);
     
     private final static Map<String, ReadWriteLock> rwLocks = 
-    		new ReferenceMap(AbstractReferenceMap.HARD, AbstractReferenceMap.WEAK);
+    		new ReferenceMap<String, ReadWriteLock>(ReferenceStrength.HARD, ReferenceStrength.WEAK);
 
     /**
      * Get named lock. 

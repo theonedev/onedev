@@ -15,7 +15,9 @@ public abstract class ModalLink extends AjaxLink<Void> {
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		if (modal == null) {
+		// if modal has not been created, or has been removed from page 
+		// when the same page instance is refreshed 
+		if (modal == null || modal.getParent() == null) {
 			modal = new ModalPanel(target) {
 	
 				@Override

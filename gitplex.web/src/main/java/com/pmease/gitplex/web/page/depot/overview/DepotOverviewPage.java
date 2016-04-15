@@ -68,8 +68,6 @@ public class DepotOverviewPage extends DepotPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("title", getDepot().getFQN()));
-		
 		UrlManager urlManager = GitPlex.getInstance(UrlManager.class);
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getDepot()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel));

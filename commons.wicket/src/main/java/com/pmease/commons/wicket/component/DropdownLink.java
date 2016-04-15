@@ -12,8 +12,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.AlignTarget;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
-import com.pmease.commons.wicket.component.floating.RectTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
+import com.pmease.commons.wicket.component.floating.RectTarget;
 
 @SuppressWarnings("serial")
 public abstract class DropdownLink extends AjaxLink<Void> {
@@ -67,7 +67,9 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		if (dropdown == null) { 
+		// if dropdown has not been created, or has been removed from page 
+		// when the same page instance is refreshed 
+		if (dropdown == null || dropdown.getParent() == null) { 
 			AlignTarget alignFloatingWith;
 			if (alignTargetMouse) {
 				int mouseX = RequestCycle.get().getRequest().getRequestParameters()

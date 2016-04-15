@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.collections.map.AbstractReferenceMap;
-import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,8 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(BlameCommand.class);
 	
-	private static final ReferenceMap cache = new ReferenceMap(AbstractReferenceMap.HARD, AbstractReferenceMap.SOFT);
+	private static final ReferenceMap<String, Map<String, Blame>> cache = 
+			new ReferenceMap<>(ReferenceStrength.HARD, ReferenceStrength.SOFT);
 	
 	private static final int CACHE_THRESHOLD = 1000;
 	
@@ -63,8 +64,7 @@ public class BlameCommand extends GitCommand<Map<String, Blame>> {
 
 		String cacheKey = commitHash + ":" + file;
 		
-		@SuppressWarnings("unchecked")
-		Map<String, Blame> cached = (Map<String, Blame>) cache.get(cacheKey);
+		Map<String, Blame> cached = cache.get(cacheKey);
 		if (cached != null)
 			return cached;
 		
