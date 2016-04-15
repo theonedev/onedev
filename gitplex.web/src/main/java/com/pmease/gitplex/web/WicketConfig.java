@@ -7,12 +7,15 @@ import org.apache.wicket.Application;
 import org.apache.wicket.Page;
 import org.apache.wicket.Session;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
+import org.apache.wicket.core.request.mapper.HomePageMapper;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 
@@ -67,6 +70,15 @@ public class WicketConfig extends AbstractWicketConfig {
 
 		getResourceSettings().setCachingStrategy(new FilenameWithVersionResourceCachingStrategy(new LastModifiedResourceVersion()));
 
+		mount(new HomePageMapper(getHomePage()) {
+
+			@Override
+			protected void encodePageComponentInfo(Url url, PageComponentInfo info) {
+				if (info.getComponentInfo() != null)
+					super.encodePageComponentInfo(url, info);
+			}
+			
+		});
 		mount(new UrlMapper(this));
 	}
 

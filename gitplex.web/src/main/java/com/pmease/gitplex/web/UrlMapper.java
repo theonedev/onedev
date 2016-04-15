@@ -3,7 +3,6 @@ package com.pmease.gitplex.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
@@ -73,15 +72,15 @@ import com.pmease.gitplex.web.resource.BlobResourceReference;
 public class UrlMapper extends CompoundRequestMapper {
 
 	public UrlMapper(WebApplication app) {
-		add(new MountedMapper("init", ServerInitPage.class));
-		add(new MountedMapper("welcome", WelcomePage.class));
+		add(new NoVersionMountedMapper("init", ServerInitPage.class));
+		add(new NoVersionMountedMapper("welcome", WelcomePage.class));
 		addAdministrationPages();
 		addAccountPages();
 		addDepotPages();
 		addSecurityPages();
 		
-		add(new MountedMapper("test", TestPage.class));
-		add(new MountedMapper("runmode", RunModePage.class));
+		add(new NoVersionMountedMapper("test", TestPage.class));
+		add(new NoVersionMountedMapper("runmode", RunModePage.class));
 		
 		addResources();
 	}
@@ -124,17 +123,17 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addSecurityPages() {
-		add(new MountedMapper("login", LoginPage.class));
-		add(new MountedMapper("logout", LogoutPage.class));
-		add(new MountedMapper("register", RegisterPage.class));
-		add(new MountedMapper("forget", ForgetPage.class));
+		add(new NoVersionMountedMapper("login", LoginPage.class));
+		add(new NoVersionMountedMapper("logout", LogoutPage.class));
+		add(new NoVersionMountedMapper("register", RegisterPage.class));
+		add(new NoVersionMountedMapper("forget", ForgetPage.class));
 	}
 	
 	private void addAdministrationPages() {
-		add(new MountedMapper("administration/accounts", AccountListPage.class));
-		add(new MountedMapper("administration/accounts/new", NewUserPage.class));
-		add(new MountedMapper("administration/settings/system", SystemSettingPage.class));
-		add(new MountedMapper("administration/settings/mail", MailSettingPage.class));
+		add(new NoVersionMountedMapper("administration/accounts", AccountListPage.class));
+		add(new NoVersionMountedMapper("administration/accounts/new", NewUserPage.class));
+		add(new NoVersionMountedMapper("administration/settings/system", SystemSettingPage.class));
+		add(new NoVersionMountedMapper("administration/settings/mail", MailSettingPage.class));
 	}
 	
 	public List<String> normalize(List<String> urlSegments) {
@@ -157,7 +156,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addAccountPages() {
-		add(new MountedMapper("${account}", AccountOverviewPage.class) {
+		add(new NoVersionMountedMapper("${account}", AccountOverviewPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -166,32 +165,32 @@ public class UrlMapper extends CompoundRequestMapper {
 
 		});
 		
-		add(new MountedMapper("accounts/${account}/new-depot", NewDepotPage.class));
-		add(new MountedMapper("accounts/${account}/new-organization", NewOrganizationPage.class));
-		add(new MountedMapper("accounts/${account}/notifications", NotificationListPage.class));
-		add(new MountedMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
-		add(new MountedMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));
-		add(new MountedMapper("accounts/${account}/settings/password", PasswordEditPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/new-depot", NewDepotPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/new-organization", NewOrganizationPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/notifications", NotificationListPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/settings/profile", ProfileEditPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/settings/avatar", AvatarEditPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/settings/password", PasswordEditPage.class));
 
-		add(new MountedMapper("accounts/${account}/members", MemberListPage.class));
-		add(new MountedMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
-		add(new MountedMapper("accounts/${account}/members/${member}/depots", MemberEffectivePrivilegePage.class));
-		add(new MountedMapper("accounts/${account}/members/${member}/depots/${depot}", MemberPrivilegeSourcePage.class));
-		add(new MountedMapper("accounts/${account}/members/new", NewMembersPage.class));
-		add(new MountedMapper("accounts/${account}/teams", TeamListPage.class));
-		add(new MountedMapper("accounts/${account}/teams/new", NewTeamPage.class));
-		add(new MountedMapper("accounts/${account}/teams/${team}/setting", TeamEditPage.class));
-		add(new MountedMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
-		add(new MountedMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/members", MemberListPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/members/${member}/teams", MemberTeamListPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/members/${member}/depots", MemberEffectivePrivilegePage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/members/${member}/depots/${depot}", MemberPrivilegeSourcePage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/members/new", NewMembersPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/teams", TeamListPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/teams/new", NewTeamPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/teams/${team}/setting", TeamEditPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/teams/${team}/members", TeamMemberListPage.class));
+		add(new NoVersionMountedMapper("accounts/${account}/teams/${team}/depots", TeamDepotListPage.class));
 
-		add(new MountedMapper("accounts/${account}/collaborators", AccountCollaboratorListPage.class));
-		add(new MountedMapper(
+		add(new NoVersionMountedMapper("accounts/${account}/collaborators", AccountCollaboratorListPage.class));
+		add(new NoVersionMountedMapper(
 				"accounts/${account}/collaborators/${collaborator}/depots", 
 				CollaboratorDepotListPage.class));
-		add(new MountedMapper(
+		add(new NoVersionMountedMapper(
 				"accounts/${account}/collaborators/${collaborator}/effective", 
 				CollaboratorEffectivePrivilegePage.class));
-		add(new MountedMapper(
+		add(new NoVersionMountedMapper(
 				"accounts/${account}/collaborators/${collaborator}/effective/${depot}", 
 				CollaboratorPrivilegeSourcePage.class));
 	}
@@ -210,7 +209,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addDepotPages() {
-		add(new MountedMapper("${account}/${depot}", DepotOverviewPage.class) {
+		add(new NoVersionMountedMapper("${account}/${depot}", DepotOverviewPage.class) {
 
 			@Override
 			protected boolean urlStartsWith(Url url, String... segments) {
@@ -219,34 +218,34 @@ public class UrlMapper extends CompoundRequestMapper {
 
 		});
 
-		add(new MountedMapper("${account}/${depot}/files", DepotFilePage.class));
-		add(new MountedMapper("${account}/${depot}/commit", CommitDetailPage.class));
-		add(new MountedMapper("${account}/${depot}/commits", DepotCommitsPage.class));
-		add(new MountedMapper("${account}/${depot}/compare", RevisionComparePage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/files", DepotFilePage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/commit", CommitDetailPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/commits", DepotCommitsPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/compare", RevisionComparePage.class));
 
-		add(new MountedMapper("${account}/${depot}/branches", DepotBranchesPage.class));
-		add(new MountedMapper("${account}/${depot}/tags", DepotTagsPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/branches", DepotBranchesPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/tags", DepotTagsPage.class));
 
-		add(new MountedMapper("${account}/${depot}/pulls", RequestListPage.class));
-		add(new MountedMapper("${account}/${depot}/pulls/new", NewRequestPage.class));
-		add(new MountedMapper("${account}/${depot}/pulls/${request}", RequestOverviewPage.class));
-		add(new MountedMapper(
+		add(new NoVersionMountedMapper("${account}/${depot}/pulls", RequestListPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/pulls/new", NewRequestPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/pulls/${request}", RequestOverviewPage.class));
+		add(new NoVersionMountedMapper(
 				"${account}/${depot}/pulls/${request}/overview", RequestOverviewPage.class));
-		add(new MountedMapper(
+		add(new NoVersionMountedMapper(
 				"${account}/${depot}/pulls/${request}/updates", RequestUpdatesPage.class));
-		add(new MountedMapper(
+		add(new NoVersionMountedMapper(
 				"${account}/${depot}/pulls/${request}/compare", RequestComparePage.class));
-		add(new MountedMapper(
+		add(new NoVersionMountedMapper(
 				"${account}/${depot}/pulls/${request}/attachments", RequestAttachmentsPage.class));
 
-		add(new MountedMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/teams", DepotTeamListPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/collaborators", DepotCollaboratorListPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/effective-privilege", DepotEffectivePrivilegePage.class));
-		add(new MountedMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
-		add(new MountedMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/settings/teams", DepotTeamListPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/settings/collaborators", DepotCollaboratorListPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/settings/effective-privilege", DepotEffectivePrivilegePage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/settings/gate-keeper", GateKeeperPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/settings/integration-policy", IntegrationPolicyPage.class));
 		
-		add(new MountedMapper("${account}/${depot}/no-commits", NoCommitsPage.class));
+		add(new NoVersionMountedMapper("${account}/${depot}/no-commits", NoCommitsPage.class));
 	}
 
 }
