@@ -10,7 +10,6 @@ import com.pmease.gitplex.core.entity.OrganizationMembership;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 
-@SuppressWarnings("serial")
 public class IsOrganizationMemberPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
@@ -30,19 +29,7 @@ public class IsOrganizationMemberPanel extends Panel {
 		add(new Label("organizationName", organization.getDisplayName()));
 		
 		BookmarkablePageLink<Void> link = new BookmarkablePageLink<Void>("organizationSetting", 
-				ProfileEditPage.class, ProfileEditPage.paramsOf(organization)) {
-
-			@Override
-			public String getAfterDisabledLink() {
-				return "";
-			}
-
-			@Override
-			public String getBeforeDisabledLink() {
-				return "";
-			}
-			
-		};
+				ProfileEditPage.class, ProfileEditPage.paramsOf(organization));
 		link.add(new Label("privilegeName", organization.getDefaultPrivilege()));
 		link.setEnabled(SecurityUtils.canManage(organization));
 		add(link);

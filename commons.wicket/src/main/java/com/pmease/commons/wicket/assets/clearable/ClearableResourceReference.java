@@ -19,7 +19,7 @@ public class ClearableResourceReference extends JavaScriptResourceReference {
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
+	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
 				ClearableResourceReference.class, "jquery.clearable.css")));

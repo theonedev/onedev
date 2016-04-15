@@ -99,7 +99,7 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 			if (avatarChanged.getUser().getId().equals(accountId)) {
 				AvatarManager avatarManager = GitPlex.getInstance(AvatarManager.class);
 				url = avatarManager.getAvatarUrl(avatarChanged.getUser());
-				avatarChanged.getTarget().add(this);
+				avatarChanged.getPartialPageRequestHandler().add(this);
 			}
 		}
 	}
@@ -117,8 +117,6 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 		
 		if (params.isEmpty()) {
 			setEnabled(false);
-			setBeforeDisabledLink("");
-			setAfterDisabledLink("");
 		}
 		setEscapeModelStrings(false);
 		

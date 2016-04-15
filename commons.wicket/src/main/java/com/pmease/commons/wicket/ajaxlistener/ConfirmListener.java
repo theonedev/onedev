@@ -47,4 +47,14 @@ public class ConfirmListener implements IAjaxCallListener {
 		return null;
 	}
 
+	@Override
+	public CharSequence getInitHandler(Component component) {
+		return null;
+	}
+
+	@Override
+	public CharSequence getDoneHandler(Component component) {
+		return null;
+	}
+
 }

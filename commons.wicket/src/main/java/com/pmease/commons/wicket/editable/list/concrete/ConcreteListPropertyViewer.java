@@ -39,10 +39,10 @@ public class ConcreteListPropertyViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PropertyContext<?>>("headers", elementPropertyContexts) {
+		add(new ListView<PropertyContext<Serializable>>("headers", elementPropertyContexts) {
 
 			@Override
-			protected void populateItem(ListItem<PropertyContext<?>> item) {
+			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
 				item.add(new Label("header", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
 			}
 			

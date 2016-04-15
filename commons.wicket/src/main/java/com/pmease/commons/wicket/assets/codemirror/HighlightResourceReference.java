@@ -1,13 +1,13 @@
 package com.pmease.commons.wicket.assets.codemirror;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 
 public class HighlightResourceReference extends JavaScriptResourceReference {
 
@@ -20,12 +20,14 @@ public class HighlightResourceReference extends JavaScriptResourceReference {
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
-		return Iterables.concat(super.getDependencies(), ImmutableList.<HeaderItem>of(
-					JavaScriptHeaderItem.forReference(CodeMirrorCoreResourceReference.INSTANCE),
-					JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js")),
-					CssHeaderItem.forReference(new CssResourceReference(HighlightResourceReference.class, "highlight.css"))
-				));		
+	public List<HeaderItem> getDependencies() {
+		List<HeaderItem> dependencies = new ArrayList<>();
+		dependencies.add(JavaScriptHeaderItem.forReference(CodeMirrorCoreResourceReference.INSTANCE));
+		dependencies.add(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(CodeMirrorResourceReference.class, "identifier-highlighter.js")));
+		dependencies.add(CssHeaderItem.forReference(
+				new CssResourceReference(HighlightResourceReference.class, "highlight.css")));
+		return dependencies;
 	}
 	
 }

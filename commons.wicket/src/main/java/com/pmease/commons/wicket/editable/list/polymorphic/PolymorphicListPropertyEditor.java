@@ -160,6 +160,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		
 		table.add(new AjaxButton("addElement") {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
@@ -195,6 +196,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		
 		table.add(new SortBehavior() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				/*

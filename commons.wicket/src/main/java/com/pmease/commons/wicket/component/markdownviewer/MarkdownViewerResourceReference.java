@@ -21,7 +21,7 @@ public class MarkdownViewerResourceReference extends JavaScriptResourceReference
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
+	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
 		dependencies.add(JavaScriptHeaderItem.forReference(HighlightResourceReference.INSTANCE));		
 		dependencies.add(CssHeaderItem.forReference(

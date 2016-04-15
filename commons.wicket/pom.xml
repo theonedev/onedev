@@ -71,17 +71,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.wicket</groupId>
-			<artifactId>wicket-bean-validation</artifactId>
-			<version>0.11</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.validation</groupId>
-					<artifactId>validation-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>de.agilecoders.wicket</groupId>
 			<artifactId>wicket-bootstrap-core</artifactId>
 			<version>${wicketBootstrapVersion}</version>
@@ -129,8 +118,8 @@
 	</dependencies>
 	<properties>
 		<moduleClass>com.pmease.commons.wicket.WicketModule</moduleClass>
-		<wicketVersion>6.21.0</wicketVersion>
-		<wicketBootstrapVersion>0.9.11</wicketBootstrapVersion>
+		<wicketVersion>7.2.0</wicketVersion>
+		<wicketBootstrapVersion>0.10.6</wicketBootstrapVersion>
 	</properties>
 	<repositories>
 		<repository>

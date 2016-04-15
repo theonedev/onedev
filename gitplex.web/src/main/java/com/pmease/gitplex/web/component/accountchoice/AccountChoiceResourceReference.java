@@ -19,7 +19,7 @@ public class AccountChoiceResourceReference extends JavaScriptResourceReference 
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
+	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
 		dependencies.add(CssHeaderItem.forReference(
 				new CssResourceReference(AccountChoiceResourceReference.class, "account-choice.css")));

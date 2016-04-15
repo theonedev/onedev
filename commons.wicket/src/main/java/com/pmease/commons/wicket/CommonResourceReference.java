@@ -72,7 +72,7 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
+	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<HeaderItem>();
 		
 		dependencies.addAll(Lists.newArrayList(super.getDependencies()));

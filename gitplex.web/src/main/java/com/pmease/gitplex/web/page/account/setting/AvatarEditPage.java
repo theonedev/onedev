@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.page.account.setting;
 
 import java.util.Map;
 
+import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -15,8 +17,6 @@ import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.lang.Bytes;
-import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
-import org.apache.wicket.util.upload.FileUploadException;
 
 import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.GitPlex;

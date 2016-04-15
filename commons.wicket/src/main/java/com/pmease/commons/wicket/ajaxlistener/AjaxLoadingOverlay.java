@@ -54,4 +54,14 @@ public class AjaxLoadingOverlay implements IAjaxCallListener, Serializable {
 		return "$('#ajax-loading-overlay').hide();";
 	}
 
+	@Override
+	public CharSequence getInitHandler(Component component) {
+		return null;
+	}
+
+	@Override
+	public CharSequence getDoneHandler(Component component) {
+		return null;
+	}
+
 }

@@ -268,16 +268,6 @@ public class MemberListPage extends AccountLayoutPage {
 					}
 
 					@Override
-					public String getAfterDisabledLink() {
-						return null;
-					}
-
-					@Override
-					public String getBeforeDisabledLink() {
-						return null;
-					}
-
-					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						Account user = item.getModelObject().getUser();
@@ -413,9 +403,6 @@ public class MemberListPage extends AccountLayoutPage {
 							}
 							
 						}).setEscapeModelStrings(false));
-						
-						setBeforeDisabledLink("");
-						setAfterDisabledLink("");
 					}
 					
 				});

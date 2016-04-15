@@ -61,10 +61,10 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -73,8 +73,8 @@ import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.EntityModel;
-import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.DepotPage;
+import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.attachments.RequestAttachmentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;
@@ -234,7 +234,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					pullRequestChanged.getTarget().add(this);
+					pullRequestChanged.getPartialPageRequestHandler().add(this);
 				}
 			}
 
@@ -329,7 +329,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					pullRequestChanged.getTarget().add(this);
+					pullRequestChanged.getPartialPageRequestHandler().add(this);
 				}
 			}
 			
@@ -524,6 +524,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				
 				boolean hasVisibleChildren = false;
 				for (int i=0; i<size(); i++) {
+					@SuppressWarnings("deprecation")
 					Component child = get(i);
 					child.configure();
 					if (child.isVisible()) {

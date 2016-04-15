@@ -53,8 +53,6 @@ public class AccountLink extends BookmarkablePageLink<Void> {
 		
 		if (params.isEmpty()) {
 			setEnabled(false);
-			setBeforeDisabledLink("");
-			setAfterDisabledLink("");
 		}
 	}
 

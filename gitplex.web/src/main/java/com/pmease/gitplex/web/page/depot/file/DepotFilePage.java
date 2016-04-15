@@ -15,6 +15,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -90,7 +91,7 @@ import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIResizableJavaScriptReference;
+import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIJavaScriptReference;
 
 @SuppressWarnings("serial")
 public class DepotFilePage extends DepotPage implements BlobViewContext {
@@ -739,7 +740,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 		response.render(JavaScriptHeaderItem.forReference(ClosestDescendantResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
-		response.render(JQueryUIResizableJavaScriptReference.asHeaderItem());
+		response.render(JQueryUIJavaScriptReference.asHeaderItem());
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(DepotFilePage.class, "depot-file.js")));
@@ -808,8 +809,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		resizeWindow(target);
 	}
 	
-	private void resizeWindow(AjaxRequestTarget target) {
-		target.appendJavaScript("$(window).resize();");
+	private void resizeWindow(IPartialPageRequestHandler partialPageRequestHandler) {
+		partialPageRequestHandler.appendJavaScript("$(window).resize();");
 	}
 	
 	@Override

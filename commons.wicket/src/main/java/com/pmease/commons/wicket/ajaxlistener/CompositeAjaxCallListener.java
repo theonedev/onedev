@@ -122,4 +122,14 @@ public class CompositeAjaxCallListener implements IAjaxCallListener, IComponentA
 		}
 	}
 
+	@Override
+	public CharSequence getInitHandler(Component component) {
+		return null;
+	}
+
+	@Override
+	public CharSequence getDoneHandler(Component component) {
+		return null;
+	}
+
 }

@@ -68,7 +68,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-					pullRequestChanged.getTarget().add(this);
+					pullRequestChanged.getPartialPageRequestHandler().add(this);
 				}
 			}
 			

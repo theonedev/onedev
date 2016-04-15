@@ -1,5 +1,7 @@
 package de.agilecoders.wicket.extensions.markup.html.bootstrap.references;
 
+import java.util.List;
+
 import org.apache.wicket.Application;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -40,7 +42,7 @@ public class DatetimePickerJsReference extends JavaScriptResourceReference {
     }
 
     @Override
-    public Iterable<? extends HeaderItem> getDependencies() {
+    public List<HeaderItem> getDependencies() {
         return Dependencies.combine(super.getDependencies(),
             JavaScriptHeaderItem.forReference(Application.get().getJavaScriptLibrarySettings().getJQueryReference()),
             MomentWithLocalesJsReference.asHeaderItem());

@@ -17,7 +17,6 @@
 package org.apache.wicket.protocol.ws.api;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,13 +30,15 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.page.IPageManager;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WicketFilter;
-import org.apache.wicket.protocol.ws.IWebSocketSettings;
+import org.apache.wicket.protocol.ws.WebSocketSettings;
+import org.apache.wicket.protocol.ws.api.event.WebSocketAbortedPayload;
 import org.apache.wicket.protocol.ws.api.event.WebSocketBinaryPayload;
 import org.apache.wicket.protocol.ws.api.event.WebSocketClosedPayload;
 import org.apache.wicket.protocol.ws.api.event.WebSocketConnectedPayload;
 import org.apache.wicket.protocol.ws.api.event.WebSocketPayload;
 import org.apache.wicket.protocol.ws.api.event.WebSocketPushPayload;
 import org.apache.wicket.protocol.ws.api.event.WebSocketTextPayload;
+import org.apache.wicket.protocol.ws.api.message.AbortedMessage;
 import org.apache.wicket.protocol.ws.api.message.BinaryMessage;
 import org.apache.wicket.protocol.ws.api.message.ClosedMessage;
 import org.apache.wicket.protocol.ws.api.message.ConnectedMessage;
@@ -54,6 +55,7 @@ import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.cycle.RequestCycleContext;
 import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.session.ISessionStore;
 import org.apache.wicket.util.lang.Args;
 import org.apache.wicket.util.lang.Checks;
@@ -82,28 +84,16 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 	 */
 	static final int NO_PAGE_ID = -1;
 
-	private static final Method GET_FILTER_PATH_METHOD;
-	static
-	{
-		try
-		{
-			GET_FILTER_PATH_METHOD = WicketFilter.class.getDeclaredMethod("getFilterPath", new Class[]{});
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		GET_FILTER_PATH_METHOD.setAccessible(true);
-	}
-
-
 	private final WebRequest webRequest;
 	private final int pageId;
 	private final String resourceName;
 	private final Url baseUrl;
 	private final WebApplication application;
 	private final String sessionId;
+	private final WebSocketSettings webSocketSettings;
 	private final IWebSocketConnectionRegistry connectionRegistry;
+	private final IWebSocketConnectionFilter connectionFilter;
+	private final HttpServletRequest servletRequest;
 
 	/**
 	 * Constructor.
@@ -137,27 +127,18 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 		this.baseUrl = Url.parse(baseUrl);
 
 		WicketFilter wicketFilter = application.getWicketFilter();
-		this.webRequest = new WebSocketRequest(new ServletRequestCopy(request), getFilterPath(wicketFilter));
+		this.servletRequest = new ServletRequestCopy(request);
 
 		this.application = Args.notNull(application, "application");
-		IWebSocketSettings webSocketSettings = IWebSocketSettings.Holder.get(application);
+
+		this.webSocketSettings = WebSocketSettings.Holder.get(application);
+
+		this.webRequest = webSocketSettings.newWebSocketRequest(request, wicketFilter.getFilterPath());
+
 		this.connectionRegistry = webSocketSettings.getConnectionRegistry();
-	}
 
-	private String getFilterPath(WicketFilter wicketFilter)
-	{
-		String filterPath;
-		try
-		{
-			filterPath = (String) GET_FILTER_PATH_METHOD.invoke(wicketFilter);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		return filterPath;
+		this.connectionFilter = webSocketSettings.getConnectionFilter();
 	}
-
 
 	@Override
 	public void onMessage(final String message)
@@ -173,17 +154,28 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 	}
 
 	/**
-	 * A helper that registers the opened connection in the application-level
-	 * registry.
+	 * A helper that registers the opened connection in the application-level registry.
 	 *
 	 * @param connection
-	 *      the web socket connection to use to communicate with the client
+	 *            the web socket connection to use to communicate with the client
 	 * @see #onOpen(Object)
 	 */
-	protected final void onConnect(final IWebSocketConnection connection)
-	{
+	protected final void onConnect(final IWebSocketConnection connection) {
 		IKey key = getRegistryKey();
 		connectionRegistry.setConnection(getApplication(), getSessionId(), key, connection);
+
+		if (connectionFilter != null)
+		{
+			ConnectionRejected connectionRejected = connectionFilter.doFilter(servletRequest);
+			if (connectionRejected != null)
+			{
+				broadcastMessage(new AbortedMessage(getApplication(), getSessionId(), key));
+				connectionRegistry.removeConnection(getApplication(), getSessionId(), key);
+				connection.close(connectionRejected.getCode(), connectionRejected.getReason());
+				return;
+			}
+		}
+
 		broadcastMessage(new ConnectedMessage(getApplication(), getSessionId(), key));
 	}
 
@@ -207,11 +199,10 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 	 * @param message
 	 *      the message to broadcast
 	 */
-	@SuppressWarnings("rawtypes")
 	public final void broadcastMessage(final IWebSocketMessage message)
 	{
 		IKey key = getRegistryKey();
-		final IWebSocketConnection connection = connectionRegistry.getConnection(application, sessionId, key);
+		IWebSocketConnection connection = connectionRegistry.getConnection(application, sessionId, key);
 
 		if (connection != null && connection.isOpen())
 		{
@@ -219,19 +210,7 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 			Session oldSession = ThreadContext.getSession();
 			RequestCycle oldRequestCycle = ThreadContext.getRequestCycle();
 
-			WebSocketResponse webResponse = new WebSocketResponse(connection) {
-
-				@Override
-				public void sendError(int sc, String msg) {
-					try {
-						WebSocketMessage wsMessage = new WebSocketMessage(WebSocketMessage.ERROR_MESSAGE, msg);
-						String errorMessage = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(wsMessage);
-						connection.sendMessage(errorMessage);
-					} catch (IOException e) {
-					}
-				}
-				
-			};
+			WebResponse webResponse = webSocketSettings.newWebSocketResponse(connection);
 			try
 			{
 				WebSocketRequestMapper requestMapper = new WebSocketRequestMapper(application.getRootRequestMapper());
@@ -255,8 +234,9 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 				IPageManager pageManager = session.getPageManager();
 				Page page = getPage(pageManager);
 
-				WebSocketRequestHandler requestHandler = new WebSocketRequestHandler(page, connection);
+				WebSocketRequestHandler requestHandler = webSocketSettings.newWebSocketRequestHandler(page, connection);
 
+				@SuppressWarnings("rawtypes")
 				WebSocketPayload payload = createEventPayload(message, requestHandler);
 
 				if (!(message instanceof ConnectedMessage || message instanceof ClosedMessage))
@@ -298,7 +278,7 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 		}
 	}
 
-	private RequestCycle createRequestCycle(WebSocketRequestMapper requestMapper, WebSocketResponse webResponse)
+	private RequestCycle createRequestCycle(WebSocketRequestMapper requestMapper, WebResponse webResponse)
 	{
 		RequestCycleContext context = new RequestCycleContext(webRequest, webResponse,
 				requestMapper, application.getExceptionMapperProvider().get());
@@ -368,6 +348,10 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 		else if (message instanceof ClosedMessage)
 		{
 			payload = new WebSocketClosedPayload((ClosedMessage) message, handler);
+		}
+		else if (message instanceof AbortedMessage)
+		{
+			payload = new WebSocketAbortedPayload((AbortedMessage) message, handler);
 		}
 		else if (message instanceof IWebSocketPushMessage)
 		{

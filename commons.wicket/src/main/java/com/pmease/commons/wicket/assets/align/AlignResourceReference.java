@@ -20,7 +20,7 @@ public class AlignResourceReference extends JavaScriptResourceReference {
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
+	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
 		dependencies.add(JavaScriptHeaderItem.forReference(TextareaCaretPositionResourceReference.INSTANCE));
 		return dependencies;

@@ -102,6 +102,7 @@ public abstract class SearchResultPanel extends Panel {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void onActiveIndexChange(AjaxRequestTarget target) {
 		Component hitsContainer = blobsView.get(activeBlobIndex).get(HITS_ID);
 		if (!hitsContainer.isVisibilityAllowed()) {

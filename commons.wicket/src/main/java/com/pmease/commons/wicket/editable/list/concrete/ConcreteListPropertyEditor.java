@@ -126,10 +126,10 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 		table.setOutputMarkupId(true);
 		table.setOutputMarkupPlaceholderTag(true);
 		
-		table.add(new ListView<PropertyContext<?>>("headers", propertyContexts) {
+		table.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
 
 			@Override
-			protected void populateItem(ListItem<PropertyContext<?>> item) {
+			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
 				item.add(new Label("header", EditableUtils.getName(item.getModelObject().getPropertyGetter())));
 				item.add(AttributeAppender.append("class", " " + item.getModelObject().getPropertyName()));
 				
@@ -175,6 +175,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 		newRow.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
 		newRow.add(new AjaxButton("addElement") {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
@@ -208,6 +209,7 @@ public class ConcreteListPropertyEditor extends PropertyEditor<List<Serializable
 		
 		table.add(new SortBehavior() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				/*

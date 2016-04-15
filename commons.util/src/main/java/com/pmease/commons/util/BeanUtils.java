@@ -161,9 +161,6 @@ public class BeanUtils {
 	/**
 	 * Find corresponding setter method by getter in specified class and super classes.
 	 * 
-	 * @param clazz
-	 * 			class to search setter method. All super classes will also be 
-	 * 			searched if not found in current class
 	 * @param getter
 	 * 			getter method to search setter for
 	 * @return
@@ -178,9 +175,6 @@ public class BeanUtils {
 	/**
 	 * Find corresponding setter method by getter in specified class and super classes.
 	 * <p>
-	 * @param clazz
-	 * 			class to search setter method. All super classes will also be 
-	 * 			searched if not found in current class
 	 * @param getter
 	 * 			getter method to search setter for
 	 * @return

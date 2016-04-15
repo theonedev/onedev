@@ -1,5 +1,8 @@
 package com.pmease.commons.wicket.assets.codemirror;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -8,8 +11,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.pmease.commons.util.StringUtils;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
@@ -26,17 +27,24 @@ public class CodeMirrorCoreResourceReference extends WebjarsJavaScriptResourceRe
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
+	public List<HeaderItem> getDependencies() {
 		String modeBase = StringUtils.substringBeforeLast(RequestCycle.get().urlFor(this, new PageParameters()).toString(), "/");
-		return Iterables.concat(super.getDependencies(), ImmutableList.<HeaderItem>of(
-					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/lib/codemirror.js")),
-					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/mode/overlay.js")),
-					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/mode/loadmode.js")),
-					JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/edit/matchbrackets.js")),
-					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/lib/codemirror.css")),
-					CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")),
-					CssHeaderItem.forReference(new CssResourceReference(CodeMirrorCoreResourceReference.class, "codemirror.css")),
-					OnDomReadyHeaderItem.forScript("CodeMirror.modeURL = '" + modeBase + "/%N/%N.js';")
-				));		
+		List<HeaderItem> dependencies = new ArrayList<>();
+		dependencies.add(JavaScriptHeaderItem.forReference(
+				new WebjarsJavaScriptResourceReference("codemirror/current/lib/codemirror.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(
+				new WebjarsJavaScriptResourceReference("codemirror/current/addon/mode/overlay.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(
+				new WebjarsJavaScriptResourceReference("codemirror/current/addon/mode/loadmode.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(
+				new WebjarsJavaScriptResourceReference("codemirror/current/addon/edit/matchbrackets.js")));
+		dependencies.add(CssHeaderItem.forReference(
+				new WebjarsCssResourceReference("codemirror/current/lib/codemirror.css")));
+		dependencies.add(CssHeaderItem.forReference(
+				new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
+		dependencies.add(CssHeaderItem.forReference(
+				new CssResourceReference(CodeMirrorCoreResourceReference.class, "codemirror.css")));
+		dependencies.add(OnDomReadyHeaderItem.forScript("CodeMirror.modeURL = '" + modeBase + "/%N/%N.js';"));		
+		return dependencies;
 	}
 }

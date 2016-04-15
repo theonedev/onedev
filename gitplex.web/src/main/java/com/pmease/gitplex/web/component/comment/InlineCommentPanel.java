@@ -1,6 +1,6 @@
 package com.pmease.gitplex.web.component.comment;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -36,10 +36,10 @@ public class InlineCommentPanel extends GenericPanel<Comment> {
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 					if (pullRequestChanged.getEvent() == PullRequest.Event.UPDATED) {
-						AjaxRequestTarget target = pullRequestChanged.getTarget();
+						IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
 						setVisible(true);
-						target.add(this);
-						send(this, Broadcast.BUBBLE, new CommentResized(target, InlineCommentPanel.this.getModelObject()));
+						partialPageRequestHandler.add(this);
+						send(this, Broadcast.BUBBLE, new CommentResized(partialPageRequestHandler, InlineCommentPanel.this.getModelObject()));
 					}
  				}				
 			}

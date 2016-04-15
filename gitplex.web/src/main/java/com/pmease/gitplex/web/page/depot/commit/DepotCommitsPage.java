@@ -162,6 +162,7 @@ public class DepotCommitsPage extends DepotPage {
 		state = new HistoryState(params);
 	}
 	
+	@SuppressWarnings("deprecation")
 	private Component replaceItem(AjaxRequestTarget target, int index) {
 		Component item = commitsView.get(index);
 		Component newItem = newCommitItem(item.getId(), index);

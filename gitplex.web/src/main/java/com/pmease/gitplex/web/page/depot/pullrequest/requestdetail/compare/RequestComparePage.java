@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -460,7 +461,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 				if (event.getPayload() instanceof PullRequestChanged) {
 					PullRequestChanged requestChanged = (PullRequestChanged) event.getPayload();
-					AjaxRequestTarget target = requestChanged.getTarget();
+					IPartialPageRequestHandler partialPageRequestHandler = requestChanged.getPartialPageRequestHandler();
 					PullRequest.Event requestEvent = requestChanged.getEvent();
 
 					boolean outdated = false;
@@ -482,8 +483,8 @@ public class RequestComparePage extends RequestDetailPage {
 					if (outdated || requestEvent == UPDATED || requestEvent == INTEGRATION_PREVIEW_CALCULATED) {
 						String script = String.format("$('#%s').trigger('sticky_kit:detach');", 
 								compareHead.getMarkupId());
-						target.prependJavaScript(script);
-						target.add(compareHead);
+						partialPageRequestHandler.prependJavaScript(script);
+						partialPageRequestHandler.add(compareHead);
 					}
 				}
 			}
@@ -589,7 +590,7 @@ public class RequestComparePage extends RequestDetailPage {
 				state.commentId = null;
 				state.oldRev = getRevision(oldCommitHash);
 				state.newRev = getRevision(newCommitHash);
-				onStateChange(commentRemoved.getTarget());
+				onStateChange(commentRemoved.getPartialPageRequestHandler());
 			}
 		}
 	}
@@ -733,21 +734,21 @@ public class RequestComparePage extends RequestDetailPage {
 		setResponsePage(RequestListPage.class, paramsOf(depot));
 	}
 
-	private void pushState(AjaxRequestTarget target) {
+	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
 		PageParameters params = paramsOf(getPullRequest(), state.commentId, 
 				state.oldRev, state.newRev, state.path, state.comparePath);
 		CharSequence url = RequestCycle.get().urlFor(RequestComparePage.class, params);
-		pushState(target, url.toString(), state);
+		pushState(partialPageRequestHandler, url.toString(), state);
 	}
 	
-	private void onStateChange(AjaxRequestTarget target) {
-		pushState(target);
+	private void onStateChange(IPartialPageRequestHandler partialPageRequestHandler) {
+		pushState(partialPageRequestHandler);
 		
-		target.add(compareHead);
-		newCompareResult(target);
+		partialPageRequestHandler.add(compareHead);
+		newCompareResult(partialPageRequestHandler);
 	}
 	
-	private void newCompareResult(@Nullable AjaxRequestTarget target) {
+	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
 		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
 				requestModel, commentModel, oldCommitHash, newCommitHash, path, comparePath, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
@@ -766,9 +767,9 @@ public class RequestComparePage extends RequestDetailPage {
 			
 		};
 		compareResult.setOutputMarkupId(true);
-		if (target != null) {
+		if (partialPageRequestHandler != null) {
 			replace(compareResult);
-			target.add(compareResult);
+			partialPageRequestHandler.add(compareResult);
 		} else {
 			add(compareResult);
 		}

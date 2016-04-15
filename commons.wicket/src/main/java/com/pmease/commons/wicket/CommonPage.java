@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -103,9 +104,9 @@ public abstract class CommonPage extends WebPage {
 		super.onBeforeRender();
 	}
 
-	public void pushState(AjaxRequestTarget target, String url, Serializable data) {
+	public void pushState(IPartialPageRequestHandler partialPageRequestHandler, String url, Serializable data) {
 		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
-		target.prependJavaScript(String.format("pmease.commons.history.pushState('%s', '%s');", encodedData, url));
+		partialPageRequestHandler.prependJavaScript(String.format("pmease.commons.history.pushState('%s', '%s');", encodedData, url));
 	}
 	
 	public void replaceState(AjaxRequestTarget target, String url, Serializable data) {

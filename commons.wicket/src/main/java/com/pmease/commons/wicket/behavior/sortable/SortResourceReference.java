@@ -7,8 +7,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import com.google.common.collect.Lists;
 
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIMouseJavaScriptReference;
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIWidgetJavaScriptReference;
+import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIJavaScriptReference;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 
 @SuppressWarnings("serial")
@@ -33,10 +32,9 @@ public class SortResourceReference extends WebjarsJavaScriptResourceReference {
     }
 
     @Override
-    public Iterable<? extends HeaderItem> getDependencies() {
-        final List<HeaderItem> dependencies = Lists.newArrayList(super.getDependencies());
-        dependencies.add(JQueryUIWidgetJavaScriptReference.asHeaderItem());
-        dependencies.add(JQueryUIMouseJavaScriptReference.asHeaderItem());
+    public List<HeaderItem> getDependencies() {
+        List<HeaderItem> dependencies = Lists.newArrayList(super.getDependencies());
+        dependencies.add(JQueryUIJavaScriptReference.asHeaderItem());
 
         return dependencies;
     }

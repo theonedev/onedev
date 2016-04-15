@@ -1,6 +1,5 @@
 package com.pmease.gitplex.web.component.diff.blob.text;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -346,7 +345,7 @@ public class TextDiffPanel extends Panel {
 
 			@Override
 			protected void onOccurrencesQueried(AjaxRequestTarget target, List<QueryHit> hits) {
-				WebSession.get().setMetaData(DepotFilePage.SEARCH_RESULT_KEY, (Serializable)hits);
+				WebSession.get().setMetaData(DepotFilePage.SEARCH_RESULT_KEY, (ArrayList<QueryHit>)hits);
 				setResponsePage(DepotFilePage.class, getFindOccurrencesParams());
 			}
 
@@ -706,7 +705,7 @@ public class TextDiffPanel extends Panel {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					commentRows.remove(this);
 					String script = String.format("gitplex.textdiff.removeComment('%s');", getMarkupId());
-					commentRemoved.getTarget().appendJavaScript(script);
+					commentRemoved.getPartialPageRequestHandler().appendJavaScript(script);
 					
 					send(TextDiffPanel.this, Broadcast.BUBBLE, commentRemoved);
 				} 

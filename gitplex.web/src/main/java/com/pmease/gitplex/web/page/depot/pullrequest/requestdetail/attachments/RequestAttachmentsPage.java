@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
@@ -24,8 +26,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.util.lang.Bytes;
-import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
-import org.apache.wicket.util.upload.FileUploadException;
 
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;

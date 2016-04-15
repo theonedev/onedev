@@ -446,13 +446,13 @@ public class SourceViewPanel extends BlobViewPanel {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					commentWidgets.remove(this);
 					String script = String.format("document.getElementById('%s').lineWidget.clear();", getMarkupId());
-					commentRemoved.getTarget().appendJavaScript(script);
+					commentRemoved.getPartialPageRequestHandler().appendJavaScript(script);
 					
 					send(SourceViewPanel.this, Broadcast.BUBBLE, commentRemoved);
 				} else if (event.getPayload() instanceof CommentResized) {
 					CommentResized commentResized = (CommentResized) event.getPayload();
 					String script = String.format("gitplex.sourceview.commentResized('%s');", getMarkupId());
-					commentResized.getTarget().appendJavaScript(script);
+					commentResized.getPartialPageRequestHandler().appendJavaScript(script);
 				} 
 			}
 

@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -327,10 +328,11 @@ public class CommentPanel extends GenericPanel<Comment> {
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
 			if (pullRequestChanged.getEvent() == PullRequest.Event.COMMENT_REPLIED) {
-				AjaxRequestTarget target = pullRequestChanged.getTarget();
+				IPartialPageRequestHandler target = pullRequestChanged.getPartialPageRequestHandler();
 				List<CommentReply> replies = repliesModel.getObject();
 				Date lastReplyDate;
 				if (repliesView.size() != 0) {
+					@SuppressWarnings("deprecation")
 					Component lastReplyRow = repliesView.get(repliesView.size()-1);
 					lastReplyDate = ((CommentReply)lastReplyRow.getDefaultModelObject()).getDate();
 				} else {

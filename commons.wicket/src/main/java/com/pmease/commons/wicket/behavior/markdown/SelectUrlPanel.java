@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,8 +30,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Bytes;
-import org.apache.wicket.util.upload.FileUploadBase.SizeLimitExceededException;
-import org.apache.wicket.util.upload.FileUploadException;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 

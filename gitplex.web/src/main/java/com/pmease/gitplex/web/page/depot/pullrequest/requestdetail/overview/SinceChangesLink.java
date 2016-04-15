@@ -2,8 +2,8 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview;
 
 import java.util.Date;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -78,8 +78,8 @@ class SinceChangesLink extends Panel {
 
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-			AjaxRequestTarget target = pullRequestChanged.getTarget();
-			target.add(this);
+			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
+			partialPageRequestHandler.add(this);
 		}
 	}
 

@@ -22,7 +22,7 @@ public class CommitGraphResourceReference extends JavaScriptResourceReference {
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
+	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
 		dependencies.add(JavaScriptHeaderItem.forReference(SnapSvgResourceReference.INSTANCE));
 		dependencies.add(CssHeaderItem.forReference(

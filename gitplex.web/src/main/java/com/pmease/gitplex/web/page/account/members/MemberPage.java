@@ -79,9 +79,6 @@ public abstract class MemberPage extends AccountLayoutPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				setBeforeDisabledLink("");
-				setAfterDisabledLink("");
-				
 				add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override

@@ -37,7 +37,7 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 	protected abstract T convertInputToValue() throws ConversionException;
 	
 	@Override
-	protected void convertInput() {
+	public void convertInput() {
 		try {
 			setConvertedInput(convertInputToValue());
 		} catch (ConversionException e) {

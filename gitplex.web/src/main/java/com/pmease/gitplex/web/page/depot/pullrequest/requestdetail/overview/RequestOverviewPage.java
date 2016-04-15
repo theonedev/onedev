@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -121,7 +122,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				if (event.getPayload() instanceof CommentRemoved) {
 					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
 					remove();
-					commentRemoved.getTarget().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
+					commentRemoved.getPartialPageRequestHandler().appendJavaScript(String.format("$('#%s').remove();", getMarkupId()));
 				} 
 			}
 			
@@ -280,8 +281,9 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 		if (event.getPayload() instanceof PullRequestChanged) {
 			PullRequestChanged pullRequestChanged = (PullRequestChanged) event.getPayload();
-			AjaxRequestTarget target = pullRequestChanged.getTarget();
+			IPartialPageRequestHandler partialPageRequestHandler = pullRequestChanged.getPartialPageRequestHandler();
 			List<RenderableActivity> activities = getActivities();
+			@SuppressWarnings("deprecation")
 			Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
 			RenderableActivity lastAcvitity = (RenderableActivity) lastActivityRow.getDefaultModelObject();
 			for (RenderableActivity activity: activities) {
@@ -291,8 +293,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 					
 					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
 							newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
-					target.prependJavaScript(script);
-					target.add(newActivityRow);
+					partialPageRequestHandler.prependJavaScript(script);
+					partialPageRequestHandler.add(newActivityRow);
 					lastActivityRow = newActivityRow;
 				}
 			}
@@ -344,6 +346,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				
 				target.add(addComment);
 				
+				@SuppressWarnings("deprecation")
 				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
 				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentPullRequest(comment)); 
 				activitiesView.add(newActivityRow);
@@ -505,7 +508,12 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 			@Override
 			public String getIdValue(WatchStatus object, int index) {
-				return String.valueOf(index);
+				return object.name();
+			}
+
+			@Override
+			public WatchStatus getObject(String id, IModel<? extends List<? extends WatchStatus>> choices) {
+				return WatchStatus.valueOf(id);
 			}
 			
 		};

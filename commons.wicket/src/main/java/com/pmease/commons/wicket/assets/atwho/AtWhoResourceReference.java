@@ -1,13 +1,13 @@
 package com.pmease.commons.wicket.assets.atwho;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 
 public class AtWhoResourceReference extends JavaScriptResourceReference {
 
@@ -20,10 +20,13 @@ public class AtWhoResourceReference extends JavaScriptResourceReference {
 	}
 
 	@Override
-	public Iterable<? extends HeaderItem> getDependencies() {
-		return Iterables.concat(super.getDependencies(), ImmutableList.<HeaderItem>of(
-				JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(AtWhoResourceReference.class, "jquery.atwho-caret.js")),
-				CssHeaderItem.forReference(new CssResourceReference(AtWhoResourceReference.class, "jquery.atwho.css"))));
+	public List<HeaderItem> getDependencies() {
+		List<HeaderItem> dependencies = new ArrayList<>();
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				AtWhoResourceReference.class, "jquery.atwho-caret.js")));
+		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
+				AtWhoResourceReference.class, "jquery.atwho.css")));
+		return dependencies;
 	}
 
 }

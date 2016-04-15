@@ -17,6 +17,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.hibernate.Transactional;
@@ -122,8 +123,8 @@ public class DefaultAvatarManager implements AvatarManager {
 			avatarLock.lock();
 			try {
 				upload.writeTo(new File(Bootstrap.getSiteDir(), "avatars/" + account.getId()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			} catch (Exception e) {
+				throw Throwables.propagate(e);
 			} finally {
 				avatarLock.unlock();
 			}

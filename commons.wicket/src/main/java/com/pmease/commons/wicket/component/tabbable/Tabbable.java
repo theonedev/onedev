@@ -13,12 +13,15 @@ import org.apache.wicket.markup.html.panel.Panel;
 @SuppressWarnings("serial")
 public class Tabbable extends Panel {
 	
-	private final List<? extends Tab> tabs;
+	private final List<Tab> tabs;
 	
 	public Tabbable(String id, List<? extends Tab> tabs) {
 		super(id);
 		
-		this.tabs = tabs;
+		this.tabs = new ArrayList<>();
+		for (Tab tab: tabs) {
+			this.tabs.add(tab);
+		}
 	}
 
 	@Override
