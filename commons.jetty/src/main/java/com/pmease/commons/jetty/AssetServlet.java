@@ -9,8 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletMapping;
@@ -102,9 +104,9 @@ public abstract class AssetServlet extends DefaultServlet {
 	protected abstract URL loadResource(String relativePath);
 	
 	@Override
-	protected void writeOptionHeaders(HttpFields fields) {
-		super.writeOptionHeaders(fields);
-		
+	protected void putHeaders(HttpServletResponse response, HttpContent content, long contentLength) {
+		super.putHeaders(response, content, contentLength);
+		HttpFields fields = ((Response) response).getHttpFields();
 		if (requestHolder.get().getDispatcherType() == DispatcherType.ERROR) {
 			/*
 			 * Do not cache error page and also makes sure that error page is not eligible for 

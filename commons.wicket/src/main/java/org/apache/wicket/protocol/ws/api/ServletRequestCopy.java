@@ -94,7 +94,19 @@ public class ServletRequestCopy implements HttpServletRequest
 		this.serverPort = request.getServerPort();
 		this.protocol = request.getProtocol();
 		this.scheme = request.getScheme();
+		
+		
+		/*
+		 * have to comment out below two lines as otherwise web socket will
+		 * report UnSupportedOperationException upon connection
+		 */
+		//this.characterEncoding = request.getCharacterEncoding();
+		//this.contentType = request.getContentType();
+		//this.requestedSessionId = request.getRequestedSessionId();
+		this.characterEncoding = null;
 		this.contentType = null;
+		this.requestedSessionId = null;
+		
 		this.locale = request.getLocale();
 		this.locales = request.getLocales();
 		this.isSecure = request.isSecure();
@@ -106,7 +118,6 @@ public class ServletRequestCopy implements HttpServletRequest
 		this.localName = request.getLocalName();
 		this.localPort = request.getLocalPort();
 		this.pathTranslated = request.getPathTranslated();
-		this.requestedSessionId = null;
 		this.principal = request.getUserPrincipal();
 
 		HttpSession session = request.getSession(true);
@@ -221,7 +232,7 @@ public class ServletRequestCopy implements HttpServletRequest
 		return parameters.get(name);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Map getParameterMap()
 	{
