@@ -41,6 +41,7 @@ import com.pmease.commons.wicket.assets.doneevents.DoneEventsResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.ComponentTarget;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -245,7 +246,7 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new AjaxLink<Void>("link") {
+						AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {

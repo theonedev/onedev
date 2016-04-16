@@ -36,6 +36,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
 import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.manager.DepotManager;
@@ -144,7 +145,7 @@ public abstract class DepotSelector extends Panel {
 			@Override
 			protected void populateItem(ListItem<Depot> item) {
 				Depot depot = item.getModelObject();
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {

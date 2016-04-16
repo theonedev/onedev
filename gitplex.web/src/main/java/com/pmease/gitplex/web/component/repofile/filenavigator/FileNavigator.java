@@ -52,6 +52,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -119,7 +120,7 @@ public abstract class FileNavigator extends Panel {
 			@Override
 			protected void populateItem(final ListItem<BlobIdent> item) {
 				final BlobIdent blobIdent = item.getModelObject();
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -236,7 +237,7 @@ public abstract class FileNavigator extends Panel {
 
 								fragment.add(new BlobIcon("icon", model));
 								
-								AjaxLink<Void> link = new AjaxLink<Void>("link") {
+								AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 									@Override
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -588,7 +589,7 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public AbstractLink newLink(String id) {
-								AbstractLink link = new AjaxLink<Void>(id) {
+								AbstractLink link = new PreventDefaultAjaxLink<Void>(id) {
 
 									@Override
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {

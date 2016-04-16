@@ -1,4 +1,4 @@
-package com.pmease.gitplex.web;
+package com.pmease.commons.wicket;
 
 import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.request.Url;

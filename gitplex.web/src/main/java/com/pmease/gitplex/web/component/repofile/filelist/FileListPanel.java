@@ -35,6 +35,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -187,7 +188,7 @@ public abstract class FileListPanel extends Panel {
 				
 				item.add(pathIcon);
 				
-				AjaxLink<Void> pathLink = new AjaxLink<Void>("pathLink") {
+				AjaxLink<Void> pathLink = new PreventDefaultAjaxLink<Void>("pathLink") {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {

@@ -6,12 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 @SuppressWarnings("serial")
-public abstract class ViewStateAwareAjaxLink<T> extends AjaxLink<T> {
+public abstract class ViewStateAwareAjaxLink<T> extends PreventDefaultAjaxLink<T> {
 
 	public ViewStateAwareAjaxLink(String id) {
 		super(id);

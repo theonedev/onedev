@@ -34,6 +34,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -97,7 +98,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					}
 					
 				});
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -125,7 +126,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			
 		});
 		
-		content.add(new AjaxLink<Void>("findOccurrences") {
+		content.add(new PreventDefaultAjaxLink<Void>("findOccurrences") {
 
 			private RunTaskBehavior runTaskBehavior;
 			

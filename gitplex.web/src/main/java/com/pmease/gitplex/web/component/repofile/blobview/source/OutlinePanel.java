@@ -19,6 +19,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.pmease.commons.lang.extractors.Symbol;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
 abstract class OutlinePanel extends Panel {
@@ -85,7 +86,7 @@ abstract class OutlinePanel extends Panel {
 				
 				fragment.add(new Image("icon", symbol.getIcon()));
 				
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {

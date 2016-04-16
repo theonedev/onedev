@@ -11,7 +11,6 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -32,6 +31,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.BlobIcon;
 
@@ -134,7 +134,7 @@ public abstract class PathSelector extends Panel {
 				WebMarkupContainer link;
 				
 				if (pathTypes.contains(blobIdent.mode & FileMode.TYPE_MASK)) {
-					link = new AjaxLink<Void>("link") {
+					link = new PreventDefaultAjaxLink<Void>("link") {
 	
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {

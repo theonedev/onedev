@@ -1,6 +1,9 @@
 package com.pmease.gitplex.web.page.test;
 
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 
 import com.pmease.gitplex.web.page.base.BasePage;
 
@@ -11,11 +14,23 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Link<Void>("test") {
+		add(new AjaxLink<Void>("test") {
 
 			@Override
-			public void onClick() {
-				System.out.println("hello");
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setPreventDefault(true);
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(AttributeAppender.replace("href", "http://www.baidu.com"));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				System.out.println("hello world");
 			}
 
 		});

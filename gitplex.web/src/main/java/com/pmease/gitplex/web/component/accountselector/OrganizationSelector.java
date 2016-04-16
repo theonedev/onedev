@@ -21,6 +21,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
@@ -87,7 +88,7 @@ public abstract class OrganizationSelector extends GenericPanel<Account> {
 			@Override
 			protected void populateItem(ListItem<Account> item) {
 				Account organization = item.getModelObject();
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {

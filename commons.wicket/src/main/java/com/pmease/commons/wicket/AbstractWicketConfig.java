@@ -11,12 +11,15 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.core.request.mapper.HomePageMapper;
 import org.apache.wicket.markup.html.pages.AbstractErrorPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.ws.WebSocketSettings;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.WebSocketResponse;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.request.mapper.info.PageComponentInfo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.bootstrap.Bootstrap;
@@ -110,6 +113,17 @@ public abstract class AbstractWicketConfig extends WebApplication {
 			}
 			
 		});
+		
+		mount(new HomePageMapper(getHomePage()) {
+
+			@Override
+			protected void encodePageComponentInfo(Url url, PageComponentInfo info) {
+				if (info.getComponentInfo() != null)
+					super.encodePageComponentInfo(url, info);
+			}
+			
+		});
+		
 		// getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 	}
 	

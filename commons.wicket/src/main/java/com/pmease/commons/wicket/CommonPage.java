@@ -109,11 +109,6 @@ public abstract class CommonPage extends WebPage {
 		partialPageRequestHandler.prependJavaScript(String.format("pmease.commons.history.pushState('%s', '%s');", encodedData, url));
 	}
 	
-	public void replaceState(AjaxRequestTarget target, String url, Serializable data) {
-		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
-		target.prependJavaScript(String.format("pmease.commons.history.replaceState('%s', '%s');", encodedData, url));
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

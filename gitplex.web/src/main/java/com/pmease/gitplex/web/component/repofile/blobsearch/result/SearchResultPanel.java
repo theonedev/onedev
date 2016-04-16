@@ -32,6 +32,7 @@ import org.eclipse.jgit.lib.FileMode;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -391,7 +392,7 @@ public abstract class SearchResultPanel extends Panel {
 					
 				});
 				
-				blobItem.add(new AjaxLink<Void>("blobLink") {
+				blobItem.add(new PreventDefaultAjaxLink<Void>("blobLink") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -447,7 +448,7 @@ public abstract class SearchResultPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<QueryHit> hitItem) {
 						final QueryHit hit = hitItem.getModelObject();
-						hitItem.add(new AjaxLink<Void>("hitLink") {
+						hitItem.add(new PreventDefaultAjaxLink<Void>("hitLink") {
 
 							@Override
 							protected void onInitialize() {
