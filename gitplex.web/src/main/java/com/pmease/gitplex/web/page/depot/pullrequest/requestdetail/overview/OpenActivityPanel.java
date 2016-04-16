@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -19,6 +18,7 @@ import org.hibernate.StaleObjectStateException;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -118,7 +118,7 @@ class OpenActivityPanel extends AbstractActivityPanel {
 						Model.of(requestModel.getObject().getDescription()));
 				form.add(input);
 				
-				form.add(new AjaxSubmitLink("save") {
+				form.add(new SubmitTypeAjaxSubmitLink("save") {
 
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {

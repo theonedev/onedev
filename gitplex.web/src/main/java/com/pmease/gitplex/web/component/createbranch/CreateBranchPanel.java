@@ -2,7 +2,6 @@ package com.pmease.gitplex.web.component.createbranch;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -14,6 +13,7 @@ import org.eclipse.jgit.lib.Repository;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
@@ -64,7 +64,7 @@ abstract class CreateBranchPanel extends Panel {
 		}));
 		nameInput.setOutputMarkupId(true);
 		
-		form.add(new AjaxButton("create") {
+		form.add(new SubmitTypeAjaxButton("create") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

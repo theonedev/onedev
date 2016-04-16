@@ -32,6 +32,8 @@ public class CommentReply extends AbstractEntity {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private String content;
+	
+	private String contextCommit;
 
 	public long getVersion() {
 		return version;
@@ -72,6 +74,20 @@ public class CommentReply extends AbstractEntity {
 
 	public void setComment(Comment comment) {
 		this.comment = comment;
+	}
+
+	/**
+	 * @return the contextCommit
+	 */
+	public String getContextCommit() {
+		return contextCommit;
+	}
+
+	/**
+	 * @param contextCommit the contextCommit to set
+	 */
+	public void setContextCommit(String contextCommit) {
+		this.contextCommit = contextCommit;
 	}
 
 }

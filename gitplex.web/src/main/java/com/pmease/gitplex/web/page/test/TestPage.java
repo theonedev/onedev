@@ -1,39 +1,58 @@
 package com.pmease.gitplex.web.page.test;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.IModel;
 
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
+	private String name;
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AjaxLink<Void>("test") {
+		Form<Void> form = new Form<Void>("form") {
 
 			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.setPreventDefault(true);
+			protected void onSubmit() {
+				super.onSubmit();
+				System.out.println("form submit: " + name);
+			}
+			
+		};
+		form.add(new TextField<String>("name", new IModel<String>() {
+
+			@Override
+			public void detach() {
 			}
 
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(AttributeAppender.replace("href", "http://www.baidu.com"));
+			public String getObject() {
+				return name;
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				System.out.println("hello world");
+			public void setObject(String object) {
+				name = object;
 			}
+			
+		}));
+		form.add(new AjaxSubmitLink("save") {
 
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				System.out.println("button submit: " + name);
+			}
+			
 		});
+		add(form);
 	}
 
 }

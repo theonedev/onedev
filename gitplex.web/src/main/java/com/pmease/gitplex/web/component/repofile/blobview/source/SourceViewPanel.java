@@ -8,28 +8,15 @@ import javax.servlet.http.Cookie;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
@@ -48,29 +35,19 @@ import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.ExtractException;
 import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
-import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.util.Range;
-import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.web.component.comment.CommentInput;
-import com.pmease.gitplex.web.component.comment.InlineCommentPanel;
-import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
-import com.pmease.gitplex.web.component.comment.event.CommentResized;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewPanel;
@@ -79,8 +56,6 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.Mark;
 import com.pmease.gitplex.web.util.DateUtils;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {
 
@@ -88,45 +63,15 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private static final String COOKIE_OUTLINE = "sourceView.outline";
 	
-	private static final String INLINE_COMMENT_ID = "inlineComment";
-	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
 	private final String viewState;
-	
-	private final IModel<List<Comment>> commentsModel = new LoadableDetachableModel<List<Comment>>() {
-
-		@Override
-		protected List<Comment> load() {
-			List<Comment> comments = new ArrayList<>();
-			PullRequest request = context.getPullRequest();
-			if (request != null) {
-				for (Comment comment: request.getComments()) {
-					if (comment.getInlineInfo() != null) {
-						GitPlex.getInstance(CommentManager.class).updateInlineInfo(comment);
-						BlobIdent blobIdent = comment.getBlobIdent();
-						if (blobIdent.equals(context.getBlobIdent()))
-							comments.add(comment);
-					}
-				}
-				comments.sort((comment1, comment2) -> comment1.getDate().compareTo(comment2.getDate()));
-			}
-			return comments;
-		}
-		
-	};	
 	
 	private Component codeContainer;
 	
 	private OutlinePanel outlinePanel;
 
 	private SymbolTooltipPanel symbolTooltip;
-	
-	private RepeatingView newCommentForms;
-	
-	private RepeatingView commentWidgets;
-	
-	private AbstractDefaultAjaxBehavior addCommentBehavior;
 	
 	public SourceViewPanel(String id, BlobViewContext context, @Nullable String viewState) {
 		super(id, context);
@@ -261,114 +206,6 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		});
 
-		add(newCommentForms = new RepeatingView("newComments"));
-		
-		commentWidgets = new RepeatingView("comments");
-		
-		for (Comment comment: commentsModel.getObject())
-			commentWidgets.add(newCommentWidget(commentWidgets.newChildId(), comment));
-		
-		add(commentWidgets);
-		
-		if (context.getPullRequest() != null) {
-			add(addCommentBehavior = new AbstractDefaultAjaxBehavior() {
-				
-				@Override
-				protected void respond(AjaxRequestTarget target) {
-					IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-					final int lineNo = params.getParameterValue("lineNo").toInt();
-					
-					final Form<?> newCommentForm = new Form<Void>(newCommentForms.newChildId());
-					newCommentForm.setOutputMarkupId(true);
-					
-					final CommentInput input;
-					newCommentForm.add(input = new CommentInput("input", new AbstractReadOnlyModel<PullRequest>() {
-
-						@Override
-						public PullRequest getObject() {
-							return context.getPullRequest();
-						}
-						
-					}, Model.of("")));
-					input.setRequired(true);
-					
-					final NotificationPanel feedback = new NotificationPanel("feedback", input); 
-					feedback.setOutputMarkupPlaceholderTag(true);
-					newCommentForm.add(feedback);
-					
-					newCommentForm.add(new AjaxLink<Void>("cancel") {
-	
-						@Override
-						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(newCommentForm));
-						}
-						
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							newCommentForm.remove();
-							String script = String.format("$('#%s').parent()[0].lineWidget.clear();", newCommentForm.getMarkupId());
-							target.appendJavaScript(script);
-						}
-						
-					});
-					
-					newCommentForm.add(new AjaxSubmitLink("save") {
-	
-						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
-							target.add(feedback);
-						}
-	
-						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
-							
-							BlobIdent commentAt = context.getBlobIdent();
-							BlobIdent compareWith = context.getBlobIdent();
-							
-							Comment comment;
-							InheritableThreadLocalData.set(new WebSocketRenderBehavior.PageId(getPage().getPageId()));
-							try {
-								comment = GitPlex.getInstance(CommentManager.class).addInline(
-										context.getPullRequest(), commentAt, compareWith, lineNo, input.getModelObject());
-							} finally {
-								InheritableThreadLocalData.clear();
-							}
-							
-	 						Component commentWidget = newCommentWidget(commentWidgets.newChildId(), comment);
-							commentWidgets.add(commentWidget);
-							
-	 						Component wrapper = commentWidget.get(INLINE_COMMENT_ID);
-							wrapper.setMarkupId(newCommentForm.getMarkupId());
-							newCommentForm.remove();
-							target.add(wrapper);
-							
-							String script = String.format(""
-									+ "var $comment = $('#%s').parent();"
-									+ "$comment.attr('id', '%s'); "
-									+ "gitplex.sourceview.commentResized($comment);", 
-									wrapper.getMarkupId(), commentWidget.getMarkupId());
-							target.appendJavaScript(script);
-						}
-	
-					});
-					
-					newCommentForms.add(newCommentForm);
-					
-					String script = String.format("gitplex.sourceview.placeComment('%s', %d, '%s');", 
-							codeContainer.getMarkupId(), lineNo, newCommentForm.getMarkupId());
-					target.prependJavaScript(script);
-					
-					target.add(newCommentForm);
-					script = String.format("gitplex.sourceview.commentResized($('#%s').parent());", 
-							newCommentForm.getMarkupId());
-					target.appendJavaScript(script);
-				}
-				
-			});		
-		}
 		setOutputMarkupId(true);
 	}
 	
@@ -415,12 +252,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			blameCommitsJson = "undefined";
 		}
 		
-		CharSequence addCommentCallback;
-		if (addCommentBehavior != null) 
-			addCommentCallback = addCommentBehavior.getCallbackFunction(CallbackParameter.explicit("lineNo"));
-		else
-			addCommentCallback = "undefined";
-		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %d, %s, %s);", 
+		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %s);", 
 				codeContainer.getMarkupId(), 
 				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
 				context.getBlobIdent().path, 
@@ -428,56 +260,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
 				blameCommitsJson, 
-				context.getComment()!=null?context.getComment().getId():-1,
-				addCommentCallback, 
 				viewState!=null?"JSON.parse('"+viewState+"')":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
-	}
-
-	private Component newCommentWidget(String id, Comment comment) {
-		final Long commentId = comment.getId();
-		final WebMarkupContainer widget = new WebMarkupContainer(id) {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				
-				if (event.getPayload() instanceof CommentRemoved) {
-					CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-					commentWidgets.remove(this);
-					String script = String.format("document.getElementById('%s').lineWidget.clear();", getMarkupId());
-					commentRemoved.getPartialPageRequestHandler().appendJavaScript(script);
-					
-					send(SourceViewPanel.this, Broadcast.BUBBLE, commentRemoved);
-				} else if (event.getPayload() instanceof CommentResized) {
-					CommentResized commentResized = (CommentResized) event.getPayload();
-					String script = String.format("gitplex.sourceview.commentResized('%s');", getMarkupId());
-					commentResized.getPartialPageRequestHandler().appendJavaScript(script);
-				} 
-			}
-
-		};
-		
-		widget.add(new InlineCommentPanel(INLINE_COMMENT_ID, new LoadableDetachableModel<Comment>() {
-
-			@Override
-			protected Comment load() {
-				return GitPlex.getInstance(Dao.class).load(Comment.class, commentId);
-			}
-			
-		}));
-		
-		widget.add(AttributeAppender.append("data-lineNo", comment.getLine()));
-		widget.setMarkupId("pullrequest-comment-" + commentId);
-		widget.setOutputMarkupId(true);
-		
-		return widget;
-	}
-	
-	@Override
-	protected void onDetach() {
-		commentsModel.detach();
-		super.onDetach();
 	}
 
 	@SuppressWarnings("unused")

@@ -35,7 +35,9 @@ public class InlineInfo implements Serializable {
 	
 	// Use Integer instead of int here in order to allow this class to be 
 	// embedded as nullable property of JPA entities 
-	private Integer line;
+	private Integer beginLine;
+	
+	private Integer endLine;
 
 	public BlobIdent getBlobIdent() {
 		return blobIdent;
@@ -53,12 +55,20 @@ public class InlineInfo implements Serializable {
 		this.compareWith = compareWith;
 	}
 
-	public int getLine() {
-		return line;
+	public Integer getBeginLine() {
+		return beginLine;
 	}
 
-	public void setLine(int line) {
-		this.line = line;
+	public void setBeginLine(Integer beginLine) {
+		this.beginLine = beginLine;
+	}
+
+	public Integer getEndLine() {
+		return endLine;
+	}
+
+	public void setEndLine(Integer endLine) {
+		this.endLine = endLine;
 	}
 
 }

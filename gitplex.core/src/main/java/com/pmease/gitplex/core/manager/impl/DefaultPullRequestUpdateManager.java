@@ -6,11 +6,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.pmease.commons.hibernate.Transactional;
-import com.pmease.commons.hibernate.UnitOfWork;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.listener.PullRequestListener;
@@ -25,20 +23,13 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityDao<PullReque
 	
 	private final Set<PullRequestListener> pullRequestListeners;
 	
-	private final CommentManager commentManager;
-	
-	private final UnitOfWork unitOfWork;
-	
 	@Inject
-	public DefaultPullRequestUpdateManager(Dao dao, 
-			StorageManager storageManager, Set<PullRequestListener> pullRequestListeners, 
-			UnitOfWork unitOfWork, CommentManager commentManager) {
+	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
+			Set<PullRequestListener> pullRequestListeners, CommentManager commentManager) {
 		super(dao);
 		
 		this.storageManager = storageManager;
 		this.pullRequestListeners = pullRequestListeners;
-		this.unitOfWork = unitOfWork;
-		this.commentManager = commentManager;
 	}
 
 	@Transactional
@@ -65,28 +56,6 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityDao<PullReque
 				listener.onUpdated(update);
 		}
 
-		// Inline comment update can be time consuming and we do it inside a separate thread 
-		// in order not to blocking the push operation
-		final Long requestId = request.getId();
-		afterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				unitOfWork.asyncCall(new Runnable() {
-
-					@Override
-					public void run() {
-						PullRequest request = dao.load(PullRequest.class, requestId);
-						for (Comment comment: request.getComments()) {
-							if (comment.getInlineInfo() != null)
-								commentManager.updateInlineInfo(comment);
-						}
-					}
-					
-				});
-			}
-			
-		});
 	}
 
 	@Transactional

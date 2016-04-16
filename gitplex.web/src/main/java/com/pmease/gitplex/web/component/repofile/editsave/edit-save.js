@@ -27,7 +27,7 @@ gitplex.editsave = {
 	}, 
 	
 	updateSubmitBtnState: function($editSave) {
-		var $submitBtn = $editSave.find("input[type=submit]");
+		var $submitBtn = $editSave.find("input.btn-primary");
 		if ($editSave.data("contentChanged") === true || $editSave.data("pathChanged") === true)
 			$submitBtn.removeAttr("disabled");
 		else

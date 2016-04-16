@@ -10,7 +10,6 @@ import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
@@ -35,12 +34,9 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
@@ -52,7 +48,6 @@ import com.pmease.gitplex.core.entity.PullRequestWatch;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -137,7 +132,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 		if (row.get(DETAIL_ID) == null) 
 			row.add(activity.render(DETAIL_ID));
 		
-		if (activity instanceof OpenPullRequest || activity instanceof CommentPullRequest)
+		if (activity instanceof OpenPullRequest)
 			row.add(AttributeAppender.append("class", " discussion"));
 		else
 			row.add(AttributeAppender.append("class", " non-discussion"));
@@ -177,9 +172,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		for (PullRequestUpdate update: request.getUpdates())
 			renderableActivities.add(new UpdatePullRequest(update));
 		
-		for (Comment comment: request.getComments()) 
-			renderableActivities.add(new CommentPullRequest(comment));
-		
 		for (PullRequestReference reference: request.getReferencedBy()) {
 			renderableActivities.add(new ReferencePullRequest(request, reference.getUser(), 
 					reference.getDate(), reference.getReferencedBy()));
@@ -214,7 +206,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 				return -1;
 			else if (o1.getDate().after(o2.getDate()))
 				return 1;
-			else if (o1 instanceof OpenPullRequest || o1 instanceof CommentPullRequest)
+			else if (o1 instanceof OpenPullRequest)
 				return -1;
 			else
 				return 1;
@@ -325,45 +317,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		form.add(input);
 		
 		form.add(new NotificationPanel("feedback", input));
-		
-		form.add(new AjaxSubmitLink("comment") {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-
-				Comment comment = new Comment();
-				comment.setRequest(getPullRequest());
-				comment.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-				comment.setContent(input.getModelObject());
-				InheritableThreadLocalData.set(new PageId(getPage().getPageId()));
-				try {
-					GitPlex.getInstance(CommentManager.class).save(comment, true);
-				} finally {
-					InheritableThreadLocalData.clear();
-				}
-				input.setModelObject("");
-				
-				target.add(addComment);
-				
-				@SuppressWarnings("deprecation")
-				Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-				Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentPullRequest(comment)); 
-				activitiesView.add(newActivityRow);
-				
-				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-						newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
-				target.prependJavaScript(script);
-				target.add(newActivityRow);
-			}
-
-			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
-				target.add(form);
-			}
-
-		});
 		
 		add(newIntegrationStrategyContainer());
 		add(newAssigneeContainer());

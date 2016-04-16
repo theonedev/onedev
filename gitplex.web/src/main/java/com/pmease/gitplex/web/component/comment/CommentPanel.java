@@ -10,7 +10,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
@@ -36,6 +35,7 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
+import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
@@ -215,7 +215,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				form.add(input);
 
 				final long lastVersion = getComment().getVersion();
-				form.add(new AjaxSubmitLink("save") {
+				form.add(new SubmitTypeAjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -388,7 +388,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				form.add(input);
 
 				final int pageId = getPage().getPageId();
-				form.add(new AjaxSubmitLink("save") {
+				form.add(new SubmitTypeAjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -516,7 +516,7 @@ public class CommentPanel extends GenericPanel<Comment> {
 				form.add(input);
 				
 				final long lastVersion = reply.getVersion();
-				form.add(new AjaxSubmitLink("save") {
+				form.add(new SubmitTypeAjaxSubmitLink("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

@@ -183,14 +183,24 @@ public class Comment extends AbstractEntity {
 		oldAndNew = null;
 	}
 
-	public int getLine() {
-		return Preconditions.checkNotNull(inlineInfo).getLine();
+	public int getBeginLine() {
+		return Preconditions.checkNotNull(inlineInfo).getBeginLine();
 	}
 
-	public void setLine(int line) {
+	public void setBeginLine(int beginLine) {
 		if (inlineInfo == null)
 			inlineInfo = new InlineInfo();
-		inlineInfo.setLine(line);
+		inlineInfo.setBeginLine(beginLine);
+	}
+	
+	public int getEndLine() {
+		return Preconditions.checkNotNull(inlineInfo).getEndLine();
+	}
+
+	public void setEndLine(int endLine) {
+		if (inlineInfo == null)
+			inlineInfo = new InlineInfo();
+		inlineInfo.setEndLine(endLine);
 	}
 	
 	public Date getLastVisitDate() {

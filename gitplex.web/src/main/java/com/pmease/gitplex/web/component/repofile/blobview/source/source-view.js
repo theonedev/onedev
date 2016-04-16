@@ -1,6 +1,5 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, mark, symbolTooltipId, revision, 
-			blameCommits, commentId, addCommentCallback, viewState) {
+	init: function(codeId, fileContent, filePath, mark, symbolTooltipId, revision, blameCommits, viewState) {
 		var cm;
 		
 		var $code = $("#" + codeId);
@@ -54,22 +53,6 @@ gitplex.sourceview = {
 
 				cm = CodeMirror($code[0], options);
 				
-				if (addCommentCallback) {
-					$code[0].addCommentCallback = addCommentCallback;
-					var gutter = "CodeMirror-addcomments";
-					var gutters = cm.getOption("gutters").slice();
-					gutters.push(gutter);
-					cm.setOption("gutters", gutters);
-					for (var line=0; line<cm.lineCount(); line++) {
-		    			var $ele = $(document.createElement("div"));
-		    			$ele.addClass("CodeMirror-addcomment");
-		    			$ele.attr("title", "Add inline comment");
-		    			var script = "document.getElementById(\"" + codeId + "\").addCommentCallback(" + line + ");";
-		        		$("<a href='javascript: " + script + "'><i class='fa fa-plus-square-o'></i></a>").appendTo($ele);
-						cm.setGutterMarker(line, gutter, $ele[0]);
-					}
-				}
-
 				pmease.commons.codemirror.setMode(cm, filePath);
 
 			    if (mark)
@@ -83,18 +66,6 @@ gitplex.sourceview = {
 			    	}, 10);
 			    }
 
-			    $sourceView.find(">.comment").each(function() {
-					var lineNo = $(this).data("lineno");
-					gitplex.sourceview.placeComment(cm, lineNo, this);
-				});
-			    if (commentId != -1) {
-			    	$comment = $("#pullrequest-comment-" + commentId);
-			    	var lineNo = $comment.data("lineno");
-					pmease.commons.codemirror.centerLine(cm, lineNo);
-			    	cm.setCursor(lineNo);
-			    	setTimeout(function() {$comment.find(">div").focus();}, 10);
-			    }
-			    
 			    $code.mouseover(function(e) {
 					var node = e.target || e.srcElement, $node = $(node);
 					if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
@@ -113,35 +84,6 @@ gitplex.sourceview = {
 	mark: function(codeId, mark) {
 		var cm = $("#"+ codeId + ">.CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.mark(cm, mark);
-	},
-	
-	placeComment: function(cm, lineNo, comment) {
-		if (typeof cm === "string") 
-			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
-		if (typeof comment === "string")
-			comment = $("<div class='comment'><div id='" + comment + "'></div></div>")[0];
-		comment.lineWidget = cm.addLineWidget(lineNo, comment, {coverGutter: true});
-	},
-	
-	commentResized: function($comment) {
-		if (typeof $comment === "string") 
-			$comment = $("#" + $comment);
-		$comment[0].lineWidget.changed();
-		var $wrapper = $comment.find(">div");
-		$wrapper.on("resized", function() {
-			$comment[0].lineWidget.changed();
-		});
-		$wrapper.find("textarea").on("autosize:resized", function(){
-			$comment[0].lineWidget.changed();
-		});
-		$wrapper.on("fullscreen", function() {
-			// full screen mode is abnormal if we do not do this
-			$("body").append($wrapper);
-		});
-		$wrapper.on("exitFullscreen", function() {
-			$comment.append($wrapper);
-			$comment[0].lineWidget.changed();
-		});
 	},
 	
 	blame: function(cm, blameCommits) {

@@ -52,7 +52,6 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.commons.wicket.component.modal.ModalLink;
@@ -89,8 +88,6 @@ import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.websocket.PullRequestChangeRenderer;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIJavaScriptReference;
 
 @SuppressWarnings("serial")
@@ -162,8 +159,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private Mark mark;
 	
 	private Mode mode;
-	
-	private Component commentContext;
 	
 	private Component revisionIndexing;
 	
@@ -326,37 +321,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		});
 		
 		newRevisionPicker(null);
-		
-		add(commentContext = new WebMarkupContainer("commentContext") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(getPullRequest() != null);
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(new TooltipBehavior(new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						PullRequest request = getPullRequest();
-						String tooltip = String.format("Inline comments added/displayed in "
-								+ "this commit belong to pull request #%d (%s)", 
-								request.getId(), request.getTitle());
-						return tooltip;
-					}
-					
-				}, new TooltipConfig().withPlacement(Placement.bottom)));
-				
-				setOutputMarkupPlaceholderTag(true);
-			}
-
-		});
 		
 		newFileNavigator(null);
 		
@@ -723,8 +687,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		trait.commitId = getDepot().getRevCommit(blobIdent.revision).getId();
 
 		newRevisionPicker(target);
-		
-		target.add(commentContext);
 		
 		newFileNavigator(target);
 		

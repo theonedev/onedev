@@ -43,7 +43,7 @@ public abstract class DiffOptionPanel extends Panel {
 	
 	private final String newRev;
 	
-	private LineProcessor lineProcessor = LineProcessOption.IGNORE_NOTHING;
+	private LineProcessor lineProcessor = LineProcessOption.IGNORE_EOL_SPACES;
 	
 	private DiffMode diffMode;
 	
@@ -82,7 +82,7 @@ public abstract class DiffOptionPanel extends Panel {
 						@Override
 						public String getIconClass() {
 							if (lineProcessor == option)
-								return "fa fa-checked";
+								return "fa fa-check";
 							else
 								return null;
 						}

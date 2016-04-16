@@ -12,7 +12,6 @@ import org.apache.shiro.codec.Base64;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -41,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.RunTaskBehavior;
+import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
@@ -132,7 +132,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 
 		form.add(newSearchOptionEditor(option));
 		
-		form.add(new AjaxSubmitLink("search") {
+		form.add(new SubmitTypeAjaxSubmitLink("search") {
 
 			private RunTaskBehavior runTaskBehavior;
 			

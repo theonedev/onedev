@@ -30,7 +30,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -52,7 +51,6 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
-import com.pmease.gitplex.web.component.comment.InlineCommentLink;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
@@ -527,12 +525,6 @@ public class RequestComparePage extends RequestDetailPage {
 		}
 		noIntegrationPreviewAlert.setEscapeModelStrings(false);
 		compareHead.add(noIntegrationPreviewAlert);
-		
-		WebMarkupContainer noCommentContextAlert = new WebMarkupContainer("noCommentContextAlert");
-		noCommentContextAlert.setVisible(state.commentId != null && oldCommitHash.equals(newCommitHash));
-		noCommentContextAlert.add(new InlineCommentLink("link", commentModel, 
-				Model.of("Commented line is no longer in diff scope, click to display in file view.")));
-		compareHead.add(noCommentContextAlert);
 		
 		newCompareResult(null);
 	}
