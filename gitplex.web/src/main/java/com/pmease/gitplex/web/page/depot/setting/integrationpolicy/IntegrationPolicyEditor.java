@@ -2,10 +2,10 @@ package com.pmease.gitplex.web.page.depot.setting.integrationpolicy;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 
@@ -31,7 +31,7 @@ abstract class IntegrationPolicyEditor extends Panel {
 		Form<?> form = new Form<Void>("form");
 		form.add(new NotificationPanel("feedback", form));
 		form.add(BeanContext.editBean("editor", policy));
-		form.add(new SubmitTypeAjaxSubmitLink("save") {
+		form.add(new AjaxButton("save") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

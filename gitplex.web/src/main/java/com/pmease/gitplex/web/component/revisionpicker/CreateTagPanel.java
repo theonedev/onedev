@@ -2,12 +2,12 @@ package com.pmease.gitplex.web.component.revisionpicker;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
-import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -53,7 +53,7 @@ abstract class CreateTagPanel extends Panel {
 			}
 			
 		}));
-		form.add(new SubmitTypeAjaxButton("create") {
+		form.add(new AjaxButton("create") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

@@ -20,6 +20,7 @@ import org.apache.wicket.ajax.IAjaxIndicatorAware;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -54,7 +55,6 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -358,7 +358,7 @@ public class DepotBranchesPage extends DepotPage {
 				nameInput.setOutputMarkupId(true);
 				
 				form.add(newRevisionPicker());
-				form.add(new SubmitTypeAjaxButton("create") {
+				form.add(new AjaxButton("create") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

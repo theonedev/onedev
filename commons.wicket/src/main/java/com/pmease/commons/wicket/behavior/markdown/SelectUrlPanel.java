@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -29,8 +30,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Bytes;
-
-import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -82,7 +81,7 @@ class SelectUrlPanel extends Panel {
 		urlField.setOutputMarkupId(true);
 		urlForm.add(urlField);
 		
-		urlForm.add(new SubmitTypeAjaxButton("insert", urlForm) {
+		urlForm.add(new AjaxButton("insert", urlForm) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

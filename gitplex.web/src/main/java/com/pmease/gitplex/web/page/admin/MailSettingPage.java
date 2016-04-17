@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.admin;
 import java.io.Serializable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 import com.pmease.commons.wicket.behavior.testform.TestFormBehavior;
 import com.pmease.commons.wicket.behavior.testform.TestResult;
-import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.BeanEditor;
 import com.pmease.gitplex.core.GitPlex;
@@ -50,7 +50,7 @@ public class MailSettingPage extends AdministrationPage {
 		};
 		form.add(editor = BeanContext.editBean("editor", mailSetting));
 				
-		form.add(new SubmitTypeAjaxSubmitLink("test") {
+		form.add(new AjaxButton("test") {
 
 			private TestFormBehavior testBehavior;
 			

@@ -9,6 +9,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -43,7 +44,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.entity.Depot;
@@ -173,7 +173,7 @@ public class DepotTagsPage extends DepotPage {
 					
 				}));
 				form.add(newRevisionPicker());
-				form.add(new SubmitTypeAjaxButton("create") {
+				form.add(new AjaxButton("create") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

@@ -566,9 +566,20 @@
 			</snapshots>
 			<url>http://artifact.pmease.com/</url>
 		</repository>
+        <repository>
+          <id>apache-snapshots</id>
+          <name>Apache Snapshots</name>
+          <url>http://repository.apache.org/snapshots/</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
 		<repository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
+			<id>sonatype-snapshots</id>
+			<name>Sonatype Snapshots</name>
 			<url>http://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases>
 				<enabled>false</enabled>

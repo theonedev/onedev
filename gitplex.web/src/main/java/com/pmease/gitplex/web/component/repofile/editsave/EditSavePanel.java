@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -39,7 +40,6 @@ import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
-import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Comment;
@@ -200,7 +200,7 @@ public abstract class EditSavePanel extends Panel {
 			
 		}));
 		
-		form.add(new SubmitTypeAjaxSubmitLink("save") {
+		form.add(new AjaxButton("save") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {

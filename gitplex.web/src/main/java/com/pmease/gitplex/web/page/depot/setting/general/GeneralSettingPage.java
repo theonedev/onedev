@@ -8,13 +8,13 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.editable.BeanContext;
@@ -144,7 +144,7 @@ public class GeneralSettingPage extends DepotSettingPage {
 						
 						form.add(new FencedFeedbackPanel("feedback", form));
 						
-						form.add(new SubmitTypeAjaxButton("transfer") {
+						form.add(new AjaxButton("transfer") {
 
 							@Override
 							protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

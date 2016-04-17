@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.depot.setting.gatekeeper;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -10,7 +11,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.EditableUtils;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
@@ -52,7 +52,7 @@ abstract class GateKeeperEditor extends Panel {
 			
 		});
 		
-		form.add(new SubmitTypeAjaxSubmitLink("save") {
+		form.add(new AjaxButton("save") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

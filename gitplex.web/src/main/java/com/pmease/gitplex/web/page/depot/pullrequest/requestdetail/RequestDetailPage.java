@@ -25,6 +25,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
@@ -52,7 +53,6 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
 import com.pmease.commons.wicket.component.tabbable.PageTabLink;
@@ -197,7 +197,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			
 		}));
 		
-		form.add(new SubmitTypeAjaxButton("save") {
+		form.add(new AjaxButton("save") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -688,7 +688,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 		}
 		form.add(new NotificationPanel("feedback", form));
-		form.add(new SubmitTypeAjaxButton("submit") {
+		form.add(new AjaxButton("submit") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

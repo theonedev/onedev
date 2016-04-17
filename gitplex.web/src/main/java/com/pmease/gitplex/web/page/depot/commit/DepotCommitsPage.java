@@ -15,6 +15,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -46,7 +47,6 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
-import com.pmease.commons.wicket.component.SubmitTypeAjaxButton;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
@@ -227,7 +227,7 @@ public class DepotCommitsPage extends DepotPage {
 			
 		}).add(new QueryAssistBehavior(depotModel)));
 		
-		queryForm.add(new SubmitTypeAjaxButton("submit") {});
+		queryForm.add(new AjaxButton("submit") {});
 		queryForm.setOutputMarkupId(true);
 		add(queryForm);
 		

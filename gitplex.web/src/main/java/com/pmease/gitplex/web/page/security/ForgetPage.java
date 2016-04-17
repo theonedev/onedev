@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.pmease.commons.wicket.behavior.testform.TestFormBehavior;
 import com.pmease.commons.wicket.behavior.testform.TestResult;
-import com.pmease.commons.wicket.component.SubmitTypeAjaxSubmitLink;
 import com.pmease.commons.wicket.editable.BeanContext;
 import com.pmease.commons.wicket.editable.annotation.Editable;
 import com.pmease.gitplex.core.GitPlex;
@@ -41,7 +41,7 @@ public class ForgetPage extends BasePage {
 		form.add(new NotificationPanel("feedback", form));		
 		form.add(BeanContext.editBean("editor", bean));
 		
-		form.add(new SubmitTypeAjaxSubmitLink("reset") {
+		form.add(new AjaxButton("reset") {
 			private TestFormBehavior testBehavior;
 			
 			@Override
