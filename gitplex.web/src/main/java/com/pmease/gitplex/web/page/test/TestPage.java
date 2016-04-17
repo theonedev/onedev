@@ -1,58 +1,74 @@
 package com.pmease.gitplex.web.page.test;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.repeater.RepeatingView;
 
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
-	private String name;
+	private RepeatingView rows;
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		Form<Void> form = new Form<Void>("form") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				System.out.println("form submit: " + name);
-			}
-			
-		};
-		form.add(new TextField<String>("name", new IModel<String>() {
+		
+		rows = new RepeatingView("rows");
+		for (int i=0; i<10000; i++) {
+			rows.add(newRow(rows.newChildId()));
+		}
+		add(rows);
+		
+		add(new AjaxLink<Void>("expand") {
 
 			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return name;
-			}
-
-			@Override
-			public void setObject(String object) {
-				name = object;
-			}
-			
-		}));
-		form.add(new AjaxSubmitLink("save") {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				System.out.println("button submit: " + name);
+			public void onClick(AjaxRequestTarget target) {
+				StringBuilder builder = new StringBuilder();
+				for (int i=0; i<10; i++) {
+					String time = String.valueOf(System.currentTimeMillis());
+					builder.append(String.format(""
+							+ "<tr id='%s'>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "<td>%s</td>"
+							+ "</tr>", 
+							time, time, time, time, time, time, time, time, time, time, time, time, time));
+				}
+				target.appendJavaScript(String.format("$('table').append(\"%s\");", builder.toString()));
 			}
 			
 		});
-		add(form);
 	}
 
+	private Component newRow(String id) {
+		WebMarkupContainer row = new WebMarkupContainer(id);
+		row.add(new Label("column1", System.currentTimeMillis()));
+		row.add(new Label("column2", System.currentTimeMillis()));
+		row.add(new Label("column3", System.currentTimeMillis()));
+		row.add(new Label("column4", System.currentTimeMillis()));
+		row.add(new Label("column5", System.currentTimeMillis()));
+		row.add(new Label("column6", System.currentTimeMillis()));
+		row.add(new Label("column7", System.currentTimeMillis()));
+		row.add(new Label("column8", System.currentTimeMillis()));
+		row.add(new Label("column9", System.currentTimeMillis()));
+		row.add(new Label("column10", System.currentTimeMillis()));
+		row.add(new Label("column11", System.currentTimeMillis()));
+		row.add(new Label("column12", System.currentTimeMillis()));
+		row.setOutputMarkupId(true);
+		return row;
+	}
 }
