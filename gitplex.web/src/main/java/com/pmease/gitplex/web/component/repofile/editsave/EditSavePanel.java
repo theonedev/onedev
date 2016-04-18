@@ -221,84 +221,83 @@ public abstract class EditSavePanel extends Panel {
 					EditSavePanel.this.error("Please specify file name.");
 					target.add(feedback);
 				} else {
-					try (Repository repository = depotModel.getObject().openRepository()) {
-						String commitMessage = summaryCommitMessage;
-						if (StringUtils.isBlank(commitMessage))
-							commitMessage = getDefaultCommitMessage();
-						if (StringUtils.isNotBlank(detailCommitMessage))
-							commitMessage += "\n\n" + detailCommitMessage;
-						Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).getCurrent());
+					String commitMessage = summaryCommitMessage;
+					if (StringUtils.isBlank(commitMessage))
+						commitMessage = getDefaultCommitMessage();
+					if (StringUtils.isNotBlank(detailCommitMessage))
+						commitMessage += "\n\n" + detailCommitMessage;
+					Account user = Preconditions.checkNotNull(GitPlex.getInstance(AccountManager.class).getCurrent());
 
-						ObjectId newCommitId = null;
-						while(newCommitId == null) {
-							try {
-								newCommitId = fileEdit.commit(repository, refName, 
-										prevCommitId, prevCommitId, user.asPerson(), commitMessage);
-							} catch (ObsoleteCommitException e) {
-								currentCommitId = e.getOldCommitId();
-								try (RevWalk revWalk = new RevWalk(repository)) {
-									RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
-									RevCommit currentCommit = revWalk.parseCommit(currentCommitId);
-									prevCommitId = currentCommitId;
+					Repository repository = depotModel.getObject().getRepository();
+					ObjectId newCommitId = null;
+					while(newCommitId == null) {
+						try {
+							newCommitId = fileEdit.commit(repository, refName, 
+									prevCommitId, prevCommitId, user.asPerson(), commitMessage);
+						} catch (ObsoleteCommitException e) {
+							currentCommitId = e.getOldCommitId();
+							try (RevWalk revWalk = new RevWalk(repository)) {
+								RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
+								RevCommit currentCommit = revWalk.parseCommit(currentCommitId);
+								prevCommitId = currentCommitId;
 
-									String oldPath = fileEdit.getOldPath();
-									if (oldPath != null) {
-										TreeWalk treeWalk = TreeWalk.forPath(repository, oldPath, 
-												prevCommit.getTree().getId(), currentCommit.getTree().getId());
-										if (treeWalk != null) {
-											if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
-													|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
-												// mark changed if original file exists and content or mode has been modified
-												// by others
-												if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-													if (newFile != null) {
-														fileEdit = new FileEdit(null, newFile);
-														change = getChange(treeWalk, prevCommit, currentCommit);
-														break;
-													} else {
-														newCommitId = currentCommitId;
-														break;
-													}
-												} else {
+								String oldPath = fileEdit.getOldPath();
+								if (oldPath != null) {
+									TreeWalk treeWalk = TreeWalk.forPath(repository, oldPath, 
+											prevCommit.getTree().getId(), currentCommit.getTree().getId());
+									if (treeWalk != null) {
+										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
+												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
+											// mark changed if original file exists and content or mode has been modified
+											// by others
+											if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
+												if (newFile != null) {
+													fileEdit = new FileEdit(null, newFile);
 													change = getChange(treeWalk, prevCommit, currentCommit);
 													break;
+												} else {
+													newCommitId = currentCommitId;
+													break;
 												}
-											}
-										}
-									}
-									if (newFile != null && !newFile.getPath().equals(oldPath)) { 
-										TreeWalk treeWalk = TreeWalk.forPath(repository, newFile.getPath(), 
-												prevCommit.getTree().getId(), currentCommit.getTree().getId());
-										if (treeWalk != null) {
-											if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
-													|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
-												// if added/renamed file exists and content or mode has been modified 
-												// by others
+											} else {
 												change = getChange(treeWalk, prevCommit, currentCommit);
 												break;
 											}
 										}
-									} 
-								} catch (IOException e2) {
-									throw new RuntimeException(e2);
+									}
 								}
-							} catch (ObjectAlreadyExistException e) {
-								EditSavePanel.this.error("A file with same name already exists. "
-										+ "Please choose a different name and try again.");
-								target.add(feedback);
-								break;
-							} catch (NotTreeException e) {
-								EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
-										+ "Choose a new path and try again..");
-								target.add(feedback);
-								break;
+								if (newFile != null && !newFile.getPath().equals(oldPath)) { 
+									TreeWalk treeWalk = TreeWalk.forPath(repository, newFile.getPath(), 
+											prevCommit.getTree().getId(), currentCommit.getTree().getId());
+									if (treeWalk != null) {
+										if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
+												|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
+											// if added/renamed file exists and content or mode has been modified 
+											// by others
+											change = getChange(treeWalk, prevCommit, currentCommit);
+											break;
+										}
+									}
+								} 
+							} catch (IOException e2) {
+								throw new RuntimeException(e2);
 							}
+						} catch (ObjectAlreadyExistException e) {
+							EditSavePanel.this.error("A file with same name already exists. "
+									+ "Please choose a different name and try again.");
+							target.add(feedback);
+							break;
+						} catch (NotTreeException e) {
+							EditSavePanel.this.error("A file exists where you’re trying to create a subdirectory. "
+									+ "Choose a new path and try again..");
+							target.add(feedback);
+							break;
 						}
-						if (newCommitId != null)
-							onCommitted(target, prevCommitId, newCommitId);
-						else
-							newChangedContainer(target);
 					}
+					if (newCommitId != null)
+						onCommitted(target, prevCommitId, newCommitId);
+					else
+						newChangedContainer(target);
 				}
 			}
 			

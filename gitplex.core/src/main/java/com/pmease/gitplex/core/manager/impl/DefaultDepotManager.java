@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -16,7 +18,9 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +80,9 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	private final BiMap<Pair<Long, String>, Long> nameToId = HashBiMap.create();
 	
 	private final ReadWriteLock idLock = new ReentrantReadWriteLock();
-    
+	
+	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
+	
     @Inject
     public DefaultDepotManager(Dao dao, AccountManager userManager, 
     		TeamAuthorizationManager teamAuthorizationManager,
@@ -104,6 +110,25 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Override
+    public Repository getRepository(Depot depot) {
+    	Repository repository = repositoryCache.get(depot.getId());
+    	if (repository == null) {
+    		synchronized (repositoryCache) {
+    			repository = repositoryCache.get(depot.getId());
+    			if (repository == null) {
+    				try {
+						repository = new FileRepository(depot.git().depotDir());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+    				repositoryCache.put(depot.getId(), repository);
+    			}
+    		}
+    	}
+    	return repository;
     }
     
     @Transactional
@@ -186,7 +211,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 					it.remove();
 			}
 		}
-		
+
 		afterCommit(new Runnable() {
 
 			@Override
@@ -197,6 +222,9 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 				} finally {
 					idLock.writeLock().unlock();
 				}
+				getRepository(depot).close();
+				repositoryCache.remove(depot.getId());
+				
 		        FileUtils.deleteDir(storageManager.getDepotDir(depot));
 			}
 			
@@ -280,7 +308,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	}
 
 	private void checkSanity(Depot depot) {
-		logger.debug("Checking git of repository '{}'...", depot);
+		logger.info("Checking sanity of repository '{}'...", depot);
 
 		Git git = depot.git();
 
@@ -319,22 +347,21 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	
 	@Transactional
 	@Override
-	public void checkSanity() {
-		logger.info("Checking sanity of repositories...");
+	public void systemStarted() {
 		for (Depot depot: query(EntityCriteria.of(Depot.class), 0, 0)) {
 			checkSanity(depot);
 		}
-	}
-
-	@Transactional
-	@Override
-	public void systemStarted() {
-		checkSanity();
+		
 		pullRequestManager.checkSanity();
 	}
 
 	@Override
 	public void systemStopping() {
+		synchronized(repositoryCache) {
+			for (Repository repository: repositoryCache.values()) {
+				repository.close();
+			}
+		}
 	}
 
 	@Override

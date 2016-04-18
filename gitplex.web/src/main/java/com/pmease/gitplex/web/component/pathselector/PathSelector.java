@@ -66,8 +66,8 @@ public abstract class PathSelector extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getRoots() {
-				try (	Repository repository = depotModel.getObject().openRepository();
-						RevWalk revWalk = new RevWalk(repository);
+				Repository repository = depotModel.getObject().getRepository();				
+				try (	RevWalk revWalk = new RevWalk(repository);
 						TreeWalk treeWalk = new TreeWalk(repository)) {
 					RevCommit commit = revWalk.parseCommit(depotModel.getObject().getObjectId(revision));
 					treeWalk.addTree(commit.getTree());
@@ -93,8 +93,8 @@ public abstract class PathSelector extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getChildren(BlobIdent node) {
-				try (	Repository repository = depotModel.getObject().openRepository();
-						RevWalk revWalk = new RevWalk(repository);) {
+				Repository repository = depotModel.getObject().getRepository();				
+				try (RevWalk revWalk = new RevWalk(repository)) {
 					RevCommit commit = revWalk.parseCommit(depotModel.getObject().getObjectId(revision));
 					TreeWalk treeWalk = TreeWalk.forPath(repository, node.path, commit.getTree());
 					treeWalk.enterSubtree();

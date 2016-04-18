@@ -34,7 +34,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
@@ -77,13 +76,12 @@ public class CommitDetailPage extends DepotPage {
 
 		@Override
 		protected RevCommit load() {
-			try(	Repository repository = getDepot().openRepository();
-					RevWalk revWalk = new RevWalk(repository);) {
+			try(RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 				ObjectId objectId;
 				if (GitUtils.isHash(revision))
 					objectId = ObjectId.fromString(revision);
 				else
-					objectId = repository.resolve(revision);
+					objectId = getDepot().getRepository().resolve(revision);
 				return revWalk.parseCommit(objectId);
 			} catch (RevisionSyntaxException | IOException e) {
 				throw new RuntimeException(e);

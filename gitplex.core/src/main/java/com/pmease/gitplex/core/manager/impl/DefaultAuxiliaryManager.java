@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -596,11 +595,10 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	
 	@Override
 	public void collect(Depot depot) {
-		try (	Repository repository = depot.openRepository();
-				RevWalk revWalk = new RevWalk(repository);) {
+		try (RevWalk revWalk = new RevWalk(depot.getRepository())) {
 			Collection<Ref> refs = new ArrayList<>();
-			refs.addAll(repository.getRefDatabase().getRefs(Constants.R_HEADS).values());
-			refs.addAll(repository.getRefDatabase().getRefs(Constants.R_TAGS).values());
+			refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
+			refs.addAll(depot.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
 			
 			for (Ref ref: refs) {
 				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));

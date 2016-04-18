@@ -142,8 +142,7 @@ public class DepotBranchesPage extends DepotPage {
 			Ref baseRef = getDepot().getRefs(Constants.R_HEADS).get(getBaseBranch());
 			Preconditions.checkNotNull(baseRef);
 			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
-			try (	Repository repository = getDepot().openRepository();
-					RevWalk revWalk = new RevWalk(repository);) {
+			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 
 				RevCommit baseCommit = revWalk.lookupCommit(baseRef.getObjectId());
 				for (ObjectId compareId: compareIds) {

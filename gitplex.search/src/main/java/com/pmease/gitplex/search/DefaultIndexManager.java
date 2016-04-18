@@ -54,7 +54,6 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -342,8 +341,8 @@ public class DefaultIndexManager implements IndexManager {
 											try (IndexReader reader = DirectoryReader.open(directory)) {
 												IndexSearcher searcher = new IndexSearcher(reader);
 												try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-													try (Repository jgitRepo = depot.openRepository()) {
-														indexResult = index(jgitRepo, commit, writer, searcher);
+													try {
+														indexResult = index(depot.getRepository(), commit, writer, searcher);
 														writer.commit();
 													} catch (Exception e) {
 														writer.rollback();
@@ -353,8 +352,8 @@ public class DefaultIndexManager implements IndexManager {
 											}
 										} else {
 											try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-												try (Repository repository = depot.openRepository()) {
-													indexResult = index(repository, commit, writer, null);
+												try {
+													indexResult = index(depot.getRepository(), commit, writer, null);
 													writer.commit();
 												} catch (Exception e) {
 													writer.rollback();

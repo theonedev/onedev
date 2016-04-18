@@ -44,8 +44,8 @@ public class SymbolLinkPanel extends BlobViewPanel {
 			targetPath = null;
 
 		if (targetPath != null) {
-			try (	Repository repository = context.getDepot().openRepository(); 
-					RevWalk revWalk = new RevWalk(repository)) {
+			Repository repository = context.getDepot().getRepository();				
+			try (RevWalk revWalk = new RevWalk(repository)) {
 				ObjectId commitId = context.getDepot().getObjectId(context.getBlobIdent().revision);
 				RevTree revTree = revWalk.parseCommit(commitId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(repository, targetPath, revTree);

@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.Repository;
+
 import com.pmease.commons.hibernate.dao.EntityDao;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -29,8 +31,6 @@ public interface DepotManager extends EntityDao<Depot> {
 	 */
 	Depot fork(Depot depot, Account user);
 	
-	void checkSanity();
-	
 	/**
 	 * Save specified depot. Note that oldName and oldAccountId should not be 
 	 * specified together, meaning that you should not rename and transfer 
@@ -51,6 +51,8 @@ public interface DepotManager extends EntityDao<Depot> {
 	void save(Depot depot, @Nullable Long oldAccountId, @Nullable String oldName);
 	
 	void delete(Depot depot);
+	
+	Repository getRepository(Depot depot);
 	
 	Collection<Depot> getAccessibles(@Nullable Account account, @Nullable Account user);
 	

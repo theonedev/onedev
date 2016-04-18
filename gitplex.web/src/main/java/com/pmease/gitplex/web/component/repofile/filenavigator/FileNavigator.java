@@ -175,8 +175,8 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
-								try (	Repository repository = context.getDepot().openRepository();
-										RevWalk revWalk = new RevWalk(repository)) {
+								Repository repository = context.getDepot().getRepository();
+								try (RevWalk revWalk = new RevWalk(repository)) {
 									RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 									TreeWalk treeWalk;
 									if (blobIdent.path != null) {
@@ -661,8 +661,8 @@ public abstract class FileNavigator extends Panel {
 	protected abstract void onNewFile(AjaxRequestTarget target);
 	
 	private List<BlobIdent> getChildren(BlobIdent blobIdent) {
-		try (	Repository repository = context.getDepot().openRepository(); 
-				RevWalk revWalk = new RevWalk(repository)) {
+		Repository repository = context.getDepot().getRepository();
+		try (RevWalk revWalk = new RevWalk(repository)) {
 			RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
 			treeWalk.setRecursive(false);

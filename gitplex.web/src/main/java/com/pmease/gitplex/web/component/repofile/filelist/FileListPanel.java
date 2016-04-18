@@ -57,8 +57,8 @@ public abstract class FileListPanel extends Panel {
 
 		@Override
 		protected List<BlobIdent> load() {
-			try (	Repository repository = depotModel.getObject().openRepository(); 
-					RevWalk revWalk = new RevWalk(repository)) {
+			Repository repository = depotModel.getObject().getRepository();			
+			try (RevWalk revWalk = new RevWalk(repository)) {
 				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
 				TreeWalk treeWalk;
 				if (directory.path != null) {

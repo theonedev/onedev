@@ -17,7 +17,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.archive.TgzFormat;
 import org.eclipse.jgit.archive.ZipFormat;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Repository;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -97,8 +96,8 @@ public class ArchiveResource extends AbstractResource {
 					ArchiveCommand.registerFormat(format, new ZipFormat());
 				else
 					ArchiveCommand.registerFormat(format, new TgzFormat());
-				try (Repository repository = depot.openRepository()) {
-					ArchiveCommand archive = Git.wrap(repository).archive();
+				try {
+					ArchiveCommand archive = Git.wrap(depot.getRepository()).archive();
 					archive.setFormat(format);
 					archive.setTree(depot.getRevCommit(revision).getId());
 					archive.setOutputStream(attributes.getResponse().getOutputStream());

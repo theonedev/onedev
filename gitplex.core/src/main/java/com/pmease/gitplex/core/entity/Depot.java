@@ -45,8 +45,6 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -59,7 +57,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.OrTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
-import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -90,6 +87,7 @@ import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.security.protectedobject.AccountBelonging;
 import com.pmease.gitplex.core.security.protectedobject.ProtectedObject;
@@ -163,6 +161,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	@OneToMany(mappedBy="depot")
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<UserAuthorization> authorizedUsers = new ArrayList<>();
+	
+	private transient Repository repository;
 	
     private transient Map<BlobIdent, Blob> blobCache;
     
@@ -280,14 +280,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		this.forks = forks;
 	}
 	
-	public Repository openRepository() {
-		try {
-			return RepositoryCache.open(FileKey.exact(git().depotDir(), FS.DETECTED), true);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	public List<Ref> getBranchRefs() {
 		List<Ref> refs = new ArrayList<Ref>(getRefs(Constants.R_HEADS).values());
 		refs.sort((o1, o2) -> {
@@ -476,9 +468,15 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		return affinals;
 	}
 	
+	public Repository getRepository() {
+		if (repository == null) {
+			repository = GitPlex.getInstance(DepotManager.class).getRepository(this);
+		}
+		return repository;
+	}
+	
 	public RevCommit getMergeBase(String ancestor, String descendant) {
-		try (	Repository repository = openRepository();
-				RevWalk revWalk = new RevWalk(repository)) {
+		try (RevWalk revWalk = new RevWalk(getRepository())) {
 			ObjectId ancestorId = getObjectId(ancestor);
 			ObjectId descendantId = getObjectId(descendant);
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
@@ -497,8 +495,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	}
 	
 	public boolean isAncestor(String ancestor, String descendant) {
-		try (	Repository repository = openRepository();
-				RevWalk revWalk = new RevWalk(repository)) {
+		try (RevWalk revWalk = new RevWalk(getRepository())) {
 			ObjectId ancestorId = getObjectId(ancestor);
 			ObjectId descendantId = getObjectId(descendant);
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
@@ -581,7 +578,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		Blob blob = getBlobCache().get(blobIdent);
 		if (blob == null) {
 			if (blobIdent.id != null) {
-				try (Repository repository = openRepository()) {
+				try {
 					if (blobIdent.isGitLink()) {
 						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 						if (url == null)
@@ -590,7 +587,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 					} else if (blobIdent.isTree()) {
 						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = repository.open(ObjectId.fromString(blobIdent.id), Constants.OBJ_BLOB);
+						ObjectLoader objectLoader = getRepository().open(ObjectId.fromString(blobIdent.id), Constants.OBJ_BLOB);
 						blob = readBlob(objectLoader, blobIdent);
 					}
 					getBlobCache().put(blobIdent, blob);
@@ -598,11 +595,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 					throw new RuntimeException(e);
 				}
 			} else {
-				try (	Repository repository = openRepository(); 
-						RevWalk revWalk = new RevWalk(repository)) {
+				try (RevWalk revWalk = new RevWalk(getRepository())) {
 					ObjectId commitId = getObjectId(blobIdent.revision);		
 					RevTree revTree = revWalk.parseCommit(commitId).getTree();
-					TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
+					TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
 					if (treeWalk != null) {
 						if (blobIdent.isGitLink()) {
 							String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
@@ -629,11 +625,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	}
 	
 	public InputStream getInputStream(BlobIdent ident) {
-		try (	Repository repository = openRepository(); 
-				RevWalk revWalk = new RevWalk(repository)) {
+		try (RevWalk revWalk = new RevWalk(getRepository())) {
 			ObjectId commitId = getObjectId(ident.revision);
 			RevTree revTree = revWalk.parseCommit(commitId).getTree();
-			TreeWalk treeWalk = TreeWalk.forPath(repository, ident.path, revTree);
+			TreeWalk treeWalk = TreeWalk.forPath(getRepository(), ident.path, revTree);
 			if (treeWalk != null) {
 				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 				return objectLoader.openStream();
@@ -665,8 +660,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
 			ObjectId objectId;
-			try (Repository repository = openRepository()) {
-				objectId = repository.resolve(revision);
+			try {
+				objectId = getRepository().resolve(revision);
 			} catch (RevisionSyntaxException | IOException e) {
 				if (!mustExist) {
 					objectId = null;
@@ -700,9 +695,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		DiffKey key = new DiffKey(oldRev, newRev, detectRenames, paths);
 		List<DiffEntry> diffs = diffCache.get(key);
 		if (diffs == null) {
-			try (	Repository repository = openRepository();
-					DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
-		    	diffFormatter.setRepository(repository);
+			try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
+		    	diffFormatter.setRepository(getRepository());
 		    	diffFormatter.setDetectRenames(detectRenames);
 				AnyObjectId oldCommitId = getObjectId(oldRev);
 				AnyObjectId newCommitId = getObjectId(newRev);
@@ -808,26 +802,24 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 		final AnyObjectId commitId = getObjectId(revision);
 		
-		try (Repository repository = openRepository()) {
-			long time = System.currentTimeMillis();
-			LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(repository, commitId, path, cache);
-			long elapsed = System.currentTimeMillis()-time;
-			if (elapsed > LAST_COMMITS_CACHE_THRESHOLD) {
-				lock.writeLock().lock();
-				try {
-					if (!cacheDir.exists())
-						FileUtils.createDir(cacheDir);
-					FileUtils.writeByteArrayToFile(
-							new File(cacheDir, commitId.name()), 
-							SerializationUtils.serialize(lastCommits));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					lock.writeLock().unlock();
-				}
+		long time = System.currentTimeMillis();
+		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(getRepository(), commitId, path, cache);
+		long elapsed = System.currentTimeMillis()-time;
+		if (elapsed > LAST_COMMITS_CACHE_THRESHOLD) {
+			lock.writeLock().lock();
+			try {
+				if (!cacheDir.exists())
+					FileUtils.createDir(cacheDir);
+				FileUtils.writeByteArrayToFile(
+						new File(cacheDir, commitId.name()), 
+						SerializationUtils.serialize(lastCommits));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				lock.writeLock().unlock();
 			}
-			return lastCommits;
 		}
+		return lastCommits;
 	}
 
 	@Nullable
@@ -836,8 +828,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			refCache = new HashMap<>();
 		Optional<Ref> optional = refCache.get(revision);
 		if (optional == null) {
-			try (Repository repository = openRepository()) {
-				optional = Optional.fromNullable(repository.getRef(revision));
+			try {
+				optional = Optional.fromNullable(getRepository().findRef(revision));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -859,8 +851,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			revObjectCache = new HashMap<>();
 		Optional<RevObject> optional = revObjectCache.get(revId);
 		if (optional == null) {
-			try (	Repository repository = openRepository();
-					RevWalk revWalk = new RevWalk(repository);) {
+			try (RevWalk revWalk = new RevWalk(getRepository());) {
 				optional = Optional.of(revWalk.parseAny(revId));
 			} catch (MissingObjectException e) {
 				if (!mustExist)
@@ -889,8 +880,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			revCommitCache = new HashMap<>();
 		Optional<RevCommit> optional = revCommitCache.get(revObject);
 		if (optional == null) {
-			try (	Repository repository = openRepository();
-					RevWalk revWalk = new RevWalk(repository);) {
+			try (RevWalk revWalk = new RevWalk(getRepository())) {
 				RevObject peeled = revWalk.peel(revObject);
 				if (peeled instanceof RevCommit)
 					optional = Optional.of((RevCommit) peeled);
@@ -931,8 +921,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		
 		Map<String, Ref> cached = prefixRefsCache.get(prefix);
 		if (cached == null) {
-			try (Repository repository = openRepository()) {
-				cached = repository.getRefDatabase().getRefs(prefix); 
+			try {
+				cached = getRepository().getRefDatabase().getRefs(prefix); 
 				prefixRefsCache.put(prefix, cached);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -977,8 +967,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     }
     
     public void createBranch(String branchName, String branchRevision) {
-		try (Repository repository = openRepository()) {
-			CreateBranchCommand command = org.eclipse.jgit.api.Git.wrap(repository).branchCreate();
+		try {
+			CreateBranchCommand command = org.eclipse.jgit.api.Git.wrap(getRepository()).branchCreate();
 			command.setName(branchName);
 			command.setStartPoint(getRevCommit(branchRevision));
 			command.call();
@@ -988,8 +978,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     }
     
     public void tag(String tagName, String tagRevision, PersonIdent taggerIdent, @Nullable String tagMessage) {
-		try (Repository repository = openRepository();) {
-			TagCommand tag = org.eclipse.jgit.api.Git.wrap(repository).tag();
+		try {
+			TagCommand tag = org.eclipse.jgit.api.Git.wrap(getRepository()).tag();
 			tag.setName(tagName);
 			if (tagMessage != null)
 				tag.setMessage(tagMessage);

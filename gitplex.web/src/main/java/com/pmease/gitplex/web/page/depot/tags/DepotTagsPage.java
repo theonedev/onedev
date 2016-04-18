@@ -308,8 +308,7 @@ public class DepotTagsPage extends DepotPage {
 
 					@Override
 					public void onClick() {
-						try (	Repository repository = getDepot().openRepository();
-								RevWalk revWalk = new RevWalk(repository);) {
+						try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 							RevCommit currentCommit = revWalk.lookupCommit(
 									getDepot().getRevCommit(item.getModelObject().getObjectId()).getId());
 							Ref prevAncestorRef = null;

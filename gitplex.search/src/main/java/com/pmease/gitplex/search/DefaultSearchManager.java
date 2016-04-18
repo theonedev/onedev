@@ -25,7 +25,6 @@ import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -86,8 +85,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
-					try (	Repository repository = depot.openRepository(); 
-							RevWalk revWalk = new RevWalk(repository)){
+					try (RevWalk revWalk = new RevWalk(depot.getRepository())){
 						final RevTree revTree = revWalk.parseCommit(commit).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
@@ -107,7 +105,7 @@ public class DefaultSearchManager implements SearchManager, IndexListener, Lifec
 									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
 									
 									if (!checkedBlobPaths.contains(blobPath)) {
-										TreeWalk treeWalk = TreeWalk.forPath(repository, blobPath, revTree);									
+										TreeWalk treeWalk = TreeWalk.forPath(depot.getRepository(), blobPath, revTree);									
 										if (treeWalk != null) 
 											query.collect(treeWalk, hits);
 										checkedBlobPaths.add(blobPath);

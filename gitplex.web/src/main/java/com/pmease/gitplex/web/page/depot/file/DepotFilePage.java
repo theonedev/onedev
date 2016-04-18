@@ -37,7 +37,6 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -205,10 +204,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		trait.commitId = commit.copy();
 		
 		if (blobIdent.path != null) {
-			try (	Repository repository = getDepot().openRepository();
-					RevWalk revWalk = new RevWalk(repository)) {
+			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 				RevTree revTree = commit.getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
+				TreeWalk treeWalk = TreeWalk.forPath(getDepot().getRepository(), blobIdent.path, revTree);
 				if (treeWalk == null) {
 					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path
 							+ "' in revision '" + blobIdent.revision + "'");
@@ -554,11 +552,10 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
-					try (	Repository repository = depot.openRepository();
-							RevWalk revWalk = new RevWalk(repository)) {
+					try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 						RevTree revTree = getDepot().getRevCommit(newCommit).getTree();
 						String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
-						while (TreeWalk.forPath(repository, parentPath, revTree) == null) {
+						while (TreeWalk.forPath(getDepot().getRepository(), parentPath, revTree) == null) {
 							if (parentPath.contains("/")) {
 								parentPath = StringUtils.substringBeforeLast(parentPath, "/");
 							} else {
@@ -634,10 +631,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		state.mark = null;
 		
 		if (state.blobIdent.path != null) {
-			try (	Repository repository = getDepot().openRepository();
-					RevWalk revWalk = new RevWalk(repository)) {
+			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 				RevTree revTree = getDepot().getRevCommit(revision, true).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
+				TreeWalk treeWalk = TreeWalk.forPath(getDepot().getRepository(), blobIdent.path, revTree);
 				if (treeWalk != null) {
 					state.blobIdent.mode = treeWalk.getRawMode(0);
 				} else {

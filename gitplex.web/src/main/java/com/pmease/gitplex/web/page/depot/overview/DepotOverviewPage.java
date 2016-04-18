@@ -15,7 +15,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -39,9 +38,8 @@ public class DepotOverviewPage extends DepotPage {
 
 		@Override
 		protected BlobIdent load() {
-			try (	Repository repository = getDepot().openRepository();
-					RevWalk revWalk = new RevWalk(repository);
-					TreeWalk treeWalk = new TreeWalk(repository);) {
+			try (	RevWalk revWalk = new RevWalk(getDepot().getRepository());
+					TreeWalk treeWalk = new TreeWalk(getDepot().getRepository());) {
 				RevCommit commit = revWalk.parseCommit(getDepot().getObjectId(getDepot().getDefaultBranch()));
 				treeWalk.addTree(commit.getTree());
 				while (treeWalk.next()) {
