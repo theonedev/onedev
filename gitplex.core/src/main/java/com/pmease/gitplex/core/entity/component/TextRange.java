@@ -1,14 +1,14 @@
 package com.pmease.gitplex.core.entity.component;
 
-public class TokenRange {
+public class TextRange {
 
 	private Integer beginLine;
 	
-	private Integer beginToken;
+	private Integer beginChar;
 	
 	private Integer endLine;
 	
-	private Integer endToken;
+	private Integer endChar;
 
 	/**
 	 * @return the beginLine
@@ -25,17 +25,17 @@ public class TokenRange {
 	}
 
 	/**
-	 * @return the beginToken
+	 * @return the beginChar
 	 */
-	public Integer getBeginToken() {
-		return beginToken;
+	public Integer getBeginChar() {
+		return beginChar;
 	}
 
 	/**
-	 * @param beginToken the beginToken to set
+	 * @param beginChar the beginChar to set
 	 */
-	public void setBeginToken(Integer beginToken) {
-		this.beginToken = beginToken;
+	public void setBeginChar(Integer beginChar) {
+		this.beginChar = beginChar;
 	}
 
 	/**
@@ -53,17 +53,17 @@ public class TokenRange {
 	}
 
 	/**
-	 * @return the endToken
+	 * @return the endChar
 	 */
-	public Integer getEndToken() {
-		return endToken;
+	public Integer getEndChar() {
+		return endChar;
 	}
 
 	/**
-	 * @param endToken the endToken to set
+	 * @param endChar the endChar to set
 	 */
-	public void setEndToken(Integer endToken) {
-		this.endToken = endToken;
+	public void setEndChar(Integer endChar) {
+		this.endChar = endChar;
 	}
 	
 }

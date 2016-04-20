@@ -65,6 +65,21 @@ gitplex.sourceview = {
 				    	gitplex.sourceview.blame(cm, blameCommits);
 			    	}, 10);
 			    }
+			    
+			    $code.on("mouseup keyup", function() {
+			    	var from = cm.getCursor("from");
+			    	var to = cm.getCursor("to");
+			    	if (from.line != to.line || from.ch != to.ch) {
+		    			var ch = (from.ch + to.ch)/2;
+		    			var position = cm.charCoords({line:from.line, ch:ch});
+		    			var uri = URI(window.location.href); 
+		    			uri.removeSearch("mark").addSearch("mark", 
+		    					(from.line+1) + "," + (from.ch+1) + "-" + (to.line+1) + "," + (to.ch+1));
+			    		$("#selection-popup").data("show")(position, uri.toString(), function(){});
+			    	} else {
+			    		$("#selection-popup").hide();
+			    	}
+			    });
 
 			    $code.mouseover(function(e) {
 					var node = e.target || e.srcElement, $node = $(node);

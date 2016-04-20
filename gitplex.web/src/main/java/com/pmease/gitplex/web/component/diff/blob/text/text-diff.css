@@ -1,6 +1,8 @@
 .text-diff {
 	border: 1px solid #D8D8D8;
 	border-radius: 4px;
+	z-index: 10;
+	position: relative;
 }
 .text-diff>.head {
 	padding: 8px;

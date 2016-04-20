@@ -22,3 +22,7 @@ gitplex.textdiff = {
 		});
 	}
 }
+$(document).on("mouseup", function() {
+	console.log(window.getSelection().anchorNode);
+	console.log(window.getSelection().anchorOffset);
+});

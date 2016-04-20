@@ -42,6 +42,7 @@ import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
+import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -212,6 +213,8 @@ public class SourceViewPanel extends BlobViewPanel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));

@@ -21,7 +21,7 @@ import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.component.TokenRange;
+import com.pmease.gitplex.core.entity.component.TextRange;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -65,7 +65,7 @@ public class CodeComment extends AbstractEntity {
 	
 	@OptimisticLock(excluded=true)
 	@Embedded
-	private TokenRange textRange;
+	private TextRange textRange;
 	
 	@OptimisticLock(excluded=true)
 	private String compareCommit;
@@ -130,14 +130,14 @@ public class CodeComment extends AbstractEntity {
 	/**
 	 * @return the textRange
 	 */
-	public TokenRange getTextRange() {
+	public TextRange getTextRange() {
 		return textRange;
 	}
 
 	/**
 	 * @param textRange the textRange to set
 	 */
-	public void setTextRange(TokenRange textRange) {
+	public void setTextRange(TextRange textRange) {
 		this.textRange = textRange;
 	}
 
