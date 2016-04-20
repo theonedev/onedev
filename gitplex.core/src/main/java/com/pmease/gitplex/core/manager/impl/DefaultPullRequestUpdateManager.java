@@ -12,7 +12,7 @@ import com.pmease.commons.util.FileUtils;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.listener.PullRequestListener;
-import com.pmease.gitplex.core.manager.CommentManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
@@ -25,7 +25,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityDao<PullReque
 	
 	@Inject
 	public DefaultPullRequestUpdateManager(Dao dao, StorageManager storageManager, 
-			Set<PullRequestListener> pullRequestListeners, CommentManager commentManager) {
+			Set<PullRequestListener> pullRequestListeners, PullRequestCommentManager commentManager) {
 		super(dao);
 		
 		this.storageManager = storageManager;

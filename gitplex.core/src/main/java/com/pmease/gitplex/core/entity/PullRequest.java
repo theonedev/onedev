@@ -41,7 +41,6 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.jackson.ExternalView;
 import com.pmease.commons.util.LockUtils;
 import com.pmease.gitplex.core.GitPlex;
@@ -236,7 +235,7 @@ public class PullRequest extends AbstractEntity {
 
 	@OneToMany(mappedBy="request")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Comment> comments = new ArrayList<>();
+	private Collection<PullRequestComment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy="request")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -265,8 +264,6 @@ public class PullRequest extends AbstractEntity {
 	private transient Set<String> pendingCommits;
 	
 	private transient Collection<Commit> mergedCommits;
-	
-	private transient Collection<CommentReply> commentReplies;
 	
 	private transient List<Review> reviews;
 	
@@ -465,11 +462,11 @@ public class PullRequest extends AbstractEntity {
 		this.referenced = referenced;
 	}
 
-	public Collection<Comment> getComments() {
+	public Collection<PullRequestComment> getComments() {
 		return comments;
 	}
 
-	public void setComments(Collection<Comment> comments) {
+	public void setComments(Collection<PullRequestComment> comments) {
 		this.comments = comments;
 	}
 
@@ -856,32 +853,6 @@ public class PullRequest extends AbstractEntity {
 				mergedCommits.add(commit);
 		}
 		return mergedCommits;
-	}
-	
-	private Collection<CommentReply> getCommentReplies() {
-		if (commentReplies == null) {
-			EntityCriteria<CommentReply> criteria = EntityCriteria.of(CommentReply.class);
-			criteria.createCriteria("comment").add(Restrictions.eq("request", this));
-			commentReplies = GitPlex.getInstance(Dao.class).query(criteria);
-		}
-		return commentReplies;
-	}
-	
-	/**
-	 * This method is here for performance consideration. Often we need to load replies of 
-	 * different comments in a pull request. And we optimize it to load all replies at once 
-	 * for all comments in a pull request to reduce SQL queries. 
-	 *  
-	 * @param comment
-	 * @return
-	 */
-	public Collection<CommentReply> getCommentReplies(Comment comment) {
-		List<CommentReply> replies = new ArrayList<>();
-		for (CommentReply reply: getCommentReplies()) {
-			if (reply.getComment().equals(comment))
-				replies.add(reply);
-		}
-		return replies;
 	}
 	
 	public List<Review> getReviews() {

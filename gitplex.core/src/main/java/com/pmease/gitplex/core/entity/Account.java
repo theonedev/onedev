@@ -139,12 +139,8 @@ public class Account extends AbstractUser implements ProtectedObject {
 
 	@OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<Comment> requestComments = new ArrayList<>();
+	private Collection<CodeComment> requestComments = new ArrayList<>();
 
-	@OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<CommentReply> requestCommentReplies = new ArrayList<>();
-	
     @OneToMany(mappedBy="user")
 	@OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<BranchWatch> branchWatches = new ArrayList<>();
@@ -334,21 +330,12 @@ public class Account extends AbstractUser implements ProtectedObject {
 		this.closedRequests = closedRequests;
 	}
 
-	public Collection<Comment> getRequestComments() {
+	public Collection<CodeComment> getRequestComments() {
 		return requestComments;
 	}
 
-	public void setRequestComments(Collection<Comment> requestComments) {
+	public void setRequestComments(Collection<CodeComment> requestComments) {
 		this.requestComments = requestComments;
-	}
-
-	public Collection<CommentReply> getRequestCommentReplies() {
-		return requestCommentReplies;
-	}
-
-	public void setRequestCommentReplies(
-			Collection<CommentReply> requestCommentReplies) {
-		this.requestCommentReplies = requestCommentReplies;
 	}
 
 	public Collection<BranchWatch> getBranchWatches() {

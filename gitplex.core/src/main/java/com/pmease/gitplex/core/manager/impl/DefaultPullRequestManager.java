@@ -51,13 +51,12 @@ import com.pmease.commons.util.concurrent.PrioritizedRunnable;
 import com.pmease.commons.util.match.PatternMatcher;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.PullRequestVisit;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
@@ -68,8 +67,8 @@ import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.manager.CommentManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
@@ -93,7 +92,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final CommentManager commentManager;
+	private final PullRequestCommentManager commentManager;
 	
 	private final AccountManager userManager;
 	
@@ -113,7 +112,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	public DefaultPullRequestManager(Dao dao, 
 			PullRequestUpdateManager pullRequestUpdateManager, StorageManager storageManager, 
 			ReviewInvitationManager reviewInvitationManager, AccountManager userManager, 
-			NotificationManager notificationManager, CommentManager commentManager, 
+			NotificationManager notificationManager, PullRequestCommentManager commentManager, 
 			MarkdownManager markdownManager, WorkManager workManager, 
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		super(dao);
@@ -202,7 +201,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		persist(activity);
 
 		if (comment != null) {
-			Comment requestComment = new Comment();
+			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
@@ -230,7 +229,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		persist(activity);
 
 		if (comment != null) {
-			Comment requestComment = new Comment();
+			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
@@ -311,7 +310,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		persist(activity);
 
 		if (comment != null) {
-			Comment requestComment = new Comment();
+			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setContent(comment);
 			requestComment.setRequest(request);
 			requestComment.setUser(user);
@@ -647,20 +646,6 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			return new HashCodeBuilder(17, 37).append(requestId).toHashCode();
 		}
 
-	}
-
-	@Override
-	public Date getLastVisitDate(PullRequest request) {
-		Account user = userManager.getCurrent();
-		if (user != null) {
-			PullRequestVisit visit = request.getVisit(user);
-			if (visit != null)
-				return visit.getDate();
-			else 
-				return null;
-		} else {
-			return null;
-		}
 	}
 
 	@Override

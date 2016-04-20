@@ -15,11 +15,11 @@ import com.pmease.commons.hibernate.PersistListener;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
-import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestReference;
 import com.pmease.gitplex.core.listener.PullRequestListener;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.util.markdown.MentionParser;
 import com.pmease.gitplex.core.util.markdown.PullRequestParser;
@@ -53,8 +53,8 @@ public class CommentPersistListener implements PersistListener {
 	@Override
 	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
 			String[] propertyNames, Type[] types) throws CallbackException {
-		if (entity instanceof Comment) {
-			Comment comment = (Comment) entity;
+		if (entity instanceof PullRequestComment) {
+			PullRequestComment comment = (PullRequestComment) entity;
 			for (int i=0; i<propertyNames.length; i++) {
 				if (propertyNames[i].equals("content")) {
 					String content = (String) currentState[i];
@@ -69,7 +69,7 @@ public class CommentPersistListener implements PersistListener {
 						mentions.removeAll(mentionParser.parseMentions(prevHtml));
 						for (Account user: mentions) {
 							for (PullRequestListener listener: pullRequestListeners)
-								listener.onMentioned((Comment) entity, user);
+								listener.onMentioned((PullRequestComment) entity, user);
 						}
 						
 						Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);
@@ -86,8 +86,8 @@ public class CommentPersistListener implements PersistListener {
 	@Override
 	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
 			throws CallbackException {
-		if (entity instanceof Comment) {
-			Comment comment = (Comment) entity;
+		if (entity instanceof PullRequestComment) {
+			PullRequestComment comment = (PullRequestComment) entity;
 			for (int i=0; i<propertyNames.length; i++) {
 				if (propertyNames[i].equals("content")) {
 					String content = (String) state[i];
@@ -95,7 +95,7 @@ public class CommentPersistListener implements PersistListener {
 					Collection<Account> mentions = new MentionParser().parseMentions(html);
 					for (Account user: mentions) {
 						for (PullRequestListener listener: pullRequestListeners)
-							listener.onMentioned((Comment) entity, user);
+							listener.onMentioned((PullRequestComment) entity, user);
 					}
 					
 					Collection<PullRequest> requests = new PullRequestParser().parseRequests(html);

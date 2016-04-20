@@ -41,7 +41,6 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
@@ -316,7 +315,7 @@ public class CommitDetailPage extends DepotPage {
 	
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
 		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
-				Model.of((PullRequest)null), Model.of((Comment)null), getCompareWith(), 
+				Model.of((PullRequest)null), getCompareWith(), 
 				getCommit().name(), state.path, state.path, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 

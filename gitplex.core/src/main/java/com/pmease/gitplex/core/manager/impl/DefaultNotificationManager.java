@@ -19,10 +19,9 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.markdown.MarkdownManager;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Comment;
-import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.Notification;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
@@ -75,13 +74,9 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 	}
 
 	@Override
-	public void onCommented(Comment comment) {
+	public void onCommented(PullRequestComment comment) {
 	}
 
-	@Override
-	public void onCommentReplied(CommentReply reply) {
-	}
-	
 	@Transactional
 	@Override
 	public void onReviewed(Review review, String comment) {
@@ -209,7 +204,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 
 	@Transactional
 	@Override
-	public void onMentioned(Comment comment, Account user) {
+	public void onMentioned(PullRequestComment comment, Account user) {
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				comment.getRequest().getId(), comment.getRequest().getTitle());
 		String url = urlManager.urlFor(comment);
@@ -218,21 +213,6 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 				+ "<p style='margin: 16px 0;'>"
 				+ "For details, please visit <a href='%s'>%s</a>", 
 				subject, markdownManager.escape(comment.getContent()), url, url);
-		
-		mailManager.sendMail(Sets.newHashSet(user), subject, decorateMail(user, body));
-	}
-	
-	@Transactional
-	@Override
-	public void onMentioned(CommentReply reply, Account user) {
-		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
-				reply.getComment().getRequest().getId(), reply.getComment().getRequest().getTitle());
-		String url = urlManager.urlFor(reply);
-		String body = String.format("%s."
-				+ "<p style='margin: 16px 0; padding-left: 16px; border-left: 4px solid #CCC;'>%s"
-				+ "<p style='margin: 16px 0;'>"
-				+ "For details, please visit <a href='%s'>%s</a>", 
-				subject, markdownManager.escape(reply.getContent()), url, url);
 		
 		mailManager.sendMail(Sets.newHashSet(user), subject, decorateMail(user, body));
 	}

@@ -39,7 +39,6 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
@@ -53,8 +52,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final IModel<PullRequest> requestModel;
 
-	private final IModel<Comment> commentModel;
-	
 	private final String oldRev;
 	
 	private final String newRev;
@@ -204,13 +201,12 @@ public abstract class RevisionDiffPanel extends Panel {
 	};
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			IModel<Comment> commentModel, String oldRev, String newRev, @Nullable String path, 
+			String oldRev, String newRev, @Nullable String path, 
 			@Nullable String comparePath, LineProcessor lineProcessor, DiffMode diffMode) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
-		this.commentModel = commentModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
 		this.path = path;
@@ -328,7 +324,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				item.setOutputMarkupId(true);
-				item.add(new BlobDiffPanel("change", depotModel, requestModel, commentModel, change, diffMode));
+				item.add(new BlobDiffPanel("change", depotModel, requestModel, change, diffMode));
 			}
 			
 		});
@@ -347,7 +343,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		changesAndCountModel.detach();
 		depotModel.detach();
 		requestModel.detach();
-		commentModel.detach();
 		
 		super.onDetach();
 	}

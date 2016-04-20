@@ -11,7 +11,7 @@ import javax.persistence.Embedded;
 import com.pmease.commons.git.BlobIdent;
 
 @Embeddable
-public class InlineInfo implements Serializable {
+public class CommentPosition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

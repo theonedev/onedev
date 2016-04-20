@@ -36,7 +36,6 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.diffmatchpatch.DiffMatchPatchResourceReference;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
@@ -140,7 +139,7 @@ public abstract class FileEditPanel extends Panel {
 					
 				};
 				BlobDiffPanel preview = new BlobDiffPanel("preview", depotModel, new Model<PullRequest>(null), 
-						new Model<Comment>(null), change, DiffMode.UNIFIED);
+						change, DiffMode.UNIFIED);
 				replace(preview);
 				target.add(preview);
 				

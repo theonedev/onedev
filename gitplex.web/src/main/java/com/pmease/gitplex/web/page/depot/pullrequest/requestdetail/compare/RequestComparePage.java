@@ -36,7 +36,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -45,8 +44,7 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
-import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
@@ -96,18 +94,6 @@ public class RequestComparePage extends RequestDetailPage {
 	private String path;
 	
 	private String comparePath;
-	
-	private final IModel<Comment> commentModel = new LoadableDetachableModel<Comment>() {
-
-		@Override
-		protected Comment load() {
-			if (state.commentId != null)
-				return GitPlex.getInstance(Dao.class).load(Comment.class, state.commentId);
-			else 
-				return null;
-		}
-		
-	};
 	
 	private WebMarkupContainer compareHead;
 	
@@ -173,18 +159,10 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private void initFromState(HistoryState state) {
-		Comment comment = commentModel.getObject();
-		if (comment != null) {
-			oldCommitHash = comment.getOldCommitHash();
-			newCommitHash = comment.getNewCommitHash();
-			path = comment.getBlobIdent().path;
-			comparePath = comment.getCompareWith().path;
-		} else {
-			oldCommitHash = getCommitHash(state.oldRev);
-			newCommitHash = getCommitHash(state.newRev);
-			path = state.path;
-			comparePath = state.comparePath;
-		}
+		oldCommitHash = getCommitHash(state.oldRev);
+		newCommitHash = getCommitHash(state.newRev);
+		path = state.path;
+		comparePath = state.comparePath;
 	}
 	
 	private String getRevision(String commitHash) {
@@ -531,16 +509,11 @@ public class RequestComparePage extends RequestDetailPage {
 
 	@Override
 	public void onDetach() {
-		commentModel.detach();
 		commitsModel.detach();
 		
 		super.onDetach();
 	}
 	
-	public static PageParameters paramsOf(Comment comment) {
-		return paramsOf(comment.getRequest(), comment.getId(), null, null, null, null);
-	}
-
 	public static PageParameters paramsOf(PullRequest request, String oldRev, String newRev) {
 		return paramsOf(request, oldRev, newRev, null);
 	}
@@ -574,11 +547,11 @@ public class RequestComparePage extends RequestDetailPage {
 		
 		if (event.getPayload() instanceof CommentRemoved) {
 			CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-			Comment comment = (Comment) commentRemoved.getComment();
+			CodeComment comment = (CodeComment) commentRemoved.getComment();
 			
 			// compare identifier instead of comment object as comment may have been deleted
 			// to cause LazyInitializationException
-			if (Comment.idOf(comment).equals(state.commentId)) {
+			if (CodeComment.idOf(comment).equals(state.commentId)) {
 				state.commentId = null;
 				state.oldRev = getRevision(oldCommitHash);
 				state.newRev = getRevision(newCommitHash);
@@ -742,7 +715,7 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
 		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
-				requestModel, commentModel, oldCommitHash, newCommitHash, path, comparePath, 
+				requestModel, oldCommitHash, newCommitHash, path, comparePath, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 
 			@Override

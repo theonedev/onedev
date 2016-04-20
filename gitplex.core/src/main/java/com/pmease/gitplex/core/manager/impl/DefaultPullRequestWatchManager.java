@@ -29,10 +29,9 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.Pair;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.BranchWatch;
-import com.pmease.gitplex.core.entity.Comment;
-import com.pmease.gitplex.core.entity.CommentReply;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.Event;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.PullRequestVisit;
 import com.pmease.gitplex.core.entity.PullRequestWatch;
@@ -128,18 +127,10 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 
 	@Transactional
 	@Override
-	public void onCommented(Comment comment) {
+	public void onCommented(PullRequestComment comment) {
 		watch(comment.getRequest(), comment.getUser(), 
 				"You are set to watch this pull request as you've commented.");
 		notify(comment.getRequest(), Sets.newHashSet(comment.getUser()), COMMENTED);
-	}
-
-	@Transactional
-	@Override
-	public void onCommentReplied(CommentReply reply) {
-		watch(reply.getComment().getRequest(), reply.getUser(), 
-				"You are set to watch this pull request as you've commented.");
-		notify(reply.getComment().getRequest(), Sets.newHashSet(reply.getUser()), COMMENTED);
 	}
 
 	@Transactional
@@ -262,13 +253,8 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 	}
 
 	@Override
-	public void onMentioned(Comment comment, Account user) {
+	public void onMentioned(PullRequestComment comment, Account user) {
 		watch(comment.getRequest(), user, "You are set to watch this pull request as you are mentioned.");
 	}
 
-	@Override
-	public void onMentioned(CommentReply reply, Account user) {
-		watch(reply.getComment().getRequest(), user, "You are set to watch this pull request as you are mentioned.");
-	}
-	
 }

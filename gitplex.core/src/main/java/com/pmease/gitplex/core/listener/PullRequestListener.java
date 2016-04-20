@@ -3,13 +3,12 @@ package com.pmease.gitplex.core.listener;
 import javax.annotation.Nullable;
 
 import com.pmease.commons.loader.ExtensionPoint;
-import com.pmease.gitplex.core.entity.Comment;
-import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Account;
 
 @ExtensionPoint
 public interface PullRequestListener {
@@ -22,14 +21,10 @@ public interface PullRequestListener {
 	
 	void onMentioned(PullRequest request, Account user);
 	
-	void onMentioned(Comment comment, Account user);
+	void onMentioned(PullRequestComment comment, Account user);
 
-	void onMentioned(CommentReply reply, Account user);
+	void onCommented(PullRequestComment comment);
 	
-	void onCommented(Comment comment);
-	
-	void onCommentReplied(CommentReply reply);
-
 	void onReviewed(Review review, @Nullable String comment);
 	
 	void onAssigned(PullRequest request);

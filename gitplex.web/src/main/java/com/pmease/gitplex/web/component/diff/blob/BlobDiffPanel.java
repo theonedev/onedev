@@ -15,7 +15,6 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
@@ -33,20 +32,16 @@ public class BlobDiffPanel extends Panel {
 	
 	private final IModel<PullRequest> requestModel;
 	
-	private final IModel<Comment> commentModel;
-	
 	private final BlobChange change;
 	
 	private final DiffMode diffMode;
 	
 	public BlobDiffPanel(String id, IModel<Depot> depotModel, 
-			IModel<PullRequest> requestModel, IModel<Comment> commentModel, 
-			BlobChange change, DiffMode diffMode) {
+			IModel<PullRequest> requestModel, BlobChange change, DiffMode diffMode) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
-		this.commentModel = commentModel;
 		this.change = change;
 		this.diffMode = diffMode;
 	}
@@ -74,7 +69,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, commentModel, change, diffMode));
+				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -109,7 +104,7 @@ public class BlobDiffPanel extends Panel {
 				} else if (change.getAdditions() + change.getDeletions() == 0) {
 					add(newFragment("Content is identical", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, commentModel, change, diffMode));
+					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));
@@ -139,7 +134,6 @@ public class BlobDiffPanel extends Panel {
 	protected void onDetach() {
 		depotModel.detach();
 		requestModel.detach();
-		commentModel.detach();
 		
 		super.onDetach();
 	}

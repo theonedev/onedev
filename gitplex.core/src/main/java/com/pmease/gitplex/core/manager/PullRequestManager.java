@@ -1,7 +1,6 @@
 package com.pmease.gitplex.core.manager;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -75,16 +74,6 @@ public interface PullRequestManager extends EntityDao<PullRequest> {
 	void deleteSourceBranch(PullRequest request);
 	
 	void restoreSourceBranch(PullRequest request);
-	
-	/**
-	 * Get last visit date of specified pull request for current user.
-	 * 
-	 * @return
-	 * 			last visit date of specified pull request for current user, or <tt>null</tt>
-	 * 			if current user is anonymous or has never visited the pull request
-	 */
-	@Nullable
-	Date getLastVisitDate(PullRequest request);
 	
 	void checkSanity();
 	

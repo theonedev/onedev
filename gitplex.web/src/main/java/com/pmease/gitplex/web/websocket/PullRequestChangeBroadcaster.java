@@ -9,14 +9,13 @@ import com.pmease.commons.loader.InheritableThreadLocalData;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
-import com.pmease.gitplex.core.entity.CommentReply;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.listener.PullRequestListener;
-import com.pmease.gitplex.core.entity.Account;
 
 public class PullRequestChangeBroadcaster implements PullRequestListener {
 	
@@ -58,7 +57,7 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onCommented(Comment comment) {
+	public void onCommented(PullRequestComment comment) {
 		onChange(comment.getRequest(), PullRequest.Event.COMMENTED);
 	}
 
@@ -70,11 +69,6 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	@Override
 	public void onAssigned(PullRequest request) {
 		onChange(request, PullRequest.Event.ASSIGNED);
-	}
-
-	@Override
-	public void onCommentReplied(CommentReply reply) {
-		onChange(reply.getComment().getRequest(), PullRequest.Event.COMMENT_REPLIED);
 	}
 
 	private void onChange(PullRequest request, PullRequest.Event event) {
@@ -115,13 +109,9 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onMentioned(Comment comment, Account user) {
+	public void onMentioned(PullRequestComment comment, Account user) {
 	}
 
-	@Override
-	public void onMentioned(CommentReply reply, Account user) {
-	}
-	
 	@Override
 	public void onInvitingReview(ReviewInvitation invitation) {
 	}

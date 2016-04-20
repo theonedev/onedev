@@ -42,7 +42,6 @@ import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AccountManager;
@@ -126,7 +125,7 @@ public abstract class EditSavePanel extends Panel {
 		changedContainer.setOutputMarkupPlaceholderTag(true);
 		if (change != null) {
 			changedContainer.add(new BlobDiffPanel("changes", depotModel, 
-					new Model<PullRequest>(null), new Model<Comment>(null), change, DiffMode.UNIFIED));
+					new Model<PullRequest>(null), change, DiffMode.UNIFIED));
 		} else {
 			changedContainer.add(new WebMarkupContainer("changes"));
 		}

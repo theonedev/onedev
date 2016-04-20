@@ -18,15 +18,15 @@ import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestActivity;
+import com.pmease.gitplex.core.entity.PullRequestComment;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Review.Result;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.manager.CommentManager;
+import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 
@@ -35,7 +35,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 
 	private final PullRequestManager pullRequestManager;
 	
-	private final CommentManager commentManager;
+	private final PullRequestCommentManager commentManager;
 
 	private final UnitOfWork unitOfWork;
 	
@@ -43,7 +43,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 	
 	@Inject
 	public DefaultReviewManager(Dao dao, 
-			PullRequestManager pullRequestManager, CommentManager commentManager, 
+			PullRequestManager pullRequestManager, PullRequestCommentManager commentManager, 
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		super(dao);
 		
@@ -84,7 +84,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 		persist(activity);
 		
 		if (comment != null) {
-			Comment requestComment = new Comment();
+			PullRequestComment requestComment = new PullRequestComment();
 			requestComment.setRequest(request);
 			requestComment.setUser(reviewer);
 			requestComment.setContent(comment);

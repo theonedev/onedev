@@ -57,7 +57,6 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.listener.RefListener;
@@ -125,28 +124,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	private Long requestId;
 	
-	private Long commentId;
-	
-	private final IModel<Comment> commentModel = new LoadableDetachableModel<Comment>() {
-
-		@Override
-		protected Comment load() {
-			if (commentId != null)
-				return GitPlex.getInstance(Dao.class).load(Comment.class, commentId);
-			else
-				return null;
-		}
-		
-	};
-	
 	private final IModel<PullRequest> requestModel = new LoadableDetachableModel<PullRequest>() {
 
 		@Override
 		protected PullRequest load() {
-			Comment comment = getComment();
-			if (comment != null)
-				return comment.getRequest();
-			else if (requestId != null)
+			if (requestId != null)
 				return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
 			else
 				return null;
@@ -180,25 +162,17 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 		trait.depotId = getDepot().getId();
 		
-		commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		blobIdent.revision = params.get(PARAM_REVISION).toString();
 		blobIdent.path = GitUtils.normalizePath(params.get(PARAM_PATH).toString());
 		
-		Comment comment = commentModel.getObject();
-		if (comment != null) {
-			if (blobIdent.revision != null || blobIdent.path != null)
-				throw new IllegalArgumentException("Revision or path should not be specified if comment is specified");
-			blobIdent = comment.getBlobIdent();
-		} else {
-			requestId = params.get(PARAM_REQUEST).toOptionalLong();
-			
-			blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
-			if (blobIdent.revision == null)
-				blobIdent.revision = getDepot().getDefaultBranch();
+		requestId = params.get(PARAM_REQUEST).toOptionalLong();
+		
+		blobIdent.revision = GitUtils.normalizePath(params.get(PARAM_REVISION).toString());
+		if (blobIdent.revision == null)
+			blobIdent.revision = getDepot().getDefaultBranch();
 
-			if (requestId != null && !GitUtils.isHash(blobIdent.revision))
-				throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
-		}
+		if (requestId != null && !GitUtils.isHash(blobIdent.revision))
+			throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
 		
 		RevCommit commit = getDepot().getRevCommit(blobIdent.revision);
 		trait.commitId = commit.copy();
@@ -377,11 +351,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 			});
 		}
-	}
-	
-	@Override
-	public Comment getComment() {
-		return commentModel.getObject();
 	}
 	
 	@Override
@@ -607,7 +576,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	private HistoryState getState() {
 		HistoryState state = new HistoryState();
 		state.blobIdent = new BlobIdent(blobIdent);
-		state.commentId = commentId;
 		state.mark = mark;
 		state.mode = mode;
 		state.requestId = requestId;
@@ -616,7 +584,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private void setState(HistoryState state) {
 		blobIdent = new BlobIdent(state.blobIdent);
-		commentId = state.commentId;
 		mark = state.mark;
 		mode = state.mode;
 		requestId = state.requestId;
@@ -795,7 +762,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
-		commentModel.detach();
 		
 		super.onDetach();
 	}

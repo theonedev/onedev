@@ -142,26 +142,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 		else
 			row.add(AttributeAppender.append("class", " non-update"));
 		
-		PullRequestManager pullRequestManager = GitPlex.getInstance(PullRequestManager.class);
-		final Date lastVisitDate = pullRequestManager.getLastVisitDate(getPullRequest());
-		
-		row.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				String cssClasses = "";
-				RenderableActivity activity = (RenderableActivity) row.getDefaultModelObject();
-				if (lastVisitDate != null && lastVisitDate.before(activity.getDate()))
-					cssClasses += " new";
-				return cssClasses;
-			}
-			
-		}));
-		
-		if (lastVisitDate != null && lastVisitDate.before(activity.getDate()))
-			avatarColumn.add(AttributeAppender.append("title", "New activity since your last visit"));
-		
-		RequestCycle.get().setMetaData(RENDERED_ACTIVITY, activity);
 		return row;
 	}
 	

@@ -36,7 +36,7 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -65,7 +65,7 @@ public class TextDiffPanel extends Panel {
 	private final DiffMode diffMode;
 	
 	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			IModel<Comment> commentModel, BlobChange change, DiffMode diffMode) {
+			BlobChange change, DiffMode diffMode) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -131,7 +131,7 @@ public class TextDiffPanel extends Panel {
 				int index = params.getParameterValue("index").toInt();
 				Integer lastContextSize = contextSizes.get(index);
 				if (lastContextSize == null)
-					lastContextSize = Comment.DIFF_CONTEXT_SIZE;
+					lastContextSize = CodeComment.DIFF_CONTEXT_SIZE;
 				int contextSize = lastContextSize + Constants.DIFF_EXPAND_SIZE;
 				contextSizes.put(index, contextSize);
 				
@@ -234,7 +234,7 @@ public class TextDiffPanel extends Panel {
 	}
 
 	private String renderDiffs() {
-		int contextSize = Comment.DIFF_CONTEXT_SIZE;
+		int contextSize = CodeComment.DIFF_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
 		builder.append("<colgroup><col width='40'></col>");
 		if (diffMode == DiffMode.UNIFIED)

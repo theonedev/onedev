@@ -8,7 +8,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
@@ -51,7 +51,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 	
-	public static boolean canModify(Comment comment) {
+	public static boolean canModify(CodeComment comment) {
 		Account currentUser = getAccount();
 		if (currentUser == null) {
 			return false;

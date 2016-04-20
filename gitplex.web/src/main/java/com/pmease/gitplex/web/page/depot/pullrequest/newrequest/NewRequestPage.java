@@ -44,14 +44,13 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.Comment;
+import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.core.entity.ReviewInvitation;
-import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
+import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.manager.PullRequestManager;
@@ -351,8 +350,8 @@ public class NewRequestPage extends PullRequestPage {
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, new Model<PullRequest>(null),
-				new Model<Comment>(null), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
+				new Model<PullRequest>(null), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
 			@Override
