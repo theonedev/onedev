@@ -16,7 +16,9 @@ gitplex.textdiff = {
 				else
 					revision = newRev;
 			}
-			document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, this);
+			var symbolTooltip = document.getElementById(symbolTooltipId);
+			if (symbolTooltip.onMouseOverSymbol)
+				symbolTooltip.onMouseOverSymbol(revision, this);
 		});
 	}
 }
