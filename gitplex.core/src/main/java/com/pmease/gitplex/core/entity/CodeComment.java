@@ -3,10 +3,13 @@ package com.pmease.gitplex.core.entity;
 import java.util.Date;
 
 import javax.annotation.Nullable;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
@@ -14,12 +17,11 @@ import javax.persistence.Version;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLock;
 
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.component.CommentPosition;
+import com.pmease.gitplex.core.entity.component.TokenRange;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -38,6 +40,7 @@ public class CodeComment extends AbstractEntity {
 	private long version;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private Depot depot;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -52,7 +55,20 @@ public class CodeComment extends AbstractEntity {
 	
 	@OptimisticLock(excluded=true)
 	@Embedded
-	private CommentPosition position;
+    @AttributeOverrides({
+        @AttributeOverride(name="revision", column=@Column(name="G_BLOB_REV")),
+        @AttributeOverride(name="path", column=@Column(name="G_BLOB_PATH")),
+        @AttributeOverride(name="mode", column=@Column(name="G_BLOB_MODE")),
+        @AttributeOverride(name="id", column=@Column(name="G_BLOB_ID"))
+    })
+	private BlobIdent blobIdent;
+	
+	@OptimisticLock(excluded=true)
+	@Embedded
+	private TokenRange textRange;
+	
+	@OptimisticLock(excluded=true)
+	private String compareCommit;
 	
 	/**
 	 * @return the depot
@@ -97,52 +113,46 @@ public class CodeComment extends AbstractEntity {
 		GitPlex.getInstance(Dao.class).remove(this);
 	}
 
-	public CommentPosition getPosition() {
-		return position;
-	}
-
-	public void setPosition(CommentPosition position) {
-		this.position = position;
-	}
-
+	/**
+	 * @return the blobIdent
+	 */
 	public BlobIdent getBlobIdent() {
-		return Preconditions.checkNotNull(position).getBlobIdent();
+		return blobIdent;
 	}
-	
+
+	/**
+	 * @param blobIdent the blobIdent to set
+	 */
 	public void setBlobIdent(BlobIdent blobIdent) {
-		if (position == null)
-			position = new CommentPosition();
-		position.setBlobIdent(blobIdent);
-	}
-	
-	public BlobIdent getCompareWith() {
-		return Preconditions.checkNotNull(position).getCompareWith();
-	}
-	
-	public void setCompareWith(BlobIdent compareWith) {
-		if (position == null)
-			position = new CommentPosition();
-		position.setCompareWith(compareWith);
+		this.blobIdent = blobIdent;
 	}
 
-	public int getBeginLine() {
-		return Preconditions.checkNotNull(position).getBeginLine();
+	/**
+	 * @return the textRange
+	 */
+	public TokenRange getTextRange() {
+		return textRange;
 	}
 
-	public void setBeginLine(int beginLine) {
-		if (position == null)
-			position = new CommentPosition();
-		position.setBeginLine(beginLine);
-	}
-	
-	public int getEndLine() {
-		return Preconditions.checkNotNull(position).getEndLine();
+	/**
+	 * @param textRange the textRange to set
+	 */
+	public void setTextRange(TokenRange textRange) {
+		this.textRange = textRange;
 	}
 
-	public void setEndLine(int endLine) {
-		if (position == null)
-			position = new CommentPosition();
-		position.setEndLine(endLine);
+	/**
+	 * @return the compareCommit
+	 */
+	public String getCompareCommit() {
+		return compareCommit;
 	}
-	
+
+	/**
+	 * @param compareCommit the compareCommit to set
+	 */
+	public void setCompareCommit(String compareCommit) {
+		this.compareCommit = compareCommit;
+	}
+
 }
