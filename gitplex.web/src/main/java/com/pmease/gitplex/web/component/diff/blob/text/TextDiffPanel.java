@@ -236,12 +236,25 @@ public class TextDiffPanel extends Panel {
 	private String renderDiffs() {
 		int contextSize = CodeComment.DIFF_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
-		builder.append("<colgroup><col width='40'></col>");
-		if (diffMode == DiffMode.UNIFIED)
-			builder.append("<col width='40'></col>");
-		else
-			builder.append("</col><col></col><col width=40></col>");
-		builder.append("<col></col></colgroup>");
+		if (diffMode == DiffMode.UNIFIED) {
+			builder.append(""
+					+ "<colgroup>"
+					+ "<col width='40'></col>"
+					+ "<col width='40'></col>"
+					+ "<col width='15'></col>"
+					+ "<col></col>"
+					+ "</colgroup>");
+		} else {
+			builder.append(""
+					+ "<colgroup>"
+					+ "<col width='40'></col>"
+					+ "<col width='15'></col>"
+					+ "<col></col>"
+					+ "<col width='40'></col>"
+					+ "<col width='15'></col>"
+					+ "<col></col>"
+					+ "</colgroup>");
+		}
 		for (int i=0; i<change.getDiffBlocks().size(); i++) {
 			DiffBlock<List<CmToken>> block = change.getDiffBlocks().get(i);
 			if (block.getOperation() == Operation.EQUAL) {
@@ -314,95 +327,103 @@ public class TextDiffPanel extends Panel {
 		if (lastContextSize != 0)
 			builder.append("<tr class='code expanded'>");
 		else
-			builder.append("<tr class='code intrinsic'>");
+			builder.append("<tr class='code non-expanded'>");
 
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append("<td class='content old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
-		contentBuilder.append("<span class='operation'>&nbsp;</span>");
 		for (CmToken token: block.getUnits().get(lineIndex)) {
 			contentBuilder.append(token.toHtml(Operation.EQUAL));
 		}
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number'>").append(oldLineNo+1).append("</td>");
-			builder.append("<td class='number'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append(contentBuilder);
 		} else {
-			builder.append("<td class='number'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append(contentBuilder);
-			builder.append("<td class='number'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append(contentBuilder);
 		}
 		builder.append("</tr>");
 	}
 	
 	private void appendInsert(StringBuilder builder, DiffBlock<List<CmToken>> block, int lineIndex) {
-		builder.append("<tr class='code intrinsic'>");
+		builder.append("<tr class='code non-expanded'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append("<td class='content new new").append(newLineNo).append("'>");
-		contentBuilder.append("<span class='operation'>+</span>");
 		List<CmToken> tokens = block.getUnits().get(lineIndex);
 		for (int i=0; i<tokens.size(); i++) 
 			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number new'>&nbsp;</td>");
-			builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect new'>&nbsp;</td>");
+			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append(contentBuilder);
 		} else {
-			builder.append("<td class='number'>&nbsp;</td><td class='content'>&nbsp;</td>");
-			builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>&nbsp;</td>");
+			builder.append("<td class='operation noselect'>&nbsp;</td>");
+			builder.append("<td class='content noselect'>&nbsp;</td>");
+			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append(contentBuilder);
 		}
 		builder.append("</tr>");
 	}
 	
 	private void appendDelete(StringBuilder builder, DiffBlock<List<CmToken>> block, int lineIndex) {
-		builder.append("<tr class='code intrinsic'>");
+		builder.append("<tr class='code non-expanded'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append("<td class='content old old").append(oldLineNo).append("'>");
-		contentBuilder.append("<span class='operation'>-</span>");
 		List<CmToken> tokens = block.getUnits().get(lineIndex);
 		for (int i=0; i<tokens.size(); i++) 
 			contentBuilder.append(tokens.get(i).toHtml(Operation.EQUAL));
 		contentBuilder.append("</td>");
 		
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
-			builder.append("<td class='number old'>&nbsp;</td>");
+			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old'>&nbsp;</td>");
+			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append(contentBuilder);
 		} else {
-			builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect new'>-</td>");
 			builder.append(contentBuilder);
-			builder.append("<td class='number'>&nbsp;</td><td class='content'>&nbsp;</td>");
+			builder.append("<td class='number noselect'>&nbsp;</td>");
+			builder.append("<td class='operation noselect'>&nbsp;</td>");
+			builder.append("<td class='content noselect'>&nbsp;</td>");
 		}
 		builder.append("</tr>");
 	}
 	
 	private void appendSideBySide(StringBuilder builder, DiffBlock<List<CmToken>> deleteBlock, 
 			DiffBlock<List<CmToken>> insertBlock, int deleteLineIndex, int insertLineIndex) {
-		builder.append("<tr class='code intrinsic'>");
+		builder.append("<tr class='code non-expanded'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
-		builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
+		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
+		builder.append("<td class='operation noselect old'>-</td>");
 		builder.append("<td class='content old old").append(oldLineNo).append("'>");
-		builder.append("<span class='operation'>-</span>");
 		for (CmToken token: deleteBlock.getUnits().get(deleteLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
 		
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
-		builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
+		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+		builder.append("<td class='operation noselect new'>+</td>");
 		builder.append("<td class='content new new").append(newLineNo).append("'>");
-		builder.append("<span class='operation'>+</span>");
 		for (CmToken token: insertBlock.getUnits().get(insertLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
@@ -413,24 +434,24 @@ public class TextDiffPanel extends Panel {
 	private void appendModification(StringBuilder builder, DiffBlock<List<CmToken>> deleteBlock, 
 			DiffBlock<List<CmToken>> insertBlock, int deleteLineIndex, int insertLineIndex, 
 			List<DiffBlock<CmToken>> tokenDiffs) {
-		builder.append("<tr class='code intrinsic'>");
+		builder.append("<tr class='code non-expanded'>");
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td class='number old new'>").append(oldLineNo+1).append("</td>");
-			builder.append("<td class='number old new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect old new'>*</td>");
 			builder.append("<td class='content old new old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
-			builder.append("<span class='operation'>*</span>");
 			for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getUnits()) 
 					builder.append(token.toHtml(tokenBlock.getOperation()));
 			}
 			builder.append("</td>");
 		} else {
-			builder.append("<td class='number old'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content old old").append(oldLineNo).append("'>");
-			builder.append("<span class='operation'>-</span>");
 			for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getUnits()) {
 					if (tokenBlock.getOperation() != Operation.INSERT) 
@@ -439,9 +460,9 @@ public class TextDiffPanel extends Panel {
 			}
 			builder.append("</td>");
 			
-			builder.append("<td class='number new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content new new").append(newLineNo).append("'>");
-			builder.append("<span class='operation'>+</span>");
 			for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getUnits()) {
 					if (tokenBlock.getOperation() != Operation.DELETE) 
@@ -461,12 +482,12 @@ public class TextDiffPanel extends Panel {
 		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td colspan='2' class='expander'><a title='Show more lines' href=\"")
 					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
-			builder.append("<td class='skipped'><i class='fa fa-ellipsis-h'></i> skipped ")
+			builder.append("<td colspan='2' class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
 			builder.append("<td class='expander'><a title='Show more lines' href=\"").append(script)
 					.append("\"><i class='fa fa-sort'></i></a></td>");
-			builder.append("<td class='skipped' colspan='3'><i class='fa fa-ellipsis-h'></i> skipped ")
+			builder.append("<td class='skipped noselect' colspan='5'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		}
 		builder.append("</tr>");
