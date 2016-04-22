@@ -36,7 +36,7 @@
 	border-radius: 0 0 4px 0;
 }
 .text-diff>.body>tbody>tr>td.number {
-	padding: 0 8px;
+	padding: 0 4px;
 	border-left: 1px solid #EEE;
 	text-align: right;
 	font-size: 12px;

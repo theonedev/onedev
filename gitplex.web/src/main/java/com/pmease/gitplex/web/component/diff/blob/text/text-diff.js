@@ -20,9 +20,14 @@ gitplex.textdiff = {
 			if (symbolTooltip.onMouseOverSymbol)
 				symbolTooltip.onMouseOverSymbol(revision, this);
 		});
+		$container.find("td.content").mouseover(function() {
+			if ($(this).hasClass("left")) {
+				$container.find("td.content.right").addClass("noselect");
+				$container.find("td.content.left").removeClass("noselect");
+			} else if ($(this).hasClass("right")) {
+				$container.find("td.content.left").addClass("noselect");
+				$container.find("td.content.right").removeClass("noselect");
+			}
+		});
 	}
 }
-$(document).on("mouseup", function() {
-	console.log(window.getSelection().anchorNode);
-	console.log(window.getSelection().anchorOffset);
-});
