@@ -10,7 +10,15 @@ pmease.commons.floating = {
 			 * floating panel, as normally the triggering element already has the logic 
 			 * closing the floating when it is clicked (to achieve the toggle effect) 
 			 */
-		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0) {
+			var x = e.pageX + $(window).scrollLeft();
+			var y = e.pageY + $(window).scrollTop();
+			
+			// add this extra check as otherwise clicking on scroll bar of floating will hide the 
+			// floating in IE
+			var contains = $floating.offset().left<x && $floating.offset().left+$floating.outerWidth()>x
+					&& $floating.offset().top<y && $floating.offset().top+$floating.outerHeight()>y;
+					
+		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0 && !contains) {
 		    	var $trigger = $floating.data("trigger");
 			    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) 
 			    	pmease.commons.floating.close($floating, true);

@@ -6,12 +6,12 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponent;
 
 @SuppressWarnings("serial")
-public abstract class FormComponentInputBehavior extends AjaxFormComponentUpdatingBehavior{
+public abstract class InputChangeBehavior extends AjaxFormComponentUpdatingBehavior{
 
 	private String input;
 	
-	public FormComponentInputBehavior() {
-		super("input");
+	public InputChangeBehavior() {
+		super("inputchange");
 	}
 
 	@Override
@@ -25,9 +25,9 @@ public abstract class FormComponentInputBehavior extends AjaxFormComponentUpdati
 		String newInput = component.getInput();
 		if (!ObjectUtils.equals(newInput, input)) {
 			input = newInput;
-			onInput(target);
+			onInputChange(target);
 		}
 	}
 
-	protected abstract void onInput(AjaxRequestTarget target);
+	protected abstract void onInputChange(AjaxRequestTarget target);
 }

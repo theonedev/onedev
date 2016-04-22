@@ -20,12 +20,12 @@
 		$input.next().click(function() {
 			$input.val("");
 			$(this).hide();
-			$input.trigger("input");
+			$input.trigger("inputchange");
 		});
 		if ($input.val().length != 0)
 			$input.next().show();
 		
-		$input.bind("input", function() {
+		$input.bind("inputchange", function() {
 			var value = $(this).val();
 			if (value.trim().length != 0)
 				$input.next().show();

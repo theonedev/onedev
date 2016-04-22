@@ -35,7 +35,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
-import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
+import com.pmease.commons.wicket.behavior.InputChangeBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
@@ -95,10 +95,10 @@ public abstract class DepotSelector extends Panel {
 		
 		TextField<String> searchField = new TextField<String>("search", Model.of(""));
 		add(searchField);
-		searchField.add(new FormComponentInputBehavior() {
+		searchField.add(new InputChangeBehavior() {
 			
 			@Override
-			protected void onInput(AjaxRequestTarget target) {
+			protected void onInputChange(AjaxRequestTarget target) {
 				target.add(depotsContainer);
 				target.add(noDepotsContainer);
 			}

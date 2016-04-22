@@ -42,7 +42,7 @@ import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
+import com.pmease.commons.wicket.behavior.InputChangeBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.modal.ModalPanel;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -229,10 +229,10 @@ public abstract class RevisionSelector extends Panel {
 			
 		});
 		
-		revField.add(new FormComponentInputBehavior() {
+		revField.add(new InputChangeBehavior() {
 			
 			@Override
-			protected void onInput(AjaxRequestTarget target) {
+			protected void onInputChange(AjaxRequestTarget target) {
 				page = 1;
 				itemValues = getItemValues(revField.getInput());
 				newItemsView(target);

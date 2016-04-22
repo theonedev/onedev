@@ -32,7 +32,7 @@ import org.eclipse.jgit.lib.Ref;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
-import com.pmease.commons.wicket.behavior.FormComponentInputBehavior;
+import com.pmease.commons.wicket.behavior.InputChangeBehavior;
 import com.pmease.gitplex.core.entity.Depot;
 
 @SuppressWarnings("serial")
@@ -104,10 +104,10 @@ public abstract class BranchSelector extends Panel {
 		};
 		add(keyBehavior);
 		
-		branchField.add(new FormComponentInputBehavior() {
+		branchField.add(new InputChangeBehavior() {
 			
 			@Override
-			protected void onInput(AjaxRequestTarget target) {
+			protected void onInputChange(AjaxRequestTarget target) {
 				branchInput = branchField.getInput();
 				filteredBranches.clear();
 				if (StringUtils.isNotBlank(branchInput)) {

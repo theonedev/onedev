@@ -564,8 +564,7 @@ pmease.commons = {
 					placement: {x: 50, y: 100, targetX: 0, targetY: 0}};
 			$selectionPopup.find(".triangle").show();
 			$selectionPopup.show().align(alignment);
-			if (Math.abs($selectionPopup.offset().top+$selectionPopup.outerHeight() - position.top)>10 
-					|| Math.abs($selectionPopup.offset().left+$selectionPopup.outerWidth()/2 - position.left)>10) {
+			if (Math.abs($selectionPopup.offset().top+$selectionPopup.outerHeight() - position.top)>10) {
 				$selectionPopup.find(".triangle").hide();
 			} 
 			$selectionPopup.find(".link").attr("href", selectionUrl);
