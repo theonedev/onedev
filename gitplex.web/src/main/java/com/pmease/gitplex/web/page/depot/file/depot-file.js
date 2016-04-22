@@ -66,23 +66,4 @@ $(window).load(function() {
 		$fileViewer.closestDescendant(".autofit:visible").trigger("autofit", [$fileViewer.width(), $fileViewer.height()]);
 	});
 	$(window).resize();
-	
-	$("body").append("" +
-			"<div id='selection-popup'>" +
-			"<div class='content'>" +
-			"<a class='link'><i class='fa fa-link'></i> Permanent link of this selection</a>" +
-			"<a class='comment'><i class='fa fa-comment'></i> Add comment for this selection</a>" +
-			"</div>" +
-			"<div class='triangle'></div>" +
-			"</div>");
-
-	var $selectionPopup = $("#selection-popup");
-	$selectionPopup.data("show", function(position, selectionUrl, commentCallback) {
-		var alignment = {
-				target: {left: position.left, top: position.top, width: 0, height: 0}, 
-				placement: {x: 50, y: 100, targetX: 0, targetY: 0}};
-		$selectionPopup.show().align(alignment);
-		$selectionPopup.find(".link").attr("href", selectionUrl);
-		$selectionPopup.find(".comment").click(commentCallback);
-	});
 });

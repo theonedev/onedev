@@ -17,6 +17,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
 import com.pmease.commons.wicket.CommonPage;
+import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
@@ -101,6 +102,8 @@ public abstract class BasePage extends CommonPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		response.render(new PriorityHeaderItem(
+				JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE)));
 		response.render(new PriorityHeaderItem(
 				JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(BasePage.class, "base.js"))));
 		response.render(new PriorityHeaderItem(

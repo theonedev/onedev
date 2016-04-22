@@ -1,12 +1,24 @@
 <wicket:extend>
 	<table>
-		<tr>
-			<td style="-ms-user-select: none; -webkit-user-select: none;-moz-user-select: -moz-none;user-select:none;">1</td>
-			<td>hello</td>
+		<tr class="expander">
+			<td>...</td>
 		</tr>
-		<tr>
-			<td style="-webkit-user-select: none;-moz-user-select: -moz-none;user-select:none;">2</td>
-			<td>world</td>
+		<tr class="anchor">
+			<td>1</td>
+		</tr>
+		<tr class="expander">
+			<td>...</td>
+		</tr>
+		<tr class="focus">
+			<td>2</td>
+		</tr>
+		<tr class="expander">
+			<td>...</td>
 		</tr>
 	</table>
+	<script type="text/javascript">
+		var $nextAll = $("tr.anchor").nextAll("tr.expander");
+		var $prevAll = $("tr.focus").prevAll("tr.expander");
+		console.log($nextAll.filter($prevAll).length);
+	</script>
 </wicket:extend>

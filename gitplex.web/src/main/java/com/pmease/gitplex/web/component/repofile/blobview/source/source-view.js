@@ -75,7 +75,7 @@ gitplex.sourceview = {
 		    			var uri = URI(window.location.href); 
 		    			uri.removeSearch("mark").addSearch("mark", 
 		    					(from.line+1) + "," + (from.ch+1) + "-" + (to.line+1) + "," + (to.ch+1));
-			    		$("#selection-popup").data("show")(position, uri.toString(), function(){});
+			    		$("#selection-popup").data("show")(position, uri.toString(), function(){}, $code[0]);
 			    	} else {
 			    		$("#selection-popup").hide();
 			    	}
