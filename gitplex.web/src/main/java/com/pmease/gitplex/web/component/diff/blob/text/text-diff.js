@@ -36,11 +36,20 @@ gitplex.textdiff = {
 		    	var selection = window.getSelection();
 		    	var hasValidSelection = false;
 		    	if (selection.rangeCount) {
-		    		var $anchor = $(selection.anchorNode);
-		    		var $focus = $(selection.focusNode);
+		    		var firstRange = selection.getRangeAt(0).cloneRange();
+		    		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
+		    		var $anchor = $(firstRange.startContainer);
+		    		var $focus = $(lastRange.endContainer);
+		    		var anchorOffset = firstRange.startOffset;
+		    		var focusOffset = lastRange.endOffset;
 		    		if ($anchor[0] != $focus[0] || selection.anchorOffset != selection.focusOffset) { // something must be selected
-		    			var $anchorDiff = $anchor.closest(".text-diff");
-		    			var $focusDiff = $focus.closest(".text-diff");
+		    			var $anchorDiff = $anchor;
+		    			if (!$anchorDiff.hasClass("text-diff"))
+		    				$anchorDiff = $anchor.closest(".text-diff");
+		    			var $focusDiff = $focus;
+		    			if (!$focusDiff.hasClass("text-diff"))
+		    				$focusDiff = $focus.closest(".text-diff");
+		    			
 		    			if ($anchorDiff.length != 0 && $focusDiff.length != 0 && $anchorDiff[0] == $focusDiff[0]) { // selection must be within same file
 		    				var $anchorTd = $anchor;
 		    				if (!$anchorTd.is("td.content"))
@@ -48,7 +57,42 @@ gitplex.textdiff = {
 		    				var $focusTd = $focus;
 		    				if (!$focusTd.is("td.content"))
 		    					$focusTd = $focus.closest(".text-diff td.content");
-		    					
+
+		    				if ($anchorTd.length != 0 || $focusTd.length != 0) {
+		    					if ($anchorTd.length == 0) {
+	    							var $tr;
+		    						if ($anchor.is("tr.code")) {
+		    							$tr = $anchor;
+		    						} else {
+		    							$tr = $anchorDiff.find("tr.code").first();
+		    						}
+	    							if ($focusTd.hasClass("left"))
+	    								$anchorTd = $tr.find("td.content.left");
+	    							else if ($focusTd.hasClass("right"))
+	    								$anchorTd = $tr.find("td.content.right");
+	    							else
+	    								$anchorTd = $tr.find("td.content");
+	    							$anchor = $anchorTd;
+	    							anchorOffset = -1;
+		    					}
+		    					if ($focusTd.length == 0) {
+	    							var $tr;
+	    							if ($focus.is("tr.code")) {
+	    								$tr = $focus;
+	    							} else {
+		    							$tr = $focusDiff.find("tr.code").last();
+		    						} 
+	    							if ($anchorTd.hasClass("left"))
+	    								$focusTd = $tr.find("td.content.left");
+	    							else if ($anchorTd.hasClass("right"))
+	    								$focusTd = $tr.find("td.content.right");
+	    							else
+	    								$focusTd = $tr.find("td.content");
+	    							$focus = $focusTd;
+	    							focusOffset = -1;
+		    					}
+		    				}
+		    				
 		    				if ($anchorTd.length != 0 && $focusTd.length != 0) { // selection must starts with diff content and ends with diff content 
 		    					if ($anchorTd.hasClass("left") && $focusTd.hasClass("left") 
 		    							|| $anchorTd.hasClass("right") && $focusTd.hasClass("right") 
@@ -57,20 +101,22 @@ gitplex.textdiff = {
 			    					var $focusTr = $focusTd.closest("tr");
 			    					if ($anchorTr.nextAll("tr.expander").filter($focusTr.prevAll("tr.expander")).length == 0
 			    							&& $anchorTr.prevAll("tr.expander").filter($focusTr.nextAll("tr.expander")).length == 0) { // all lines between selection has been expanded 
-			    						var range = selection.getRangeAt(0).cloneRange();
-			    						range.collapse(true);
-			    						var startRect = range.getClientRects()[0];
-			    						range = selection.getRangeAt(0).cloneRange();
-			    						range.collapse(false);
-			    						var endRect = range.getClientRects()[0];
-			    						if (startRect && endRect) {
-			    							hasValidSelection = true;
-			    			    			var position = {
-			    			    				left: $(window).scrollLeft() + (startRect.left + endRect.left)/2,
-			    			    				top: $(window).scrollTop() + startRect.top
-			    			    			}
-			    				    		$("#selection-popup").data("show")(position, "www.pmease.com", function(){}, $container[0]);
-			    						}
+		    							hasValidSelection = true;
+		    							firstRange.collapse(true);
+		    							var startRect = firstRange.getClientRects()[0];
+		    							lastRange.collapse(false);
+		    							var endRect = lastRange.getClientRects()[0];
+		    							if (!startRect || !endRect) {
+				    						startRect = selection.getRangeAt(0).getClientRects()[0];
+				    						endRect = startRect;
+		    							}
+		    							var position = {
+		    								left: (startRect.left + endRect.right)/2,
+		    								top: startRect.top
+		    							};
+		    			    			position.left += $(window).scrollLeft();
+		    			    			position.top += $(window).scrollTop();
+		    				    		$("#selection-popup").data("show")(position, "www.pmease.com", function(){}, $container[0]);
 			    					}
 		    					}
 		    				}
