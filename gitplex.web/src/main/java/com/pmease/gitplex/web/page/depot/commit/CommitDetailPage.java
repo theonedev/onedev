@@ -316,7 +316,7 @@ public class CommitDetailPage extends DepotPage {
 	private void newCompareResult(@Nullable AjaxRequestTarget target) {
 		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
 				Model.of((PullRequest)null), getCompareWith(), 
-				getCommit().name(), state.path, state.path, diffOption.getLineProcessor(), 
+				getCommit().name(), state.path, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
 			@Override

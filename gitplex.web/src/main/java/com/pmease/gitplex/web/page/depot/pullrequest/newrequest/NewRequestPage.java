@@ -351,7 +351,7 @@ public class NewRequestPage extends PullRequestPage {
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
-				new Model<PullRequest>(null), oldRev, newRev, path, null, diffOption.getLineProcessor(), 
+				new Model<PullRequest>(null), oldRev, newRev, path, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
 			@Override

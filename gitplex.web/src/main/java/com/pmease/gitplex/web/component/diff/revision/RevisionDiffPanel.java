@@ -57,8 +57,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final String path;
 	
-	private final String comparePath;
-	
 	private final LineProcessor lineProcessor;
 	
 	private final DiffMode diffMode;
@@ -72,8 +70,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			List<String> paths = new ArrayList<>();
 			if (path != null)
 				paths.add(path);
-			if (comparePath != null)
-				paths.add(comparePath);
 			List<DiffEntry> diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash,
 					true, paths.toArray(new String[paths.size()]));
 			
@@ -82,7 +78,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			 * to make rename detection possible 
 			 */
 			boolean renamePossible = false;
-			if (path != null && comparePath == null) {
+			if (path != null) {
 				for (DiffEntry entry: diffEntries) {
 					if ((entry.getChangeType() == ChangeType.ADD || entry.getChangeType() == ChangeType.DELETE)
 							&& (path.equals(entry.getOldPath()) || path.equals(entry.getNewPath()))) {
@@ -201,7 +197,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, @Nullable String path, 
-			@Nullable String comparePath, LineProcessor lineProcessor, DiffMode diffMode) {
+			LineProcessor lineProcessor, DiffMode diffMode) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -209,7 +205,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		this.oldRev = oldRev;
 		this.newRev = newRev;
 		this.path = path;
-		this.comparePath = comparePath;
 		this.lineProcessor = lineProcessor;
 		this.diffMode = diffMode;
 	}

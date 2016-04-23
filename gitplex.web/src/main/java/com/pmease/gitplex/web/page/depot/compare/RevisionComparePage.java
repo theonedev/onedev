@@ -461,7 +461,7 @@ public class RevisionComparePage extends DepotPage {
 				new Model<PullRequest>(null),  
 				compareWithMergeBase?mergeBaseModel.getObject():leftSide.getRevision(), 
 				rightSide.getRevision(), 
-				StringUtils.isBlank(path)?null:path, null, diffOption.getLineProcessor(), 
+				StringUtils.isNotBlank(path)?path:null, diffOption.getLineProcessor(), 
 				diffOption.getDiffMode()) {
 
 			@Override

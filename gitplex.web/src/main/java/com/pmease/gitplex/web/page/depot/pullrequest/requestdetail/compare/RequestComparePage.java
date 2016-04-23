@@ -67,8 +67,6 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private static final String PARAM_PATH = "path";
 	
-	private static final String PARAM_COMPARE_PATH = "comparePath";
-	
 	public static final String REV_BASE = "base";
 	
 	public static final String REV_UPDATE_PREFIX = "update";
@@ -92,8 +90,6 @@ public class RequestComparePage extends RequestDetailPage {
 	private String newCommitHash;
 	
 	private String path;
-	
-	private String comparePath;
 	
 	private WebMarkupContainer compareHead;
 	
@@ -153,7 +149,6 @@ public class RequestComparePage extends RequestDetailPage {
 		state.oldRev = params.get(PARAM_OLD_REV).toString();
 		state.newRev = params.get(PARAM_NEW_REV).toString();
 		state.path = params.get(PARAM_PATH).toString();
-		state.comparePath = params.get(PARAM_COMPARE_PATH).toString();
 		
 		initFromState(state);
 	}
@@ -162,7 +157,6 @@ public class RequestComparePage extends RequestDetailPage {
 		oldCommitHash = getCommitHash(state.oldRev);
 		newCommitHash = getCommitHash(state.newRev);
 		path = state.path;
-		comparePath = state.comparePath;
 	}
 	
 	private String getRevision(String commitHash) {
@@ -402,7 +396,6 @@ public class RequestComparePage extends RequestDetailPage {
 			@Override
 			protected void onSelectPath(AjaxRequestTarget target, String path) {
 				RequestComparePage.this.path = state.path = path;
-				comparePath = state.comparePath = null;
 				if (state.commentId != null) {
 					state.commentId = null;
 					state.oldRev = getRevision(oldCommitHash);
@@ -520,12 +513,11 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	public static PageParameters paramsOf(PullRequest request, String oldRev, String newRev, 
 			@Nullable String path) {
-		return paramsOf(request, null, oldRev, newRev, path, null);
+		return paramsOf(request, null, oldRev, newRev, path);
 	}
 	
 	private static PageParameters paramsOf(PullRequest request, @Nullable Long commentId, 
-			@Nullable String oldRev, @Nullable String newRev, @Nullable String path, 
-			@Nullable String comparePath) {
+			@Nullable String oldRev, @Nullable String newRev, @Nullable String path) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 
 		if (commentId != null)
@@ -536,8 +528,6 @@ public class RequestComparePage extends RequestDetailPage {
 			params.set(PARAM_NEW_REV, newRev);
 		if (path != null)
 			params.set(PARAM_PATH,  path);
-		if (comparePath != null)
-			params.set(PARAM_COMPARE_PATH,  path);
 		return params;
 	}
 	
@@ -701,7 +691,7 @@ public class RequestComparePage extends RequestDetailPage {
 
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
 		PageParameters params = paramsOf(getPullRequest(), state.commentId, 
-				state.oldRev, state.newRev, state.path, state.comparePath);
+				state.oldRev, state.newRev, state.path);
 		CharSequence url = RequestCycle.get().urlFor(RequestComparePage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
@@ -715,12 +705,12 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
 		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
-				requestModel, oldCommitHash, newCommitHash, path, comparePath, 
+				requestModel, oldCommitHash, newCommitHash, path, 
 				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
 
 			@Override
 			protected void onClearPath(AjaxRequestTarget target) {
-				path = comparePath = state.path = state.comparePath = null;
+				path = state.path = null;
 				if (state.commentId != null) {
 					state.commentId = null;
 					state.oldRev = getRevision(oldCommitHash);
