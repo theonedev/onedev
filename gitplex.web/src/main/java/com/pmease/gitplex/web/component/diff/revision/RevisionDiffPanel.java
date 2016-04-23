@@ -11,7 +11,6 @@ import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -284,7 +283,6 @@ public abstract class RevisionDiffPanel extends Panel {
 				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
 				
 				WebMarkupContainer pathLink = new WebMarkupContainer("path");
-				pathLink.add(AttributeModifier.replace("href", "#diff-" + change.getPath()));
 				pathLink.add(new Label("path", change.getPath()));
 				
 				item.add(pathLink);
@@ -322,8 +320,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
-				item.setMarkupId("diff-" + change.getPath());
-				item.setOutputMarkupId(true);
 				item.add(new BlobDiffPanel("change", depotModel, requestModel, change, diffMode));
 			}
 			

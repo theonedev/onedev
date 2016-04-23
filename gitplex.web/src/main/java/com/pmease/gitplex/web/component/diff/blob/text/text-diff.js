@@ -40,8 +40,6 @@ gitplex.textdiff = {
 		    		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
 		    		var $anchor = $(firstRange.startContainer);
 		    		var $focus = $(lastRange.endContainer);
-		    		var anchorOffset = firstRange.startOffset;
-		    		var focusOffset = lastRange.endOffset;
 		    		if ($anchor[0] != $focus[0] || selection.anchorOffset != selection.focusOffset) { // something must be selected
 		    			var $anchorDiff = $anchor;
 		    			if (!$anchorDiff.hasClass("text-diff"))
@@ -73,7 +71,6 @@ gitplex.textdiff = {
 	    							else
 	    								$anchorTd = $tr.find("td.content");
 	    							$anchor = $anchorTd;
-	    							anchorOffset = -1;
 		    					}
 		    					if ($focusTd.length == 0) {
 	    							var $tr;
@@ -89,7 +86,6 @@ gitplex.textdiff = {
 	    							else
 	    								$focusTd = $tr.find("td.content");
 	    							$focus = $focusTd;
-	    							focusOffset = -1;
 		    					}
 		    				}
 		    				
@@ -116,7 +112,95 @@ gitplex.textdiff = {
 		    							};
 		    			    			position.left += $(window).scrollLeft();
 		    			    			position.top += $(window).scrollTop();
-		    				    		$("#selection-popup").data("show")(position, "www.pmease.com", function(){}, $container[0]);
+		    			    			
+		    				    		function getCursor($td, $node, nodeOffset) {
+		    				    			var oldLine, newLine;
+		    				    			var oldCh, newCh;
+	    				    				if (!$td.hasClass("old") && !$td.hasClass("new") 
+	    				    						|| $td.hasClass("old") && $td.hasClass("new")) {
+	    				    					oldLine = $td.data("old") + 1;
+	    				    					newLine = $td.data("new") + 1;
+	    				    					oldCh = newCh = $td.text().length;
+	    				    				} else if ($td.hasClass("old")) {
+	    				    					oldLine = $td.data("old") + 1;
+	    				    					oldCh = $td.text().length;
+	    				    				} else {
+	    				    					newLine = $td.data("new") + 1;
+	    				    					newCh = $td.text().length;
+	    				    				}
+		    				    			if ($node[0] != $td[0]) {
+	    										var oldOffset = 0, newOffset = 0;
+			    				    			var $children = $td.contents();
+			    				    			if ($node.parent().is("span"))
+			    				    				$node = $node.parent();
+			    				    			for (var i=0; i<$children.length; i++) {
+			    				    				var $child = $($children[i]);
+			    				    				if ($child[0] == $node[0]) {
+			    				    					if ($child.hasClass("delete")) { 
+			    				    						oldCh = oldOffset + nodeOffset;
+			    				    						newCh = undefined;
+			    				    						newLine = undefined;
+			    				    					} else if ($child.hasClass("insert")) {
+			    				    						oldCh = undefined;
+			    				    						oldLine = undefined;
+			    				    						newCh = newOffset + nodeOffset;
+			    				    					} else {
+			    				    						oldCh = oldOffset + nodeOffset;
+			    				    						newCh = newOffset + nodeOffset;
+			    				    					}
+			    				    					break;
+			    				    				} else {
+			    				    					var len = $child.text().length;
+			    				    					if ($child.hasClass("delete")) {
+			    				    						oldOffset += len;
+			    				    					} else if ($child.hasClass("insert")) {
+			    				    						newOffset += len;
+			    				    					} else {
+				    				    					oldOffset += len;
+				    				    					newOffset += len;
+			    				    					}
+			    				    				}
+			    				    			}
+		    				    			}
+	    									return {
+	    										oldLine: oldLine,
+	    										oldCh: oldCh,
+	    										newLine: newLine,
+	    										newCh: newCh
+	    									};
+		    				    		}
+
+		    				    		console.log(firstRange.startOffset + ":" + lastRange.endOffset);
+		    				    		var anchorCursor = getCursor($anchorTd, $anchor, firstRange.startOffset);
+		    				    		var focusCursor = getCursor($focusTd, $focus, lastRange.endOffset);
+
+		    				    		var mark;
+		    				    		var commentCallback = function() {};
+		    				    		var unableToCommentUrl = "http://wiki.pmease.com/display/gp/Add+Diff+Comment";
+		    				    		if (anchorCursor.newLine) {
+		    				    			if (focusCursor.newLine) {
+		    				    				mark = "new." + anchorCursor.newLine+"."+anchorCursor.newCh 
+		    				    						+ "-new." + focusCursor.newLine + "." + focusCursor.newCh;		    				    			
+		    				    			} else {
+		    				    				mark = "new." + anchorCursor.newLine+"."+anchorCursor.newCh 
+		    				    						+ "-old." + focusCursor.oldLine + "." + focusCursor.oldCh;		    				    			
+		    				    				commentCallback = unableToCommentUrl;
+		    				    			}
+		    				    		} else {
+		    				    			if (focusCursor.oldLine) {
+		    				    				mark = "old." + anchorCursor.oldLine+"."+anchorCursor.oldCh 
+		    				    						+ "-old." + focusCursor.oldLine + "." + focusCursor.oldCh;		    				    			
+		    				    			} else {
+		    				    				mark = "old." + anchorCursor.oldLine+"."+anchorCursor.oldCh 
+		    				    						+ "-new." + focusCursor.newLine + "." + focusCursor.newCh;		    				    			
+		    				    				commentCallback = unableToCommentUrl;
+		    				    			}
+		    				    		}
+		    			    			var uri = URI(window.location.href); 
+		    			    			uri.removeSearch("path").addSearch("path", $container.data("path"));
+		    			    			uri.removeSearch("mark").addSearch("mark", mark);
+		    				    		$("#selection-popup").data("show")(position, uri.toString(), 
+		    				    				commentCallback, $container[0]);
 			    					}
 		    					}
 		    				}

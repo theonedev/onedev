@@ -47,12 +47,6 @@
 	margin-top: 2px;
 }
 
-/* 
- * margin-top and padding-top property below is necessary to make change anchor working 
- * nicely with sticky revision diff options 
- */
 .revision-diff>.changes>.change {
 	margin-bottom: 20px;
-	margin-top: -48px;
-	padding-top: 48px;
 }

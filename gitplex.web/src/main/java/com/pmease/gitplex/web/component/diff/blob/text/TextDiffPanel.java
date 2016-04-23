@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -36,6 +37,7 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -180,6 +182,7 @@ public class TextDiffPanel extends Panel {
 		};
 		add(symbolTooltip);
 		
+		add(AttributeModifier.replace("data-path", change.getPath()));
 		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s');", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision);
@@ -225,6 +228,7 @@ public class TextDiffPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
 		response.render(CssHeaderItem.forReference(
@@ -336,7 +340,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
+			builder.append("<td class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			for (CmToken token: block.getUnits().get(lineIndex)) {
 				builder.append(token.toHtml(Operation.EQUAL));
 			}
@@ -344,14 +348,14 @@ public class TextDiffPanel extends Panel {
 		} else {
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content left old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
+			builder.append("<td class='content left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			for (CmToken token: block.getUnits().get(lineIndex)) {
 				builder.append(token.toHtml(Operation.EQUAL));
 			}
 			builder.append("</td>");
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content right old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
+			builder.append("<td class='content right' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			for (CmToken token: block.getUnits().get(lineIndex)) {
 				builder.append(token.toHtml(Operation.EQUAL));
 			}
@@ -368,7 +372,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect new'>&nbsp;</td>");
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
-			builder.append("<td class='content new new").append(newLineNo).append("'>");
+			builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
 			List<CmToken> tokens = block.getUnits().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
@@ -379,7 +383,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='content left'>&nbsp;</td>");
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
-			builder.append("<td class='content right new new").append(newLineNo).append("'>");
+			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
 			List<CmToken> tokens = block.getUnits().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
@@ -396,7 +400,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect old'>&nbsp;</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
-			builder.append("<td class='content old old").append(oldLineNo).append("'>");
+			builder.append("<td class='content old' data-old='").append(oldLineNo).append("'>");
 			List<CmToken> tokens = block.getUnits().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
@@ -404,7 +408,7 @@ public class TextDiffPanel extends Panel {
 		} else {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
-			builder.append("<td class='content left old old").append(oldLineNo).append("'>");
+			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
 			List<CmToken> tokens = block.getUnits().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
@@ -423,7 +427,7 @@ public class TextDiffPanel extends Panel {
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
 		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect old'>-</td>");
-		builder.append("<td class='content left old old").append(oldLineNo).append("'>");
+		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
 		for (CmToken token: deleteBlock.getUnits().get(deleteLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
@@ -431,7 +435,7 @@ public class TextDiffPanel extends Panel {
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
 		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect new'>+</td>");
-		builder.append("<td class='content right new new").append(newLineNo).append("'>");
+		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
 		for (CmToken token: insertBlock.getUnits().get(insertLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
@@ -450,7 +454,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old new'>*</td>");
-			builder.append("<td class='content old new old").append(oldLineNo).append(" new").append(newLineNo).append("'>");
+			builder.append("<td class='content old new' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getUnits()) 
 					builder.append(token.toHtml(tokenBlock.getOperation()));
@@ -459,7 +463,7 @@ public class TextDiffPanel extends Panel {
 		} else {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
-			builder.append("<td class='content left old old").append(oldLineNo).append("'>");
+			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
 			for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getUnits()) {
 					if (tokenBlock.getOperation() != Operation.INSERT) 
@@ -470,7 +474,7 @@ public class TextDiffPanel extends Panel {
 			
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
-			builder.append("<td class='content right new new").append(newLineNo).append("'>");
+			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
 			for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
 				for (CmToken token: tokenBlock.getUnits()) {
 					if (tokenBlock.getOperation() != Operation.DELETE) 
