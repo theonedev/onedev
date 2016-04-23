@@ -70,8 +70,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			List<String> paths = new ArrayList<>();
 			if (path != null)
 				paths.add(path);
-			List<DiffEntry> diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash,
-					true, paths.toArray(new String[paths.size()]));
+			List<DiffEntry> diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash, true, path);
 			
 			/*
 			 * If a single path is specified, JGit will not detect renames, hence we add logic below
@@ -88,7 +87,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				}
 			}
 			if (renamePossible) {
-				diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash, true);
+				diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash, true, null);
 				for (Iterator<DiffEntry> it = diffEntries.iterator(); it.hasNext();) {
 					DiffEntry entry = it.next();
 					boolean oldPathMatches = false;

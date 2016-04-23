@@ -54,9 +54,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.OrTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -688,11 +686,11 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 	
-	public List<DiffEntry> getDiffs(String oldRev, String newRev, boolean detectRenames, String...paths) {
+	public List<DiffEntry> getDiffs(String oldRev, String newRev, boolean detectRenames, @Nullable String path) {
 		if (diffCache == null)
 			diffCache = new HashMap<>();
 		
-		DiffKey key = new DiffKey(oldRev, newRev, detectRenames, paths);
+		DiffKey key = new DiffKey(oldRev, newRev, detectRenames, path);
 		List<DiffEntry> diffs = diffCache.get(key);
 		if (diffs == null) {
 			try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
@@ -700,14 +698,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		    	diffFormatter.setDetectRenames(detectRenames);
 				AnyObjectId oldCommitId = getObjectId(oldRev);
 				AnyObjectId newCommitId = getObjectId(newRev);
-				if (paths.length >= 2) {
-					List<TreeFilter> pathFilters = new ArrayList<>();
-					for (String path: paths)
-						pathFilters.add(PathFilter.create(path));
-					diffFormatter.setPathFilter(OrTreeFilter.create(pathFilters));
-				} else if (paths.length == 1) {
-					diffFormatter.setPathFilter(PathFilter.create(paths[0]));
-				}
+				if (path != null)
+					diffFormatter.setPathFilter(PathFilter.create(path));
 				diffs = new ArrayList<>();
 		    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
 		    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
@@ -1007,15 +999,15 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		
 		String newRev;
 		
-		String[] paths;
+		String path;
 		
 		boolean detectRenames;
 		
-		DiffKey(String oldRev, String newRev, boolean detectRenames, String...paths) {
+		DiffKey(String oldRev, String newRev, boolean detectRenames, @Nullable String path) {
 			this.oldRev = oldRev;
 			this.newRev = newRev;
 			this.detectRenames = detectRenames;
-			this.paths = paths;
+			this.path = path;
 		}
 		
 		public boolean equals(Object other) {
@@ -1026,12 +1018,12 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			DiffKey otherKey = (DiffKey) other;
 			return Objects.equal(oldRev, otherKey.oldRev) 
 					&& Objects.equal(newRev, otherKey.newRev) 
-					&& Objects.equal(paths, otherKey.paths)
+					&& Objects.equal(path, otherKey.path)
 					&& Objects.equal(detectRenames, otherKey.detectRenames);
 		}
 
 		public int hashCode() {
-			return Objects.hashCode(oldRev, newRev, paths, detectRenames);
+			return Objects.hashCode(oldRev, newRev, path, detectRenames);
 		}
 		
 	}
