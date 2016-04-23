@@ -170,7 +170,6 @@ gitplex.textdiff = {
 	    									};
 		    				    		}
 
-		    				    		console.log(firstRange.startOffset + ":" + lastRange.endOffset);
 		    				    		var anchorCursor = getCursor($anchorTd, $anchor, firstRange.startOffset);
 		    				    		var focusCursor = getCursor($focusTd, $focus, lastRange.endOffset);
 
