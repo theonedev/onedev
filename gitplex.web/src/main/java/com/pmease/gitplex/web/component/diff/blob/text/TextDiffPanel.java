@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -182,7 +181,6 @@ public class TextDiffPanel extends Panel {
 		};
 		add(symbolTooltip);
 		
-		add(AttributeModifier.replace("data-path", change.getPath()));
 		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s');", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision);

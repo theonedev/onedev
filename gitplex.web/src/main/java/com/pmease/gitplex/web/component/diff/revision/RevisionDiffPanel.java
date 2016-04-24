@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.diff.revision;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -10,13 +12,18 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 
+import org.apache.commons.codec.Charsets;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -25,10 +32,14 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
@@ -37,6 +48,7 @@ import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -252,7 +264,14 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
+		WebMarkupContainer diffStats = new WebMarkupContainer("diffStats");
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie("revisionDiff.showDiffStats");
+		if (cookie == null || !"yes".equals(cookie.getValue())) {
+			diffStats.add(AttributeAppender.append("style", "display:none;"));
+		}
+		add(diffStats);
+		diffStats.add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -277,6 +296,15 @@ public abstract class RevisionDiffPanel extends Panel {
 				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
 				
 				WebMarkupContainer pathLink = new WebMarkupContainer("path");
+				try {
+					String url = "#?file=" + URLEncoder.encode(change.getPath(), Charsets.UTF_8.name()); 
+					pathLink.add(AttributeModifier.replace("href", url));
+					String script = String.format("return gitplex.revisionDiff.jumpToFile('%s', '%s');", 
+							JavaScriptEscape.escapeJavaScript(change.getPath()), url);
+					pathLink.add(AttributeModifier.replace("onclick", script));
+				} catch (UnsupportedEncodingException e) {
+					throw new RuntimeException(e);
+				}
 				pathLink.add(new Label("path", change.getPath()));
 				
 				item.add(pathLink);
@@ -314,6 +342,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
+				item.add(AttributeAppender.append("data-file", change.getPath()));
 				item.add(new BlobDiffPanel("change", depotModel, requestModel, change, diffMode));
 			}
 			
@@ -340,7 +369,12 @@ public abstract class RevisionDiffPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
+		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
+		response.render(OnDomReadyHeaderItem.forScript("gitplex.revisionDiff.init();"));
 	}
 	
 	protected abstract void onClearPath(AjaxRequestTarget target);

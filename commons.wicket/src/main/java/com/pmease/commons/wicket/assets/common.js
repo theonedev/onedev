@@ -4,8 +4,10 @@
  **************************************************************/
 
 var pmease = {};
-
-pmease.commons = {
+String.prototype.escape = function() {
+	return (this + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+};
+pmease.commons = {		
 	setupCollapse: function(triggerId, targetId) {
 		var trigger = $("#" + triggerId);
 		var target = $("#" + targetId);

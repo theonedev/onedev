@@ -325,7 +325,7 @@ public class CommitDetailPage extends DepotPage {
 				newCompareResult(target);
 				pushState(target);
 			}
-			
+
 		};
 		compareResult.setOutputMarkupId(true);
 		if (target != null) {
