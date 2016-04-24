@@ -34,12 +34,14 @@ gitplex.textdiff = {
 	    $container.on("mouseup keyup", function() {
 	    	setTimeout(function() { // use a timeout to make sure selection remains stable after an action
 		    	var selection = window.getSelection();
-		    	var hasValidSelection = false;
+		    	var displaySelectionPopup = false;
 		    	if (selection.rangeCount) {
 		    		var firstRange = selection.getRangeAt(0).cloneRange();
 		    		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
 		    		var $anchor = $(firstRange.startContainer);
 		    		var $focus = $(lastRange.endContainer);
+		    		var anchorOffset = firstRange.startOffset;
+		    		var focusOffset = lastRange.endOffset;
 		    		if ($anchor[0] != $focus[0] || selection.anchorOffset != selection.focusOffset) { // something must be selected
 		    			var $anchorDiff = $anchor;
 		    			if (!$anchorDiff.hasClass("text-diff"))
@@ -93,26 +95,62 @@ gitplex.textdiff = {
 		    					if ($anchorTd.hasClass("left") && $focusTd.hasClass("left") 
 		    							|| $anchorTd.hasClass("right") && $focusTd.hasClass("right") 
 		    							|| !$anchorTd.hasClass("left") && !$anchorTd.hasClass("right")) { // selection must not span the split view
+		    						displaySelectionPopup = true;
+	    							
+		    						firstRange.collapse(true);
+	    							var startRect = firstRange.getClientRects()[0];
+	    							lastRange.collapse(false);
+	    							var endRect = lastRange.getClientRects()[0];
+	    							if (!startRect || !endRect) {
+			    						startRect = selection.getRangeAt(0).getClientRects()[0];
+			    						endRect = startRect;
+	    							}
+	    							var position = {
+	    								left: (startRect.left + endRect.right)/2,
+	    								top: startRect.top
+	    							};
+	    			    			position.left += $(window).scrollLeft();
+	    			    			position.top += $(window).scrollTop();
+
+	    			    			var markPos;
 			    					var $anchorTr = $anchorTd.closest("tr");
 			    					var $focusTr = $focusTd.closest("tr");
+			    					
+			    					if ($anchor.is("td.content") && anchorOffset == 0 && $anchorTr.next().is("tr.expander")) {
+			    						if ($anchor.hasClass("left")) {
+			    							$anchor = $anchorTr.next().next().find("td.content.left");
+			    							$anchorTd = $anchor;
+			    							anchorOffset = $anchor.text().length;
+			    						} else if ($anchor.hasClass("right")) {
+			    							$anchor = $anchorTr.next().next().find("td.content.right");
+			    							$anchorTd = $anchor;
+			    							anchorOffset = $anchor.text().length;
+			    						} else {
+			    							$anchor = $anchorTr.next().next().find("td.content");
+			    							$anchorTd = $anchor;
+			    							anchorOffset = $anchor.text().length;
+			    						}
+			    						$anchorTr = $anchorTd.parent();
+			    					}
+			    					if ($focus.is("td.content") && focusOffset == 0 && $focusTr.prev().is("tr.expander")) {
+			    						if ($focus.hasClass("left")) {
+			    							$focus = $focusTr.prev().prev().find("td.content.left");
+			    							$focusTd = $focus;
+			    							focusOffset = $focus.text().length;
+			    						} else if ($focus.hasClass("right")) {
+			    							$focus = $focusTr.prev().prev().find("td.content.right");
+			    							$focusTd = $focus;
+			    							focusOffset = $focus.text().length;
+			    						} else {
+			    							$focus = $focusTr.prev().prev().find("td.content");
+			    							$focusTd = $focus;
+			    							focusOffset = $focus.text().length;
+			    						}
+			    						$focusTr = $focusTd.parent();
+			    					}
+			    					
 			    					if ($anchorTr.nextAll("tr.expander").filter($focusTr.prevAll("tr.expander")).length == 0
 			    							&& $anchorTr.prevAll("tr.expander").filter($focusTr.nextAll("tr.expander")).length == 0) { // all lines between selection has been expanded 
-		    							hasValidSelection = true;
-		    							firstRange.collapse(true);
-		    							var startRect = firstRange.getClientRects()[0];
-		    							lastRange.collapse(false);
-		    							var endRect = lastRange.getClientRects()[0];
-		    							if (!startRect || !endRect) {
-				    						startRect = selection.getRangeAt(0).getClientRects()[0];
-				    						endRect = startRect;
-		    							}
-		    							var position = {
-		    								left: (startRect.left + endRect.right)/2,
-		    								top: startRect.top
-		    							};
-		    			    			position.left += $(window).scrollLeft();
-		    			    			position.top += $(window).scrollTop();
-		    			    			
 		    				    		function getCursor($td, $node, nodeOffset) {
 		    				    			var oldLine, newLine;
 		    				    			var oldCh, newCh;
@@ -169,47 +207,180 @@ gitplex.textdiff = {
 	    										newCh: newCh
 	    									};
 		    				    		}
-
-		    				    		var anchorCursor = getCursor($anchorTd, $anchor, firstRange.startOffset);
-		    				    		var focusCursor = getCursor($focusTd, $focus, lastRange.endOffset);
-
-		    				    		var mark;
-		    				    		var commentCallback = function() {};
-		    				    		var unableToCommentUrl = "http://wiki.pmease.com/display/gp/Add+Diff+Comment";
-		    				    		if (anchorCursor.newLine) {
-		    				    			if (focusCursor.newLine) {
-		    				    				mark = "new." + anchorCursor.newLine+"."+anchorCursor.newCh 
-		    				    						+ "-new." + focusCursor.newLine + "." + focusCursor.newCh;		    				    			
+	
+		    				    		var anchorCursor = getCursor($anchorTd, $anchor, anchorOffset);
+		    				    		var focusCursor = getCursor($focusTd, $focus, focusOffset);
+	
+		    				    		if (anchorCursor.newLine && focusCursor.newLine) {
+		    				    			if (anchorCursor.newLine == focusCursor.newLine && anchorCursor.newCh < focusCursor.newCh
+		    				    					|| anchorCursor.newLine < focusCursor.newLine) {
+		    				    				markPos = "new-" + anchorCursor.newLine + "." + anchorCursor.newCh 
+		    				    						+ "-" + focusCursor.newLine + "." + focusCursor.newCh;		    				    			
 		    				    			} else {
-		    				    				mark = "new." + anchorCursor.newLine+"."+anchorCursor.newCh 
-		    				    						+ "-old." + focusCursor.oldLine + "." + focusCursor.oldCh;		    				    			
-		    				    				commentCallback = unableToCommentUrl;
+		    				    				displaySelectionPopup = false;
 		    				    			}
-		    				    		} else {
-		    				    			if (focusCursor.oldLine) {
-		    				    				mark = "old." + anchorCursor.oldLine+"."+anchorCursor.oldCh 
-		    				    						+ "-old." + focusCursor.oldLine + "." + focusCursor.oldCh;		    				    			
+		    				    		} else if (anchorCursor.oldLine && focusCursor.oldLine) {
+		    				    			if (anchorCursor.oldLine == focusCursor.oldLine && anchorCursor.oldCh < focusCursor.oldCh
+		    				    					|| anchorCursor.oldLine < focusCursor.oldLine) {
+		    				    				markPos = "old-" + anchorCursor.oldLine + "." + anchorCursor.oldCh 
+		    				    						+ "-" + focusCursor.oldLine + "." + focusCursor.oldCh;		    				    			
 		    				    			} else {
-		    				    				mark = "old." + anchorCursor.oldLine+"."+anchorCursor.oldCh 
-		    				    						+ "-new." + focusCursor.newLine + "." + focusCursor.newCh;		    				    			
-		    				    				commentCallback = unableToCommentUrl;
+		    				    				displaySelectionPopup = false;
 		    				    			}
 		    				    		}
-		    			    			var uri = URI(window.location.href); 
-		    			    			uri.removeSearch("path").addSearch("path", $container.data("path"));
-		    			    			uri.removeSearch("mark").addSearch("mark", mark);
-		    				    		$("#selection-popup").data("show")(position, uri.toString(), 
-		    				    				commentCallback, $container[0]);
 			    					}
+	    				    		var invalidSelectionUrl = "http://wiki.pmease.com/display/gp/Diff+Selection";
+	    			    			var permanentCallback = function($permanentLink) {
+	    			    				$permanentLink.off("click");
+	    				    			if (markPos) {
+			    			    			var uri = URI(window.location.href); 
+			    			    			var markFile = $container.data("markfile");
+			    			    			uri.fragment({
+			    			    				markfile: markFile,
+			    			    				markpos: markPos
+			    			    			});
+		    			    				$permanentLink.attr("href", uri.toString());
+		    			    				$permanentLink.html("<i class='fa fa-link'></i> Permanent link of this selection");
+		    			    				$permanentLink.click(function() {
+		    			    					history.pushState(undefined, '', uri.toString());
+		    			    					gitplex.textdiff.mark(markFile, markPos);
+		    			    					return false;
+		    			    				});
+	    				    			} else {
+	    				    				$permanentLink.attr("href", invalidSelectionUrl);
+	    				    				$permanentLink.html("<i class='fa fa-link'></i> No permanent link to this selection, see why");
+	    				    			}
+	    			    			}
+	    				    		var commentCallback = function($commentLink) {
+	    				    			if (markPos) {
+	    				    				$commentLink.removeAttr("href");
+	    				    				$commentLink.html("<i class='fa fa-comment'></i> Add comment for this selection");
+	    				    			} else {
+	    				    				$commentLink.attr("href", invalidSelectionUrl);
+	    				    				$commentLink.html("<i class='fa fa-comment'></i> Unable to comment this selection, see why");
+	    				    			}
+	    				    		};
+	    				    		$("#selection-popup").data("show")(position, permanentCallback, 
+	    				    				commentCallback, $container[0]);
 		    					}
 		    				}
 		    			}
 		    		}
 		    	}
-		    	if (!hasValidSelection) {
+		    	if (!displaySelectionPopup) {
 		    		$("#selection-popup").hide();	    		
 		    	}	    		
 	    	}, 100);
 	    });
+	},
+	mark: function(markFile, markPos) {
+		var $container = $('*[data-markfile="' + markFile.escape() + '"]');
+		var splitted = markPos.split("-");
+		var oldOrNew = splitted[0];
+		var anchorCursor = splitted[1].split(".");
+		var focusCursor = splitted[2].split(".");
+		
+		var $anchorTd = $container.find("td.content[data-" + oldOrNew + "='" + (anchorCursor[0]-1) + "']");
+		var $focusTd = $container.find("td.content[data-" + oldOrNew + "='" + (focusCursor[0]-1) + "']");
+		if ($anchorTd.length == 2) {
+			if (oldOrNew == "old") {
+				$anchorTd = $anchorTd.first();
+			} else {
+				$anchorTd = $anchorTd.last();
+			}
+		}
+		if ($focusTd.length == 2) {
+			if (oldOrNew == "old") {
+				$focusTd = $focusTd.first();
+			} else {
+				$focusTd = $focusTd.last();
+			}
+		}
+
+		var $td = $anchorTd;
+		while (true) {
+			var ch = 0;
+			$td.contents().each(function() {
+				var $this = $(this);
+				var text = $this.text();
+				var nextCh = ch + text.length;
+				
+				function markText(from, to) {
+					var text = $this.text();
+					var left = text.substring(0, from);
+					var middle = text.substring(from, to);
+					var right = text.substring(to);
+					
+					var classes = "mark-affected ";
+					if ($this.is("span"))
+						classes += $this.attr("classes");
+					
+					var $current = $this;
+					if (left.length != 0) {
+						$current.after("<span></span>");
+						$current = $current.next();
+						$current.attr("class", classes).text(left);
+					}
+					
+					$current.after("<span></span>");
+					$current = $current.next();
+					$current.attr("class", classes + " mark").text(middle);
+					
+					if (right.length != 0) {
+						$current.after("<span></span>");
+						$current = $current.next();
+						$current.attr("class", classes).text(right);
+					}
+					$this.remove();
+				}
+				
+				if (!$td.is($anchorTd) && !$td.is($focusTd)) {
+					markText(0, text.length);
+				} else if ($td.is($anchorTd) && $td.is($focusTd)) {
+					if (focusCursor[1]>ch && anchorCursor[1]<nextCh) {
+						if (ch>=anchorCursor[1] && nextCh<=focusCursor[1]) {
+							markText(0, text.length);
+						} else if (ch<anchorCursor[1] && nextCh>focusCursor[1]) {
+							markText(anchorCursor[1]-ch, nextCh-focusCursor[1]);
+						} else if (ch<anchorCursor[1]) {
+							markText(anchorCursor[1]-ch, text.length);
+						} else {
+							markText(0, nextCh-focusCursor[1]);
+						}
+					}
+				} else if ($td.is($anchorTd)) {
+					if (ch>=anchorCursor[1]) {
+						markText(0, text.length);
+					} else if (nextCh>anchorCursor[1]) {
+						markText(text.length-nextCh+anchorCursor[1], text.length);
+					} 
+				} else {
+					if (nextCh<=focusCursor[1]) {
+						markText(0, text.length);
+					} else if (ch<focusCursor[1]) {
+						markText(0, focusCursor[1]-ch);
+					} 
+				}
+			});
+			if ($td.is($focusTd)) {
+				break;
+			} else {
+				if ($anchorTd.hasClass("left")) {
+					$td = $td.parent().next().children("td.left");
+				} else if ($anchorTd.hasClass("right")) {
+					$td = $td.parent().next().children("td.right");
+				} else {
+					$td = $td.parent().next().children("td.content");
+				}
+			}
+		}
 	}
 }
+
+$(function() {
+	var uri = URI(window.location.href); 
+	var fragment = uri.fragment(true);
+	if (fragment.markfile && fragment.markpos) {
+		gitplex.textdiff.mark(fragment.markfile, fragment.markpos);	
+	}
+});

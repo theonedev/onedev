@@ -452,7 +452,7 @@ span.move.icon {
 	display: block;
 	white-space: nowrap;
 }
-#selection-popup>.content>a.link {
+#selection-popup>.content>a.permanent {
 	margin-bottom: 8px;
 }
 #selection-popup>.triangle {

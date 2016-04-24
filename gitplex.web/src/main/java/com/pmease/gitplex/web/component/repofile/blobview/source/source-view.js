@@ -75,7 +75,13 @@ gitplex.sourceview = {
 		    			var uri = URI(window.location.href); 
 		    			uri.removeSearch("mark").addSearch("mark", 
 		    					(from.line+1) + "," + (from.ch+1) + "-" + (to.line+1) + "," + (to.ch+1));
-			    		$("#selection-popup").data("show")(position, uri.toString(), function(){}, $code[0]);
+		    			var permanentCallback = function($permanentLink) {
+		    				$permanentLink.attr("href", uri.toString());
+		    			};
+		    			var commentCallback = function($commentLink) {
+		    				
+		    			};
+			    		$("#selection-popup").data("show")(position, permanentCallback, commentCallback, $code[0]);
 			    	} else {
 			    		$("#selection-popup").hide();
 			    	}

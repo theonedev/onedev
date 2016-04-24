@@ -12,6 +12,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.assets.Assets;
+import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.assets.autosize.AutoSizeResourceReference;
 
 import de.agilecoders.wicket.core.Bootstrap;
@@ -83,10 +84,9 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 		dependencies.add(CssHeaderItem.forReference(
 				new WebjarsCssResourceReference("font-awesome/current/css/font-awesome.min.css")));
 
+		dependencies.add(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
 		dependencies.add(JavaScriptHeaderItem.forReference(AutoSizeResourceReference.INSTANCE));
-
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.STICKY_JS));
-
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ARE_YOU_SURE_JS));
 		
 		dependencies.add(CssHeaderItem.forReference(Assets.COMMON_CSS));

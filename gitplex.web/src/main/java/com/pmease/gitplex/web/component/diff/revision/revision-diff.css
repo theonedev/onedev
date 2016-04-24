@@ -10,7 +10,7 @@
     font-weight: bold;
     content: "\f107";
 }
-.revision-diff .total-changed.diff-stats:after {
+.revision-diff .total-changed.expanded:after {
     content: "\f106";
 }
 .revision-diff>ul>li.diff-stat {

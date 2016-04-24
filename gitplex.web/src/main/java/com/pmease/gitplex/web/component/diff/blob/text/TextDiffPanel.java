@@ -185,6 +185,7 @@ public class TextDiffPanel extends Panel {
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision);
 		add(new Label("script", script).setEscapeModelStrings(false));
+		add(AttributeAppender.append("data-markfile", change.getPath()));
 		
 		setOutputMarkupId(true);
 	}

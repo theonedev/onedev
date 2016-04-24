@@ -2,16 +2,16 @@ gitplex.revisionDiff = {
 	init: function() {
 		var cookieName = "revisionDiff.showDiffStats";
 		var $container = $(".revision-diff");
-		var $diffStats = $container.find(".diff-stats");
+		var $diffStats = $container.find("ul.diff-stats");
 		var $diffStatsToggle = $container.find("a.total-changed");
 		$diffStatsToggle.click(function() {
 			if ($diffStats.is(":visible")) {
 				$diffStats.hide();
-				$diffStatsToggle.removeClass("diff-stats");
+				$diffStatsToggle.removeClass("expanded");
 				Cookies.set(cookieName, "no", {expires: Infinity});
 			} else {
 				$diffStats.show();
-				$diffStatsToggle.addClass("diff-stats");
+				$diffStatsToggle.addClass("expanded");
 				Cookies.set(cookieName, "yes", {expires: Infinity});
 			}
 			$(document.body).trigger('sticky_kit:recalc');		

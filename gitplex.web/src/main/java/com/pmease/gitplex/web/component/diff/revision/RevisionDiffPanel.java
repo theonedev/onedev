@@ -16,6 +16,7 @@ import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -224,11 +225,12 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("totalChanged", new AbstractReadOnlyModel<Integer>() {
+		Component totalChangedLink;
+		add(totalChangedLink = new Label("totalChanged", new AbstractReadOnlyModel<String>() {
 
 			@Override
-			public Integer getObject() {
-				return getChangesCount();
+			public String getObject() {
+				return getChangesCount() + " changed files ";
 			}
 			
 		}));
@@ -269,6 +271,8 @@ public abstract class RevisionDiffPanel extends Panel {
 		Cookie cookie = request.getCookie("revisionDiff.showDiffStats");
 		if (cookie == null || !"yes".equals(cookie.getValue())) {
 			diffStats.add(AttributeAppender.append("style", "display:none;"));
+		} else {
+			totalChangedLink.add(AttributeAppender.append("class", "expanded"));			
 		}
 		add(diffStats);
 		diffStats.add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {

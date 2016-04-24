@@ -7,7 +7,7 @@ var pmease = {};
 String.prototype.escape = function() {
 	return (this + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
 };
-pmease.commons = {		
+pmease.commons = {
 	setupCollapse: function(triggerId, targetId) {
 		var trigger = $("#" + triggerId);
 		var target = $("#" + targetId);
@@ -553,14 +553,14 @@ pmease.commons = {
 		$("body").append("" +
 				"<div id='selection-popup'>" +
 				"<div class='content'>" +
-				"<a class='link'><i class='fa fa-link'></i> Permanent link of this selection</a>" +
+				"<a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>" +
 				"<a class='comment'><i class='fa fa-comment'></i> Add comment for this selection</a>" +
 				"</div>" +
 				"<div class='triangle'></div>" +
 				"</div>");
 
 		var $selectionPopup = $("#selection-popup");
-		$selectionPopup.data("show", function(position, selectionUrl, commentCallback, containerEl) {
+		$selectionPopup.data("show", function(position, permanentCallback, commentCallback, containerEl) {
 			var alignment = {
 					target: {left: position.left, top: position.top, width: 0, height: 0}, 
 					placement: {x: 50, y: 100, targetX: 0, targetY: 0}};
@@ -569,8 +569,8 @@ pmease.commons = {
 			if (Math.abs($selectionPopup.offset().top+$selectionPopup.outerHeight() - position.top)>10) {
 				$selectionPopup.find(".triangle").hide();
 			} 
-			$selectionPopup.find(".link").attr("href", selectionUrl);
-			$selectionPopup.find(".comment").click(commentCallback);
+			permanentCallback($selectionPopup.find(".permanent"));
+			commentCallback($selectionPopup.find(".comment"));
 			$selectionPopup.data("container", containerEl);
 		});
 		Wicket.Event.subscribe('/ajax/call/complete', function() {

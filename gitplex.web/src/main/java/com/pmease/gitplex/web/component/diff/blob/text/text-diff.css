@@ -136,6 +136,10 @@
 .text-diff>.body>tbody>tr.expanded>td {
 	background: #F9F9F9;
 }
+.text-diff>.body>tbody>tr>td.content>span.mark {
+	background: #DADBFE;
+	padding: 0;
+}
 .diff-tokentooltip {
 	background-color: infobackground; 
 	border: 1px solid black;
