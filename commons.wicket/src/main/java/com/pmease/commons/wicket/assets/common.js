@@ -489,7 +489,7 @@ pmease.commons = {
 			setTimeout(function() {
 				window.onpopstate = function(event) {
 					var currentUrlWithoutHash = location.pathname+(location.search?location.search:"");
-					if (currentUrlWithoutHash != pmease.commons.history.urlWithoutHash) { // ignore hash changes
+					if (currentUrlWithoutHash != pmease.commons.history.urlWithoutHash) {
 						if (pmease.commons.form.confirmLeave()) {
 							if (!event.state || !event.state.data)
 								location.reload();
@@ -503,6 +503,8 @@ pmease.commons = {
 							history.pushState(pmease.commons.history.current.state, '' , 
 									pmease.commons.history.current.url);
 						}
+					} else {
+						$(document).trigger("popstate");
 					}
 					pmease.commons.history.urlWithoutHash = currentUrlWithoutHash;
 				};
