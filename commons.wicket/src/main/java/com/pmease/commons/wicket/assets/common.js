@@ -503,7 +503,11 @@ pmease.commons = {
 							history.pushState(pmease.commons.history.current.state, '' , 
 									pmease.commons.history.current.url);
 						}
-					} else {
+					} else { 
+						/*
+						 * propogate to client side javascripts in case they need it to handle 
+						 * state transitions when navigate via hashes 
+						 */
 						$(document).trigger("popstate");
 					}
 					pmease.commons.history.urlWithoutHash = currentUrlWithoutHash;
