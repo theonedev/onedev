@@ -1,8 +1,9 @@
 gitplex.textdiff = {
+	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta",
 	init: function(containerId, symbolTooltipId, oldRev, newRev) {
 		var $container = $("#" + containerId);
-		var $symbols = $container.find(".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta"); 
-		$symbols.mouseover(function() {
+		$container.data("symbolHover", function() {
+			console.log("symbolhover");
 			var revision;
 			var $symbol = $(this);
 			if ($symbol.hasClass("delete")) {
@@ -20,6 +21,8 @@ gitplex.textdiff = {
 			if (symbolTooltip.onMouseOverSymbol)
 				symbolTooltip.onMouseOverSymbol(revision, this);
 		});
+		var $symbols = $container.find(gitplex.textdiff.symbolClasses); 
+		$symbols.mouseover($container.data("symbolHover"));
 		$container.find("td.content").mouseover(function() {
 			if (!gitplex.mouseState.pressed) {
 				if ($(this).hasClass("left")) {
@@ -248,6 +251,7 @@ gitplex.textdiff = {
 		    			    				$permanentLink.html("<i class='fa fa-link'></i> Permanent link of this selection");
 		    			    				$permanentLink.click(function() {
 		    				    				window.getSelection().removeAllRanges();
+		    				    				gitplex.textdiff.clearMarks();
 		    				    				$("#selection-popup").hide();
 		    			    					history.pushState(undefined, '', uri.toString());
 		    			    					gitplex.textdiff.mark(markFile, markPos);
@@ -307,6 +311,8 @@ gitplex.textdiff = {
 		var $td = $anchorTd;
 		while (true) {
 			var ch = 0;
+			$td.addClass("mark");
+			$td.data("beforemark", $td.html());
 			$td.contents().each(function() {
 				var $this = $(this);
 				var text = $this.text();
@@ -316,27 +322,33 @@ gitplex.textdiff = {
 					var middle = text.substring(from, to);
 					var right = text.substring(to);
 					
-					var classes = "mark-affected ";
-					if ($this.is("span"))
-						classes += $this.attr("classes");
-					
-					var $current = $this;
-					if (left.length != 0) {
+					if (left.length == 0 && right.length == 0 && $this.is("span")) {
+						$this.addClass("mark");
+					} else {
+						var classes;
+						if ($this.is("span"))
+							classes = $this.attr("classes");
+						else
+							classes = "";
+						
+						var $current = $this;
+						if (left.length != 0) {
+							$current.after("<span></span>");
+							$current = $current.next();
+							$current.attr("class", classes).text(left);
+						}
+						
 						$current.after("<span></span>");
 						$current = $current.next();
-						$current.attr("class", classes).text(left);
+						$current.attr("class", classes + " mark").text(middle);
+						
+						if (right.length != 0) {
+							$current.after("<span></span>");
+							$current = $current.next();
+							$current.attr("class", classes).text(right);
+						}
+						$this.remove();
 					}
-					
-					$current.after("<span></span>");
-					$current = $current.next();
-					$current.attr("class", classes + " mark").text(middle);
-					
-					if (right.length != 0) {
-						$current.after("<span></span>");
-						$current = $current.next();
-						$current.attr("class", classes).text(right);
-					}
-					$this.remove();
 				}
 				if ($this.hasClass("insert") && oldOrNew == "old" 
 						|| $this.hasClass("delete") && oldOrNew == "new") {
@@ -399,6 +411,16 @@ gitplex.textdiff = {
 				}
 			}
 		}
+	}, 
+	clearMarks: function() {
+		$("td.content.mark").each(function() {
+			var $this = $(this);
+			$this.html($this.data("beforemark"));
+			$this.removeClass("mark");
+			$this.removeData("beforemark");
+			$container = $this.closest(".text-diff").parent();
+			$this.find(gitplex.textdiff.symbolClasses).mouseover($container.data("symbolHover"));
+		});
 	}
 }
 
