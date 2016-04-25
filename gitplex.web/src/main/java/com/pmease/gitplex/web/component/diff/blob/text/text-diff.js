@@ -68,6 +68,7 @@ gitplex.textdiff = {
 		    							$tr = $anchor;
 		    						} else {
 		    							$tr = $anchorDiff.find("tr.code").first();
+		    							anchorOffset = 0;
 		    						}
 	    							if ($focusTd.hasClass("left"))
 	    								$anchorTd = $tr.find("td.content.left");
@@ -83,6 +84,7 @@ gitplex.textdiff = {
 	    								$tr = $focus;
 	    							} else {
 		    							$tr = $focusDiff.find("tr.code").last();
+		    							focusOffset = -1;
 		    						} 
 	    							if ($anchorTd.hasClass("left"))
 	    								$focusTd = $tr.find("td.content.left");
@@ -91,6 +93,8 @@ gitplex.textdiff = {
 	    							else
 	    								$focusTd = $tr.find("td.content");
 	    							$focus = $focusTd;
+	    							if (focusOffset == -1)
+	    								focusOffset = $focusTd.text().length;
 		    					}
 		    				}
 		    				
@@ -123,15 +127,15 @@ gitplex.textdiff = {
 			    						if ($anchor.hasClass("left")) {
 			    							$anchor = $anchorTr.next().next().find("td.content.left");
 			    							$anchorTd = $anchor;
-			    							anchorOffset = $anchor.text().length;
+			    							anchorOffset = 0;
 			    						} else if ($anchor.hasClass("right")) {
 			    							$anchor = $anchorTr.next().next().find("td.content.right");
 			    							$anchorTd = $anchor;
-			    							anchorOffset = $anchor.text().length;
+			    							anchorOffset = 0;
 			    						} else {
 			    							$anchor = $anchorTr.next().next().find("td.content");
 			    							$anchorTd = $anchor;
-			    							anchorOffset = $anchor.text().length;
+			    							anchorOffset = 0;
 			    						}
 			    						$anchorTr = $anchorTd.parent();
 			    					}
@@ -154,6 +158,7 @@ gitplex.textdiff = {
 			    					
 			    					if ($anchorTr.nextAll("tr.expander").filter($focusTr.prevAll("tr.expander")).length == 0
 			    							&& $anchorTr.prevAll("tr.expander").filter($focusTr.nextAll("tr.expander")).length == 0) { // all lines between selection has been expanded 
+			    						
 		    				    		function getCursor($td, $node, nodeOffset) {
 		    				    			var oldLine, newLine;
 		    				    			var oldCh, newCh;
@@ -161,15 +166,15 @@ gitplex.textdiff = {
 	    				    						|| $td.hasClass("old") && $td.hasClass("new")) {
 	    				    					oldLine = $td.data("old") + 1;
 	    				    					newLine = $td.data("new") + 1;
-	    				    					oldCh = newCh = $td.text().length;
+	    				    					oldCh = newCh = nodeOffset;
 	    				    				} else if ($td.hasClass("old")) {
 	    				    					oldLine = $td.data("old") + 1;
-	    				    					oldCh = $td.text().length;
+	    				    					oldCh = nodeOffset;
 	    				    				} else {
 	    				    					newLine = $td.data("new") + 1;
-	    				    					newCh = $td.text().length;
+	    				    					newCh = nodeOffset;
 	    				    				}
-		    				    			if ($node[0] != $td[0]) {
+		    				    			if (!$node.is($td)) {
 	    										var oldOffset = 0, newOffset = 0;
 			    				    			var $children = $td.contents();
 			    				    			if ($node.parent().is("span"))
@@ -311,7 +316,7 @@ gitplex.textdiff = {
 		var $td = $anchorTd;
 		while (true) {
 			var ch = 0;
-			$td.addClass("mark");
+			$td.addClass("content-mark");
 			$td.data("beforemark", $td.html());
 			$td.contents().each(function() {
 				var $this = $(this);
@@ -323,7 +328,7 @@ gitplex.textdiff = {
 					var right = text.substring(to);
 					
 					if (left.length == 0 && right.length == 0 && $this.is("span")) {
-						$this.addClass("mark");
+						$this.addClass("content-mark");
 					} else {
 						var classes;
 						if ($this.is("span"))
@@ -340,7 +345,7 @@ gitplex.textdiff = {
 						
 						$current.after("<span></span>");
 						$current = $current.next();
-						$current.attr("class", classes + " mark").text(middle);
+						$current.attr("class", classes + " content-mark").text(middle);
 						
 						if (right.length != 0) {
 							$current.after("<span></span>");
@@ -413,10 +418,10 @@ gitplex.textdiff = {
 		}
 	}, 
 	clearMarks: function() {
-		$("td.content.mark").each(function() {
+		$("td.content.content-mark").each(function() {
 			var $this = $(this);
 			$this.html($this.data("beforemark"));
-			$this.removeClass("mark");
+			$this.removeClass("content-mark");
 			$this.removeData("beforemark");
 			$container = $this.closest(".text-diff").parent();
 			$this.find(gitplex.textdiff.symbolClasses).mouseover($container.data("symbolHover"));

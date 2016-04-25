@@ -127,22 +127,17 @@
 	font-weight: bold;
 	padding: 0 4px 0 4px;
 }
-.text-diff>.body>tbody>tr.non-expanded+.expanded>td {
+.text-diff>.body>tbody>tr.original+.expanded>td {
 	border-top: 1px solid #E8E8E8;
 }
-.text-diff>.body>tbody>tr.expanded+.non-expanded>td {
+.text-diff>.body>tbody>tr.expanded+.original>td {
 	border-top: 1px solid #E8E8E8;
 }
 .text-diff>.body>tbody>tr.expanded>td {
 	background: #F9F9F9;
 }
-.text-diff>.body>tbody>tr>td.content.mark {
-	padding: 0;
-	background: inherit;
-}
-.text-diff>.body>tbody>tr>td.content>span.mark {
+.text-diff>.body>tbody>tr>td.content>span.content-mark {
 	background: #DADBFE;
-	padding: 0;
 }
 .diff-tokentooltip {
 	background-color: infobackground; 

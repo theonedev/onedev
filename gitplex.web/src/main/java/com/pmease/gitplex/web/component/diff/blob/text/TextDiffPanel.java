@@ -330,7 +330,7 @@ public class TextDiffPanel extends Panel {
 		if (lastContextSize != 0)
 			builder.append("<tr class='code expanded'>");
 		else
-			builder.append("<tr class='code non-expanded'>");
+			builder.append("<tr class='code original'>");
 
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
@@ -364,7 +364,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendInsert(StringBuilder builder, DiffBlock<List<CmToken>> block, int lineIndex) {
-		builder.append("<tr class='code non-expanded'>");
+		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
 		if (diffMode == DiffMode.UNIFIED) {
@@ -392,7 +392,7 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendDelete(StringBuilder builder, DiffBlock<List<CmToken>> block, int lineIndex) {
-		builder.append("<tr class='code non-expanded'>");
+		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
 		if (diffMode == DiffMode.UNIFIED) {
@@ -421,7 +421,7 @@ public class TextDiffPanel extends Panel {
 	
 	private void appendSideBySide(StringBuilder builder, DiffBlock<List<CmToken>> deleteBlock, 
 			DiffBlock<List<CmToken>> insertBlock, int deleteLineIndex, int insertLineIndex) {
-		builder.append("<tr class='code non-expanded'>");
+		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
 		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
@@ -445,7 +445,7 @@ public class TextDiffPanel extends Panel {
 	private void appendModification(StringBuilder builder, DiffBlock<List<CmToken>> deleteBlock, 
 			DiffBlock<List<CmToken>> insertBlock, int deleteLineIndex, int insertLineIndex, 
 			List<DiffBlock<CmToken>> tokenDiffs) {
-		builder.append("<tr class='code non-expanded'>");
+		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
