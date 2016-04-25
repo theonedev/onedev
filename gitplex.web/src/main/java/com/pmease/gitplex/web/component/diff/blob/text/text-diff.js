@@ -50,7 +50,7 @@ gitplex.textdiff = {
 		    			if (!$focusDiff.hasClass("text-diff"))
 		    				$focusDiff = $focus.closest(".text-diff");
 		    			
-		    			if ($anchorDiff.length != 0 && $focusDiff.length != 0 && $anchorDiff[0] == $focusDiff[0]) { // selection must be within same file
+		    			if ($anchorDiff.length != 0 && $focusDiff.length != 0 && $anchorDiff.is($focusDiff)) { // selection must be within same file
 		    				var $anchorTd = $anchor;
 		    				if (!$anchorTd.is("td.content"))
 		    					$anchorTd = $anchor.closest(".text-diff td.content");
@@ -173,7 +173,7 @@ gitplex.textdiff = {
 			    				    				$node = $node.parent();
 			    				    			for (var i=0; i<$children.length; i++) {
 			    				    				var $child = $($children[i]);
-			    				    				if ($child[0] == $node[0]) {
+			    				    				if ($child.is($node)) {
 			    				    					if ($child.hasClass("delete")) { 
 			    				    						oldCh = oldOffset + nodeOffset;
 			    				    						newCh = undefined;
@@ -199,6 +199,11 @@ gitplex.textdiff = {
 			    				    					}
 			    				    				}
 			    				    			}
+		    				    			}
+		    				    			if ($td.hasClass("left")) {
+		    				    				newLine = newCh = undefined;
+		    				    			} else if ($td.hasClass("right")) {
+		    				    				oldLine = oldCh = undefined;
 		    				    			}
 	    									return {
 	    										oldLine: oldLine,
@@ -242,6 +247,8 @@ gitplex.textdiff = {
 		    			    				$permanentLink.attr("href", uri.toString());
 		    			    				$permanentLink.html("<i class='fa fa-link'></i> Permanent link of this selection");
 		    			    				$permanentLink.click(function() {
+		    				    				window.getSelection().removeAllRanges();
+		    				    				$("#selection-popup").hide();
 		    			    					history.pushState(undefined, '', uri.toString());
 		    			    					gitplex.textdiff.mark(markFile, markPos);
 		    			    					return false;
@@ -303,8 +310,6 @@ gitplex.textdiff = {
 			$td.contents().each(function() {
 				var $this = $(this);
 				var text = $this.text();
-				var nextCh = ch + text.length;
-				
 				function markText(from, to) {
 					var text = $this.text();
 					var left = text.substring(0, from);
@@ -333,33 +338,53 @@ gitplex.textdiff = {
 					}
 					$this.remove();
 				}
-				
-				if (!$td.is($anchorTd) && !$td.is($focusTd)) {
-					markText(0, text.length);
-				} else if ($td.is($anchorTd) && $td.is($focusTd)) {
-					if (focusCursor[1]>ch && anchorCursor[1]<nextCh) {
-						if (ch>=anchorCursor[1] && nextCh<=focusCursor[1]) {
+				if ($this.hasClass("insert") && oldOrNew == "old" 
+						|| $this.hasClass("delete") && oldOrNew == "new") {
+					if (!$td.is($anchorTd) && !$td.is($focusTd)) {
+						markText(0, text.length);
+					} else if ($td.is($anchorTd) && $td.is($focusTd)) {
+						if (focusCursor[1]>ch && anchorCursor[1]<ch) {
 							markText(0, text.length);
-						} else if (ch<anchorCursor[1] && nextCh>focusCursor[1]) {
-							markText(anchorCursor[1]-ch, nextCh-focusCursor[1]);
-						} else if (ch<anchorCursor[1]) {
-							markText(anchorCursor[1]-ch, text.length);
-						} else {
-							markText(0, nextCh-focusCursor[1]);
+						}
+					} else if ($td.is($anchorTd)) {
+						if (anchorCursor[1]<ch) {
+							markText(0, text.length);
+						}
+					} else {
+						if (focusCursor[1]>ch) {
+							markText(0, text.length);
 						}
 					}
-				} else if ($td.is($anchorTd)) {
-					if (ch>=anchorCursor[1]) {
-						markText(0, text.length);
-					} else if (nextCh>anchorCursor[1]) {
-						markText(text.length-nextCh+anchorCursor[1], text.length);
-					} 
 				} else {
-					if (nextCh<=focusCursor[1]) {
+					var nextCh = ch + text.length;
+					if (!$td.is($anchorTd) && !$td.is($focusTd)) {
 						markText(0, text.length);
-					} else if (ch<focusCursor[1]) {
-						markText(0, focusCursor[1]-ch);
-					} 
+					} else if ($td.is($anchorTd) && $td.is($focusTd)) {
+						if (focusCursor[1]>ch && anchorCursor[1]<nextCh) {
+							if (ch>=anchorCursor[1] && nextCh<=focusCursor[1]) {
+								markText(0, text.length);
+							} else if (ch<anchorCursor[1] && nextCh>focusCursor[1]) {
+								markText(anchorCursor[1]-ch, focusCursor[1]-ch);
+							} else if (ch<anchorCursor[1]) {
+								markText(anchorCursor[1]-ch, text.length);
+							} else {
+								markText(0, focusCursor[1]-ch);
+							}
+						}
+					} else if ($td.is($anchorTd)) {
+						if (ch>=anchorCursor[1]) {
+							markText(0, text.length);
+						} else if (nextCh>anchorCursor[1]) {
+							markText(anchorCursor[1]-ch, text.length);
+						} 
+					} else {
+						if (nextCh<=focusCursor[1]) {
+							markText(0, text.length);
+						} else if (ch<focusCursor[1]) {
+							markText(0, focusCursor[1]-ch);
+						} 
+					}
+					ch = nextCh;
 				}
 			});
 			if ($td.is($focusTd)) {
