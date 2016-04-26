@@ -65,6 +65,8 @@ public class TextDiffPanel extends Panel {
 	
 	private final DiffMode diffMode;
 	
+	private Component symbolTooltip;
+	
 	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffMode diffMode) {
 		super(id);
@@ -157,7 +159,7 @@ public class TextDiffPanel extends Panel {
 			
 		});
 		
-		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel, requestModel) {
+		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel, requestModel) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
@@ -181,12 +183,8 @@ public class TextDiffPanel extends Panel {
 		};
 		add(symbolTooltip);
 		
-		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s');", 
-				getMarkupId(), symbolTooltip.getMarkupId(), 
-				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision);
-		add(new Label("script", script).setEscapeModelStrings(false));
 		add(AttributeAppender.append("data-markfile", change.getPath()));
-		
+
 		setOutputMarkupId(true);
 	}
 	
@@ -234,6 +232,12 @@ public class TextDiffPanel extends Panel {
 				new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
+		
+		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s);", 
+				getMarkupId(), symbolTooltip.getMarkupId(), 
+				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
+				RequestCycle.get().find(AjaxRequestTarget.class) == null);
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	private String renderDiffs() {

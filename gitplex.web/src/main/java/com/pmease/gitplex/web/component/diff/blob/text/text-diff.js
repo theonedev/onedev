@@ -1,6 +1,6 @@
 gitplex.textdiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta",
-	init: function(containerId, symbolTooltipId, oldRev, newRev) {
+	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll) {
 		var $container = $("#" + containerId);
 		$container.data("symbolHover", function() {
 			var revision;
@@ -247,23 +247,21 @@ gitplex.textdiff = {
 	    				    			if (markPos) {
 			    			    			var uri = URI(window.location.href); 
 			    			    			var markFile = $container.data("markfile");
-			    			    			uri.fragment({
-			    			    				markfile: markFile,
-			    			    				markpos: markPos
-			    			    			});
+			    			    			uri.removeSearch("mark-file").addSearch("mark-file", markFile);
+			    			    			uri.removeSearch("mark-pos").addSearch("mark-pos", markPos);
 		    			    				$permanentLink.attr("href", uri.toString());
 		    			    				$permanentLink.html("<i class='fa fa-link'></i> Permanent link of this selection");
-		    			    				$permanentLink.click(function() {
+		    			    				$permanentLink.click(function(e) {
+		    			    					e.preventDefault();
 		    				    				window.getSelection().removeAllRanges();
 		    				    				// continue to operate DOM in a timer to give browser a chance to 
 		    				    				// clear selections
 		    				    				setTimeout(function() {
 			    				    				gitplex.textdiff.clearMarks();
 			    				    				$("#selection-popup").hide();
-			    			    					history.pushState(undefined, '', uri.toString());
+			    			    					pmease.commons.history.pushState(uri.toString());
 			    			    					gitplex.textdiff.mark(markFile, markPos);
 		    				    				}, 100);
-		    			    					return false;
 		    			    				});
 	    				    			} else {
 	    				    				$permanentLink.attr("href", invalidSelectionUrl);
@@ -292,9 +290,11 @@ gitplex.textdiff = {
 	    	}, 100);
 	    });
 		var uri = URI(window.location.href); 
-		var fragment = uri.fragment(true);
-		if ($container.data("markfile") == fragment.markfile && fragment.markpos) {
-			gitplex.textdiff.mark(fragment.markfile, fragment.markpos);	
+		var search = uri.search(true);
+		if ($container.data("markfile") == search["mark-file"] && search["mark-pos"]) {
+			gitplex.textdiff.mark(search["mark-file"], search["mark-pos"]);	
+			if (scroll) 
+				gitplex.textdiff.scroll(search["mark-file"], search["mark-pos"]);
 		}
 	},
 	expand: function(containerId, blockIndex, expandedHtml) {
@@ -493,20 +493,3 @@ gitplex.textdiff = {
 		});
 	}
 }
-
-$(function() {
-	var uri = URI(window.location.href); 
-	var fragment = uri.fragment(true);
-	if (fragment.markfile && fragment.markpos) {
-		gitplex.textdiff.scroll(fragment.markfile, fragment.markpos);	
-	}
-	$(document).on("popstate", function(e) {
-		e.stopPropagation();
-		gitplex.textdiff.clearMarks();
-		var uri = URI(window.location.href); 
-		var fragment = uri.fragment(true);
-		if (fragment.markfile && fragment.markpos) {
-			gitplex.textdiff.mark(fragment.markfile, fragment.markpos);	
-		}
-	});
-});

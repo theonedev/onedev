@@ -37,7 +37,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
@@ -367,19 +366,9 @@ public abstract class RevisionDiffPanel extends Panel {
 				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
-		
-		String jumpFile;
-		if (RequestCycle.get().find(AjaxRequestTarget.class) != null) {
-			jumpFile = "undefined";
-		} else {
-			jumpFile = RequestCycle.get().getRequest().getClientUrl()
-					.getQueryParameterValue("jump-file").toString();
-			if (jumpFile != null) 
-				jumpFile = "'" + JavaScriptEscape.escapeJavaScript(jumpFile) + "'";
-			else
-				jumpFile = "undefined";
-		}
-		String script = String.format("gitplex.revisionDiff.init(%s);", jumpFile);
+
+		String script = String.format("gitplex.revisionDiff.init(%s);", 
+				RequestCycle.get().find(AjaxRequestTarget.class) == null);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

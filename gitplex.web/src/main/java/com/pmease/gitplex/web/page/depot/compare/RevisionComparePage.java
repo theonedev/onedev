@@ -60,7 +60,7 @@ public class RevisionComparePage extends DepotPage {
 	
 	private static final String PARAM_RIGHT = "right";
 	
-	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compareWithMergeBase";
+	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compare-with-merge-base";
 	
 	private static final String PARAM_PATH = "path";
 	

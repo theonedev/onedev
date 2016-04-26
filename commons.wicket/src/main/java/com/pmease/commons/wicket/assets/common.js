@@ -491,7 +491,7 @@ pmease.commons = {
 					var currentUrlWithoutHash = location.pathname+(location.search?location.search:"");
 					if (currentUrlWithoutHash != pmease.commons.history.urlWithoutHash) {
 						if (pmease.commons.form.confirmLeave()) {
-							if (!event.state || !event.state.data)
+							if (!event.state || !event.state.data) 
 								location.reload();
 							else 
 								callback(event.state.data);
@@ -503,12 +503,6 @@ pmease.commons = {
 							history.pushState(pmease.commons.history.current.state, '' , 
 									pmease.commons.history.current.url);
 						}
-					} else { 
-						/*
-						 * propogate to client side javascripts in case they need it to handle 
-						 * state transitions when navigate via hashes 
-						 */
-						$(document).trigger("popstate");
 					}
 					pmease.commons.history.urlWithoutHash = currentUrlWithoutHash;
 				};

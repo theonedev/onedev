@@ -1,5 +1,5 @@
 gitplex.revisionDiff = {
-	init: function(jumpFile) {
+	init: function(scroll) {
 		var cookieName = "revisionDiff.showDiffStats";
 		var $container = $(".revision-diff");
 		var $diffStats = $container.find("ul.diff-stats");
@@ -27,8 +27,12 @@ gitplex.revisionDiff = {
 				gitplex.revisionDiff.jumpToFile($this.data("file"));
 			});
 		});
-		if (jumpFile)
-			gitplex.revisionDiff.jumpToFile(jumpFile);
+		if (scroll) {
+			var uri = URI(window.location.href); 
+			var search = uri.search(true);
+			if (search["jump-file"])
+				gitplex.revisionDiff.jumpToFile(search["jump-file"]);
+		}
 	},
 	jumpToFile: function(file) {
 		var $container = $(".revision-diff");
