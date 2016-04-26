@@ -1,7 +1,5 @@
 package com.pmease.gitplex.web.component.diff.revision;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -14,7 +12,6 @@ import java.util.concurrent.Future;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.codec.Charsets;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -299,19 +296,11 @@ public abstract class RevisionDiffPanel extends Panel {
 				
 				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
 				
-				WebMarkupContainer pathLink = new WebMarkupContainer("path");
-				try {
-					String url = "#?file=" + URLEncoder.encode(change.getPath(), Charsets.UTF_8.name()); 
-					pathLink.add(AttributeModifier.replace("href", url));
-					String script = String.format("return gitplex.revisionDiff.jumpToFile('%s', '%s');", 
-							JavaScriptEscape.escapeJavaScript(change.getPath()), url);
-					pathLink.add(AttributeModifier.replace("onclick", script));
-				} catch (UnsupportedEncodingException e) {
-					throw new RuntimeException(e);
-				}
-				pathLink.add(new Label("path", change.getPath()));
+				WebMarkupContainer fileLink = new WebMarkupContainer("file");
+				fileLink.add(AttributeModifier.replace("data-file", change.getPath()));
+				fileLink.add(new Label("name", change.getPath()));
 				
-				item.add(pathLink);
+				item.add(fileLink);
 				
 				item.add(new Label("additions", "+" + change.getAdditions()));
 				item.add(new Label("deletions", "-" + change.getDeletions()));
@@ -378,7 +367,20 @@ public abstract class RevisionDiffPanel extends Panel {
 				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
-		response.render(OnDomReadyHeaderItem.forScript("gitplex.revisionDiff.init();"));
+		
+		String jumpFile;
+		if (RequestCycle.get().find(AjaxRequestTarget.class) != null) {
+			jumpFile = "undefined";
+		} else {
+			jumpFile = RequestCycle.get().getRequest().getClientUrl()
+					.getQueryParameterValue("jump-file").toString();
+			if (jumpFile != null) 
+				jumpFile = "'" + JavaScriptEscape.escapeJavaScript(jumpFile) + "'";
+			else
+				jumpFile = "undefined";
+		}
+		String script = String.format("gitplex.revisionDiff.init(%s);", jumpFile);
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 	protected abstract void onClearPath(AjaxRequestTarget target);

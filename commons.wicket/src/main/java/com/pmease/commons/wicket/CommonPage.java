@@ -106,7 +106,8 @@ public abstract class CommonPage extends WebPage {
 
 	public void pushState(IPartialPageRequestHandler partialPageRequestHandler, String url, Serializable data) {
 		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
-		partialPageRequestHandler.prependJavaScript(String.format("pmease.commons.history.pushState('%s', '%s');", encodedData, url));
+		String script = String.format("pmease.commons.history.pushState('%s', '%s');", url, encodedData);
+		partialPageRequestHandler.prependJavaScript(script);
 	}
 	
 	@Override

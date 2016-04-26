@@ -38,7 +38,7 @@
 .revision-diff>.diff-stats li:last-child {
 	border-bottom: none;
 }
-.revision-diff>.diff-stats li a.path {
+.revision-diff>.diff-stats li a.file {
 	padding: 0 6px;
 }
 .revision-diff>.diff-stats li>.additions {

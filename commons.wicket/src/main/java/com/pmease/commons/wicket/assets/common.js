@@ -518,7 +518,7 @@ pmease.commons = {
 				url: window.location.href	
 			};
 		},
-		pushState: function(data, url) {
+		pushState: function(url, data) {
 			var state = {data: data};
 			pmease.commons.history.current = {state: state, url: url};
 			history.pushState(state, '', url);

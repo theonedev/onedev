@@ -1,5 +1,5 @@
 gitplex.revisionDiff = {
-	init: function() {
+	init: function(jumpFile) {
 		var cookieName = "revisionDiff.showDiffStats";
 		var $container = $(".revision-diff");
 		var $diffStats = $container.find("ul.diff-stats");
@@ -16,23 +16,24 @@ gitplex.revisionDiff = {
 			}
 			$(document.body).trigger('sticky_kit:recalc');		
 		});
-		return false;
-		
+		$diffStats.find("a.file").each(function() {
+			var $this = $(this);
+			var uri = new URI(window.location.href);
+			uri.removeSearch("jump-file").addSearch("jump-file", $this.data("file"));
+			$this.attr("href", uri.toString());
+			$this.click(function(e) {
+				e.preventDefault();
+				pmease.commons.history.pushState(uri.toString());
+				gitplex.revisionDiff.jumpToFile($this.data("file"));
+			});
+		});
+		if (jumpFile)
+			gitplex.revisionDiff.jumpToFile(jumpFile);
 	},
-	jumpToFile: function(file, url) {
-		if (url) 
-			history.pushState(undefined, '', url);
+	jumpToFile: function(file) {
 		var $container = $(".revision-diff");
-		var $fileDiff = $container.find('*[data-file="' + file.escape() + '"]');
+		var $fileDiff = $container.find('li[data-file="' + file.escape() + '"]');
 		$(window).scrollTop($fileDiff.offset().top - $(".sticky").outerHeight());
 		return false;
 	}
 }
-
-$(function() {
-	var uri = URI(window.location.href); 
-	var fragment = uri.fragment(true);
-	if (fragment.file) {
-		gitplex.revisionDiff.jumpToFile(fragment.file);	
-	}
-});
