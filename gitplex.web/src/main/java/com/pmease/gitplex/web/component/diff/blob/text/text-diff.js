@@ -297,6 +297,23 @@ gitplex.textdiff = {
 			gitplex.textdiff.mark(fragment.markfile, fragment.markpos);	
 		}
 	},
+	expand: function(containerId, blockIndex, expandedHtml) {
+		var $container = $("#" + containerId);
+		var $expanderTr = $container.find(".expander" + blockIndex);
+		var $prevTr = $expanderTr.prev();
+		var $nextTr = $expanderTr.next();
+		$expanderTr.replaceWith(expandedHtml); 
+		var $expandedTrs;
+		if ($prevTr.length != 0 && $nextTr.length != 0) {
+			$expandedTrs = $prevTr.nextAll().filter($nextTr.prevAll());
+		} else if ($prevTr.length != 0) {
+			$expandedTrs = $prevTr.nextAll();
+		} else {
+			$expandedTrs = $nextTr.prevAll();
+		}
+		var $symbols = $expandedTrs.find(gitplex.textdiff.symbolClasses); 
+		$symbols.mouseover($container.data("symbolHover"));
+	},
 	getMarkInfo: function(markFile, markPos) {
 		var $container = $('*[data-markfile="' + markFile.escape() + '"]');
 		var splitted = markPos.split("-");

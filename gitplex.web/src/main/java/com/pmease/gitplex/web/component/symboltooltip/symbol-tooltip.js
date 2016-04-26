@@ -54,7 +54,8 @@ gitplex.symboltooltip = {
 				if (container.tooltip || !$symbol.is(":visible")) 
 					return;
 				
-				var $tooltip = $("<div class='symbol-tooltip'><img src=" + ajaxIndicatorUrl + "></img></div>");
+				var $tooltip = $("<div class='symbol-tooltip' id='" + containerId 
+						+ "-symbol-tooltip'><img src=" + ajaxIndicatorUrl + "></img></div>");
 				container.tooltip = $tooltip[0];
 				container.tooltip.symbolEl = symbolEl;
 				document.body.appendChild(container.tooltip);
@@ -79,8 +80,10 @@ gitplex.symboltooltip = {
 		};
 	},
 	doneQuery: function(contentId) {
-		var $tooltip = $(".symbol-tooltip");
-		$tooltip.empty().append($("#" + contentId).children());
+		var $content = $("#" + contentId);
+		var $container = $content.parent();
+		var $tooltip = $("#" + $container.attr("id") + "-symbol-tooltip");
+		$tooltip.empty().append($content.children());
 		$tooltip.align($tooltip.data("alignment"));
 	},
 	removeTooltip: function(container) {

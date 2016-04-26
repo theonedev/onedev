@@ -141,7 +141,7 @@ public class TextDiffPanel extends Panel {
 				
 				String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
 				expanded = StringUtils.replace(expanded, "\n", "");
-				String script = String.format("$('#%s .expander%d').replaceWith(\"%s\");", 
+				String script = String.format("gitplex.textdiff.expand('%s', %d, \"%s\");",
 						getMarkupId(), index, expanded);
 				target.appendJavaScript(script);
 			}
@@ -150,14 +150,14 @@ public class TextDiffPanel extends Panel {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				
-				String script = String.format("$('#%s')[0].expander = %s;", 
+				String script = String.format("$('#%s').data('expandCallback', %s);", 
 						getMarkupId(), getCallbackFunction(CallbackParameter.explicit("index")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});
 		
-		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbols", depotModel, requestModel) {
+		SymbolTooltipPanel symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel, requestModel) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
@@ -489,7 +489,7 @@ public class TextDiffPanel extends Panel {
 	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
-		String script = String.format("javascript: $('#%s')[0].expander(%d);", getMarkupId(), blockIndex);
+		String script = String.format("javascript: $('#%s').data('expandCallback')(%d);", getMarkupId(), blockIndex);
 		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td colspan='2' class='expander'><a title='Show more lines' href=\"")
 					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
