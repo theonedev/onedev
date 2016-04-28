@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.diff.blob.text;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -7,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -24,6 +26,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
@@ -42,6 +45,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
 import com.pmease.gitplex.web.component.diff.revision.DiffMode;
@@ -55,6 +59,11 @@ import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReferenc
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
+	private static class TextDiffUrlKey extends MetaDataKey<Url> {
+	};
+	
+	public static final TextDiffUrlKey TEXT_DIFF_URL_KEY = new TextDiffUrlKey();		
+	
 	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
@@ -65,7 +74,13 @@ public class TextDiffPanel extends Panel {
 	
 	private final DiffMode diffMode;
 	
+	private MarkInfo markInfo;
+	
 	private Component symbolTooltip;
+	
+	private AbstractDefaultAjaxBehavior callbackBehavior;
+	
+	private transient List<MarkAwareDiffBlock> diffBlocks;
 	
 	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffMode diffMode) {
@@ -80,6 +95,23 @@ public class TextDiffPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		Url url = getEffectiveUrl();
+		String markFile = url.getQueryParameterValue("mark-file").toString();
+		
+		/*
+		 * Initialize mark info here as we want to make sure that calculated mark aware diff 
+		 * blocks remain unchanged after initialization of this panel as otherwise line 
+		 * expanding may work abnormally
+		 */
+		if (change.getPath().equals(markFile)) {
+			String markPos = url.getQueryParameterValue("mark-pos").toString();
+			String[] fields = StringUtils.split(markPos, "-");
+			boolean old = fields[0].equals("old");
+			int beginLine = Integer.parseInt(StringUtils.substringBefore(fields[1], "."))-1;
+			int endLine = Integer.parseInt(StringUtils.substringBefore(fields[2], "."));
+			markInfo = new MarkInfo(old, beginLine, endLine);
+		}
 		
 		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		add(new BlobDiffTitle("title", change));
@@ -126,37 +158,36 @@ public class TextDiffPanel extends Panel {
 			
 		}).setEscapeModelStrings(false));
 		
-		add(new AbstractDefaultAjaxBehavior() {
+		add(callbackBehavior = new AbstractDefaultAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-				int index = params.getParameterValue("index").toInt();
-				Integer lastContextSize = contextSizes.get(index);
-				if (lastContextSize == null)
-					lastContextSize = CodeComment.DIFF_CONTEXT_SIZE;
-				int contextSize = lastContextSize + Constants.DIFF_EXPAND_SIZE;
-				contextSizes.put(index, contextSize);
-				
-				StringBuilder builder = new StringBuilder();
-				appendEquals(builder, index, lastContextSize, contextSize);
-				
-				String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
-				expanded = StringUtils.replace(expanded, "\n", "");
-				String script = String.format("gitplex.textdiff.expand('%s', %d, \"%s\");",
-						getMarkupId(), index, expanded);
-				target.appendJavaScript(script);
+				switch (params.getParameterValue("action").toString()) {
+				case "expand":
+					int index = params.getParameterValue("param1").toInt();
+					Integer lastContextSize = contextSizes.get(index);
+					if (lastContextSize == null)
+						lastContextSize = CodeComment.DIFF_CONTEXT_SIZE;
+					int contextSize = lastContextSize + Constants.DIFF_EXPAND_SIZE;
+					contextSizes.put(index, contextSize);
+					
+					StringBuilder builder = new StringBuilder();
+					appendEquals(builder, index, lastContextSize, contextSize);
+					
+					String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
+					expanded = StringUtils.replace(expanded, "\n", "");
+					String script = String.format("gitplex.textdiff.expand('%s', %d, \"%s\");",
+							getMarkupId(), index, expanded);
+					target.appendJavaScript(script);
+					break;
+				case "storeUrl":
+					String url = params.getParameterValue("param1").toString();
+					getPage().setMetaData(TEXT_DIFF_URL_KEY, Url.parse(url));
+					break;
+				}
 			}
 
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-				
-				String script = String.format("$('#%s').data('expandCallback', %s);", 
-						getMarkupId(), getCallbackFunction(CallbackParameter.explicit("index")));
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-			
 		});
 		
 		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", depotModel, requestModel) {
@@ -188,18 +219,27 @@ public class TextDiffPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
+	private Url getEffectiveUrl() {
+		Url url = getPage().getMetaData(TEXT_DIFF_URL_KEY);
+		if (url != null) {
+			return url;
+		} else {
+			return RequestCycle.get().getRequest().getClientUrl();
+		} 
+	}
+	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
-		DiffBlock<List<CmToken>> block = change.getDiffBlocks().get(index);
+		MarkAwareDiffBlock block = getDiffBlocks().get(index);
 		if (index == 0) {
-			int start = block.getUnits().size()-contextSize;
+			int start = block.getLines().size()-contextSize;
 			if (start < 0)
 				start=0;
 			else if (start > 0)
 				appendExpander(builder, index, start);
-			for (int j=start; j<block.getUnits().size()-lastContextSize; j++) 
+			for (int j=start; j<block.getLines().size()-lastContextSize; j++) 
 				appendEqual(builder, block, j, lastContextSize);
-		} else if (index == change.getDiffBlocks().size()-1) {
-			int end = block.getUnits().size();
+		} else if (index == getDiffBlocks().size()-1) {
+			int end = block.getLines().size();
 			int skipped = 0;
 			if (end > contextSize) {
 				skipped = end-contextSize;
@@ -209,16 +249,22 @@ public class TextDiffPanel extends Panel {
 				appendEqual(builder, block, j, lastContextSize);
 			if (skipped != 0)
 				appendExpander(builder, index, skipped);
-		} else if (2*contextSize < block.getUnits().size()) {
+		} else if (2*contextSize < block.getLines().size()) {
 			for (int j=lastContextSize; j<contextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
-			appendExpander(builder, index, block.getUnits().size() - 2*contextSize);
-			for (int j=block.getUnits().size()-contextSize; j<block.getUnits().size()-lastContextSize; j++)
+			appendExpander(builder, index, block.getLines().size() - 2*contextSize);
+			for (int j=block.getLines().size()-contextSize; j<block.getLines().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		} else {
-			for (int j=lastContextSize; j<block.getUnits().size()-lastContextSize; j++)
+			for (int j=lastContextSize; j<block.getLines().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		}
+	}
+	
+	private void appendMarkedEquals(StringBuilder builder, int index) {
+		MarkAwareDiffBlock block = getDiffBlocks().get(index);
+		for (int i=0; i<block.getLines().size(); i++)
+			appendEqual(builder, block, i, 0);
 	}
 	
 	@Override
@@ -233,10 +279,12 @@ public class TextDiffPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
 		
-		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s);", 
+		CharSequence callback = callbackBehavior.getCallbackFunction(
+				explicit("action"), explicit("param1"), explicit("param2"), explicit("param3")); 
+		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s, %s);", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
-				RequestCycle.get().find(AjaxRequestTarget.class) == null);
+				RequestCycle.get().find(AjaxRequestTarget.class) == null, callback);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
@@ -262,15 +310,18 @@ public class TextDiffPanel extends Panel {
 					+ "<col></col>"
 					+ "</colgroup>");
 		}
-		for (int i=0; i<change.getDiffBlocks().size(); i++) {
-			DiffBlock<List<CmToken>> block = change.getDiffBlocks().get(i);
-			if (block.getOperation() == Operation.EQUAL) {
+		for (int i=0; i<getDiffBlocks().size(); i++) {
+			MarkAwareDiffBlock block = getDiffBlocks().get(i);
+			if (block.getType() == Type.EQUAL) {
 				appendEquals(builder, i, 0, contextSize);
-			} else if (block.getOperation() == Operation.DELETE) {
-				if (i+1<change.getDiffBlocks().size()) {
-					DiffBlock<List<CmToken>> nextBlock = change.getDiffBlocks().get(i+1);
-					if (nextBlock.getOperation() == Operation.INSERT) {
-						LinkedHashMap<Integer, LineDiff> lineChanges = DiffUtils.align(block, nextBlock);
+			} else if (block.getType() == Type.MARKED_EQUAL) {
+				appendMarkedEquals(builder, i);
+			} else if (block.getType () == Type.DELETE) {
+				if (i+1<getDiffBlocks().size()) {
+					MarkAwareDiffBlock nextBlock = getDiffBlocks().get(i+1);
+					if (nextBlock.getType() == Type.INSERT) {
+						LinkedHashMap<Integer, LineDiff> lineChanges = 
+								DiffUtils.align(block.getLines(), nextBlock.getLines());
 						int prevDeleteLineIndex = 0;
 						int prevInsertLineIndex = 0;
 						for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {
@@ -286,27 +337,28 @@ public class TextDiffPanel extends Panel {
 							prevDeleteLineIndex = deleteLineIndex+1;
 							prevInsertLineIndex = insertLineIndex+1;
 						}
-						appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, block.getUnits().size(), 
-								prevInsertLineIndex, nextBlock.getUnits().size());
+						appendDeletesAndInserts(builder, block, nextBlock, 
+								prevDeleteLineIndex, block.getLines().size(), 
+								prevInsertLineIndex, nextBlock.getLines().size());
 						i++;
 					} else {
-						for (int j=0; j<block.getUnits().size(); j++) 
+						for (int j=0; j<block.getLines().size(); j++) 
 							appendDelete(builder, block, j);
 					}
 				} else {
-					for (int j=0; j<block.getUnits().size(); j++) 
+					for (int j=0; j<block.getLines().size(); j++) 
 						appendDelete(builder, block, j);
 				}
 			} else {
-				for (int j=0; j<block.getUnits().size(); j++) 
+				for (int j=0; j<block.getLines().size(); j++) 
 					appendInsert(builder, block, j);
 			}
 		}
 		return builder.toString();
 	}
 
-	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock<List<CmToken>> deleteBlock, 
-			DiffBlock<List<CmToken>> insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
+	private void appendDeletesAndInserts(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
+			MarkAwareDiffBlock insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
 			int fromInsertLineIndex, int toInsertLineIndex) {
 		if (diffMode == DiffMode.UNIFIED) {
 			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
@@ -330,7 +382,7 @@ public class TextDiffPanel extends Panel {
 		}
 	}
 	
-	private void appendEqual(StringBuilder builder, DiffBlock<List<CmToken>> block, int lineIndex, int lastContextSize) {
+	private void appendEqual(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
 			builder.append("<tr class='code expanded'>");
 		else
@@ -344,7 +396,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			for (CmToken token: block.getUnits().get(lineIndex)) {
+			for (CmToken token: block.getLines().get(lineIndex)) {
 				builder.append(token.toHtml(Operation.EQUAL));
 			}
 			builder.append("</td>");
@@ -352,14 +404,14 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			for (CmToken token: block.getUnits().get(lineIndex)) {
+			for (CmToken token: block.getLines().get(lineIndex)) {
 				builder.append(token.toHtml(Operation.EQUAL));
 			}
 			builder.append("</td>");
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content right' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			for (CmToken token: block.getUnits().get(lineIndex)) {
+			for (CmToken token: block.getLines().get(lineIndex)) {
 				builder.append(token.toHtml(Operation.EQUAL));
 			}
 			builder.append("</td>");
@@ -367,7 +419,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private void appendInsert(StringBuilder builder, DiffBlock<List<CmToken>> block, int lineIndex) {
+	private void appendInsert(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex) {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
@@ -376,7 +428,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
-			List<CmToken> tokens = block.getUnits().get(lineIndex);
+			List<CmToken> tokens = block.getLines().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
 			builder.append("</td>");
@@ -387,7 +439,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-			List<CmToken> tokens = block.getUnits().get(lineIndex);
+			List<CmToken> tokens = block.getLines().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
 			builder.append("</td>");
@@ -395,7 +447,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private void appendDelete(StringBuilder builder, DiffBlock<List<CmToken>> block, int lineIndex) {
+	private void appendDelete(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex) {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
@@ -404,7 +456,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect old'>&nbsp;</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content old' data-old='").append(oldLineNo).append("'>");
-			List<CmToken> tokens = block.getUnits().get(lineIndex);
+			List<CmToken> tokens = block.getLines().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
 			builder.append("</td>");
@@ -412,7 +464,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-			List<CmToken> tokens = block.getUnits().get(lineIndex);
+			List<CmToken> tokens = block.getLines().get(lineIndex);
 			for (int i=0; i<tokens.size(); i++) 
 				builder.append(tokens.get(i).toHtml(Operation.EQUAL));
 			builder.append("</td>");
@@ -423,15 +475,15 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private void appendSideBySide(StringBuilder builder, DiffBlock<List<CmToken>> deleteBlock, 
-			DiffBlock<List<CmToken>> insertBlock, int deleteLineIndex, int insertLineIndex) {
+	private void appendSideBySide(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
+			MarkAwareDiffBlock insertBlock, int deleteLineIndex, int insertLineIndex) {
 		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
 		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect old'>-</td>");
 		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-		for (CmToken token: deleteBlock.getUnits().get(deleteLineIndex))
+		for (CmToken token: deleteBlock.getLines().get(deleteLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
 		
@@ -439,15 +491,15 @@ public class TextDiffPanel extends Panel {
 		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect new'>+</td>");
 		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-		for (CmToken token: insertBlock.getUnits().get(insertLineIndex))
+		for (CmToken token: insertBlock.getLines().get(insertLineIndex))
 			builder.append(token.toHtml(Operation.EQUAL));
 		builder.append("</td>");
 		
 		builder.append("</tr>");
 	}
 
-	private void appendModification(StringBuilder builder, DiffBlock<List<CmToken>> deleteBlock, 
-			DiffBlock<List<CmToken>> insertBlock, int deleteLineIndex, int insertLineIndex, 
+	private void appendModification(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
+			MarkAwareDiffBlock insertBlock, int deleteLineIndex, int insertLineIndex, 
 			List<DiffBlock<CmToken>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
@@ -493,7 +545,10 @@ public class TextDiffPanel extends Panel {
 	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
-		String script = String.format("javascript: $('#%s').data('expandCallback')(%d);", getMarkupId(), blockIndex);
+		String script = String.format("javascript: "
+				+ "var callback = $('#%s').data('callback');"
+				+ "if (callback) callback('expand', %d);", 
+				getMarkupId(), blockIndex);
 		if (diffMode == DiffMode.UNIFIED) {
 			builder.append("<td colspan='2' class='expander'><a title='Show more lines' href=\"")
 					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
@@ -506,6 +561,62 @@ public class TextDiffPanel extends Panel {
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		}
 		builder.append("</tr>");
+	}
+	
+	private List<MarkAwareDiffBlock> getDiffBlocks() {
+		if (diffBlocks == null) {
+			diffBlocks = new ArrayList<>();
+			for (DiffBlock<List<CmToken>> diffBlock: change.getDiffBlocks()) {
+				if (diffBlock.getOperation() == Operation.DELETE) {
+					diffBlocks.add(new MarkAwareDiffBlock(Type.DELETE, diffBlock.getUnits(), 
+							diffBlock.getOldStart(), diffBlock.getNewStart()));
+				} else if (diffBlock.getOperation() == Operation.INSERT) {
+					diffBlocks.add(new MarkAwareDiffBlock(Type.INSERT, diffBlock.getUnits(), 
+							diffBlock.getOldStart(), diffBlock.getNewStart()));
+				} else {
+					if (markInfo != null) {
+						int beginMarkIndex;
+						int endMarkIndex;
+						if (markInfo.isOld()) {
+							beginMarkIndex = markInfo.getBeginLine() - diffBlock.getOldStart();
+							endMarkIndex = markInfo.getEndLine() - diffBlock.getOldStart();
+						} else {
+							beginMarkIndex = markInfo.getBeginLine() - diffBlock.getNewStart();
+							endMarkIndex = markInfo.getEndLine() - diffBlock.getNewStart();
+						}	
+						if (beginMarkIndex < 0)
+							beginMarkIndex = 0;
+						if (beginMarkIndex > diffBlock.getUnits().size())
+							beginMarkIndex = diffBlock.getUnits().size();
+						if (endMarkIndex < 0)
+							endMarkIndex = 0;
+						if (endMarkIndex > diffBlock.getUnits().size())
+							endMarkIndex = diffBlock.getUnits().size();
+						List<List<CmToken>> lines = diffBlock.getUnits().subList(0, beginMarkIndex);
+						if (!lines.isEmpty()) {
+							diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
+									diffBlock.getOldStart(), diffBlock.getNewStart()));
+						}
+						lines = diffBlock.getUnits().subList(beginMarkIndex, endMarkIndex);
+						if (!lines.isEmpty()) {
+							diffBlocks.add(new MarkAwareDiffBlock(Type.MARKED_EQUAL, lines, 
+									diffBlock.getOldStart()+beginMarkIndex, 
+									diffBlock.getNewStart()+beginMarkIndex));
+						}
+						lines = diffBlock.getUnits().subList(endMarkIndex, diffBlock.getUnits().size());
+						if (!lines.isEmpty()) {
+							diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
+									diffBlock.getOldStart()+endMarkIndex, 
+									diffBlock.getNewStart()+endMarkIndex));
+						}
+					} else {
+						diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, diffBlock.getUnits(), 
+								diffBlock.getOldStart(), diffBlock.getNewStart()));
+					}
+				}
+			}
+		}
+		return diffBlocks;
 	}
 	
 	@Override

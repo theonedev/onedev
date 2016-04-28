@@ -1,7 +1,8 @@
 gitplex.textdiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta",
-	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll) {
+	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll, callback) {
 		var $container = $("#" + containerId);
+		$container.data("callback", callback);
 		$container.data("symbolHover", function() {
 			var revision;
 			var $symbol = $(this);
@@ -20,9 +21,7 @@ gitplex.textdiff = {
 			if (symbolTooltip.onMouseOverSymbol)
 				symbolTooltip.onMouseOverSymbol(revision, this);
 		});
-		var $symbols = $container.find(gitplex.textdiff.symbolClasses); 
-		$symbols.mouseover($container.data("symbolHover"));
-		$container.find("td.content").mouseover(function() {
+		$container.data("onMouseOverContent", function() {
 			if (!gitplex.mouseState.pressed) {
 				if ($(this).hasClass("left")) {
 					$container.find("td.content.right").addClass("noselect");
@@ -33,6 +32,10 @@ gitplex.textdiff = {
 				}
 			}
 		});
+		var $symbols = $container.find(gitplex.textdiff.symbolClasses); 
+		$symbols.mouseover($container.data("symbolHover"));
+		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
+		
 	    $container.on("mouseup keyup", function() {
 	    	setTimeout(function() { // use a timeout to make sure selection remains stable after an action
 		    	var selection = window.getSelection();
@@ -254,6 +257,7 @@ gitplex.textdiff = {
 		    			    				$permanentLink.click(function(e) {
 		    			    					e.preventDefault();
 		    				    				window.getSelection().removeAllRanges();
+	    				    					$container.data("callback")("storeUrl", uri.toString());
 		    				    				// continue to operate DOM in a timer to give browser a chance to 
 		    				    				// clear selections
 		    				    				setTimeout(function() {
@@ -313,6 +317,7 @@ gitplex.textdiff = {
 		}
 		var $symbols = $expandedTrs.find(gitplex.textdiff.symbolClasses); 
 		$symbols.mouseover($container.data("symbolHover"));
+		$expandedTrs.find("td.content").mouseover($container.data("onMouseOverContent"));
 	},
 	getMarkInfo: function(markFile, markPos) {
 		var $container = $('*[data-markfile="' + markFile.escape() + '"]');
@@ -396,7 +401,7 @@ gitplex.textdiff = {
 						} else {
 							var classes;
 							if ($this.is("span"))
-								classes = $this.attr("classes");
+								classes = $this.attr("class");
 							else
 								classes = "";
 							

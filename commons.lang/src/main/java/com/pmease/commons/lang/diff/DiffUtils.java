@@ -156,17 +156,17 @@ public class DiffUtils {
 	}
 	
 	public static LinkedHashMap<Integer, LineDiff> align(
-			DiffBlock<List<CmToken>> deleteBlock, DiffBlock<List<CmToken>> insertBlock) {
+			List<List<CmToken>> deleteLines, List<List<CmToken>> insertLines) {
 		LinkedHashMap<Integer, LineDiff> lineDiffs = new LinkedHashMap<>();
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		
 		long time = System.currentTimeMillis();
 		int nextInsert = 0;
-		for (int i=0; i<deleteBlock.getUnits().size(); i++) {
-			List<CmToken> deleteLine = deleteBlock.getUnits().get(i);
-			for (int j=nextInsert; j<insertBlock.getUnits().size(); j++) {
-				List<CmToken> insertLine = insertBlock.getUnits().get(j);
+		for (int i=0; i<deleteLines.size(); i++) {
+			List<CmToken> deleteLine = deleteLines.get(i);
+			for (int j=nextInsert; j<insertLines.size(); j++) {
+				List<CmToken> insertLine = insertLines.get(j);
 				TokensToCharsResult<CmToken> result = DiffUtils.tokensToChars(deleteLine, insertLine);						
 				List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result.chars1, result.chars2, false);
 				int equal = 0;
@@ -212,7 +212,7 @@ public class DiffUtils {
 					break;
 				} else {
 					if (System.currentTimeMillis()-time > CHANGE_CALC_TIMEOUT) {
-						nextInsert = insertBlock.getUnits().size();
+						nextInsert = insertLines.size();
 						break;
 					}
 				}

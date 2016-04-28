@@ -89,7 +89,7 @@
 	background: #ffecec;
 }
 .text-diff>.body>tbody>tr>td.old .delete {
-	background-color: #f8cbcb;
+	background-color: #F8C8C8;
 }
 .text-diff>.body>tbody>tr>td.new.number {
 	background: #dbffdb;
@@ -103,7 +103,7 @@
 	background: #eaffea;
 }
 .text-diff>.body>tbody>tr>td.new .insert {
-	background-color: #a6f3a6;
+	background-color: #94F094;
 }
 .text-diff>.body>tbody>tr>td.old.new.number {
 	background: #F6EAAC;
@@ -137,7 +137,13 @@
 	background: #F9F9F9;
 }
 .text-diff>.body>tbody>tr>td.content>span.content-mark {
-	background: #DADBFE;
+	background: #CCCCFF;
+}
+.text-diff>.body>tbody>tr>td.content>span.content-mark.insert {
+	background: #88FFFF;
+}
+.text-diff>.body>tbody>tr>td.content>span.content-mark.delete {
+	background: #FF88FF;
 }
 .diff-tokentooltip {
 	background-color: infobackground; 
