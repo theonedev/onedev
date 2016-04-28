@@ -23,6 +23,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
@@ -38,6 +39,8 @@ public abstract class CommonPage extends WebPage {
 	
 	private RepeatingView rootComponents;
 	
+	private Url requestUrl;
+	
 	public CommonPage() {
 	}
 
@@ -49,9 +52,15 @@ public abstract class CommonPage extends WebPage {
 		super(params);
 	}
 
+	public Url getRequestUrl() {
+		return requestUrl;
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		requestUrl = RequestCycle.get().getRequest().getUrl();
 		
 		add(new AbstractDefaultAjaxBehavior() {
 			

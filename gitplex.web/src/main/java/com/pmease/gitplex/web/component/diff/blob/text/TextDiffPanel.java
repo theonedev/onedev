@@ -39,6 +39,7 @@ import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.CommonPage;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -96,7 +97,9 @@ public class TextDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Url url = getEffectiveUrl();
+		Url url = getPage().getMetaData(TEXT_DIFF_URL_KEY);
+		if (url == null)
+			url = ((CommonPage)getPage()).getRequestUrl();
 		String markFile = url.getQueryParameterValue("mark-file").toString();
 		
 		/*
@@ -217,15 +220,6 @@ public class TextDiffPanel extends Panel {
 		add(AttributeAppender.append("data-markfile", change.getPath()));
 
 		setOutputMarkupId(true);
-	}
-	
-	private Url getEffectiveUrl() {
-		Url url = getPage().getMetaData(TEXT_DIFF_URL_KEY);
-		if (url != null) {
-			return url;
-		} else {
-			return RequestCycle.get().getRequest().getClientUrl();
-		} 
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
@@ -550,12 +544,12 @@ public class TextDiffPanel extends Panel {
 				+ "if (callback) callback('expand', %d);", 
 				getMarkupId(), blockIndex);
 		if (diffMode == DiffMode.UNIFIED) {
-			builder.append("<td colspan='2' class='expander'><a title='Show more lines' href=\"")
+			builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
 					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
 			builder.append("<td colspan='2' class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
-			builder.append("<td class='expander'><a title='Show more lines' href=\"").append(script)
+			builder.append("<td class='expander noselect'><a title='Show more lines' href=\"").append(script)
 					.append("\"><i class='fa fa-sort'></i></a></td>");
 			builder.append("<td class='skipped noselect' colspan='5'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");

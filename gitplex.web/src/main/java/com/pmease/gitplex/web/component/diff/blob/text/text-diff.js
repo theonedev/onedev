@@ -35,7 +35,6 @@ gitplex.textdiff = {
 		var $symbols = $container.find(gitplex.textdiff.symbolClasses); 
 		$symbols.mouseover($container.data("symbolHover"));
 		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
-		
 	    $container.on("mouseup keyup", function() {
 	    	setTimeout(function() { // use a timeout to make sure selection remains stable after an action
 		    	var selection = window.getSelection();
@@ -43,67 +42,67 @@ gitplex.textdiff = {
 		    	if (selection.rangeCount) { 
 		    		var firstRange = selection.getRangeAt(0).cloneRange();
 		    		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
-		    		var $anchor = $(firstRange.startContainer);
-		    		var $focus = $(lastRange.endContainer);
-		    		var anchorOffset = firstRange.startOffset;
-		    		var focusOffset = lastRange.endOffset;
-		    		if ($anchor[0] != $focus[0] || selection.anchorOffset != selection.focusOffset) { // something must be selected
-		    			var $anchorDiff = $anchor;
-		    			if (!$anchorDiff.hasClass("text-diff"))
-		    				$anchorDiff = $anchor.closest(".text-diff");
-		    			var $focusDiff = $focus;
-		    			if (!$focusDiff.hasClass("text-diff"))
-		    				$focusDiff = $focus.closest(".text-diff");
+		    		var $start = $(firstRange.startContainer);
+		    		var $end = $(lastRange.endContainer);
+		    		var startOffset = firstRange.startOffset;
+		    		var endOffset = lastRange.endOffset;
+		    		if (!$start.is($end) || startOffset != endOffset) { // something must be selected
+		    			var $startDiff = $start;
+		    			if (!$startDiff.hasClass("text-diff"))
+		    				$startDiff = $start.closest(".text-diff");
+		    			var $endDiff = $end;
+		    			if (!$endDiff.hasClass("text-diff"))
+		    				$endDiff = $end.closest(".text-diff");
 		    			
-		    			if ($anchorDiff.length != 0 && $focusDiff.length != 0 && $anchorDiff.is($focusDiff)) { // selection must be within same file
-		    				var $anchorTd = $anchor;
-		    				if (!$anchorTd.is("td.content"))
-		    					$anchorTd = $anchor.closest(".text-diff td.content");
-		    				var $focusTd = $focus;
-		    				if (!$focusTd.is("td.content"))
-		    					$focusTd = $focus.closest(".text-diff td.content");
+		    			if ($startDiff.length != 0 && $endDiff.length != 0 && $startDiff.is($endDiff)) { // selection must be within same file
+		    				var $startTd = $start;
+		    				if (!$startTd.is("td.content"))
+		    					$startTd = $start.closest(".text-diff td.content");
+		    				var $endTd = $end;
+		    				if (!$endTd.is("td.content"))
+		    					$endTd = $end.closest(".text-diff td.content");
 
-		    				if ($anchorTd.length != 0 || $focusTd.length != 0) {
-		    					if ($anchorTd.length == 0) {
+		    				if ($startTd.length != 0 || $endTd.length != 0) {
+		    					if ($startTd.length == 0) { 
 	    							var $tr;
-		    						if ($anchor.is("tr.code")) {
-		    							$tr = $anchor;
+		    						if ($start.is("tr.code")) {
+		    							$tr = $start;
 		    						} else {
-		    							$tr = $anchorDiff.find("tr.code").first();
-		    							anchorOffset = 0;
+		    							$tr = $startDiff.find("tr.code").first();
+		    							startOffset = 0;
 		    						}
-	    							if ($focusTd.hasClass("left"))
-	    								$anchorTd = $tr.find("td.content.left");
-	    							else if ($focusTd.hasClass("right"))
-	    								$anchorTd = $tr.find("td.content.right");
+	    							if ($endTd.hasClass("left"))
+	    								$startTd = $tr.find("td.content.left");
+	    							else if ($endTd.hasClass("right"))
+	    								$startTd = $tr.find("td.content.right");
 	    							else
-	    								$anchorTd = $tr.find("td.content");
-	    							$anchor = $anchorTd;
+	    								$startTd = $tr.find("td.content");
+	    							$start = $startTd;
 		    					}
-		    					if ($focusTd.length == 0) {
+		    					if ($endTd.length == 0) {
 	    							var $tr;
-	    							if ($focus.is("tr.code")) {
-	    								$tr = $focus;
+	    							if ($end.is("tr.code")) {
+	    								$tr = $end;
 	    							} else {
-		    							$tr = $focusDiff.find("tr.code").last();
-		    							focusOffset = -1;
+		    							$tr = $endDiff.find("tr.code").last();
+		    							endOffset = -1;
 		    						} 
-	    							if ($anchorTd.hasClass("left"))
-	    								$focusTd = $tr.find("td.content.left");
-	    							else if ($anchorTd.hasClass("right"))
-	    								$focusTd = $tr.find("td.content.right");
+	    							if ($startTd.hasClass("left"))
+	    								$endTd = $tr.find("td.content.left");
+	    							else if ($startTd.hasClass("right"))
+	    								$endTd = $tr.find("td.content.right");
 	    							else
-	    								$focusTd = $tr.find("td.content");
-	    							$focus = $focusTd;
-	    							if (focusOffset == -1)
-	    								focusOffset = $focusTd.text().length;
+	    								$endTd = $tr.find("td.content");
+	    							$end = $endTd;
+	    							if (endOffset == -1)
+	    								endOffset = $endTd.text().length;
 		    					}
 		    				}
 		    				
-		    				if ($anchorTd.length != 0 && $focusTd.length != 0) { // selection must starts with diff content and ends with diff content 
-		    					if ($anchorTd.hasClass("left") && $focusTd.hasClass("left") 
-		    							|| $anchorTd.hasClass("right") && $focusTd.hasClass("right") 
-		    							|| !$anchorTd.hasClass("left") && !$anchorTd.hasClass("right")) { // selection must not span the split view
+		    				if ($startTd.length != 0 && $endTd.length != 0) { // selection must starts with diff content and ends with diff content 
+		    					if ($startTd.hasClass("left") && $endTd.hasClass("left") 
+		    							|| $startTd.hasClass("right") && $endTd.hasClass("right") 
+		    							|| !$startTd.hasClass("left") && !$startTd.hasClass("right")) { // selection must not span the split view
 		    						displaySelectionPopup = true;
 	    							
 		    						firstRange.collapse(true);
@@ -122,44 +121,30 @@ gitplex.textdiff = {
 	    			    			position.top += $(window).scrollTop();
 
 	    			    			var markPos;
-			    					var $anchorTr = $anchorTd.closest("tr");
-			    					var $focusTr = $focusTd.closest("tr");
-			    					
-			    					if ($anchor.is("td.content") && anchorOffset == 0 && $anchorTr.next().is("tr.expander")) {
-			    						if ($anchor.hasClass("left")) {
-			    							$anchor = $anchorTr.next().next().find("td.content.left");
-			    							$anchorTd = $anchor;
-			    							anchorOffset = 0;
-			    						} else if ($anchor.hasClass("right")) {
-			    							$anchor = $anchorTr.next().next().find("td.content.right");
-			    							$anchorTd = $anchor;
-			    							anchorOffset = 0;
+			    					var $startTr = $startTd.closest("tr");
+			    					var $endTr = $endTd.closest("tr");
+
+			    					// drag mouse over a line above expander, chrome will set $end as the line 
+			    					// below expander, below code handles this case
+			    					if ($end.is("td.content") && endOffset == 0 && $endTr.prev().is("tr.expander")) {
+			    						if ($end.hasClass("left")) {
+			    							$end = $endTr.prev().prev().find("td.content.left");
+			    							$endTd = $end;
+			    							endOffset = $end.text().length;
+			    						} else if ($end.hasClass("right")) {
+			    							$end = $endTr.prev().prev().find("td.content.right");
+			    							$endTd = $end;
+			    							endOffset = $end.text().length;
 			    						} else {
-			    							$anchor = $anchorTr.next().next().find("td.content");
-			    							$anchorTd = $anchor;
-			    							anchorOffset = 0;
+			    							$end = $endTr.prev().prev().find("td.content");
+			    							$endTd = $end;
+			    							endOffset = $end.text().length;
 			    						}
-			    						$anchorTr = $anchorTd.parent();
-			    					}
-			    					if ($focus.is("td.content") && focusOffset == 0 && $focusTr.prev().is("tr.expander")) {
-			    						if ($focus.hasClass("left")) {
-			    							$focus = $focusTr.prev().prev().find("td.content.left");
-			    							$focusTd = $focus;
-			    							focusOffset = $focus.text().length;
-			    						} else if ($focus.hasClass("right")) {
-			    							$focus = $focusTr.prev().prev().find("td.content.right");
-			    							$focusTd = $focus;
-			    							focusOffset = $focus.text().length;
-			    						} else {
-			    							$focus = $focusTr.prev().prev().find("td.content");
-			    							$focusTd = $focus;
-			    							focusOffset = $focus.text().length;
-			    						}
-			    						$focusTr = $focusTd.parent();
+			    						$endTr = $endTd.parent();
 			    					}
 			    					
-			    					if ($anchorTr.nextAll("tr.expander").filter($focusTr.prevAll("tr.expander")).length == 0
-			    							&& $anchorTr.prevAll("tr.expander").filter($focusTr.nextAll("tr.expander")).length == 0) { // all lines between selection has been expanded 
+			    					if ($startTr.nextAll("tr.expander").filter($endTr.prevAll("tr.expander")).length == 0
+			    							&& $startTr.prevAll("tr.expander").filter($endTr.nextAll("tr.expander")).length == 0) { // all lines between selection has been expanded 
 			    						
 		    				    		function getCursor($td, $node, nodeOffset) {
 		    				    			var oldLine, newLine;
@@ -223,22 +208,22 @@ gitplex.textdiff = {
 	    									};
 		    				    		}
 	
-		    				    		var anchorCursor = getCursor($anchorTd, $anchor, anchorOffset);
-		    				    		var focusCursor = getCursor($focusTd, $focus, focusOffset);
+		    				    		var startCursor = getCursor($startTd, $start, startOffset);
+		    				    		var endCursor = getCursor($endTd, $end, endOffset);
 	
-		    				    		if (anchorCursor.newLine && focusCursor.newLine) {
-		    				    			if (anchorCursor.newLine == focusCursor.newLine && anchorCursor.newCh < focusCursor.newCh
-		    				    					|| anchorCursor.newLine < focusCursor.newLine) {
-		    				    				markPos = "new-" + anchorCursor.newLine + "." + anchorCursor.newCh 
-		    				    						+ "-" + focusCursor.newLine + "." + focusCursor.newCh;		    				    			
+		    				    		if (startCursor.newLine && endCursor.newLine) {
+		    				    			if (startCursor.newLine == endCursor.newLine && startCursor.newCh < endCursor.newCh
+		    				    					|| startCursor.newLine < endCursor.newLine) {
+		    				    				markPos = "new-" + startCursor.newLine + "." + startCursor.newCh 
+		    				    						+ "-" + endCursor.newLine + "." + endCursor.newCh;		    				    			
 		    				    			} else {
 		    				    				displaySelectionPopup = false;
 		    				    			}
-		    				    		} else if (anchorCursor.oldLine && focusCursor.oldLine) {
-		    				    			if (anchorCursor.oldLine == focusCursor.oldLine && anchorCursor.oldCh < focusCursor.oldCh
-		    				    					|| anchorCursor.oldLine < focusCursor.oldLine) {
-		    				    				markPos = "old-" + anchorCursor.oldLine + "." + anchorCursor.oldCh 
-		    				    						+ "-" + focusCursor.oldLine + "." + focusCursor.oldCh;		    				    			
+		    				    		} else if (startCursor.oldLine && endCursor.oldLine) {
+		    				    			if (startCursor.oldLine == endCursor.oldLine && startCursor.oldCh < endCursor.oldCh
+		    				    					|| startCursor.oldLine < endCursor.oldLine) {
+		    				    				markPos = "old-" + startCursor.oldLine + "." + startCursor.oldCh 
+		    				    						+ "-" + endCursor.oldLine + "." + endCursor.oldCh;		    				    			
 		    				    			} else {
 		    				    				displaySelectionPopup = false;
 		    				    			}
@@ -323,50 +308,50 @@ gitplex.textdiff = {
 		var $container = $('*[data-markfile="' + markFile.escape() + '"]');
 		var splitted = markPos.split("-");
 		var oldOrNew = splitted[0];
-		var anchorCursor = splitted[1].split(".");
-		var focusCursor = splitted[2].split(".");
-		var $anchorTd = $container.find("td.content[data-" + oldOrNew + "='" + (anchorCursor[0]-1) + "']");
-		var $focusTd = $container.find("td.content[data-" + oldOrNew + "='" + (focusCursor[0]-1) + "']");
-		if ($anchorTd.length == 0) { 
-			console.error("Unable to find anchor td!");
-			$anchorTd = undefined;
-		} else if ($anchorTd.length == 2) {
+		var startCursor = splitted[1].split(".");
+		var endCursor = splitted[2].split(".");
+		var $startTd = $container.find("td.content[data-" + oldOrNew + "='" + (startCursor[0]-1) + "']");
+		var $endTd = $container.find("td.content[data-" + oldOrNew + "='" + (endCursor[0]-1) + "']");
+		if ($startTd.length == 0) { 
+			console.error("Unable to find start td!");
+			$startTd = undefined;
+		} else if ($startTd.length == 2) {
 			if (oldOrNew == "old") {
-				$anchorTd = $anchorTd.first();
+				$startTd = $startTd.first();
 			} else {
-				$anchorTd = $anchorTd.last();
+				$startTd = $startTd.last();
 			}
 		}
-		if ($focusTd.length == 0) {
-			console.error("Unable to find focus td!");
-			$focusTd = undefined;
-		} else if ($focusTd.length == 2) {
+		if ($endTd.length == 0) {
+			console.error("Unable to find end td!");
+			$endTd = undefined;
+		} else if ($endTd.length == 2) {
 			if (oldOrNew == "old") {
-				$focusTd = $focusTd.first();
+				$endTd = $endTd.first();
 			} else {
-				$focusTd = $focusTd.last();
+				$endTd = $endTd.last();
 			}
 		}
 		return {
-			anchorTd: $anchorTd,
-			anchorCursor: anchorCursor,
-			focusTd: $focusTd,
-			focusCursor: focusCursor,
+			startTd: $startTd,
+			startCursor: startCursor,
+			endTd: $endTd,
+			endCursor: endCursor,
 			oldOrNew: oldOrNew
 		};
 	},
 	scroll: function(markFile, markPos) {
 		var markInfo = gitplex.textdiff.getMarkInfo(markFile, markPos);
-		var $anchorTd = markInfo.anchorTd;
-		var $focusTd = markInfo.focusTd;
-		if ($anchorTd && $focusTd) {
-			var anchorTop = $anchorTd.offset().top;
-			var focusBottom = $focusTd.offset().top + $focusTd.outerHeight();
-			var markHeight = focusBottom - anchorTop;
+		var $startTd = markInfo.startTd;
+		var $endTd = markInfo.endTd;
+		if ($startTd && $endTd) {
+			var startTop = $startTd.offset().top;
+			var endBottom = $endTd.offset().top + $endTd.outerHeight();
+			var markHeight = endBottom - startTop;
 			var stickyHeight = $(".sticky").outerHeight();
 			var screenHeight = $(window).height() - stickyHeight;
 			var availableHeight = screenHeight - markHeight;
-			var scrollTop = $anchorTd.offset().top - stickyHeight;
+			var scrollTop = $startTd.offset().top - stickyHeight;
 			if (availableHeight > 0) {
 				// we have enough screen space, so do not put on top of screen for easier reading
 				scrollTop -= availableHeight/4;
@@ -376,13 +361,13 @@ gitplex.textdiff = {
 	},
 	mark: function(markFile, markPos) {
 		var markInfo = gitplex.textdiff.getMarkInfo(markFile, markPos);
-		var $anchorTd = markInfo.anchorTd;
-		var $focusTd = markInfo.focusTd;
-		if ($anchorTd && $focusTd) {
-			var anchorCursor = markInfo.anchorCursor;
-			var focusCursor = markInfo.focusCursor;
+		var $startTd = markInfo.startTd;
+		var $endTd = markInfo.endTd;
+		if ($startTd && $endTd) {
+			var startCursor = markInfo.startCursor;
+			var endCursor = markInfo.endCursor;
 			var oldOrNew = markInfo.oldOrNew;
-			var $td = $anchorTd;
+			var $td = $startTd;
 			while (true) {
 				var ch = 0;
 				$td.addClass("content-mark");
@@ -426,59 +411,59 @@ gitplex.textdiff = {
 					}
 					if ($this.hasClass("insert") && oldOrNew == "old" 
 							|| $this.hasClass("delete") && oldOrNew == "new") {
-						if (!$td.is($anchorTd) && !$td.is($focusTd)) {
+						if (!$td.is($startTd) && !$td.is($endTd)) {
 							markText(0, text.length);
-						} else if ($td.is($anchorTd) && $td.is($focusTd)) {
-							if (focusCursor[1]>ch && anchorCursor[1]<ch) {
+						} else if ($td.is($startTd) && $td.is($endTd)) {
+							if (endCursor[1]>ch && startCursor[1]<ch) {
 								markText(0, text.length);
 							}
-						} else if ($td.is($anchorTd)) {
-							if (anchorCursor[1]<ch) {
+						} else if ($td.is($startTd)) {
+							if (startCursor[1]<ch) {
 								markText(0, text.length);
 							}
 						} else {
-							if (focusCursor[1]>ch) {
+							if (endCursor[1]>ch) {
 								markText(0, text.length);
 							}
 						}
 					} else {
 						var nextCh = ch + text.length;
-						if (!$td.is($anchorTd) && !$td.is($focusTd)) {
+						if (!$td.is($startTd) && !$td.is($endTd)) {
 							markText(0, text.length);
-						} else if ($td.is($anchorTd) && $td.is($focusTd)) {
-							if (focusCursor[1]>ch && anchorCursor[1]<nextCh) {
-								if (ch>=anchorCursor[1] && nextCh<=focusCursor[1]) {
+						} else if ($td.is($startTd) && $td.is($endTd)) {
+							if (endCursor[1]>ch && startCursor[1]<nextCh) {
+								if (ch>=startCursor[1] && nextCh<=endCursor[1]) {
 									markText(0, text.length);
-								} else if (ch<anchorCursor[1] && nextCh>focusCursor[1]) {
-									markText(anchorCursor[1]-ch, focusCursor[1]-ch);
-								} else if (ch<anchorCursor[1]) {
-									markText(anchorCursor[1]-ch, text.length);
+								} else if (ch<startCursor[1] && nextCh>endCursor[1]) {
+									markText(startCursor[1]-ch, endCursor[1]-ch);
+								} else if (ch<startCursor[1]) {
+									markText(startCursor[1]-ch, text.length);
 								} else {
-									markText(0, focusCursor[1]-ch);
+									markText(0, endCursor[1]-ch);
 								}
 							}
-						} else if ($td.is($anchorTd)) {
-							if (ch>=anchorCursor[1]) {
+						} else if ($td.is($startTd)) {
+							if (ch>=startCursor[1]) {
 								markText(0, text.length);
-							} else if (nextCh>anchorCursor[1]) {
-								markText(anchorCursor[1]-ch, text.length);
+							} else if (nextCh>startCursor[1]) {
+								markText(startCursor[1]-ch, text.length);
 							} 
 						} else {
-							if (nextCh<=focusCursor[1]) {
+							if (nextCh<=endCursor[1]) {
 								markText(0, text.length);
-							} else if (ch<focusCursor[1]) {
-								markText(0, focusCursor[1]-ch);
+							} else if (ch<endCursor[1]) {
+								markText(0, endCursor[1]-ch);
 							} 
 						}
 						ch = nextCh;
 					}
 				});
-				if ($td.is($focusTd) || $td.length == 0) {
+				if ($td.is($endTd) || $td.length == 0) {
 					break;
 				} else {
-					if ($anchorTd.hasClass("left")) {
+					if ($startTd.hasClass("left")) {
 						$td = $td.parent().next().children("td.left");
-					} else if ($anchorTd.hasClass("right")) {
+					} else if ($startTd.hasClass("right")) {
 						$td = $td.parent().next().children("td.right");
 					} else {
 						$td = $td.parent().next().children("td.content");
