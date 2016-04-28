@@ -35,7 +35,7 @@ gitplex.textdiff = {
 		var $symbols = $container.find(gitplex.textdiff.symbolClasses); 
 		$symbols.mouseover($container.data("symbolHover"));
 		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
-	    $container.on("mouseup keyup", function() {
+		$container.on("mouseup keyup", function() {
 	    	setTimeout(function() { // use a timeout to make sure selection remains stable after an action
 		    	var selection = window.getSelection();
 		    	var displaySelectionPopup = false;
@@ -47,55 +47,101 @@ gitplex.textdiff = {
 		    		var startOffset = firstRange.startOffset;
 		    		var endOffset = lastRange.endOffset;
 		    		if (!$start.is($end) || startOffset != endOffset) { // something must be selected
-		    			var $startDiff = $start;
-		    			if (!$startDiff.hasClass("text-diff"))
+		    			var $startDiff;
+		    			if (!$start.hasClass("text-diff"))
 		    				$startDiff = $start.closest(".text-diff");
-		    			var $endDiff = $end;
-		    			if (!$endDiff.hasClass("text-diff"))
+		    			else
+		    				$startDiff = $start;
+		    			
+		    			var $endDiff;
+		    			if (!$end.hasClass("text-diff"))
 		    				$endDiff = $end.closest(".text-diff");
+		    			else
+		    				$endDiff = $end;
 		    			
 		    			if ($startDiff.length != 0 && $endDiff.length != 0 && $startDiff.is($endDiff)) { // selection must be within same file
-		    				var $startTd = $start;
-		    				if (!$startTd.is("td.content"))
-		    					$startTd = $start.closest(".text-diff td.content");
-		    				var $endTd = $end;
-		    				if (!$endTd.is("td.content"))
-		    					$endTd = $end.closest(".text-diff td.content");
+			    			function getStartTextNodeAndOffset($td, index) {
+			    				var $children = $td.contents();
+				    			for (var i=0; i<$children.length; i++) {
+				    				if (i == index) {
+				    					return {
+				    						node: $($children[i]),
+				    						offset: 0
+				    					};
+				    				}
+				    			}		    		
+				    			return {node: $td, offset: 0};
+			    			}
+			    			function getEndTextNodeAndOffset($td, index) {
+			    				var $children = $td.contents();
+				    			for (var i=0; i<$children.length; i++) {
+				    				var $child = $($children[i]);
+				    				if (i == index-1) {
+				    					return {
+				    						node: $child,
+				    						offset: $child.text().length
+				    					};
+				    				}
+				    			}		    		
+				    			return {node: $td, offset: $children.length};
+			    			}
+		    				
+		    				/*
+		    				 * in case start or end node is table cell (for instance when triple click 
+		    				 * a line in firefox), the offset is index of child node inside the 
+		    				 * table cell, so we convert them to child node and corresponding index
+		    				 */
+		    				var $startTd = $start.is("td.content")? $start: $start.closest(".text-diff td.content");
+		    				var $endTd = $end.is("td.content")? $end: $end.closest(".text-diff td.content");
 
-		    				if ($startTd.length != 0 || $endTd.length != 0) {
-		    					if ($startTd.length == 0) { 
-	    							var $tr;
-		    						if ($start.is("tr.code")) {
-		    							$tr = $start;
-		    						} else {
+		    				if ($startTd.length != 0 || $endTd.length != 0) { // at least one side of selection must be within a table cell
+		    					var $referenceTd = $startTd.length != 0? $startTd: $endTd;
+		    					
+		    					function getSameSideTd($tr, $referenceTd) {
+		    						if ($referenceTd.hasClass("left"))
+		    							return $tr.find("td.content.left");
+		    						else if ($referenceTd.hasClass("right"))
+		    							return $tr.find("td.content.right");
+		    						else
+		    							return $tr.find("td.content");
+		    					}
+
+		    					if (!$start.parent().is("td.content")) {
+		    						var $td;
+				    				if ($start.is("td.content")) { 
+				    					$td = $start;
+				    				} else if ($start.is("tr.code")) {
+				    					$td = getSameSideTd($start, $referenceTd);
+				    					startOffset = 0;
+				    				} else if ($start.is("tr.expander")) {
+				    					$td = getSameSideTd($start.next(), $referenceTd);
+				    					startOffset = 0;
+				    				} else {
 		    							$tr = $startDiff.find("tr.code").first();
 		    							startOffset = 0;
-		    						}
-	    							if ($endTd.hasClass("left"))
-	    								$startTd = $tr.find("td.content.left");
-	    							else if ($endTd.hasClass("right"))
-	    								$startTd = $tr.find("td.content.right");
-	    							else
-	    								$startTd = $tr.find("td.content");
-	    							$start = $startTd;
+				    				}
+			    					var nodeAndOffset = getStartTextNodeAndOffset($td, startOffset);
+			    					$start = nodeAndOffset.node;
+			    					startOffset = nodeAndOffset.offset;
 		    					}
-		    					if ($endTd.length == 0) {
-	    							var $tr;
-	    							if ($end.is("tr.code")) {
-	    								$tr = $end;
-	    							} else {
+			    				
+		    					if (!$end.parent().is("td.content")) {
+		    						var $td;
+				    				if ($end.is("td.content")) { 
+				    					$td = $end;
+				    				} else if ($end.is("tr.code")) {
+				    					$td = getSameSideTd($end, $referenceTd);
+				    					endOffset = $td.contents().length;
+				    				} else if ($end.is("tr.expander")) {
+				    					$td = getSameSideTd($end.prev(), $referenceTd);
+				    					endOffset = $td.contents().length;
+				    				} else {
 		    							$tr = $endDiff.find("tr.code").last();
-		    							endOffset = -1;
-		    						} 
-	    							if ($startTd.hasClass("left"))
-	    								$endTd = $tr.find("td.content.left");
-	    							else if ($startTd.hasClass("right"))
-	    								$endTd = $tr.find("td.content.right");
-	    							else
-	    								$endTd = $tr.find("td.content");
-	    							$end = $endTd;
-	    							if (endOffset == -1)
-	    								endOffset = $endTd.text().length;
+		    							endOffset = $td.contents().length;
+				    				}
+			    					var nodeAndOffset = getEndTextNodeAndOffset($td, endOffset);
+			    					$end = nodeAndOffset.node;
+			    					endOffset = nodeAndOffset.offset;
 		    					}
 		    				}
 		    				
@@ -124,7 +170,7 @@ gitplex.textdiff = {
 			    					var $startTr = $startTd.closest("tr");
 			    					var $endTr = $endTd.closest("tr");
 
-			    					// drag mouse over a line above expander, chrome will set $end as the line 
+			    					// drag mouse over a line above expander, chrome may set $end as the line 
 			    					// below expander, below code handles this case
 			    					if ($end.is("td.content") && endOffset == 0 && $endTr.prev().is("tr.expander")) {
 			    						if ($end.hasClass("left")) {
