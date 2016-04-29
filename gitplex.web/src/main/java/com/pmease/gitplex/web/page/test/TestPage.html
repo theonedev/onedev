@@ -1,10 +1,12 @@
 <wicket:extend>
 	<table class="diff">
 		<tr>
-			<td></td>
+			<td class="a1">hello<span class="s1"></span>world</td>
+			<td class="a2"></td>
+			<td class="a3"></td>
 		</tr>
 	</table>
 	<script type="text/javascript">
-		console.log($('table.diff td').contents().length);
+		console.log($(".s1").attr("data-old")?"true":"false");
 	</script>
 </wicket:extend>

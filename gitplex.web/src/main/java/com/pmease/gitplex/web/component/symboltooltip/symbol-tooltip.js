@@ -83,8 +83,10 @@ gitplex.symboltooltip = {
 		var $content = $("#" + contentId);
 		var $container = $content.parent();
 		var $tooltip = $("#" + $container.attr("id") + "-symbol-tooltip");
-		$tooltip.empty().append($content.children());
-		$tooltip.align($tooltip.data("alignment"));
+		if ($tooltip.length != 0) {
+			$tooltip.empty().append($content.children());
+			$tooltip.align($tooltip.data("alignment"));
+		}
 	},
 	removeTooltip: function(container) {
 		if (container.tooltip) {
