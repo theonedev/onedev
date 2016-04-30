@@ -59,6 +59,7 @@ import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.BlobIcon;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobNameChangeCallback;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext;
@@ -417,8 +418,12 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 					
+					String path = file.path;
+					if (path != null && file.isTree())
+						path += "/";
+					
 					List<MenuItem> changeItems = new ArrayList<>();
-					if (file.isTree() && context.isOnBranch()) {
+					if (file.isTree() && context.isOnBranch() && SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
 						changeItems.add(new MenuItem() {
 
 							@Override
@@ -453,8 +458,10 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 
+					PullRequest request = context.getPullRequest();
 					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
-							&& context.isAtSourceBranchHead()) {
+							&& context.isAtSourceBranchHead() 
+							&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), path)) {
 						changeItems.add(new MenuItem() {
 		
 							@Override
@@ -495,7 +502,8 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 					if (file.isFile() && context.getDepot().getBlob(file).getText() != null 
-							&& context.isOnBranch()) {
+							&& context.isOnBranch() 
+							&& SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
 						changeItems.add(new MenuItem() {
 
 							@Override
@@ -540,7 +548,8 @@ public abstract class FileNavigator extends Panel {
 						});
 					}
 
-					if (file.isFile() && context.isAtSourceBranchHead()) {
+					if (file.isFile() && context.isAtSourceBranchHead()
+							&& SecurityUtils.canModify(request.getSourceDepot(), request.getSourceBranch(), path)) {
 						changeItems.add(new MenuItem() {
 
 							@Override
@@ -574,7 +583,8 @@ public abstract class FileNavigator extends Panel {
 							
 						});
 					} 
-					if (file.isFile() && context.isOnBranch()) {
+					if (file.isFile() && context.isOnBranch() 
+							&& SecurityUtils.canModify(context.getDepot(), file.revision, path)) {
 						changeItems.add(new MenuItem() {
 
 							@Override

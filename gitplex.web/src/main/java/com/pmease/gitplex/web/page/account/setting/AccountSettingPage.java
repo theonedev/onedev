@@ -28,7 +28,7 @@ public abstract class AccountSettingPage extends AccountLayoutPage {
 		super.onInitialize();
 		
 		List<PageTab> tabs = new ArrayList<>();
-		tabs.add(new AccountTab("Profile", "", 2, ProfileEditPage.class));
+		tabs.add(new AccountTab("Profile", "", 0, ProfileEditPage.class));
 		tabs.add(new AccountTab("Avatar", "", 0, AvatarEditPage.class));
 		
 		if (!getAccount().isOrganization())

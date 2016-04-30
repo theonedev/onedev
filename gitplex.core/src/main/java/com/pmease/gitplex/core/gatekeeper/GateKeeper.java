@@ -2,6 +2,8 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
@@ -38,11 +40,12 @@ public interface GateKeeper extends Serializable {
 	 * @param branch
 	 * 			branch to be checked
 	 * @param file
-	 * 			file to be checked
+	 * 			file to be checked, use <tt>null</tt> to ignore checking of file, that is, 
+	 * 			only check the branch
 	 * @return
 	 * 			result of the check. 
 	 */
-	CheckResult checkFile(Account user, Depot depot, String branch, String file);
+	CheckResult checkFile(Account user, Depot depot, String branch, @Nullable String file);
 	
 	/**
 	 * Check if specified user can push specified commit to specified ref.

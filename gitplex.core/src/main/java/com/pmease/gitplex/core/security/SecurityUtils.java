@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.gitplex.core.GitPlex;
@@ -70,6 +72,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return currentUser != null 
 				&& currentUser.asSubject().isPermitted(ObjectPermission.ofDepotWrite(depot))	
 				&& depot.getGateKeeper().checkPush(currentUser, depot, refName, oldCommit, newCommit).isPassed();
+	}
+
+	public static boolean canModify(Depot depot, String branch, @Nullable String file) {
+		return canWrite(depot) && depot.getGateKeeper().checkFile(getAccount(), depot, branch, file).isPassed();
 	}
 	
 	public static boolean canManage(Account account) {

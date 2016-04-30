@@ -13,11 +13,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -101,6 +104,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	
 	private final UnitOfWork unitOfWork;
 	
+	private final ExecutorService executorService;
+	
 	private final Map<Long, Environment> envs = new HashMap<>();
 	
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
@@ -111,12 +116,14 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	
 	@Inject
 	public DefaultAuxiliaryManager(DepotManager depotManager, StorageManager storageManager, 
-			WorkManager workManager, SequentialWorkManager sequentialWorkManager, UnitOfWork unitOfWork) {
+			WorkManager workManager, SequentialWorkManager sequentialWorkManager, 
+			UnitOfWork unitOfWork, ExecutorService executorService) {
 		this.depotManager = depotManager;
 		this.storageManager = storageManager;
 		this.workManager = workManager;
 		this.sequentialWorkManager = sequentialWorkManager;
 		this.unitOfWork = unitOfWork;
+		this.executorService = executorService;
 	}
 	
 	private String getSequentialExecutorKey(Depot depot) {
@@ -143,6 +150,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 		
 		env.executeInTransaction(new TransactionalExecutable() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
 			public void execute(final Transaction txn) {
 				byte[] bytes = getBytes(defaultStore.get(txn, LAST_COMMIT_KEY));
@@ -178,11 +186,51 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 				AtomicReference<Set<String>> files = new AtomicReference<>(null);
 				AtomicBoolean filesChanged = new AtomicBoolean(false);
 				
-				log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
+				/*
+				 * Use a synchronous queue to achieve below purpose:
+				 * 1. Add commit to Xodus transactional store in the same thread opening the transaction 
+				 * as this is required by Xodus
+				 * 2. Do not pile up commits to use minimal memory 
+				 */
+				SynchronousQueue<Optional<Commit>> queue = new SynchronousQueue<>(); 
+				executorService.execute(new Runnable() {
 
-					@SuppressWarnings("unchecked")
 					@Override
-					public void consume(Commit commit) {
+					public void run() {
+						try {
+							log.revisions(revisions).listChangedFiles(true).run(new CommitConsumer() {
+	
+								@Override
+								public void consume(Commit commit) {
+									try {
+										queue.put(Optional.of(commit));
+									} catch (InterruptedException e) {
+									}
+								}
+								
+							});		
+						} catch (Exception e) {
+							logger.error("Error running git log command", e);
+						} finally {
+							try {
+								queue.put(Optional.empty());
+							} catch (InterruptedException e) {
+							}
+						}
+					}
+					
+				});
+				while (true) {
+					Optional<Commit> optionalCommit = null;
+					try {
+						optionalCommit = queue.take();
+					} catch (InterruptedException e) {
+					}
+					if (optionalCommit == null || !optionalCommit.isPresent())
+						break;
+
+					Commit commit = optionalCommit.get();
+					try {
 						byte[] keyBytes = new byte[20];
 						ObjectId commitId = ObjectId.fromString(commit.getHash());
 						commitId.copyRawTo(keyBytes, 0);
@@ -224,7 +272,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 								commitsStore.put(txn, key, new ArrayByteIterable(newValueBytes));
 							}
 							if (contributors.get() == null) {
-								byte[] bytes = getBytes(defaultStore.get(txn, CONTRIBUTORS_KEY));
+								bytes = getBytes(defaultStore.get(txn, CONTRIBUTORS_KEY));
 								if (bytes != null)
 									contributors.set((Set<NameAndEmail>) SerializationUtils.deserialize(bytes));
 								else
@@ -238,9 +286,9 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 									contributorsChanged.set(true);
 								}
 							}
-
+	
 							if (files.get() == null) {
-								byte[] bytes = getBytes(defaultStore.get(txn, FILES_KEY));
+								bytes = getBytes(defaultStore.get(txn, FILES_KEY));
 								if (bytes != null)
 									files.set((Set<String>) SerializationUtils.deserialize(bytes));
 								else
@@ -249,7 +297,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 							
 							for (String file: commit.getChangedFiles()) {
 								ByteIterable fileKey = new StringByteIterable(file);
-								byte[] bytes = getBytes(contributionsStore.get(txn, fileKey));
+								bytes = getBytes(contributionsStore.get(txn, fileKey));
 								Map<NameAndEmail, Long> fileContributions;
 								if (bytes != null)
 									fileContributions = (Map<NameAndEmail, Long>) SerializationUtils.deserialize(bytes);
@@ -263,7 +311,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 									if (lastContributionTime == null || lastContributionTime.longValue() < contributionTime)
 										fileContributions.put(contributor, contributionTime);
 								}													
-
+	
 								bytes = SerializationUtils.serialize((Serializable) fileContributions);
 								contributionsStore.put(txn, fileKey, new ArrayByteIterable(bytes));
 								
@@ -275,10 +323,11 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 							
 							if (lastCommit.get() == null)
 								lastCommit.set(commit.getHash());
-						}
+						}		
+					} catch (Exception e) {
+						logger.error("Error processing commit " + commit.getHash(), e);
 					}
-					
-				});
+				}
 				
 				if (contributorsChanged.get()) {
 					bytes = SerializationUtils.serialize((Serializable) contributors.get());

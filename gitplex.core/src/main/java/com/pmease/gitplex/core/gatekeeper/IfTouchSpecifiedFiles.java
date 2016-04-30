@@ -59,10 +59,14 @@ public class IfTouchSpecifiedFiles extends AbstractGateKeeper {
 
 	@Override
 	protected CheckResult doCheckFile(Account user, Depot depot, String branch, String file) {
-		if (matches(file)) 
-			return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));
-		else
-			return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'"));
+		if (file != null) {
+			if (matches(file)) 
+				return passed(Lists.newArrayList("Touched files match '" + pathMatch + "'"));
+			else
+				return failed(Lists.newArrayList("No touched files match '" + pathMatch + "'"));
+		} else {
+			return ignored();
+		}
 	}
 	
 	@Override

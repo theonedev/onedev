@@ -2,6 +2,8 @@ package com.pmease.gitplex.core.gatekeeper;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.pmease.commons.wicket.editable.annotation.Editable;
@@ -77,7 +79,7 @@ public abstract class AbstractGateKeeper implements GateKeeper {
 	 * @return
 	 * 			result of the check
 	 */
-	protected abstract CheckResult doCheckFile(Account user, Depot depot, String branch, String file);
+	protected abstract CheckResult doCheckFile(Account user, Depot depot, String branch, @Nullable String file);
 
 	/**
 	 * Check if specified user can push specified commit to specified branch, without considering enable flag.

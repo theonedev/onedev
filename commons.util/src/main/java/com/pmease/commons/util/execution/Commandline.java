@@ -32,7 +32,7 @@ public class Commandline  {
     
     private File workingDir;
     
-    private Map<String, String> environment = new HashMap<String, String>();
+    private Map<String, String> environments = new HashMap<String, String>();
     
     public Commandline(String command) {
         String[] parts = StringUtils.parseQuoteTokens(command);
@@ -68,9 +68,9 @@ public class Commandline  {
     	return this;
     }
     
-    public Commandline environment(Map<String, String> environment) {
-    	this.environment.clear();
-    	this.environment.putAll(environment);
+    public Commandline environments(Map<String, String> environments) {
+    	this.environments.clear();
+    	this.environments.putAll(environments);
     	return this;
     }
 
@@ -95,7 +95,7 @@ public class Commandline  {
     public Commandline clear() {
         executable = null;
         arguments.clear();
-        environment.clear();
+        environments.clear();
         workingDir = null;
         
         return this;
@@ -129,7 +129,7 @@ public class Commandline  {
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.directory(workingDir);
         
-        processBuilder.environment().putAll(environment);
+        processBuilder.environment().putAll(environments);
 		
         if (logger.isDebugEnabled()) {
     		logger.debug("Executing command: " + this);

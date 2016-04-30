@@ -49,16 +49,19 @@ public abstract class BasePage extends CommonPage {
 		return GitPlex.getInstance(AccountManager.class).getCurrent();
 	}
 	
+	public void unauthorized() {
+		if (getLoginUser() != null) 
+			throw new UnauthorizedException();
+		else 
+			throw new RestartResponseAtInterceptPageException(LoginPage.class);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (!isPermitted()) {
-			if (getLoginUser() != null) 
-				throw new UnauthorizedException();
-			else 
-				throw new RestartResponseAtInterceptPageException(LoginPage.class);
-		}
+		if (!isPermitted())
+			unauthorized();
 		
 		add(new Label("pageTitle", getPageTitle()));
 

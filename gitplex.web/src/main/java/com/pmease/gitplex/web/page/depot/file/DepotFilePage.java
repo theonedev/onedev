@@ -60,6 +60,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
 import com.pmease.gitplex.search.SearchManager;
@@ -218,6 +219,17 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 		
 		viewState = params.get(PARAM_VIEW_STATE).toString();
+		
+		if (mode == Mode.EDIT || mode == Mode.DELETE) {
+			if (!isOnBranch()) 
+				throw new RuntimeException("Files can only be edited on branch");
+			
+			String path = blobIdent.path;
+			if (path != null && blobIdent.isTree())
+				path += "/";
+			if (!SecurityUtils.canModify(getDepot(), blobIdent.revision, path))
+				unauthorized();
+		}
 	}
 	
 	@Override
