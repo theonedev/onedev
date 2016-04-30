@@ -18,7 +18,7 @@ gitplex.revisionDiff = {
 		});
 		$diffStats.find("a.file").each(function() {
 			var $this = $(this);
-			var uri = new URI(window.location.href);
+			var uri = URI(window.location.href);
 			uri.removeSearch("mark-file").removeSearch("mark-pos");
 			uri.removeSearch("jump-file").addSearch("jump-file", $this.data("file"));
 			$this.attr("href", uri.toString());
