@@ -439,6 +439,7 @@ gitplex.textdiff = {
 					$permanentLink.off("click");
 	    			var uri = URI(window.location.href); 
 	    			var markFile = $container.data("markfile");
+	    			uri.removeSearch("jump-file");
 	    			uri.removeSearch("mark-file").addSearch("mark-file", markFile);
 	    			uri.removeSearch("mark-pos").addSearch("mark-pos", markPos);
     				$permanentLink.attr("href", uri.toString());
