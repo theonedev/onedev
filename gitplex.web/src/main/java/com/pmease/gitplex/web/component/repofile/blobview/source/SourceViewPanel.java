@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -27,6 +26,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -257,8 +257,8 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %s);", 
 				codeContainer.getMarkupId(), 
-				StringEscapeUtils.escapeEcmaScript(blob.getText().getContent()),
-				context.getBlobIdent().path, 
+				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
+				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path), 
 				context.getMark()!=null?context.getMark().toJSON():"undefined",
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
