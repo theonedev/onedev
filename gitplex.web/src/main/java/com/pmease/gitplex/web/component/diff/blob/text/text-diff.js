@@ -36,7 +36,8 @@ gitplex.textdiff = {
 		$symbols.mouseover($container.data("symbolHover"));
 		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
 		$container.on("mouseup keyup", function() {
-	    	setTimeout(function() { // use a timeout to make sure selection remains stable after an action
+			// use a timeout to make sure selection remains stable after mouse or keyboard action
+	    	setTimeout(function() { 
 	    		function hideSelectionPopup() {
 	    			$("#selection-popup").hide();	    			
 	    		}
@@ -49,8 +50,17 @@ gitplex.textdiff = {
 	    		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
 	    		var $start = $(firstRange.startContainer);
 	    		var $end = $(lastRange.endContainer);
+	    		
+	    		/* 
+	    		 * offset represents offset within $start or $end node, for instance for below selection
+	    		 * <span>hello</span><span>world</span>
+	    		 *         ^                   ^
+	    		 * $start will be <span>hello</span> and startOffset will be index of character 'l' which is 2, 
+	    		 * $end will be <span>world</span> and endOffset will be index of character 'd' which will be 4  
+	    		 */   
 	    		var startOffset = firstRange.startOffset;
 	    		var endOffset = lastRange.endOffset;
+	    		
     			var $startDiff;
     			if (!$start.hasClass("text-diff"))
     				$startDiff = $start.closest(".text-diff");
@@ -78,6 +88,7 @@ gitplex.textdiff = {
     				return;
 				}
 
+				// make sure we are processing td.content on the same side on split view
 				function getTd($tr) {
 					var $td = $startTd.length != 0? $startTd: $endTd;
 					if ($td.hasClass("left"))
@@ -87,7 +98,22 @@ gitplex.textdiff = {
 					else
 						return $tr.find("td.content");
 				}
-				
+
+				/*
+				 * sometimes the selection returns $start and $end as td instead of 
+				 * children under td, for instance:
+				 * <td><span>hello</span><span>world</span></td>
+				 *                                        ^
+				 * in this case, both $start and $end is the whole td, and startOffset
+				 * is index of first span element which is 0, and endOffset is index of 
+				 * last span element plus 1 which is 2. 
+				 * 
+				 * this function returns the equivalent child node and offset under td. 
+				 * with above example, the equivalent child node will be <span>hello</span>
+				 * and offset will be 0 for selection start, while equivalent end child node
+				 * is <span>world</span> with offset being 5   
+				 * 
+				 */
 				function getNodeAndOffsetUnderTd($td, contentIndex) {
     				var $contents = $td.contents();
 	    			for (var i=0; i<$contents.length; i++) {
@@ -106,17 +132,17 @@ gitplex.textdiff = {
 				}
 
 				// normalize $start to be within td.content
-				if ($start.parent().parent().is("td.content"))
+				if ($start.parent().parent().is("td.content")) // $start might be the text node under span
 					$start = $start.parent();
 				if (!$start.parent().is("td.content")) { 
 					var $td;
-    				if ($start.is("td.content")) {
+    				if ($start.is("td.content")) { // this happens if we triple click to select a line in firefox 
     					$td = $start;
-    				} else if ($start.is("tr.code")) {
+    				} else if ($start.is("tr.code")) { // this may happen if we drag mouse to select multiple lines in firefox 
     					$td = getTd($start);
     					startOffset = startOffset<=$td.index()? 0: $td.contents().length;
-    				} else if ($start.is("tr.expander")) {
-    					var $tr = $start.next();
+    				} else if ($start.is("tr.expander") || $start.closest("tr.expander").length != 0) { // this may happen if we drag mouse over to expander line 
+    					var $tr = $start.is("tr.expander")? $start.next(): $start.closest("tr.expander").next();
     					if ($tr.length == 0) {
     						hideSelectionPopup();
     						return;
@@ -163,8 +189,8 @@ gitplex.textdiff = {
     				} else if ($end.is("tr.code")) {
     					$td = getTd($end);
     					endOffset = endOffset>$td.index()? $td.contents().length: 0;
-    				} else if ($end.is("tr.expander")) {
-    					var $tr = $end.prev();
+    				} else if ($end.is("tr.expander") || $end.closest("tr.expander").length != 0) {
+    					var $tr = $end.is("tr.expander")? $end.prev(): $end.closest("tr.expander").prev();
     					if ($tr.length == 0) {
     						hideSelectionPopup();
     						return;
@@ -257,14 +283,16 @@ gitplex.textdiff = {
 					return $td.attr("data-old") || $td.attr("data-new");					
 				}
 				
-				// continue to normalize $start and $end. This time we convert below selection:
-				// <span>begin</span><span>middle</span><span>end</span>
-				//            ^                               ^       
-				// into this selection:
-				// <span>begin</span><span>middle</span><span>end</span>
-				//                         ^     ^
-				// this normalization makes it accurate to detect invalid selections where start 
-				// and end of selection points to different revisions
+				/*
+				 * continue to normalize $start and $end. This time we convert below selection:
+				 * <span>begin</span><span>middle</span><span>end</span>
+				 *            ^                               ^       
+				 * into this selection:
+				 * <span>begin</span><span>middle</span><span>end</span>
+				 *                         ^     ^
+				 * this normalization makes it accurate to detect invalid selections where start 
+				 * and end of selection points to different revisions
+				 */
 				var $content = $start;
 				while (!$content.is($end) && (startOffset >= $content.text().length || !hasOldOrNewData($content))) {
 					$content = nextContent($content);
@@ -333,6 +361,11 @@ gitplex.textdiff = {
 					return;
 				}
 				
+				/*
+				 * cursor.line represents line number of selection and cursor.ch represents 
+				 * character index inside text of the whole line, without considering element 
+				 * tags. 
+				 */
 	    		function getCursor($node, offset) {
 					$nodeTd = $node.parent();
 	    			var oldLine, newLine;
