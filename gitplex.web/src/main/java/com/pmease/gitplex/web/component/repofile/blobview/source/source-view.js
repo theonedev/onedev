@@ -72,12 +72,24 @@ gitplex.sourceview = {
 			    	if (from.line != to.line || from.ch != to.ch) {
 		    			var ch = (from.ch + to.ch)/2;
 		    			var position = cm.charCoords({line:from.line, ch:ch});
-		    			var uri = URI(window.location.href); 
-		    			uri.removeSearch("mark").addSearch("mark", 
-		    					(from.line+1) + "," + (from.ch+1) + "-" + (to.line+1) + "," + (to.ch+1));
-		    			var permanentCallback = function($permanentLink) {
+						var permanentCallback = function($permanentLink) {
+							$permanentLink.off("click");
+			    			var uri = new URI(window.location.href); 
+			    			uri.removeSearch("mark").addSearch("mark", 
+			    					(from.line+1) + "." + from.ch + "-" + (to.line+1) + "." + to.ch);
 		    				$permanentLink.attr("href", uri.toString());
-		    			};
+		    				$permanentLink.click(function(e) {
+		    					e.preventDefault();
+			    				$("#selection-popup").hide();
+		    					pmease.commons.history.pushState(uri.toString());
+		    					pmease.commons.codemirror.mark(cm, {
+		    						beginLine: from.line,
+		    						beginChar: from.ch,
+		    						endLine: to.line,
+		    						endChar: to.ch
+		    					});
+		    				});
+						};
 		    			var commentCallback = function($commentLink) {
 		    				
 		    			};

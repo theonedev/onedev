@@ -41,10 +41,10 @@ public class Mark implements Serializable {
 	public Mark(String str) {
 		String begin = StringUtils.substringBefore(str, "-");
 		String end = StringUtils.substringAfter(str, "-");
-		beginLine = Integer.parseInt(StringUtils.substringBefore(begin, ","))-1;
-		beginChar = Integer.parseInt(StringUtils.substringAfter(begin, ","))-1;
-		endLine = Integer.parseInt(StringUtils.substringBefore(end, ","))-1;
-		endChar = Integer.parseInt(StringUtils.substringAfter(end, ","))-1;
+		beginLine = Integer.parseInt(StringUtils.substringBefore(begin, "."))-1;
+		beginChar = Integer.parseInt(StringUtils.substringAfter(begin, "."));
+		endLine = Integer.parseInt(StringUtils.substringBefore(end, "."))-1;
+		endChar = Integer.parseInt(StringUtils.substringAfter(end, "."));
 	}
 	
 	public int getBeginLine() {
@@ -65,7 +65,7 @@ public class Mark implements Serializable {
 	
 	@Override
 	public String toString() {
-		return (beginLine+1) + "," + (beginChar+1) + "-" + (endLine+1) + "," + (endChar+1);
+		return (beginLine+1) + "." + beginChar + "-" + (endLine+1) + "." + endChar;
 	}
 	
 	@Override
