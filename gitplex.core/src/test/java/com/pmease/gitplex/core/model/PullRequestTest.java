@@ -1,6 +1,12 @@
 package com.pmease.gitplex.core.model;
 
+import java.io.IOException;
+
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.util.FS;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,6 +31,15 @@ public class PullRequestTest extends AbstractGitTest {
 			@Override
 			public Git git() {
 				return git;
+			}
+
+			@Override
+			public Repository getRepository() {
+				try {
+					return RepositoryCache.open(FileKey.lenient(git.depotDir(), FS.DETECTED));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
         	
         };

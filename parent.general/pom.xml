@@ -77,6 +77,7 @@
 											<goal>generate-plugin-resources</goal>
 											<goal>generate-product-resources</goal>
 											<goal>create-product-sandbox</goal>
+											<goal>copy-antlr-tokens</goal>
 											<goal>run-ant</goal>
 										</goals>
 									</pluginExecutionFilter>
@@ -176,6 +177,13 @@
 							<phase>compile</phase>
 							<goals>
 								<goal>check-project-dependencies</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>copy-antlr-tokens</id>
+							<phase>compile</phase>
+							<goals>
+								<goal>copy-antlr-tokens</goal>
 							</goals>
 						</execution>
 						<execution>

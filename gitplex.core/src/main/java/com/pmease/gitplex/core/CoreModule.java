@@ -37,9 +37,11 @@ import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.MailManager;
 import com.pmease.gitplex.core.manager.OrganizationMembershipManager;
+import com.pmease.gitplex.core.manager.PullRequestActivityManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.PullRequestVisitManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.ReviewInvitationManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
@@ -61,9 +63,11 @@ import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDepotManager;
 import com.pmease.gitplex.core.manager.impl.DefaultMailManager;
 import com.pmease.gitplex.core.manager.impl.DefaultOrganizationMembershipManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestActivityManager;
 import com.pmease.gitplex.core.manager.impl.DefaultNotificationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestUpdateManager;
+import com.pmease.gitplex.core.manager.impl.DefaultPullRequestVisitManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewInvitationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultReviewManager;
@@ -174,6 +178,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(TeamMembershipManager.class).to(DefaultTeamMembershipManager.class);
 		bind(TeamAuthorizationManager.class).to(DefaultTeamAuthorizationManager.class);
 		bind(UserAuthorizationManager.class).to(DefaultUserAuthorizationManager.class);
+		bind(PullRequestActivityManager.class).to(DefaultPullRequestActivityManager.class);
+		bind(PullRequestVisitManager.class).to(DefaultPullRequestVisitManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 
