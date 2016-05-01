@@ -82,7 +82,7 @@ public abstract class DepotPage extends AccountPage {
 		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(getAccount(), depotName);
 		
 		if (depot == null) 
-			throw new EntityNotFoundException("Unable to find repository " + getAccount() + "/" + depotName);
+			throw new EntityNotFoundException("Unable to find repository " + getAccount().getName() + "/" + depotName);
 		
 		depotModel = new DepotModel(depot);
 		

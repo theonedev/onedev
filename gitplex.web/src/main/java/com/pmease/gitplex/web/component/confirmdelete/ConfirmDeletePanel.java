@@ -12,6 +12,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
+
 @SuppressWarnings("serial")
 abstract class ConfirmDeletePanel extends Panel {
 	
@@ -32,7 +34,7 @@ abstract class ConfirmDeletePanel extends Panel {
 			
 		}));
 		
-		add(new AjaxLink<Void>("delete") {
+		add(new PreventDefaultAjaxLink<Void>("delete") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {

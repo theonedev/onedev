@@ -136,6 +136,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	    		}
 	    	}
 
+	    	long time = System.currentTimeMillis();
 	    	// Diff calculation can be slow, so we pre-load diffs of each change 
 	    	// concurrently
 	    	Collection<Callable<Void>> tasks = new ArrayList<>();
@@ -158,6 +159,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					throw new RuntimeException(e);
 				}
 	    	}
+	    	System.out.println(System.currentTimeMillis()-time);
 
 	    	int totalChanges = diffEntries.size();
 	    	if (diffableChanges.size() == totalChanges) { 
