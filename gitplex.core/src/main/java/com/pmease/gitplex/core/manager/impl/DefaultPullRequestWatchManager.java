@@ -40,6 +40,7 @@ import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.MailManager;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestWatchManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 
@@ -53,13 +54,16 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 	private final MailManager mailManager;
 	
 	private final UrlManager urlManager;
+
+	private final PullRequestManager pullRequestManager;
 	
 	@Inject
-	public DefaultPullRequestWatchManager(Dao dao, 
+	public DefaultPullRequestWatchManager(Dao dao, PullRequestManager pullRequestManager,
 			AccountManager userManager, BranchWatchManager branchWatchManager, 
 			MailManager mailManager, UrlManager urlManager) {
 		super(dao);
 		
+		this.pullRequestManager = pullRequestManager;
 		this.userManager = userManager;
 		this.branchWatchManager = branchWatchManager;
 		this.mailManager = mailManager;
@@ -243,7 +247,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 		request.setLastEventDate(new Date());
 		request.setLastEvent(event);
 		
-		persist(request);
+		pullRequestManager.persist(request);
 	}
 
 	@Transactional

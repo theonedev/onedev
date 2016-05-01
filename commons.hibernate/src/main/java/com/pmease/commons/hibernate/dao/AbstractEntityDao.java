@@ -36,12 +36,12 @@ public abstract class AbstractEntityDao<T extends AbstractEntity> implements Ent
 	}
 
 	@Override
-	public void persist(AbstractEntity entity) {
+	public void persist(T entity) {
 		dao.persist(entity);
 	}
 
 	@Override
-	public void remove(AbstractEntity entity) {
+	public void remove(T entity) {
 		dao.remove(entity);
 	}
 

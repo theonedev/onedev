@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.test;
+package com.pmease.commons.antlr.codeassist;
 
 import static org.junit.Assert.assertEquals;
 
@@ -15,6 +15,7 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
+import com.pmease.commons.antlr.codeassist.test.CodeAssistTest5Lexer;
 import com.pmease.commons.antlr.grammar.ElementSpec;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
@@ -26,7 +27,7 @@ import com.pmease.commons.antlr.parser.Element;
  * @author robin
  *
  */
-public class CodeAssistTest5 {
+public class TestCodeAssist5 {
 
 	private static final Map<String, List<String>> SCHEMA_TABLES = new LinkedHashMap<>();
 	

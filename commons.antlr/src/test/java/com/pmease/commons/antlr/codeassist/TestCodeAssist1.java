@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.test;
+package com.pmease.commons.antlr.codeassist;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,8 +12,9 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
+import com.pmease.commons.antlr.codeassist.test.CodeAssistTest1Lexer;
 
-public class CodeAssistTest1 {
+public class TestCodeAssist1 {
 
 	private CodeAssist codeAssist = new CodeAssist(CodeAssistTest1Lexer.class) {
 

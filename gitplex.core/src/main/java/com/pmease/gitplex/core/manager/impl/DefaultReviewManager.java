@@ -26,6 +26,7 @@ import com.pmease.gitplex.core.entity.Review;
 import com.pmease.gitplex.core.entity.Review.Result;
 import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.PullRequestActivityManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
@@ -35,6 +36,8 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 
 	private final PullRequestManager pullRequestManager;
 	
+	private final PullRequestActivityManager pullRequestActivityManager;
+	
 	private final PullRequestCommentManager commentManager;
 
 	private final UnitOfWork unitOfWork;
@@ -42,11 +45,12 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 	private final Set<PullRequestListener> pullRequestListeners;
 	
 	@Inject
-	public DefaultReviewManager(Dao dao, 
+	public DefaultReviewManager(Dao dao, PullRequestActivityManager pullRequestActivityManager, 
 			PullRequestManager pullRequestManager, PullRequestCommentManager commentManager, 
 			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
 		super(dao);
 		
+		this.pullRequestActivityManager = pullRequestActivityManager;
 		this.pullRequestManager = pullRequestManager;
 		this.commentManager = commentManager;
 		this.unitOfWork = unitOfWork;
@@ -81,7 +85,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 		activity.setDate(new Date());
 		activity.setRequest(request);
 		activity.setUser(reviewer);
-		persist(activity);
+		pullRequestActivityManager.persist(activity);
 		
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -133,7 +137,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 		activity.setDate(new Date());
 		activity.setRequest(review.getUpdate().getRequest());
 		activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-		persist(activity);
+		pullRequestActivityManager.persist(activity);
 
 		final Long requestId = review.getUpdate().getRequest().getId();
 		afterCommit(new Runnable() {

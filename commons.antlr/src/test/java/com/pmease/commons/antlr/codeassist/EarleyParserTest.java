@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.parse;
+package com.pmease.commons.antlr.codeassist;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

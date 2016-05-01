@@ -22,7 +22,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.tika.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 import com.pmease.commons.antlr.ANTLRv4Lexer;
 import com.pmease.commons.antlr.ANTLRv4Parser;

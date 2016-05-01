@@ -68,6 +68,7 @@ import com.pmease.gitplex.core.listener.PullRequestListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.NotificationManager;
+import com.pmease.gitplex.core.manager.PullRequestActivityManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.PullRequestUpdateManager;
@@ -107,6 +108,8 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	private final Set<Long> integrationPreviewCalculatingRequestIds = new ConcurrentHashSet<>();
 
 	private final WorkManager workManager;
+	
+	private final PullRequestActivityManager pullRequestActivityManager;
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, 
@@ -114,7 +117,8 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			ReviewInvitationManager reviewInvitationManager, AccountManager userManager, 
 			NotificationManager notificationManager, PullRequestCommentManager commentManager, 
 			MarkdownManager markdownManager, WorkManager workManager, 
-			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners) {
+			UnitOfWork unitOfWork, Set<PullRequestListener> pullRequestListeners, 
+			PullRequestActivityManager pullRequestActivityManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -125,6 +129,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		this.workManager = workManager;
 		this.unitOfWork = unitOfWork;
 		this.pullRequestListeners = pullRequestListeners;
+		this.pullRequestActivityManager = pullRequestActivityManager;
 	}
 
 	@Transactional
@@ -159,7 +164,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			activity.setAction(PullRequestActivity.Action.RESTORE_SOURCE_BRANCH);
 			activity.setDate(new Date());
 			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-			persist(activity);
+			pullRequestActivityManager.persist(activity);
 		}
 	}
 
@@ -176,7 +181,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			activity.setAction(PullRequestActivity.Action.DELETE_SOURCE_BRANCH);
 			activity.setDate(new Date());
 			activity.setUser(GitPlex.getInstance(AccountManager.class).getCurrent());
-			persist(activity);
+			pullRequestActivityManager.persist(activity);
 		}
 	}
 	
@@ -198,7 +203,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		activity.setAction(PullRequestActivity.Action.REOPEN);
 		activity.setUser(user);
 		
-		persist(activity);
+		pullRequestActivityManager.persist(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -226,7 +231,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		activity.setAction(PullRequestActivity.Action.DISCARD);
 		activity.setUser(user);
 		
-		persist(activity);
+		pullRequestActivityManager.persist(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -307,7 +312,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		activity.setAction(PullRequestActivity.Action.INTEGRATE);
 		activity.setUser(user);
 		
-		persist(activity);
+		pullRequestActivityManager.persist(activity);
 
 		if (comment != null) {
 			PullRequestComment requestComment = new PullRequestComment();
@@ -341,7 +346,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		activity.setAction(PullRequestActivity.Action.OPEN);
 		activity.setRequest(request);
 		activity.setUser(request.getSubmitter());
-		persist(activity);
+		pullRequestActivityManager.persist(activity);
 		
 		FileUtils.cleanDir(storageManager.getCacheDir(request));
 		
@@ -415,7 +420,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			activity.setUser(GitPlex.getInstance(AccountManager.class).getRoot());
 			activity.setAction(PullRequestActivity.Action.INTEGRATE);
 			activity.setDate(new Date());
-			persist(activity);
+			pullRequestActivityManager.persist(activity);
 			
 			request.setLastIntegrationPreview(null);
 			CloseInfo closeInfo = new CloseInfo();

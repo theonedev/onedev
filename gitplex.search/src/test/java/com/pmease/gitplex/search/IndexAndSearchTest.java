@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -14,6 +15,10 @@ import java.util.concurrent.Future;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.util.FS;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Test;
@@ -178,7 +183,20 @@ public class IndexAndSearchTest extends AbstractGitTest {
 
 		indexDir = FileUtils.createTempDir();
 		
-		depot = new Depot();
+		depot = new Depot() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Repository getRepository() {
+				try {
+					return RepositoryCache.open(FileKey.lenient(git().depotDir(), FS.DETECTED));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		};
 		depot.setId(1L);
 		depot.setName("test");
 		depot.setAccount(new Account());

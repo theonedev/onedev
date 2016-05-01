@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.test;
+package com.pmease.commons.antlr.codeassist;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,11 +12,12 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
+import com.pmease.commons.antlr.codeassist.test.CodeAssistTest3Lexer;
 import com.pmease.commons.antlr.codeassist.FenceAware;
 import com.pmease.commons.antlr.grammar.RuleRefElementSpec;
 import com.pmease.commons.antlr.parser.Element;
 
-public class CodeAssistTest3 {
+public class TestCodeAssist3 {
 
 	private static final String[] AUTHORS = new String[]{"robin shen", "steve luo", "justin"};
 

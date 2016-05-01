@@ -1,4 +1,4 @@
-package com.pmease.commons.antlr.codeassist.test;
+package com.pmease.commons.antlr.codeassist;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,9 +13,10 @@ import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.antlr.codeassist.ParentedElement;
+import com.pmease.commons.antlr.codeassist.test.CodeAssistTest2Lexer;
 import com.pmease.commons.antlr.grammar.LexerRuleRefElementSpec;
 
-public class CodeAssistTest2 {
+public class TestCodeAssist2 {
 
 	private static final String[] BRANCHS = new String[]{"master", "dev", "feature1", "feature2"};
 

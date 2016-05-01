@@ -1,10 +1,16 @@
 package com.pmease.gitplex.core.model;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.util.FS;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.google.common.collect.Sets;
@@ -14,6 +20,7 @@ import com.pmease.commons.loader.AppLoader;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 
 public class PullRequestUpdateTest extends AbstractGitTest {
@@ -40,6 +47,16 @@ public class PullRequestUpdateTest extends AbstractGitTest {
         	
         };
         
+        Repository repository;
+		try {
+			repository = RepositoryCache.open(FileKey.lenient(depot.git().depotDir(), FS.DETECTED));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+        
+        DepotManager depotManager = Mockito.mock(DepotManager.class);        
+        Mockito.when(depotManager.getRepository(Matchers.any())).thenReturn(repository);
+        Mockito.when(AppLoader.getInstance(DepotManager.class)).thenReturn(depotManager);
 		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(new StorageManager() {
 			
 			@Override
