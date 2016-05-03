@@ -33,7 +33,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +41,7 @@ import org.unbescape.java.JavaEscape;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
@@ -202,12 +202,6 @@ public class DepotCommitsPage extends DepotPage {
 				RequestCycle.get().find(AjaxRequestTarget.class).add(feedback);
 			}
 
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("gitplex.repocommits.initQuery();"));
-			}
-			
 		};
 		queryForm.add(new TextField<String>("input", new IModel<String>() {
 
@@ -438,7 +432,7 @@ public class DepotCommitsPage extends DepotPage {
 				PageParameters params = RevisionComparePage.paramsOf(getDepot(), 
 						new DepotAndRevision(getDepot(), commit.getHash()), 
 						new DepotAndRevision(getDepot(), state.getCompareWith()), 
-						true, path);
+						true, WhitespaceOption.DEFAULT, path);
 				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
@@ -522,8 +516,6 @@ public class DepotCommitsPage extends DepotPage {
 		
 		response.render(JavaScriptHeaderItem.forReference(ClearableResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CommitGraphResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(DepotCommitsPage.class, "depot-commits.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(DepotCommitsPage.class, "depot-commits.css")));
 		

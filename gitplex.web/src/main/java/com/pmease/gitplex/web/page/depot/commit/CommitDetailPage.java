@@ -39,6 +39,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
@@ -49,7 +50,6 @@ import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
 import com.pmease.gitplex.web.component.createtag.CreateTagLink;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
-import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
@@ -63,9 +63,11 @@ public class CommitDetailPage extends DepotPage {
 	
 	// make sure to use a different value from wicket:id according to wicket bug:
 	// https://issues.apache.org/jira/browse/WICKET-6069
-	private static final String PARAM_COMPARE_WITH = "compareWith";
+	private static final String PARAM_COMPARE_WITH = "compare-with";
 	
-	private static final String PARAM_PATH = "path";
+	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
+	
+	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	protected String revision;
 	
@@ -89,9 +91,7 @@ public class CommitDetailPage extends DepotPage {
 		
 	};
 	
-	private DiffOptionPanel diffOption;
-	
-	private RevisionDiffPanel compareResult;
+	private RevisionDiffPanel revisionDiff;
 	
 	public CommitDetailPage(PageParameters params) {
 		super(params);
@@ -258,7 +258,7 @@ public class CommitDetailPage extends DepotPage {
 						public void onClick(AjaxRequestTarget target) {
 							setCompareWith(parent); 
 							target.add(parentsContainer);
-							newCompareResult(target);
+							newRevisionDiff(target);
 							pushState(target);
 						}
 
@@ -276,30 +276,9 @@ public class CommitDetailPage extends DepotPage {
 		}
 
 		if (getCommit().getParentCount() != 0) {
-			add(diffOption = new DiffOptionPanel("compareOption", depotModel, getCommit().name()) {
-	
-				@Override
-				protected void onSelectPath(AjaxRequestTarget target, String path) {
-					CommitDetailPage.this.state.path = path;
-					newCompareResult(target);
-					pushState(target);
-				}
-	
-				@Override
-				protected void onLineProcessorChange(AjaxRequestTarget target) {
-					newCompareResult(target);
-				}
-	
-				@Override
-				protected void onDiffModeChange(AjaxRequestTarget target) {
-					newCompareResult(target);
-				}
-	
-			});
-			newCompareResult(null);
+			newRevisionDiff(null);
 		} else {
-			add(new WebMarkupContainer("compareOption").setVisible(false));
-			add(new WebMarkupContainer("compareResult").setVisible(false));
+			add(new WebMarkupContainer("revisionDiff").setVisible(false));
 		}
 	}
 	
@@ -313,26 +292,31 @@ public class CommitDetailPage extends DepotPage {
 		state.compareWith = compareWith;
 	}
 	
-	private void newCompareResult(@Nullable AjaxRequestTarget target) {
-		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
+	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
+		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
 				Model.of((PullRequest)null), getCompareWith(), 
-				getCommit().name(), state.path, diffOption.getLineProcessor(), 
-				diffOption.getDiffMode()) {
+				getCommit().name(), state.pathFilter, state.whitespaceOption) {
 
 			@Override
-			protected void onClearPath(AjaxRequestTarget target) {
-				state.path = null;
-				newCompareResult(target);
+			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
+				state.pathFilter = pathFilter;
 				pushState(target);
 			}
 
+			@Override
+			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
+					WhitespaceOption whitespaceOption) {
+				state.whitespaceOption = whitespaceOption;
+				pushState(target);
+			}
+			
 		};
-		compareResult.setOutputMarkupId(true);
+		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
-			replace(compareResult);
-			target.add(compareResult);
+			replace(revisionDiff);
+			target.add(revisionDiff);
 		} else {
-			add(compareResult);
+			add(revisionDiff);
 		}
 	}
 	
@@ -355,8 +339,10 @@ public class CommitDetailPage extends DepotPage {
 		params.set(PARAM_REVISION, revision);
 		if (state.compareWith != null)
 			params.set(PARAM_COMPARE_WITH, state.compareWith);
-		if (state.path != null)
-			params.set(PARAM_PATH, state.path);
+		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
+			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
+		if (state.pathFilter != null)
+			params.set(PARAM_PATH_FILTER, state.pathFilter);
 		return params;
 	}
 	
@@ -383,7 +369,7 @@ public class CommitDetailPage extends DepotPage {
 		super.onPopState(target, data);
 		
 		state = (HistoryState) data;
-		newCompareResult(target);
+		newRevisionDiff(target);
 	}
 	
 	public static class HistoryState implements Serializable {
@@ -392,14 +378,17 @@ public class CommitDetailPage extends DepotPage {
 		
 		public String compareWith;
 		
-		public String path;
+		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+		
+		public String pathFilter;
 		
 		public HistoryState() {
 		}
 		
 		public HistoryState(PageParameters params) {
 			compareWith = params.get(PARAM_COMPARE_WITH).toString();
-			path = params.get(PARAM_PATH).toString();
+			whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
+			pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		}
 		
 	}

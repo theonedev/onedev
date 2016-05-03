@@ -112,10 +112,10 @@ public class Blob {
 			return content;
 		}
 
-		public List<String> getLines(LineProcessor processor) {
+		public List<String> getLines(WhitespaceOption whitespaceOption) {
 			List<String> processedLines = new ArrayList<>();
 			for (String line: getLines())
-				processedLines.add(processor.process(line));
+				processedLines.add(whitespaceOption.process(line));
 			return processedLines;
 		}
 		

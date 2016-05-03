@@ -36,6 +36,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;
@@ -44,14 +45,11 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
-import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
-import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
@@ -59,13 +57,13 @@ import com.pmease.gitplex.web.websocket.PullRequestChanged;
 @SuppressWarnings("serial")
 public class RequestComparePage extends RequestDetailPage {
 
-	private static final String PARAM_COMMENT = "comment";
+	private static final String PARAM_OLD_REV = "old-rev";
 	
-	private static final String PARAM_OLD_REV = "oldRev";
+	private static final String PARAM_NEW_REV = "new-rev";
 	
-	private static final String PARAM_NEW_REV = "newRev";
+	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
-	private static final String PARAM_PATH = "path";
+	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	public static final String REV_BASE = "base";
 	
@@ -89,13 +87,13 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	private String newCommitHash;
 	
-	private String path;
+	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+	
+	private String pathFilter;
 	
 	private WebMarkupContainer compareHead;
 	
-	private DiffOptionPanel diffOption;
-	
-	private Component compareResult;
+	private Component revisionDiff;
 	
 	private final IModel<Map<String, CommitDescription>> commitsModel = 
 			new LoadableDetachableModel<Map<String, CommitDescription>>() {
@@ -145,10 +143,10 @@ public class RequestComparePage extends RequestDetailPage {
 	public RequestComparePage(PageParameters params) {
 		super(params);
 
-		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.oldRev = params.get(PARAM_OLD_REV).toString();
 		state.newRev = params.get(PARAM_NEW_REV).toString();
-		state.path = params.get(PARAM_PATH).toString();
+		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
+		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
 		initFromState(state);
 	}
@@ -156,7 +154,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private void initFromState(HistoryState state) {
 		oldCommitHash = getCommitHash(state.oldRev);
 		newCommitHash = getCommitHash(state.newRev);
-		path = state.path;
+		whitespaceOption = state.whitespaceOption;
+		pathFilter = state.pathFilter;
 	}
 	
 	private String getRevision(String commitHash) {
@@ -243,7 +242,6 @@ public class RequestComparePage extends RequestDetailPage {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, String commitHash) {
 						oldCommitHash = commitHash;
-						state.commentId = null;
 						state.oldRev = getRevision(oldCommitHash);
 						state.newRev = getRevision(newCommitHash);
 						close();
@@ -288,7 +286,6 @@ public class RequestComparePage extends RequestDetailPage {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, String commitHash) {
 						newCommitHash = commitHash;
-						state.commentId = null;
 						state.oldRev = getRevision(oldCommitHash);
 						state.newRev = getRevision(newCommitHash);
 						close();
@@ -331,7 +328,6 @@ public class RequestComparePage extends RequestDetailPage {
 					protected void onSelect(AjaxRequestTarget target) {
 						close();
 						
-						state.commentId = null;
 						state.oldRev = REV_BASE;
 						state.newRev = REV_LAST_UPDATE_PREFIX + "1";
 						initFromState(state);
@@ -350,7 +346,6 @@ public class RequestComparePage extends RequestDetailPage {
 							protected void onSelect(AjaxRequestTarget target) {
 								close();
 								
-								state.commentId = null;
 								state.oldRev = REV_TARGET_BRANCH;
 								state.newRev = REV_INTEGRATION_PREVIEW;
 								initFromState(state);
@@ -376,7 +371,6 @@ public class RequestComparePage extends RequestDetailPage {
 						protected void onSelect(AjaxRequestTarget target) {
 							close();
 
-							state.commentId = null;
 							state.oldRev = REV_UPDATE_PREFIX + (updateNo-1);
 							state.newRev = REV_UPDATE_PREFIX + updateNo;
 							initFromState(state);
@@ -387,37 +381,6 @@ public class RequestComparePage extends RequestDetailPage {
 				}
 				
 				return items;
-			}
-			
-		});
-		
-		compareHead.add(diffOption = new DiffOptionPanel("diffOption", depotModel, newCommitHash) {
-
-			@Override
-			protected void onSelectPath(AjaxRequestTarget target, String path) {
-				RequestComparePage.this.path = state.path = path;
-				if (state.commentId != null) {
-					state.commentId = null;
-					state.oldRev = getRevision(oldCommitHash);
-					state.newRev = getRevision(newCommitHash);
-				} 
-				newCompareResult(target);
-				pushState(target);
-			}
-
-			@Override
-			protected void onLineProcessorChange(AjaxRequestTarget target) {
-				newCompareResult(target);
-			}
-
-			@Override
-			protected void onDiffModeChange(AjaxRequestTarget target) {
-				newCompareResult(target);
-			}
-
-			@Override
-			protected Component getDirtyContainer() {
-				return compareResult;
 			}
 			
 		});
@@ -434,14 +397,12 @@ public class RequestComparePage extends RequestDetailPage {
 					PullRequest.Event requestEvent = requestChanged.getEvent();
 
 					boolean outdated = false;
-					if (state.commentId == null) {
-						if (requestEvent == INTEGRATION_PREVIEW_CALCULATED) {
-							outdated = state.oldRev.equals(REV_INTEGRATION_PREVIEW) 
-									|| state.newRev.equals(REV_INTEGRATION_PREVIEW);
-						} else if (requestEvent == UPDATED) {
-							outdated = !GitUtils.isHash(state.oldRev) && state.oldRev.startsWith(REV_LAST_UPDATE_PREFIX)
-									|| !GitUtils.isHash(state.newRev) && state.newRev.startsWith(REV_LAST_UPDATE_PREFIX);
-						}
+					if (requestEvent == INTEGRATION_PREVIEW_CALCULATED) {
+						outdated = state.oldRev.equals(REV_INTEGRATION_PREVIEW) 
+								|| state.newRev.equals(REV_INTEGRATION_PREVIEW);
+					} else if (requestEvent == UPDATED) {
+						outdated = !GitUtils.isHash(state.oldRev) && state.oldRev.startsWith(REV_LAST_UPDATE_PREFIX)
+								|| !GitUtils.isHash(state.newRev) && state.newRev.startsWith(REV_LAST_UPDATE_PREFIX);
 					}
 
 					if (outdated)
@@ -508,48 +469,24 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String oldRev, String newRev) {
-		return paramsOf(request, oldRev, newRev, null);
+		return paramsOf(request, oldRev, newRev, WhitespaceOption.DEFAULT, null);
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, String oldRev, String newRev, 
-			@Nullable String path) {
-		return paramsOf(request, null, oldRev, newRev, path);
-	}
-	
-	private static PageParameters paramsOf(PullRequest request, @Nullable Long commentId, 
-			@Nullable String oldRev, @Nullable String newRev, @Nullable String path) {
+	public static PageParameters paramsOf(PullRequest request, @Nullable String oldRev, @Nullable String newRev, 
+			WhitespaceOption whitespaceOption, @Nullable String pathFilter) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 
-		if (commentId != null)
-			params.set(PARAM_COMMENT, commentId);
 		if (oldRev != null)
 			params.set(PARAM_OLD_REV, oldRev);
 		if (newRev != null)
 			params.set(PARAM_NEW_REV, newRev);
-		if (path != null)
-			params.set(PARAM_PATH,  path);
+		if (whitespaceOption != WhitespaceOption.DEFAULT)
+			params.set(PARAM_WHITESPACE_OPTION, whitespaceOption.name());
+		if (pathFilter != null)
+			params.set(PARAM_PATH_FILTER, pathFilter);
 		return params;
 	}
 	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof CommentRemoved) {
-			CommentRemoved commentRemoved = (CommentRemoved) event.getPayload();
-			CodeComment comment = (CodeComment) commentRemoved.getComment();
-			
-			// compare identifier instead of comment object as comment may have been deleted
-			// to cause LazyInitializationException
-			if (CodeComment.idOf(comment).equals(state.commentId)) {
-				state.commentId = null;
-				state.oldRev = getRevision(oldCommitHash);
-				state.newRev = getRevision(newCommitHash);
-				onStateChange(commentRemoved.getPartialPageRequestHandler());
-			}
-		}
-	}
-
 	private static class CommitDescription implements Serializable {
 		private final String name;
 		
@@ -606,7 +543,7 @@ public class RequestComparePage extends RequestDetailPage {
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
 							attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(compareResult));
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(revisionDiff));
 						}
 
 						@Override
@@ -659,7 +596,7 @@ public class RequestComparePage extends RequestDetailPage {
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
 					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(compareResult));
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(revisionDiff));
 				}
 
 				@Override
@@ -690,8 +627,8 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
-		PageParameters params = paramsOf(getPullRequest(), state.commentId, 
-				state.oldRev, state.newRev, state.path);
+		PageParameters params = paramsOf(getPullRequest(), state.oldRev, state.newRev, 
+				state.whitespaceOption, state.pathFilter);
 		CharSequence url = RequestCycle.get().urlFor(RequestComparePage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
@@ -704,29 +641,30 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
-		compareResult = new RevisionDiffPanel("compareResult", depotModel,  
-				requestModel, oldCommitHash, newCommitHash, path, 
-				diffOption.getLineProcessor(), diffOption.getDiffMode()) {
+		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
+				requestModel, oldCommitHash, newCommitHash, pathFilter, 
+				whitespaceOption) {
 
 			@Override
-			protected void onClearPath(AjaxRequestTarget target) {
-				path = state.path = null;
-				if (state.commentId != null) {
-					state.commentId = null;
-					state.oldRev = getRevision(oldCommitHash);
-					state.newRev = getRevision(newCommitHash);
-				}
-				newCompareResult(target);
+			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
+				pathFilter = state.pathFilter = pathFilter;
+				pushState(target);
+			}
+
+			@Override
+			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
+					WhitespaceOption whitespaceOption) {
+				whitespaceOption = state.whitespaceOption = whitespaceOption;
 				pushState(target);
 			}
 			
 		};
-		compareResult.setOutputMarkupId(true);
+		revisionDiff.setOutputMarkupId(true);
 		if (partialPageRequestHandler != null) {
-			replace(compareResult);
-			partialPageRequestHandler.add(compareResult);
+			replace(revisionDiff);
+			partialPageRequestHandler.add(revisionDiff);
 		} else {
-			add(compareResult);
+			add(revisionDiff);
 		}
 	}
 	

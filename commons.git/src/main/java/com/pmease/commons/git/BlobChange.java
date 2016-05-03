@@ -20,22 +20,28 @@ public abstract class BlobChange implements Serializable {
 
 	protected final ChangeType type;
 	
+	protected final WhitespaceOption whitespaceOption;
+	
 	protected final BlobIdent oldBlobIdent;
 	
 	protected final BlobIdent newBlobIdent;
 	
 	private transient List<DiffBlock<List<CmToken>>> diffBlocks;
 	
-	public BlobChange(String oldRev, String newRev, DiffEntry diffEntry) {
+	public BlobChange(String oldRev, String newRev, DiffEntry diffEntry, 
+			WhitespaceOption whitespaceOption) {
 		type = diffEntry.getChangeType();
+		this.whitespaceOption = whitespaceOption;
 		oldBlobIdent = GitUtils.getOldBlobIdent(diffEntry, oldRev);
 		newBlobIdent = GitUtils.getNewBlobIdent(diffEntry, newRev);
 	}
 	
-	public BlobChange(ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent) {
+	public BlobChange(ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent, 
+			WhitespaceOption whitespaceOption) {
 		this.type = type;
 		this.oldBlobIdent = oldBlobIdent;
 		this.newBlobIdent = newBlobIdent;
+		this.whitespaceOption = whitespaceOption;
 	}
 	
 	public ChangeType getType() {
@@ -63,7 +69,7 @@ public abstract class BlobChange implements Serializable {
 			try {
 				if (type == ChangeType.ADD || type == ChangeType.COPY) {
 					if (getNewText() != null) {
-						List<String> newLines = getNewText().getLines(getLineProcessor());
+						List<String> newLines = getNewText().getLines(whitespaceOption);
 						if (newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> oldLines = new ArrayList<>();
 							diffBlocks = DiffUtils.diff(
@@ -77,7 +83,7 @@ public abstract class BlobChange implements Serializable {
 					}
 				} else if (type == ChangeType.DELETE) {
 					if (getOldText() != null) {
-						List<String> oldLines = getOldText().getLines(getLineProcessor());
+						List<String> oldLines = getOldText().getLines(whitespaceOption);
 						if (oldLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> newLines = new ArrayList<>();
 							diffBlocks = DiffUtils.diff(
@@ -93,8 +99,8 @@ public abstract class BlobChange implements Serializable {
 					diffBlocks = new ArrayList<>();
 				} else {
 					if (getOldText() != null && getNewText() != null) {
-						List<String> oldLines = getOldText().getLines(getLineProcessor());
-						List<String> newLines = getNewText().getLines(getLineProcessor());
+						List<String> oldLines = getOldText().getLines(whitespaceOption);
+						List<String> newLines = getNewText().getLines(whitespaceOption);
 						if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE)
 							diffBlocks = DiffUtils.diff(
 									oldLines, oldBlobIdent.isFile()?newBlobIdent.path:null, 
@@ -151,7 +157,5 @@ public abstract class BlobChange implements Serializable {
 	}
 	
 	public abstract Blob getBlob(BlobIdent blobIdent);
-	
-	public abstract LineProcessor getLineProcessor();
 	
 }

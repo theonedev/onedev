@@ -2,6 +2,8 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare;
 
 import java.io.Serializable;
 
+import com.pmease.commons.git.WhitespaceOption;
+
 class HistoryState implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -10,7 +12,8 @@ class HistoryState implements Serializable {
 	
 	public String newRev;
 	
-	public String path;
+	public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 	
-	public Long commentId;
+	public String pathFilter;
+	
 }

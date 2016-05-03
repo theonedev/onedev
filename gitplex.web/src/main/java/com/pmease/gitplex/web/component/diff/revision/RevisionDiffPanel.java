@@ -16,7 +16,9 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -24,6 +26,10 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -32,19 +38,24 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.git.LineProcessor;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
+import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.gitplex.core.GitPlex;
@@ -57,6 +68,8 @@ import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 @SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
 
+	private static final String COOKIE_VIEW_MODE = "gitplex.diff.viewmode";
+	
 	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
@@ -65,11 +78,11 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final String newRev;
 	
-	private final String path;
+	private String pathFilter;
 	
-	private final LineProcessor lineProcessor;
+	private WhitespaceOption whitespaceOption;
 	
-	private final DiffMode diffMode;
+	private DiffViewMode diffMode;
 	
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
@@ -77,70 +90,38 @@ public abstract class RevisionDiffPanel extends Panel {
 		protected ChangesAndCount load() {
 			String oldCommitHash = depotModel.getObject().getObjectId(oldRev).name();
 			String newCommitHash = depotModel.getObject().getObjectId(newRev).name();
-			List<String> paths = new ArrayList<>();
-			if (path != null)
-				paths.add(path);
-			List<DiffEntry> diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash, true, path);
+			List<DiffEntry> diffEntries = depotModel.getObject()
+					.getDiffs(oldCommitHash, newCommitHash);
 			
-			/*
-			 * If a single path is specified, JGit will not detect renames, hence we add logic below
-			 * to make rename detection possible 
-			 */
-			boolean renamePossible = false;
-			if (path != null) {
-				for (DiffEntry entry: diffEntries) {
-					if ((entry.getChangeType() == ChangeType.ADD || entry.getChangeType() == ChangeType.DELETE)
-							&& (path.equals(entry.getOldPath()) || path.equals(entry.getNewPath()))) {
-						renamePossible = true;
-						break;
-					}
-				}
-			}
-			if (renamePossible) {
-				diffEntries = depotModel.getObject().getDiffs(oldCommitHash, newCommitHash, true, null);
-				for (Iterator<DiffEntry> it = diffEntries.iterator(); it.hasNext();) {
-					DiffEntry entry = it.next();
-					boolean oldPathMatches = false;
-					if (entry.getOldPath() != null && entry.getOldPath().startsWith(path)) {
-						String subpath = entry.getOldPath().substring(path.length());
-						oldPathMatches = subpath.length() == 0 || subpath.charAt(0) == '/';
-					} 
-					boolean newPathMatches = false;
-					if (entry.getNewPath() != null && entry.getNewPath().startsWith(path)) {
-						String subpath = entry.getNewPath().substring(path.length());
-						newPathMatches = subpath.length() == 0 || subpath.charAt(0) == '/';
-					} 
-		    		if (!oldPathMatches && !newPathMatches)
-		    			it.remove();
-				}
-			}
-			
-			List<BlobChange> diffableChanges = new ArrayList<>();
+			List<BlobChange> filterChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
-	    		if (diffableChanges.size() < Constants.MAX_DIFF_FILES) {
-		    		diffableChanges.add(new BlobChange(oldRev, newRev, entry) {
+    			BlobChange change = new BlobChange(oldRev, newRev, entry, whitespaceOption) {
 
-						@Override
-						public Blob getBlob(BlobIdent blobIdent) {
-							return depotModel.getObject().getBlob(blobIdent);
-						}
+					@Override
+					public Blob getBlob(BlobIdent blobIdent) {
+						return depotModel.getObject().getBlob(blobIdent);
+					}
 
-						@Override
-						public LineProcessor getLineProcessor() {
-							return lineProcessor;
-						}
-
-		    		});
+	    		};
+	    		String pattern = pathFilter;
+	    		if (StringUtils.isNotBlank(pattern)) {
+	    			if (WildcardUtils.matchString(pattern, change.getPath()))
+	    				filterChanges.add(change);
 	    		} else {
-	    			break;
+	    			filterChanges.add(change);
 	    		}
 	    	}
-
-	    	long time = System.currentTimeMillis();
+	    	
+			List<BlobChange> diffChanges = new ArrayList<>();
+			if (filterChanges.size() > Constants.MAX_DIFF_FILES)
+				diffChanges = filterChanges.subList(0, Constants.MAX_DIFF_FILES);
+			else
+				diffChanges = filterChanges;
+			
 	    	// Diff calculation can be slow, so we pre-load diffs of each change 
 	    	// concurrently
 	    	Collection<Callable<Void>> tasks = new ArrayList<>();
-	    	for (final BlobChange change: diffableChanges) {
+	    	for (BlobChange change: diffChanges) {
 	    		tasks.add(new Callable<Void>() {
 
 					@Override
@@ -159,12 +140,11 @@ public abstract class RevisionDiffPanel extends Panel {
 					throw new RuntimeException(e);
 				}
 	    	}
-	    	System.out.println(System.currentTimeMillis()-time);
-
-	    	int totalChanges = diffEntries.size();
-	    	if (diffableChanges.size() == totalChanges) { 
+	    	
+	    	int totalChanges = filterChanges.size();
+	    	if (diffChanges.size() == totalChanges) { 
 		    	// some changes should be removed if content is the same after line processing 
-		    	for (Iterator<BlobChange> it = diffableChanges.iterator(); it.hasNext();) {
+		    	for (Iterator<BlobChange> it = diffChanges.iterator(); it.hasNext();) {
 		    		BlobChange change = it.next();
 		    		if (change.getType() == ChangeType.MODIFY 
 		    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
@@ -177,90 +157,193 @@ public abstract class RevisionDiffPanel extends Panel {
 		    			}
 		    		}
 		    	}
-		    	totalChanges = diffableChanges.size();
+		    	totalChanges = diffChanges.size();
 	    	} 
-
-	    	List<BlobChange> displayableChanges = new ArrayList<>();
+	    	
+	    	List<BlobChange> displayChanges = new ArrayList<>();
 	    	int totalChangedLines = 0;
-	    	for (BlobChange change: diffableChanges) {
+	    	for (BlobChange change: diffChanges) {
 	    		int changedLines = change.getAdditions() + change.getDeletions(); 
-	    		
-	    		// we do not count large diff in a single file in order to 
-	    		// display smaller diffs from different files as many as 
-	    		// possible. 
+	    		/*
+	    		 * we do not count large diff in a single file in order to
+	    		 * display smaller diffs from different files as many as
+	    		 * possible
+	    		 */
 	    		if (changedLines <= Constants.MAX_SINGLE_FILE_DIFF_LINES) {
 		    		totalChangedLines += changedLines;
 		    		if (totalChangedLines <= Constants.MAX_DIFF_LINES)
-		    			displayableChanges.add(change);
+		    			displayChanges.add(change);
 		    		else
 		    			break;
 	    		} else {
-	    			// large diff in a single file will not be displayed, so 
-	    			// adding it to change list will do no harm, and can avoid 
-	    			// displaying "too many changes" when some big text file 
-	    			// is added/removed without touching too many files
-	    			displayableChanges.add(change);
+	    			/*
+	    			 * large diff in a single file will not be displayed, but 
+	    			 * we still add it into the list as otherwise we may 
+	    			 * incorrectly display the "too many changed files" warning  
+	    			 */
+	    			displayChanges.add(change);
 	    		}
 	    	}
-	    	return new ChangesAndCount(displayableChanges, totalChanges);
+	    	return new ChangesAndCount(displayChanges, totalChanges);
 		}
 	};
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			String oldRev, String newRev, @Nullable String path, 
-			LineProcessor lineProcessor, DiffMode diffMode) {
+			String oldRev, String newRev, @Nullable String pathFilter, 
+			WhitespaceOption whitespaceOption) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
-		this.path = path;
-		this.lineProcessor = lineProcessor;
-		this.diffMode = diffMode;
+		this.pathFilter = pathFilter;
+		this.whitespaceOption = whitespaceOption;
+		
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie(COOKIE_VIEW_MODE);
+		if (cookie == null)
+			diffMode = DiffViewMode.UNIFIED;
+		else
+			diffMode = DiffViewMode.valueOf(cookie.getValue());
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
+		List<WhitespaceOption> choices = new ArrayList<>();
+		for (WhitespaceOption each: WhitespaceOption.values())
+			choices.add(each);
+		
+		IModel<WhitespaceOption> choiceModel = new IModel<WhitespaceOption>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public WhitespaceOption getObject() {
+				return whitespaceOption;
+			}
+
+			@Override
+			public void setObject(WhitespaceOption object) {
+				whitespaceOption = object;
+			}
+			
+		};
+		IChoiceRenderer<WhitespaceOption> choiceRenderer = new IChoiceRenderer<WhitespaceOption>() {
+
+			@Override
+			public Object getDisplayValue(WhitespaceOption object) {
+				return object.getDescription();
+			}
+
+			@Override
+			public String getIdValue(WhitespaceOption object, int index) {
+				return object.name();
+			}
+
+			@Override
+			public WhitespaceOption getObject(String id, IModel<? extends List<? extends WhitespaceOption>> choices) {
+				return WhitespaceOption.valueOf(id);
+			}
+		};
+		
+		DropDownChoice<WhitespaceOption> whitespaceChoice = 
+				new DropDownChoice<WhitespaceOption>("whitespaceOption", choiceModel, choices, choiceRenderer);
+		whitespaceChoice.add(new OnChangeAjaxBehavior() {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				target.add(RevisionDiffPanel.this);
+				onWhitespaceOptionChange(target, whitespaceOption);
+			}
+			
+		});
+		add(whitespaceChoice);
+		
+		Form<?> form = new Form<Void>("pathFilter") {
+
+			@Override
+			protected void onSubmit() {
+				super.onSubmit();
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				Preconditions.checkNotNull(target);
+				target.add(RevisionDiffPanel.this);
+				onPathFilterChange(target, pathFilter);
+			}
+			
+		};
+		form.add(new TextField<String>("input", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return pathFilter;
+			}
+
+			@Override
+			public void setObject(String object) {
+				pathFilter = object;
+			}
+			
+		}));
+		form.add(new AjaxButton("submit") {});
+		add(form);
+ 		
+		for (DiffViewMode each: DiffViewMode.values()) {
+			add(new AjaxLink<Void>(each.name().toLowerCase()) {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
+					if (getDirtyContainer() != null)
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
+				}
+				
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					diffMode = each;
+					WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+					Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
+					cookie.setMaxAge(Integer.MAX_VALUE);
+					response.addCookie(cookie);
+					target.add(RevisionDiffPanel.this);
+				}
+				
+			}.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					return each==diffMode?" active":"";
+				}
+				
+			})));
+		}
+		
 		Component totalChangedLink;
 		add(totalChangedLink = new Label("totalChanged", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getChangesCount() + " changed files ";
+				return changesAndCountModel.getObject().getChanges().size() + " changed files ";
 			}
 			
 		}));
-		if (path != null) {
-			add(new Label("filterPath", "filter by " + path));
-			add(new AjaxLink<Void>("clearPath") {
-
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(RevisionDiffPanel.this));
-					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-				}
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					onClearPath(target);
-				}
-				
-			});
-		} else {
-			add(new WebMarkupContainer("filterPath").setVisible(false));
-			add(new WebMarkupContainer("clearPath").setVisible(false));
-		}
 
 		add(new WebMarkupContainer("tooManyChanges") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getChanges().size() < getChangesCount());
+				ChangesAndCount changesAndCount = changesAndCountModel.getObject();
+				setVisible(changesAndCount.getChanges().size() < changesAndCount.getCount());
 			}
 			
 		});
@@ -278,7 +361,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public List<BlobChange> getObject() {
-				return getChanges();
+				return changesAndCountModel.getObject().getChanges();
 			}
 			
 		}) {
@@ -329,7 +412,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public List<BlobChange> getObject() {
-				return getChanges();
+				return changesAndCountModel.getObject().getChanges();
 			}
 			
 		}) {
@@ -342,15 +425,13 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 	
-	private List<BlobChange> getChanges() {
-		return changesAndCountModel.getObject().getChanges();
-	}
-	
-	private int getChangesCount() {
-		return changesAndCountModel.getObject().getCount();
-	}
+	protected Component getDirtyContainer() {
+		return null;
+	};
 	
 	@Override
 	protected void onDetach() {
@@ -365,6 +446,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(ClearableResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
@@ -376,8 +458,11 @@ public abstract class RevisionDiffPanel extends Panel {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
-	protected abstract void onClearPath(AjaxRequestTarget target);
-
+	protected abstract void onPathFilterChange(AjaxRequestTarget target, String pathFilter);
+	
+	protected abstract void onWhitespaceOptionChange(AjaxRequestTarget target, 
+			WhitespaceOption whitespaceOption);
+	
 	private static class ChangesAndCount {
 		
 		private final List<BlobChange> changes;
@@ -386,13 +471,27 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 		public ChangesAndCount(List<BlobChange> changes, int count) {
 			this.changes = changes;
-			this.count =  count;
+			this.count = count;
 		}
-
+		
+		/**
+		 * Get list of changes we are capable to handle, note that size of this list 
+		 * might be less than total number of changes in order not to put heavy 
+		 * burden on the system and browser
+		 * 
+		 * @return
+		 * 			list of changes we are capable to handle
+		 */
 		public List<BlobChange> getChanges() {
 			return changes;
 		}
 
+		/**
+		 * Get total number of changes detected
+		 * 
+		 * @return
+		 * 			total number of changes detected
+		 */
 		public int getCount() {
 			return count;
 		}

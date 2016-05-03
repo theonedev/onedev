@@ -50,6 +50,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
@@ -485,6 +486,7 @@ public class DepotBranchesPage extends DepotPage {
 									new DepotAndBranch(getDepot(), branch),
 									new DepotAndBranch(getDepot(), getBaseBranch()),
 									true,
+									WhitespaceOption.DEFAULT,
 									null); 
 							setResponsePage(RevisionComparePage.class, params);
 						}
@@ -546,6 +548,7 @@ public class DepotBranchesPage extends DepotPage {
 									new DepotAndBranch(getDepot(), getBaseBranch()),
 									new DepotAndBranch(getDepot(), branch), 
 									true,
+									WhitespaceOption.DEFAULT,
 									null);
 							setResponsePage(RevisionComparePage.class, params);
 						}

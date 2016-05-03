@@ -1,5 +1,5 @@
 package com.pmease.gitplex.web.component.diff.revision;
 
-public enum DiffMode {
+public enum DiffViewMode {
 	UNIFIED, SPLIT
 }

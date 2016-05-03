@@ -49,7 +49,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
-import com.pmease.gitplex.web.component.diff.revision.DiffMode;
+import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 import com.pmease.gitplex.web.component.repofile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -73,7 +73,7 @@ public class TextDiffPanel extends Panel {
 	
 	private final Map<Integer, Integer> contextSizes = new HashMap<>();
 	
-	private final DiffMode diffMode;
+	private final DiffViewMode diffMode;
 	
 	private MarkInfo markInfo;
 	
@@ -84,7 +84,7 @@ public class TextDiffPanel extends Panel {
 	private transient List<MarkAwareDiffBlock> diffBlocks;
 	
 	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			BlobChange change, DiffMode diffMode) {
+			BlobChange change, DiffViewMode diffMode) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -285,7 +285,7 @@ public class TextDiffPanel extends Panel {
 	private String renderDiffs() {
 		int contextSize = CodeComment.DIFF_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
-		if (diffMode == DiffMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append(""
 					+ "<colgroup>"
 					+ "<col width='40'></col>"
@@ -354,7 +354,7 @@ public class TextDiffPanel extends Panel {
 	private void appendDeletesAndInserts(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
 			MarkAwareDiffBlock insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
 			int fromInsertLineIndex, int toInsertLineIndex) {
-		if (diffMode == DiffMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
 				appendDelete(builder, deleteBlock, i);
 			for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++)
@@ -385,7 +385,7 @@ public class TextDiffPanel extends Panel {
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
 		
-		if (diffMode == DiffMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
@@ -432,7 +432,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
-		if (diffMode == DiffMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append("<td class='number noselect new'>&nbsp;</td>");
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
@@ -468,7 +468,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
-		if (diffMode == DiffMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect old'>&nbsp;</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
@@ -540,7 +540,7 @@ public class TextDiffPanel extends Panel {
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
-		if (diffMode == DiffMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old new'>*</td>");
@@ -596,7 +596,7 @@ public class TextDiffPanel extends Panel {
 				+ "var callback = $('#%s').data('callback');"
 				+ "if (callback) callback('expand', %d);", 
 				getMarkupId(), blockIndex);
-		if (diffMode == DiffMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
 					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
 			builder.append("<td colspan='2' class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")

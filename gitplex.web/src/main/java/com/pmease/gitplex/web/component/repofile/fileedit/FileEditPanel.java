@@ -30,8 +30,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.git.PathAndContent;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
@@ -39,8 +39,7 @@ import com.pmease.commons.wicket.assets.diffmatchpatch.DiffMatchPatchResourceRef
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
-import com.pmease.gitplex.web.component.diff.revision.DiffMode;
-import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
+import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 import com.pmease.gitplex.web.component.repofile.editsave.EditSavePanel;
 import com.pmease.gitplex.web.page.depot.file.Mark;
 
@@ -122,7 +121,8 @@ public abstract class FileEditPanel extends Panel {
 				else
 					changeType = DiffEntry.ChangeType.MODIFY;
 				
-				BlobChange change = new BlobChange(changeType, oldBlobIdent, newBlobIdent) {
+				BlobChange change = new BlobChange(changeType, oldBlobIdent, newBlobIdent, 
+						WhitespaceOption.DEFAULT) {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
@@ -132,14 +132,9 @@ public abstract class FileEditPanel extends Panel {
 							return depotModel.getObject().getBlob(blobIdent);
 					}
 
-					@Override
-					public LineProcessor getLineProcessor() {
-						return LineProcessOption.IGNORE_NOTHING;
-					}
-					
 				};
 				BlobDiffPanel preview = new BlobDiffPanel("preview", depotModel, new Model<PullRequest>(null), 
-						change, DiffMode.UNIFIED);
+						change, DiffViewMode.UNIFIED);
 				replace(preview);
 				target.add(preview);
 				

@@ -41,6 +41,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 
 import com.pmease.commons.git.GitUtils;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
@@ -336,7 +337,8 @@ public class DepotTagsPage extends DepotPage {
 							}
 							DepotAndRevision source = new DepotAndRevision(getDepot(), 
 									GitUtils.ref2tag(item.getModelObject().getName()));
-							PageParameters params = RevisionComparePage.paramsOf(getDepot(), target, source, true, "");
+							PageParameters params = RevisionComparePage.paramsOf(getDepot(), target, source, true, 
+									WhitespaceOption.DEFAULT, "");
 							setResponsePage(RevisionComparePage.class, params);
 						} catch (IOException e) {
 							throw new RuntimeException(e);

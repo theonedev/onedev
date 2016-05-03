@@ -35,9 +35,9 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -60,7 +60,6 @@ import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
-import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
@@ -86,10 +85,6 @@ public class NewRequestPage extends PullRequestPage {
 	private IModel<List<Commit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
-	
-	private DiffOptionPanel diffOption;
-	
-	private String path;
 	
 	public static PageParameters paramsOf(Depot depot, DepotAndBranch target, DepotAndBranch source) {
 		PageParameters params = paramsOf(depot);
@@ -283,7 +278,7 @@ public class NewRequestPage extends PullRequestPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component panel = newComparePanel();
+				Component panel = newRevDiffPanel();
 				getPage().replace(panel);
 				target.add(panel);
 			}
@@ -310,56 +305,21 @@ public class NewRequestPage extends PullRequestPage {
 		return new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel).setOutputMarkupId(true);
 	}
 	
-	private Component newComparePanel() {
-		final Fragment fragment = new Fragment(TAB_PANEL_ID, "compareFrag", this);
-		
-		diffOption = new DiffOptionPanel("diffOption", depotModel, getPullRequest().getLatestUpdate().getHeadCommitHash()) {
-
-			@Override
-			protected void onSelectPath(AjaxRequestTarget target, String path) {
-				NewRequestPage.this.path = path;
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				fragment.replace(diffPanel);
-				target.add(diffPanel);
-			}
-
-			@Override
-			protected void onLineProcessorChange(AjaxRequestTarget target) {
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				fragment.replace(diffPanel);
-				target.add(diffPanel);
-			}
-
-			@Override
-			protected void onDiffModeChange(AjaxRequestTarget target) {
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				fragment.replace(diffPanel);
-				target.add(diffPanel);
-			}
-			
-		};
-		diffOption.add(new StickyBehavior());
-		fragment.add(diffOption);
-		fragment.add(newRevDiffPanel());
-		
-		return fragment;
-	}
-	
-	protected RevisionDiffPanel newRevDiffPanel() {
+	private RevisionDiffPanel newRevDiffPanel() {
 		PullRequest request = getPullRequest();
 		String oldRev = request.getBaseCommitHash();
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
-				new Model<PullRequest>(null), oldRev, newRev, path, diffOption.getLineProcessor(), 
-				diffOption.getDiffMode()) {
+				new Model<PullRequest>(null), oldRev, newRev, null, null) {
 
 			@Override
-			protected void onClearPath(AjaxRequestTarget target) {
-				path = null;
-				RevisionDiffPanel diffPanel = newRevDiffPanel();
-				replaceWith(diffPanel);
-				target.add(diffPanel);
+			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
+			}
+
+			@Override
+			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
+					WhitespaceOption whitespaceOption) {
 			}
 			
 		};

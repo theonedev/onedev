@@ -21,7 +21,7 @@ import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.DiffRenderer;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
-import com.pmease.gitplex.web.component.diff.revision.DiffMode;
+import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {
@@ -34,10 +34,10 @@ public class BlobDiffPanel extends Panel {
 	
 	private final BlobChange change;
 	
-	private final DiffMode diffMode;
+	private final DiffViewMode diffMode;
 	
 	public BlobDiffPanel(String id, IModel<Depot> depotModel, 
-			IModel<PullRequest> requestModel, BlobChange change, DiffMode diffMode) {
+			IModel<PullRequest> requestModel, BlobChange change, DiffViewMode diffMode) {
 		super(id);
 		
 		this.depotModel = depotModel;

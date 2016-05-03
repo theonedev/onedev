@@ -239,7 +239,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				commit.hash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
 				commit.message = blame.getCommit().getSubject();
 				CommitDetailPage.HistoryState state = new CommitDetailPage.HistoryState();
-				state.path = context.getBlobIdent().path;
+				state.pathFilter = context.getBlobIdent().path;
 				PageParameters params = CommitDetailPage.paramsOf(context.getDepot(), 
 						blame.getCommit().getHash(), state);
 				commit.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();

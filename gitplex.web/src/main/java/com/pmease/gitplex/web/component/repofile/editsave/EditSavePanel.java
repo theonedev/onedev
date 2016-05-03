@@ -35,8 +35,8 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.FileEdit;
-import com.pmease.commons.git.LineProcessor;
 import com.pmease.commons.git.PathAndContent;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.git.exception.NotTreeException;
 import com.pmease.commons.git.exception.ObjectAlreadyExistException;
 import com.pmease.commons.git.exception.ObsoleteCommitException;
@@ -46,8 +46,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
-import com.pmease.gitplex.web.component.diff.revision.DiffMode;
-import com.pmease.gitplex.web.component.diff.revision.LineProcessOption;
+import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import jersey.repackaged.com.google.common.base.Objects;
@@ -125,7 +124,7 @@ public abstract class EditSavePanel extends Panel {
 		changedContainer.setOutputMarkupPlaceholderTag(true);
 		if (change != null) {
 			changedContainer.add(new BlobDiffPanel("changes", depotModel, 
-					new Model<PullRequest>(null), change, DiffMode.UNIFIED));
+					new Model<PullRequest>(null), change, DiffViewMode.UNIFIED));
 		} else {
 			changedContainer.add(new WebMarkupContainer("changes"));
 		}
@@ -340,18 +339,13 @@ public abstract class EditSavePanel extends Panel {
 			changeType = DiffEntry.ChangeType.DELETE;
 		}
 		
-		return new BlobChange(changeType, oldBlobIdent, newBlobIdent) {
+		return new BlobChange(changeType, oldBlobIdent, newBlobIdent, WhitespaceOption.DEFAULT) {
 
 			@Override
 			public Blob getBlob(BlobIdent blobIdent) {
 				return depotModel.getObject().getBlob(blobIdent);
 			}
 
-			@Override
-			public LineProcessor getLineProcessor() {
-				return LineProcessOption.IGNORE_NOTHING;
-			}
-			
 		};
 	}
 

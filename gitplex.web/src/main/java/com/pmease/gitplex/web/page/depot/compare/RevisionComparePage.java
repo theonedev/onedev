@@ -16,7 +16,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -28,10 +27,9 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
@@ -45,7 +43,6 @@ import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
-import com.pmease.gitplex.web.component.diff.revision.option.DiffOptionPanel;
 import com.pmease.gitplex.web.component.revisionpicker.AffinalRevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
@@ -62,7 +59,9 @@ public class RevisionComparePage extends DepotPage {
 	
 	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compare-with-merge-base";
 	
-	private static final String PARAM_PATH = "path";
+	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
+	
+	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
@@ -76,24 +75,27 @@ public class RevisionComparePage extends DepotPage {
 	
 	private DepotAndRevision rightSide;
 	
-	private DiffOptionPanel diffOption;
-	
 	private AjaxActionTab commitsTab;
 	
 	private AjaxActionTab filesTab;
 	
 	private boolean compareWithMergeBase;
 	
-	private String path;
+	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+	
+	private String pathFilter;
 	
 	public static PageParameters paramsOf(Depot depot, DepotAndRevision leftSide, 
-			DepotAndRevision rightSide, boolean compareWithMergeBase, @Nullable String path) {
+			DepotAndRevision rightSide, boolean compareWithMergeBase, 
+			WhitespaceOption whitespaceOption, @Nullable String pathFilter) {
 		PageParameters params = paramsOf(depot);
 		params.set(PARAM_LEFT, leftSide.toString());
 		params.set(PARAM_RIGHT, rightSide.toString());
 		params.set(PARAM_COMPARE_WITH_MERGE_BASE, compareWithMergeBase);
-		if (path != null)
-			params.set(PARAM_PATH, path);
+		if (whitespaceOption != WhitespaceOption.DEFAULT)
+			params.set(PARAM_WHITESPACE_OPTION, whitespaceOption.name());
+		if (pathFilter != null)
+			params.set(PARAM_PATH_FILTER, pathFilter);
 		return params;
 	}
 
@@ -119,7 +121,7 @@ public class RevisionComparePage extends DepotPage {
 		
 		compareWithMergeBase = params.get(PARAM_COMPARE_WITH_MERGE_BASE).toBoolean(false);
 		
-		path = params.get(PARAM_PATH).toString();
+		pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -186,7 +188,8 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				PageParameters params = paramsOf(getDepot(), new DepotAndRevision(depot, revision), rightSide, compareWithMergeBase, path);
+				PageParameters params = paramsOf(getDepot(), new DepotAndRevision(depot, revision), 
+						rightSide, compareWithMergeBase, whitespaceOption, pathFilter);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
@@ -196,7 +199,7 @@ public class RevisionComparePage extends DepotPage {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				PageParameters params = RevisionComparePage.paramsOf(depotModel.getObject(), 
-						leftSide, rightSide, !compareWithMergeBase, path);
+						leftSide, rightSide, !compareWithMergeBase, whitespaceOption, pathFilter);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
@@ -209,7 +212,8 @@ public class RevisionComparePage extends DepotPage {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
 				PageParameters params = paramsOf(getDepot(), leftSide, 
-						new DepotAndRevision(depot, revision), compareWithMergeBase, path);
+						new DepotAndRevision(depot, revision), compareWithMergeBase, 
+						whitespaceOption, pathFilter);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
@@ -220,7 +224,7 @@ public class RevisionComparePage extends DepotPage {
 			@Override
 			public void onClick() {
 				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), rightSide, leftSide, 
-						compareWithMergeBase, path));
+						compareWithMergeBase, whitespaceOption, pathFilter));
 			}
 
 		});
@@ -318,7 +322,8 @@ public class RevisionComparePage extends DepotPage {
 
 					@Override
 					public void onClick() {
-						PageParameters params = paramsOf(getDepot(), leftSide, rightSide, true, path);
+						PageParameters params = paramsOf(getDepot(), leftSide, rightSide, true, 
+								whitespaceOption, pathFilter);
 						setResponsePage(RevisionComparePage.class, params);
 					}
 					
@@ -341,7 +346,7 @@ public class RevisionComparePage extends DepotPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				path = null;
+				pathFilter = null;
 				newTabPanel(target);
 				pushState(target);
 			}
@@ -352,7 +357,7 @@ public class RevisionComparePage extends DepotPage {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				path = "";
+				pathFilter = "";
 				newTabPanel(target);
 				pushState(target);
 			}
@@ -391,9 +396,25 @@ public class RevisionComparePage extends DepotPage {
 
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {
 		WebMarkupContainer tabPanel;
-		if (path != null) {
-			tabPanel = new Fragment(TAB_PANEL_ID, "compareFrag", this) {
+		if (pathFilter != null) {
+			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
+					new Model<PullRequest>(null),  
+					compareWithMergeBase?mergeBaseModel.getObject():leftSide.getRevision(), 
+					rightSide.getRevision(), pathFilter, whitespaceOption) {
 
+				@Override
+				protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
+					RevisionComparePage.this.pathFilter = pathFilter;
+					pushState(target);
+				}
+
+				@Override
+				protected void onWhitespaceOptionChange(AjaxRequestTarget target,
+						WhitespaceOption whitespaceOption) {
+					RevisionComparePage.this.whitespaceOption = whitespaceOption;
+					pushState(target);
+				}
+				
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
@@ -401,37 +422,6 @@ public class RevisionComparePage extends DepotPage {
 				}
 				
 			};
-			
-			diffOption = new DiffOptionPanel("diffOption", new AbstractReadOnlyModel<Depot>() {
-
-				@Override
-				public Depot getObject() {
-					return getDepot();
-				}
-				
-			}, rightSide.getRevision()) {
-
-				@Override
-				protected void onSelectPath(AjaxRequestTarget target, String path) {
-					RevisionComparePage.this.path = path;
-					newRevDiffPanel(tabPanel, target);
-					pushState(target);
-				}
-
-				@Override
-				protected void onLineProcessorChange(AjaxRequestTarget target) {
-					newRevDiffPanel(tabPanel, target);
-				}
-
-				@Override
-				protected void onDiffModeChange(AjaxRequestTarget target) {
-					newRevDiffPanel(tabPanel, target);
-				}
-				
-			};
-			diffOption.add(new StickyBehavior());
-			tabPanel.add(diffOption);
-			newRevDiffPanel(tabPanel, null);
 			commitsTab.setSelected(false);
 			filesTab.setSelected(true);
 		} else {
@@ -456,43 +446,18 @@ public class RevisionComparePage extends DepotPage {
 		}
 	}
 	
-	private void newRevDiffPanel(final WebMarkupContainer tabPanel, @Nullable AjaxRequestTarget target) {
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
-				new Model<PullRequest>(null),  
-				compareWithMergeBase?mergeBaseModel.getObject():leftSide.getRevision(), 
-				rightSide.getRevision(), 
-				StringUtils.isNotBlank(path)?path:null, diffOption.getLineProcessor(), 
-				diffOption.getDiffMode()) {
-
-			@Override
-			protected void onClearPath(AjaxRequestTarget target) {
-				path = "";
-				newRevDiffPanel(tabPanel, target);
-				pushState(target);
-			}
-			
-		};
-		diffPanel.setOutputMarkupId(true);
-		if (target != null) {
-			tabPanel.replace(diffPanel);
-			target.add(diffPanel);
-		} else {
-			tabPanel.add(diffPanel);
-		}
-	}
-
 	private void pushState(AjaxRequestTarget target) {
 		PageParameters params = paramsOf(getDepot(), leftSide, 
-				rightSide, compareWithMergeBase, path);
+				rightSide, compareWithMergeBase, whitespaceOption, pathFilter);
 		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
-		pushState(target, url.toString(), path);
+		pushState(target, url.toString(), pathFilter);
 	}
 	
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		
-		path = (String) data;
+		pathFilter = (String) data;
 		newTabPanel(target);
 	}
 	

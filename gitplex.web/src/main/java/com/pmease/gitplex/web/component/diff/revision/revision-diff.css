@@ -1,3 +1,12 @@
+.revision-diff>.option {
+	margin-bottom: 16px;
+}
+.revision-diff>.option>.view-mode {
+	margin-left: 16px;
+}
+.revision-diff>.option .path-filter input {
+	width: 300px;
+}
 .revision-diff>.title {
 	font-size: 16px;
 	margin-bottom: 16px;	

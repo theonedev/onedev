@@ -28,6 +28,7 @@ gitplex.revisionDiff = {
 				gitplex.revisionDiff.jumpToFile($this.data("file"));
 			});
 		});
+		
 		if (scroll) {
 			var uri = URI(window.location.href); 
 			var search = uri.search(true);
