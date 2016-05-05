@@ -41,8 +41,8 @@ public class FileQuery extends BlobQuery {
 		String blobName = blobPath.substring(blobPath.lastIndexOf('/')+1);
 		if (caseSensitive) {
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames)) {
-				Range matchRange = WildcardUtils.rangeOfMatch(pattern, blobName);
-				if (matchRange != null) {
+				if (WildcardUtils.matchString(pattern, blobName)) {
+					Range matchRange = WildcardUtils.rangeOfMatch(pattern, blobName);
 					hits.add(new FileHit(blobPath, matchRange));
 					break;
 				}

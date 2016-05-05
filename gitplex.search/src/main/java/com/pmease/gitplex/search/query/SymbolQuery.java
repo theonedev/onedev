@@ -86,8 +86,8 @@ public class SymbolQuery extends BlobQuery {
 										else
 											normalizedSymbolName = symbol.getName();
 										
-										Range matchRange = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
-										if (matchRange != null) {
+										if (WildcardUtils.matchString(normalizedTerm, normalizedSymbolName)) {
+											Range matchRange = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
 											hits.add(new SymbolHit(blobPath, symbol, matchRange));
 										}
 									}

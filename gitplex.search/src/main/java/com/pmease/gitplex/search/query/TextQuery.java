@@ -20,7 +20,6 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.util.ContentDetector;
@@ -34,8 +33,6 @@ public class TextQuery extends BlobQuery {
 
 	private static int MAX_LINE_LEN = 1024;
 
-	private static CharMatcher EOL_MATCHER = CharMatcher.anyOf("\r\n");
-	
 	private final String term;
 	
 	private final boolean regex;
@@ -96,7 +93,7 @@ public class TextQuery extends BlobQuery {
 					Pattern pattern = getPattern();
 					if (pattern != null) {
 						int lineNo = 0;
-						for (String line: Splitter.on(EOL_MATCHER).split(content)) {
+						for (String line: Splitter.on('\n').split(content)) {
 							if (line.length() <= MAX_LINE_LEN) {
 								Matcher matcher = pattern.matcher(line);
 								while (matcher.find()) {
@@ -118,7 +115,7 @@ public class TextQuery extends BlobQuery {
 							normalizedTerm = term;
 						
 						int lineNo = 0;
-						for (String line: Splitter.on(EOL_MATCHER).split(content)) {
+						for (String line: Splitter.on('\n').split(content)) {
 							if (line.length() <= MAX_LINE_LEN) {
 								String normalizedLine;
 								if (!caseSensitive)

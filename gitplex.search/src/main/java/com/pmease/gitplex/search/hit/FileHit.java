@@ -1,5 +1,7 @@
 package com.pmease.gitplex.search.hit;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.PackageResourceReference;
@@ -14,7 +16,7 @@ public class FileHit extends QueryHit {
 
 	private final Range matchRange;
 	
-	public FileHit(String blobPath, Range matchRange) {
+	public FileHit(String blobPath, @Nullable Range matchRange) {
 		super(blobPath, null);
 		this.matchRange = matchRange;
 	}

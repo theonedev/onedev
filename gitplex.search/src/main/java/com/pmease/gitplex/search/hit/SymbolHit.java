@@ -1,5 +1,7 @@
 package com.pmease.gitplex.search.hit;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.request.resource.ResourceReference;
 
@@ -14,7 +16,7 @@ public class SymbolHit extends QueryHit {
 	
 	private final Range matchRange;
 	
-	public SymbolHit(String blobPath, Symbol symbol, Range matchRange) {
+	public SymbolHit(String blobPath, Symbol symbol, @Nullable Range matchRange) {
 		super(blobPath, symbol.getPos());
 		this.symbol = symbol;
 		this.matchRange = matchRange;
