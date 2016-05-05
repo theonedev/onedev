@@ -1,14 +1,18 @@
 package com.pmease.gitplex.web.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.Ref;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
@@ -89,29 +93,61 @@ public class SuggestionUtils {
 		return suggestPath(auxiliaryManager.getFiles(depot), matchWith, count);
 	}
 	
-	public static List<InputSuggestion> suggestPath(List<String> paths, String matchWith, int count) {
+	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {
+		Set<String> children = new HashSet<>();
+		for (PatternApplied applied: allApplied) {
+			if (applied.getText().startsWith(path)) {
+				String suffix = applied.getText().substring(path.length());
+				int index = suffix.indexOf('/');
+				if (index != -1)
+					children.add(suffix.substring(0, index+1));
+				else
+					children.add(suffix);
+			}
+		}
+		return children;
+	}
+	
+	public static List<InputSuggestion> suggestPath(List<String> files, String matchWith, int count) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
 		List<PatternApplied> allApplied = new ArrayList<>();
-		Map<String, Range> suggestedInputs = new LinkedHashMap<>();
-		for (String path: paths) {
+		for (String path: files) {
 			PatternApplied applied = WildcardUtils.applyPattern(lowerCaseMatchWith, path, false);
 			if (applied != null) 
 				allApplied.add(applied);
 		}
 		allApplied.sort((o1, o2) -> o1.getMatchRange().getFrom() - o2.getMatchRange().getFrom());
 
-		suggestedInputs = new LinkedHashMap<>();
+		Map<String, Set<String>> childrenCache = new HashMap<>();
+		Map<String, Range> suggestedInputs = new LinkedHashMap<>();
 		for (PatternApplied applied: allApplied) {
 			Range matchRange = applied.getMatchRange();
 			String suffix = applied.getText().substring(matchRange.getTo());
 			int index = suffix.indexOf('/');
 			String suggestedInput = applied.getText().substring(0, matchRange.getTo());
-			if (index != -1)
+			if (index != -1) {
 				suggestedInput += suffix.substring(0, index) + "/";
-			else
+				while (true) {
+					Set<String> children = childrenCache.get(suggestedInput);
+					if (children == null) {
+						children = getChildren(allApplied, suggestedInput);
+						childrenCache.put(suggestedInput, children);
+					}
+					Preconditions.checkState(!children.isEmpty());
+					if (children.size() > 1) {
+						break;
+					} else {
+						String child = children.iterator().next();
+						suggestedInput += child;
+						if (!suggestedInput.endsWith("/"))
+							break;
+					}
+				}
+			} else {
 				suggestedInput += suffix;
+			}
 			suggestedInputs.put(suggestedInput, matchRange);
 			if (suggestedInputs.size() == count)
 				break;
