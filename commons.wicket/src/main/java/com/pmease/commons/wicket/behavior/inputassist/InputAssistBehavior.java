@@ -115,10 +115,13 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 
 		Preconditions.checkArgument(inputContent.indexOf('\r') == -1);
 		
-		List<Range> errors = normalizeErrors(inputContent, getErrors(inputContent));
+		List<Range> errors = getErrors(inputContent);
+		if (errors == null)
+			errors = new ArrayList<>();
+		List<Range> normalizedErrors = normalizeErrors(inputContent, errors);
 		String json;
 		try {
-			json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(errors);
+			json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(normalizedErrors);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -211,6 +214,14 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 	
 	protected abstract List<Range> getErrors(String inputContent);
 	
-	protected abstract int getAnchor(String content);
+	/**
+	 * Given an input content, anchor is index of the char at which place to display left side 
+	 * of the suggestion window. This makes it possible to make the suggestion window moves 
+	 * as one types, instead of always staying at a fixed place  
+	 *  
+	 * @param inputContent
+	 * @return
+	 */
+	protected abstract int getAnchor(String inputContent);
 	
 }

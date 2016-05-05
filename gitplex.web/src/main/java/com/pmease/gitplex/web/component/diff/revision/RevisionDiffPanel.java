@@ -16,7 +16,6 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -26,10 +25,9 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -46,24 +44,32 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.pmease.commons.antlr.codeassist.InputCompletion;
+import com.pmease.commons.antlr.codeassist.InputStatus;
+import com.pmease.commons.antlr.codeassist.InputSuggestion;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.util.Range;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
+import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
+import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
+import com.pmease.gitplex.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
@@ -84,14 +90,22 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private DiffViewMode diffMode;
 	
+	private IModel<List<DiffEntry>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntry>>() {
+
+		@Override
+		protected List<DiffEntry> load() {
+			String oldCommitHash = depotModel.getObject().getObjectId(oldRev).name();
+			String newCommitHash = depotModel.getObject().getObjectId(newRev).name();
+			return depotModel.getObject().getDiffs(oldCommitHash, newCommitHash);
+		}
+		
+	};
+	
 	private IModel<ChangesAndCount> changesAndCountModel = new LoadableDetachableModel<ChangesAndCount>() {
 
 		@Override
 		protected ChangesAndCount load() {
-			String oldCommitHash = depotModel.getObject().getObjectId(oldRev).name();
-			String newCommitHash = depotModel.getObject().getObjectId(newRev).name();
-			List<DiffEntry> diffEntries = depotModel.getObject()
-					.getDiffs(oldCommitHash, newCommitHash);
+			List<DiffEntry> diffEntries = diffEntriesModel.getObject();
 			
 			List<BlobChange> filterChanges = new ArrayList<>();
 	    	for (DiffEntry entry: diffEntries) {
@@ -103,10 +117,18 @@ public abstract class RevisionDiffPanel extends Panel {
 					}
 
 	    		};
-	    		String pattern = pathFilter;
-	    		if (StringUtils.isNotBlank(pattern)) {
-	    			if (WildcardUtils.matchString(pattern, change.getPath()))
+	    		if (StringUtils.isNotBlank(pathFilter)) {
+		    		String matchWith = pathFilter.toLowerCase().trim();
+	    			matchWith = StringUtils.stripStart(matchWith, "/");
+	    			matchWith = StringUtils.stripEnd(matchWith, "/");
+	    			String path = change.getPath().toLowerCase();
+	    			if (matchWith.equals(path)) {
 	    				filterChanges.add(change);
+	    			} else if (path.startsWith(matchWith + "/")) {
+	    				filterChanges.add(change);
+	    			} else if (WildcardUtils.matchString(matchWith, path)){
+	    				filterChanges.add(change);
+	    			}
 	    		} else {
 	    			filterChanges.add(change);
 	    		}
@@ -212,99 +234,17 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		List<WhitespaceOption> choices = new ArrayList<>();
-		for (WhitespaceOption each: WhitespaceOption.values())
-			choices.add(each);
+		WebMarkupContainer body = new WebMarkupContainer("body");
+		body.setOutputMarkupId(true);
+		add(body);
 		
-		IModel<WhitespaceOption> choiceModel = new IModel<WhitespaceOption>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public WhitespaceOption getObject() {
-				return whitespaceOption;
-			}
-
-			@Override
-			public void setObject(WhitespaceOption object) {
-				whitespaceOption = object;
-			}
-			
-		};
-		IChoiceRenderer<WhitespaceOption> choiceRenderer = new IChoiceRenderer<WhitespaceOption>() {
-
-			@Override
-			public Object getDisplayValue(WhitespaceOption object) {
-				return object.getDescription();
-			}
-
-			@Override
-			public String getIdValue(WhitespaceOption object, int index) {
-				return object.name();
-			}
-
-			@Override
-			public WhitespaceOption getObject(String id, IModel<? extends List<? extends WhitespaceOption>> choices) {
-				return WhitespaceOption.valueOf(id);
-			}
-		};
-		
-		DropDownChoice<WhitespaceOption> whitespaceChoice = 
-				new DropDownChoice<WhitespaceOption>("whitespaceOption", choiceModel, choices, choiceRenderer);
-		whitespaceChoice.add(new OnChangeAjaxBehavior() {
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				target.add(RevisionDiffPanel.this);
-				onWhitespaceOptionChange(target, whitespaceOption);
-			}
-			
-		});
-		add(whitespaceChoice);
-		
-		Form<?> form = new Form<Void>("pathFilter") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				Preconditions.checkNotNull(target);
-				target.add(RevisionDiffPanel.this);
-				onPathFilterChange(target, pathFilter);
-			}
-			
-		};
-		form.add(new TextField<String>("input", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return pathFilter;
-			}
-
-			@Override
-			public void setObject(String object) {
-				pathFilter = object;
-			}
-			
-		}));
-		form.add(new AjaxButton("submit") {});
-		add(form);
- 		
 		for (DiffViewMode each: DiffViewMode.values()) {
 			add(new AjaxLink<Void>(each.name().toLowerCase()) {
 
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new IndicateLoadingListener());
-					if (getDirtyContainer() != null)
-						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(getDirtyContainer()));
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
 				}
 				
 				@Override
@@ -327,8 +267,156 @@ public abstract class RevisionDiffPanel extends Panel {
 			})));
 		}
 		
+		add(new MenuLink("whitespaceOption") {
+
+			@Override
+			protected List<MenuItem> getMenuItems() {
+				List<MenuItem> menuItems = new ArrayList<>();
+				
+				for (WhitespaceOption each: WhitespaceOption.values()) {
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return each.getDescription();
+						}
+
+						@Override
+						public String getIconClass() {
+							if (whitespaceOption == each)
+								return "fa fa-check";
+							else
+								return null;
+						}
+
+						@Override
+						public AbstractLink newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									close();
+									whitespaceOption = each;
+									target.add(body);
+									onWhitespaceOptionChange(target, whitespaceOption);
+								}
+
+								@Override
+								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+									super.updateAjaxAttributes(attributes);
+									attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
+								}
+								
+							};
+						}
+						
+					});
+				}
+
+				return menuItems;
+			}
+			
+		});
+		
+		Form<?> form = new Form<Void>("pathFilter");
+		TextField<String> filterInput;
+		form.add(filterInput = new TextField<String>("input", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return pathFilter;
+			}
+
+			@Override
+			public void setObject(String object) {
+				pathFilter = object;
+			}
+			
+		}));
+		
+		List<String> diffPaths = new ArrayList<>();
+		for (DiffEntry diffEntry: diffEntriesModel.getObject()) {
+			if (diffEntry.getChangeType() == DiffEntry.ChangeType.ADD) {
+				diffPaths.add(diffEntry.getNewPath());
+			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.COPY) {
+				diffPaths.add(diffEntry.getNewPath());
+				diffPaths.add(diffEntry.getOldPath());
+			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.DELETE) {
+				diffPaths.add(diffEntry.getOldPath());
+			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.MODIFY) {
+				diffPaths.add(diffEntry.getNewPath());
+			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.RENAME) {
+				diffPaths.add(diffEntry.getNewPath());
+				diffPaths.add(diffEntry.getOldPath());
+			} else {
+				throw new IllegalStateException();
+			}
+		}
+		
+		filterInput.add(new InputAssistBehavior() {
+			
+			@Override
+			protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
+				List<InputCompletion> completions = new ArrayList<>();
+				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(diffPaths, 
+						inputStatus.getContentBeforeCaret().trim(), count)) {
+					int caret = suggestion.getCaret();
+					if (caret == -1)
+						caret = suggestion.getContent().length();
+					InputCompletion completion = new InputCompletion(0, inputStatus.getContent().length(), 
+							suggestion.getContent(), caret, suggestion.getLabel(), 
+							null, suggestion.getMatchRange());
+					completions.add(completion);
+				}
+				return completions;
+			}
+			
+			@Override
+			protected List<String> getHints(InputStatus inputStatus) {
+				return Lists.newArrayList("Use * to match any string in the path");
+			}
+
+			@Override
+			protected List<Range> getErrors(String inputContent) {
+				return null;
+			}
+			
+			@Override
+			protected int getAnchor(String content) {
+				for (int i=0; i<content.length(); i++) {
+					if (!Character.isWhitespace(content.charAt(i)))
+						return i;
+				}
+				return content.length();
+			}
+			
+		});
+		
+		form.add(new AjaxButton("submit") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
+			}
+			
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				Preconditions.checkNotNull(target);
+				target.add(body);
+				onPathFilterChange(target, pathFilter);
+			}
+			
+		});
+		add(form);
+ 		
 		Component totalChangedLink;
-		add(totalChangedLink = new Label("totalChanged", new AbstractReadOnlyModel<String>() {
+		body.add(totalChangedLink = new Label("totalChanged", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -337,7 +425,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		}));
 
-		add(new WebMarkupContainer("tooManyChanges") {
+		body.add(new WebMarkupContainer("tooManyChanges") {
 
 			@Override
 			protected void onConfigure() {
@@ -356,7 +444,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		} else {
 			totalChangedLink.add(AttributeAppender.append("class", "expanded"));			
 		}
-		add(diffStats);
+		body.add(diffStats);
 		diffStats.add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
@@ -408,7 +496,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		add(new ListView<BlobChange>("changes", new AbstractReadOnlyModel<List<BlobChange>>() {
+		body.add(new ListView<BlobChange>("changes", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -429,12 +517,9 @@ public abstract class RevisionDiffPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	protected Component getDirtyContainer() {
-		return null;
-	};
-	
 	@Override
 	protected void onDetach() {
+		diffEntriesModel.detach();
 		changesAndCountModel.detach();
 		depotModel.detach();
 		requestModel.detach();

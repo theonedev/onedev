@@ -124,3 +124,20 @@ section>.head {
 	font-size: 18px;
 	margin-bottom: 20px;
 }
+
+.floating>.content>.create-new {
+	padding: 12px;
+}
+.floating>.content>.create-new>a {
+	display: block;
+	text-decoration: none;
+	color: #444;
+	padding: 4px 8px;
+}
+.floating>.content>.create-new>a:hover {
+	background: #F0F0F0;
+}
+
+.create.depot {
+	padding: 20px;
+}

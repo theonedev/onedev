@@ -12,7 +12,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -25,7 +24,6 @@ import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
-import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 
 @SuppressWarnings("serial")
 public abstract class OrganizationSelector extends GenericPanel<Account> {
@@ -42,9 +40,6 @@ public abstract class OrganizationSelector extends GenericPanel<Account> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new BookmarkablePageLink<Void>("addNew", NewOrganizationPage.class, 
-				NewOrganizationPage.paramsOf(getAccount())));
 		
 		WebMarkupContainer organizationsContainer = new WebMarkupContainer("organizations") {
 

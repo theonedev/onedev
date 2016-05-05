@@ -2,7 +2,7 @@
 	padding: 10px;
 }
 .organization-selector ul, .organization-selector .alert {
-	margin: 12px 0 0 0;
+	margin: 0;
 }
 .organization-selector ul a {
 	padding: 5px 20px;

@@ -1,45 +1,49 @@
 <wicket:panel>
 	<div class="revision-diff">
-		<div class="option clearfix">
-			<div class="pull-left">
-				<form wicket:id="pathFilter" class="form-inline path-filter">
-					<div class="input-group">
-						<input wicket:id="input" class="form-control" placeholder="Filter by path pattern" type="text"></input> 
-						<span class="input-group-btn">
-							<button wicket:id="submit" title="Filter" class="btn btn-default" type="submit"><i class="fa fa-filter"></i></button>
-						</span>
-					</div>
-				</form>
+		<table class="head">
+			<tr>
+				<td class="view-mode">
+					<span class="btn-group">
+						<a wicket:id="unified" class="btn btn-default">Unified</a>
+						<a wicket:id="split" class="btn btn-default">Split</a>
+					</span>
+				</td>
+				<td class="whitespace-option">
+					<span wicket:id="whitespaceOption" class="btn btn-default" title="White space options">White space <i class="caret"></i></span>
+				</td>
+				<td class="path-filter">
+					<form wicket:id="pathFilter">
+						<div class="input-group">
+							<input wicket:id="input" class="form-control" spellcheck="false" placeholder="Filter by path pattern" type="text"></input> 
+							<span class="input-group-btn">
+								<button wicket:id="submit" title="Filter" class="btn btn-default" type="submit"><i class="fa fa-filter"></i></button>
+							</span>
+						</div>
+					</form>
+				</td>
+			</tr>
+		</table>
+		<div wicket:id="body" class="body">
+			<div class="title">
+				Total <a wicket:id="totalChanged" class="total-changed"></a>
 			</div>
-			<div class="pull-right view-mode">
-				<span class="btn-group">
-					<a wicket:id="unified" class="btn btn-default">Unified</a>
-					<a wicket:id="split" class="btn btn-default">Split</a>
-				</span>
-			</div>
-			<div class="pull-right">
-				<select wicket:id="whitespaceOption" class="form-control"></select>
-			</div>
+			<div wicket:id="tooManyChanges" class="alert alert-warning">Sorry we are unable to display the full diff as there are too many changes</div>
+			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
+				<li wicket:id="diffStats" class="diff-stat clearfix">
+					<i wicket:id="icon" class="icon pull-left"></i>
+					<a wicket:id="file" class="file pull-left"><span wicket:id="name"></span></a>
+					<wicket:enclosure child="bar">
+					<span wicket:id="bar" class="bar pull-right"></span>
+					<span wicket:id="deletions" class="deletions pull-right"></span>
+					<span wicket:id="additions" class="additions pull-right"></span>
+					</wicket:enclosure>
+				</li>
+			</ul>
+			<ul class="changes list-unstyled">
+				<li wicket:id="changes" class="change">
+					<div wicket:id="change"></div>
+				</li>
+			</ul>
 		</div>
-		<div class="title">
-			Total <a wicket:id="totalChanged" class="total-changed"></a>
-		</div>
-		<div wicket:id="tooManyChanges" class="alert alert-warning">Sorry we are unable to display the full diff as there are too many changes</div>
-		<ul wicket:id="diffStats" class="diff-stats list-unstyled">
-			<li wicket:id="diffStats" class="diff-stat clearfix">
-				<i wicket:id="icon" class="icon pull-left"></i>
-				<a wicket:id="file" class="file pull-left"><span wicket:id="name"></span></a>
-				<wicket:enclosure child="bar">
-				<span wicket:id="bar" class="bar pull-right"></span>
-				<span wicket:id="deletions" class="deletions pull-right"></span>
-				<span wicket:id="additions" class="additions pull-right"></span>
-				</wicket:enclosure>
-			</li>
-		</ul>
-		<ul class="changes list-unstyled">
-			<li wicket:id="changes" class="change">
-				<div wicket:id="change"></div>
-			</li>
-		</ul>
 	</div>
 </wicket:panel>

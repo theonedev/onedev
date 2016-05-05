@@ -109,15 +109,11 @@ public class DefaultAccountManager extends AbstractEntityDao<Account> implements
     	query.setParameter("user", account);
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequestActivity set user=null where user=:user");
+    	query = getSession().createQuery("update PullRequestComment set user=null where user=:user");
     	query.setParameter("user", account);
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Comment set user=null where user=:user");
-    	query.setParameter("user", account);
-    	query.executeUpdate();
-    	
-    	query = getSession().createQuery("update CommentReply set user=null where user=:user");
+    	query = getSession().createQuery("update CodeComment set user=null where user=:user");
     	query.setParameter("user", account);
     	query.executeUpdate();
 

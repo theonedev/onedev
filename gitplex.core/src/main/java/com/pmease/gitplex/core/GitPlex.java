@@ -31,12 +31,15 @@ import com.pmease.commons.util.init.InitStage;
 import com.pmease.commons.util.init.ManualConfig;
 import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.setting.ServerConfig;
 
 public class GitPlex extends AbstractPlugin implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(GitPlex.class);
+	
+	private final ConfigManager configManager;
 	
 	private final DataManager dataManager;
 	
@@ -59,10 +62,11 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 	private String gitCheckTaskId;
 	
 	@Inject
-	public GitPlex(ServerConfig serverConfig, DataManager dataManager, 
+	public GitPlex(ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager,
             TaskScheduler taskScheduler, Provider<GitConfig> gitConfigProvider,
             AccountManager userManager, Provider<Set<LifecycleListener>> listenersProvider, 
             @AppName String appName) {
+		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
 		this.taskScheduler = taskScheduler;
@@ -81,7 +85,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		List<ManualConfig> manualConfigs = dataManager.init();
 		
 		if (!manualConfigs.isEmpty()) {
-			logger.warn("Please set up the server at " + GitPlex.getInstance().guessServerUrl());
+			logger.warn("Please set up the server at " + guessServerUrl());
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitFor();
@@ -122,7 +126,7 @@ public class GitPlex extends AbstractPlugin implements Serializable {
 		
 		ThreadContext.unbindSubject();
 		
-		logger.info("Server is ready at " + guessServerUrl() + ".");
+		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
 	}
 
 	public String guessServerUrl() {

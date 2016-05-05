@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,7 +18,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -86,12 +83,6 @@ public abstract class DepotSelector extends Panel {
 		};
 		noDepotsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noDepotsContainer);
-		
-		Link<Void> addLink = newAddLink("addNew");
-		if (addLink != null)
-			add(addLink);
-		else
-			add(new WebMarkupContainer("addNew").setVisible(false));
 		
 		TextField<String> searchField = new TextField<String>("search", Model.of(""));
 		add(searchField);
@@ -181,11 +172,6 @@ public abstract class DepotSelector extends Panel {
 		super.onDetach();
 	}
 
-	@Nullable
-	protected Link<Void> newAddLink(String componentId) {
-		return null;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

@@ -51,6 +51,7 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
+import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
@@ -930,8 +931,8 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public String getUrl() {
-		return GitPlex.getInstance().guessServerUrl() + "/" + getTargetDepot().getFQN() 
-				+ "/pull_requests/" + getId() + "/overview";
+		return GitPlex.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() 
+				+ "/" + getTargetDepot().getFQN() + "/pull_requests/" + getId() + "/overview";
 	}
 
 	@PrePersist

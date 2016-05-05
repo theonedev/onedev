@@ -8,17 +8,15 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 
@@ -36,7 +34,7 @@ import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.depotselector.DepotSelector;
 import com.pmease.gitplex.web.page.account.notifications.NotificationListPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
-import com.pmease.gitplex.web.page.account.overview.NewDepotPage;
+import com.pmease.gitplex.web.page.account.overview.NewOrganizationPage;
 import com.pmease.gitplex.web.page.account.setting.ProfileEditPage;
 import com.pmease.gitplex.web.page.admin.account.AccountListPage;
 import com.pmease.gitplex.web.page.base.BasePage;
@@ -111,35 +109,28 @@ public abstract class LayoutPage extends BasePage {
 						LayoutPage.this.onSelect(target, depot);
 					}
 
-					@Override
-					protected Link<Void> newAddLink(String componentId) {
-						Account loginUser = getLoginUser();
-						if (loginUser != null) {
-							return new BookmarkablePageLink<Void>(componentId, 
-									NewDepotPage.class, NewDepotPage.paramsOf(loginUser)) {
-
-								@Override
-								protected void onInitialize() {
-									super.onInitialize();
-									setEscapeModelStrings(false);
-									add(AttributeAppender.append("class", "btn btn-primary btn-block"));
-								}
-
-								@Override
-								public IModel<?> getBody() {
-									return Model.of("<i class='fa fa-plus'></i> Add New");
-								}
-								
-							};
-						} else {
-							return null;
-						}
-					}
-
 				};
 			}
 			
 		});
+		
+		if (isLoggedIn()) {
+			head.add(new DropdownLink("createNewDropdown") {
+
+				@Override
+				protected Component newContent(String id) {
+					Fragment fragment = new Fragment(id, "createNewFrag", LayoutPage.this);
+					fragment.add(new BookmarkablePageLink<Void>("createNewDepot", CreateDepotPage.class));
+					fragment.add(new BookmarkablePageLink<Void>("createNewOrganization", 
+							NewOrganizationPage.class, NewOrganizationPage.paramsOf(getLoginUser())));
+					return fragment;
+				}
+				
+			});
+		} else {
+			head.add(new WebMarkupContainer("createNewDropdown").setVisible(false));
+		}
+		
 		head.add(new BookmarkablePageLink<Void>("administration", AccountListPage.class)
 				.setVisible(SecurityUtils.canManageSystem()));
 		

@@ -1,17 +1,17 @@
-.revision-diff>.option {
+.revision-diff>.head {
 	margin-bottom: 16px;
 }
-.revision-diff>.option>.view-mode {
-	margin-left: 16px;
+.revision-diff>.head td.view-mode {
+	width: 140px;
 }
-.revision-diff>.option .path-filter input {
-	width: 300px;
+.revision-diff>.head td.whitespace-option {
+	width: 140px;
 }
-.revision-diff>.title {
+.revision-diff>.body>.title {
 	font-size: 16px;
 	margin-bottom: 16px;	
 }
-.revision-diff>.alert {
+.revision-diff>.body>.alert {
 	margin-bottom: 16px;
 }
 .revision-diff .total-changed:after {
@@ -22,47 +22,47 @@
 .revision-diff .total-changed.expanded:after {
     content: "\f106";
 }
-.revision-diff>ul>li.diff-stat {
+.revision-diff>.body>ul>li.diff-stat {
 	font-size: 13px;
 }
-.revision-diff>ul>li.diff-stat>.icon {
+.revision-diff>.body>ul>li.diff-stat>.icon {
 	margin-top: 2px;
 }
-.revision-diff>ul>li.diff-stat .fa-diff-modified, .revision-diff>ul>li.diff-stat .fa-diff-renamed {
+.revision-diff>.body>ul>li.diff-stat .fa-diff-modified, .revision-diff>ul>li.diff-stat .fa-diff-renamed {
 	color: #D0B44C;
 }
-.revision-diff>ul>li.diff-stat .fa-diff-added {
+.revision-diff>.body>ul>li.diff-stat .fa-diff-added {
 	color: #35C335;
 }
-.revision-diff>ul>li.diff-stat .fa-diff-removed {
+.revision-diff>.body>ul>li.diff-stat .fa-diff-removed {
 	color: #C33535;
 }
-.revision-diff>.diff-stats {
+.revision-diff>.body>.diff-stats {
 	margin-top: -10px;
 }
-.revision-diff>.diff-stats li {
+.revision-diff>.body>.diff-stats li {
 	padding: 6px 0;
 	border-bottom: 1px solid #F2F2F2;
 }
-.revision-diff>.diff-stats li:last-child {
+.revision-diff>.body>.diff-stats li:last-child {
 	border-bottom: none;
 }
-.revision-diff>.diff-stats li a.file {
+.revision-diff>.body>.diff-stats li a.file {
 	padding: 0 6px;
 }
-.revision-diff>.diff-stats li>.additions {
+.revision-diff>.body>.diff-stats li>.additions {
 	color: #35C335;
 }
-.revision-diff>.diff-stats li>.deletions {
+.revision-diff>.body>.diff-stats li>.deletions {
 	color: #C33535;
 }
-.revision-diff>.diff-stats li>.additions, .revision-diff .diff-stats li>.deletions {
+.revision-diff>.body>.diff-stats li>.additions, .revision-diff .diff-stats li>.deletions {
 	font-size: 12px;
 	font-weight: bold;
 	margin-right: 4px;
 	margin-top: 2px;
 }
 
-.revision-diff>.changes>.change {
+.revision-diff>.body>.changes>.change {
 	margin-bottom: 20px;
 }

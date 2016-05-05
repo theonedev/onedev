@@ -58,7 +58,7 @@ public class SuggestionUtils {
 				suggestions.add(new InputSuggestion(wildcard, wildcardDescription, matchRange));
 			}
 		}
-		for (Depot affinal: /*depot.findAffinals()*/GitPlex.getInstance(Dao.class).allOf(Depot.class)) {
+		for (Depot affinal: GitPlex.getInstance(Dao.class).allOf(Depot.class)) {
 			String FQN = affinal.getFQN();
 			int index = FQN.toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<count) {
@@ -85,13 +85,17 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestPath(Depot depot, String matchWith, int count) {
+		AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
+		return suggestPath(auxiliaryManager.getFiles(depot), matchWith, count);
+	}
+	
+	public static List<InputSuggestion> suggestPath(List<String> paths, String matchWith, int count) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
 		List<PatternApplied> allApplied = new ArrayList<>();
 		Map<String, Range> suggestedInputs = new LinkedHashMap<>();
-		AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
-		for (String path: auxiliaryManager.getFiles(depot)) {
+		for (String path: paths) {
 			PatternApplied applied = WildcardUtils.applyPattern(lowerCaseMatchWith, path, false);
 			if (applied != null) 
 				allApplied.add(applied);
@@ -125,4 +129,5 @@ public class SuggestionUtils {
 		
 		return suggestions;		
 	}
+
 }

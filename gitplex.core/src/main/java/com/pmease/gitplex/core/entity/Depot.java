@@ -3,7 +3,6 @@ package com.pmease.gitplex.core.entity;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -86,6 +85,7 @@ import com.pmease.gitplex.core.entity.component.IntegrationPolicy;
 import com.pmease.gitplex.core.gatekeeper.AndGateKeeper;
 import com.pmease.gitplex.core.gatekeeper.GateKeeper;
 import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.security.protectedobject.AccountBelonging;
@@ -165,8 +165,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
     private transient Map<BlobIdent, Blob> blobCache;
     
-    private transient Map<DiffKey, List<DiffEntry>> diffCache;
-    
     private transient Map<String, Commit> commitCache;
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
@@ -211,7 +209,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		this.description = description;
 	}
 
-	@Editable(order=300, name="Public", description="Whether or this repository can be read by everyone")
+	@Editable(order=300, name="Public", description="Whether or not this repository can be read by everyone")
     public boolean isPublicRead() {
 		return publicRead;
 	}
@@ -513,7 +511,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	}
 
 	public String getUrl() {
-		return GitPlex.getInstance().guessServerUrl() + "/" + getFQN();
+		return GitPlex.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() + "/" + getFQN();
 	}
 	
 	public String getDefaultBranch() {
@@ -688,34 +686,26 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	}
 	
 	public List<DiffEntry> getDiffs(String oldRev, String newRev) {
-		if (diffCache == null)
-			diffCache = new HashMap<>();
-		
-		DiffKey key = new DiffKey(oldRev, newRev);
-		List<DiffEntry> diffs = diffCache.get(key);
-		if (diffs == null) {
-			try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
-		    	diffFormatter.setRepository(getRepository());
-		    	diffFormatter.setDetectRenames(true);
-		    	diffFormatter.setDiffAlgorithm(MyersDiff.INSTANCE);
-		    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-				AnyObjectId oldCommitId = getObjectId(oldRev);
-				AnyObjectId newCommitId = getObjectId(newRev);
-				diffs = new ArrayList<>();
-		    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
-		    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
-		    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
-		    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
-		    				|| entry.getNewId()== null || !entry.getNewId().isComplete()
-		    				|| !entry.getOldId().equals(entry.getNewId())) {
-		    			diffs.add(entry);
-		    		}
-		    	}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}			
-			diffCache.put(key, diffs);
-		}
+		List<DiffEntry> diffs = new ArrayList<>();
+		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);) {
+	    	diffFormatter.setRepository(getRepository());
+	    	diffFormatter.setDetectRenames(true);
+	    	diffFormatter.setDiffAlgorithm(MyersDiff.INSTANCE);
+	    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+			AnyObjectId oldCommitId = getObjectId(oldRev);
+			AnyObjectId newCommitId = getObjectId(newRev);
+	    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
+	    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
+	    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
+	    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
+	    				|| entry.getNewId()== null || !entry.getNewId().isComplete()
+	    				|| !entry.getOldId().equals(entry.getNewId())) {
+	    			diffs.add(entry);
+	    		}
+	    	}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}			
 		return diffs;
 	}
 	
@@ -992,35 +982,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 			listener.onRefUpdate(this, refName, commitId, ObjectId.zeroId());
     }
     
-	private static class DiffKey implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		String oldRev;
-		
-		String newRev;
-
-		DiffKey(String oldRev, String newRev) {
-			this.oldRev = oldRev;
-			this.newRev = newRev;
-		}
-		
-		public boolean equals(Object other) {
-			if (!(other instanceof DiffKey))
-				return false;
-			if (this == other)
-				return true;
-			DiffKey otherKey = (DiffKey) other;
-			return Objects.equal(oldRev, otherKey.oldRev) 
-					&& Objects.equal(newRev, otherKey.newRev);
-		}
-
-		public int hashCode() {
-			return Objects.hashCode(oldRev, newRev);
-		}
-		
-	}
-
 	public Collection<TeamAuthorization> getAuthorizedTeams() {
 		return authorizedTeams;
 	}
