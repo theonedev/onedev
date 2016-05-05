@@ -79,15 +79,25 @@ public class DiffUtils {
 	 * Diff two list of strings.
 	 */
 	public static List<DiffBlock<List<CmToken>>> diff(List<String> oldLines, @Nullable String oldFileName, 
-			List<String> newLines, @Nullable String newFileName) {
+			List<String> newLines, @Nullable String newFileName, WhitespaceOption whitespaceOption) {
 		Preconditions.checkArgument(oldLines.size() + newLines.size() <= MAX_DIFF_SIZE, 
 				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
+		
+		List<String> processedOldLines = new ArrayList<>();
+		for (String line: oldLines) {
+			processedOldLines.add(whitespaceOption.process(line));
+		}
+		
+		List<String> processedNewLines = new ArrayList<>();
+		for (String line: newLines) {
+			processedNewLines.add(whitespaceOption.process(line));
+		}
 		
 		List<List<CmToken>> oldTokenizedLines = tokenize(oldLines, oldFileName);
 		List<List<CmToken>> newTokenizedLines = tokenize(newLines, newFileName);
 
 		DiffMatchPatch dmp = new DiffMatchPatch();
-		TokensToCharsResult<String> result1 = tokensToChars(oldLines, newLines);
+		TokensToCharsResult<String> result1 = tokensToChars(processedOldLines, processedNewLines);
 		
 		List<DiffMatchPatch.Diff> diffs = dmp.diff_main(result1.chars1, result1.chars2, false);
 

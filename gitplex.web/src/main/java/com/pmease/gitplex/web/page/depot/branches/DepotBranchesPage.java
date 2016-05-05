@@ -50,8 +50,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.WhitespaceOption;
 import com.pmease.commons.hibernate.dao.Dao;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;

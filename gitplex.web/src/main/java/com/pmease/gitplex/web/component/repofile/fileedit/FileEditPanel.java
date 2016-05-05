@@ -31,7 +31,7 @@ import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathAndContent;
-import com.pmease.commons.git.WhitespaceOption;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;

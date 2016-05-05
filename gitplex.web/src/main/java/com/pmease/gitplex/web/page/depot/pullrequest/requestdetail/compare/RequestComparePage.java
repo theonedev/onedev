@@ -36,7 +36,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.WhitespaceOption;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
 import com.pmease.commons.wicket.behavior.StickyBehavior;

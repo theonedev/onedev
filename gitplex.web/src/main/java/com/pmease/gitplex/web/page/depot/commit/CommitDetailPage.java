@@ -39,7 +39,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.WhitespaceOption;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;

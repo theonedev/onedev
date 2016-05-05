@@ -50,7 +50,10 @@ public class DiffUtilsTest extends AppLoaderMocker {
 				"		System.out.println(\"hello tim\");",
 				"	}",
 				"}");
-		List<DiffBlock<List<CmToken>>> diffBlocks = DiffUtils.diff(oldLines, "test.java", newLines, "test.java");
+		List<DiffBlock<List<CmToken>>> diffBlocks = DiffUtils.diff(
+				oldLines, "test.java", 
+				newLines, "test.java", 
+				WhitespaceOption.DEFAULT);
 		assertEquals(""
 				+ "-public class HelloRobin {\n", toString(diffBlocks.get(0)));
 		assertEquals(""

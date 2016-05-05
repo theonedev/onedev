@@ -11,7 +11,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.git.WhitespaceOption;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;

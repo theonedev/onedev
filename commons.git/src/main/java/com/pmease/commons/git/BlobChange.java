@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.lang.tokenizers.CmToken;
 
 @SuppressWarnings("serial")
@@ -69,12 +70,13 @@ public abstract class BlobChange implements Serializable {
 			try {
 				if (type == ChangeType.ADD || type == ChangeType.COPY) {
 					if (getNewText() != null) {
-						List<String> newLines = getNewText().getLines(whitespaceOption);
+						List<String> newLines = getNewText().getLines();
 						if (newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> oldLines = new ArrayList<>();
 							diffBlocks = DiffUtils.diff(
 									oldLines, null, 
-									newLines, newBlobIdent.isFile()?newBlobIdent.path:null);
+									newLines, newBlobIdent.isFile()?newBlobIdent.path:null, 
+									WhitespaceOption.DEFAULT);
 						} else {
 							diffBlocks = new ArrayList<>();
 						}
@@ -83,12 +85,13 @@ public abstract class BlobChange implements Serializable {
 					}
 				} else if (type == ChangeType.DELETE) {
 					if (getOldText() != null) {
-						List<String> oldLines = getOldText().getLines(whitespaceOption);
+						List<String> oldLines = getOldText().getLines();
 						if (oldLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> newLines = new ArrayList<>();
 							diffBlocks = DiffUtils.diff(
 									oldLines, oldBlobIdent.isFile()?newBlobIdent.path:null, 
-									newLines, null);
+									newLines, null, 
+									WhitespaceOption.DEFAULT);
 						} else {
 							diffBlocks = new ArrayList<>();
 						}
@@ -99,14 +102,16 @@ public abstract class BlobChange implements Serializable {
 					diffBlocks = new ArrayList<>();
 				} else {
 					if (getOldText() != null && getNewText() != null) {
-						List<String> oldLines = getOldText().getLines(whitespaceOption);
-						List<String> newLines = getNewText().getLines(whitespaceOption);
-						if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE)
+						List<String> oldLines = getOldText().getLines();
+						List<String> newLines = getNewText().getLines();
+						if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							diffBlocks = DiffUtils.diff(
 									oldLines, oldBlobIdent.isFile()?newBlobIdent.path:null, 
-									newLines, newBlobIdent.isFile()?newBlobIdent.path:null);
-						else 
+									newLines, newBlobIdent.isFile()?newBlobIdent.path:null, 
+									whitespaceOption);
+						} else { 
 							diffBlocks = new ArrayList<>();
+						}
 					} else {
 						diffBlocks = new ArrayList<>();
 					}

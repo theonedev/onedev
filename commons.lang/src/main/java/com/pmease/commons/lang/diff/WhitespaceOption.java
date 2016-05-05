@@ -1,11 +1,10 @@
-package com.pmease.commons.git;
+package com.pmease.commons.lang.diff;
 
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.diff.RawTextComparator;
 
 public enum WhitespaceOption {
 	
@@ -14,11 +13,6 @@ public enum WhitespaceOption {
 		@Override
 		public String process(String line) {
 			return line;
-		}
-
-		@Override
-		public RawTextComparator getComparator() {
-			return RawTextComparator.DEFAULT;
 		}
 
 		@Override
@@ -35,11 +29,6 @@ public enum WhitespaceOption {
 		}
 
 		@Override
-		public RawTextComparator getComparator() {
-			return RawTextComparator.WS_IGNORE_LEADING;
-		}
-
-		@Override
 		public String getDescription() {
 			return "Ignore leading white spaces";
 		}
@@ -50,11 +39,6 @@ public enum WhitespaceOption {
 		@Override
 		public String process(String line) {
 			return StringUtils.stripEnd(line, " \t\r\n");
-		}
-
-		@Override
-		public RawTextComparator getComparator() {
-			return RawTextComparator.WS_IGNORE_TRAILING;
 		}
 
 		@Override
@@ -71,11 +55,6 @@ public enum WhitespaceOption {
 		}
 
 		@Override
-		public RawTextComparator getComparator() {
-			return RawTextComparator.WS_IGNORE_CHANGE;
-		}
-		
-		@Override
 		public String getDescription() {
 			return "Ignore white space changes";
 		}
@@ -85,14 +64,9 @@ public enum WhitespaceOption {
 
 		@Override
 		public String process(String line) {
-			return WHITESPACE_PATTERN.matcher(line.trim()).replaceAll(" ");
+			return WHITESPACE_PATTERN.matcher(line.trim()).replaceAll("");
 		}
 
-		@Override
-		public RawTextComparator getComparator() {
-			return RawTextComparator.WS_IGNORE_ALL;
-		}
-		
 		@Override
 		public String getDescription() {
 			return "Ignore all white spaces";
@@ -105,8 +79,6 @@ public enum WhitespaceOption {
 	public abstract String getDescription();
 	
 	public abstract String process(String line);
-	
-	public abstract RawTextComparator getComparator();
 	
 	public static WhitespaceOption of(@Nullable String name) {
 		if (name != null) {

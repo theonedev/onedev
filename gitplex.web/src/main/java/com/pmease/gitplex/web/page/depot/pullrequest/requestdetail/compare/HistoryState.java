@@ -2,7 +2,7 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare;
 
 import java.io.Serializable;
 
-import com.pmease.commons.git.WhitespaceOption;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 
 class HistoryState implements Serializable {
 

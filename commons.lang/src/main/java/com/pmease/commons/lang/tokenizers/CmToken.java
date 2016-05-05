@@ -138,7 +138,11 @@ public class CmToken implements Serializable {
 	}
 
 	public String toHtml(Operation operation) {
-		String escapedText = StringUtils.escapeHtml(text);
+		String escapedText;
+		if (text.equals("\r"))
+			escapedText = " ";
+		else
+			escapedText = StringUtils.escapeHtml(text);
 		
 		if (operation == Operation.EQUAL && StringUtils.isBlank(type)) {
 			return escapedText;

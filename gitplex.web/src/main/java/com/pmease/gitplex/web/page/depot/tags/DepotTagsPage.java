@@ -41,7 +41,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 
 import com.pmease.commons.git.GitUtils;
-import com.pmease.commons.git.WhitespaceOption;
+import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
