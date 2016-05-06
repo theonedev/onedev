@@ -22,6 +22,10 @@ gitplex.filelist = {
 		$.ajax({
 			url: lastCommitsUrl,
 			cache: false, 
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('Wicket-Ajax', 'true');
+				xhr.setRequestHeader('Wicket-Ajax-BaseURL', Wicket.Ajax.baseUrl || '.');
+			},
 			success: function(lastCommits) {
 				if (jQuery.contains(document, $container[0])) { // add this check to avoid rendering last commits if directory is changed
 					var $table = $container.find(".file-list>table");
