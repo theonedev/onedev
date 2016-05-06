@@ -70,7 +70,9 @@
 	padding-top: 12px;
 	margin-top: 16px;
 }
-
+.member.add .role label {
+	margin-right: 16px;
+}
 .list td.name .note {
 	font-size: 12px;
 	color: #888;
