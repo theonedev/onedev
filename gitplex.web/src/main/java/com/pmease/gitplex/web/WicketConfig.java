@@ -17,6 +17,7 @@ import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCac
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 
 import com.pmease.commons.wicket.AbstractWicketConfig;
+import com.pmease.gitplex.web.mapper.UrlMapper;
 import com.pmease.gitplex.web.page.error.BaseErrorPage;
 import com.pmease.gitplex.web.page.home.DashboardPage;
 

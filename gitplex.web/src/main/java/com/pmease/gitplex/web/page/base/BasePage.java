@@ -86,7 +86,22 @@ public abstract class BasePage extends CommonPage {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				tag.put("href", urlFor(new PackageResourceReference(BasePage.class, "favicon.ico"), new PageParameters()));
+				CharSequence url = urlFor(
+						new PackageResourceReference(BasePage.class, "favicon.ico"), 
+						new PageParameters()); 
+				tag.put("href", url);
+			}
+
+		});
+		add(new WebMarkupContainer("appleTouchIcon") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				CharSequence url = urlFor(
+						new PackageResourceReference(BasePage.class, "apple-touch-icon.png"), 
+						new PageParameters()); 
+				tag.put("href", url);
 			}
 
 		});
