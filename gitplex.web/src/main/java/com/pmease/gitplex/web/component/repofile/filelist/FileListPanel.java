@@ -266,11 +266,14 @@ public abstract class FileListPanel extends Panel {
 				new JavaScriptResourceReference(FileListPanel.class, "file-list.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(FileListPanel.class, "file-list.css")));
+
+		String homeUrl = urlFor(getApplication().getHomePage(), new PageParameters()).toString();
 		
-		PageParameters params = LastCommitsResource.paramsOf(depotModel.getObject(), directory.revision, directory.path); 
+		PageParameters params = LastCommitsResource.paramsOf(depotModel.getObject(), 
+				directory.revision, directory.path); 
 		String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
 		response.render(OnDomReadyHeaderItem.forScript(
-				String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl)));
+				String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl, homeUrl)));
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent file);
