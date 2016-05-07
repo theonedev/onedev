@@ -45,7 +45,6 @@ import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
@@ -86,7 +85,7 @@ public class DepotTagsPage extends DepotPage {
 		super.onInitialize();
 		
 		TextField<String> searchField;
-		add(searchField = new ClearableTextField<String>("searchTags", Model.of("")));
+		add(searchField = new TextField<String>("searchTags", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(200) {
 
 			@Override

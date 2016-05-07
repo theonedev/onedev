@@ -22,7 +22,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.OrganizationMembership;
@@ -64,7 +63,7 @@ public class DepotEffectivePrivilegePage extends DepotSettingPage {
 		
 		TextField<String> searchField;
 		
-		add(searchField = new ClearableTextField<String>("searchUsers", Model.of("")));
+		add(searchField = new TextField<String>("searchUsers", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override

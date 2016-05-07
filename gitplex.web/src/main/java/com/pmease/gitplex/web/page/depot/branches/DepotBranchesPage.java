@@ -56,7 +56,6 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.BranchWatch;
@@ -298,7 +297,7 @@ public class DepotBranchesPage extends DepotPage {
 			
 		});
 		
-		add(searchField = new ClearableTextField<String>("searchBranches", Model.of("")));
+		add(searchField = new TextField<String>("searchBranches", Model.of("")));
 		searchField.add(new OnSearchingBehavior());
 
 		add(new ModalLink("createBranch") {

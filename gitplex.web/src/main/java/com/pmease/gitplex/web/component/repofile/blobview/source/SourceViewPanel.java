@@ -116,13 +116,16 @@ public class SourceViewPanel extends BlobViewPanel {
 						public void onClick(AjaxRequestTarget target) {
 							menuLink.close();
 							WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+							Cookie cookie;
 							if (outlinePanel.isVisible()) {
-								response.addCookie(new Cookie(COOKIE_OUTLINE, "no"));
+								cookie = new Cookie(COOKIE_OUTLINE, "no");
 								outlinePanel.setVisible(false);
 							} else {
-								response.addCookie(new Cookie(COOKIE_OUTLINE, "yes"));
+								cookie = new Cookie(COOKIE_OUTLINE, "yes");
 								outlinePanel.setVisible(true);
 							}
+							cookie.setMaxAge(Integer.MAX_VALUE);
+							response.addCookie(cookie);
 							target.add(outlinePanel);
 							
 							String script = String.format(""
@@ -161,12 +164,11 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		});
+		
 		if (!symbols.isEmpty()) {
 			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
-			if (cookie!=null && cookie.getValue().equals("yes"))
-				outlinePanel.setVisible(true);
-			else
+			if (cookie!=null && cookie.getValue().equals("no"))
 				outlinePanel.setVisible(false);
 		} else {
 			outlinePanel.setVisible(false);

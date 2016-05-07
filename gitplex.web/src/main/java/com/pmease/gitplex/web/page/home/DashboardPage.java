@@ -21,7 +21,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -127,7 +126,7 @@ public class DashboardPage extends LayoutPage {
 		});
 		
 		TextField<String> searchDepots;
-		add(searchDepots = new ClearableTextField<String>("searchDepots", Model.of("")));
+		add(searchDepots = new TextField<String>("searchDepots", Model.of("")));
 		searchDepots.add(new OnTypingDoneBehavior(100) {
 
 			@Override

@@ -46,7 +46,6 @@ import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
-import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
@@ -514,7 +513,6 @@ public class DepotCommitsPage extends DepotPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(ClearableResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CommitGraphResourceReference.INSTANCE));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(DepotCommitsPage.class, "depot-commits.css")));

@@ -27,7 +27,6 @@ import org.json.JSONWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
 import com.pmease.gitplex.core.GitPlex;
@@ -74,7 +73,7 @@ public class TeamMemberListPage extends TeamPage {
 		
 		TextField<String> searchField;
 		
-		add(searchField = new ClearableTextField<String>("searchMembers", Model.of("")));
+		add(searchField = new TextField<String>("searchMembers", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override

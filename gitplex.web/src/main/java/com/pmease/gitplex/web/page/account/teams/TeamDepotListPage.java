@@ -28,7 +28,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.component.select2.ResponseFiller;
 import com.pmease.commons.wicket.component.select2.SelectToAddChoice;
@@ -79,7 +78,7 @@ public class TeamDepotListPage extends TeamPage {
 		
 		TextField<String> searchField;
 		
-		add(searchField = new ClearableTextField<String>("searchDepots", Model.of("")));
+		add(searchField = new TextField<String>("searchDepots", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override

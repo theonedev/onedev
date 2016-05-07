@@ -22,7 +22,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.manager.AccountManager;
@@ -56,7 +55,7 @@ public class AccountListPage extends AdministrationPage {
 		super.onInitialize();
 		
 		TextField<String> searchField;
-		add(searchField = new ClearableTextField<String>("searchAccounts", Model.of("")));
+		add(searchField = new TextField<String>("searchAccounts", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override

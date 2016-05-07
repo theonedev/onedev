@@ -19,7 +19,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
-import com.pmease.commons.wicket.component.clearable.ClearableTextField;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -56,7 +55,7 @@ public class DepotListPanel extends GenericPanel<Account> {
 		
 		TextField<String> searchField;
 		
-		add(searchField = new ClearableTextField<String>("searchDepots", Model.of("")));
+		add(searchField = new TextField<String>("searchDepots", Model.of("")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override

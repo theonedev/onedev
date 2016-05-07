@@ -57,7 +57,6 @@ import com.pmease.commons.util.Range;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.clearable.ClearableResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
@@ -531,7 +530,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(ClearableResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
