@@ -535,17 +535,15 @@ gitplex.textdiff = {
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
-			var startTop = $startTd.offset().top;
-			var endBottom = $endTd.offset().top + $endTd.outerHeight();
-			var markHeight = endBottom - startTop;
-			var screenHeight = $(window).height();
-			var availableHeight = screenHeight - markHeight;
-			var scrollTop = $startTd.offset().top;
-			if (availableHeight > 0) {
-				// we have enough screen space, so do not put on top of screen for easier reading
-				scrollTop -= availableHeight/4;
-			} 
-			$(window).scrollTop(scrollTop);
+			var top = $startTd.offset().top;
+			var bottom = $endTd.offset().top + $endTd.outerHeight();
+			var markHeight = bottom - top;
+			var windowHeight = $(window).height();
+			if (windowHeight <= markHeight) {
+				$(window).scrollTop(top-50);
+			} else {
+				$(window).scrollTop((top+bottom-windowHeight)/2);
+			}
 		}
 	},
 	mark: function(markFile, markPos) {

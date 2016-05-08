@@ -14,8 +14,9 @@ gitplex.sourceview = {
 			var $outline = $sourceView.find(">.outline");
 			if ($outline.is(":visible")) {
 				$code.outerWidth($sourceView.width()/4.0*3);
+				var $outlineBody = $outline.find(">.body");
 				$outline.outerWidth($sourceView.width() - $code.outerWidth()-1);
-				$outline.outerHeight($sourceView.height());
+				$outlineBody.outerHeight($sourceView.height() - $outline.find(">.head").outerHeight());
 			} else {
 				$code.outerWidth($sourceView.width());
 			}
@@ -56,7 +57,7 @@ gitplex.sourceview = {
 				pmease.commons.codemirror.setMode(cm, filePath);
 
 			    if (mark)
-			    	pmease.commons.codemirror.mark(cm, mark);
+			    	pmease.commons.codemirror.mark(cm, mark, true);
 
 			    if (blameCommits) {
 			    	// render blame blocks with a timer to avoid the issue that occasionally 
@@ -87,7 +88,7 @@ gitplex.sourceview = {
 		    						beginChar: from.ch,
 		    						endLine: to.line,
 		    						endChar: to.ch
-		    					});
+		    					}, false);
 		    				});
 						};
 		    			var commentCallback = function($commentLink) {
@@ -114,9 +115,9 @@ gitplex.sourceview = {
 				pmease.commons.codemirror.initState(cm, viewState);
 		});
 	}, 
-	mark: function(codeId, mark) {
+	mark: function(codeId, mark, scroll) {
 		var cm = $("#"+ codeId + ">.CodeMirror")[0].CodeMirror;		
-		pmease.commons.codemirror.mark(cm, mark);
+		pmease.commons.codemirror.mark(cm, mark, scroll);
 	},
 	
 	blame: function(cm, blameCommits) {

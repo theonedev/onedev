@@ -1,11 +1,17 @@
 pmease.commons.codemirror = {
-	centerLine: function(cm, line) {
-		var h = cm.getScrollInfo().clientHeight;
-		var coords = cm.charCoords({line: line, ch: 0}, "local");
-		cm.scrollTo(null, (coords.top + coords.bottom - h) / 2); 			
-	},
-	mark: function(cm, mark) {
-		pmease.commons.codemirror.centerLine(cm, mark.beginLine);
+	mark: function(cm, mark, scroll) {
+		if (scroll) {
+			var top = cm.charCoords({line: mark.beginLine, ch: 0}, "local").top;
+			var bottom = cm.charCoords({line: mark.endLine, ch: 0}, "local").bottom;
+			
+			var markHeight = bottom - top;
+			var clientHeight = cm.getScrollInfo().clientHeight;
+			if (clientHeight <= markHeight) {
+				cm.scrollTo(null, top - 50); 			
+			} else {
+				cm.scrollTo(null, (top+bottom-clientHeight)/2); 			
+			}
+		}
 		
 		var allMarks = cm.getAllMarks();
 		for (var i=0; i<allMarks.length; i++) 

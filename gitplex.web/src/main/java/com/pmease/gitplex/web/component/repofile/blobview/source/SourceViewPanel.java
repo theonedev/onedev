@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web.component.repofile.blobview.source;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -9,13 +10,20 @@ import javax.servlet.http.Cookie;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
+import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
@@ -43,6 +51,7 @@ import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
+import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -70,7 +79,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private Component codeContainer;
 	
-	private OutlinePanel outlinePanel;
+	private WebMarkupContainer outlineContainer;
 
 	private SymbolTooltipPanel symbolTooltip;
 	
@@ -105,7 +114,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 				@Override
 				public String getIconClass() {
-					return outlinePanel.isVisible()?"fa fa-check":null;
+					return outlineContainer.isVisible()?"fa fa-check":null;
 				}
 
 				@Override
@@ -115,24 +124,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							menuLink.close();
-							WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-							Cookie cookie;
-							if (outlinePanel.isVisible()) {
-								cookie = new Cookie(COOKIE_OUTLINE, "no");
-								outlinePanel.setVisible(false);
-							} else {
-								cookie = new Cookie(COOKIE_OUTLINE, "yes");
-								outlinePanel.setVisible(true);
-							}
-							cookie.setMaxAge(Integer.MAX_VALUE);
-							response.addCookie(cookie);
-							target.add(outlinePanel);
-							
-							String script = String.format(""
-									+ "var $sourceView = $('#%s').closest('.source-view');"
-									+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);", 
-									codeContainer.getMarkupId());
-							target.appendJavaScript(script);
+							toggleOutline(target);
 						}
 						
 					};
@@ -142,9 +134,30 @@ public class SourceViewPanel extends BlobViewPanel {
 		} 
 		return menuItems;
 	}
+	
+	private void toggleOutline(AjaxRequestTarget target) {
+		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+		Cookie cookie;
+		if (outlineContainer.isVisible()) {
+			cookie = new Cookie(COOKIE_OUTLINE, "no");
+			outlineContainer.setVisible(false);
+		} else {
+			cookie = new Cookie(COOKIE_OUTLINE, "yes");
+			outlineContainer.setVisible(true);
+		}
+		cookie.setMaxAge(Integer.MAX_VALUE);
+		response.addCookie(cookie);
+		target.add(outlineContainer);
+		
+		String script = String.format(""
+				+ "var $sourceView = $('#%s').closest('.source-view');"
+				+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);", 
+				codeContainer.getMarkupId());
+		target.appendJavaScript(script);
+	}
 
 	public void mark(AjaxRequestTarget target, Mark mark) {
-		String script = String.format("gitplex.sourceview.mark('%s', %s);", 
+		String script = String.format("gitplex.sourceview.mark('%s', %s, true);", 
 				codeContainer.getMarkupId(), mark.toJSON());
 		target.appendJavaScript(script);
 	}
@@ -156,22 +169,86 @@ public class SourceViewPanel extends BlobViewPanel {
 		add(codeContainer = new WebMarkupContainer("code"));
 		codeContainer.setOutputMarkupId(true);
 		
-		add(outlinePanel = new OutlinePanel("outline", symbols) {
+		outlineContainer = new WebMarkupContainer("outline");
+		outlineContainer.add(new AjaxLink<Void>("close") {
 
 			@Override
-			protected void onSelect(AjaxRequestTarget target, Symbol symbol) {
-				context.onSelect(target, context.getBlobIdent(), symbol.getPos());
+			public void onClick(AjaxRequestTarget target) {
+				toggleOutline(target);
 			}
 			
 		});
+		NestedTree<Symbol> tree;
+		outlineContainer.add(tree = new NestedTree<Symbol>("body", new ITreeProvider<Symbol>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Iterator<? extends Symbol> getRoots() {
+				return getChildSymbols(null).iterator();
+			}
+
+			@Override
+			public boolean hasChildren(Symbol symbol) {
+				return !getChildSymbols(symbol).isEmpty();
+			}
+
+			@Override
+			public Iterator<? extends Symbol> getChildren(Symbol symbol) {
+				return getChildSymbols(symbol).iterator();
+			}
+
+			@Override
+			public IModel<Symbol> model(Symbol symbol) {
+				return Model.of(symbol);
+			}
+			
+		}) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new HumanTheme());				
+			}
+
+			@Override
+			protected Component newContentComponent(String id, IModel<Symbol> nodeModel) {
+				Fragment fragment = new Fragment(id, "outlineNodeFrag", SourceViewPanel.this);
+				Symbol symbol = nodeModel.getObject();
+				
+				fragment.add(new Image("icon", symbol.getIcon()));
+				
+				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						context.onSelect(target, context.getBlobIdent(), symbol.getPos());
+					}
+					
+				};
+				link.add(symbol.render("label", null));
+				fragment.add(link);
+				
+				return fragment;
+			}
+			
+		});		
+		
+		for (Symbol root: getChildSymbols(null))
+			tree.expand(root);
+		
+		outlineContainer.setOutputMarkupPlaceholderTag(true);
+		add(outlineContainer);
 		
 		if (!symbols.isEmpty()) {
 			WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 			Cookie cookie = request.getCookie(COOKIE_OUTLINE);
 			if (cookie!=null && cookie.getValue().equals("no"))
-				outlinePanel.setVisible(false);
+				outlineContainer.setVisible(false);
 		} else {
-			outlinePanel.setVisible(false);
+			outlineContainer.setVisible(false);
 		}
 		
 		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip", new AbstractReadOnlyModel<Depot>() {
@@ -210,6 +287,15 @@ public class SourceViewPanel extends BlobViewPanel {
 		});
 
 		setOutputMarkupId(true);
+	}
+	
+	private List<Symbol> getChildSymbols(@Nullable Symbol parentSymbol) {
+		List<Symbol> children = new ArrayList<>();
+		for (Symbol symbol: symbols) {
+			if (symbol.getParent() == parentSymbol)
+				children.add(symbol);
+		}
+		return children;
 	}
 	
 	@Override
