@@ -538,10 +538,9 @@ gitplex.textdiff = {
 			var startTop = $startTd.offset().top;
 			var endBottom = $endTd.offset().top + $endTd.outerHeight();
 			var markHeight = endBottom - startTop;
-			var stickyHeight = $(".sticky").outerHeight();
-			var screenHeight = $(window).height() - stickyHeight;
+			var screenHeight = $(window).height();
 			var availableHeight = screenHeight - markHeight;
-			var scrollTop = $startTd.offset().top - stickyHeight;
+			var scrollTop = $startTd.offset().top;
 			if (availableHeight > 0) {
 				// we have enough screen space, so do not put on top of screen for easier reading
 				scrollTop -= availableHeight/4;

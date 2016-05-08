@@ -86,7 +86,6 @@ public class CommonResourceReference extends JavaScriptResourceReference {
 
 		dependencies.add(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
 		dependencies.add(JavaScriptHeaderItem.forReference(AutoSizeResourceReference.INSTANCE));
-		dependencies.add(JavaScriptHeaderItem.forReference(Assets.STICKY_JS));
 		dependencies.add(JavaScriptHeaderItem.forReference(Assets.ARE_YOU_SURE_JS));
 		
 		dependencies.add(CssHeaderItem.forReference(Assets.COMMON_CSS));

@@ -24,7 +24,6 @@ import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.bootstrap.Bootstrap;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketMessage;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
@@ -75,12 +74,8 @@ public abstract class AbstractWicketConfig extends WebApplication {
 					target.add(page.getSessionFeedback());
 				
 				for (Component component: map.values()) {
-					if (!component.getBehaviors(StickyBehavior.class).isEmpty())
-						target.prependJavaScript(String.format("$('#%s').trigger('sticky_kit:detach');", component.getMarkupId()));
 					target.appendJavaScript((String.format("$(document).trigger('elementReplaced', '%s');", component.getMarkupId())));
 				}
-				
-				target.appendJavaScript("$(document.body).trigger('sticky_kit:recalc');");
 			}
 
 			@Override

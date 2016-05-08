@@ -39,7 +39,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
-import com.pmease.commons.wicket.behavior.StickyBehavior;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
@@ -217,10 +216,7 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		compareHead = new WebMarkupContainer("compareHead");
-		compareHead.add(new StickyBehavior());
-		
-		add(compareHead);
+		add(compareHead = new WebMarkupContainer("compareHead"));
 
 		DropdownLink oldSelector = new DropdownLink("oldSelector") {
 
@@ -408,12 +404,7 @@ public class RequestComparePage extends RequestDetailPage {
 					if (outdated)
 						setVisible(true);
 					
-					// have to call this here as the sticky update logic in AbstractWicketConfig can 
-					// not be executed in a web socket call back
 					if (outdated || requestEvent == UPDATED || requestEvent == INTEGRATION_PREVIEW_CALCULATED) {
-						String script = String.format("$('#%s').trigger('sticky_kit:detach');", 
-								compareHead.getMarkupId());
-						partialPageRequestHandler.prependJavaScript(script);
 						partialPageRequestHandler.add(compareHead);
 					}
 				}

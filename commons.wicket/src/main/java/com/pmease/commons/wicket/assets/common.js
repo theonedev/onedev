@@ -246,103 +246,6 @@ pmease.commons = {
 		});
 	}, 
 		
-	stick: function(sticky, parent) {
-		var $sticky = $(sticky);
-		var offset = 0;
-		var $parent;
-		if (parent != undefined)
-			$parent = $(parent);
-		else
-			$parent = $sticky.parent();
-		$parent.parents().each(function() {
-			var $this = $(this);
-			var maxHeight = 0;
-			$this.children(".sticky").each(function() {
-				var height = $(this).outerHeight();
-				if (height > maxHeight)
-					maxHeight = height;
-			});
-			offset += maxHeight;
-		});
-		if (parent != undefined)
-			$sticky.stick_in_parent({"offset_top": offset, "parent": parent, "inner_scrolling": false});
-		else
-			$sticky.stick_in_parent({"offset_top": offset, "inner_scrolling": false});
-	},
-	
-	scroll: {
-		setupScrollStop: function() {
-			var $window = $(window);
-		    $window.scroll(function() {
-		        if ($window.data('scrollTimeout')) {
-		          clearTimeout($window.data('scrollTimeout'));
-		        }
-		        $window.data('scrollTimeout', setTimeout("$(window).trigger('scrollStopped');",250));
-		    });
-		},
-		
-		getTopOffset: function(selector) {
-			var offset = 0;
-			$(selector).first().parents().each(function() {
-				var $this = $(this);
-				var maxHeight = 0;
-				$this.children(".sticky").each(function() {
-					var height = $(this).outerHeight();
-					if (height > maxHeight)
-						maxHeight = height;
-				});
-				offset += maxHeight;
-			});
-			return offset;
-		},
-		
-		next: function(selector, margin) {
-			var next = pmease.commons.scroll.getNext(selector, margin);
-			if (next != null) {
-				var topOffset = margin + pmease.commons.scroll.getTopOffset(selector);
-				$('html, body').animate({scrollTop: $(next).offset().top - topOffset}, 500);			
-			}
-		},
-
-		prev: function(selector, margin) {
-			var prev = pmease.commons.scroll.getPrev(selector, margin);
-			if (prev != null) {
-				var topOffset = margin + pmease.commons.scroll.getTopOffset(selector);
-				$('html, body').animate({scrollTop: $(prev).offset().top - topOffset}, 500);				
-			}
-		}, 
-		
-		getNext: function(selector, margin) {
-			var next = null;
-			$(selector).each(function() {
-		        var bottom = $(window).scrollTop() + $(window).height() - margin;
-
-		        var thisTop = $(this).offset().top;
-		        if (bottom < thisTop && $(document).height() - thisTop > margin) {
-		        	next = this;
-		        	return false;
-		        }
-			});
-			return next;
-		},
-		
-		getPrev: function(selector, margin) {
-			var topOffset = margin + pmease.commons.scroll.getTopOffset(selector);
-			var prev = null;
-			$($(selector).get().reverse()).each(function() {
-		        var top = $(window).scrollTop() + topOffset;
-
-		        var thisTop = $(this).offset().top;
-		        if (top > thisTop && thisTop > topOffset) {
-		        	prev = this;
-		        	return false;
-		        }
-			});
-			return prev;
-		}
-		
-	},
-	
 	focus: {
 		$components: null,
 		
@@ -587,7 +490,6 @@ $(function() {
 	pmease.commons.setupAjaxLoadingIndicator();
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
-	pmease.commons.scroll.setupScrollStop();
 	pmease.commons.websocket.setupCallback();
 	pmease.commons.setupSelectionPopup();
 });

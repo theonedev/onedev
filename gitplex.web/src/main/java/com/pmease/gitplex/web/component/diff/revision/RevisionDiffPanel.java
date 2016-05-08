@@ -233,7 +233,15 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer body = new WebMarkupContainer("body");
+		WebMarkupContainer body = new WebMarkupContainer("body") {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript("gitplex.revisionDiff.init();"));
+			}
+			
+		};
 		body.setOutputMarkupId(true);
 		add(body);
 		
@@ -536,9 +544,8 @@ public abstract class RevisionDiffPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
 
-		String script = String.format("gitplex.revisionDiff.init(%s);", 
-				RequestCycle.get().find(AjaxRequestTarget.class) == null);
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		if (RequestCycle.get().find(AjaxRequestTarget.class) == null)
+			response.render(OnDomReadyHeaderItem.forScript("gitplex.revisionDiff.scroll();"));
 	}
 	
 	protected abstract void onPathFilterChange(AjaxRequestTarget target, String pathFilter);
