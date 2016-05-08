@@ -25,7 +25,7 @@ import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.UrlManager;
-import com.pmease.gitplex.web.component.repofile.filelist.FileListPanel;
+import com.pmease.gitplex.web.component.depotfile.filelist.FileListPanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;

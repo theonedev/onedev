@@ -122,6 +122,7 @@ public class RevisionComparePage extends DepotPage {
 		compareWithMergeBase = params.get(PARAM_COMPARE_WITH_MERGE_BASE).toBoolean(false);
 		
 		pathFilter = params.get(PARAM_PATH_FILTER).toString();
+		whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 

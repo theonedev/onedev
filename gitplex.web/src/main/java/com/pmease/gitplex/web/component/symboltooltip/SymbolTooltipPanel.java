@@ -43,7 +43,7 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
-import com.pmease.gitplex.web.component.repofile.blobsearch.result.SearchResultPanel;
+import com.pmease.gitplex.web.component.depotfile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.page.depot.file.Mark;

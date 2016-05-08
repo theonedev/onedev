@@ -29,13 +29,13 @@ gitplex.symboltooltip = {
 		};
 		
 		container.onMouseOverSymbol = function(revision, symbolEl) {
-			if (gitplex.mouseState.pressed || !gitplex.mouseState.moved)
+			var $symbol = $(symbolEl);
+			if (gitplex.mouseState.pressed || !gitplex.mouseState.moved || $symbol.text() == "@")
 				return;
 			
 			cancelShow();
 			cancelHide();
 
-			var $symbol = $(symbolEl);
 			var onSymbolMouseOutOrUpOrDown = function(e) {
 				prepareToHide();
 				cancelShow();

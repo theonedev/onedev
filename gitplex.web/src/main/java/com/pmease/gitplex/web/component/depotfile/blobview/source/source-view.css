@@ -1,0 +1,58 @@
+.source-view {
+	position: relative;
+}
+.source-view>.outline {
+	background: white; 
+	position: absolute;
+	padding-left: 4px;
+	top: 0;
+	right: 0;
+}
+.source-view>.outline>.ui-resizable-handle {
+	position: absolute;
+	border-left: 1px solid #CCC;
+    background: #EEE url("vgrabber.png") no-repeat scroll left center;
+    cursor: w-resize;
+    width: 4px;
+    left: 0;
+    top: 0;
+}
+.source-view>.outline>.content>.head {
+	font-size: 16px;
+	padding: 4px 8px;
+	border-bottom: 1px dotted #BBB;
+}
+.source-view>.outline>.content>.body {
+	font-size: 13px;
+	padding: 4px;
+	overflow: auto; 
+}
+.source-view>.outline>.content>.head a {
+	color: #666;
+}
+.source-view>.outline .tree-node {
+	line-height: 1.8;
+}
+
+.CodeMirror-annotations {
+	width: 240px;
+}
+
+.CodeMirror-annotation {
+	font-family: monospace;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	padding: 0 4px;
+}
+.CodeMirror-annotation .hash, .CodeMirror-annotation .date {
+	margin-right: 8px;
+}
+.CodeMirror-annotation .same-as-above {
+	margin-left: 100px;
+	color: #666;
+	font-size: 16px;
+}
+.CodeMirror-activeline .CodeMirror-annotation {
+	background: #E8F2FE;	
+}
