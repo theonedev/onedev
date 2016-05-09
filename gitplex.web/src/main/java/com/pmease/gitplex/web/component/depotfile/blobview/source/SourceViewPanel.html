@@ -1,6 +1,16 @@
 <wicket:extend>
 	<div class="source-view autofit">
-		<div wicket:id="code" class="code"></div>
+		<div wicket:id="comment" class="comment">
+			<div class="ui-resizable-handle ui-resizable-e"></div>
+			<div class="content">
+				<div class="head clearfix">
+					<span class="pull-left">Comment</span>
+					<a wicket:id="close" class="pull-right" title="Hide comment"><i class="fa fa-times"></i></a>
+				</div>
+				<div class="body"></div>
+			</div>
+		</div>
+		<div class="code"></div>
 		<div wicket:id="outline" class="outline">
 			<div class="ui-resizable-handle ui-resizable-w"></div>
 			<div class="content">

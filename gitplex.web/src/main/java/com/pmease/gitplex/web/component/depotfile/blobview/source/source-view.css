@@ -1,6 +1,22 @@
 .source-view {
 	position: relative;
 }
+.source-view>.comment {
+	background: white; 
+	position: absolute;
+	padding-right: 4px;
+	top: 0;
+	left: 0;
+}
+.source-view>.comment>.ui-resizable-handle {
+	position: absolute;
+	border-right: 1px solid #CCC;
+    background: #EEE url("vgrabber.png") no-repeat scroll right center;
+    cursor: e-resize;
+    width: 4px;
+    right: 0;
+    top: 0;
+}
 .source-view>.outline {
 	background: white; 
 	position: absolute;
@@ -17,21 +33,21 @@
     left: 0;
     top: 0;
 }
-.source-view>.outline>.content>.head {
+.source-view>.outline .tree-node {
+	line-height: 1.8;
+}
+.source-view>.comment>.content>.head, .source-view>.outline>.content>.head {
 	font-size: 16px;
 	padding: 4px 8px;
 	border-bottom: 1px dotted #BBB;
 }
-.source-view>.outline>.content>.body {
+.source-view>.comment>.content>.body, .source-view>.outline>.content>.body {
 	font-size: 13px;
 	padding: 4px;
 	overflow: auto; 
 }
-.source-view>.outline>.content>.head a {
+.source-view>.comment>.content>.head a, .source-view>.outline>.content>.head a {
 	color: #666;
-}
-.source-view>.outline .tree-node {
-	line-height: 1.8;
 }
 
 .CodeMirror-annotations {

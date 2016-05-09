@@ -1,9 +1,9 @@
 gitplex.sourceview = {
-	init: function(codeId, fileContent, filePath, mark, symbolTooltipId, revision, blameCommits, viewState) {
+	init: function(containerId, fileContent, filePath, mark, symbolTooltipId, revision, blameCommits, viewState) {
 		var cm;
 		
-		var $code = $("#" + codeId);
-		var $sourceView = $code.closest(".source-view");
+		var $sourceView = $("#" + containerId + " .source-view");
+		var $code = $sourceView.children(".code");
 		$sourceView.closest(".content").css("overflow", "hidden");
 		
 		$sourceView.on("autofit", function(event, width, height) {
@@ -12,12 +12,25 @@ gitplex.sourceview = {
 			$sourceView.outerHeight(height);
 			$code.outerHeight($sourceView.height());
 			
+			var $comment = $sourceView.children(".comment");
+			var paddingLeft;
+			if ($comment.is(":visible")) {
+				paddingLeft = $comment.outerWidth();
+				$comment.children(".ui-resizable-handle").outerHeight($sourceView.height());				
+
+				var $commentHead = $comment.find(">.content>.head");
+				var $commentBody = $comment.find(">.content>.body");
+				$commentBody.outerHeight($sourceView.height() - $commentHead.outerHeight());
+			} else {
+				paddingLeft = 0;
+			}
+			$sourceView.css("padding-left", paddingLeft);
+			
 			var $outline = $sourceView.children(".outline");
 			if ($outline.is(":visible")) {
-				var $outlineResizeHandle = $outline.children(".ui-resizable-handle");
 				$sourceView.css("padding-right", $outline.outerWidth());
-				$outline.css("left", $code.outerWidth());
-				$outlineResizeHandle.outerHeight($sourceView.height());				
+				$outline.css("left", $code.outerWidth() + paddingLeft);
+				$outline.children(".ui-resizable-handle").outerHeight($sourceView.height());				
 
 				var $outlineHead = $outline.find(">.content>.head");
 				var $outlineBody = $outline.find(">.content>.body");
@@ -128,17 +141,41 @@ gitplex.sourceview = {
 			if (initState)
 				pmease.commons.codemirror.initState(cm, viewState);
 		});
-	}, 
-	initOutline: function(codeId) {
-		var $code = $("#" + codeId);
-		var $sourceView = $code.closest(".source-view");
+	},
+	initComment: function(containerId) {
+		var $sourceView = $("#" + containerId + " .source-view");
+		var $code = $sourceView.children(".code");
+		var commentWidthCookieKey = "sourceView.comment.width";
+		var $comment = $sourceView.children(".comment");
+		var commentWidth = Cookies.get(commentWidthCookieKey);
+		if (!commentWidth)
+			commentWidth = 400;
+		$comment.outerWidth(commentWidth);
+		var $commentResizeHandle = $comment.children(".ui-resizable-handle");
+		$comment.resizable({
+			autoHide: false,
+			handles: {"e": $commentResizeHandle},
+			minWidth: 200,
+			resize: function(e, ui) {
+				var codeWidth = $code.outerWidth();
+			    if(codeWidth < 300)
+			    	$(this).resizable({maxWidth: ui.size.width});
+			},
+			stop: function(e, ui) {
+				$(this).resizable({maxWidth: undefined});
+				Cookies.set(commentWidthCookieKey, ui.size.width, {expires: Infinity});
+			}
+		});
+	},
+	initOutline: function(containerId) {
+		var $sourceView = $("#" + containerId + " .source-view");
+		var $code = $sourceView.children(".code");
 		var outlineWidthCookieKey = "sourceView.outline.width";
 		var $outline = $sourceView.children(".outline");
 		var outlineWidth = Cookies.get(outlineWidthCookieKey);
 		if (!outlineWidth)
 			outlineWidth = 350;
-		if (outlineWidth) 
-			$outline.outerWidth(outlineWidth);
+		$outline.outerWidth(outlineWidth);
 		var $outlineResizeHandle = $outline.children(".ui-resizable-handle");
 		$outline.resizable({
 			autoHide: false,
@@ -146,7 +183,7 @@ gitplex.sourceview = {
 			minWidth: 100,
 			resize: function(e, ui) {
 				var codeWidth = $code.outerWidth();
-			    if(codeWidth < 400)
+			    if(codeWidth < 300)
 			    	$(this).resizable({maxWidth: ui.size.width});
 			},
 			stop: function(e, ui) {
@@ -155,8 +192,8 @@ gitplex.sourceview = {
 			}
 		});
 	},
-	mark: function(codeId, mark, scroll) {
-		var cm = $("#"+ codeId + ">.CodeMirror")[0].CodeMirror;		
+	mark: function(containerId, mark, scroll) {
+		var cm = $("#"+ containerId + " .CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.mark(cm, mark, scroll);
 	},
 	

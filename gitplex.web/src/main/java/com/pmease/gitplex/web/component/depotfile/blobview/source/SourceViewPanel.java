@@ -78,11 +78,11 @@ public class SourceViewPanel extends BlobViewPanel {
 	private final List<Symbol> symbols = new ArrayList<>();
 	
 	private final String viewState;
-	
-	private Component codeContainer;
+
+	private WebMarkupContainer commentContainer;
 	
 	private WebMarkupContainer outlineContainer;
-
+	
 	private SymbolTooltipPanel symbolTooltip;
 	
 	public SourceViewPanel(String id, BlobViewContext context, @Nullable String viewState) {
@@ -137,6 +137,17 @@ public class SourceViewPanel extends BlobViewPanel {
 		return menuItems;
 	}
 	
+	private void hideComment(AjaxRequestTarget target) {
+		commentContainer.setVisible(false);
+		target.add(commentContainer);
+		
+		String script = String.format(""
+				+ "var $sourceView = $('#%s .source-view');"
+				+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);", 
+				getMarkupId());
+		target.appendJavaScript(script);
+	}
+	
 	private void toggleOutline(AjaxRequestTarget target) {
 		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 		Cookie cookie;
@@ -152,15 +163,15 @@ public class SourceViewPanel extends BlobViewPanel {
 		target.add(outlineContainer);
 		
 		String script = String.format(""
-				+ "var $sourceView = $('#%s').closest('.source-view');"
+				+ "var $sourceView = $('#%s .source-view');"
 				+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);", 
-				codeContainer.getMarkupId());
+				getMarkupId());
 		target.appendJavaScript(script);
 	}
 
 	public void mark(AjaxRequestTarget target, Mark mark) {
 		String script = String.format("gitplex.sourceview.mark('%s', %s, true);", 
-				codeContainer.getMarkupId(), mark.toJSON());
+				getMarkupId(), mark.toJSON());
 		target.appendJavaScript(script);
 	}
 	
@@ -168,8 +179,27 @@ public class SourceViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(codeContainer = new WebMarkupContainer("code"));
-		codeContainer.setOutputMarkupId(true);
+		commentContainer = new WebMarkupContainer("comment") {
+			
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				String script = String.format("gitplex.sourceview.initComment('%s');", 
+						SourceViewPanel.this.getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		};
+		commentContainer.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				hideComment(target);
+			}
+			
+		});
+		commentContainer.setOutputMarkupPlaceholderTag(true);
+		add(commentContainer);
 		
 		outlineContainer = new WebMarkupContainer("outline") {
 
@@ -177,7 +207,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				String script = String.format("gitplex.sourceview.initOutline('%s');", 
-						codeContainer.getMarkupId());
+						SourceViewPanel.this.getMarkupId());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
@@ -357,7 +387,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		}
 		
 		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %s);", 
-				codeContainer.getMarkupId(), 
+				getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path), 
 				context.getMark()!=null?context.getMark().toJSON():"undefined",
