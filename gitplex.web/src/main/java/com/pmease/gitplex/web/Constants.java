@@ -18,6 +18,7 @@ public class Constants {
 	public static final int MAX_DIFF_FILES = 200;
 	public static final int MAX_SINGLE_FILE_DIFF_LINES = 5000;
 	public static final int MAX_DIFF_LINES = 10000;
+	public static final int DIFF_CONTEXT_SIZE = 3;
 	
 	/* commit constants */
 	public static final int MAX_DISPLAY_COMMITS = 500;

@@ -6,15 +6,17 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.lang.extractors.TokenPosition;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.search.hit.QueryHit;
-import com.pmease.gitplex.web.page.depot.file.Mark;
 
 public interface BlobViewContext extends Serializable {
 
@@ -29,6 +31,8 @@ public interface BlobViewContext extends Serializable {
 	
 	@Nullable
 	Mark getMark();
+	
+	void onMark(AjaxRequestTarget target, @Nullable Mark mark);
 	
 	Mode getMode();
 	
@@ -45,7 +49,14 @@ public interface BlobViewContext extends Serializable {
 	void onDelete(AjaxRequestTarget target);
 	
 	void onEdit(AjaxRequestTarget target, @Nullable String viewState);
+	
+	void onShowComment(AjaxRequestTarget target, @Nullable CodeComment comment);
 
+	@Nullable
+	CodeComment getComment();
+	
+	RevCommit getCommit();
+	
 	List<MenuItem> getMenuItems(MenuLink menuLink);
 	
 }

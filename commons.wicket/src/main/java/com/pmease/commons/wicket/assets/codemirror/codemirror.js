@@ -1,4 +1,13 @@
 pmease.commons.codemirror = {
+	clearMark: function(cm) {
+		var marks = cm.getAllMarks();
+		for (var i=0; i<marks.length; i++)  {
+			marks[i].clear();
+		}
+	},
+	clearSelection: function(cm) {
+    	cm.setCursor(cm.getCursor("from"));
+	},
 	mark: function(cm, mark, scroll) {
 		if (scroll) {
 			var top = cm.charCoords({line: mark.beginLine, ch: 0}, "local").top;
@@ -12,18 +21,12 @@ pmease.commons.codemirror = {
 				cm.scrollTo(null, (top+bottom-clientHeight)/2); 			
 			}
 		}
-		
-		var allMarks = cm.getAllMarks();
-		for (var i=0; i<allMarks.length; i++) 
-			allMarks[i].clear();
+
+		pmease.commons.codemirror.clearMark(cm);
 		cm.markText(
 				{line: mark.beginLine, ch: mark.beginChar}, 
 				{line: mark.endLine, ch: mark.endChar},
 				{className: "CodeMirror-mark"});
-		cm.setCursor({line:mark.beginLine, ch:mark.beginChar});
-		setTimeout(function() {
-			cm.focus();
-		}, 10);
 	},
 	setMode: function(cm, filePath) {
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);

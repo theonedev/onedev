@@ -19,10 +19,8 @@ import org.eclipse.jgit.lib.Constants;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -34,8 +32,6 @@ public class AttachmentResource extends AbstractResource {
 	private static final String PARAM_ACCOUNT = "account";
 	
 	private static final String PARAM_DEPOT = "depot";
-	
-	private static final String PARAM_REQUEST = "request";
 	
 	private static final String PARAM_ATTACHMENT = "attachment";
 	
@@ -54,16 +50,10 @@ public class AttachmentResource extends AbstractResource {
 		if (repoName.endsWith(Constants.DOT_GIT_EXT))
 			repoName = repoName.substring(0, repoName.length() - Constants.DOT_GIT_EXT.length());
 		
-		final Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
+		Depot depot = GitPlex.getInstance(DepotManager.class).findBy(userName, repoName);
 		
 		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
-		
-		Long requestId = params.get(PARAM_REQUEST).toOptionalLong();
-		if (requestId == null)
-			throw new IllegalArgumentException("request parameter has to be specified");
-		
-		PullRequest request = GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
 		
 		String attachment = params.get(PARAM_ATTACHMENT).toString();
 		if (StringUtils.isBlank(attachment))
@@ -72,7 +62,7 @@ public class AttachmentResource extends AbstractResource {
 		if (!SecurityUtils.canRead(depot)) 
 			throw new UnauthorizedException();
 
-		final File attachmentFile = new File(getAttachmentsDir(request), attachment);
+		File attachmentFile = new File(getAttachmentsDir(depot), attachment);
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(attachmentFile.length());
@@ -101,17 +91,16 @@ public class AttachmentResource extends AbstractResource {
 		return response;
 	}
 
-	private static File getAttachmentsDir(PullRequest request) {
-		return GitPlex.getInstance(StorageManager.class).getAttachmentsDir(request);		
+	private static File getAttachmentsDir(Depot depot) {
+		return GitPlex.getInstance(StorageManager.class).getAttachmentsDir(depot);		
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, String attachment) {
+	public static PageParameters paramsOf(Depot depot, String attachment) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_ACCOUNT, request.getTargetDepot().getAccount().getName());
-		params.set(PARAM_DEPOT, request.getTargetDepot().getName());
-		params.set(PARAM_REQUEST, request.getId());
+		params.add(PARAM_ACCOUNT, depot.getAccount().getName());
+		params.set(PARAM_DEPOT, depot.getName());
 		params.set(PARAM_ATTACHMENT, attachment);
-		final File attachmentFile = new File(getAttachmentsDir(request), attachment);
+		final File attachmentFile = new File(getAttachmentsDir(depot), attachment);
 		params.set("v", attachmentFile.lastModified());
 		
 		return params;

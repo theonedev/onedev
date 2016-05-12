@@ -52,6 +52,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.loader.InheritableThreadLocalData;
+import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.PageTab;
@@ -70,13 +71,13 @@ import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.attachments.RequestAttachmentsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
@@ -271,7 +272,6 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			}
 			
 		});
-		tabs.add(new RequestTab("Attachments", RequestAttachmentsPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
@@ -668,7 +668,14 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		Preconditions.checkNotNull(source);
 		
 		if (operation != INTEGRATE) {
-			form.add(noteInput = new CommentInput("note", requestModel, Model.of("")));
+			form.add(noteInput = new CommentInput("note", Model.of("")) {
+
+				@Override
+				protected AttachmentSupport getAttachmentSupport() {
+					return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+				}
+				
+			});
 			noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
 		} else {
 			IntegrationPreview preview = request.getIntegrationPreview();
@@ -680,7 +687,14 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			if (strategy == REBASE_SOURCE_ONTO_TARGET 
 					|| strategy == REBASE_TARGET_ONTO_SOURCE
 					|| preview.getIntegrated().equals(preview.getRequestHead())) {
-				form.add(noteInput = new CommentInput("note", requestModel, Model.of("")));
+				form.add(noteInput = new CommentInput("note", Model.of("")) {
+
+					@Override
+					protected AttachmentSupport getAttachmentSupport() {
+						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+					}
+					
+				});
 				noteInput.add(AttributeModifier.replace("placeholder", "Leave a comment"));
 			} else {
 				form.add(noteInput = new TextArea<String>("note", Model.of("")));

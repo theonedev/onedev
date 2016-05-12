@@ -5,9 +5,10 @@
 			<div class="content">
 				<div class="head clearfix">
 					<span class="pull-left">Comment</span>
-					<a wicket:id="close" class="pull-right" title="Hide comment"><i class="fa fa-times"></i></a>
+					<a wicket:id="close" class="pull-right close" title="Hide comment"><i class="fa fa-times"></i></a>
+					<a wicket:id="locate" class="pull-right locate close" title="Locate marked text of this comment"><i class="fa fa-hand-o-right"></i></a>
 				</div>
-				<div class="body"></div>
+				<div wicket:id="body" class="body"></div>
 			</div>
 		</div>
 		<div class="code"></div>
@@ -16,7 +17,7 @@
 			<div class="content">
 				<div class="head clearfix">
 					<span class="pull-left">Outline</span>
-					<a wicket:id="close" class="pull-right" title="Hide outline"><i class="fa fa-times"></i></a>
+					<a wicket:id="close" class="pull-right close" title="Hide outline"><i class="fa fa-times"></i></a>
 				</div>
 				<div wicket:id="body" class="body"></div>
 			</div>
@@ -25,5 +26,15 @@
 	<div wicket:id="symbolTooltip"></div>
 	<wicket:fragment wicket:id="outlineNodeFrag">
 		<img wicket:id="icon"></img> <a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="newCommentFrag">
+		<form wicket:id="form" class="new-comment leave-confirm">
+			<div wicket:id="feedback" class="feedback"></div>
+			<textarea wicket:id="input" rows="10" class="form-control focusable"></textarea>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
+			</div>
+		</form>
 	</wicket:fragment>
 </wicket:extend>

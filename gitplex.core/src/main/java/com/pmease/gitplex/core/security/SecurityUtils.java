@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.CodeComment;
+import com.pmease.gitplex.core.entity.CodeCommentReply;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Review;
@@ -58,15 +59,19 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (currentUser == null) {
 			return false;
 		} else {
-			if (currentUser.equals(comment.getUser())) {
-				return true;
-			} else {
-				ObjectPermission adminPermission = ObjectPermission.ofDepotAdmin(comment.getDepot());
-				return SecurityUtils.getSubject().isPermitted(adminPermission);
-			}
+			return currentUser.equals(comment.getUser()) || canManage(comment.getDepot());
 		}
 	}
 
+	public static boolean canModify(CodeCommentReply reply) {
+		Account currentUser = getAccount();
+		if (currentUser == null) {
+			return false;
+		} else {
+			return currentUser.equals(reply.getUser()) || canManage(reply.getComment().getDepot());
+		}
+	}
+	
 	public static boolean canPushRef(Depot depot, String refName, ObjectId oldCommit, ObjectId newCommit) {
 		Account currentUser = getAccount();
 		return currentUser != null 

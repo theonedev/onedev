@@ -70,6 +70,12 @@ import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
+/**
+ * Make sure to add only one revision diff panel on a page
+ * 
+ * @author robin
+ *
+ */
 @SuppressWarnings("serial")
 public abstract class RevisionDiffPanel extends Panel {
 

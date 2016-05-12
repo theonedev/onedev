@@ -14,9 +14,9 @@ public interface StorageManager {
     
     File getCacheDir(Depot depot);
     
-    File getCacheDir(PullRequest request);
+    File getAttachmentsDir(Depot depot);
     
-    File getAttachmentsDir(PullRequest request);
+    File getCacheDir(PullRequest request);
     
     File getCacheDir(PullRequestUpdate update);
 

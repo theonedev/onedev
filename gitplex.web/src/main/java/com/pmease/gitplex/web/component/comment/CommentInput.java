@@ -28,19 +28,15 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
-public class CommentInput extends TextArea<String> {
+public abstract class CommentInput extends TextArea<String> {
 
-	private final IModel<PullRequest> requestModel;
-	
-	public CommentInput(String id, IModel<PullRequest> requestModel, IModel<String> contentModel) {
+	public CommentInput(String id, IModel<String> contentModel) {
 		super(id, contentModel);
-		
-		this.requestModel = requestModel;
 	}
 
 	@Override
@@ -109,7 +105,7 @@ public class CommentInput extends TextArea<String> {
 
 			@Override
 			public AttachmentSupport getAttachmentSupport() {
-				return new CommentAttachmentSupport(requestModel.getObject().getId());
+				return CommentInput.this.getAttachmentSupport();
 			}
 
 			@Override
@@ -150,11 +146,6 @@ public class CommentInput extends TextArea<String> {
 		return GitPlex.getInstance(Dao.class).query(criteria, 0, count);
 	}
 	
-	@Override
-	protected void onDetach() {
-		requestModel.detach();
-		
-		super.onDetach();
-	}	
+	protected abstract AttachmentSupport getAttachmentSupport();
 	
 }

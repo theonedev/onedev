@@ -34,13 +34,13 @@ import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.component.EmphasizeAwareLabel;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.search.hit.FileHit;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
-import com.pmease.gitplex.web.page.depot.file.Mark;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {

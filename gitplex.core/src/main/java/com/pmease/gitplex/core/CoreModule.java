@@ -31,6 +31,7 @@ import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
 import com.pmease.gitplex.core.manager.PullRequestCommentManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
@@ -57,6 +58,7 @@ import com.pmease.gitplex.core.manager.impl.DefaultTeamAuthorizationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAuxiliaryManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentManager;
+import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentReplyManager;
 import com.pmease.gitplex.core.manager.impl.DefaultPullRequestCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
@@ -180,6 +182,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(UserAuthorizationManager.class).to(DefaultUserAuthorizationManager.class);
 		bind(PullRequestActivityManager.class).to(DefaultPullRequestActivityManager.class);
 		bind(PullRequestVisitManager.class).to(DefaultPullRequestVisitManager.class);
+		bind(CodeCommentReplyManager.class).to(DefaultCodeCommentReplyManager.class);
 
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 

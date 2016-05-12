@@ -57,9 +57,12 @@ import com.pmease.commons.wicket.component.modal.ModalLink;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.core.listener.RefListener;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.IndexListener;
 import com.pmease.gitplex.search.IndexManager;
@@ -142,6 +145,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private Mode mode;
 	
+	private Long commentId;
+	
 	private Component revisionIndexing;
 	
 	private WebMarkupContainer searchResultContainer;
@@ -200,6 +205,10 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		String markStr = params.get(PARAM_MARK).toString();
 		if (markStr != null)
 			mark = new Mark(markStr);
+		
+		String commentIdStr = params.get(PARAM_COMMENT).toString();
+		if (commentIdStr != null)
+			commentId = Long.valueOf(commentIdStr);
 		
 		queryHits = WebSession.get().getMetaData(SEARCH_RESULT_KEY);
 		if (queryHits != null) { 
@@ -368,6 +377,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	@Override
 	public PullRequest getPullRequest() {
 		return requestModel.getObject();
+	}
+	
+	@Override
+	public CodeComment getComment() {
+		if (commentId != null)
+			return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+		else
+			return null;
 	}
 	
 	private void newFileNavigator(@Nullable AjaxRequestTarget target) {
@@ -591,6 +608,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		state.mark = mark;
 		state.mode = mode;
 		state.requestId = requestId;
+		state.commentId = commentId;
 		return state;
 	}
 	
@@ -598,6 +616,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		blobIdent = new BlobIdent(state.blobIdent);
 		mark = state.mark;
 		mode = state.mode;
+		commentId = state.commentId;
 		requestId = state.requestId;
 	}
 	
@@ -805,6 +824,12 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
+	public void onMark(AjaxRequestTarget target, Mark mark) {
+		this.mark = mark;
+		pushState(target);
+	}
+
+	@Override
 	public Mode getMode() {
 		return mode;
 	}
@@ -819,7 +844,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				Component fileViewer = get(FILE_VIEWER_ID);
 				if (fileViewer instanceof SourceViewPanel) {
 					SourceViewPanel sourceViewer = (SourceViewPanel) fileViewer;
-					sourceViewer.mark(target, mark);
+					sourceViewer.mark(target, mark, true);
 				} else if (fileViewer instanceof FileEditPanel) {
 					FileEditPanel fileEditor = (FileEditPanel) fileViewer;
 					fileEditor.mark(target, mark);
@@ -831,6 +856,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		} else {
 			this.blobIdent = blobIdent; 
 			mode = null;
+			commentId = null;
 			
 			newFileNavigator(target);
 			newContributionPanel(target);
@@ -849,10 +875,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public void onBlameChange(AjaxRequestTarget target, @Nullable String viewState) {
-		if (mode == null)
-			mode = Mode.BLAME;
-		else
-			mode = null;
+		mode = (mode==null?Mode.BLAME:null);
 		newFileViewer(target, viewState);
 		pushState(target);
 		resizeWindow(target);
@@ -879,10 +902,26 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
+	public void onShowComment(AjaxRequestTarget target, CodeComment comment) {
+		if (comment != null) {
+			commentId = comment.getId();
+			mark = comment.getMark();
+		} else {
+			commentId = null;
+		}
+		pushState(target);
+	}
+
+	@Override
 	public boolean isOnBranch() {
 		return getDepot().getRefs(Constants.R_HEADS).containsKey(blobIdent.revision);
 	}
 
+	@Override
+	public RevCommit getCommit() {
+		return getDepot().getRevCommit(getBlobIdent().revision);
+	}
+	
 	@Override
 	public boolean isAtSourceBranchHead() {
 		PullRequest request = getPullRequest();

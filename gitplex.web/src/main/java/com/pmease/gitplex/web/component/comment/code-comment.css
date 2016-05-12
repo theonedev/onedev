@@ -1,0 +1,47 @@
+.code-comment>.post {
+	border-bottom: 1px solid #EEE;
+	position: relative;
+	padding-bottom: 8px;
+	margin-bottom: 8px;
+}
+.code-comment>.post>.author-avatar {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.code-comment>.post>.author-avatar img {
+	width: 32px;
+	height: 32px;
+}
+.code-comment>.post>.detail {
+	padding-left: 40px;
+}
+.code-comment>.post>.detail>.head .author-name {
+	font-size: 14px;
+	color: #999;
+}
+.code-comment>.post>.detail>.head .author-name:hover {
+	color: #333;
+}
+.code-comment>.post>.detail>.head .author-date {
+	font-size: 12px;
+	color: #999;
+}
+.code-comment>.post>.detail>.foot a {
+	font-size: 12px;
+	color: #999;
+}
+.code-comment>.post>.detail>.foot a:hover {
+	font-size: 12px;
+	color: #333;
+}
+.code-comment>.post>.detail>.foot .middot:before {
+	vertical-align: 25%;
+	color: #999;
+}
+.code-comment>.add-reply a {
+	color: #999;
+}
+.code-comment>.add-reply a:hover {
+	color: inherit;
+}

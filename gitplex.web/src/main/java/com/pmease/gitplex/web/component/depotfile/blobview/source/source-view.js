@@ -1,10 +1,30 @@
 gitplex.sourceview = {
-	init: function(containerId, fileContent, filePath, mark, symbolTooltipId, revision, blameCommits, viewState) {
+	init: function(fileContent, filePath, mark, symbolTooltipId, 
+			commitHash, blameInfos, commentInfos, commentCallback, viewState, loggedIn) {
 		var cm;
 		
-		var $sourceView = $("#" + containerId + " .source-view");
+		var $sourceView = $(".source-view");
+		$sourceView.data("commentCallback", commentCallback);
+		
 		var $code = $sourceView.children(".code");
 		$sourceView.closest(".content").css("overflow", "hidden");
+		
+		function alignCommentPopovers() {
+			$(".comment-popover:visible").each(function() {
+				var $popover = $(this);
+				var lineInfo = cm.lineInfo($popover.data("line"));
+				if (lineInfo.gutterMarkers) {
+					var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
+					if (gutter) {
+						var $commentLink = $(gutter).children("a");
+						$popover.css({
+							"left": $commentLink.offset().left + $commentLink.outerWidth() - $sourceView.offset().left,
+							"top": $commentLink.offset().top + ($commentLink.outerHeight() - $popover.outerHeight())/2 - $sourceView.offset().top
+						});
+					}
+				}
+			});
+		}
 		
 		$sourceView.on("autofit", function(event, width, height) {
 			event.stopPropagation();
@@ -71,19 +91,24 @@ gitplex.sourceview = {
 				};
 
 				cm = CodeMirror($code[0], options);
-				
 				pmease.commons.codemirror.setMode(cm, filePath);
 
-			    if (mark)
-			    	pmease.commons.codemirror.mark(cm, mark, true);
-
-			    if (blameCommits) {
-			    	// render blame blocks with a timer to avoid the issue that occasionally 
-			    	// blame gutter becomes much wider than expected
-			    	setTimeout(function() {
-				    	gitplex.sourceview.blame(cm, blameCommits);
-			    	}, 10);
-			    }
+		    	// add gutters with a timer to avoid the issue that occasionally 
+		    	// gutter becomes much wider than expected
+			    setTimeout(function() {
+			    	if (blameInfos) {
+				    	gitplex.sourceview.blame(blameInfos);
+			    	}
+					var gutters = cm.getOption("gutters").slice();
+					gutters.splice(0, 0, "CodeMirror-comments");
+					cm.setOption("gutters", gutters);
+					for (var line in commentInfos) {
+					    if (commentInfos.hasOwnProperty(line)) {
+					    	gitplex.sourceview.addCommentGutter(line, commentInfos[line][1]);
+					    }
+					}
+					gitplex.sourceview.highlightCommentTrigger();				
+			    }, 10);
 			    
 			    function onSelectText() {
 			    	var from = cm.getCursor("from");
@@ -91,7 +116,7 @@ gitplex.sourceview = {
 			    	if (from.line != to.line || from.ch != to.ch) {
 		    			var ch = (from.ch + to.ch)/2;
 		    			var position = cm.charCoords({line:from.line, ch:ch});
-						var permanentCallback = function($permanentLink) {
+						var permanentLinkCallback = function($permanentLink) {
 							$permanentLink.off("click");
 			    			var uri = new URI(window.location.href); 
 			    			uri.removeSearch("mark").addSearch("mark", 
@@ -101,6 +126,7 @@ gitplex.sourceview = {
 		    					e.preventDefault();
 			    				$("#selection-popup").hide();
 		    					pmease.commons.history.pushState(uri.toString());
+		    					pmease.commons.codemirror.clearSelection(cm);
 		    					pmease.commons.codemirror.mark(cm, {
 		    						beginLine: from.line,
 		    						beginChar: from.ch,
@@ -109,15 +135,34 @@ gitplex.sourceview = {
 		    					}, false);
 		    				});
 						};
-		    			var commentCallback = function($commentLink) {
-		    				
+		    			var commentLinkCallback = function($commentLink) {
+		    				$commentLink.off("click");
+		    				if (loggedIn) {
+			    				$commentLink.click(function() {
+			    					if ($sourceView.find("form.dirty").length != 0 
+			    							&& !confirm("There are unsaved changes, discard and continue?")) {
+			    						return;
+			    					}
+				    				$("#selection-popup").hide();
+			    					pmease.commons.codemirror.clearSelection(cm);
+			    					pmease.commons.codemirror.mark(cm, {
+			    						beginLine: from.line,
+			    						beginChar: from.ch,
+			    						endLine: to.line,
+			    						endChar: to.ch
+			    					}, false);
+				    				commentCallback("add", commitHash, from.line, from.ch, to.line, to.ch);
+			    				});
+		    				} else {
+		    					$commentLink.html("Log in to comment on selection");
+		    				}
 		    			};
-			    		$("#selection-popup").data("show")(position, permanentCallback, commentCallback, $code[0]);
+			    		$("#selection-popup").data("show")(
+			    				position, permanentLinkCallback, commentLinkCallback, $code[0]);
 			    	} else {
 			    		$("#selection-popup").hide();
 			    	}
 			    }
-			    
 			    $code.on("mouseup", function() {
 			    	onSelectText();
 			    });
@@ -131,19 +176,27 @@ gitplex.sourceview = {
 					var node = e.target || e.srcElement, $node = $(node);
 					if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
 							|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def") || $node.hasClass("cm-meta")) {
-						document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, node);
+						document.getElementById(symbolTooltipId).onMouseOverSymbol(commitHash, node);
 					}
 			    });
-			} 
-			if (cm.getOption("fullScreen"))
-				cm.setOption("fullScreen", false);
-			cm.setSize($code.width(), $code.height());
-			if (initState)
-				pmease.commons.codemirror.initState(cm, viewState);
+				cm.setSize($code.width(), $code.height());
+			    if (mark)
+			    	pmease.commons.codemirror.mark(cm, mark, true);
+				if (initState)
+					pmease.commons.codemirror.initState(cm, viewState);
+				cm.on("scroll", function() {
+					alignCommentPopovers(cm);					
+				});
+			} else {
+				cm.setSize($code.width(), $code.height());
+				if (cm.getOption("fullScreen"))
+					cm.setOption("fullScreen", false);
+				alignCommentPopovers(cm);
+			}
 		});
 	},
-	initComment: function(containerId) {
-		var $sourceView = $("#" + containerId + " .source-view");
+	initComment: function() {
+		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
 		var commentWidthCookieKey = "sourceView.comment.width";
 		var $comment = $sourceView.children(".comment");
@@ -167,8 +220,8 @@ gitplex.sourceview = {
 			}
 		});
 	},
-	initOutline: function(containerId) {
-		var $sourceView = $("#" + containerId + " .source-view");
+	initOutline: function() {
+		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
 		var outlineWidthCookieKey = "sourceView.outline.width";
 		var $outline = $sourceView.children(".outline");
@@ -192,35 +245,204 @@ gitplex.sourceview = {
 			}
 		});
 	},
-	mark: function(containerId, mark, scroll) {
-		var cm = $("#"+ containerId + " .CodeMirror")[0].CodeMirror;		
+	addCommentGutter: function(line, commentInfos) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var commentCallback = $(".source-view").data("commentCallback");
+		function restoreMark() {
+			var uri = new URI(window.location.href); 
+			var markStr = uri.search(true).mark;
+			if (markStr) {
+				var splitted = markStr.split("-");
+				var fromInfo = splitted[0].split(".");
+				var toInfo = splitted[1].split(".");
+				var mark = {
+					beginLine: parseInt(fromInfo[0])-1,
+					beginChar: parseInt(fromInfo[1]),
+					endLine: parseInt(toInfo[0])-1,
+					endChar: parseInt(toInfo[1])
+				}
+				pmease.commons.codemirror.mark(cm, mark, false);
+			} else {
+				pmease.commons.codemirror.clearMark(cm);
+			}
+		}
+		
+		var $gutter = $(document.createElement("div"));
+		$gutter.addClass("CodeMirror-comment");
+		$gutter.data("commentInfos", commentInfos);
+		if (commentInfos.length != 1) {
+			$gutter.append("<a><i class='fa fa-comments'></i></a>");
+			var $commentLink = $gutter.children("a");
+			var content = "";
+			for (var i in commentInfos) {
+				var commentInfo = commentInfos[i];
+				var index = parseInt(i) + 1;
+				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + index + "</a>";
+			}
+			$commentLink.popover({
+				html: true, 
+				container: ".source-view",
+				placement: "right auto",
+				template: "<div data-line='" + line + "' class='popover comment-popover'><div class='arrow'></div><div class='popover-content'></div></div>",
+				content: content
+			});
+			$commentLink.on('shown.bs.popover', function () {
+				$(".comment-popover[data-line='" + line + "'] a").each(function() {
+					$(this).mouseover(function() {
+						var commentInfo = commentInfos[$(this).index()];			        						
+						pmease.commons.codemirror.mark(cm, commentInfo.mark, false);
+					});
+					$(this).mouseout(function() {
+						restoreMark();
+					});
+					$(this).click(function() {
+    					if ($(".source-view form.dirty").length != 0 
+    							&& !confirm("There are unsaved changes, discard and continue?")) {
+    						return;
+    					}
+						var commentInfo = commentInfos[$(this).index()];			        						
+						commentCallback("show", commentInfo.id);
+					});
+				});
+				gitplex.sourceview.highlightCommentTrigger();				
+			});
+		} else {
+			var commentInfo = commentInfos[0];
+			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><i class='fa fa-commenting'></i></a>");
+			var $commentLink = $gutter.children("a");
+			$commentLink.mouseover(function() {
+				pmease.commons.codemirror.mark(cm, commentInfo.mark, false);
+			});
+			$commentLink.mouseout(function() {
+				restoreMark();
+			});
+			$commentLink.click(function() {
+				if ($(".source-view form.dirty").length != 0 
+						&& !confirm("There are unsaved changes, discard and continue?")) {
+					return;
+				}
+				commentCallback("show", commentInfo.id);
+			});
+		}
+		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
+	},
+	onCommentAdded: function(line, commentInfo) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var commentCallback = $(".source-view").data("commentCallback");		
+		var lineInfo = cm.lineInfo(line);
+		var gutter;
+		if (lineInfo.gutterMarkers)
+			gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
+		var commentInfos;
+		if (gutter) {
+			commentInfos = $(gutter).data("commentInfos");
+		} else {
+			commentInfos = [];
+		} 
+		commentInfos.push(commentInfo);
+		gitplex.sourceview.addCommentGutter(line, commentInfos);
+		gitplex.sourceview.highlightCommentTrigger();				
+	},
+	onCommentDeleted: function(line, commentId) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var commentCallback = $(".source-view").data("commentCallback");		
+		var lineInfo = cm.lineInfo(line);
+		var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
+		var commentInfos = $gutter.data("commentInfos");
+		if (commentInfos.length == 1) {
+			cm.setGutterMarker(line, "CodeMirror-comments", null);
+		} else {
+			for (var i in commentInfos) {
+				var commentInfo = commentInfos[i];
+				if (commentInfo.id == commentId) {
+					commentInfos.splice(i, 1);
+					break;
+				}
+			}
+			gitplex.sourceview.addCommentGutter(line, commentInfos);
+			$(".comment-popover[data-line='" + line + "']").remove();
+		}
+		gitplex.sourceview.highlightCommentTrigger();				
+	},
+	onLayoutChange: function() {
+		$sourceView = $('.source-view');
+		$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);
+	},
+	onAddingComment: function() {
+		gitplex.sourceview.highlightCommentTrigger();
+		gitplex.sourceview.onLayoutChange();
+	},
+	onShowComment: function(commentInfo) {
+		gitplex.sourceview.highlightCommentTrigger();
+		gitplex.sourceview.onLayoutChange();
+		if (commentInfo)
+			gitplex.sourceview.mark(commentInfo.mark, false);
+	},
+	onToggleOutline: function() {
+		gitplex.sourceview.onLayoutChange();
+	},
+	highlightCommentTrigger: function() {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
+		$(".comment-popover a").removeClass("active");
+		for (var i=0; i<cm.lineCount(); i++) {
+			var gutterMarkers = cm.lineInfo(i).gutterMarkers;
+			if (gutterMarkers) {
+				var gutter = gutterMarkers["CodeMirror-comments"];
+				if (gutter) {
+					$(gutter).children("a").removeClass("active");
+				}
+			}
+		}
+		var $comment = $(".source-view>.comment>.content>.body");
+		if ($comment.length != 0) {
+			var line = parseInt($comment.data("line"));
+			var lineInfo = cm.lineInfo(line);
+			if (lineInfo && lineInfo.gutterMarkers) {
+				var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
+				if (gutter) {
+					var commentInfos = $(gutter).data("commentInfos");
+					if (commentInfos.length == 1) {
+						$(gutter).children("a").addClass("active");
+					} else {
+						var commentId = $comment.data("comment");
+						$(".comment-popover[data-line='" + line + "'] a").each(function() {
+							var commentInfo = commentInfos[$(this).index()];			        						
+							if (commentInfo.id == commentId) {
+								$(this).addClass("active");
+							}
+						});
+					}
+				}
+			}
+		}		
+	},
+	mark: function(mark, scroll) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.mark(cm, mark, scroll);
 	},
-	
-	blame: function(cm, blameCommits) {
-		if (typeof cm === "string") 
-			cm = $("#"+ cm + ">.CodeMirror")[0].CodeMirror;		
+	blame: function(blameInfos) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		
-		if (blameCommits) {
+		if (blameInfos) {
 			var gutters = cm.getOption("gutters").slice();
 			gutters.splice(0, 0, "CodeMirror-annotations");
 			cm.setOption("gutters", gutters);
-    		for (var i in blameCommits) {
-    			var commit = blameCommits[i];
-        		for (var j in commit.ranges) {
-        			var range = commit.ranges[j];
-        			var $ele = $(document.createElement("div"));
-        			$ele.addClass("CodeMirror-annotation");
-            		$("<a class='hash'>" + commit.hash + "</a>").appendTo($ele).attr("href", commit.url).attr("title", commit.message);
-            		$ele.append("<span class='date'>" + commit.commitDate + "</span>");
-            		$ele.append("<span class='author'>" + commit.authorName + "</span>");
-            		cm.setGutterMarker(range.from, "CodeMirror-annotations", $ele[0]);
+    		for (var i in blameInfos) {
+    			var blameInfo = blameInfos[i];
+        		for (var j in blameInfo.ranges) {
+        			var range = blameInfo.ranges[j];
+        			var $gutter = $(document.createElement("div"));
+        			$gutter.addClass("CodeMirror-annotation");
+            		$("<a class='hash'>" + blameInfo.hash + "</a>").appendTo($gutter).attr("href", blameInfo.url).attr("title", blameInfo.message);
+            		$gutter.append("<span class='date'>" + blameInfo.commitDate + "</span>");
+            		$gutter.append("<span class='author'>" + blameInfo.authorName + "</span>");
+            		cm.setGutterMarker(range.from, "CodeMirror-annotations", $gutter[0]);
             		
             		for (var line = range.from+1; line<range.to; line++) {
-            			var $ele = $(document.createElement("div"));
-            			$ele.addClass("CodeMirror-annotation");
-                		$ele.append("<span class='same-as-above'>...</span>");
-                		cm.setGutterMarker(line, "CodeMirror-annotations", $ele[0]);
+            			var $gutter = $(document.createElement("div"));
+            			$gutter.addClass("CodeMirror-annotation");
+            			$gutter.append("<span class='same-as-above'>...</span>");
+                		cm.setGutterMarker(line, "CodeMirror-annotations", $gutter[0]);
             		}
         		}
     		} 

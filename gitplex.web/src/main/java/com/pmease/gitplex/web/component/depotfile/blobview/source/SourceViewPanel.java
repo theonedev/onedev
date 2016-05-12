@@ -1,15 +1,23 @@
 package com.pmease.gitplex.web.component.depotfile.blobview.source;
 
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -18,12 +26,15 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
@@ -48,6 +59,7 @@ import com.pmease.commons.lang.extractors.Extractor;
 import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.Range;
+import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
@@ -55,19 +67,32 @@ import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
+import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
+import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
-import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
+import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
-import com.pmease.gitplex.web.page.depot.file.Mark;
 import com.pmease.gitplex.web.util.DateUtils;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIJavaScriptReference;
 
+/**
+ * Make sure to add only one source view panel per page
+ * 
+ * @author robin
+ *
+ */
 @SuppressWarnings("serial")
 public class SourceViewPanel extends BlobViewPanel {
 
@@ -75,15 +100,30 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private static final String COOKIE_OUTLINE = "sourceView.outline";
 	
+	private static final String BODY_ID = "body";
+	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
 	private final String viewState;
+	
+	private final IModel<Collection<CodeComment>> commentsModel = 
+			new LoadableDetachableModel<Collection<CodeComment>>() {
+
+		@Override
+		protected Collection<CodeComment> load() {
+			return GitPlex.getInstance(CodeCommentManager.class).query(
+					context.getDepot(), context.getCommit().name(), context.getBlobIdent().path);
+		}
+		
+	};
 
 	private WebMarkupContainer commentContainer;
 	
 	private WebMarkupContainer outlineContainer;
 	
 	private SymbolTooltipPanel symbolTooltip;
+	
+	private AbstractDefaultAjaxBehavior commentBehavior;
 	
 	public SourceViewPanel(String id, BlobViewContext context, @Nullable String viewState) {
 		super(id, context);
@@ -137,17 +177,6 @@ public class SourceViewPanel extends BlobViewPanel {
 		return menuItems;
 	}
 	
-	private void hideComment(AjaxRequestTarget target) {
-		commentContainer.setVisible(false);
-		target.add(commentContainer);
-		
-		String script = String.format(""
-				+ "var $sourceView = $('#%s .source-view');"
-				+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);", 
-				getMarkupId());
-		target.appendJavaScript(script);
-	}
-	
 	private void toggleOutline(AjaxRequestTarget target) {
 		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 		Cookie cookie;
@@ -161,17 +190,12 @@ public class SourceViewPanel extends BlobViewPanel {
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
 		target.add(outlineContainer);
-		
-		String script = String.format(""
-				+ "var $sourceView = $('#%s .source-view');"
-				+ "$sourceView.trigger('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);", 
-				getMarkupId());
-		target.appendJavaScript(script);
+		target.appendJavaScript("gitplex.sourceview.onToggleOutline();");
 	}
 
-	public void mark(AjaxRequestTarget target, Mark mark) {
-		String script = String.format("gitplex.sourceview.mark('%s', %s, true);", 
-				getMarkupId(), mark.toJSON());
+	public void mark(AjaxRequestTarget target, Mark mark, boolean scroll) {
+		String script = String.format("gitplex.sourceview.mark(%s, %s);", 
+				mark.toJSON(), scroll);
 		target.appendJavaScript(script);
 	}
 	
@@ -184,31 +208,215 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				String script = String.format("gitplex.sourceview.initComment('%s');", 
-						SourceViewPanel.this.getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
+				response.render(OnDomReadyHeaderItem.forScript("gitplex.sourceview.initComment();"));
 			}
 			
 		};
-		commentContainer.add(new AjaxLink<Void>("close") {
+		commentContainer.add(new AjaxLink<Void>("locate") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				mark(target, context.getComment().getMark(), true);
+				context.onMark(target, context.getComment().getMark());
+			}
+			
+		});
+		commentContainer.add(new AjaxLink<Void>("close") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(commentContainer));
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
 				hideComment(target);
+				context.onShowComment(target, null);
 			}
 			
 		});
 		commentContainer.setOutputMarkupPlaceholderTag(true);
+		if (context.getComment() != null) {
+			IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+
+				@Override
+				protected CodeComment load() {
+					return context.getComment();
+				}
+				
+			};
+			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
+
+				@Override
+				protected void onCommentDeleted(AjaxRequestTarget target) {
+					CodeComment comment = commentModel.getObject();
+					SourceViewPanel.this.onCommentDeleted(target, comment);
+				}
+				
+			};
+			commentContainer.add(commentPanel);
+		} else {
+			commentContainer.add(new WebMarkupContainer(BODY_ID));
+			commentContainer.setVisible(false);
+		}
 		add(commentContainer);
+		
+		add(commentBehavior = new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
+				
+				switch(params.getParameterValue("action").toString()) {
+				case "add": 
+					Preconditions.checkNotNull(SecurityUtils.getAccount());
+					
+					// must use commit from source view page in case we are commenting on 
+					// a branch and that branch has new commits since the file is being 
+					// displayed
+					String commitHash = params.getParameterValue("param1").toString();
+					
+					int fromLine = params.getParameterValue("param2").toInt();
+					int fromCh = params.getParameterValue("param3").toInt();
+					int toLine = params.getParameterValue("param4").toInt();
+					int toCh = params.getParameterValue("param5").toInt();
+					
+					Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", SourceViewPanel.this);
+					fragment.setOutputMarkupId(true);
+					
+					Form<?> form = new Form<Void>("form");
+					
+					CommentInput input;
+					form.add(input = new CommentInput("input", Model.of("")) {
+
+						@Override
+						protected DepotAttachmentSupport getAttachmentSupport() {
+							return new DepotAttachmentSupport(context.getDepot());
+						}
+						
+					});
+					input.setRequired(true);
+					
+					NotificationPanel feedback = new NotificationPanel("feedback", input); 
+					feedback.setOutputMarkupPlaceholderTag(true);
+					form.add(feedback);
+					
+					form.add(new AjaxLink<Void>("cancel") {
+
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+						}
+						
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							hideComment(target);
+						}
+						
+					});
+					
+					form.add(new AjaxButton("save") {
+
+						@Override
+						protected void onError(AjaxRequestTarget target, Form<?> form) {
+							super.onError(target, form);
+							target.add(feedback);
+						}
+
+						@Override
+						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+							super.onSubmit(target, form);
+							
+							CodeComment comment = new CodeComment();
+							comment.setCommit(commitHash);
+							comment.setPath(context.getBlobIdent().path);
+							comment.setCompareCommit(commitHash);
+							comment.setContent(input.getModelObject());
+							comment.setDepot(context.getDepot());
+							comment.setUser(SecurityUtils.getAccount());
+							Mark mark = new Mark();
+							mark.beginLine = fromLine;
+							mark.beginChar = fromCh;
+							mark.endLine = toLine;
+							mark.endChar = toCh;
+							comment.setMark(mark);
+							GitPlex.getInstance(CodeCommentManager.class).persist(comment);
+							
+							Long commentId = comment.getId();
+							IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+
+								@Override
+								protected CodeComment load() {
+									return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+								}
+								
+							};
+							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), commentModel) {
+
+								@Override
+								protected void onCommentDeleted(AjaxRequestTarget target) {
+									CodeComment comment = commentModel.getObject();
+									SourceViewPanel.this.onCommentDeleted(target, comment);
+								}
+								
+							};
+							fragment.replaceWith(commentPanel);
+							target.add(commentPanel);
+
+							String script = String.format("gitplex.sourceview.onCommentAdded(%d, %s);", 
+									comment.getMark().getBeginLine(), 
+									getJsonOfComment(comment));
+							target.appendJavaScript(script);
+							context.onShowComment(target, comment);
+						}
+
+					});
+					fragment.add(form);
+					commentContainer.replace(fragment);
+					commentContainer.setVisible(true);
+					target.add(commentContainer);
+					target.appendJavaScript("gitplex.sourceview.onAddingComment();");
+					break;
+				case "show":
+					Long commentId = params.getParameterValue("param1").toLong();
+					IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+
+						@Override
+						protected CodeComment load() {
+							return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+						}
+						
+					};
+					CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
+
+						@Override
+						protected void onCommentDeleted(AjaxRequestTarget target) {
+							CodeComment comment = commentModel.getObject();
+							SourceViewPanel.this.onCommentDeleted(target, comment);
+						}
+						
+					};
+					commentContainer.replace(commentPanel);
+					commentContainer.setVisible(true);
+					target.add(commentContainer);
+					String script = String.format("gitplex.sourceview.onShowComment(%s);", 
+							getJsonOfComment(commentModel.getObject()));
+					target.appendJavaScript(script);
+					context.onShowComment(target, commentModel.getObject());
+					break;
+				}
+			}
+			
+		});
 		
 		outlineContainer = new WebMarkupContainer("outline") {
 
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				String script = String.format("gitplex.sourceview.initOutline('%s');", 
-						SourceViewPanel.this.getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
+				response.render(OnDomReadyHeaderItem.forScript("gitplex.sourceview.initOutline();"));
 			}
 			
 		};
@@ -221,7 +429,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			
 		});
 		NestedTree<Symbol> tree;
-		outlineContainer.add(tree = new NestedTree<Symbol>("body", new ITreeProvider<Symbol>() {
+		outlineContainer.add(tree = new NestedTree<Symbol>(BODY_ID, new ITreeProvider<Symbol>() {
 
 			@Override
 			public void detach() {
@@ -327,8 +535,37 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		});
+	}
+	
+	private String getJsonOfComment(CodeComment comment) {
+		CommentInfo commentInfo = new CommentInfo();
+		commentInfo.id = comment.getId();
+		commentInfo.mark = comment.getMark();
 
-		setOutputMarkupId(true);
+		String jsonOfCommentInfo;
+		try {
+			jsonOfCommentInfo = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commentInfo);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		return jsonOfCommentInfo;
+	}
+	
+	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
+		commentContainer.replace(new WebMarkupContainer(BODY_ID));
+		commentContainer.setVisible(false);
+		target.add(commentContainer);
+		String script = String.format("gitplex.sourceview.onCommentDeleted(%d, %d);", 
+				comment.getMark().getBeginLine(), comment.getId());
+		target.appendJavaScript(script);
+		context.onShowComment(target, null);
+	}
+	
+	private void hideComment(AjaxRequestTarget target) {
+		commentContainer.replace(new WebMarkupContainer(BODY_ID));
+		commentContainer.setVisible(false);
+		target.add(commentContainer);
+		target.appendJavaScript("gitplex.sourceview.onShowComment();");
 	}
 	
 	private List<Symbol> getChildSymbols(@Nullable Symbol parentSymbol) {
@@ -357,49 +594,86 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		
-		String blameCommitsJson;
+		String jsonOfBlameInfos;
 		if (context.getMode() == Mode.BLAME) {
-			List<BlameCommit> commits = new ArrayList<>();
+			List<BlameInfo> blameInfos = new ArrayList<>();
 			
-			String commitHash = context.getDepot().getObjectId(context.getBlobIdent().revision).name();
+			String commitHash = context.getCommit().name();
 			
 			for (Blame blame: context.getDepot().git().blame(commitHash, context.getBlobIdent().path).values()) {
-				BlameCommit commit = new BlameCommit();
-				commit.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
-				commit.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());
-				commit.hash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
-				commit.message = blame.getCommit().getSubject();
+				BlameInfo blameInfo = new BlameInfo();
+				blameInfo.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
+				blameInfo.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());
+				blameInfo.hash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
+				blameInfo.message = blame.getCommit().getSubject();
 				CommitDetailPage.HistoryState state = new CommitDetailPage.HistoryState();
 				state.pathFilter = context.getBlobIdent().path;
 				PageParameters params = CommitDetailPage.paramsOf(context.getDepot(), 
 						blame.getCommit().getHash(), state);
-				commit.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
-				commit.ranges = blame.getRanges();
-				commits.add(commit);
+				blameInfo.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
+				blameInfo.ranges = blame.getRanges();
+				blameInfos.add(blameInfo);
 			}
 			try {
-				blameCommitsJson = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commits);
+				jsonOfBlameInfos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(blameInfos);
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
-			blameCommitsJson = "undefined";
+			jsonOfBlameInfos = "undefined";
 		}
 		
-		String script = String.format("gitplex.sourceview.init('%s', '%s', '%s', %s, '%s', '%s', %s, %s);", 
-				getMarkupId(), 
+		Map<Integer, List<CommentInfo>> commentInfos = new HashMap<>(); 
+		for (CodeComment comment: commentsModel.getObject()) {
+			if (comment.getMark() != null) {
+				int line = comment.getMark().getBeginLine();
+				List<CommentInfo> commentInfosAtLine = commentInfos.get(line);
+				if (commentInfosAtLine == null) {
+					commentInfosAtLine = new ArrayList<>();
+					commentInfos.put(line, commentInfosAtLine);
+				}
+				CommentInfo commentInfo = new CommentInfo();
+				commentInfo.id = comment.getId();
+				commentInfo.mark = comment.getMark();
+				commentInfosAtLine.add(commentInfo);
+			}
+		}
+		for (List<CommentInfo> value: commentInfos.values()) {
+			value.sort((o1, o2)->(int)(o1.id-o2.id));
+		}
+		
+		String jsonOfCommentInfos;
+		try {
+			jsonOfCommentInfos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commentInfos);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		CharSequence commentCallback = commentBehavior.getCallbackFunction(
+				explicit("action"), explicit("param1"), explicit("param2"), 
+				explicit("param3"), explicit("param4"), explicit("param5"));
+		String script = String.format("gitplex.sourceview.init('%s', '%s', %s, '%s', '%s', "
+				+ "%s, %s, %s, %s, %s);", 
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path), 
 				context.getMark()!=null?context.getMark().toJSON():"undefined",
 				symbolTooltip.getMarkupId(), 
-				context.getBlobIdent().revision, 
-				blameCommitsJson, 
-				viewState!=null?"JSON.parse('"+viewState+"')":"undefined");
+				context.getCommit().name(), 
+				jsonOfBlameInfos, 
+				jsonOfCommentInfos,
+				commentCallback, 
+				viewState!=null?"JSON.parse('"+viewState+"')":"undefined", 
+				SecurityUtils.getAccount()!=null);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
+	@Override
+	protected void onDetach() {
+		commentsModel.detach();
+		super.onDetach();
+	}
+
 	@SuppressWarnings("unused")
-	private static class BlameCommit {
+	private static class BlameInfo {
 		
 		String hash;
 		
@@ -412,6 +686,13 @@ public class SourceViewPanel extends BlobViewPanel {
 		String commitDate;
 		
 		List<Range> ranges;
+	}
+	
+	@SuppressWarnings("unused")
+	private static class CommentInfo {
+		long id;
+		
+		Mark mark;
 	}
 	
 }

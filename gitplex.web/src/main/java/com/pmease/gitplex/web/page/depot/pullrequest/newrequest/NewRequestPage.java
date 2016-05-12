@@ -38,6 +38,7 @@ import com.pmease.commons.git.Git;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -57,6 +58,7 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
@@ -478,7 +480,7 @@ public class NewRequestPage extends PullRequestPage {
 			
 		}));
 
-		form.add(new CommentInput("comment", requestModel, new IModel<String>() {
+		form.add(new CommentInput("comment", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -494,7 +496,14 @@ public class NewRequestPage extends PullRequestPage {
 				getPullRequest().setDescription(object);
 			}
 			
-		}));
+		}) {
+
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new DepotAttachmentSupport(getDepot());
+			}
+			
+		});
 
 		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
 		form.add(assigneeContainer);

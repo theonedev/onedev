@@ -8,6 +8,10 @@
 	top: 0;
 	left: 0;
 }
+.source-view>.comment>.content>.head .locate {
+	margin-right: 8px;
+	font-size: 20px;
+}
 .source-view>.comment>.ui-resizable-handle {
 	position: absolute;
 	border-right: 1px solid #CCC;
@@ -17,6 +21,17 @@
     right: 0;
     top: 0;
 }
+.source-view>.comment>.content>.head {
+	font-size: 16px;
+	padding: 4px 8px;
+	border-bottom: 1px dotted #BBB;
+}
+.source-view>.comment>.content>.body {
+	font-size: 13px;
+	padding: 12px;
+	overflow: auto; 
+}
+
 .source-view>.outline {
 	background: white; 
 	position: absolute;
@@ -36,24 +51,44 @@
 .source-view>.outline .tree-node {
 	line-height: 1.8;
 }
-.source-view>.comment>.content>.head, .source-view>.outline>.content>.head {
+.source-view>.outline>.content>.head {
 	font-size: 16px;
 	padding: 4px 8px;
 	border-bottom: 1px dotted #BBB;
 }
-.source-view>.comment>.content>.body, .source-view>.outline>.content>.body {
+.source-view>.outline>.content>.body {
 	font-size: 13px;
 	padding: 4px;
 	overflow: auto; 
 }
-.source-view>.comment>.content>.head a, .source-view>.outline>.content>.head a {
-	color: #666;
-}
 
+.CodeMirror-comments {
+	width: 20px;
+}
+.CodeMirror-comment {
+	padding-left: 4px;
+}
+.CodeMirror-comment a {
+	color: #999;
+}
+.CodeMirror-comment a:hover {
+	color: #333;
+}
+.comment-popover a {
+	display: block;
+	color: #999;
+	text-decoration: none;
+}
+.comment-popover a:hover {
+	color: #333;
+}
+.comment-trigger.active {
+	font-size: 16px;	
+	color: #333;	
+}
 .CodeMirror-annotations {
 	width: 240px;
 }
-
 .CodeMirror-annotation {
 	font-family: monospace;
 	text-overflow: ellipsis;
@@ -67,7 +102,6 @@
 .CodeMirror-annotation .same-as-above {
 	margin-left: 100px;
 	color: #666;
-	font-size: 16px;
 }
 .CodeMirror-activeline .CodeMirror-annotation {
 	background: #E8F2FE;	

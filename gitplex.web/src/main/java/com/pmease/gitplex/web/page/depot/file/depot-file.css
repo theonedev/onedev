@@ -95,6 +95,11 @@
 	font-weight: bold;
 	color: #555;
 }
+#repo-file>.contribution .contributors a {
+	color: #666;
+	text-decoration: none;
+}
+
 #repo-file>.revision-indexing {
 	padding: 8px 8px 9px 8px;
 	background: #fcf8e3;

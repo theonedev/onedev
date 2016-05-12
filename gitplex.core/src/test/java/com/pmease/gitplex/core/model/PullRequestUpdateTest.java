@@ -87,7 +87,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 			}
 
 			@Override
-			public File getAttachmentsDir(PullRequest request) {
+			public File getAttachmentsDir(Depot depot) {
 				throw new UnsupportedOperationException();
 			}
 		});

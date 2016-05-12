@@ -19,11 +19,13 @@ import org.hibernate.StaleObjectStateException;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -113,9 +115,15 @@ class OpenActivityPanel extends AbstractActivityPanel {
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
-				final long lastVersion = requestModel.getObject().getVersion();
-				final CommentInput input = new CommentInput("input", requestModel, 
-						Model.of(requestModel.getObject().getDescription()));
+				long lastVersion = requestModel.getObject().getVersion();
+				CommentInput input = new CommentInput("input", Model.of(requestModel.getObject().getDescription())) {
+
+					@Override
+					protected AttachmentSupport getAttachmentSupport() {
+						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+					}
+					
+				};
 				form.add(input);
 				
 				form.add(new AjaxButton("save") {

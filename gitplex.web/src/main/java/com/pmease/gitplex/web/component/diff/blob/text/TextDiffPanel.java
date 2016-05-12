@@ -41,7 +41,6 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.CommonPage;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -171,7 +170,7 @@ public class TextDiffPanel extends Panel {
 					int index = params.getParameterValue("param1").toInt();
 					Integer lastContextSize = contextSizes.get(index);
 					if (lastContextSize == null)
-						lastContextSize = CodeComment.DIFF_CONTEXT_SIZE;
+						lastContextSize = Constants.DIFF_CONTEXT_SIZE;
 					int contextSize = lastContextSize + Constants.DIFF_EXPAND_SIZE;
 					contextSizes.put(index, contextSize);
 					
@@ -283,7 +282,7 @@ public class TextDiffPanel extends Panel {
 	}
 
 	private String renderDiffs() {
-		int contextSize = CodeComment.DIFF_CONTEXT_SIZE;
+		int contextSize = Constants.DIFF_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
 		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append(""

@@ -1,29 +1,22 @@
 package com.pmease.gitplex.core.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
 
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.component.Mark;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -32,7 +25,7 @@ import com.pmease.gitplex.core.entity.component.Mark;
  */
 @Entity
 @DynamicUpdate 
-public class CodeComment extends AbstractEntity {
+public class CodeCommentReply extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -41,7 +34,7 @@ public class CodeComment extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Depot depot;
+	private CodeComment comment;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account user;
@@ -54,32 +47,8 @@ public class CodeComment extends AbstractEntity {
 	private Date date = new Date();
 	
 	@OptimisticLock(excluded=true)
-	@Column(nullable=false)
-	private String commit;
-	
-	@OptimisticLock(excluded=true)
-	private String path;
-	
-	@OptimisticLock(excluded=true)
-	@Embedded
-	private Mark mark;
-	
-	@OptimisticLock(excluded=true)
-	@Column(nullable=false)
 	private String compareCommit;
 	
-	@OneToMany(mappedBy="comment")
-	@OnDelete(action=OnDeleteAction.CASCADE)
-	private Collection<CodeCommentReply> replies = new ArrayList<>();
-	
-	public Depot getDepot() {
-		return depot;
-	}
-
-	public void setDepot(Depot depot) {
-		this.depot = depot;
-	}
-
 	@Nullable
 	public Account getUser() {
 		return user;
@@ -105,36 +74,20 @@ public class CodeComment extends AbstractEntity {
 		return date;
 	}
 
-	public void delete() {
-		GitPlex.getInstance(Dao.class).remove(this);
+	public CodeComment getComment() {
+		return comment;
 	}
 
-	public String getCommit() {
-		return commit;
-	}
-
-	public void setCommit(String commit) {
-		this.commit = commit;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
+	public void setComment(CodeComment comment) {
+		this.comment = comment;
 	}
 
 	public void setDate(Date date) {
 		this.date = date;
 	}
 
-	public Mark getMark() {
-		return mark;
-	}
-
-	public void setMark(Mark mark) {
-		this.mark = mark;
+	public void delete() {
+		GitPlex.getInstance(Dao.class).remove(this);
 	}
 
 	public String getCompareCommit() {
@@ -143,14 +96,6 @@ public class CodeComment extends AbstractEntity {
 
 	public void setCompareCommit(String compareCommit) {
 		this.compareCommit = compareCommit;
-	}
-
-	public Collection<CodeCommentReply> getReplies() {
-		return replies;
-	}
-
-	public void setReplies(Collection<CodeCommentReply> replies) {
-		this.replies = replies;
 	}
 
 }

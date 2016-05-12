@@ -1,5 +1,8 @@
 package com.pmease.gitplex.web.component;
 
+import javax.annotation.Nullable;
+
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -19,11 +22,16 @@ public class AccountLink extends BookmarkablePageLink<Void> {
 	
 	private final String name;
 	
-	public AccountLink(String id, Account account) {
+	public AccountLink(String id, @Nullable Account account) {
 		super(id, AccountOverviewPage.class);
 
-		params = AccountPage.paramsOf(account);
-		name = account.getDisplayName();
+		if (account != null) {
+			params = AccountPage.paramsOf(account);
+			name = account.getDisplayName();
+		} else {
+			params = new PageParameters();
+			name = null;
+		}
 	}
 	
 	public AccountLink(String id, PersonIdent person) {
@@ -44,9 +52,19 @@ public class AccountLink extends BookmarkablePageLink<Void> {
 
 	@Override
 	public IModel<?> getBody() {
-		return Model.of(name);
+		if (name != null)
+			return Model.of(name);
+		else
+			return Model.of("Unknown");
 	}
 	
+	@Override
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		if (params.isEmpty())
+			tag.setName("i");
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

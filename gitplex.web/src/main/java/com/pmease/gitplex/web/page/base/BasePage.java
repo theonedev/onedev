@@ -105,6 +105,18 @@ public abstract class BasePage extends CommonPage {
 			}
 
 		});
+		add(new WebMarkupContainer("appleTouchIconPrecomposed") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				CharSequence url = urlFor(
+						new PackageResourceReference(BasePage.class, "apple-touch-icon.png"), 
+						new PageParameters()); 
+				tag.put("href", url);
+			}
+			
+		});
 	}
 	
 	protected final String getPageTitle() {

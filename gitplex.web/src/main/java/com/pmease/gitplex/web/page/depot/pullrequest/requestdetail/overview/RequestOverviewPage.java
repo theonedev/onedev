@@ -35,6 +35,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
+import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -53,6 +54,7 @@ import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
@@ -277,7 +279,7 @@ public class RequestOverviewPage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		final WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
+		WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
 
 			@Override
 			protected void onConfigure() {
@@ -292,7 +294,14 @@ public class RequestOverviewPage extends RequestDetailPage {
 		Form<?> form = new Form<Void>("form");
 		addComment.add(form);
 		
-		final CommentInput input = new CommentInput("input", requestModel, Model.of(""));
+		CommentInput input = new CommentInput("input", Model.of("")) {
+
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+			}
+			
+		};
 		input.setRequired(true);
 		form.add(input);
 		
