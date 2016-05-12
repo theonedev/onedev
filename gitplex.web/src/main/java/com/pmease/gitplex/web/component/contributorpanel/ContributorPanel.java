@@ -18,10 +18,13 @@ public class ContributorPanel extends Panel {
 	
 	private final PersonIdent committer;
 	
-	public ContributorPanel(String id, PersonIdent author, PersonIdent committer) {
+	private final boolean withDate;
+	
+	public ContributorPanel(String id, PersonIdent author, PersonIdent committer, boolean withDate) {
 		super(id);
 		this.author = author;
 		this.committer = committer;
+		this.withDate = withDate;
 	}
 
 	@Override
@@ -35,7 +38,10 @@ public class ContributorPanel extends Panel {
 		} else {
 			add(new AccountLink("committer", committer));
 		}
-		add(new Label("date", DateUtils.formatAge(committer.getWhen())));
+		if (withDate)
+			add(new Label("date", DateUtils.formatAge(committer.getWhen())));
+		else
+			add(new WebMarkupContainer("date").setVisible(false));
 	}
 
 	@Override

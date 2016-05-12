@@ -63,6 +63,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
+import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
@@ -146,6 +147,39 @@ public class SourceViewPanel extends BlobViewPanel {
 	@Override
 	public List<MenuItem> getMenuItems(MenuLink menuLink) {
 		List<MenuItem> menuItems = new ArrayList<>();
+		menuItems.add(new MenuItem() {
+			
+			@Override
+			public String getIconClass() {
+				return context.getMode() == Mode.BLAME?"fa fa-check":null;
+			}
+
+			@Override
+			public String getLabel() {
+				return "Blame";
+			}
+
+			@Override
+			public AbstractLink newLink(String id) {
+				AbstractLink link = new AjaxLink<Void>(id) {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						menuLink.close();
+						boolean blamed = (context.getMode() != Mode.BLAME);
+						String jsonOfBlameInfos = getJsonOfBlameInfos(blamed);
+						String script = String.format("gitplex.sourceview.onBlame(%s);", jsonOfBlameInfos);
+						target.appendJavaScript(script);
+						context.onBlameChange(target, blamed);									
+					}
+					
+				};
+				link.add(new ViewStateAwareBehavior());
+				return link;
+			}
+			
+		});
+		
 		if (!symbols.isEmpty()) {
 			menuItems.add(new MenuItem() {
 
@@ -232,7 +266,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				hideComment(target);
-				context.onShowComment(target, null);
+				context.onOpenComment(target, null);
 			}
 			
 		});
@@ -369,7 +403,7 @@ public class SourceViewPanel extends BlobViewPanel {
 									comment.getMark().getBeginLine(), 
 									getJsonOfComment(comment));
 							target.appendJavaScript(script);
-							context.onShowComment(target, comment);
+							context.onOpenComment(target, comment);
 						}
 
 					});
@@ -404,7 +438,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					String script = String.format("gitplex.sourceview.onShowComment(%s);", 
 							getJsonOfComment(commentModel.getObject()));
 					target.appendJavaScript(script);
-					context.onShowComment(target, commentModel.getObject());
+					context.onOpenComment(target, commentModel.getObject());
 					break;
 				}
 			}
@@ -558,7 +592,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		String script = String.format("gitplex.sourceview.onCommentDeleted(%d, %d);", 
 				comment.getMark().getBeginLine(), comment.getId());
 		target.appendJavaScript(script);
-		context.onShowComment(target, null);
+		context.onOpenComment(target, null);
 	}
 	
 	private void hideComment(AjaxRequestTarget target) {
@@ -577,25 +611,9 @@ public class SourceViewPanel extends BlobViewPanel {
 		return children;
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		
-		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
-		response.render(JQueryUIJavaScriptReference.asHeaderItem());
-		
-		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
-		
-		response.render(JavaScriptHeaderItem.forReference(
-				new JavaScriptResourceReference(SourceViewPanel.class, "source-view.js")));
-		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
-		
-		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
-		
+	private String getJsonOfBlameInfos(boolean blamed) {
 		String jsonOfBlameInfos;
-		if (context.getMode() == Mode.BLAME) {
+		if (blamed) {
 			List<BlameInfo> blameInfos = new ArrayList<>();
 			
 			String commitHash = context.getCommit().name();
@@ -622,7 +640,27 @@ public class SourceViewPanel extends BlobViewPanel {
 		} else {
 			jsonOfBlameInfos = "undefined";
 		}
+		return jsonOfBlameInfos;
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
 		
+		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
+		response.render(JQueryUIJavaScriptReference.asHeaderItem());
+		
+		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
+		
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(SourceViewPanel.class, "source-view.js")));
+		response.render(CssHeaderItem.forReference(
+				new CssResourceReference(SourceViewPanel.class, "source-view.css")));
+		
+		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
+		
+		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
 		Map<Integer, List<CommentInfo>> commentInfos = new HashMap<>(); 
 		for (CodeComment comment: commentsModel.getObject()) {
 			if (comment.getMark() != null) {

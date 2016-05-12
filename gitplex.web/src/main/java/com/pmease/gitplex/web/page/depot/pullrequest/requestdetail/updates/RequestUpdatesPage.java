@@ -194,7 +194,7 @@ public class RequestUpdatesPage extends RequestDetailPage {
 							
 						}));
 
-						commitItem.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter()));
+						commitItem.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter(), true));
 						
 						commitItem.add(new HashAndCodePanel("hashAndCode", new AbstractReadOnlyModel<Depot>() {
 

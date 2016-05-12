@@ -122,7 +122,7 @@ public class CommitListPanel extends Panel {
 						labelsView.add(new Label(labelsView.newChildId(), label));
 					fragment.add(labelsView);
 					
-					fragment.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter()));
+					fragment.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter(), true));
 					fragment.add(new HashAndCodePanel("hashAndCode", depotModel, commit.getHash()));
 					item.add(AttributeAppender.append("class", "commit clearfix commit-item-" + itemIndex++));
 				} else {

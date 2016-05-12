@@ -220,7 +220,7 @@ public class CommitDetailPage extends DepotPage {
 		});
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
-		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
+		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent(), true));
 
 		final WebMarkupContainer parentsContainer = new WebMarkupContainer("parents");
 		parentsContainer.setOutputMarkupId(true);

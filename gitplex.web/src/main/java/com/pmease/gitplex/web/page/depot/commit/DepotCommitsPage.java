@@ -403,7 +403,7 @@ public class DepotCommitsPage extends DepotPage {
 				labelsView.add(new Label(labelsView.newChildId(), label));
 			item.add(labelsView);
 			
-			item.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter()));
+			item.add(new ContributorPanel("contribution", commit.getAuthor(), commit.getCommitter(), true));
 			
 			/*
 			 * If we query a single definitive path, let's record it to be used for 

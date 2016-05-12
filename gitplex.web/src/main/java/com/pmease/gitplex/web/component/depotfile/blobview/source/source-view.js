@@ -96,9 +96,6 @@ gitplex.sourceview = {
 		    	// add gutters with a timer to avoid the issue that occasionally 
 		    	// gutter becomes much wider than expected
 			    setTimeout(function() {
-			    	if (blameInfos) {
-				    	gitplex.sourceview.blame(blameInfos);
-			    	}
 					var gutters = cm.getOption("gutters").slice();
 					gutters.splice(0, 0, "CodeMirror-comments");
 					cm.setOption("gutters", gutters);
@@ -107,6 +104,10 @@ gitplex.sourceview = {
 					    	gitplex.sourceview.addCommentGutter(line, commentInfos[line][1]);
 					    }
 					}
+
+					if (blameInfos) {
+				    	gitplex.sourceview.blame(blameInfos);
+			    	}
 					gitplex.sourceview.highlightCommentTrigger();				
 			    }, 10);
 			    
@@ -425,7 +426,7 @@ gitplex.sourceview = {
 		
 		if (blameInfos) {
 			var gutters = cm.getOption("gutters").slice();
-			gutters.splice(0, 0, "CodeMirror-annotations");
+			gutters.splice(1, 0, "CodeMirror-annotations");
 			cm.setOption("gutters", gutters);
     		for (var i in blameInfos) {
     			var blameInfo = blameInfos[i];
@@ -449,9 +450,12 @@ gitplex.sourceview = {
 		} else {
 			cm.clearGutter("CodeMirror-annotations");
 			var gutters = cm.getOption("gutters").slice();
-			gutters.splice(0, 1);
+			gutters.splice(1, 1);
 			cm.setOption("gutters", gutters);
 		}
+	},
+	onBlame: function(blameInfos) {
+		gitplex.sourceview.blame(blameInfos);
+		gitplex.sourceview.onLayoutChange();
 	}
-	
 }

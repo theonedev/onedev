@@ -44,13 +44,13 @@ public interface BlobViewContext extends Serializable {
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
-	void onBlameChange(AjaxRequestTarget target, @Nullable String viewState);
+	void onBlameChange(AjaxRequestTarget target, boolean blamed);
 	
 	void onDelete(AjaxRequestTarget target);
 	
 	void onEdit(AjaxRequestTarget target, @Nullable String viewState);
 	
-	void onShowComment(AjaxRequestTarget target, @Nullable CodeComment comment);
+	void onOpenComment(AjaxRequestTarget target, @Nullable CodeComment comment);
 
 	@Nullable
 	CodeComment getComment();

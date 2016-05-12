@@ -18,6 +18,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -28,6 +29,7 @@ import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
+import com.pmease.gitplex.web.util.DateUtils;
 
 @SuppressWarnings("serial")
 class ContributionPanel extends Panel {
@@ -54,12 +56,18 @@ class ContributionPanel extends Panel {
 		super.onInitialize();
 		
 		add(new AvatarLink("avatar", commit.getAuthor()));
-		add(new ContributorPanel("contributor", commit.getAuthor(), commit.getCommitter()));
+		add(new ContributorPanel("contributor", commit.getAuthor(), commit.getCommitter(), false));
 		
 		Link<Void> link = new BookmarkablePageLink<Void>("messageLink", CommitDetailPage.class, 
 				CommitDetailPage.paramsOf(depotModel.getObject(), commit.getHash()));
 		link.add(new Label("message", commit.getSubject()));
 		add(link);
+
+		link = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, 
+				CommitDetailPage.paramsOf(depotModel.getObject(), commit.getHash()));
+		link.add(new Label("hash", GitUtils.abbreviateSHA(commit.getHash())));
+		add(link);
+		add(new Label("date", DateUtils.formatAge(commit.getCommitter().getWhen())));
 		
 		add(new DropdownLink("contributors") {
 

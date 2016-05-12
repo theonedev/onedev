@@ -874,11 +874,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onBlameChange(AjaxRequestTarget target, @Nullable String viewState) {
-		mode = (mode==null?Mode.BLAME:null);
-		newFileViewer(target, viewState);
+	public void onBlameChange(AjaxRequestTarget target, boolean blamed) {
+		mode = (blamed?Mode.BLAME:null);
 		pushState(target);
-		resizeWindow(target);
 	}
 
 	@Override
@@ -902,7 +900,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onShowComment(AjaxRequestTarget target, CodeComment comment) {
+	public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			commentId = comment.getId();
 			mark = comment.getMark();

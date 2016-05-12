@@ -381,42 +381,6 @@ public abstract class FileNavigator extends Panel {
 							
 						});
 					}
-					if (file.isFile() && context.getDepot().getBlob(file).getText() != null) {
-						generalItems.add(new MenuItem() {
-							
-							@Override
-							public String getIconClass() {
-								return context.getMode() == Mode.BLAME?"fa fa-check":null;
-							}
-
-							@Override
-							public String getLabel() {
-								return "Blame";
-							}
-
-							@Override
-							public AbstractLink newLink(String id) {
-								AbstractLink link = new ViewStateAwareAjaxLink<Void>(id) {
-
-									@Override
-									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-										super.updateAjaxAttributes(attributes);
-										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-									}
-
-									@Override
-									protected void onClick(AjaxRequestTarget target, String viewState) {
-										close();
-										context.onBlameChange(target, viewState);									
-									}
-									
-								};
-								link.add(new ViewStateAwareBehavior());
-								return link;
-							}
-							
-						});
-					}
 					
 					String path = file.path;
 					if (path != null && file.isTree())

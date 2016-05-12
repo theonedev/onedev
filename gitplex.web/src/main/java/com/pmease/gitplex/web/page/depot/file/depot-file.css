@@ -80,24 +80,27 @@
 	display: none;
 	padding: 2px 0 3px 0;
 }
+
 #repo-file>.contribution {
 	padding: 6px 12px;
 	background: #F9F9F9;
 	border-bottom: 1px solid #DDD; 
+	color: #999;
 }
 #repo-file>.contribution img.loading {
 	padding: 4px 0;
 }
+#repo-file>.contribution a {
+	color: #666;
+}
 #repo-file>.contribution .pull-left {
 	margin-right: 12px;
 }
-#repo-file>.contribution .message a {
-	font-weight: bold;
-	color: #555;
+#repo-file>.contribution .hash a {
+	font-family: monospace;
 }
-#repo-file>.contribution .contributors a {
-	color: #666;
-	text-decoration: none;
+#repo-file>.contribution .date {
+	margin-left: 12px;
 }
 
 #repo-file>.revision-indexing {
