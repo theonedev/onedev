@@ -350,7 +350,7 @@ gitplex.textdiff = {
 	    				$commentLink.attr("href", invalidSelectionUrl);
 	    				$commentLink.html("<i class='fa fa-comment'></i> Unable to comment this selection, see why");
 		    		};
-		    		$("#selection-popup").data("show")(position, permanentCallback, 
+		    		$("#selection-popup").data("open")(position, permanentCallback, 
 		    				commentCallback, $container[0]);	
 				}
 
@@ -462,7 +462,7 @@ gitplex.textdiff = {
     				$commentLink.removeAttr("href");
     				$commentLink.html("<i class='fa fa-comment'></i> Add comment for this selection");
 	    		};
-	    		$("#selection-popup").data("show")(position, permanentCallback, 
+	    		$("#selection-popup").data("open")(position, permanentCallback, 
 	    				commentCallback, $container[0]);				
 	    		
 	    	}, 100);

@@ -463,7 +463,7 @@ pmease.commons = {
 				"</div>");
 
 		var $selectionPopup = $("#selection-popup");
-		$selectionPopup.data("show", function(position, permanentCallback, commentCallback, containerEl) {
+		$selectionPopup.data("open", function(position, permanentCallback, commentCallback, containerEl) {
 			var alignment = {
 					target: {left: position.left, top: position.top, width: 0, height: 0}, 
 					placement: {x: 50, y: 100, targetX: 0, targetY: 0}};

@@ -126,7 +126,6 @@ gitplex.sourceview = {
 		    				$permanentLink.click(function(e) {
 		    					e.preventDefault();
 			    				$("#selection-popup").hide();
-		    					pmease.commons.history.pushState(uri.toString());
 		    					pmease.commons.codemirror.clearSelection(cm);
 		    					pmease.commons.codemirror.mark(cm, {
 		    						beginLine: from.line,
@@ -134,6 +133,7 @@ gitplex.sourceview = {
 		    						endLine: to.line,
 		    						endChar: to.ch
 		    					}, false);
+		    					commentCallback("mark", from.line, from.ch, to.line, to.ch);
 		    				});
 						};
 		    			var commentLinkCallback = function($commentLink) {
@@ -152,13 +152,13 @@ gitplex.sourceview = {
 			    						endLine: to.line,
 			    						endChar: to.ch
 			    					}, false);
-				    				commentCallback("add", commitHash, from.line, from.ch, to.line, to.ch);
+				    				commentCallback("addComment", commitHash, from.line, from.ch, to.line, to.ch);
 			    				});
 		    				} else {
 		    					$commentLink.html("Log in to comment on selection");
 		    				}
 		    			};
-			    		$("#selection-popup").data("show")(
+			    		$("#selection-popup").data("open")(
 			    				position, permanentLinkCallback, commentLinkCallback, $code[0]);
 			    	} else {
 			    		$("#selection-popup").hide();
@@ -304,7 +304,7 @@ gitplex.sourceview = {
     						return;
     					}
 						var commentInfo = commentInfos[$(this).index()];			        						
-						commentCallback("show", commentInfo.id);
+						commentCallback("openComment", commentInfo.id);
 					});
 				});
 				gitplex.sourceview.highlightCommentTrigger();				
@@ -324,7 +324,7 @@ gitplex.sourceview = {
 						&& !confirm("There are unsaved changes, discard and continue?")) {
 					return;
 				}
-				commentCallback("show", commentInfo.id);
+				commentCallback("openComment", commentInfo.id);
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		

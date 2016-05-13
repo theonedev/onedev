@@ -310,7 +310,19 @@ public class SourceViewPanel extends BlobViewPanel {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				
 				switch(params.getParameterValue("action").toString()) {
-				case "add": 
+				case "mark":
+					int fromLine = params.getParameterValue("param1").toInt();
+					int fromCh = params.getParameterValue("param2").toInt();
+					int toLine = params.getParameterValue("param3").toInt();
+					int toCh = params.getParameterValue("param4").toInt();
+					Mark mark = new Mark();
+					mark.beginLine = fromLine;
+					mark.beginChar = fromCh;
+					mark.endLine = toLine;
+					mark.endChar = toCh;
+					context.onMark(target, mark);
+					break;
+				case "addComment": 
 					Preconditions.checkNotNull(SecurityUtils.getAccount());
 					
 					// must use commit from source view page in case we are commenting on 
@@ -318,10 +330,10 @@ public class SourceViewPanel extends BlobViewPanel {
 					// displayed
 					String commitHash = params.getParameterValue("param1").toString();
 					
-					int fromLine = params.getParameterValue("param2").toInt();
-					int fromCh = params.getParameterValue("param3").toInt();
-					int toLine = params.getParameterValue("param4").toInt();
-					int toCh = params.getParameterValue("param5").toInt();
+					fromLine = params.getParameterValue("param2").toInt();
+					fromCh = params.getParameterValue("param3").toInt();
+					toLine = params.getParameterValue("param4").toInt();
+					toCh = params.getParameterValue("param5").toInt();
 					
 					Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", SourceViewPanel.this);
 					fragment.setOutputMarkupId(true);
@@ -420,7 +432,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					target.add(commentContainer);
 					target.appendJavaScript("gitplex.sourceview.onAddingComment();");
 					break;
-				case "show":
+				case "openComment":
 					Long commentId = params.getParameterValue("param1").toLong();
 					IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
 
