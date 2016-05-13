@@ -27,6 +27,12 @@
 	font-size: 12px;
 	color: #999;
 }
+.code-comment>.post>.detail>.body {
+	padding-top: 8px;
+}
+.code-comment>.post>.detail>.body>.feedback .alert {
+	margin-bottom: 0;
+}
 .code-comment>.post>.detail>.foot a {
 	font-size: 12px;
 	color: #999;
@@ -38,6 +44,9 @@
 .code-comment>.post>.detail>.foot .middot:before {
 	vertical-align: 25%;
 	color: #999;
+}
+.code-comment>.add-reply {
+	margin-top: 16px;
 }
 .code-comment>.add-reply a {
 	color: #999;

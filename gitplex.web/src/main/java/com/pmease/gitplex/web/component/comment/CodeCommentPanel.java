@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.component.comment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -18,8 +19,11 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.hibernate.StaleObjectStateException;
 
+import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
@@ -53,7 +57,41 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		commentContainer.add(new AccountLink("authorName", getComment().getUser()));
 		commentContainer.add(new Label("authorDate", DateUtils.formatAge(getComment().getDate())));
 
-		commentContainer.add(new MarkdownViewer("body", Model.of(getComment().getContent()), true));
+		NotificationPanel feedback = new NotificationPanel("feedback", commentContainer);
+		feedback.setOutputMarkupPlaceholderTag(true);
+		commentContainer.add(feedback);
+		AtomicLong lastVersionRef = new AtomicLong(getComment().getVersion());
+		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return getComment().getContent();
+			}
+
+			@Override
+			public void setObject(String object) {
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				Preconditions.checkNotNull(target);
+				CodeComment comment = getComment();
+				try {
+					if (comment.getVersion() != lastVersionRef.get())
+						throw new StaleObjectStateException(CodeComment.class.getName(), comment.getId());
+					comment.setContent(object);
+					GitPlex.getInstance(CodeCommentManager.class).persist(comment);				
+					target.add(feedback); // clear the feedback
+				} catch (StaleObjectStateException e) {
+					commentContainer.warn("Some one changed the content you are editing. "
+							+ "The content has now been reloaded, please try again.");
+					target.add(commentContainer);
+				}
+				lastVersionRef.set(comment.getVersion());
+			}
+			
+		}, SecurityUtils.canModify(getComment())));
 
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
 		foot.setVisible(SecurityUtils.canModify(getComment()));
@@ -81,7 +119,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 				form.add(input);
 				input.setRequired(true);
 				
-				NotificationPanel feedback = new NotificationPanel("feedback", input); 
+				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
@@ -102,6 +140,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					
 				});
 				
+				long lastVersion = getComment().getVersion();
 				form.add(new AjaxButton("save") {
 
 					@Override
@@ -114,12 +153,19 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						CodeComment comment = getComment();
-						comment.setContent(input.getModelObject());
-						GitPlex.getInstance(CodeCommentManager.class).persist(comment);
-						WebMarkupContainer commentContainer = newCommentContainer();
-						fragment.replaceWith(commentContainer);
-						target.add(commentContainer);
+						try {
+							CodeComment comment = getComment();
+							if (comment.getVersion() != lastVersion)
+								throw new StaleObjectStateException(CodeComment.class.getName(), comment.getId());
+							comment.setContent(input.getModelObject());
+							GitPlex.getInstance(CodeCommentManager.class).persist(comment);
+							WebMarkupContainer commentContainer = newCommentContainer();
+							fragment.replaceWith(commentContainer);
+							target.add(commentContainer);
+						} catch (StaleObjectStateException e) {
+							error("Some one changed the content you are editing. Reload the page and try again.");
+							target.add(feedback);
+						}
 					}
 
 				});
@@ -172,8 +218,42 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		replyContainer.add(new AccountLink("authorName", getReply(replyId).getUser()));
 		replyContainer.add(new Label("authorDate", DateUtils.formatAge(getReply(replyId).getDate())));
 
-		replyContainer.add(new MarkdownViewer("body", Model.of(getReply(replyId).getContent()), true));
+		NotificationPanel feedback = new NotificationPanel("feedback", replyContainer);
+		feedback.setOutputMarkupPlaceholderTag(true);
+		replyContainer.add(feedback);
+		AtomicLong lastVersionRef = new AtomicLong(getReply(replyId).getVersion());
+		replyContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return getReply(replyId).getContent();
+			}
+
+			@Override
+			public void setObject(String object) {
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				Preconditions.checkNotNull(target);
+				CodeCommentReply reply = getReply(replyId);
+				try {
+					if (reply.getVersion() != lastVersionRef.get())
+						throw new StaleObjectStateException(CodeCommentReply.class.getName(), reply.getId());
+					reply.setContent(object);
+					GitPlex.getInstance(CodeCommentReplyManager.class).persist(reply);				
+					target.add(feedback); // clear the feedback
+				} catch (StaleObjectStateException e) {
+					replyContainer.warn("Some one changed the content you are editing. The content has now been reloaded, "
+							+ "please try again.");
+					target.add(replyContainer);
+				}
+				lastVersionRef.set(reply.getVersion());
+			}
+			
+		}, SecurityUtils.canModify(getComment())));
+		
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
 		foot.setVisible(SecurityUtils.canModify(getReply(replyId)));
 		
@@ -200,7 +280,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 				form.add(input);
 				input.setRequired(true);
 				
-				NotificationPanel feedback = new NotificationPanel("feedback", input); 
+				NotificationPanel feedback = new NotificationPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
@@ -221,6 +301,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					
 				});
 				
+				long lastVersion = getReply(replyId).getVersion();
 				form.add(new AjaxButton("save") {
 
 					@Override
@@ -233,13 +314,19 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						CodeCommentReply reply = getReply(replyId);
-						reply.setContent(input.getModelObject());
-						GitPlex.getInstance(CodeCommentReplyManager.class).persist(reply);
-
-						WebMarkupContainer replyContainer = newReplyContainer(componentId, replyId);
-						fragment.replaceWith(replyContainer);
-						target.add(replyContainer);
+						try {
+							CodeCommentReply reply = getReply(replyId);
+							if (reply.getVersion() != lastVersion)
+								throw new StaleObjectStateException(CodeComment.class.getName(), reply.getId());
+							reply.setContent(input.getModelObject());
+							GitPlex.getInstance(CodeCommentReplyManager.class).persist(reply);
+							WebMarkupContainer replyContainer = newReplyContainer(componentId, replyId);
+							fragment.replaceWith(replyContainer);
+							target.add(replyContainer);
+						} catch (StaleObjectStateException e) {
+							error("Some one changed the content you are editing. Reload the page and try again.");
+							target.add(feedback);
+						}
 					}
 
 				});

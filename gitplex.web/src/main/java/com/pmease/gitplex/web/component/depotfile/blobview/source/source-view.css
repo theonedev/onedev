@@ -24,7 +24,7 @@
 .source-view>.comment>.content>.head {
 	font-size: 16px;
 	padding: 4px 8px;
-	border-bottom: 1px dotted #BBB;
+	background: #F2F2F2;
 }
 .source-view>.comment>.content>.body {
 	font-size: 13px;
@@ -54,7 +54,7 @@
 .source-view>.outline>.content>.head {
 	font-size: 16px;
 	padding: 4px 8px;
-	border-bottom: 1px dotted #BBB;
+	background: #F2F2F2;
 }
 .source-view>.outline>.content>.body {
 	font-size: 13px;
