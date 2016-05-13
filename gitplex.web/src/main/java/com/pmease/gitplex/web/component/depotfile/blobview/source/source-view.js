@@ -186,6 +186,7 @@ gitplex.sourceview = {
 				if (initState)
 					pmease.commons.codemirror.initState(cm, viewState);
 				cm.on("scroll", function() {
+					gitplex.mouseState.moved = false;					
 					alignCommentPopovers(cm);					
 				});
 			} else {
