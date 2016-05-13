@@ -3,11 +3,18 @@ package com.pmease.commons.lang.extractors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExtractStream {
 
+	private static final Logger logger = LoggerFactory.getLogger(ExtractStream.class);
+	
 	private final List<ExtractToken> tokens;
 	
 	private int pos = -1; // 0-indexed position of current token 
@@ -18,6 +25,16 @@ public class ExtractStream {
 	}
 	
 	public ExtractStream(Lexer lexer, TokenFilter filter) {
+		lexer.removeErrorListeners();
+		lexer.addErrorListener(new BaseErrorListener() {
+
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				logger.error("Error lexing at position '" + line + ":" + charPositionInLine + "': " + msg);
+			}
+			
+		});
 		tokens = new ArrayList<>();
 		Token token = lexer.nextToken();
 		while (token.getType() != Token.EOF) {

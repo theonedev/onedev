@@ -1,7 +1,10 @@
 package com.pmease.gitplex.web.page.test;
 
-import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.web.component.AccountLink;
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
+
+import com.pmease.commons.lang.extractors.java.JavaExtractor;
 import com.pmease.gitplex.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -10,8 +13,12 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new AccountLink("account", (Account)null));
+
+		JavaExtractor extractor = new JavaExtractor();
+		try {
+			extractor.extract(FileUtils.readFileToString(new File("w:\\linux\\MAINTAINERS")));
+		} catch (Exception e) {
+		}
 	}
 
 }
