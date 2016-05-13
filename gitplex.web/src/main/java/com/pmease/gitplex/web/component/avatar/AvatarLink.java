@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.component.avatar;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -102,6 +103,13 @@ public class AvatarLink extends BookmarkablePageLink<Void> {
 				avatarChanged.getPartialPageRequestHandler().add(this);
 			}
 		}
+	}
+	
+	@Override
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		if (params.isEmpty())
+			tag.setName("span");
 	}
 	
 	@Override

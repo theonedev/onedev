@@ -18,7 +18,6 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.Commit;
-import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -63,10 +62,6 @@ class ContributionPanel extends Panel {
 		link.add(new Label("message", commit.getSubject()));
 		add(link);
 
-		link = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, 
-				CommitDetailPage.paramsOf(depotModel.getObject(), commit.getHash()));
-		link.add(new Label("hash", GitUtils.abbreviateSHA(commit.getHash())));
-		add(link);
 		add(new Label("date", DateUtils.formatAge(commit.getCommitter().getWhen())));
 		
 		add(new DropdownLink("contributors") {

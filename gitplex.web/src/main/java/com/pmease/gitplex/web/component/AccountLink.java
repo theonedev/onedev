@@ -62,7 +62,7 @@ public class AccountLink extends BookmarkablePageLink<Void> {
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		if (params.isEmpty())
-			tag.setName("i");
+			tag.setName("span");
 	}
 
 	@Override
