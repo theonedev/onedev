@@ -98,6 +98,7 @@
 }
 #repo-file>.contribution .hash a {
 	font-family: monospace;
+	font-size: 13px;
 }
 #repo-file>.contribution .date {
 	margin-left: 12px;

@@ -247,27 +247,28 @@ gitplex.sourceview = {
 			}
 		});
 	},
+	restoreMark: function() {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var uri = new URI(window.location.href); 
+		var markStr = uri.search(true).mark;
+		if (markStr) {
+			var splitted = markStr.split("-");
+			var fromInfo = splitted[0].split(".");
+			var toInfo = splitted[1].split(".");
+			var mark = {
+				beginLine: parseInt(fromInfo[0])-1,
+				beginChar: parseInt(fromInfo[1]),
+				endLine: parseInt(toInfo[0])-1,
+				endChar: parseInt(toInfo[1])
+			}
+			pmease.commons.codemirror.mark(cm, mark, false);
+		} else {
+			pmease.commons.codemirror.clearMark(cm);
+		}
+	},
 	addCommentGutter: function(line, commentInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		var commentCallback = $(".source-view").data("commentCallback");
-		function restoreMark() {
-			var uri = new URI(window.location.href); 
-			var markStr = uri.search(true).mark;
-			if (markStr) {
-				var splitted = markStr.split("-");
-				var fromInfo = splitted[0].split(".");
-				var toInfo = splitted[1].split(".");
-				var mark = {
-					beginLine: parseInt(fromInfo[0])-1,
-					beginChar: parseInt(fromInfo[1]),
-					endLine: parseInt(toInfo[0])-1,
-					endChar: parseInt(toInfo[1])
-				}
-				pmease.commons.codemirror.mark(cm, mark, false);
-			} else {
-				pmease.commons.codemirror.clearMark(cm);
-			}
-		}
 		
 		var $gutter = $(document.createElement("div"));
 		$gutter.addClass("CodeMirror-comment");
@@ -295,7 +296,7 @@ gitplex.sourceview = {
 						pmease.commons.codemirror.mark(cm, commentInfo.mark, false);
 					});
 					$(this).mouseout(function() {
-						restoreMark();
+						gitplex.sourceview.restoreMark();
 					});
 					$(this).click(function() {
     					if ($(".source-view form.dirty").length != 0 
@@ -316,7 +317,7 @@ gitplex.sourceview = {
 				pmease.commons.codemirror.mark(cm, commentInfo.mark, false);
 			});
 			$commentLink.mouseout(function() {
-				restoreMark();
+				gitplex.sourceview.restoreMark();
 			});
 			$commentLink.click(function() {
 				if ($(".source-view form.dirty").length != 0 
@@ -374,11 +375,13 @@ gitplex.sourceview = {
 		gitplex.sourceview.highlightCommentTrigger();
 		gitplex.sourceview.onLayoutChange();
 	},
-	onShowComment: function(commentInfo) {
+	onOpenComment: function(commentInfo) {
 		gitplex.sourceview.highlightCommentTrigger();
 		gitplex.sourceview.onLayoutChange();
 		if (commentInfo)
 			gitplex.sourceview.mark(commentInfo.mark, false);
+		else
+			gitplex.sourceview.restoreMark();
 	},
 	onToggleOutline: function() {
 		gitplex.sourceview.onLayoutChange();

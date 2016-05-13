@@ -252,6 +252,13 @@ public class SourceViewPanel extends BlobViewPanel {
 			public void onClick(AjaxRequestTarget target) {
 				mark(target, context.getComment().getMark(), true);
 				context.onMark(target, context.getComment().getMark());
+				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				setOutputMarkupId(true);
 			}
 			
 		});
@@ -435,7 +442,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					commentContainer.replace(commentPanel);
 					commentContainer.setVisible(true);
 					target.add(commentContainer);
-					String script = String.format("gitplex.sourceview.onShowComment(%s);", 
+					String script = String.format("gitplex.sourceview.onOpenComment(%s);", 
 							getJsonOfComment(commentModel.getObject()));
 					target.appendJavaScript(script);
 					context.onOpenComment(target, commentModel.getObject());
@@ -599,7 +606,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		commentContainer.replace(new WebMarkupContainer(BODY_ID));
 		commentContainer.setVisible(false);
 		target.add(commentContainer);
-		target.appendJavaScript("gitplex.sourceview.onShowComment();");
+		target.appendJavaScript("gitplex.sourceview.onOpenComment();");
 	}
 	
 	private List<Symbol> getChildSymbols(@Nullable Symbol parentSymbol) {
