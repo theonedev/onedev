@@ -14,55 +14,57 @@
 .revision-diff>.body>.alert {
 	margin-bottom: 16px;
 }
-.revision-diff .total-changed:after {
+.revision-diff>.body>.title>a:after {
     font-family: FontAwesome; 
     font-weight: bold;
     content: "\f107";
 }
-.revision-diff .total-changed.expanded:after {
+.revision-diff>.body>.title>a.expanded:after {
     content: "\f106";
 }
-.revision-diff>.body>ul>li.diff-stat {
+.revision-diff>.body>.diff-stats>.diff-stat {
 	font-size: 13px;
 }
-.revision-diff>.body>ul>li.diff-stat>.icon {
+.revision-diff>.body>.diff-stats>.diff-stat>.icon {
 	margin-top: 2px;
 }
-.revision-diff>.body>ul>li.diff-stat .fa-diff-modified, .revision-diff>.body>ul>li.diff-stat .fa-diff-renamed {
+.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-modified, 
+.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-renamed {
 	color: #D0B44C;
 }
-.revision-diff>.body>ul>li.diff-stat .fa-diff-added {
+.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-added {
 	color: #35C335;
 }
-.revision-diff>.body>ul>li.diff-stat .fa-diff-removed {
+.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-removed {
 	color: #C33535;
 }
 .revision-diff>.body>.diff-stats {
 	margin-top: -10px;
 }
-.revision-diff>.body>.diff-stats li {
+.revision-diff>.body>.diff-stats>.diff-stat {
 	padding: 6px 0;
 	border-bottom: 1px solid #F2F2F2;
 }
-.revision-diff>.body>.diff-stats li:last-child {
+.revision-diff>.body>.diff-stats>.diff-stat:last-child {
 	border-bottom: none;
 }
-.revision-diff>.body>.diff-stats li a.file {
+.revision-diff>.body>.diff-stats>.diff-stat a.file {
 	padding: 0 6px;
 }
-.revision-diff>.body>.diff-stats li>.additions {
+.revision-diff>.body>.diff-stats>.diff-stat>.additions {
 	color: #35C335;
 }
-.revision-diff>.body>.diff-stats li>.deletions {
+.revision-diff>.body>.diff-stats>.diff-stat>.deletions {
 	color: #C33535;
 }
-.revision-diff>.body>.diff-stats li>.additions, .revision-diff .diff-stats li>.deletions {
+.revision-diff>.body>.diff-stats>.diff-stat>.additions, 
+.revision-diff>.body>.diff-stats>.diff-stat>.deletions {
 	font-size: 12px;
 	font-weight: bold;
 	margin-right: 4px;
 	margin-top: 2px;
 }
 
-.revision-diff>.body>.changes>.change {
+.revision-diff>.body>.detail>.diffs>.diff {
 	margin-bottom: 20px;
 }

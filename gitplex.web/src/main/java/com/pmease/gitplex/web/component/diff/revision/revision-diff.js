@@ -1,9 +1,9 @@
 gitplex.revisionDiff = {
 	init: function() {
 		var cookieName = "revisionDiff.showDiffStats";
-		var $container = $(".revision-diff");
-		var $diffStats = $container.find("ul.diff-stats");
-		var $diffStatsToggle = $container.find("a.total-changed");
+		var $body = $(".revision-diff>.body");
+		var $diffStats = $body.children(".diff-stats");
+		var $diffStatsToggle = $body.find(">.title a");
 		$diffStatsToggle.click(function() {
 			if ($diffStats.is(":visible")) {
 				$diffStats.hide();
@@ -14,7 +14,6 @@ gitplex.revisionDiff = {
 				$diffStatsToggle.addClass("expanded");
 				Cookies.set(cookieName, "yes", {expires: Infinity});
 			}
-			$(document.body).trigger('sticky_kit:recalc');		
 		});
 		$diffStats.find("a.file").each(function() {
 			var $this = $(this);
@@ -36,8 +35,8 @@ gitplex.revisionDiff = {
 			gitplex.revisionDiff.jumpToFile(search["jump-file"]);
 	},
 	jumpToFile: function(file) {
-		var $container = $(".revision-diff");
-		var $fileDiff = $container.find('li[data-file="' + file.escape() + '"]');
+		var $detail = $(".revision-diff>.body>.detail");
+		var $fileDiff = $detail.find('li[data-file="' + file.escape() + '"]');
 		$(window).scrollTop($fileDiff.offset().top);
 		return false;
 	}

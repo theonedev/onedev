@@ -509,7 +509,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		body.add(new ListView<BlobChange>("changes", new AbstractReadOnlyModel<List<BlobChange>>() {
+		body.add(new ListView<BlobChange>("diffs", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -522,7 +522,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				item.add(AttributeAppender.append("data-file", change.getPath()));
-				item.add(new BlobDiffPanel("change", depotModel, requestModel, change, diffMode));
+				item.add(new BlobDiffPanel("diff", depotModel, requestModel, change, diffMode));
 			}
 			
 		});

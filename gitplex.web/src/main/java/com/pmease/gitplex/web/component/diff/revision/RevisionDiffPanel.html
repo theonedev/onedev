@@ -25,7 +25,7 @@
 		</table>
 		<div wicket:id="body" class="body">
 			<div class="title">
-				Total <a wicket:id="totalChanged" class="total-changed"></a>
+				Total <a wicket:id="totalChanged"></a>
 			</div>
 			<div wicket:id="tooManyChanges" class="alert alert-warning">Sorry we are unable to display the full diff as there are too many changes</div>
 			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
@@ -39,11 +39,13 @@
 					</wicket:enclosure>
 				</li>
 			</ul>
-			<ul class="changes list-unstyled">
-				<li wicket:id="changes" class="change">
-					<div wicket:id="change"></div>
-				</li>
-			</ul>
+			<div class="detail">
+				<ul class="diffs list-unstyled">
+					<li wicket:id="diffs" class="diff">
+						<div wicket:id="diff"></div>
+					</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 </wicket:panel>
