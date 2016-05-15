@@ -62,6 +62,7 @@ import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
+import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
@@ -86,7 +87,6 @@ import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.jqueryui.JQueryUIJavaScriptReference;
 
 /**
  * Make sure to add only one source view panel per page
@@ -667,7 +667,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
-		response.render(JQueryUIJavaScriptReference.asHeaderItem());
+		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));

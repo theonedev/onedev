@@ -1,6 +1,5 @@
 .text-diff {
 	border: 1px solid #D8D8D8;
-	border-radius: 4px;
 	z-index: 10;
 	position: relative;
 }
@@ -28,12 +27,6 @@
  */
 .text-diff>.body>tbody>tr>td {
 	position: relative;
-}
-.text-diff>.body>tbody>tr:last-child>td:first-child {
-	border-radius: 0 0 0 4px;
-}
-.text-diff>.body>tbody>tr:last-child>td:last-child {
-	border-radius: 0 0 4px 0;
 }
 .text-diff>.body>tbody>tr>td.number {
 	padding: 0 4px;
@@ -69,9 +62,6 @@
 	background: #edf2f9;
 	padding: 6px 0;
 	color: #888;
-}
-.text-diff>.body>tbody>tr:last-child>td.expander a {
-	border-radius: 0 0 0 4px;
 }
 .text-diff>.body>tbody>tr.expander>td.expander>a:hover {
 	background: #4078c0;

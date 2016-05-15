@@ -64,7 +64,47 @@
 	margin-right: 4px;
 	margin-top: 2px;
 }
-
+.revision-diff>.body>.loading {
+	font-size: 20px;
+}
 .revision-diff>.body>.detail>.diffs>.diff {
 	margin-bottom: 20px;
+}
+.revision-diff>.body>.detail {
+	position: relative;
+	display: none;
+}
+.revision-diff>.body>.detail>.comment {
+	border: 1px solid #DDD;
+	position: absolute;
+	left: 0;
+	margin-right: 12px;
+	padding-right: 4px;	
+}
+.revision-diff>.body>.detail>.comment>.content>.head .locate {
+	margin-right: 8px;
+	font-size: 20px;
+}
+.revision-diff>.body>.detail>.comment>.ui-resizable-handle {
+	position: absolute;
+    background: #EEE url("vgrabber.png") no-repeat scroll right center;
+    cursor: e-resize;
+    width: 4px;
+    right: 0;
+    top: 0;
+}
+.revision-diff>.body>.detail>.comment>.content>.head {
+	font-size: 16px;
+	padding: 4px 8px;
+	background: #F2F2F2;
+}
+.revision-diff>.body>.detail>.comment>.content>.body {
+	font-size: 13px;
+	padding: 12px;
+	overflow: auto; 
+}
+
+.revision-diff>.body>.detail>.diffs {
+	position: absolute;
+	top: 0;
 }

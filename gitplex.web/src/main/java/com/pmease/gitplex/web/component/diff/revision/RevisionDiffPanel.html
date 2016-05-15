@@ -39,7 +39,19 @@
 					</wicket:enclosure>
 				</li>
 			</ul>
+			<div class="loading">Loading...</div>
 			<div class="detail">
+				<div wicket:id="comment" class="comment">
+					<div class="ui-resizable-handle ui-resizable-e"></div>
+					<div class="content">
+						<div class="head clearfix">
+							<span class="pull-left">Comment</span>
+							<a wicket:id="close" class="pull-right close" title="Hide comment"><i class="fa fa-times"></i></a>
+							<a wicket:id="locate" class="pull-right locate close" title="Locate marked text of this comment"><i class="fa fa-hand-o-right"></i></a>
+						</div>
+						<div wicket:id="body" class="body"></div>
+					</div>
+				</div>
 				<ul class="diffs list-unstyled">
 					<li wicket:id="diffs" class="diff">
 						<div wicket:id="diff"></div>

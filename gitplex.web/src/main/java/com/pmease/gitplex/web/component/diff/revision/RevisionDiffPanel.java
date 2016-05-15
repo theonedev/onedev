@@ -58,6 +58,7 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
+import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -427,7 +428,36 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		add(form);
- 		
+
+		WebMarkupContainer commentContainer = new WebMarkupContainer("comment") {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript("gitplex.revisionDiff.initComment();"));
+			}
+			
+		};
+		commentContainer.setOutputMarkupPlaceholderTag(true);
+		body.add(commentContainer);
+		commentContainer.add(new AjaxLink<Void>("locate") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				
+			}
+
+		});
+		commentContainer.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				
+			}
+			
+		});
+		commentContainer.add(new WebMarkupContainer("body"));
+		
 		Component totalChangedLink;
 		body.add(totalChangedLink = new Label("totalChanged", new AbstractReadOnlyModel<String>() {
 
@@ -543,6 +573,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(

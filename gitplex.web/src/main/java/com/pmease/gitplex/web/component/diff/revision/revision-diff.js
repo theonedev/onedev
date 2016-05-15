@@ -27,6 +27,67 @@ gitplex.revisionDiff = {
 				gitplex.revisionDiff.jumpToFile($this.data("file"));
 			});
 		});
+
+		function onWindowResizeOrScroll() {
+			var $detail = $body.children(".detail");
+			var $comment = $detail.children(".comment");
+			var $diffs = $detail.children(".diffs");
+			$detail.show();
+			$body.children(".loading").hide();
+			$diffs.css("left", $comment.outerWidth(true));
+			$diffs.outerWidth($detail.width() - $comment.outerWidth(true));
+			
+			var scrollTop = $(window).scrollTop();
+			var commentOffset = scrollTop - $diffs.offset().top;
+			if (commentOffset > 0) {
+				$comment.css("top", commentOffset);
+			} else {
+				$comment.css("top", 0);
+			}
+			var $lastDiff = $diffs.children().last();
+			var diffsHeight = $diffs.outerHeight();
+			var commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop;
+			var windowHeight = $(window).height();
+			var minCommentHeight = windowHeight - 100;
+			if (commentHeight < minCommentHeight)
+				commentHeight = minCommentHeight;
+			else if (commentHeight > windowHeight)
+				commentHeight = windowHeight;
+			var $commentResizeHandle = $comment.children(".ui-resizable-handle");
+			$commentResizeHandle.outerHeight(commentHeight - 2);
+			var $commentHead = $comment.find(">.content>.head");
+			$comment.find(">.content>.body").outerHeight(commentHeight-2-$commentHead.outerHeight());
+			$detail.height(commentHeight>diffsHeight?commentHeight:diffsHeight);
+		}
+		
+		onWindowResizeOrScroll();
+		$(window).on("scroll resize", onWindowResizeOrScroll);
+	},
+	initComment: function() {
+		var commentWidthCookieKey = "revisionDiff.comment.width";
+		var $comment = $(".revision-diff>.body>.detail>.comment");
+		var commentWidth = Cookies.get(commentWidthCookieKey);
+		if (!commentWidth)
+			commentWidth = 400;
+		$comment.outerWidth(commentWidth);
+		var $commentResizeHandle = $comment.children(".ui-resizable-handle");
+		var $diffs = $(".revision-diff>.body>.detail>.diffs");
+		/*
+		$comment.resizable({
+			autoHide: false,
+			handles: {"e": $commentResizeHandle},
+			minWidth: 200,
+			resize: function(e, ui) {
+				var diffsWidth = $diffs.outerWidth();
+			    if(diffsWidth < 300)
+			    	$(this).resizable({maxWidth: ui.size.width});
+			},
+			stop: function(e, ui) {
+				$(this).resizable({maxWidth: undefined});
+				Cookies.set(commentWidthCookieKey, ui.size.width, {expires: Infinity});
+			}
+		});
+		*/
 	},
 	scroll: function() {
 		var uri = URI(window.location.href); 

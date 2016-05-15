@@ -10,6 +10,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
+
 public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 
 	private static final long serialVersionUID = 1L;
@@ -142,7 +144,7 @@ public abstract class SortBehavior extends AbstractDefaultAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(SortResourceReference.get()));
+		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
 		response.render(OnLoadHeaderItem.forScript(getSortScript()));
 	}
 	
