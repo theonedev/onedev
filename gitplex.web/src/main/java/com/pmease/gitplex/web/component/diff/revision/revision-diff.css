@@ -80,6 +80,8 @@
 	left: 0;
 	margin-right: 12px;
 	padding-right: 4px;	
+	background: white;
+	z-index: 12;
 }
 .revision-diff>.body>.detail>.comment>.content>.head .locate {
 	margin-right: 8px;

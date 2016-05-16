@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.pmease.commons.lang.diff.WhitespaceOption;
 
-class HistoryState implements Serializable {
+public class HistoryState implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -15,5 +15,7 @@ class HistoryState implements Serializable {
 	public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 	
 	public String pathFilter;
+	
+	public Long commentId;
 	
 }

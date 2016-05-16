@@ -42,7 +42,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.command.LogCommand;
-import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.util.concurrent.PrioritizedCallable;
 import com.pmease.commons.wicket.ajaxlistener.IndicateLoadingListener;
@@ -428,10 +427,12 @@ public class DepotCommitsPage extends DepotPage {
 				}
 			}
 			if (state.getCompareWith() != null) {
-				PageParameters params = RevisionComparePage.paramsOf(getDepot(), 
-						new DepotAndRevision(getDepot(), commit.getHash()), 
-						new DepotAndRevision(getDepot(), state.getCompareWith()), 
-						true, WhitespaceOption.DEFAULT, path);
+				RevisionComparePage.HistoryState state = new RevisionComparePage.HistoryState();
+				state.leftSide = new DepotAndRevision(getDepot(), commit.getHash());
+				state.rightSide = new DepotAndRevision(getDepot(), DepotCommitsPage.this.state.getCompareWith());
+				state.pathFilter = path;
+				
+				PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
 				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));

@@ -44,6 +44,7 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
@@ -63,6 +64,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
+	
+	private static final String PARAM_COMMENT = "comment";
 	
 	public static final String REV_BASE = "base";
 	
@@ -89,6 +92,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 	
 	private String pathFilter;
+	
+	private Long commentId;
 	
 	private WebMarkupContainer compareHead;
 	
@@ -146,6 +151,7 @@ public class RequestComparePage extends RequestDetailPage {
 		state.newRev = params.get(PARAM_NEW_REV).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		
 		initFromState(state);
 	}
@@ -155,6 +161,7 @@ public class RequestComparePage extends RequestDetailPage {
 		newCommitHash = getCommitHash(state.newRev);
 		whitespaceOption = state.whitespaceOption;
 		pathFilter = state.pathFilter;
+		commentId = state.commentId;
 	}
 	
 	private String getRevision(String commitHash) {
@@ -460,21 +467,25 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String oldRev, String newRev) {
-		return paramsOf(request, oldRev, newRev, WhitespaceOption.DEFAULT, null);
+		HistoryState state = new HistoryState();
+		state.oldRev = oldRev;
+		state.newRev = newRev;
+		return paramsOf(request, state);
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, @Nullable String oldRev, @Nullable String newRev, 
-			WhitespaceOption whitespaceOption, @Nullable String pathFilter) {
+	public static PageParameters paramsOf(PullRequest request, HistoryState state) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 
-		if (oldRev != null)
-			params.set(PARAM_OLD_REV, oldRev);
-		if (newRev != null)
-			params.set(PARAM_NEW_REV, newRev);
-		if (whitespaceOption != WhitespaceOption.DEFAULT)
-			params.set(PARAM_WHITESPACE_OPTION, whitespaceOption.name());
-		if (pathFilter != null)
-			params.set(PARAM_PATH_FILTER, pathFilter);
+		if (state.oldRev != null)
+			params.set(PARAM_OLD_REV, state.oldRev);
+		if (state.newRev != null)
+			params.set(PARAM_NEW_REV, state.newRev);
+		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
+			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
+		if (state.pathFilter != null)
+			params.set(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.commentId != null)
+			params.set(PARAM_COMMENT, state.commentId);
 		return params;
 	}
 	
@@ -618,8 +629,7 @@ public class RequestComparePage extends RequestDetailPage {
 	}
 
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
-		PageParameters params = paramsOf(getPullRequest(), state.oldRev, state.newRev, 
-				state.whitespaceOption, state.pathFilter);
+		PageParameters params = paramsOf(getPullRequest(), state);
 		CharSequence url = RequestCycle.get().urlFor(RequestComparePage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
@@ -634,7 +644,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
 		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
 				requestModel, oldCommitHash, newCommitHash, pathFilter, 
-				whitespaceOption) {
+				whitespaceOption, commentId) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -647,6 +657,11 @@ public class RequestComparePage extends RequestDetailPage {
 					WhitespaceOption whitespaceOption) {
 				whitespaceOption = state.whitespaceOption = whitespaceOption;
 				pushState(target);
+			}
+
+			@Override
+			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+				commentId = state.commentId = CodeComment.idOf(comment);
 			}
 			
 		};

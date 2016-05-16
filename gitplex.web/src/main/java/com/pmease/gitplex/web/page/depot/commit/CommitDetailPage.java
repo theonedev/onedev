@@ -42,6 +42,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
@@ -68,6 +69,8 @@ public class CommitDetailPage extends DepotPage {
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
+	
+	private static final String PARAM_COMMENT = "comment";
 	
 	protected String revision;
 	
@@ -295,7 +298,7 @@ public class CommitDetailPage extends DepotPage {
 	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
 		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
 				Model.of((PullRequest)null), getCompareWith(), 
-				getCommit().name(), state.pathFilter, state.whitespaceOption) {
+				getCommit().name(), state.pathFilter, state.whitespaceOption, state.commentId) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -307,6 +310,12 @@ public class CommitDetailPage extends DepotPage {
 			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
 					WhitespaceOption whitespaceOption) {
 				state.whitespaceOption = whitespaceOption;
+				pushState(target);
+			}
+
+			@Override
+			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+				state.commentId = CodeComment.idOf(comment);
 				pushState(target);
 			}
 			
@@ -343,6 +352,8 @@ public class CommitDetailPage extends DepotPage {
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.commentId != null)
+			params.set(PARAM_COMMENT, state.commentId);
 		return params;
 	}
 	
@@ -378,6 +389,8 @@ public class CommitDetailPage extends DepotPage {
 		
 		public String compareWith;
 		
+		public Long commentId;
+		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 		
 		public String pathFilter;
@@ -389,6 +402,7 @@ public class CommitDetailPage extends DepotPage {
 			compareWith = params.get(PARAM_COMPARE_WITH).toString();
 			whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();
+			commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		}
 		
 	}

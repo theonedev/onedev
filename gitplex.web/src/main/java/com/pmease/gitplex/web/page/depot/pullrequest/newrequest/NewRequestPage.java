@@ -46,6 +46,7 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
@@ -313,7 +314,7 @@ public class NewRequestPage extends PullRequestPage {
 		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
-				new Model<PullRequest>(null), oldRev, newRev, null, null) {
+				new Model<PullRequest>(null), oldRev, newRev, null, WhitespaceOption.DEFAULT, null) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -322,6 +323,10 @@ public class NewRequestPage extends PullRequestPage {
 			@Override
 			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
 					WhitespaceOption whitespaceOption) {
+			}
+
+			@Override
+			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
 			}
 			
 		};

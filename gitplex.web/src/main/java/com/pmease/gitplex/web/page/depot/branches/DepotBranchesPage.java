@@ -51,7 +51,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmListener;
 import com.pmease.commons.wicket.behavior.OnTypingDoneBehavior;
@@ -480,13 +479,10 @@ public class DepotBranchesPage extends DepotPage {
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							PageParameters params = RevisionComparePage.paramsOf(
-									getDepot(),
-									new DepotAndBranch(getDepot(), branch),
-									new DepotAndBranch(getDepot(), getBaseBranch()),
-									true,
-									WhitespaceOption.DEFAULT,
-									null); 
+							RevisionComparePage.HistoryState state = new RevisionComparePage.HistoryState();
+							state.leftSide = new DepotAndBranch(getDepot(), branch);
+							state.rightSide = new DepotAndBranch(getDepot(), getBaseBranch());
+							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state); 
 							setResponsePage(RevisionComparePage.class, params);
 						}
 					}
@@ -542,13 +538,10 @@ public class DepotBranchesPage extends DepotPage {
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							PageParameters params = RevisionComparePage.paramsOf(
-									getDepot(), 
-									new DepotAndBranch(getDepot(), getBaseBranch()),
-									new DepotAndBranch(getDepot(), branch), 
-									true,
-									WhitespaceOption.DEFAULT,
-									null);
+							RevisionComparePage.HistoryState state = new RevisionComparePage.HistoryState();
+							state.leftSide = new DepotAndBranch(getDepot(), getBaseBranch());
+							state.rightSide = new DepotAndBranch(getDepot(), branch);
+							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
 							setResponsePage(RevisionComparePage.class, params);
 						}
 					}

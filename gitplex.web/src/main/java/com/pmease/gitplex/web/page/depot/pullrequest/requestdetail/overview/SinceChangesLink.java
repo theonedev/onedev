@@ -11,9 +11,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.HistoryState;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
@@ -61,8 +61,10 @@ class SinceChangesLink extends Panel {
 			@Override
 			public void onClick() {
 				PullRequest request = requestModel.getObject();
-				PageParameters params = RequestComparePage.paramsOf(request, oldRevModel.getObject(), 
-						RequestComparePage.REV_LAST_UPDATE_PREFIX+1, WhitespaceOption.DEFAULT, null);
+				HistoryState state = new HistoryState();
+				state.oldRev = oldRevModel.getObject();
+				state.newRev = RequestComparePage.REV_LAST_UPDATE_PREFIX+1;
+				PageParameters params = RequestComparePage.paramsOf(request, state);
 				setResponsePage(RequestComparePage.class, params);
 			}
 			
