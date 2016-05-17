@@ -43,7 +43,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
@@ -835,8 +834,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
-		Preconditions.checkArgument(blobIdent.revision.equals(this.blobIdent.revision));
-		
 		mark = Mark.of(tokenPos);
 		if (blobIdent.equals(this.blobIdent)) {
 			if (mark != null) {
@@ -875,6 +872,11 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	@Override
 	public void onBlameChange(AjaxRequestTarget target, boolean blamed) {
 		mode = (blamed?Mode.BLAME:null);
+		Component fileViewer = get(FILE_VIEWER_ID);
+		if (!(fileViewer instanceof SourceViewPanel)) {
+			newFileViewer(target, null);
+			resizeWindow(target);
+		}
 		pushState(target);
 	}
 

@@ -1,13 +1,23 @@
 package com.pmease.gitplex.web.component.depotfile.blobview.markdown;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import com.pmease.commons.git.Blob;
+import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
+import com.pmease.commons.wicket.component.menu.MenuItem;
+import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
+import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
 
 @SuppressWarnings("serial")
@@ -25,6 +35,41 @@ public class MarkdownFilePanel extends BlobViewPanel {
 		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), false));
 	}
 
+	@Override
+	public List<MenuItem> getMenuItems(MenuLink menuLink) {
+		List<MenuItem> menuItems = new ArrayList<>();
+		menuItems.add(new MenuItem() {
+			
+			@Override
+			public String getIconClass() {
+				return context.getMode() == Mode.BLAME?"fa fa-check":null;
+			}
+
+			@Override
+			public String getLabel() {
+				return "Blame";
+			}
+
+			@Override
+			public AbstractLink newLink(String id) {
+				AbstractLink link = new AjaxLink<Void>(id) {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						menuLink.close();
+						context.onBlameChange(target, true);									
+					}
+					
+				};
+				link.add(new ViewStateAwareBehavior());
+				return link;
+			}
+			
+		});
+		
+		return menuItems;
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
