@@ -493,7 +493,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	
 	protected String getDirectory(boolean insideDir) {
 		BlobIdent blobIdent = getCurrentBlob();
-		if (blobIdent == null || blobIdent.path == null || !insideDir) 
+		if (blobIdent == null || blobIdent.path == null || !blobIdent.path.contains("/") || !insideDir) 
 			return null;
 		else if (blobIdent.isTree()) 
 			return blobIdent.path;
