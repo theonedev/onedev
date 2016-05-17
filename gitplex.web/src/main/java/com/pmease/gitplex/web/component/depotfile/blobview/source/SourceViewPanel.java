@@ -566,7 +566,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
-						getRevision(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
+						getCommitId().name(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 				context.onSelect(target, blobIdent, hit.getTokenPos());
 			}
 

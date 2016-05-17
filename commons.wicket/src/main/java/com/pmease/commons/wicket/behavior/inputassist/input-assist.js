@@ -11,7 +11,7 @@ pmease.commons.inputassist = {
 				caret = $input.caret();
 			else
 				caret = -1;
-			if (value != $input.data("prevValue") || caret != $input.data("prevCaret")) {
+			if (value != $input.data("prevValue") || caret != $input.data("prevCaret") || !$input.data("dropdown")) {
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
 				if ($input.is(":focus") && e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter

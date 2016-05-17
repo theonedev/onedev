@@ -12,14 +12,14 @@ public enum WhitespaceOption {
 
 		@Override
 		public String process(String line) {
-			return line;
+			return StringUtils.stripEnd(line, " \t\r\n");
 		}
 
 		@Override
 		public String getDescription() {
-			return "Do not ignore white spaces";
+			return "Ignore trailing white spaces";
 		}
-
+		
 	},
 	IGNORE_LEADING() {
 
@@ -31,19 +31,6 @@ public enum WhitespaceOption {
 		@Override
 		public String getDescription() {
 			return "Ignore leading white spaces";
-		}
-		
-	},
-	IGNORE_TRAILING() {
-
-		@Override
-		public String process(String line) {
-			return StringUtils.stripEnd(line, " \t\r\n");
-		}
-
-		@Override
-		public String getDescription() {
-			return "Ignore trailing white spaces";
 		}
 		
 	},
@@ -72,7 +59,20 @@ public enum WhitespaceOption {
 			return "Ignore all white spaces";
 		}
 		
-	};	
+	},
+	DO_NOT_IGNORE() {
+
+		@Override
+		public String process(String line) {
+			return line;
+		}
+
+		@Override
+		public String getDescription() {
+			return "Do not ignore white spaces";
+		}
+
+	};
 
 	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 	

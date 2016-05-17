@@ -796,22 +796,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		super.onDetach();
 	}
 
-	public static class IndexedListener implements IndexListener {
-
-		@Override
-		public void commitIndexed(Depot depot, ObjectId commit) {
-			CommitIndexed trait = new CommitIndexed();
-			trait.depotId = depot.getId();
-			trait.commitId = commit;
-			WebSocketRenderBehavior.requestToRender(trait);
-		}
-
-		@Override
-		public void indexRemoving(Depot depot) {
-		}
-		
-	}
-
 	@Override
 	public BlobIdent getBlobIdent() {
 		return blobIdent;
@@ -959,6 +943,22 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 		}
 		return new ArrayList<>();
+	}
+
+	public static class IndexedListener implements IndexListener {
+
+		@Override
+		public void commitIndexed(Depot depot, ObjectId commit) {
+			CommitIndexed trait = new CommitIndexed();
+			trait.depotId = depot.getId();
+			trait.commitId = commit;
+			WebSocketRenderBehavior.requestToRender(trait);
+		}
+
+		@Override
+		public void indexRemoving(Depot depot) {
+		}
+		
 	}
 
 	public static class HistoryState implements Serializable {

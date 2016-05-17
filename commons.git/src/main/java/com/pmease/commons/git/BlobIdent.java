@@ -23,9 +23,6 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	@Nullable
 	public Integer mode;
 	
-	@Nullable
-	public String id;
-	
 	public BlobIdent() {
 	}
 	
@@ -33,7 +30,6 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		revision = blobIdent.revision;
 		path = blobIdent.path;
 		mode = blobIdent.mode;
-		id = blobIdent.id;
 	}
 	
 	public BlobIdent(@Nullable String revision, @Nullable String path, @Nullable Integer mode) {

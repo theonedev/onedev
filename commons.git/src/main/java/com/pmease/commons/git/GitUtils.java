@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
-import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -211,8 +210,6 @@ public class GitUtils {
     	BlobIdent blobIdent;
 		if (diffEntry.getChangeType() != ChangeType.ADD) {
 			blobIdent = new BlobIdent(oldRev, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());
-			AnyObjectId id = diffEntry.getOldId().toObjectId();
-			blobIdent.id = id!=null?id.name():null;
 		} else {
 			blobIdent = new BlobIdent(oldRev, null, null);
 		}
@@ -223,8 +220,6 @@ public class GitUtils {
     	BlobIdent blobIdent;
 		if (diffEntry.getChangeType() != ChangeType.DELETE) {
 			blobIdent = new BlobIdent(newRev, diffEntry.getNewPath(), diffEntry.getNewMode().getBits());
-			AnyObjectId id = diffEntry.getNewId().toObjectId();
-			blobIdent.id = id!=null?id.name():null;
 		} else {
 			blobIdent = new BlobIdent(newRev, null, null);
 		}

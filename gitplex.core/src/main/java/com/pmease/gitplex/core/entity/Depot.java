@@ -574,48 +574,29 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		
 		Blob blob = getBlobCache().get(blobIdent);
 		if (blob == null) {
-			if (blobIdent.id != null) {
-				try {
+			try (RevWalk revWalk = new RevWalk(getRepository())) {
+				ObjectId commitId = getObjectId(blobIdent.revision);		
+				RevTree revTree = revWalk.parseCommit(commitId).getTree();
+				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
+				if (treeWalk != null) {
 					if (blobIdent.isGitLink()) {
 						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 						if (url == null)
 							throw new ObjectNotExistException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
-						blob = new Blob(blobIdent, new Submodule(url, blobIdent.id).toString().getBytes());
+						String hash = treeWalk.getObjectId(0).name();
+						blob = new Blob(blobIdent, new Submodule(url, hash).toString().getBytes());
 					} else if (blobIdent.isTree()) {
 						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
-						ObjectLoader objectLoader = getRepository().open(ObjectId.fromString(blobIdent.id), Constants.OBJ_BLOB);
+						ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 						blob = readBlob(objectLoader, blobIdent);
 					}
 					getBlobCache().put(blobIdent, blob);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				} else {
+					throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path + "' in revision '" + blobIdent.revision + "'");
 				}
-			} else {
-				try (RevWalk revWalk = new RevWalk(getRepository())) {
-					ObjectId commitId = getObjectId(blobIdent.revision);		
-					RevTree revTree = revWalk.parseCommit(commitId).getTree();
-					TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
-					if (treeWalk != null) {
-						if (blobIdent.isGitLink()) {
-							String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
-							if (url == null)
-								throw new ObjectNotExistException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
-							String hash = treeWalk.getObjectId(0).name();
-							blob = new Blob(blobIdent, new Submodule(url, hash).toString().getBytes());
-						} else if (blobIdent.isTree()) {
-							throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
-						} else {
-							ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
-							blob = readBlob(objectLoader, blobIdent);
-						}
-						getBlobCache().put(blobIdent, blob);
-					} else {
-						throw new ObjectNotExistException("Unable to find blob path '" + blobIdent.path + "' in revision '" + blobIdent.revision + "'");
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 		return blob;

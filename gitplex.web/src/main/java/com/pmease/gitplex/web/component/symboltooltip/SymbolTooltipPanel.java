@@ -57,7 +57,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	private final IModel<PullRequest> requestModel;
 	
-	private String revision = "";
+	private ObjectId commitId = ObjectId.zeroId();
 	
 	private String symbol = "";
 	
@@ -157,8 +157,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 									null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
 						try {
 							SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-							ObjectId commit = depotModel.getObject().getRevCommit(revision);
-							List<QueryHit> hits = searchManager.search(depotModel.getObject(), commit, query);
+							List<QueryHit> hits = searchManager.search(depotModel.getObject(), commitId, query);
 							onOccurrencesQueried(target, hits);
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
@@ -190,18 +189,17 @@ public abstract class SymbolTooltipPanel extends Panel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
-				revision = params.getParameterValue("revision").toString();
+				commitId = ObjectId.fromString(params.getParameterValue("commit").toString());
 				symbol = params.getParameterValue("symbol").toString();
 				if (symbol.startsWith("@"))
 					symbol = symbol.substring(1);
 				try {
 					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-					ObjectId commit = depotModel.getObject().getRevCommit(revision);
-					symbolHits = searchManager.search(depotModel.getObject(), commit, query);
+					symbolHits = searchManager.search(depotModel.getObject(), commitId, query);
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
-						symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+						symbolHits.addAll(searchManager.search(depotModel.getObject(), commitId, query));
 					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
@@ -224,7 +222,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 				ResourceReference ajaxIndicator =  new PackageResourceReference(
 						SymbolTooltipPanel.class, "ajax-indicator.gif");
 				String script = String.format("gitplex.symboltooltip.init('%s', %s, '%s');", 
-						getMarkupId(), getCallbackFunction(explicit("revision"), explicit("symbol")), 
+						getMarkupId(), getCallbackFunction(explicit("commit"), explicit("symbol")), 
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()));
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
@@ -238,7 +236,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
 		HistoryState state = new HistoryState();
-		state.blobIdent.revision = revision;
+		state.blobIdent.revision = commitId.name();
 		state.blobIdent.path = hit.getBlobPath();
 		state.mark = Mark.of(hit.getTokenPos());
 		state.requestId = PullRequest.idOf(requestModel.getObject());
@@ -247,7 +245,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	
 	public PageParameters getFindOccurrencesParams() {
 		HistoryState state = new HistoryState();
-		state.blobIdent.revision = revision;
+		state.blobIdent.revision = commitId.name();
 		state.blobIdent.path = getBlobPath();
 		state.requestId = PullRequest.idOf(requestModel.getObject());
 		state.query = symbol;
@@ -258,8 +256,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 		return symbol;
 	}
 
-	public String getRevision() {
-		return revision;
+	public ObjectId getCommitId() {
+		return commitId;
 	}
 	
 	@Override

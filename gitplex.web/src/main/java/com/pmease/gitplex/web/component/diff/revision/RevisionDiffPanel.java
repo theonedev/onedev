@@ -43,7 +43,6 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
@@ -353,7 +352,10 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public void setObject(String object) {
-				pathFilter = object;
+				if (object != null)
+					pathFilter = object;
+				else
+					pathFilter = ""; // use empty string to make files tab being selected upon refresh
 			}
 			
 		}));
@@ -427,7 +429,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				Preconditions.checkNotNull(target);
 				target.add(body);
 				onPathFilterChange(target, pathFilter);
 			}
@@ -600,9 +601,6 @@ public abstract class RevisionDiffPanel extends Panel {
 				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
-
-		if (RequestCycle.get().find(AjaxRequestTarget.class) == null)
-			response.render(OnDomReadyHeaderItem.forScript("gitplex.revisionDiff.scroll();"));
 	}
 	
 	protected abstract void onPathFilterChange(AjaxRequestTarget target, String pathFilter);

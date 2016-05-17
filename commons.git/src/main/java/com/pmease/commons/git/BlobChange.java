@@ -98,8 +98,6 @@ public abstract class BlobChange implements Serializable {
 					} else {
 						diffBlocks = new ArrayList<>();
 					}
-				} else if (oldBlobIdent.id != null && oldBlobIdent.id.equals(newBlobIdent.id)) {
-					diffBlocks = new ArrayList<>();
 				} else {
 					if (getOldText() != null && getNewText() != null) {
 						List<String> oldLines = getOldText().getLines();

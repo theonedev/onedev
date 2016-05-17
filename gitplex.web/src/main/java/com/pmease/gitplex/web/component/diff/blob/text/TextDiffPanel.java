@@ -207,7 +207,7 @@ public class TextDiffPanel extends Panel {
 
 			@Override
 			protected String getBlobPath() {
-				if (getRevision().equals(change.getNewBlobIdent().revision))
+				if (getCommitId().name().equals(change.getNewBlobIdent().revision))
 					return change.getNewBlobIdent().path;
 				else
 					return change.getOldBlobIdent().path;
