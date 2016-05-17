@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.pmease.commons.git.BlobIdent;
@@ -32,7 +33,9 @@ public interface BlobViewContext extends Serializable {
 	@Nullable
 	Mark getMark();
 	
-	void onMark(AjaxRequestTarget target, @Nullable Mark mark);
+	void onMark(AjaxRequestTarget target, ObjectId commitId, @Nullable Mark mark);
+	
+	String getMarkUrl(ObjectId commitId, Mark mark);
 	
 	Mode getMode();
 	

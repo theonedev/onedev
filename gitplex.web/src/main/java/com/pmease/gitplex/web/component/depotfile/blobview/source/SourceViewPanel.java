@@ -42,6 +42,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -251,7 +252,8 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				mark(target, context.getComment().getMark(), true);
-				context.onMark(target, context.getComment().getMark());
+				context.onMark(target, ObjectId.fromString(context.getComment().getCommit()), 
+						context.getComment().getMark());
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
 
@@ -310,30 +312,27 @@ public class SourceViewPanel extends BlobViewPanel {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				
 				switch(params.getParameterValue("action").toString()) {
+				case "openSelectionPopup": 
+					// must use commit from source view page in case we are commenting on 
+					// a branch and that branch has new commits since the file is being 
+					// displayed
+					ObjectId commitId = ObjectId.fromString(params.getParameterValue("param1").toString());
+					Mark mark = getMark(params, "param2", "param3", "param4", "param5");
+					String script = String.format("gitplex.sourceview.openSelectionPopup('%s', %s, '%s', %s);", 
+							commitId.name(), mark.toJSON(), context.getMarkUrl(commitId, mark), 
+							SecurityUtils.getAccount()!=null);
+					target.appendJavaScript(script);
+					break;
 				case "mark":
-					int fromLine = params.getParameterValue("param1").toInt();
-					int fromCh = params.getParameterValue("param2").toInt();
-					int toLine = params.getParameterValue("param3").toInt();
-					int toCh = params.getParameterValue("param4").toInt();
-					Mark mark = new Mark();
-					mark.beginLine = fromLine;
-					mark.beginChar = fromCh;
-					mark.endLine = toLine;
-					mark.endChar = toCh;
-					context.onMark(target, mark);
+					commitId = ObjectId.fromString(params.getParameterValue("param1").toString());
+					mark = getMark(params, "param2", "param3", "param4", "param5");
+					context.onMark(target, commitId, mark);
 					break;
 				case "addComment": 
 					Preconditions.checkNotNull(SecurityUtils.getAccount());
 					
-					// must use commit from source view page in case we are commenting on 
-					// a branch and that branch has new commits since the file is being 
-					// displayed
-					String commitHash = params.getParameterValue("param1").toString();
-					
-					fromLine = params.getParameterValue("param2").toInt();
-					fromCh = params.getParameterValue("param3").toInt();
-					toLine = params.getParameterValue("param4").toInt();
-					toCh = params.getParameterValue("param5").toInt();
+					commitId = ObjectId.fromString(params.getParameterValue("param1").toString());
+					mark = getMark(params, "param2", "param3", "param4", "param5");
 					
 					Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", SourceViewPanel.this);
 					fragment.setOutputMarkupId(true);
@@ -383,17 +382,11 @@ public class SourceViewPanel extends BlobViewPanel {
 							super.onSubmit(target, form);
 							
 							CodeComment comment = new CodeComment();
-							comment.setCommit(commitHash);
+							comment.setCommit(commitId.name());
 							comment.setPath(context.getBlobIdent().path);
-							comment.setCompareCommit(commitHash);
 							comment.setContent(input.getModelObject());
 							comment.setDepot(context.getDepot());
 							comment.setUser(SecurityUtils.getAccount());
-							Mark mark = new Mark();
-							mark.beginLine = fromLine;
-							mark.beginChar = fromCh;
-							mark.endLine = toLine;
-							mark.endChar = toCh;
 							comment.setMark(mark);
 							GitPlex.getInstance(CodeCommentManager.class).persist(comment);
 							
@@ -454,7 +447,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					commentContainer.replace(commentPanel);
 					commentContainer.setVisible(true);
 					target.add(commentContainer);
-					String script = String.format("gitplex.sourceview.onOpenComment(%s);", 
+					script = String.format("gitplex.sourceview.onOpenComment(%s);", 
 							getJsonOfComment(commentModel.getObject()));
 					target.appendJavaScript(script);
 					context.onOpenComment(target, commentModel.getObject());
@@ -590,6 +583,20 @@ public class SourceViewPanel extends BlobViewPanel {
 		});
 	}
 	
+	private Mark getMark(IRequestParameters params, String beginLineParam, String beginCharParam, 
+			String endLineParam, String endCharParam) {
+		int beginLine = params.getParameterValue(beginLineParam).toInt();
+		int beginChar = params.getParameterValue(beginCharParam).toInt();
+		int endLine = params.getParameterValue(endLineParam).toInt();
+		int endChar = params.getParameterValue(endCharParam).toInt();
+		Mark mark = new Mark();
+		mark.beginLine = beginLine;
+		mark.beginChar = beginChar;
+		mark.endLine = endLine;
+		mark.endChar = endChar;
+		return mark;
+	}
+
 	private String getJsonOfComment(CodeComment comment) {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();

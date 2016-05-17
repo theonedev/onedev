@@ -43,6 +43,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
@@ -822,11 +823,24 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, Mark mark) {
+	public void onMark(AjaxRequestTarget target, ObjectId commitId, Mark mark) {
 		this.mark = mark;
+		if (!blobIdent.revision.equals(commitId.name())) {
+			blobIdent.revision = commitId.name();
+			newRevisionPicker(target);
+		}
 		pushState(target);
 	}
 
+	@Override
+	public String getMarkUrl(ObjectId commitId, Mark mark) {
+		HistoryState state = getState();
+		state.blobIdent.revision = commitId.name();
+		state.mark = mark;
+		PageParameters params = paramsOf(getDepot(), state);		
+		return RequestCycle.get().urlFor(DepotFilePage.class, params).toString();
+	}
+	
 	@Override
 	public Mode getMode() {
 		return mode;
@@ -834,6 +848,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
+		Preconditions.checkArgument(blobIdent.revision.equals(this.blobIdent.revision));
+		
 		mark = Mark.of(tokenPos);
 		if (blobIdent.equals(this.blobIdent)) {
 			if (mark != null) {

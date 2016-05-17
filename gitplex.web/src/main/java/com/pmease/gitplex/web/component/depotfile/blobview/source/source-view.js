@@ -1,10 +1,10 @@
 gitplex.sourceview = {
 	init: function(fileContent, filePath, mark, symbolTooltipId, 
-			commitHash, blameInfos, commentInfos, commentCallback, viewState, loggedIn) {
+			commitHash, blameInfos, commentInfos, sourceCllback, viewState, loggedIn) {
 		var cm;
 		
 		var $sourceView = $(".source-view");
-		$sourceView.data("commentCallback", commentCallback);
+		$sourceView.data("sourceCllback", sourceCllback);
 		
 		var $code = $sourceView.children(".code");
 		$sourceView.closest(".content").css("overflow", "hidden");
@@ -112,58 +112,17 @@ gitplex.sourceview = {
 			    }, 10);
 			    
 			    function onSelectText() {
-			    	var from = cm.getCursor("from");
-			    	var to = cm.getCursor("to");
-			    	if (from.line != to.line || from.ch != to.ch) {
-		    			var ch = (from.ch + to.ch)/2;
-		    			var position = cm.charCoords({line:from.line, ch:ch});
-						var permanentLinkCallback = function($permanentLink) {
-							$permanentLink.off("click");
-			    			var uri = new URI(window.location.href); 
-			    			uri.removeSearch("mark").addSearch("mark", 
-			    					(from.line+1) + "." + from.ch + "-" + (to.line+1) + "." + to.ch);
-		    				$permanentLink.attr("href", uri.toString());
-		    				$permanentLink.click(function(e) {
-		    					e.preventDefault();
-			    				$("#selection-popup").hide();
-		    					pmease.commons.codemirror.clearSelection(cm);
-		    					pmease.commons.codemirror.mark(cm, {
-		    						beginLine: from.line,
-		    						beginChar: from.ch,
-		    						endLine: to.line,
-		    						endChar: to.ch
-		    					}, false);
-		    					commentCallback("mark", from.line, from.ch, to.line, to.ch);
-		    				});
-						};
-		    			var commentLinkCallback = function($commentLink) {
-		    				$commentLink.off("click");
-		    				if (loggedIn) {
-			    				$commentLink.click(function() {
-			    					if ($sourceView.find("form.dirty").length != 0 
-			    							&& !confirm("There are unsaved changes, discard and continue?")) {
-			    						return;
-			    					}
-				    				$("#selection-popup").hide();
-			    					pmease.commons.codemirror.clearSelection(cm);
-			    					pmease.commons.codemirror.mark(cm, {
-			    						beginLine: from.line,
-			    						beginChar: from.ch,
-			    						endLine: to.line,
-			    						endChar: to.ch
-			    					}, false);
-				    				commentCallback("addComment", commitHash, from.line, from.ch, to.line, to.ch);
-			    				});
-		    				} else {
-		    					$commentLink.html("Log in to comment on selection");
-		    				}
-		    			};
-			    		$("#selection-popup").data("open")(
-			    				position, permanentLinkCallback, commentLinkCallback, $code[0]);
-			    	} else {
-			    		$("#selection-popup").hide();
+			    	if (cm.hasFocus()) {
+				    	var from = cm.getCursor("from");
+				    	var to = cm.getCursor("to");
+				    	if (from.line != to.line || from.ch != to.ch) {
+				    		sourceCllback("openSelectionPopup", commitHash, from.line, from.ch, to.line, to.ch);
+				    	} else {
+				    		$("#selection-popup").hide();
+				    	}
 			    	}
 			    }
+
 			    $code.on("mouseup", function() {
 			    	onSelectText();
 			    });
@@ -268,7 +227,7 @@ gitplex.sourceview = {
 	},
 	addCommentGutter: function(line, commentInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var commentCallback = $(".source-view").data("commentCallback");
+		var sourceCllback = $(".source-view").data("sourceCllback");
 		
 		var $gutter = $(document.createElement("div"));
 		$gutter.addClass("CodeMirror-comment");
@@ -304,7 +263,7 @@ gitplex.sourceview = {
     						return;
     					}
 						var commentInfo = commentInfos[$(this).index()];			        						
-						commentCallback("openComment", commentInfo.id);
+						sourceCllback("openComment", commentInfo.id);
 					});
 				});
 				gitplex.sourceview.highlightCommentTrigger();				
@@ -324,14 +283,51 @@ gitplex.sourceview = {
 						&& !confirm("There are unsaved changes, discard and continue?")) {
 					return;
 				}
-				commentCallback("openComment", commentInfo.id);
+				sourceCllback("openComment", commentInfo.id);
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
+	openSelectionPopup: function(commitHash, mark, markUrl, loggedIn) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
+		var $sourceView = $(".source-view");
+		var sourceCllback = $sourceView.data("sourceCllback");
+		var ch = (mark.beginChar + mark.endChar)/2;
+		var position = cm.charCoords({line:mark.beginLine, ch:ch});
+		var permanentLinkCallback = function($permanentLink) {
+			$permanentLink.off("click");
+			$permanentLink.attr("href", markUrl);
+			$permanentLink.click(function(e) {
+				e.preventDefault();
+				$("#selection-popup").hide();
+				pmease.commons.codemirror.clearSelection(cm);
+				pmease.commons.codemirror.mark(cm, mark, false);
+				sourceCllback("mark", commitHash, mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+			});
+		};
+		var commentLinkCallback = function($commentLink) {
+			$commentLink.off("click");
+			if (loggedIn) {
+				$commentLink.click(function() {
+					if ($sourceView.find("form.dirty").length != 0 
+							&& !confirm("There are unsaved changes, discard and continue?")) {
+						return;
+					}
+    				$("#selection-popup").hide();
+					pmease.commons.codemirror.clearSelection(cm);
+					pmease.commons.codemirror.mark(cm, mark, false);
+    				sourceCllback("addComment", commitHash, mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+				});
+			} else {
+				$commentLink.html("Log in to comment on selection");
+			}
+		};
+		$("#selection-popup").data("open")(
+				position, permanentLinkCallback, commentLinkCallback, $(".source-view>.code")[0]);
+	},
 	onCommentAdded: function(line, commentInfo) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var commentCallback = $(".source-view").data("commentCallback");		
+		var sourceCllback = $(".source-view").data("sourceCllback");		
 		var lineInfo = cm.lineInfo(line);
 		var gutter;
 		if (lineInfo.gutterMarkers)
@@ -348,7 +344,7 @@ gitplex.sourceview = {
 	},
 	onCommentDeleted: function(line, commentId) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var commentCallback = $(".source-view").data("commentCallback");		
+		var sourceCllback = $(".source-view").data("sourceCllback");		
 		var lineInfo = cm.lineInfo(line);
 		var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
 		var commentInfos = $gutter.data("commentInfos");
