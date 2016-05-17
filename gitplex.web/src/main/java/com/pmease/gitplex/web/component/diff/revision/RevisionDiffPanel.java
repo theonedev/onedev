@@ -526,8 +526,8 @@ public abstract class RevisionDiffPanel extends Panel {
 				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
 				
 				WebMarkupContainer fileLink = new WebMarkupContainer("file");
-				fileLink.add(AttributeModifier.replace("data-file", change.getPath()));
 				fileLink.add(new Label("name", change.getPath()));
+				fileLink.add(AttributeModifier.replace("href", "#diff-" + change.getPath()));
 				
 				item.add(fileLink);
 				
@@ -564,7 +564,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
-				item.add(AttributeAppender.append("data-file", change.getPath()));
+				item.setMarkupId("diff-" + change.getPath());
 				item.add(new BlobDiffPanel("diff", depotModel, requestModel, change, diffMode));
 			}
 			
