@@ -129,11 +129,7 @@ gitplex.fileedit = {
 						if (oldLine == beginLine && oldChar == beginChar) {
 							newBeginLine = newLine;
 							newBeginChar = newChar;
-						} else if (oldLine == endLine && oldChar == endChar) {
-							newEndLine = newLine;
-							newEndChar = newChar;
 						} 
-
 						if (char == '\n') {
 							oldLine++;
 							oldChar = 0;
@@ -143,16 +139,22 @@ gitplex.fileedit = {
 							oldChar++;
 							newChar++;
 						}
+						if (oldLine == endLine && oldChar == endChar) {
+							newEndLine = newLine;
+							newEndChar = newChar;
+						} 
 					}
-					if (oldLine>beginLine && !newBeginLine || oldLine>endLine) {
-						quite = true;
+					if (oldLine>beginLine && newBeginLine==undefined || oldLine>endLine) {
+						quit = true;
 						break;
 					}
 				}
+				if (quit)
+					break;
 			}
 		}
 		
-		if (newBeginLine && newEndLine) {
+		if (newBeginLine!=undefined && newEndLine!=undefined) {
 			var newMark = {
 				beginLine: newBeginLine, 
 				beginChar: newBeginChar, 
