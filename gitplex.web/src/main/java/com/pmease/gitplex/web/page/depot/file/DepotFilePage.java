@@ -570,6 +570,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
+					resolveRevision();
 					try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 						RevTree revTree = getDepot().getRevCommit(newCommit).getTree();
 						String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");

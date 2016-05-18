@@ -147,7 +147,7 @@ public abstract class FileListPanel extends Panel {
 		} else {
 			parentIdent = new BlobIdent(directory.revision, null, FileMode.TREE.getBits());
 		}
-		parent.add(new AjaxLink<Void>("link") {
+		parent.add(new PreventDefaultAjaxLink<Void>("link") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
