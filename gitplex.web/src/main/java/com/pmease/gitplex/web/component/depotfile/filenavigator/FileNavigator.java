@@ -304,6 +304,8 @@ public abstract class FileNavigator extends Panel {
 				}
 				
 			});
+			if (name.length() == 0)
+				nameInput.add(AttributeAppender.append("class", "focusable"));
 			lastSegment.add(AttributeAppender.append("class", "input"));
 		} else if (file.isFile()) {
 			lastSegment = new Fragment(LAST_SEGMENT_ID, "blobNameFrag", this);
