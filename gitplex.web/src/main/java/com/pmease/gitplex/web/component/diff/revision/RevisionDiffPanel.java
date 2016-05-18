@@ -2,8 +2,10 @@ package com.pmease.gitplex.web.component.diff.revision;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -142,11 +144,45 @@ public abstract class RevisionDiffPanel extends Panel {
 	    		}
 	    	}
 	    	
+	    	// for some unknown reason, some paths in the diff entries is DELETE/ADD 
+	    	// pair instead MODIFICATION, here we normalize those as a single 
+	    	// MODIFICATION entry
+	    	Map<String, BlobIdent> deleted = new HashMap<>();
+	    	Map<String, BlobIdent> added = new HashMap<>();
+	    	for (BlobChange change: filterChanges) {
+	    		if (change.getType() == ChangeType.DELETE)
+	    			deleted.put(change.getPath(), change.getOldBlobIdent());
+	    		else if (change.getType() == ChangeType.ADD) 
+	    			added.put(change.getPath(), change.getNewBlobIdent());
+	    	}
+	    	
+	    	List<BlobChange> normalizedChanges = new ArrayList<>();
+	    	for (BlobChange change: filterChanges) {
+	    		BlobIdent oldBlobIdent = deleted.get(change.getPath());
+	    		BlobIdent newBlobIdent = added.get(change.getPath());
+	    		if (oldBlobIdent != null && newBlobIdent != null) {
+	    			if (change.getType() == ChangeType.DELETE) {
+	        			BlobChange normalizedChange = new BlobChange(ChangeType.MODIFY, 
+	        					oldBlobIdent, newBlobIdent, whitespaceOption) {
+
+	    					@Override
+	    					public Blob getBlob(BlobIdent blobIdent) {
+	    						return depotModel.getObject().getBlob(blobIdent);
+	    					}
+
+	    	    		};
+	    				normalizedChanges.add(normalizedChange);
+	    			}
+	    		} else {
+	    			normalizedChanges.add(change);
+	    		}
+	    	}
+	    	
 			List<BlobChange> diffChanges = new ArrayList<>();
-			if (filterChanges.size() > Constants.MAX_DIFF_FILES)
-				diffChanges = filterChanges.subList(0, Constants.MAX_DIFF_FILES);
+			if (normalizedChanges.size() > Constants.MAX_DIFF_FILES)
+				diffChanges = normalizedChanges.subList(0, Constants.MAX_DIFF_FILES);
 			else
-				diffChanges = filterChanges;
+				diffChanges = normalizedChanges;
 			
 	    	// Diff calculation can be slow, so we pre-load diffs of each change 
 	    	// concurrently
@@ -171,7 +207,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				}
 	    	}
 	    	
-	    	int totalChanges = filterChanges.size();
+	    	int totalChanges = normalizedChanges.size();
 	    	if (diffChanges.size() == totalChanges) { 
 		    	// some changes should be removed if content is the same after line processing 
 		    	for (Iterator<BlobChange> it = diffChanges.iterator(); it.hasNext();) {

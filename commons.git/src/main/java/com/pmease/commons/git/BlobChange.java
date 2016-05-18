@@ -31,7 +31,14 @@ public abstract class BlobChange implements Serializable {
 	
 	public BlobChange(String oldRev, String newRev, DiffEntry diffEntry, 
 			WhitespaceOption whitespaceOption) {
-		type = diffEntry.getChangeType();
+		if (diffEntry.getChangeType() == ChangeType.RENAME 
+				&& diffEntry.getOldPath().equals(diffEntry.getNewPath())) {
+			// for some unknown reason, jgit detects rename even if path 
+			// is the same
+			type = ChangeType.MODIFY;
+		} else {
+			type = diffEntry.getChangeType();
+		}
 		this.whitespaceOption = whitespaceOption;
 		oldBlobIdent = GitUtils.getOldBlobIdent(diffEntry, oldRev);
 		newBlobIdent = GitUtils.getNewBlobIdent(diffEntry, newRev);
