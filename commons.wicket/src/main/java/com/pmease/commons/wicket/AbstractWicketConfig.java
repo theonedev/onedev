@@ -3,7 +3,9 @@ package com.pmease.commons.wicket;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.Component;
+import org.apache.wicket.DefaultExceptionMapper;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -11,15 +13,19 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.application.IComponentInstantiationListener;
+import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.mapper.HomePageMapper;
 import org.apache.wicket.markup.html.pages.AbstractErrorPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.ws.WebSocketSettings;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.WebSocketResponse;
+import org.apache.wicket.request.IExceptionMapper;
+import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
+import org.apache.wicket.util.IProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.commons.bootstrap.Bootstrap;
@@ -120,6 +126,34 @@ public abstract class AbstractWicketConfig extends WebApplication {
 		});
 		
 		// getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
+	}
+
+	@Override
+	public final IProvider<IExceptionMapper> getExceptionMapperProvider() {
+		return new IProvider<IExceptionMapper>() {
+
+			@Override
+			public IExceptionMapper get() {
+				return new DefaultExceptionMapper() {
+
+					@Override
+					protected IRequestHandler mapExpectedExceptions(Exception e, Application application) {
+						Page errorPage = mapExceptions(e);
+						if (errorPage != null) {
+							return createPageRequestHandler(new PageProvider(errorPage));
+						} else {
+							return super.mapExpectedExceptions(e, application);
+						}
+					}
+					
+				};
+			}
+			
+		};
+	}
+	
+	protected Page mapExceptions(Exception e) {
+		return null;
 	}
 	
 }

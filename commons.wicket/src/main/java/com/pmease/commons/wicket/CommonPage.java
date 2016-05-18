@@ -127,7 +127,6 @@ public abstract class CommonPage extends WebPage {
 	}
 
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		
 	}
 	
 	public RepeatingView getRootComponents() {

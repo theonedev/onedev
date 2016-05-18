@@ -1,6 +1,7 @@
 package com.pmease.gitplex.web;
 
 import javax.inject.Singleton;
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Application;
@@ -16,9 +17,12 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.resource.caching.FilenameWithVersionResourceCachingStrategy;
 import org.apache.wicket.request.resource.caching.version.LastModifiedResourceVersion;
 
+import com.pmease.commons.git.exception.ObjectNotExistException;
+import com.pmease.commons.util.ExceptionUtils;
 import com.pmease.commons.wicket.AbstractWicketConfig;
 import com.pmease.gitplex.web.mapper.UrlMapper;
 import com.pmease.gitplex.web.page.error.BaseErrorPage;
+import com.pmease.gitplex.web.page.error.NotFoundErrorPage;
 import com.pmease.gitplex.web.page.home.DashboardPage;
 
 @Singleton
@@ -74,4 +78,18 @@ public class WicketConfig extends AbstractWicketConfig {
 	public Iterable<IRequestMapper> getRequestMappers() {
 		return getRootRequestMapperAsCompound();
 	}
+
+	@Override
+	protected Page mapExceptions(Exception e) {
+		EntityNotFoundException entityNotFoundException = ExceptionUtils.find(e, EntityNotFoundException.class);
+		if (entityNotFoundException != null)
+			return new NotFoundErrorPage(entityNotFoundException.getMessage());
+		
+		ObjectNotExistException objectNotExistException = ExceptionUtils.find(e, ObjectNotExistException.class);
+		if (objectNotExistException != null)
+			return new NotFoundErrorPage(objectNotExistException.getMessage());
+		
+		return super.mapExceptions(e);
+	}
+	
 }
