@@ -1,6 +1,6 @@
 gitplex.sourceview = {
 	init: function(fileContent, filePath, mark, symbolTooltipId, 
-			commitHash, blameInfos, commentInfos, sourceCllback, viewState, loggedIn) {
+			revision, blameInfos, commentInfos, sourceCllback, viewState, loggedIn) {
 		var cm;
 		
 		var $sourceView = $(".source-view");
@@ -116,7 +116,7 @@ gitplex.sourceview = {
 				    	var from = cm.getCursor("from");
 				    	var to = cm.getCursor("to");
 				    	if (from.line != to.line || from.ch != to.ch) {
-				    		sourceCllback("openSelectionPopup", commitHash, from.line, from.ch, to.line, to.ch);
+				    		sourceCllback("openSelectionPopup", from.line, from.ch, to.line, to.ch);
 				    	} else {
 				    		$("#selection-popup").hide();
 				    	}
@@ -136,7 +136,7 @@ gitplex.sourceview = {
 					var node = e.target || e.srcElement, $node = $(node);
 					if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
 							|| $node.hasClass("cm-variable-3") || $node.hasClass("cm-def") || $node.hasClass("cm-meta")) {
-						document.getElementById(symbolTooltipId).onMouseOverSymbol(commitHash, node);
+						document.getElementById(symbolTooltipId).onMouseOverSymbol(revision, node);
 					}
 			    });
 				cm.setSize($code.width(), $code.height());
@@ -288,7 +288,7 @@ gitplex.sourceview = {
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
-	openSelectionPopup: function(commitHash, mark, markUrl, loggedIn) {
+	openSelectionPopup: function(mark, markUrl, loggedIn) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
 		var $sourceView = $(".source-view");
 		var sourceCllback = $sourceView.data("sourceCllback");
@@ -302,7 +302,7 @@ gitplex.sourceview = {
 				$("#selection-popup").hide();
 				pmease.commons.codemirror.clearSelection(cm);
 				pmease.commons.codemirror.mark(cm, mark, false);
-				sourceCllback("mark", commitHash, mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+				sourceCllback("mark", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 			});
 		};
 		var commentLinkCallback = function($commentLink) {
@@ -316,7 +316,7 @@ gitplex.sourceview = {
     				$("#selection-popup").hide();
 					pmease.commons.codemirror.clearSelection(cm);
 					pmease.commons.codemirror.mark(cm, mark, false);
-    				sourceCllback("addComment", commitHash, mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+    				sourceCllback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 				});
 			} else {
 				$commentLink.html("Log in to comment on selection");

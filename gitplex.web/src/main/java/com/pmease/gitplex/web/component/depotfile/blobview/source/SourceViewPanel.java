@@ -18,6 +18,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -85,6 +86,7 @@ import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -313,26 +315,20 @@ public class SourceViewPanel extends BlobViewPanel {
 				
 				switch(params.getParameterValue("action").toString()) {
 				case "openSelectionPopup": 
-					// must use commit from source view page in case we are commenting on 
-					// a branch and that branch has new commits since the file is being 
-					// displayed
-					ObjectId commitId = ObjectId.fromString(params.getParameterValue("param1").toString());
-					Mark mark = getMark(params, "param2", "param3", "param4", "param5");
-					String script = String.format("gitplex.sourceview.openSelectionPopup('%s', %s, '%s', %s);", 
-							commitId.name(), mark.toJSON(), context.getMarkUrl(commitId, mark), 
+					Mark mark = getMark(params, "param1", "param2", "param3", "param4");
+					String script = String.format("gitplex.sourceview.openSelectionPopup(%s, '%s', %s);", 
+							mark.toJSON(), context.getMarkUrl(context.getCommit(), mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "mark":
-					commitId = ObjectId.fromString(params.getParameterValue("param1").toString());
-					mark = getMark(params, "param2", "param3", "param4", "param5");
-					context.onMark(target, commitId, mark);
+					mark = getMark(params, "param1", "param2", "param3", "param4");
+					context.onMark(target, context.getCommit(), mark);
 					break;
 				case "addComment": 
 					Preconditions.checkNotNull(SecurityUtils.getAccount());
 					
-					commitId = ObjectId.fromString(params.getParameterValue("param1").toString());
-					mark = getMark(params, "param2", "param3", "param4", "param5");
+					mark = getMark(params, "param1", "param2", "param3", "param4");
 					
 					Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", SourceViewPanel.this);
 					fragment.setOutputMarkupId(true);
@@ -382,7 +378,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							super.onSubmit(target, form);
 							
 							CodeComment comment = new CodeComment();
-							comment.setCommit(commitId.name());
+							comment.setCommit(context.getCommit().name());
 							comment.setPath(context.getBlobIdent().path);
 							comment.setContent(input.getModelObject());
 							comment.setDepot(context.getDepot());
@@ -524,6 +520,13 @@ public class SourceViewPanel extends BlobViewPanel {
 					}
 					
 				};
+				DepotFilePage.HistoryState state = new DepotFilePage.HistoryState();
+				state.blobIdent = context.getBlobIdent();
+				state.commentId = CodeComment.idOf(context.getComment());
+				state.mark = Mark.of(symbol.getPos());
+				state.requestId = PullRequest.idOf(context.getPullRequest());
+				PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
+				link.add(AttributeAppender.replace("href", urlFor(DepotFilePage.class, params).toString()));
 				link.add(symbol.render("label", null));
 				fragment.add(link);
 				
@@ -566,7 +569,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
-						getCommitId().name(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
+						getRevision(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 				context.onSelect(target, blobIdent, hit.getTokenPos());
 			}
 
@@ -714,14 +717,14 @@ public class SourceViewPanel extends BlobViewPanel {
 		}
 		CharSequence commentCallback = commentBehavior.getCallbackFunction(
 				explicit("action"), explicit("param1"), explicit("param2"), 
-				explicit("param3"), explicit("param4"), explicit("param5"));
+				explicit("param3"), explicit("param4"));
 		String script = String.format("gitplex.sourceview.init('%s', '%s', %s, '%s', '%s', "
 				+ "%s, %s, %s, %s, %s);", 
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path), 
 				context.getMark()!=null?context.getMark().toJSON():"undefined",
 				symbolTooltip.getMarkupId(), 
-				context.getCommit().name(), 
+				context.getBlobIdent().revision, 
 				jsonOfBlameInfos, 
 				jsonOfCommentInfos,
 				commentCallback, 

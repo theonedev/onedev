@@ -276,7 +276,7 @@ public abstract class FileListPanel extends Panel {
 				String.format("gitplex.filelist.init('%s', '%s')", getMarkupId(), lastCommitsUrl, homeUrl)));
 	}
 
-	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent file);
+	protected abstract void onSelect(AjaxRequestTarget target, BlobIdent blobIdent);
 	
 	private ObjectId getCommitId() {
 		return depotModel.getObject().getObjectId(directory.revision);

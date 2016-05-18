@@ -11,7 +11,6 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -245,8 +244,8 @@ public abstract class InstantSearchPanel extends Panel {
 
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
-						final QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
+						QueryHit hit = item.getModelObject();
+						PreventDefaultAjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -286,7 +285,7 @@ public abstract class InstantSearchPanel extends Panel {
 					}
 					
 				});
-				searchResult.add(new AjaxLink<Void>("moreSymbolHits") {
+				searchResult.add(new PreventDefaultAjaxLink<Void>("moreSymbolHits") {
 
 					@Override
 					protected void onInitialize() {
@@ -369,7 +368,7 @@ public abstract class InstantSearchPanel extends Panel {
 					@Override
 					protected void populateItem(ListItem<QueryHit> item) {
 						final QueryHit hit = item.getModelObject();
-						AjaxLink<Void> link = new AjaxLink<Void>("link") {
+						PreventDefaultAjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -409,7 +408,7 @@ public abstract class InstantSearchPanel extends Panel {
 					}
 					
 				});
-				searchResult.add(new AjaxLink<Void>("moreTextHits") {
+				searchResult.add(new PreventDefaultAjaxLink<Void>("moreTextHits") {
 
 					@Override
 					protected void onInitialize() {

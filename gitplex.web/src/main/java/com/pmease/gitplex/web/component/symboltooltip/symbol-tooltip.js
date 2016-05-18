@@ -28,7 +28,7 @@ gitplex.symboltooltip = {
 			} 
 		};
 		
-		container.onMouseOverSymbol = function(commit, symbolEl) {
+		container.onMouseOverSymbol = function(revision, symbolEl) {
 			var $symbol = $(symbolEl);
 			if (gitplex.mouseState.pressed || !gitplex.mouseState.moved || $symbol.text() == "@")
 				return;
@@ -73,7 +73,7 @@ gitplex.symboltooltip = {
 				$tooltip.data("alignment", {placement: {x: 0, y:0, offset:2, targetX: 0, targetY: 100}, target: {element: symbolEl}});
 				$tooltip.align($tooltip.data("alignment"));
 
-				queryCallback(commit, $symbol.text());
+				queryCallback(revision, $symbol.text());
 				
 				showTimer = null;
 			}, 500);

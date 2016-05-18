@@ -3,7 +3,9 @@ package com.pmease.gitplex.web.page.depot.file;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
@@ -43,7 +45,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
@@ -140,6 +141,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private BlobIdent blobIdent = new BlobIdent();
 	
+	private ObjectId resolvedRevision;
+	
 	private Mark mark;
 	
 	private Mode mode;
@@ -176,6 +179,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		if (blobIdent.revision == null)
 			blobIdent.revision = getDepot().getDefaultBranch();
 
+		resolvedRevision = getDepot().getObjectId(blobIdent.revision);
+		
 		if (requestId != null && !GitUtils.isHash(blobIdent.revision))
 			throw new IllegalArgumentException("Pull request can only be associated with a hash revision");
 		
@@ -372,7 +377,22 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			});
 		}
 	}
-	
+
+	/*
+	 * In case we are on a branch, this operation makes sure that the branch resolves
+	 * to a certain commit during the life cycle of our page, unless the page is 
+	 * refreshed. This can avoid the issue that displayed file content and subsequent 
+	 * operations encounters different commit if someone commits to the branch while 
+	 * we are staying on the page. 
+	 */
+	@Override
+	protected Map<String, ObjectId> getObjectIdCache() {
+		Map<String, ObjectId> objectIdCache = new HashMap<>();
+		if (resolvedRevision != null)
+			objectIdCache.put(blobIdent.revision, resolvedRevision);
+		return objectIdCache;
+	}
+
 	@Override
 	public PullRequest getPullRequest() {
 		return requestModel.getObject();
@@ -500,6 +520,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
+					resolvedRevision = newCommit;
 					BlobIdent committed = new BlobIdent(
 							branch, newPathRef.get(), FileMode.REGULAR_FILE.getBits());
 		    		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
@@ -579,8 +600,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			fileViewer = new FileListPanel(FILE_VIEWER_ID, depotModel, requestModel, blobIdent) {
 
 				@Override
-				protected void onSelect(AjaxRequestTarget target, BlobIdent file) {
-					DepotFilePage.this.onSelect(target, file, null);
+				protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
+					DepotFilePage.this.onSelect(target, blobIdent, null);
 				}
 				
 			};
@@ -612,7 +633,12 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 	
 	private void setState(HistoryState state) {
-		blobIdent = new BlobIdent(state.blobIdent);
+		if (!blobIdent.revision.equals(state.blobIdent.revision)) {
+			blobIdent = new BlobIdent(state.blobIdent);
+			resolveRevision();
+		} else {
+			blobIdent = new BlobIdent(state.blobIdent);
+		}
 		mark = state.mark;
 		mode = state.mode;
 		commentId = state.commentId;
@@ -626,7 +652,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		state.commentId = null;
 		state.mode = null;
 		state.mark = null;
-		
+
 		if (state.blobIdent.path != null) {
 			try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 				RevTree revTree = getDepot().getRevCommit(revision, true).getTree();
@@ -809,8 +835,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	@Override
 	public void onMark(AjaxRequestTarget target, ObjectId commitId, Mark mark) {
 		this.mark = mark;
-		if (!blobIdent.revision.equals(commitId.name())) {
-			blobIdent.revision = commitId.name();
+		if (!blobIdent.revision.equals(resolvedRevision.name())) {
+			blobIdent.revision = resolvedRevision.name();
 			newRevisionPicker(target);
 		}
 		pushState(target);
@@ -832,10 +858,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
-		Preconditions.checkArgument(blobIdent.revision.equals(this.blobIdent.revision));
-		
 		mark = Mark.of(tokenPos);
-		if (blobIdent.equals(this.blobIdent)) {
+		if (Objects.equal(DepotFilePage.this.blobIdent.path, blobIdent.path)) {
 			if (mark != null) {
 				Component fileViewer = get(FILE_VIEWER_ID);
 				if (fileViewer instanceof SourceViewPanel) {
@@ -850,7 +874,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				}
 			}
 		} else {
-			this.blobIdent = blobIdent; 
+			DepotFilePage.this.blobIdent.path = blobIdent.path;
+			DepotFilePage.this.blobIdent.mode = blobIdent.mode;
+			
 			mode = null;
 			commentId = null;
 			
@@ -908,9 +934,23 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		} else {
 			commentId = null;
 		}
+		if (!blobIdent.revision.equals(resolvedRevision.name())) {
+			blobIdent.revision = resolvedRevision.name();
+			newRevisionPicker(target);
+		}
 		pushState(target);
 	}
 
+	private void resolveRevision() {
+		/* 
+		 * a hack to reset resolved revision to null to disable getObjectIdCache()
+		 * temporarily as otherwise getObjectId() method below will always 
+		 * resolved to existing value of resolvedRevision
+		 */
+		resolvedRevision = null;
+		resolvedRevision = getDepot().getObjectId(blobIdent.revision);
+	}
+	
 	@Override
 	public boolean isOnBranch() {
 		return getDepot().getRefs(Constants.R_HEADS).containsKey(blobIdent.revision);

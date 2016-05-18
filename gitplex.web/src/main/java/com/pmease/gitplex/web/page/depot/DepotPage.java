@@ -1,7 +1,9 @@
 package com.pmease.gitplex.web.page.depot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.Cookie;
@@ -18,6 +20,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -25,6 +28,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
@@ -38,7 +42,6 @@ import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.WebSession;
-import com.pmease.gitplex.web.model.DepotModel;
 import com.pmease.gitplex.web.page.account.AccountPage;
 import com.pmease.gitplex.web.page.account.overview.AccountOverviewPage;
 import com.pmease.gitplex.web.page.depot.branches.DepotBranchesPage;
@@ -84,13 +87,38 @@ public abstract class DepotPage extends AccountPage {
 		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + getAccount().getName() + "/" + depotName);
 		
-		depotModel = new DepotModel(depot);
+		Long depotId = depot.getId();
+		
+		depotModel = new LoadableDetachableModel<Depot>() {
+
+			@Override
+			protected Depot load() {
+				Depot depot = GitPlex.getInstance(DepotManager.class).load(depotId);
+				
+				/*
+				 * Give child page a chance to cache object id of known revisions upon
+				 * loading the depot object 
+				 */
+				for (Map.Entry<String, ObjectId> entry: getObjectIdCache().entrySet()) {
+					depot.cacheObjectId(entry.getKey(), entry.getValue());
+				}
+				return depot;
+			}
+			
+		};
+		
+		// we do not need to reload the depot this time as we already have that object on hand
+		depotModel.setObject(depot);
 		
 		if (!(this instanceof NoCommitsPage) 
 				&& !(this instanceof DepotSettingPage) 
 				&& !getDepot().git().hasRefs()) { 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 		}
+	}
+	
+	protected Map<String, ObjectId> getObjectIdCache() {
+		return new HashMap<>();
 	}
 	
 	@Override
