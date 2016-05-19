@@ -12,9 +12,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.manager.DepotManager;
 
 public class DepotAndRevision implements Serializable {
 
@@ -116,7 +116,7 @@ public class DepotAndRevision implements Serializable {
 	
 	public Depot getDepot() {
 		if (depot == null)
-			depot = GitPlex.getInstance(Dao.class).load(Depot.class, depotId);
+			depot = GitPlex.getInstance(DepotManager.class).load(depotId);
 		return depot;
 	}
 	

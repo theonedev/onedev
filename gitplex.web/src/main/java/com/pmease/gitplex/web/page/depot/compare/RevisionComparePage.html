@@ -4,16 +4,13 @@
 		<div class="body">
 			<div class="revisions clearfix">
 				<div class="revision pull-left">
-					<div class="clearfix">
+					<div>
 						<label class="pull-left">Left side</label>
-						<input wicket:id="compareWithMergeBase" type="checkbox" class="pull-left"></input> 
-						<span class="pull-left">common ancestor</span>
-						<a wicket:id="tooltip" class="pull-left"><i class="fa fa-question-circle"></i></a>
 					</div>
 					<div wicket:id="leftSide"></div>
 				</div>
 				<div class="action pull-left">
-					<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-arrows-h"></i></a>
+					<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-exchange"></i></a>
 				</div>
 				<div class="revision pull-left">
 					<div>
@@ -30,8 +27,7 @@
 				No changes between left side and right side
 			</div>		
 			<div wicket:id="leftAhead" class="alert alert-warning">
-				Left side has new commits since the branching point, <a wicket:id="compareWithMergeBase">tick the common ancestor option</a> 
-				to compare right side against the original branching point   
+				Left side is ahead of right side, <a wicket:id="swap">swap</a> the comparison to see the changes   
 			</div>		
 			<div>
 				<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>

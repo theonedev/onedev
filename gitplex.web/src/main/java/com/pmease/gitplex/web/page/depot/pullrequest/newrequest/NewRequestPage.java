@@ -221,8 +221,7 @@ public class NewRequestPage extends PullRequestPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String branch) {
-				PageParameters params = paramsOf(getDepot(), 
-						new DepotAndBranch(depot, branch), source); 
+				PageParameters params = paramsOf(depot, new DepotAndBranch(depot, branch), source); 
 				setResponsePage(NewRequestPage.class, params);
 			}
 			
@@ -243,9 +242,9 @@ public class NewRequestPage extends PullRequestPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(
-						NewRequestPage.class, 
-						paramsOf(getDepot(), getPullRequest().getSource(), getPullRequest().getTarget()));
+				PageParameters params = paramsOf(getPullRequest().getSourceDepot(), 
+						getPullRequest().getSource(), getPullRequest().getTarget()); 
+				setResponsePage(NewRequestPage.class, params);
 			}
 			
 		});

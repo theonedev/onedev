@@ -9,12 +9,10 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -23,14 +21,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
-import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.FileUtils;
-import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -58,8 +54,6 @@ public class RevisionComparePage extends DepotPage {
 	
 	private static final String PARAM_RIGHT = "right";
 	
-	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compare-with-merge-base";
-	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
 	private static final String PARAM_COMMENT = "comment";
@@ -80,11 +74,12 @@ public class RevisionComparePage extends DepotPage {
 	
 	private HistoryState state = new HistoryState();
 	
+	private ObjectId resolvedRightSideRevision;
+	
 	public static PageParameters paramsOf(Depot depot, HistoryState state) {
 		PageParameters params = paramsOf(depot);
 		params.set(PARAM_LEFT, state.leftSide.toString());
 		params.set(PARAM_RIGHT, state.rightSide.toString());
-		params.set(PARAM_COMPARE_WITH_MERGE_BASE, state.compareWithMergeBase);
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
@@ -106,6 +101,7 @@ public class RevisionComparePage extends DepotPage {
 		} else {
 			state.rightSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
+		resolvedRightSideRevision = state.rightSide.getObjectId();
 		
 		str = params.get(PARAM_LEFT).toString();
 		if (str != null) {
@@ -113,8 +109,6 @@ public class RevisionComparePage extends DepotPage {
 		} else {
 			state.leftSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
-		
-		state.compareWithMergeBase = params.get(PARAM_COMPARE_WITH_MERGE_BASE).toBoolean(false);
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
@@ -157,17 +151,8 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			protected List<Commit> load() {
-				Depot sourceDepot = state.leftSide.getDepot();
-				LogCommand log = new LogCommand(sourceDepot.git().depotDir());
-				List<Commit> commits;
-				if (!state.compareWithMergeBase) {
-					String revisions = state.leftSide.getRevision() + "..." + state.rightSide.getRevision();
-					commits = log.revisions(Lists.newArrayList(revisions)).call();
-					commits.add(sourceDepot.git().showRevision(mergeBaseModel.getObject()));
-				} else {
-					commits = sourceDepot.git().log(state.leftSide.getRevision(), state.rightSide.getRevision(), null, 0, 0, false);
-				}
-				return commits;
+				Depot rightDepot = state.rightSide.getDepot();
+				return rightDepot.git().log(mergeBaseModel.getObject(), state.rightSide.getRevision(), null, 0, 0, false);
 			}
 			
 		};
@@ -187,26 +172,11 @@ public class RevisionComparePage extends DepotPage {
 				HistoryState state = new HistoryState(RevisionComparePage.this.state);
 				state.leftSide = new DepotAndRevision(depot, revision);
 
-				PageParameters params = paramsOf(getDepot(), state);
+				PageParameters params = paramsOf(depot, state);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		});
-		add(new CheckBox("compareWithMergeBase", Model.of(state.compareWithMergeBase)).add(new OnChangeAjaxBehavior() {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				HistoryState state = new HistoryState(RevisionComparePage.this.state);
-				state.compareWithMergeBase = !state.compareWithMergeBase;
-
-				PageParameters params = RevisionComparePage.paramsOf(depotModel.getObject(), state);
-				setResponsePage(RevisionComparePage.class, params);
-			}
-			
-		}));
-		String tooltip = "Check this to compare \"right side\" with common ancestor of left and right";
-		add(new WebMarkupContainer("tooltip").add(new TooltipBehavior(Model.of(tooltip))));
-
 		add(new AffinalRevisionPicker("rightSide", state.rightSide.getDepotId(), state.rightSide.getRevision()) { 
 
 			@Override
@@ -245,9 +215,7 @@ public class RevisionComparePage extends DepotPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (state.leftSide.getBranch()!=null 
-						&& state.rightSide.getBranch()!=null 
-						&& state.compareWithMergeBase) {
+				if (state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
 					setVisible(request == null && !mergeBaseModel.getObject().equals(state.rightSide.getCommit().name()));
 				} else {
@@ -263,12 +231,8 @@ public class RevisionComparePage extends DepotPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				if (state.compareWithMergeBase) {
-					PullRequest request = requestModel.getObject();
-					setVisible(request != null);
-				} else {
-					setVisible(false);
-				}
+				PullRequest request = requestModel.getObject();
+				setVisible(request != null);
 			}
 
 			@Override
@@ -323,13 +287,14 @@ public class RevisionComparePage extends DepotPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new Link<Void>("compareWithMergeBase") {
+				add(new Link<Void>("swap") {
 
 					@Override
 					public void onClick() {
-						HistoryState state = new HistoryState(RevisionComparePage.this.state);
-						state.compareWithMergeBase = true;
-						PageParameters params = paramsOf(getDepot(), state);
+						HistoryState newState = new HistoryState(state);
+						newState.leftSide = state.rightSide;
+						newState.rightSide = state.leftSide;
+						PageParameters params = paramsOf(getDepot(), newState);
 						setResponsePage(RevisionComparePage.class, params);
 					}
 					
@@ -340,8 +305,7 @@ public class RevisionComparePage extends DepotPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(!state.compareWithMergeBase 
-						&& !mergeBaseModel.getObject().equals(state.leftSide.getCommit().name()));
+				setVisible(!mergeBaseModel.getObject().equals(state.leftSide.getCommit().name()));
 			}
 
 		});
@@ -386,11 +350,7 @@ public class RevisionComparePage extends DepotPage {
 	}
 	
 	private boolean hasChanges() {
-		if (state.compareWithMergeBase) {
-			return !mergeBaseModel.getObject().equals(state.rightSide.getCommit().name());
-		} else {
-			return !state.leftSide.getCommit().name().equals(state.rightSide.getCommit().name());
-		}
+		return !mergeBaseModel.getObject().equals(state.rightSide.getCommit().name());
 	}
 	
 	@Override
@@ -403,11 +363,20 @@ public class RevisionComparePage extends DepotPage {
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {
 		WebMarkupContainer tabPanel;
 		if (state.pathFilter != null) {
+			IModel<Depot> depotModel = new LoadableDetachableModel<Depot>() {
+
+				@Override
+				protected Depot load() {
+					Depot depot = state.rightSide.getDepot();
+					depot.cacheObjectId(state.rightSide.getRevision(), resolvedRightSideRevision);
+					return depot;
+				}
+				
+			};
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
-					new Model<PullRequest>(null),  
-					state.compareWithMergeBase?mergeBaseModel.getObject():state.leftSide.getRevision(), 
-							state.rightSide.getRevision(), state.pathFilter, 
-							state.whitespaceOption, state.commentId) {
+					new Model<PullRequest>(null), mergeBaseModel.getObject(), 
+					state.rightSide.getRevision(), state.pathFilter, 
+					state.whitespaceOption, state.commentId) {
 
 				@Override
 				protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -497,7 +466,6 @@ public class RevisionComparePage extends DepotPage {
 		public HistoryState(HistoryState copy) {
 			leftSide = copy.leftSide;
 			rightSide = copy.rightSide;
-			compareWithMergeBase = copy.compareWithMergeBase;
 			whitespaceOption = copy.whitespaceOption;
 			pathFilter = copy.pathFilter;
 			commentId = copy.commentId;
@@ -506,8 +474,6 @@ public class RevisionComparePage extends DepotPage {
 		public DepotAndRevision leftSide;
 		
 		public DepotAndRevision rightSide;
-		
-		public boolean compareWithMergeBase = true;
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 
