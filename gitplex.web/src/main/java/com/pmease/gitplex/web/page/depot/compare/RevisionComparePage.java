@@ -32,13 +32,13 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.revisionpicker.AffinalRevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -131,14 +131,14 @@ public class RevisionComparePage extends DepotPage {
 				Depot leftDepot = state.leftSide.getDepot();
 				Depot rightDepot = state.rightSide.getDepot();
 				if (!leftDepot.equals(rightDepot)) {
-					Git sandbox = new Git(FileUtils.createTempDir());
+					Git tempGit = new Git(FileUtils.createTempDir());
 					try {
-						sandbox.clone(leftDepot.git(), false, true, true, state.leftSide.getRevision());
-						sandbox.reset(null, null);
-						sandbox.fetch(rightDepot.git(), state.rightSide.getRevision());
-						return sandbox.calcMergeBase(state.leftSide.getCommit().name(), state.rightSide.getCommit().name());
+						tempGit.clone(leftDepot.git(), false, true, true, state.leftSide.getRevision());
+						tempGit.reset(null, null);
+						tempGit.fetch(rightDepot.git(), state.rightSide.getRevision());
+						return tempGit.calcMergeBase(state.leftSide.getCommit().name(), state.rightSide.getCommit().name());
 					} finally {
-						FileUtils.deleteDir(sandbox.depotDir());
+						FileUtils.deleteDir(tempGit.depotDir());
 					}
 				} else {
 					return leftDepot.getMergeBase(state.leftSide.getRevision(), state.rightSide.getRevision()).name();
@@ -152,7 +152,11 @@ public class RevisionComparePage extends DepotPage {
 			@Override
 			protected List<Commit> load() {
 				Depot rightDepot = state.rightSide.getDepot();
-				return rightDepot.git().log(mergeBaseModel.getObject(), state.rightSide.getRevision(), null, 0, 0, false);
+				
+				// for right side, we use resolved commit name instead of revision 
+				// to make sure that revision is resolved consistently
+				return rightDepot.git().log(mergeBaseModel.getObject(), 
+						state.rightSide.getCommit().name(), null, 0, 0, false);
 			}
 			
 		};
@@ -177,18 +181,7 @@ public class RevisionComparePage extends DepotPage {
 			}
 			
 		});
-		add(new AffinalRevisionPicker("rightSide", state.rightSide.getDepotId(), state.rightSide.getRevision()) { 
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				HistoryState state = new HistoryState(RevisionComparePage.this.state);
-				state.rightSide = new DepotAndRevision(depot, revision);
-				
-				PageParameters params = paramsOf(getDepot(), state);
-				setResponsePage(RevisionComparePage.class, params);
-			}
-			
-		});
+		newRightSideRevisionPicker(null);
 		
 		add(new Link<Void>("swap") {
 
@@ -349,6 +342,28 @@ public class RevisionComparePage extends DepotPage {
 		add(new BackToTop("backToTop"));
 	}
 	
+	private void newRightSideRevisionPicker(@Nullable AjaxRequestTarget target) {
+		AffinalRevisionPicker revisionPicker = new AffinalRevisionPicker("rightSide", 
+				state.rightSide.getDepotId(), state.rightSide.getRevision()) { 
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
+				HistoryState state = new HistoryState(RevisionComparePage.this.state);
+				state.rightSide = new DepotAndRevision(depot, revision);
+				
+				PageParameters params = paramsOf(getDepot(), state);
+				setResponsePage(RevisionComparePage.class, params);
+			}
+			
+		};
+		if (target != null) {
+			replace(revisionPicker);
+			target.add(revisionPicker);
+		} else {
+			add(revisionPicker);
+		}
+	}
+	
 	private boolean hasChanges() {
 		return !mergeBaseModel.getObject().equals(state.rightSide.getCommit().name());
 	}
@@ -376,7 +391,13 @@ public class RevisionComparePage extends DepotPage {
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
 					new Model<PullRequest>(null), mergeBaseModel.getObject(), 
 					state.rightSide.getRevision(), state.pathFilter, 
-					state.whitespaceOption, state.commentId) {
+					state.whitespaceOption, state.commentId, state.mark) {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(hasChanges());
+				}
 
 				@Override
 				protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -388,18 +409,6 @@ public class RevisionComparePage extends DepotPage {
 				protected void onWhitespaceOptionChange(AjaxRequestTarget target,
 						WhitespaceOption whitespaceOption) {
 					state.whitespaceOption = whitespaceOption;
-					pushState(target);
-				}
-				
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(hasChanges());
-				}
-
-				@Override
-				protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-					state.commentId = CodeComment.idOf(comment);
 					pushState(target);
 				}
 				
@@ -460,17 +469,6 @@ public class RevisionComparePage extends DepotPage {
 
 		private static final long serialVersionUID = 1L;
 
-		public HistoryState() {
-		}
-		
-		public HistoryState(HistoryState copy) {
-			leftSide = copy.leftSide;
-			rightSide = copy.rightSide;
-			whitespaceOption = copy.whitespaceOption;
-			pathFilter = copy.pathFilter;
-			commentId = copy.commentId;
-		}
-		
 		public DepotAndRevision leftSide;
 		
 		public DepotAndRevision rightSide;
@@ -482,6 +480,21 @@ public class RevisionComparePage extends DepotPage {
 		
 		@Nullable
 		public Long commentId;
+
+		@Nullable
+		public DiffMark mark;
+		
+		public HistoryState() {
+		}
+		
+		public HistoryState(HistoryState state) {
+			leftSide = state.leftSide;
+			rightSide = state.rightSide;
+			whitespaceOption = state.whitespaceOption;
+			pathFilter = state.pathFilter;
+			commentId = state.commentId;
+			mark = state.mark;
+		}
 		
 	}
 	

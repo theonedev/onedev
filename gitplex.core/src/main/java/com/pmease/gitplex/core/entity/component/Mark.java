@@ -103,7 +103,7 @@ public class Mark implements Serializable {
 			return null;
 	}
 	
-	public String toJSON() {
+	public String toJson() {
 		try {
 			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(this);
 		} catch (JsonProcessingException e) {

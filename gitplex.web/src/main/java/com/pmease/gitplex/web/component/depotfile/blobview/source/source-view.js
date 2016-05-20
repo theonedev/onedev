@@ -140,8 +140,10 @@ gitplex.sourceview = {
 					}
 			    });
 				cm.setSize($code.width(), $code.height());
-			    if (mark)
+			    if (mark) {
+			    	$sourceView.data("mark", mark);
 			    	pmease.commons.codemirror.mark(cm, mark, true);
+			    }
 				if (initState)
 					pmease.commons.codemirror.initState(cm, viewState);
 				cm.on("scroll", function() {
@@ -207,19 +209,8 @@ gitplex.sourceview = {
 		});
 	},
 	restoreMark: function() {
-		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var uri = new URI(window.location.href); 
-		var markStr = uri.search(true).mark;
-		if (markStr) {
-			var splitted = markStr.split("-");
-			var fromInfo = splitted[0].split(".");
-			var toInfo = splitted[1].split(".");
-			var mark = {
-				beginLine: parseInt(fromInfo[0])-1,
-				beginChar: parseInt(fromInfo[1]),
-				endLine: parseInt(toInfo[0])-1,
-				endChar: parseInt(toInfo[1])
-			}
+		var mark = $(".source-view").data("mark");
+		if (mark) {
 			pmease.commons.codemirror.mark(cm, mark, false);
 		} else {
 			pmease.commons.codemirror.clearMark(cm);
@@ -295,15 +286,7 @@ gitplex.sourceview = {
 		var ch = (mark.beginChar + mark.endChar)/2;
 		var position = cm.charCoords({line:mark.beginLine, ch:ch});
 		var permanentLinkCallback = function($permanentLink) {
-			$permanentLink.off("click");
 			$permanentLink.attr("href", markUrl);
-			$permanentLink.click(function(e) {
-				e.preventDefault();
-				$("#selection-popup").hide();
-				pmease.commons.codemirror.clearSelection(cm);
-				pmease.commons.codemirror.mark(cm, mark, false);
-				sourceCllback("mark", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
-			});
 		};
 		var commentLinkCallback = function($commentLink) {
 			$commentLink.off("click");
@@ -316,6 +299,7 @@ gitplex.sourceview = {
     				$("#selection-popup").hide();
 					pmease.commons.codemirror.clearSelection(cm);
 					pmease.commons.codemirror.mark(cm, mark, false);
+					$sourceView.data("mark", mark);
     				sourceCllback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 				});
 			} else {

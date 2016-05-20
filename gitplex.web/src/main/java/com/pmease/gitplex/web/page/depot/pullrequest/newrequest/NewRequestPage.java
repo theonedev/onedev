@@ -31,6 +31,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.Commit;
@@ -46,7 +47,6 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
@@ -59,8 +59,8 @@ import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.web.component.BranchLink;
 import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;
-import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
@@ -162,16 +162,16 @@ public class NewRequestPage extends PullRequestPage {
 					pullRequest.setCloseInfo(closeInfo);
 				}
 			} else {
-				Git sandbox = new Git(FileUtils.createTempDir());
-				pullRequest.setSandbox(sandbox);
-				sandbox.clone(target.getDepot().git(), false, true, true, pullRequest.getTarget().getBranch());
-				sandbox.reset(null, null);
-
-				sandbox.fetch(source.getDepot().git(), source.getBranch());
-				
-				pullRequest.setBaseCommitHash(pullRequest.git().calcMergeBase(target.getObjectName(), source.getObjectName()));			
-
-				if (sandbox.isAncestor(source.getObjectName(), target.getObjectName())) {
+				Git tempGit = new Git(FileUtils.createTempDir());
+				try {
+					tempGit.clone(target.getDepot().git(), false, true, true, pullRequest.getTarget().getBranch());
+					tempGit.reset(null, null);
+					tempGit.fetch(source.getDepot().git(), source.getBranch());
+					pullRequest.setBaseCommitHash(tempGit.calcMergeBase(target.getObjectName(), source.getObjectName()));			
+				} finally {
+					FileUtils.deleteDir(tempGit.depotDir());
+				}
+				if (pullRequest.getBaseCommitHash().equals(source.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setCloseDate(new Date());
 					closeInfo.setCloseStatus(CloseInfo.Status.INTEGRATED);
@@ -180,12 +180,12 @@ public class NewRequestPage extends PullRequestPage {
 			}
 			requestModel = Model.of(pullRequest);
 		} else {
-			final Long requestId = pullRequest.getId();
+			Long requestId = pullRequest.getId();
 			requestModel = new LoadableDetachableModel<PullRequest>() {
 
 				@Override
 				protected PullRequest load() {
-					return GitPlex.getInstance(Dao.class).load(PullRequest.class, requestId);
+					return GitPlex.getInstance(PullRequestManager.class).load(requestId);
 				}
 				
 			};
@@ -197,7 +197,7 @@ public class NewRequestPage extends PullRequestPage {
 			@Override
 			protected List<Commit> load() {
 				PullRequest request = getPullRequest();
-				List<Commit> commits = request.git().log(request.getBaseCommitHash(), 
+				List<Commit> commits = source.getDepot().git().log(request.getBaseCommitHash(), 
 						request.getLatestUpdate().getHeadCommitHash(), null, 0, 0, false);
 				Collections.reverse(commits);
 				return commits;
@@ -309,11 +309,28 @@ public class NewRequestPage extends PullRequestPage {
 	
 	private RevisionDiffPanel newRevDiffPanel() {
 		PullRequest request = getPullRequest();
-		String oldRev = request.getBaseCommitHash();
-		String newRev = request.getLatestUpdate().getHeadCommitHash();
 		
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel("revisionDiff", depotModel, 
-				new Model<PullRequest>(null), oldRev, newRev, null, WhitespaceOption.DEFAULT, null) {
+		IModel<Depot> depotModel = new LoadableDetachableModel<Depot>() {
+
+			@Override
+			protected Depot load() {
+				Depot depot = source.getDepot();
+				depot.cacheObjectId(source.getRevision(), 
+						ObjectId.fromString(getPullRequest().getLatestUpdate().getHeadCommitHash()));
+				return depot;
+			}
+			
+		};
+		
+		/*
+		 * we are passing source revision here instead of head commit hash of latest update
+		 * as we want to preserve the branch name in case they are useful at some point 
+		 * later. Also it is guaranteed to be resolved to the same commit has as we've cached
+		 * it above when loading the depot  
+		 */
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
+				new Model<PullRequest>(null), request.getBaseCommitHash(), 
+				source.getRevision(), null, WhitespaceOption.DEFAULT, null, null) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -324,10 +341,6 @@ public class NewRequestPage extends PullRequestPage {
 					WhitespaceOption whitespaceOption) {
 			}
 
-			@Override
-			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-			}
-			
 		};
 		diffPanel.setOutputMarkupId(true);
 		return diffPanel;
@@ -512,7 +525,7 @@ public class NewRequestPage extends PullRequestPage {
 		WebMarkupContainer assigneeContainer = new WebMarkupContainer("assignee");
 		form.add(assigneeContainer);
 		IModel<Account> assigneeModel = new PropertyModel<>(getPullRequest(), "assignee");
-		final AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", depotModel, assigneeModel);
+		AssigneeChoice assigneeChoice = new AssigneeChoice("assignee", depotModel, assigneeModel);
 		assigneeChoice.setRequired(true);
 		assigneeContainer.add(assigneeChoice);
 		
@@ -527,7 +540,7 @@ public class NewRequestPage extends PullRequestPage {
 			
 		}));
 		
-		final WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers") {
+		WebMarkupContainer reviewersContainer = new WebMarkupContainer("reviewers") {
 
 			@Override
 			protected void onBeforeRender() {
@@ -591,12 +604,6 @@ public class NewRequestPage extends PullRequestPage {
 	@Override
 	protected void onDetach() {
 		commitsModel.detach();
-
-		if (getPullRequest() != null && getPullRequest().getSandbox() != null) {
-			FileUtils.deleteDir(getPullRequest().getSandbox().depotDir());
-			getPullRequest().setSandbox(null);
-		}
-
 		requestModel.detach();
 		
 		super.onDetach();

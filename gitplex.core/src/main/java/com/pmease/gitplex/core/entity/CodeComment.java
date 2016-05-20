@@ -23,6 +23,7 @@ import org.hibernate.annotations.OptimisticLock;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.Mark;
 
 /*
@@ -63,10 +64,9 @@ public class CodeComment extends AbstractEntity {
 	@OptimisticLock(excluded=true)
 	@Embedded
 	private Mark mark;
-	
-	@OptimisticLock(excluded=true)
-	@Column(nullable=false)
-	private String compareCommit;
+
+	@Embedded
+	private CompareContext compareContext;
 	
 	@OneToMany(mappedBy="comment")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -137,12 +137,12 @@ public class CodeComment extends AbstractEntity {
 		this.mark = mark;
 	}
 
-	public String getCompareCommit() {
-		return compareCommit;
+	public CompareContext getCompareContext() {
+		return compareContext;
 	}
 
-	public void setCompareCommit(String compareCommit) {
-		this.compareCommit = compareCommit;
+	public void setCompareContext(CompareContext compareContext) {
+		this.compareContext = compareContext;
 	}
 
 	public Collection<CodeCommentReply> getReplies() {

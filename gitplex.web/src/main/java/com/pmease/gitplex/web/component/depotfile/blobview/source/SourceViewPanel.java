@@ -43,7 +43,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -232,7 +231,7 @@ public class SourceViewPanel extends BlobViewPanel {
 
 	public void mark(AjaxRequestTarget target, Mark mark, boolean scroll) {
 		String script = String.format("gitplex.sourceview.mark(%s, %s);", 
-				mark.toJSON(), scroll);
+				mark.toJson(), scroll);
 		target.appendJavaScript(script);
 	}
 	
@@ -254,8 +253,6 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				mark(target, context.getComment().getMark(), true);
-				context.onMark(target, ObjectId.fromString(context.getComment().getCommit()), 
-						context.getComment().getMark());
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
 
@@ -277,7 +274,6 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				hideComment(target);
-				context.onOpenComment(target, null);
 			}
 			
 		});
@@ -317,13 +313,12 @@ public class SourceViewPanel extends BlobViewPanel {
 				case "openSelectionPopup": 
 					Mark mark = getMark(params, "param1", "param2", "param3", "param4");
 					String script = String.format("gitplex.sourceview.openSelectionPopup(%s, '%s', %s);", 
-							mark.toJSON(), context.getMarkUrl(context.getCommit(), mark), 
+							mark.toJson(), context.getMarkUrl(context.getCommit(), mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "mark":
 					mark = getMark(params, "param1", "param2", "param3", "param4");
-					context.onMark(target, context.getCommit(), mark);
 					break;
 				case "addComment": 
 					Preconditions.checkNotNull(SecurityUtils.getAccount());
@@ -411,7 +406,6 @@ public class SourceViewPanel extends BlobViewPanel {
 									comment.getMark().getBeginLine(), 
 									getJsonOfComment(comment));
 							target.appendJavaScript(script);
-							context.onOpenComment(target, comment);
 						}
 
 					});
@@ -446,7 +440,6 @@ public class SourceViewPanel extends BlobViewPanel {
 					script = String.format("gitplex.sourceview.onOpenComment(%s);", 
 							getJsonOfComment(commentModel.getObject()));
 					target.appendJavaScript(script);
-					context.onOpenComment(target, commentModel.getObject());
 					break;
 				}
 			}
@@ -621,7 +614,6 @@ public class SourceViewPanel extends BlobViewPanel {
 		String script = String.format("gitplex.sourceview.onCommentDeleted(%d, %d);", 
 				comment.getMark().getBeginLine(), comment.getId());
 		target.appendJavaScript(script);
-		context.onOpenComment(target, null);
 	}
 	
 	private void hideComment(AjaxRequestTarget target) {
@@ -722,7 +714,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				+ "%s, %s, %s, %s, %s);", 
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path), 
-				context.getMark()!=null?context.getMark().toJSON():"undefined",
+				context.getMark()!=null?context.getMark().toJson():"undefined",
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
 				jsonOfBlameInfos, 

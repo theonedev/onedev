@@ -44,11 +44,11 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
@@ -66,6 +66,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	private static final String PARAM_COMMENT = "comment";
+	
+	private static final String PARAM_MARK = "mark";
 	
 	public static final String REV_BASE = "base";
 	
@@ -94,6 +96,8 @@ public class RequestComparePage extends RequestDetailPage {
 	private String pathFilter;
 	
 	private Long commentId;
+	
+	private DiffMark mark;
 	
 	private WebMarkupContainer compareHead;
 	
@@ -152,6 +156,9 @@ public class RequestComparePage extends RequestDetailPage {
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		String markStr = params.get(PARAM_MARK).toString();
+		if (markStr != null)
+			state.mark = new DiffMark(markStr);
 		
 		initFromState(state);
 	}
@@ -162,6 +169,7 @@ public class RequestComparePage extends RequestDetailPage {
 		whitespaceOption = state.whitespaceOption;
 		pathFilter = state.pathFilter;
 		commentId = state.commentId;
+		mark = state.mark;
 	}
 	
 	private String getRevision(String commitHash) {
@@ -486,6 +494,8 @@ public class RequestComparePage extends RequestDetailPage {
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
+		if (state.mark != null)
+			params.set(PARAM_MARK, state.mark);
 		return params;
 	}
 	
@@ -644,7 +654,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
 		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
 				requestModel, oldCommitHash, newCommitHash, pathFilter, 
-				whitespaceOption, commentId) {
+				whitespaceOption, commentId, mark) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -659,11 +669,6 @@ public class RequestComparePage extends RequestDetailPage {
 				pushState(target);
 			}
 
-			@Override
-			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-				commentId = state.commentId = CodeComment.idOf(comment);
-			}
-			
 		};
 		revisionDiff.setOutputMarkupId(true);
 		if (partialPageRequestHandler != null) {

@@ -221,7 +221,7 @@ public abstract class FileEditPanel extends Panel {
 				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
-				mark!=null?mark.toJSON():"undefined",
+				mark!=null?mark.toJson():"undefined",
 				viewState!=null?"JSON.parse('"+viewState+"')":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
@@ -250,7 +250,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	public void mark(AjaxRequestTarget target, Mark mark) {
 		String script = String.format("gitplex.fileedit.mark('%s', %s);", 
-				getMarkupId(), mark.toJSON());
+				getMarkupId(), mark.toJson());
 		target.appendJavaScript(script);
 	}
 

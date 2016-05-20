@@ -23,7 +23,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
@@ -192,9 +191,6 @@ public class PullRequest extends AbstractEntity {
 	
 	@Version
 	private long version;
-	
-	@Transient
-	private Git sandbox;
 	
 	@OptimisticLock(excluded=true)
 	@Embedded
@@ -394,20 +390,8 @@ public class PullRequest extends AbstractEntity {
 	}
 	
 	public Git git() {
-		if (sandbox == null)
-			return getTargetDepot().git();
-		else
-			return sandbox;
+		return getTargetDepot().git();
 	}
-
-	public Git getSandbox() {
-		return sandbox;
-	}
-
-	public void setSandbox(Git sandbox) {
-		this.sandbox = sandbox;
-	}
-
 	/**
 	 * Get unmodifiable collection of updates of this pull request. To add update 
 	 * to the pull request, call {@link this#addUpdate(PullRequestUpdate)} instead.

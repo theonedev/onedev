@@ -834,16 +834,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, ObjectId commitId, Mark mark) {
-		this.mark = mark;
-		if (!blobIdent.revision.equals(resolvedRevision.name())) {
-			blobIdent.revision = resolvedRevision.name();
-			newRevisionPicker(target);
-		}
-		pushState(target);
-	}
-
-	@Override
 	public String getMarkUrl(ObjectId commitId, Mark mark) {
 		HistoryState state = getState();
 		state.blobIdent.revision = commitId.name();
@@ -925,21 +915,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		newFileViewer(target, viewState);
 		pushState(target);
 		resizeWindow(target);
-	}
-
-	@Override
-	public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			commentId = comment.getId();
-			mark = comment.getMark();
-		} else {
-			commentId = null;
-		}
-		if (!blobIdent.revision.equals(resolvedRevision.name())) {
-			blobIdent.revision = resolvedRevision.name();
-			newRevisionPicker(target);
-		}
-		pushState(target);
 	}
 
 	private void resolveRevision() {

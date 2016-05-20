@@ -42,7 +42,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
@@ -50,6 +49,7 @@ import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
 import com.pmease.gitplex.web.component.createtag.CreateTagLink;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.hashandcode.HashAndCodePanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -71,6 +71,8 @@ public class CommitDetailPage extends DepotPage {
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	private static final String PARAM_COMMENT = "comment";
+	
+	private static final String PARAM_MARK = "mark";
 	
 	protected String revision;
 	
@@ -298,7 +300,8 @@ public class CommitDetailPage extends DepotPage {
 	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
 		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
 				Model.of((PullRequest)null), getCompareWith(), 
-				getCommit().name(), state.pathFilter, state.whitespaceOption, state.commentId) {
+				getCommit().name(), state.pathFilter, state.whitespaceOption, 
+				state.commentId, state.mark) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -313,12 +316,6 @@ public class CommitDetailPage extends DepotPage {
 				pushState(target);
 			}
 
-			@Override
-			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-				state.commentId = CodeComment.idOf(comment);
-				pushState(target);
-			}
-			
 		};
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
@@ -395,6 +392,8 @@ public class CommitDetailPage extends DepotPage {
 		
 		public String pathFilter;
 		
+		public DiffMark mark;
+		
 		public HistoryState() {
 		}
 		
@@ -403,6 +402,9 @@ public class CommitDetailPage extends DepotPage {
 			whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();
 			commentId = params.get(PARAM_COMMENT).toOptionalLong();
+			String markStr = params.get(PARAM_MARK).toString();
+			if (markStr != null)
+				mark = new DiffMark(markStr);
 		}
 		
 	}

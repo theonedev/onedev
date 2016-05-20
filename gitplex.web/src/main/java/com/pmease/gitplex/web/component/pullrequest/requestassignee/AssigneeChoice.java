@@ -45,9 +45,9 @@ public class AssigneeChoice extends Select2Choice<Assignee> {
 		
 		// getSettings().setMinimumInputLength(1);
 		getSettings().setPlaceholder("Type to find an assignee");
-		getSettings().setFormatResult("gitplex.userChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("gitplex.userChoiceFormatter.formatSelection");
-		getSettings().setEscapeMarkup("gitplex.userChoiceFormatter.escapeMarkup");
+		getSettings().setFormatResult("gitplex.accountChoiceFormatter.formatResult");
+		getSettings().setFormatSelection("gitplex.accountChoiceFormatter.formatSelection");
+		getSettings().setEscapeMarkup("gitplex.accountChoiceFormatter.escapeMarkup");
 	}
 
 	@Override

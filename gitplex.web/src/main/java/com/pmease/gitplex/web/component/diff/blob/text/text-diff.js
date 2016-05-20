@@ -436,7 +436,6 @@ gitplex.textdiff = {
 					return;
 	    		}
 				var permanentCallback = function($permanentLink) {
-					$permanentLink.off("click");
 	    			var uri = URI(window.location.href); 
 	    			var markFile = $container.data("markfile");
 	    			uri.removeSearch("jump-file");
@@ -444,19 +443,6 @@ gitplex.textdiff = {
 	    			uri.removeSearch("mark-pos").addSearch("mark-pos", markPos);
     				$permanentLink.attr("href", uri.toString());
     				$permanentLink.html("<i class='fa fa-link'></i> Permanent link of this selection");
-    				$permanentLink.click(function(e) {
-    					e.preventDefault();
-	    				window.getSelection().removeAllRanges();
-    					$container.data("callback")("storeUrl", uri.toString());
-	    				// continue to operate DOM in a timer to give browser a chance to 
-	    				// clear selections
-	    				setTimeout(function() {
-		    				gitplex.textdiff.clearMarks();
-		    				$("#selection-popup").hide();
-	    					pmease.commons.history.pushState(uri.toString());
-	    					gitplex.textdiff.mark(markFile, markPos);
-	    				}, 100);
-    				});
 				};
 	    		var commentCallback = function($commentLink) {
     				$commentLink.removeAttr("href");

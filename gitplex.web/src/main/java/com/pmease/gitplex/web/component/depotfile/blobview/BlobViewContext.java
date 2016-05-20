@@ -33,8 +33,6 @@ public interface BlobViewContext extends Serializable {
 	@Nullable
 	Mark getMark();
 	
-	void onMark(AjaxRequestTarget target, ObjectId commitId, @Nullable Mark mark);
-	
 	String getMarkUrl(ObjectId commitId, Mark mark);
 	
 	Mode getMode();
@@ -53,8 +51,6 @@ public interface BlobViewContext extends Serializable {
 	
 	void onEdit(AjaxRequestTarget target, @Nullable String viewState);
 	
-	void onOpenComment(AjaxRequestTarget target, @Nullable CodeComment comment);
-
 	@Nullable
 	CodeComment getComment();
 	

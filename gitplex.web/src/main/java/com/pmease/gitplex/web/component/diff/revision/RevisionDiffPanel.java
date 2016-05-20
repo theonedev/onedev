@@ -65,7 +65,6 @@ import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
@@ -100,13 +99,13 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private Long commentId;
 	
+	private DiffMark mark;
+	
 	private IModel<List<DiffEntry>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntry>>() {
 
 		@Override
 		protected List<DiffEntry> load() {
-			String oldCommitHash = depotModel.getObject().getObjectId(oldRev).name();
-			String newCommitHash = depotModel.getObject().getObjectId(newRev).name();
-			return depotModel.getObject().getDiffs(oldCommitHash, newCommitHash);
+			return depotModel.getObject().getDiffs(oldRev, newRev);
 		}
 		
 	};
@@ -258,7 +257,8 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, @Nullable String pathFilter, 
-			WhitespaceOption whitespaceOption, @Nullable Long commentId) {
+			WhitespaceOption whitespaceOption, @Nullable Long commentId, 
+			@Nullable DiffMark mark) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -268,6 +268,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		this.pathFilter = pathFilter;
 		this.whitespaceOption = whitespaceOption;
 		this.commentId = commentId;
+		this.mark = mark;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_VIEW_MODE);
@@ -502,7 +503,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				hideComment(target);
-				onOpenComment(target, null);
 			}
 			
 		});
@@ -610,6 +610,22 @@ public abstract class RevisionDiffPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
+	protected String getPathFilter() {
+		return pathFilter;
+	}
+	
+	protected WhitespaceOption getWhitespaceOption() {
+		return whitespaceOption;
+	}
+	
+	protected Long getCommentId() {
+		return commentId;
+	}
+	
+	protected DiffMark getMark() {
+		return mark;
+	}
+	
 	private void hideComment(AjaxRequestTarget target) {
 		commentContainer.replace(new WebMarkupContainer("body"));
 		commentContainer.setVisible(false);
@@ -643,8 +659,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	protected abstract void onWhitespaceOptionChange(AjaxRequestTarget target, 
 			WhitespaceOption whitespaceOption);
-	
-	protected abstract void onOpenComment(AjaxRequestTarget target, @Nullable CodeComment comment);
 	
 	private static class ChangesAndCount {
 		

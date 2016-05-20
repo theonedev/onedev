@@ -3,6 +3,7 @@ package com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare;
 import java.io.Serializable;
 
 import com.pmease.commons.lang.diff.WhitespaceOption;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 
 public class HistoryState implements Serializable {
 
@@ -17,5 +18,7 @@ public class HistoryState implements Serializable {
 	public String pathFilter;
 	
 	public Long commentId;
+	
+	public DiffMark mark;
 	
 }

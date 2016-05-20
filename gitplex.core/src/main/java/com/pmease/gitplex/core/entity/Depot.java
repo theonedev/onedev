@@ -673,9 +673,9 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	    	diffFormatter.setDetectRenames(true);
 	    	diffFormatter.setDiffAlgorithm(MyersDiff.INSTANCE);
 	    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-			AnyObjectId oldCommitId = getObjectId(oldRev);
-			AnyObjectId newCommitId = getObjectId(newRev);
-	    	for (DiffEntry entry: diffFormatter.scan(oldCommitId, newCommitId)) {
+			AnyObjectId oldRevId = getObjectId(oldRev);
+			AnyObjectId newRevId = getObjectId(newRev);
+	    	for (DiffEntry entry: diffFormatter.scan(oldRevId, newRevId)) {
 	    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
 	    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
 	    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
