@@ -42,6 +42,7 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.assets.oneline.OnelineResourceReference;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AuxiliaryManager;
@@ -313,6 +314,12 @@ public class CommitDetailPage extends DepotPage {
 			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
 					WhitespaceOption whitespaceOption) {
 				state.whitespaceOption = whitespaceOption;
+				pushState(target);
+			}
+
+			@Override
+			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+				state.commentId = CodeComment.idOf(comment);
 				pushState(target);
 			}
 

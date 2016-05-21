@@ -1,10 +1,10 @@
 gitplex.sourceview = {
 	init: function(fileContent, filePath, mark, symbolTooltipId, 
-			revision, blameInfos, commentInfos, sourceCllback, viewState, loggedIn) {
+			revision, blameInfos, commentInfos, sourceCallback, viewState, loggedIn) {
 		var cm;
 		
 		var $sourceView = $(".source-view");
-		$sourceView.data("sourceCllback", sourceCllback);
+		$sourceView.data("sourceCallback", sourceCallback);
 		
 		var $code = $sourceView.children(".code");
 		$sourceView.closest(".content").css("overflow", "hidden");
@@ -116,7 +116,7 @@ gitplex.sourceview = {
 				    	var from = cm.getCursor("from");
 				    	var to = cm.getCursor("to");
 				    	if (from.line != to.line || from.ch != to.ch) {
-				    		sourceCllback("openSelectionPopup", from.line, from.ch, to.line, to.ch);
+				    		sourceCallback("openSelectionPopup", from.line, from.ch, to.line, to.ch);
 				    	} else {
 				    		$("#selection-popup").hide();
 				    	}
@@ -140,10 +140,8 @@ gitplex.sourceview = {
 					}
 			    });
 				cm.setSize($code.width(), $code.height());
-			    if (mark) {
-			    	$sourceView.data("mark", mark);
+			    if (mark)
 			    	pmease.commons.codemirror.mark(cm, mark, true);
-			    }
 				if (initState)
 					pmease.commons.codemirror.initState(cm, viewState);
 				cm.on("scroll", function() {
@@ -209,8 +207,19 @@ gitplex.sourceview = {
 		});
 	},
 	restoreMark: function() {
-		var mark = $(".source-view").data("mark");
-		if (mark) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var uri = new URI(window.location.href); 
+		var markStr = uri.search(true).mark;
+		if (markStr) {
+			var splitted = markStr.split("-");
+			var fromInfo = splitted[0].split(".");
+			var toInfo = splitted[1].split(".");
+			var mark = {
+				beginLine: parseInt(fromInfo[0])-1,
+				beginChar: parseInt(fromInfo[1]),
+				endLine: parseInt(toInfo[0])-1,
+				endChar: parseInt(toInfo[1])
+			}
 			pmease.commons.codemirror.mark(cm, mark, false);
 		} else {
 			pmease.commons.codemirror.clearMark(cm);
@@ -218,7 +227,7 @@ gitplex.sourceview = {
 	},
 	addCommentGutter: function(line, commentInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var sourceCllback = $(".source-view").data("sourceCllback");
+		var sourceCallback = $(".source-view").data("sourceCallback");
 		
 		var $gutter = $(document.createElement("div"));
 		$gutter.addClass("CodeMirror-comment");
@@ -254,7 +263,7 @@ gitplex.sourceview = {
     						return;
     					}
 						var commentInfo = commentInfos[$(this).index()];			        						
-						sourceCllback("openComment", commentInfo.id);
+						sourceCallback("openComment", commentInfo.id);
 					});
 				});
 				gitplex.sourceview.highlightCommentTrigger();				
@@ -274,7 +283,7 @@ gitplex.sourceview = {
 						&& !confirm("There are unsaved changes, discard and continue?")) {
 					return;
 				}
-				sourceCllback("openComment", commentInfo.id);
+				sourceCallback("openComment", commentInfo.id);
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
@@ -282,7 +291,7 @@ gitplex.sourceview = {
 	openSelectionPopup: function(mark, markUrl, loggedIn) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
 		var $sourceView = $(".source-view");
-		var sourceCllback = $sourceView.data("sourceCllback");
+		var sourceCallback = $sourceView.data("sourceCallback");
 		var ch = (mark.beginChar + mark.endChar)/2;
 		var position = cm.charCoords({line:mark.beginLine, ch:ch});
 		var permanentLinkCallback = function($permanentLink) {
@@ -299,8 +308,7 @@ gitplex.sourceview = {
     				$("#selection-popup").hide();
 					pmease.commons.codemirror.clearSelection(cm);
 					pmease.commons.codemirror.mark(cm, mark, false);
-					$sourceView.data("mark", mark);
-    				sourceCllback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+    				sourceCallback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 				});
 			} else {
 				$commentLink.html("Log in to comment on selection");
@@ -311,7 +319,7 @@ gitplex.sourceview = {
 	},
 	onCommentAdded: function(line, commentInfo) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var sourceCllback = $(".source-view").data("sourceCllback");		
+		var sourceCallback = $(".source-view").data("sourceCallback");		
 		var lineInfo = cm.lineInfo(line);
 		var gutter;
 		if (lineInfo.gutterMarkers)
@@ -328,7 +336,7 @@ gitplex.sourceview = {
 	},
 	onCommentDeleted: function(line, commentId) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var sourceCllback = $(".source-view").data("sourceCllback");		
+		var sourceCallback = $(".source-view").data("sourceCallback");		
 		var lineInfo = cm.lineInfo(line);
 		var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
 		var commentInfos = $gutter.data("commentInfos");

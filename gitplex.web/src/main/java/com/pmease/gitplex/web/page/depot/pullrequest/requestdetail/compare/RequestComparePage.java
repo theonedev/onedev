@@ -44,6 +44,7 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
@@ -669,6 +670,12 @@ public class RequestComparePage extends RequestDetailPage {
 				pushState(target);
 			}
 
+			@Override
+			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+				commentId = state.commentId = CodeComment.idOf(comment);
+				pushState(target);
+			}
+			
 		};
 		revisionDiff.setOutputMarkupId(true);
 		if (partialPageRequestHandler != null) {

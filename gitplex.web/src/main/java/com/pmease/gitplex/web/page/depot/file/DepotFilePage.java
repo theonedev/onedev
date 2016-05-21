@@ -834,9 +834,16 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public String getMarkUrl(ObjectId commitId, Mark mark) {
+	public void onMark(AjaxRequestTarget target, Mark mark) {
+		this.mark = mark;
+		pushState(target);
+	}
+
+	@Override
+	public String getMarkUrl(Mark mark) {
 		HistoryState state = getState();
-		state.blobIdent.revision = commitId.name();
+		state.blobIdent.revision = resolvedRevision.name();
+		state.commentId = null;
 		state.mark = mark;
 		PageParameters params = paramsOf(getDepot(), state);		
 		return RequestCycle.get().urlFor(DepotFilePage.class, params).toString();
@@ -915,6 +922,14 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		newFileViewer(target, viewState);
 		pushState(target);
 		resizeWindow(target);
+	}
+
+	@Override
+	public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+		commentId = CodeComment.idOf(comment);
+		if (comment != null)
+			mark = comment.getMark();
+		pushState(target);
 	}
 
 	private void resolveRevision() {

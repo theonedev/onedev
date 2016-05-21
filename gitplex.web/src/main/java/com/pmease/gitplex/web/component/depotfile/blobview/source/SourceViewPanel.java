@@ -253,6 +253,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				mark(target, context.getComment().getMark(), true);
+				context.onMark(target, context.getComment().getMark());
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
 
@@ -263,6 +264,28 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		});
+		
+		
+		// use this instead of permanent link as we want to get the link 
+		// updated whenever we re-render the comment container
+		AttributeAppender appender = AttributeAppender.append("href", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (context.getComment() != null) {
+					DepotFilePage.HistoryState state = new DepotFilePage.HistoryState();
+					state.blobIdent = new BlobIdent(context.getBlobIdent());
+					state.blobIdent.revision = context.getCommit().name();
+					state.commentId = context.getComment().getId();
+					state.mark = context.getComment().getMark();
+					return urlFor(DepotFilePage.class, DepotFilePage.paramsOf(context.getDepot(), state)).toString();
+				} else {
+					return "";
+				}
+			}
+			
+		});
+		commentContainer.add(new WebMarkupContainer("permanent").add(appender));
 		commentContainer.add(new AjaxLink<Void>("close") {
 
 			@Override
@@ -274,6 +297,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				hideComment(target);
+				context.onOpenComment(target, null);
 			}
 			
 		});
@@ -313,12 +337,9 @@ public class SourceViewPanel extends BlobViewPanel {
 				case "openSelectionPopup": 
 					Mark mark = getMark(params, "param1", "param2", "param3", "param4");
 					String script = String.format("gitplex.sourceview.openSelectionPopup(%s, '%s', %s);", 
-							mark.toJson(), context.getMarkUrl(context.getCommit(), mark), 
+							mark.toJson(), context.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
-					break;
-				case "mark":
-					mark = getMark(params, "param1", "param2", "param3", "param4");
 					break;
 				case "addComment": 
 					Preconditions.checkNotNull(SecurityUtils.getAccount());
@@ -406,6 +427,7 @@ public class SourceViewPanel extends BlobViewPanel {
 									comment.getMark().getBeginLine(), 
 									getJsonOfComment(comment));
 							target.appendJavaScript(script);
+							context.onOpenComment(target, comment);
 						}
 
 					});
@@ -440,6 +462,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					script = String.format("gitplex.sourceview.onOpenComment(%s);", 
 							getJsonOfComment(commentModel.getObject()));
 					target.appendJavaScript(script);
+					context.onOpenComment(target, commentModel.getObject());
 					break;
 				}
 			}
@@ -614,6 +637,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		String script = String.format("gitplex.sourceview.onCommentDeleted(%d, %d);", 
 				comment.getMark().getBeginLine(), comment.getId());
 		target.appendJavaScript(script);
+		context.onOpenComment(target, null);
 	}
 	
 	private void hideComment(AjaxRequestTarget target) {

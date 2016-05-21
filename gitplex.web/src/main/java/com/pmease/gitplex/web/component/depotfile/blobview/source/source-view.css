@@ -12,6 +12,11 @@
 	margin-right: 8px;
 	font-size: 20px;
 }
+.source-view>.comment>.content>.head .permanent {
+	margin-top: 2px;
+	margin-right: 8px;
+	font-size: 18px;
+}
 .source-view>.comment>.ui-resizable-handle {
 	position: absolute;
 	border-right: 1px solid #CCC;

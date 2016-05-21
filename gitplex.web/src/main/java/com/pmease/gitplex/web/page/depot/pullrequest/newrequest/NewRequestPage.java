@@ -47,6 +47,7 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
@@ -339,6 +340,10 @@ public class NewRequestPage extends PullRequestPage {
 			@Override
 			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
 					WhitespaceOption whitespaceOption) {
+			}
+
+			@Override
+			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
 			}
 
 		};

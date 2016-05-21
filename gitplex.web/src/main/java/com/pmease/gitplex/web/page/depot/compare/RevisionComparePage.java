@@ -32,6 +32,7 @@ import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
@@ -412,6 +413,16 @@ public class RevisionComparePage extends DepotPage {
 					pushState(target);
 				}
 				
+				@Override
+				protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+					state.commentId = CodeComment.idOf(comment);
+					if (comment != null) {
+						boolean leftSide = comment.getCommit().equals(mergeBaseModel.getObject()); 
+						state.mark = new DiffMark(comment.getPath(), leftSide, comment.getMark());
+					}
+					pushState(target);
+				}
+
 			};
 			commitsTab.setSelected(false);
 			filesTab.setSelected(true);

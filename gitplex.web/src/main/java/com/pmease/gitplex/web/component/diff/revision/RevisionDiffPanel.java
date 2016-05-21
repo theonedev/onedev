@@ -65,6 +65,7 @@ import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
@@ -503,6 +504,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				hideComment(target);
+				onOpenComment(target, null);
 			}
 			
 		});
@@ -610,22 +612,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	protected String getPathFilter() {
-		return pathFilter;
-	}
-	
-	protected WhitespaceOption getWhitespaceOption() {
-		return whitespaceOption;
-	}
-	
-	protected Long getCommentId() {
-		return commentId;
-	}
-	
-	protected DiffMark getMark() {
-		return mark;
-	}
-	
 	private void hideComment(AjaxRequestTarget target) {
 		commentContainer.replace(new WebMarkupContainer("body"));
 		commentContainer.setVisible(false);
@@ -659,6 +645,8 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	protected abstract void onWhitespaceOptionChange(AjaxRequestTarget target, 
 			WhitespaceOption whitespaceOption);
+	
+	protected abstract void onOpenComment(AjaxRequestTarget target, @Nullable CodeComment comment);
 	
 	private static class ChangesAndCount {
 		
