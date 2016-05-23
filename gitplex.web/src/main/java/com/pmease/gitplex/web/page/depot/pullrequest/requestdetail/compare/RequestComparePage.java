@@ -44,19 +44,22 @@ import com.pmease.commons.wicket.component.floating.AlignPlacement;
 import com.pmease.commons.wicket.component.floating.FloatingPanel;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.web.component.diff.revision.MarkSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
-public class RequestComparePage extends RequestDetailPage {
+public class RequestComparePage extends RequestDetailPage implements MarkSupport {
 
 	private static final String PARAM_OLD_REV = "old-rev";
 	
@@ -80,7 +83,7 @@ public class RequestComparePage extends RequestDetailPage {
 	
 	public static final String REV_TARGET_BRANCH = "targetBranch";
 	
-	private HistoryState state = new HistoryState();
+	private State state = new State();
 
 	// below fields duplicates some members of state field, and they are serving different 
 	// purposes and may have different values. State members reflects url parameters, while 
@@ -164,7 +167,7 @@ public class RequestComparePage extends RequestDetailPage {
 		initFromState(state);
 	}
 	
-	private void initFromState(HistoryState state) {
+	private void initFromState(State state) {
 		oldCommitHash = getCommitHash(state.oldRev);
 		newCommitHash = getCommitHash(state.newRev);
 		whitespaceOption = state.whitespaceOption;
@@ -471,18 +474,17 @@ public class RequestComparePage extends RequestDetailPage {
 	@Override
 	public void onDetach() {
 		commitsModel.detach();
-		
 		super.onDetach();
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String oldRev, String newRev) {
-		HistoryState state = new HistoryState();
+		State state = new State();
 		state.oldRev = oldRev;
 		state.newRev = newRev;
 		return paramsOf(request, state);
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, HistoryState state) {
+	public static PageParameters paramsOf(PullRequest request, State state) {
 		PageParameters params = RequestDetailPage.paramsOf(request);
 
 		if (state.oldRev != null)
@@ -496,7 +498,7 @@ public class RequestComparePage extends RequestDetailPage {
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
-			params.set(PARAM_MARK, state.mark);
+			params.set(PARAM_MARK, state.mark.toString());
 		return params;
 	}
 	
@@ -627,7 +629,7 @@ public class RequestComparePage extends RequestDetailPage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 
-		state = (HistoryState) data;
+		state = (State) data;
 		initFromState(state);
 		
 		target.add(compareHead);
@@ -655,7 +657,7 @@ public class RequestComparePage extends RequestDetailPage {
 	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
 		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
 				requestModel, oldCommitHash, newCommitHash, pathFilter, 
-				whitespaceOption, commentId, mark) {
+				whitespaceOption, this) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
@@ -670,12 +672,6 @@ public class RequestComparePage extends RequestDetailPage {
 				pushState(target);
 			}
 
-			@Override
-			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-				commentId = state.commentId = CodeComment.idOf(comment);
-				pushState(target);
-			}
-			
 		};
 		revisionDiff.setOutputMarkupId(true);
 		if (partialPageRequestHandler != null) {
@@ -691,6 +687,86 @@ public class RequestComparePage extends RequestDetailPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RequestComparePage.class, "request-compare.css")));
+	}
+
+	@Override
+	public DiffMark getMark() {
+		return mark;
+	}
+
+	@Override
+	public String getMarkUrl(DiffMark mark) {
+		State state = new State();
+		state.mark = mark;
+		state.oldRev = oldCommitHash;
+		state.newRev = newCommitHash;
+		state.pathFilter = pathFilter;
+		state.whitespaceOption = whitespaceOption;
+		return urlFor(RequestComparePage.class, paramsOf(getPullRequest(), state)).toString();
+	}
+
+	@Override
+	public String getCommentUrl(CodeComment comment) {
+		State state = new State();
+		state.mark = new DiffMark(comment, oldCommitHash, newCommitHash);
+		state.commentId = comment.getId();
+		state.oldRev = oldCommitHash;
+		state.newRev = newCommitHash;
+		state.pathFilter = pathFilter;
+		state.whitespaceOption = whitespaceOption;
+		return urlFor(RequestComparePage.class, paramsOf(getPullRequest(), state)).toString();
+	}
+	
+	@Override
+	public CodeComment getOpenComment() {
+		if (commentId != null)
+			return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+		else
+			return null;
+	}
+
+	@Override
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		commentId = state.commentId = comment.getId();
+		mark = state.mark = new DiffMark(comment, oldCommitHash, newCommitHash);
+		pushState(target);
+	}
+
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target) {
+		commentId = state.commentId = null;
+		pushState(target);
+	}
+
+	@Override
+	public void onMark(AjaxRequestTarget target, DiffMark mark) {
+		this.mark = state.mark = mark;
+		pushState(target);
+	}
+
+	@Override
+	public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+		commentId = state.commentId = null;
+		this.mark = state.mark = mark;
+		pushState(target);
+	}
+
+	public static class State implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		public String oldRev;
+		
+		public String newRev;
+		
+		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+		
+		public String pathFilter;
+		
+		public Long commentId;
+		
+		public DiffMark mark;
+		
 	}
 
 }

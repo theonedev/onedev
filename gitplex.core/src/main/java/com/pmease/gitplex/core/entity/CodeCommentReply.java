@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -12,11 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OptimisticLock;
 
 import com.pmease.commons.hibernate.AbstractEntity;
-import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.component.CompareContext;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -46,8 +45,8 @@ public class CodeCommentReply extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date = new Date();
 	
-	@OptimisticLock(excluded=true)
-	private String compareCommit;
+	@Embedded
+	private CompareContext compareContext;
 	
 	@Nullable
 	public Account getUser() {
@@ -86,16 +85,16 @@ public class CodeCommentReply extends AbstractEntity {
 		this.date = date;
 	}
 
-	public void delete() {
-		GitPlex.getInstance(Dao.class).remove(this);
+	public CompareContext getCompareContext() {
+		return compareContext;
 	}
 
-	public String getCompareCommit() {
-		return compareCommit;
+	public void setCompareContext(CompareContext compareContext) {
+		this.compareContext = compareContext;
 	}
 
-	public void setCompareCommit(String compareCommit) {
-		this.compareCommit = compareCommit;
+	public void setVersion(long version) {
+		this.version = version;
 	}
-
+	
 }

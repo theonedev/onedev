@@ -399,7 +399,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 	
 	@Override
-	public CodeComment getComment() {
+	public CodeComment getOpenComment() {
 		if (commentId != null)
 			return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
 		else
@@ -526,7 +526,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		    		for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 		    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
 
-		    		HistoryState state = getState();
+		    		State state = getState();
 	    			state.blobIdent = committed;
 	    			state.mode = null;
 	    			applyState(target, state);
@@ -570,7 +570,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					Depot depot = getDepot();
 					String branch = blobIdent.revision;
 					depot.cacheObjectId(branch, newCommit);
-					resolveRevision();
+					resolvedRevision = newCommit;
 					try (RevWalk revWalk = new RevWalk(getDepot().getRepository())) {
 						RevTree revTree = getDepot().getRevCommit(newCommit).getTree();
 						String parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
@@ -585,7 +585,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 						for (RefListener listener: GitPlex.getExtensions(RefListener.class))
 			    			listener.onRefUpdate(depot, refName, oldCommit, newCommit);
 						BlobIdent parentBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-						HistoryState state = getState();
+						State state = getState();
 						state.blobIdent = parentBlobIdent;
 						state.mode = null;
 						applyState(target, state);
@@ -623,8 +623,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		pushState(target, url.toString(), getState());
 	}
 	
-	private HistoryState getState() {
-		HistoryState state = new HistoryState();
+	private State getState() {
+		State state = new State();
 		state.blobIdent = new BlobIdent(blobIdent);
 		state.mark = mark;
 		state.mode = mode;
@@ -633,10 +633,16 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		return state;
 	}
 	
-	private void setState(HistoryState state) {
+	private void setState(State state) {
 		if (!blobIdent.revision.equals(state.blobIdent.revision)) {
 			blobIdent = new BlobIdent(state.blobIdent);
-			resolveRevision();
+			/* 
+			 * a hack to reset resolved revision to null to disable getObjectIdCache()
+			 * temporarily as otherwise getObjectId() method below will always 
+			 * resolved to existing value of resolvedRevision
+			 */
+			resolvedRevision = null;
+			resolvedRevision = getDepot().getObjectId(blobIdent.revision);
 		} else {
 			blobIdent = new BlobIdent(state.blobIdent);
 		}
@@ -647,7 +653,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 	
 	private void onSelect(AjaxRequestTarget target, String revision) {
-		HistoryState state = getState();
+		State state = getState();
 		state.blobIdent.revision = revision;
 		state.requestId = null;
 		state.commentId = null;
@@ -679,7 +685,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 			@Override
 			protected String getRevisionUrl(String revision) {
-				HistoryState state = new HistoryState();
+				State state = new State();
 				state.blobIdent.revision = revision;
 				PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
 				return urlFor(DepotFilePage.class, params).toString();
@@ -699,7 +705,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
-	private void applyState(AjaxRequestTarget target, HistoryState state) {
+	private void applyState(AjaxRequestTarget target, State state) {
 		if (!state.blobIdent.revision.equals(blobIdent.revision))
 			newSearchResult(target, null);
 		
@@ -730,7 +736,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				new CssResourceReference(DepotFilePage.class, "depot-file.css")));
 	}
 
-	public static PageParameters paramsOf(Depot depot, HistoryState state) {
+	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
 		if (state.blobIdent.revision != null)
 			params.set(PARAM_REVISION, state.blobIdent.revision);
@@ -787,7 +793,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		
-		applyState(target, (HistoryState) data);
+		applyState(target, (State) data);
 		resizeWindow(target);
 	}
 	
@@ -841,7 +847,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public String getMarkUrl(Mark mark) {
-		HistoryState state = getState();
+		State state = getState();
 		state.blobIdent.revision = resolvedRevision.name();
 		state.commentId = null;
 		state.mark = mark;
@@ -925,21 +931,23 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-		commentId = CodeComment.idOf(comment);
-		if (comment != null)
-			mark = comment.getMark();
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		commentId = comment.getId();
+		mark = comment.getMark();
 		pushState(target);
 	}
 
-	private void resolveRevision() {
-		/* 
-		 * a hack to reset resolved revision to null to disable getObjectIdCache()
-		 * temporarily as otherwise getObjectId() method below will always 
-		 * resolved to existing value of resolvedRevision
-		 */
-		resolvedRevision = null;
-		resolvedRevision = getDepot().getObjectId(blobIdent.revision);
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target) {
+		commentId = null;
+		pushState(target);
+	}
+	
+	@Override
+	public void onAddComment(AjaxRequestTarget target, Mark mark) {
+		commentId = null;
+		this.mark = mark;
+		pushState(target);
 	}
 	
 	@Override
@@ -992,7 +1000,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		
 	}
 
-	public static class HistoryState implements Serializable {
+	public static class State implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
 

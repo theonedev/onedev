@@ -2,6 +2,8 @@ package com.pmease.commons.git;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -164,6 +166,15 @@ public abstract class BlobChange implements Serializable {
 	@Nullable
 	public Blob.Text getNewText() {
 		return getNewBlob().getText();
+	}
+	
+	public Collection<String> getPaths() {
+		Collection<String> paths = new HashSet<>();
+		if (oldBlobIdent.path != null)
+			paths.add(oldBlobIdent.path);
+		if (newBlobIdent.path != null)
+			paths.add(newBlobIdent.path);
+		return paths;
 	}
 	
 	public abstract Blob getBlob(BlobIdent blobIdent);

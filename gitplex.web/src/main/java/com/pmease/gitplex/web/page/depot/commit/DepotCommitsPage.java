@@ -84,7 +84,7 @@ public class DepotCommitsPage extends DepotPage {
 	
 	private static final String PARAM_STEP = "step";
 	
-	private HistoryState state = new HistoryState();
+	private State state = new State();
 	
 	private boolean hasMore;
 	
@@ -157,7 +157,7 @@ public class DepotCommitsPage extends DepotPage {
 	public DepotCommitsPage(PageParameters params) {
 		super(params);
 		
-		state = new HistoryState(params);
+		state = new State(params);
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -427,7 +427,7 @@ public class DepotCommitsPage extends DepotPage {
 				}
 			}
 			if (state.getCompareWith() != null) {
-				RevisionComparePage.HistoryState state = new RevisionComparePage.HistoryState();
+				RevisionComparePage.State state = new RevisionComparePage.State();
 				state.leftSide = new DepotAndRevision(getDepot(), commit.getHash());
 				state.rightSide = new DepotAndRevision(getDepot(), DepotCommitsPage.this.state.getCompareWith());
 				state.pathFilter = path;
@@ -451,7 +451,7 @@ public class DepotCommitsPage extends DepotPage {
 		return item;
 	}
 	
-	public static PageParameters paramsOf(Depot depot, HistoryState state) {
+	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
 		if (state.getCompareWith() != null)
 			params.set(PARAM_COMPARE_WITH, state.getCompareWith());
@@ -471,7 +471,7 @@ public class DepotCommitsPage extends DepotPage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		
-		state = (HistoryState) data;
+		state = (State) data;
 
 		target.add(queryForm);
 		
@@ -541,7 +541,7 @@ public class DepotCommitsPage extends DepotPage {
 		List<Commit> current;
 	}
 	
-	public static class HistoryState implements Serializable {
+	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 
@@ -553,10 +553,10 @@ public class DepotCommitsPage extends DepotPage {
 		
 		private transient Optional<QueryContext> parseTree;
 		
-		public HistoryState() {
+		public State() {
 		}
 		
-		public HistoryState(PageParameters params) {
+		public State(PageParameters params) {
 			compareWith = params.get(PARAM_COMPARE_WITH).toString();
 			query = params.get(PARAM_QUERY).toString();
 			

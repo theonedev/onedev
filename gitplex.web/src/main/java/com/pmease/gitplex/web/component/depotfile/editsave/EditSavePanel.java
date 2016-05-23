@@ -124,7 +124,7 @@ public abstract class EditSavePanel extends Panel {
 		changedContainer.setOutputMarkupPlaceholderTag(true);
 		if (change != null) {
 			changedContainer.add(new BlobDiffPanel("changes", depotModel, 
-					new Model<PullRequest>(null), change, DiffViewMode.UNIFIED));
+					new Model<PullRequest>(null), change, DiffViewMode.UNIFIED, null));
 		} else {
 			changedContainer.add(new WebMarkupContainer("changes"));
 		}

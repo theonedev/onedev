@@ -37,9 +37,11 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.web.component.diff.revision.MarkSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.revisionpicker.AffinalRevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -49,7 +51,7 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends DepotPage {
+public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 	private static final String PARAM_LEFT = "left";
 	
@@ -58,6 +60,8 @@ public class RevisionComparePage extends DepotPage {
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
 	private static final String PARAM_COMMENT = "comment";
+	
+	private static final String PARAM_MARK = "mark";
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
@@ -73,11 +77,11 @@ public class RevisionComparePage extends DepotPage {
 	
 	private AjaxActionTab filesTab;
 	
-	private HistoryState state = new HistoryState();
+	private State state = new State();
 	
 	private ObjectId resolvedRightSideRevision;
 	
-	public static PageParameters paramsOf(Depot depot, HistoryState state) {
+	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
 		params.set(PARAM_LEFT, state.leftSide.toString());
 		params.set(PARAM_RIGHT, state.rightSide.toString());
@@ -87,6 +91,8 @@ public class RevisionComparePage extends DepotPage {
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
+		if (state.mark != null)
+			params.set(PARAM_MARK, state.mark.toString());
 		return params;
 	}
 
@@ -102,7 +108,7 @@ public class RevisionComparePage extends DepotPage {
 		} else {
 			state.rightSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
-		resolvedRightSideRevision = state.rightSide.getObjectId();
+		resolvedRightSideRevision = state.rightSide.getCommit().copy();
 		
 		str = params.get(PARAM_LEFT).toString();
 		if (str != null) {
@@ -174,7 +180,7 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				HistoryState state = new HistoryState(RevisionComparePage.this.state);
+				State state = new State(RevisionComparePage.this.state);
 				state.leftSide = new DepotAndRevision(depot, revision);
 
 				PageParameters params = paramsOf(depot, state);
@@ -188,7 +194,7 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			public void onClick() {
-				HistoryState state = new HistoryState(RevisionComparePage.this.state);
+				State state = new State(RevisionComparePage.this.state);
 				state.leftSide = RevisionComparePage.this.state.rightSide;
 				state.rightSide = RevisionComparePage.this.state.leftSide;
 				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), state));
@@ -285,7 +291,7 @@ public class RevisionComparePage extends DepotPage {
 
 					@Override
 					public void onClick() {
-						HistoryState newState = new HistoryState(state);
+						State newState = new State(state);
 						newState.leftSide = state.rightSide;
 						newState.rightSide = state.leftSide;
 						PageParameters params = paramsOf(getDepot(), newState);
@@ -349,7 +355,7 @@ public class RevisionComparePage extends DepotPage {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				HistoryState state = new HistoryState(RevisionComparePage.this.state);
+				State state = new State(RevisionComparePage.this.state);
 				state.rightSide = new DepotAndRevision(depot, revision);
 				
 				PageParameters params = paramsOf(getDepot(), state);
@@ -392,7 +398,7 @@ public class RevisionComparePage extends DepotPage {
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
 					new Model<PullRequest>(null), mergeBaseModel.getObject(), 
 					state.rightSide.getRevision(), state.pathFilter, 
-					state.whitespaceOption, state.commentId, state.mark) {
+					state.whitespaceOption, this) {
 
 				@Override
 				protected void onConfigure() {
@@ -413,16 +419,6 @@ public class RevisionComparePage extends DepotPage {
 					pushState(target);
 				}
 				
-				@Override
-				protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-					state.commentId = CodeComment.idOf(comment);
-					if (comment != null) {
-						boolean leftSide = comment.getCommit().equals(mergeBaseModel.getObject()); 
-						state.mark = new DiffMark(comment.getPath(), leftSide, comment.getMark());
-					}
-					pushState(target);
-				}
-
 			};
 			commitsTab.setSelected(false);
 			filesTab.setSelected(true);
@@ -458,7 +454,7 @@ public class RevisionComparePage extends DepotPage {
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
 		
-		state = (HistoryState) data;
+		state = (State) data;
 		newTabPanel(target);
 	}
 	
@@ -476,7 +472,7 @@ public class RevisionComparePage extends DepotPage {
 		setResponsePage(RevisionComparePage.class, paramsOf(depot));
 	}
 
-	public static class HistoryState implements Serializable {
+	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 
@@ -495,10 +491,10 @@ public class RevisionComparePage extends DepotPage {
 		@Nullable
 		public DiffMark mark;
 		
-		public HistoryState() {
+		public State() {
 		}
 		
-		public HistoryState(HistoryState state) {
+		public State(State state) {
 			leftSide = state.leftSide;
 			rightSide = state.rightSide;
 			whitespaceOption = state.whitespaceOption;
@@ -507,6 +503,68 @@ public class RevisionComparePage extends DepotPage {
 			mark = state.mark;
 		}
 		
+	}
+
+	@Override
+	public DiffMark getMark() {
+		return state.mark;
+	}
+
+	@Override
+	public String getMarkUrl(DiffMark mark) {
+		State markState = new State();
+		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), mergeBaseModel.getObject());
+		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), resolvedRightSideRevision.name());
+		markState.mark = mark;
+		markState.pathFilter = state.pathFilter;
+		markState.whitespaceOption = state.whitespaceOption;
+		return urlFor(RevisionComparePage.class, paramsOf(state.rightSide.getDepot(), state)).toString();
+	}
+
+	@Override
+	public String getCommentUrl(CodeComment comment) {
+		State markState = new State();
+		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), mergeBaseModel.getObject());
+		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), resolvedRightSideRevision.name());
+		markState.mark = new DiffMark(comment, mergeBaseModel.getObject(), resolvedRightSideRevision.name());
+		markState.commentId = comment.getId();
+		markState.pathFilter = state.pathFilter;
+		markState.whitespaceOption = state.whitespaceOption;
+		return urlFor(RevisionComparePage.class, paramsOf(state.rightSide.getDepot(), state)).toString();
+	}
+	
+	@Override
+	public CodeComment getOpenComment() {
+		if (state.commentId != null)
+			return GitPlex.getInstance(CodeCommentManager.class).load(state.commentId);
+		else
+			return null;
+	}
+
+	@Override
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		state.mark = new DiffMark(comment, mergeBaseModel.getObject(), resolvedRightSideRevision.name());
+		state.commentId = comment.getId();
+		pushState(target);
+	}
+
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target) {
+		state.commentId = null;
+		pushState(target);
+	}
+
+	@Override
+	public void onMark(AjaxRequestTarget target, DiffMark mark) {
+		state.mark = mark;
+		pushState(target);
+	}
+
+	@Override
+	public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+		state.commentId = null;
+		state.mark = mark;
+		pushState(target);
 	}
 	
 }

@@ -66,7 +66,6 @@ import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.page.depot.commit.DepotCommitsPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.resource.BlobResource;
 import com.pmease.gitplex.web.resource.BlobResourceReference;
 
@@ -137,7 +136,7 @@ public abstract class FileNavigator extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						HistoryState state = new HistoryState();
+						DepotFilePage.State state = new DepotFilePage.State();
 						state.blobIdent = blobIdent;
 						state.requestId = PullRequest.idOf(context.getPullRequest());
 						PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
@@ -256,7 +255,7 @@ public abstract class FileNavigator extends Panel {
 									protected void onComponentTag(ComponentTag tag) {
 										super.onComponentTag(tag);
 										
-										HistoryState state = new HistoryState();
+										DepotFilePage.State state = new DepotFilePage.State();
 										state.blobIdent = model.getObject();
 										state.requestId = PullRequest.idOf(context.getPullRequest());
 										PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);
@@ -343,7 +342,7 @@ public abstract class FileNavigator extends Panel {
 
 								@Override
 								public void onClick() {
-									DepotCommitsPage.HistoryState state = new DepotCommitsPage.HistoryState();
+									DepotCommitsPage.State state = new DepotCommitsPage.State();
 									String commitHash = context.getDepot().getObjectId(file.revision).name();
 									state.setCompareWith(commitHash);
 									if (file.path != null) 
@@ -442,7 +441,7 @@ public abstract class FileNavigator extends Panel {
 		
 							@Override
 							public AbstractLink newLink(String id) {
-								HistoryState state = new HistoryState();
+								DepotFilePage.State state = new DepotFilePage.State();
 								state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 								state.blobIdent.path = context.getBlobIdent().path;
 								state.mode = Mode.EDIT;
@@ -500,7 +499,7 @@ public abstract class FileNavigator extends Panel {
 								};
 								
 								PageParameters params;
-								HistoryState state = new HistoryState();
+								DepotFilePage.State state = new DepotFilePage.State();
 								state.blobIdent = context.getBlobIdent();
 								state.mode = Mode.EDIT;
 								state.mark = context.getMark();
@@ -530,7 +529,7 @@ public abstract class FileNavigator extends Panel {
 
 							@Override
 							public AbstractLink newLink(String id) {
-								HistoryState state = new HistoryState();
+								DepotFilePage.State state = new DepotFilePage.State();
 								state.blobIdent.revision = context.getPullRequest().getSourceBranch();
 								state.blobIdent.path = context.getBlobIdent().path;
 								state.mode = Mode.DELETE;
@@ -580,7 +579,7 @@ public abstract class FileNavigator extends Panel {
 									}
 
 								};
-								HistoryState state = new HistoryState();
+								DepotFilePage.State state = new DepotFilePage.State();
 								state.blobIdent = context.getBlobIdent();
 								state.mode = Mode.EDIT;
 								PageParameters params = DepotFilePage.paramsOf(context.getDepot(), state);

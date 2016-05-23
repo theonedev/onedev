@@ -1,5 +1,9 @@
 package com.pmease.gitplex.web.component.diff.blob;
 
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -15,16 +19,19 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.diff.DiffRenderer;
 import com.pmease.gitplex.web.component.diff.blob.text.TextDiffPanel;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
+import com.pmease.gitplex.web.component.diff.revision.BlobMarkSupport;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 
 @SuppressWarnings("serial")
-public class BlobDiffPanel extends Panel {
+public class BlobDiffPanel extends Panel implements CommentAware {
 
 	private static final String CONTENT_ID = "content";
 	
@@ -36,14 +43,17 @@ public class BlobDiffPanel extends Panel {
 	
 	private final DiffViewMode diffMode;
 	
-	public BlobDiffPanel(String id, IModel<Depot> depotModel, 
-			IModel<PullRequest> requestModel, BlobChange change, DiffViewMode diffMode) {
+	private final BlobMarkSupport markSupport;
+	
+	public BlobDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
+			BlobChange change, DiffViewMode diffMode, @Nullable BlobMarkSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
+		this.markSupport = markSupport;
 	}
 	
 	private Fragment newFragment(String message, boolean warning) {
@@ -69,7 +79,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode));
+				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, markSupport));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -104,7 +114,7 @@ public class BlobDiffPanel extends Panel {
 				} else if (change.getAdditions() + change.getDeletions() == 0) {
 					add(newFragment("Content is identical", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode));
+					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, markSupport));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));
@@ -138,4 +148,49 @@ public class BlobDiffPanel extends Panel {
 		super.onDetach();
 	}
 
+	@Override
+	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
+		Component content = get(CONTENT_ID);
+		if (content instanceof CommentAware) {
+			CommentAware commentAware = (CommentAware) content;
+			commentAware.onCommentDeleted(target, comment);
+		}
+	}
+
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
+		Component content = get(CONTENT_ID);
+		if (content instanceof CommentAware) {
+			CommentAware commentAware = (CommentAware) content;
+			commentAware.onCommentClosed(target, comment);
+		}
+	}
+
+	@Override
+	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
+		Component content = get(CONTENT_ID);
+		if (content instanceof CommentAware) {
+			CommentAware commentAware = (CommentAware) content;
+			commentAware.onCommentAdded(target, comment);
+		}
+	}
+
+	@Override
+	public void mark(AjaxRequestTarget target, DiffMark mark) {
+		Component content = get(CONTENT_ID);
+		if (content instanceof CommentAware) {
+			CommentAware commentAware = (CommentAware) content;
+			commentAware.mark(target, mark);
+		}
+	}
+	
+	@Override
+	public void clearMark(AjaxRequestTarget target) {
+		Component content = get(CONTENT_ID);
+		if (content instanceof CommentAware) {
+			CommentAware commentAware = (CommentAware) content;
+			commentAware.clearMark(target);
+		}
+	}
+	
 }

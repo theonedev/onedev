@@ -11,7 +11,7 @@ public class Highlighter {
 			Transformer<String> matchedTransformer, Transformer<String> unmatchedTransformer) {
 		StringBuffer buffer = new StringBuffer();
     	int start = 0;
-    	for (Range range: new JoinedRanges(ranges)) {
+    	for (Range range: RangeUtils.merge(ranges)) {
     		buffer.append(unmatchedTransformer.transform(text.substring(start, range.getFrom())));
     		buffer.append(matchedTransformer.transform(text.substring(range.getFrom(), range.getTo())));
     		start = range.getTo();

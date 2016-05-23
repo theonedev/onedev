@@ -38,7 +38,12 @@ gitplex.revisionDiff = {
 					$comment.css("top", 0);
 				}
 				var $lastDiff = $diffs.children().last();
-				var commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop;
+				var commentHeight;
+				if ($lastDiff.length != 0) {
+					commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop;
+				} else {
+					commentHeight = $diffs.offset().top + $diffs.height() - scrollTop;
+				}
 				var windowHeight = $(window).height();
 				var minCommentHeight = windowHeight - 100;
 				if (commentHeight < minCommentHeight)
@@ -89,8 +94,5 @@ gitplex.revisionDiff = {
 				}
 			});
 		}
-	},
-	onOpenComment: function(commentInfo) {
-		$(window).resize();
-	}	
+	}
 }

@@ -46,7 +46,6 @@ import com.pmease.gitplex.search.query.SymbolQuery;
 import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.web.component.depotfile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
@@ -237,7 +236,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	}
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
-		HistoryState state = new HistoryState();
+		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = hit.getBlobPath();
 		state.mark = Mark.of(hit.getTokenPos());
@@ -246,7 +245,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
-		HistoryState state = new HistoryState();
+		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = revision;
 		state.blobIdent.path = getBlobPath();
 		state.requestId = PullRequest.idOf(requestModel.getObject());

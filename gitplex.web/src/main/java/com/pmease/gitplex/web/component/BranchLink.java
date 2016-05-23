@@ -9,7 +9,6 @@ import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public class BranchLink extends BookmarkablePageLink<Void> {
@@ -22,7 +21,7 @@ public class BranchLink extends BookmarkablePageLink<Void> {
 	}
 	
 	private static PageParameters getPageParams(DepotAndBranch depotAndBranch) {
-		HistoryState state = new HistoryState();
+		DepotFilePage.State state = new DepotFilePage.State();
 		state.blobIdent.revision = depotAndBranch.getBranch();
 		return DepotFilePage.paramsOf(depotAndBranch.getDepot(), state);
 	}

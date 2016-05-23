@@ -40,7 +40,6 @@ import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public abstract class FileListPanel extends Panel {
@@ -158,7 +157,7 @@ public abstract class FileListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				HistoryState state = new HistoryState();
+				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent = parentIdent;
 				state.requestId = PullRequest.idOf(requestModel.getObject());
 				PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state); 
@@ -194,7 +193,7 @@ public abstract class FileListPanel extends Panel {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						HistoryState state = new HistoryState();
+						DepotFilePage.State state = new DepotFilePage.State();
 						state.blobIdent = blobIdent;
 						state.requestId = PullRequest.idOf(requestModel.getObject());
 						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state); 

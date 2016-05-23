@@ -73,7 +73,6 @@ import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -418,7 +417,7 @@ public class DepotBranchesPage extends DepotPage {
 				Ref ref = item.getModelObject();
 				final String branch = GitUtils.ref2branch(ref.getName());
 				
-				HistoryState state = new HistoryState();
+				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent.revision = branch;
 				AbstractLink link = new BookmarkablePageLink<Void>("branchLink", 
 						DepotFilePage.class, DepotFilePage.paramsOf(getDepot(), state));
@@ -445,7 +444,7 @@ public class DepotBranchesPage extends DepotPage {
 					
 				});
 				
-				final AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
+				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
 				
 				item.add(new Link<Void>("behindLink") {
 
@@ -479,7 +478,7 @@ public class DepotBranchesPage extends DepotPage {
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							RevisionComparePage.HistoryState state = new RevisionComparePage.HistoryState();
+							RevisionComparePage.State state = new RevisionComparePage.State();
 							state.leftSide = new DepotAndBranch(getDepot(), branch);
 							state.rightSide = new DepotAndBranch(getDepot(), getBaseBranch());
 							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state); 
@@ -538,7 +537,7 @@ public class DepotBranchesPage extends DepotPage {
 						if (request != null) {
 							setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(request));
 						} else {
-							RevisionComparePage.HistoryState state = new RevisionComparePage.HistoryState();
+							RevisionComparePage.State state = new RevisionComparePage.State();
 							state.leftSide = new DepotAndBranch(getDepot(), getBaseBranch());
 							state.rightSide = new DepotAndBranch(getDepot(), branch);
 							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);

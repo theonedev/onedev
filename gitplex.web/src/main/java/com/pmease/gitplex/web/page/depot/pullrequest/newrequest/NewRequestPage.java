@@ -56,6 +56,7 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.ReviewInvitation;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.web.component.BranchLink;
@@ -63,12 +64,15 @@ import com.pmease.gitplex.web.component.branchpicker.AffinalBranchPicker;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.commitlist.CommitListPanel;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.web.component.diff.revision.MarkSupport;
 import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerAvatar;
 import com.pmease.gitplex.web.component.pullrequest.requestreviewer.ReviewerChoice;
 import com.pmease.gitplex.web.model.ReviewersModel;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -78,7 +82,7 @@ import com.pmease.gitplex.web.page.security.LoginPage;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
-public class NewRequestPage extends PullRequestPage {
+public class NewRequestPage extends PullRequestPage implements MarkSupport {
 
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
@@ -89,6 +93,14 @@ public class NewRequestPage extends PullRequestPage {
 	private IModel<List<Commit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
+	
+	private Long commentId;
+	
+	private DiffMark mark;
+	
+	private String pathFilter;
+	
+	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 	
 	public static PageParameters paramsOf(Depot depot, DepotAndBranch target, DepotAndBranch source) {
 		PageParameters params = paramsOf(depot);
@@ -331,19 +343,17 @@ public class NewRequestPage extends PullRequestPage {
 		 */
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
 				new Model<PullRequest>(null), request.getBaseCommitHash(), 
-				source.getRevision(), null, WhitespaceOption.DEFAULT, null, null) {
+				source.getRevision(), pathFilter, whitespaceOption, this) {
 
 			@Override
 			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
+				NewRequestPage.this.pathFilter = pathFilter;
 			}
 
 			@Override
 			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
 					WhitespaceOption whitespaceOption) {
-			}
-
-			@Override
-			protected void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+				NewRequestPage.this.whitespaceOption = whitespaceOption;
 			}
 
 		};
@@ -617,6 +627,66 @@ public class NewRequestPage extends PullRequestPage {
 	@Override
 	protected void onSelect(AjaxRequestTarget target, Depot depot) {
 		setResponsePage(RequestListPage.class, paramsOf(depot));
+	}
+
+	@Override
+	public DiffMark getMark() {
+		return mark;
+	}
+
+	@Override
+	public String getMarkUrl(DiffMark mark) {
+		RevisionComparePage.State state = new RevisionComparePage.State();
+		state.mark = mark;
+		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
+		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
+		state.pathFilter = pathFilter;
+		state.whitespaceOption = whitespaceOption;
+		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
+	}
+
+	@Override
+	public CodeComment getOpenComment() {
+		if (commentId != null)
+			return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+		else
+			return null;
+	}
+
+	@Override
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		commentId = comment.getId();
+		PullRequest request = getPullRequest();
+		mark = new DiffMark(comment, request.getBaseCommitHash(), request.getLatestUpdate().getHeadCommitHash());
+	}
+
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target) {
+		commentId = null;
+	}
+	
+	@Override
+	public String getCommentUrl(CodeComment comment) {
+		RevisionComparePage.State state = new RevisionComparePage.State();
+		PullRequest request = getPullRequest();
+		mark = new DiffMark(comment, request.getBaseCommitHash(), request.getLatestUpdate().getHeadCommitHash());
+		state.commentId = comment.getId();
+		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
+		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
+		state.pathFilter = pathFilter;
+		state.whitespaceOption = whitespaceOption;
+		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
+	}
+
+	@Override
+	public void onMark(AjaxRequestTarget target, DiffMark mark) {
+		this.mark = mark;
+	}
+
+	@Override
+	public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+		this.commentId = null;
+		this.mark = mark;
 	}
 
 }

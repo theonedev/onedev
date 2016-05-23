@@ -26,8 +26,8 @@ import com.google.common.base.Splitter;
 import com.pmease.commons.antlr.codeassist.InputCompletion;
 import com.pmease.commons.antlr.codeassist.InputStatus;
 import com.pmease.commons.loader.AppLoader;
-import com.pmease.commons.util.JoinedRanges;
 import com.pmease.commons.util.Range;
+import com.pmease.commons.util.RangeUtils;
 import com.pmease.commons.wicket.assets.caret.CaretResourceReference;
 import com.pmease.commons.wicket.assets.hotkeys.HotkeysResourceReference;
 import com.pmease.commons.wicket.assets.scrollintoview.ScrollIntoViewResourceReference;
@@ -74,7 +74,7 @@ public abstract class InputAssistBehavior extends AbstractDefaultAjaxBehavior {
 		List<Range> normalizedErrors = new ArrayList<>();
 		
 		List<String> lines = Splitter.on('\n').splitToList(inputContent);
-		for (Range error: new JoinedRanges(errors)) {
+		for (Range error: RangeUtils.merge(errors)) {
 			int fromLine = getLine(inputContent, error.getFrom());
 			int toLine = getLine(inputContent, error.getTo());
 			if (fromLine != toLine) {

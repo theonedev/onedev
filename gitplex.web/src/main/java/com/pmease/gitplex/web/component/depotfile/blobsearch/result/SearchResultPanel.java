@@ -40,7 +40,6 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.hit.TextHit;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
@@ -411,7 +410,7 @@ public abstract class SearchResultPanel extends Panel {
 						if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == -1)
 							add(AttributeAppender.append("class", " active"));
 						
-						HistoryState state = new HistoryState();
+						DepotFilePage.State state = new DepotFilePage.State();
 						state.blobIdent.revision = context.getBlobIdent().revision;
 						state.blobIdent.path = blobPath;
 						state.requestId = PullRequest.idOf(context.getPullRequest());
@@ -470,7 +469,7 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
-								HistoryState state = new HistoryState();
+								DepotFilePage.State state = new DepotFilePage.State();
 								state.requestId = PullRequest.idOf(context.getPullRequest());
 								state.mark = Mark.of(hit.getTokenPos());
 								state.blobIdent.revision = context.getBlobIdent().revision;

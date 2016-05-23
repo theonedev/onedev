@@ -575,8 +575,8 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 		Blob blob = getBlobCache().get(blobIdent);
 		if (blob == null) {
 			try (RevWalk revWalk = new RevWalk(getRepository())) {
-				ObjectId commitId = getObjectId(blobIdent.revision);		
-				RevTree revTree = revWalk.parseCommit(commitId).getTree();
+				ObjectId revId = getObjectId(blobIdent.revision);		
+				RevTree revTree = revWalk.parseCommit(revId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
 				if (treeWalk != null) {
 					if (blobIdent.isGitLink()) {

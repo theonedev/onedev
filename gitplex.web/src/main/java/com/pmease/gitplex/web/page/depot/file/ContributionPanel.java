@@ -87,7 +87,7 @@ class ContributionPanel extends Panel {
 					protected void populateItem(ListItem<NameAndEmail> item) {
 						NameAndEmail nameAndEmail = item.getModelObject();
 						PersonIdent person = new PersonIdent(nameAndEmail.getName(), nameAndEmail.getEmailAddress());
-						DepotCommitsPage.HistoryState state = new DepotCommitsPage.HistoryState(); 
+						DepotCommitsPage.State state = new DepotCommitsPage.State(); 
 						state.setCompareWith(blobIdent.revision);
 						state.setQuery(String.format("path(%s) author(%s <%s>)", 
 								blobIdent.path, nameAndEmail.getName(), nameAndEmail.getEmailAddress()));

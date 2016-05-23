@@ -57,7 +57,6 @@ import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -256,7 +255,7 @@ public class DepotTagsPage extends DepotPage {
 				Ref ref = item.getModelObject();
 				final String tagName = GitUtils.ref2tag(ref.getName());
 				
-				HistoryState state = new HistoryState();
+				DepotFilePage.State state = new DepotFilePage.State();
 				state.blobIdent.revision = tagName;
 				AbstractLink link = new BookmarkablePageLink<Void>("tagLink", 
 						DepotFilePage.class, DepotFilePage.paramsOf(getDepot(), state));
@@ -335,7 +334,7 @@ public class DepotTagsPage extends DepotPage {
 							}
 							DepotAndRevision source = new DepotAndRevision(getDepot(), 
 									GitUtils.ref2tag(item.getModelObject().getName()));
-							RevisionComparePage.HistoryState state = new RevisionComparePage.HistoryState();
+							RevisionComparePage.State state = new RevisionComparePage.State();
 							state.leftSide = target;
 							state.rightSide = source;
 							state.pathFilter = "";

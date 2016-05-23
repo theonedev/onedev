@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.component.Mark;
 
 public class DiffMark extends Mark {
@@ -28,6 +29,12 @@ public class DiffMark extends Mark {
 		super(mark);
 		this.path = path;
 		this.leftSide = leftSide;
+	}
+	
+	public DiffMark(CodeComment comment, String oldCommitHash, String newCommitHash) {
+		super(comment.getMark());
+		path = comment.getPath();
+		leftSide = comment.getCommit().equals(oldCommitHash);
 	}
 
 	public String getPath() {

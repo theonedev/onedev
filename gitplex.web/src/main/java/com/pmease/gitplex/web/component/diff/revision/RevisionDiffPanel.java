@@ -32,17 +32,22 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -60,7 +65,6 @@ import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
-import com.pmease.commons.wicket.assets.uri.URIResourceReference;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
@@ -68,10 +72,20 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.CompareContext;
+import com.pmease.gitplex.core.entity.component.Mark;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.Constants;
+import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
+import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
+import com.pmease.gitplex.web.component.diff.blob.CommentAware;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.util.SuggestionUtils;
+
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 /**
  * Make sure to add only one revision diff panel on a page
@@ -83,7 +97,11 @@ import com.pmease.gitplex.web.util.SuggestionUtils;
 public abstract class RevisionDiffPanel extends Panel {
 
 	private static final String COOKIE_VIEW_MODE = "gitplex.diff.viewmode";
+
+	private static final String BODY_ID = "body";
 	
+	private static final String DIFF_ID = "diff";
+
 	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
@@ -92,15 +110,13 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final String newRev;
 	
+	private final MarkSupport markSupport;
+	
 	private String pathFilter;
 	
 	private WhitespaceOption whitespaceOption;
 	
 	private DiffViewMode diffMode;
-	
-	private Long commentId;
-	
-	private DiffMark mark;
 	
 	private IModel<List<DiffEntry>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntry>>() {
 
@@ -254,12 +270,25 @@ public abstract class RevisionDiffPanel extends Panel {
 		}
 	};
 	
+	private final IModel<Collection<CodeComment>> commentsModel = 
+			new LoadableDetachableModel<Collection<CodeComment>>() {
+
+		@Override
+		protected Collection<CodeComment> load() {
+			Depot depot = depotModel.getObject();
+			return GitPlex.getInstance(CodeCommentManager.class).query(
+					depot, depot.getRevCommit(oldRev), depot.getRevCommit(newRev));
+		}
+		
+	};
+	
 	private WebMarkupContainer commentContainer;
+	
+	private ListView<BlobChange> diffsView;
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, @Nullable String pathFilter, 
-			WhitespaceOption whitespaceOption, @Nullable Long commentId, 
-			@Nullable DiffMark mark) {
+			WhitespaceOption whitespaceOption, @Nullable MarkSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -268,8 +297,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		this.newRev = newRev;
 		this.pathFilter = pathFilter;
 		this.whitespaceOption = whitespaceOption;
-		this.commentId = commentId;
-		this.mark = mark;
+		this.markSupport = markSupport;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_VIEW_MODE);
@@ -283,7 +311,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer body = new WebMarkupContainer("body") {
+		WebMarkupContainer body = new WebMarkupContainer(BODY_ID) {
 
 			@Override
 			public void renderHead(IHeaderResponse response) {
@@ -484,15 +512,59 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
+		
 		body.add(commentContainer);
 		commentContainer.add(new AjaxLink<Void>("locate") {
 
 			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				setOutputMarkupId(true);
+			}
+			
+			@Override
 			public void onClick(AjaxRequestTarget target) {
-				
+				CodeComment comment = markSupport.getOpenComment();
+				DiffMark mark;
+				if (comment != null) {
+					mark = new DiffMark(comment, getOldCommit().name(), getNewCommit().name());
+				} else {
+					mark = (DiffMark)commentContainer.getDefaultModel();
+				}
+				CommentAware commentAware = getCommentAware(mark.getPath());
+				if (commentAware != null)
+					commentAware.mark(target, mark);
+				markSupport.onMark(target, mark);
+				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
 
 		});
+		
+		// use this instead of bookmarkable link as we want to get the link 
+		// updated whenever we re-render the comment container
+		AttributeAppender appender = AttributeAppender.append("href", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (markSupport.getOpenComment() != null) {
+					return markSupport.getCommentUrl(markSupport.getOpenComment());
+				} else {
+					return "";
+				}
+			}
+			
+		});
+		
+		commentContainer.add(new WebMarkupContainer("permanent") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(markSupport.getOpenComment() != null);
+			}
+			
+		}.add(appender));
+		
 		commentContainer.add(new AjaxLink<Void>("close") {
 
 			@Override
@@ -503,13 +575,42 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				hideComment(target);
-				onOpenComment(target, null);
+				clearComment(target);
+				CodeComment comment = markSupport.getOpenComment();
+				if (comment != null) {
+					CommentAware commentAware = getCommentAware(comment.getPath());
+					if (commentAware != null) 
+						commentAware.onCommentClosed(target, comment);
+					markSupport.onCommentClosed(target);
+				}
+				target.appendJavaScript("$(window).resize();");
 			}
 			
 		});
-		commentContainer.add(new WebMarkupContainer("body"));
-		
+		if (markSupport != null && markSupport.getOpenComment() != null) {
+			IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+
+				@Override
+				protected CodeComment load() {
+					return markSupport.getOpenComment();
+				}
+				
+			};
+			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
+
+				@Override
+				protected void onCommentDeleted(AjaxRequestTarget target) {
+					CodeComment comment = commentModel.getObject();
+					RevisionDiffPanel.this.onCommentDeleted(target, comment);
+				}
+				
+			};
+			commentContainer.add(commentPanel);
+		} else {
+			commentContainer.add(new WebMarkupContainer(BODY_ID));
+			commentContainer.setVisible(false);
+		}
+				
 		Component totalChangedLink;
 		body.add(totalChangedLink = new Label("totalChanged", new AbstractReadOnlyModel<String>() {
 
@@ -540,7 +641,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			totalChangedLink.add(AttributeAppender.append("class", "expanded"));			
 		}
 		body.add(diffStats);
-		diffStats.add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
+		diffStats.add(diffsView = new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -604,7 +705,225 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
-				item.add(new BlobDiffPanel("diff", depotModel, requestModel, change, diffMode));
+				if (markSupport != null) {
+					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, new BlobMarkSupport() {
+	
+						@Override
+						public DiffMark getMark() {
+							DiffMark mark = markSupport.getMark();
+							if (mark != null && change.getPaths().contains(mark.getPath()))
+								return mark;
+							else
+								return null;
+						}
+	
+						@Override
+						public String getMarkUrl(DiffMark mark) {
+							return markSupport.getMarkUrl(mark);
+						}
+	
+						@Override
+						public CodeComment getOpenComment() {
+							CodeComment comment = markSupport.getOpenComment();
+							if (comment != null && change.getPaths().contains(comment.getPath()))
+								return comment;
+							else
+								return null;
+						}
+	
+						@Override
+						public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+							Long commentId = comment.getId();
+							IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+
+								@Override
+								protected CodeComment load() {
+									return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+								}
+								
+							};
+							
+							CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentModel) {
+
+								@Override
+								protected void onCommentDeleted(AjaxRequestTarget target) {
+									CodeComment comment = commentModel.getObject();
+									RevisionDiffPanel.this.onCommentDeleted(target, comment);
+								}
+								
+							};
+							
+							commentContainer.replace(commentPanel);
+							commentContainer.setVisible(true);
+							target.add(commentContainer);
+							
+							CodeComment prevComment = markSupport.getOpenComment();
+							if (prevComment != null) {
+								CommentAware commentAware = getCommentAware(prevComment.getPath());
+								if (commentAware != null) 
+									commentAware.onCommentClosed(target, prevComment);
+							} 
+							
+							DiffMark prevMark = markSupport.getMark();
+							if (prevMark != null) {
+								CommentAware commentAware = getCommentAware(prevMark.getPath());
+								if (commentAware != null)
+									commentAware.clearMark(target);
+							}
+							
+							markSupport.onCommentOpened(target, comment);
+							target.appendJavaScript("$(window).resize();");
+						}
+	
+						@Override
+						public void onAddComment(AjaxRequestTarget target, DiffMark mark) {
+							commentContainer.setDefaultModelObject(mark);
+							
+							Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", RevisionDiffPanel.this);
+							fragment.setOutputMarkupId(true);
+							
+							Form<?> form = new Form<Void>("form");
+							
+							CommentInput input;
+							form.add(input = new CommentInput("input", Model.of("")) {
+
+								@Override
+								protected DepotAttachmentSupport getAttachmentSupport() {
+									return new DepotAttachmentSupport(depotModel.getObject());
+								}
+								
+							});
+							input.setRequired(true);
+							
+							NotificationPanel feedback = new NotificationPanel("feedback", input); 
+							feedback.setOutputMarkupPlaceholderTag(true);
+							form.add(feedback);
+							
+							form.add(new AjaxLink<Void>("cancel") {
+
+								@Override
+								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+									super.updateAjaxAttributes(attributes);
+									attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+								}
+								
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									clearComment(target);
+									target.appendJavaScript("$(window).resize();");
+								}
+								
+							});
+							
+							form.add(new AjaxButton("save") {
+
+								@Override
+								protected void onError(AjaxRequestTarget target, Form<?> form) {
+									super.onError(target, form);
+									target.add(feedback);
+								}
+
+								@Override
+								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+									super.onSubmit(target, form);
+									
+									CodeComment comment = new CodeComment();
+									CompareContext compareContext = new CompareContext();
+									Depot depot = depotModel.getObject();
+									String oldCommitHash = depot.getRevCommit(oldRev).name();
+									String newCommitHash = depot.getRevCommit(newRev).name();
+									if (mark.isLeftSide()) {
+										comment.setCommit(oldCommitHash);
+										compareContext.setCompareCommit(newCommitHash);
+										compareContext.setLeftSide(false);
+									} else {
+										comment.setCommit(newCommitHash);
+										compareContext.setCompareCommit(oldCommitHash);
+										compareContext.setLeftSide(true);
+									}
+									compareContext.setPathFilter(pathFilter);
+									compareContext.setWhitespaceOption(whitespaceOption);
+									comment.setCompareContext(compareContext);
+									comment.setPath(mark.getPath());
+									comment.setContent(input.getModelObject());
+									comment.setDepot(depotModel.getObject());
+									comment.setUser(SecurityUtils.getAccount());
+									comment.setMark(new Mark(mark.getBeginLine(), mark.getBeginChar(), 
+											mark.getEndLine(), mark.getEndChar()));
+									GitPlex.getInstance(CodeCommentManager.class).persist(comment);
+									
+									Long commentId = comment.getId();
+									IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {
+
+										@Override
+										protected CodeComment load() {
+											return GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+										}
+										
+									};
+									CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), commentModel) {
+
+										@Override
+										protected void onCommentDeleted(AjaxRequestTarget target) {
+											CodeComment comment = commentModel.getObject();
+											RevisionDiffPanel.this.onCommentDeleted(target, comment);
+										}
+										
+									};
+									commentContainer.replaceWith(commentPanel);
+									target.add(commentContainer);
+									
+									CommentAware commentAware = getCommentAware(comment.getPath());
+									if (commentAware != null) 
+										commentAware.onCommentAdded(target, comment);
+
+									markSupport.onCommentOpened(target, comment);
+								}
+
+							});
+							fragment.add(form);
+							commentContainer.replace(fragment);
+							commentContainer.setVisible(true);
+							target.add(commentContainer);
+							
+							CodeComment prevComment = markSupport.getOpenComment();
+							if (prevComment != null) {
+								CommentAware commentAware = getCommentAware(prevComment.getPath());
+								if (commentAware != null) 
+									commentAware.onCommentClosed(target, prevComment);
+							}
+							DiffMark prevMark = markSupport.getMark();
+							if (prevMark != null) {
+								CommentAware commentAware = getCommentAware(prevMark.getPath());
+								if (commentAware != null) 
+									commentAware.clearMark(target);
+							}
+							
+							markSupport.onAddComment(target, mark);
+							target.appendJavaScript("$(window).resize();");
+						}
+
+						@Override
+						public Collection<CodeComment> getComments() {
+							Collection<CodeComment> comments = new ArrayList<>();
+							for (CodeComment comment: commentsModel.getObject()) {
+								if (comment.getPath().equals(change.getOldBlobIdent().path)
+										|| comment.getPath().equals(change.getNewBlobIdent().path)) {
+									comments.add(comment);
+								}
+							}
+							return comments;
+						}
+
+						@Override
+						public Component getDirtyContainer() {
+							return RevisionDiffPanel.this;
+						}
+
+					}));
+				} else {
+					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, null));
+				}
 			}
 			
 		});
@@ -612,15 +931,48 @@ public abstract class RevisionDiffPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private void hideComment(AjaxRequestTarget target) {
-		commentContainer.replace(new WebMarkupContainer("body"));
+	@Nullable
+	private CommentAware getCommentAware(String path) {
+		return diffsView.visitChildren(ListItem.class, new IVisitor<ListItem<BlobChange>, CommentAware>() {
+
+			@Override
+			public void component(ListItem<BlobChange> object, IVisit<CommentAware> visit) {
+				if (object.getModelObject().getPaths().contains(path)) {
+					visit.stop((CommentAware) object.get(DIFF_ID));
+				} else {
+					visit.dontGoDeeper();
+				}
+			}
+
+		});
+	}
+	
+	private RevCommit getOldCommit() {
+		return depotModel.getObject().getRevCommit(oldRev);
+	}
+	
+	private RevCommit getNewCommit() {
+		return depotModel.getObject().getRevCommit(newRev);
+	}
+	
+	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
+		clearComment(target);
+		CommentAware commentAware = getCommentAware(comment.getPath());
+		if (commentAware != null)
+			commentAware.onCommentDeleted(target, comment);
+		markSupport.onCommentClosed(target);
+		target.appendJavaScript("$(window).resize();");
+	}
+	
+	private void clearComment(AjaxRequestTarget target) {
+		commentContainer.replace(new WebMarkupContainer(BODY_ID));
 		commentContainer.setVisible(false);
 		target.add(commentContainer);
-		target.appendJavaScript("gitplex.revisionDiff.onOpenComment();");
 	}
 	
 	@Override
 	protected void onDetach() {
+		commentsModel.detach();
 		diffEntriesModel.detach();
 		changesAndCountModel.detach();
 		depotModel.detach();
@@ -633,7 +985,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(RevisionDiffPanel.class, "revision-diff.js")));
@@ -645,8 +996,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	protected abstract void onWhitespaceOptionChange(AjaxRequestTarget target, 
 			WhitespaceOption whitespaceOption);
-	
-	protected abstract void onOpenComment(AjaxRequestTarget target, @Nullable CodeComment comment);
 	
 	private static class ChangesAndCount {
 		
@@ -682,4 +1031,5 @@ public abstract class RevisionDiffPanel extends Panel {
 		}
 		
 	}
+
 }

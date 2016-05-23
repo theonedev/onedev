@@ -8,8 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
-import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -26,44 +27,48 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobChange;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
 import com.pmease.commons.lang.diff.LineDiff;
 import com.pmease.commons.lang.tokenizers.CmToken;
+import com.pmease.commons.util.Range;
+import com.pmease.commons.util.RangeUtils;
 import com.pmease.commons.util.StringUtils;
-import com.pmease.commons.wicket.CommonPage;
-import com.pmease.commons.wicket.assets.uri.URIResourceReference;
+import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
+import com.pmease.gitplex.web.component.diff.blob.CommentAware;
 import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
+import com.pmease.gitplex.web.component.diff.revision.BlobMarkSupport;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 
 @SuppressWarnings("serial")
-public class TextDiffPanel extends Panel {
+public class TextDiffPanel extends Panel implements CommentAware {
 
-	private static class TextDiffUrlKey extends MetaDataKey<Url> {
-	};
-	
-	public static final TextDiffUrlKey TEXT_DIFF_URL_KEY = new TextDiffUrlKey();		
-	
 	private final IModel<Depot> depotModel;
 	
 	private final IModel<PullRequest> requestModel;
@@ -74,7 +79,7 @@ public class TextDiffPanel extends Panel {
 	
 	private final DiffViewMode diffMode;
 	
-	private MarkInfo markInfo;
+	private final BlobMarkSupport markSupport;
 	
 	private Component symbolTooltip;
 	
@@ -83,49 +88,31 @@ public class TextDiffPanel extends Panel {
 	private transient List<MarkAwareDiffBlock> diffBlocks;
 	
 	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			BlobChange change, DiffViewMode diffMode) {
+			BlobChange change, DiffViewMode diffMode, @Nullable BlobMarkSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
+		this.markSupport = markSupport;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Url url = getPage().getMetaData(TEXT_DIFF_URL_KEY);
-		if (url == null)
-			url = ((CommonPage)getPage()).getRequestUrl();
-		String markFile = url.getQueryParameterValue("mark-file").toString();
-		
-		/*
-		 * Initialize mark info here as we want to make sure that calculated mark aware diff 
-		 * blocks remain unchanged after initialization of this panel as otherwise line 
-		 * expanding may work abnormally
-		 */
-		if (change.getPath().equals(markFile)) {
-			String markPos = url.getQueryParameterValue("mark-pos").toString();
-			String[] fields = StringUtils.split(markPos, "-");
-			boolean old = fields[0].equals("old");
-			int beginLine = Integer.parseInt(StringUtils.substringBefore(fields[1], "."))-1;
-			int endLine = Integer.parseInt(StringUtils.substringBefore(fields[2], "."));
-			markInfo = new MarkInfo(old, beginLine, endLine);
-		}
-		
 		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		add(new BlobDiffTitle("title", change));
 
 		PullRequest request = requestModel.getObject();
 		if (request != null) {
-			HistoryState state = new HistoryState();
+			DepotFilePage.State state = new DepotFilePage.State();
 			state.requestId = request.getId();
 			state.blobIdent = change.getBlobIdent();
 			PageParameters params = DepotFilePage.paramsOf(request.getTargetDepot(), state);
 			add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
-			state = new HistoryState();
+			state = new DepotFilePage.State();
 			state.blobIdent.revision = request.getSourceBranch();
 			state.blobIdent.path = change.getPath();
 			state.mode = Mode.EDIT;
@@ -144,7 +131,7 @@ public class TextDiffPanel extends Panel {
 			editFileLink.add(AttributeAppender.append("target", "_blank"));
 			add(editFileLink);
 		} else {
-			HistoryState state = new HistoryState();
+			DepotFilePage.State state = new DepotFilePage.State();
 			state.blobIdent = change.getBlobIdent();
 			PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
 			add(new BookmarkablePageLink<Void>("viewFile", DepotFilePage.class, params));
@@ -183,9 +170,28 @@ public class TextDiffPanel extends Panel {
 							getMarkupId(), index, expanded);
 					target.appendJavaScript(script);
 					break;
-				case "storeUrl":
-					String url = params.getParameterValue("param1").toString();
-					getPage().setMetaData(TEXT_DIFF_URL_KEY, Url.parse(url));
+				case "openSelectionPopup":
+					String jsonOfPosition = String.format("{left: %d, top: %d}", 
+							params.getParameterValue("param1").toInt(), 
+							params.getParameterValue("param2").toInt());
+					DiffMark mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
+					script = String.format("gitplex.textdiff.openSelectionPopup('%s', %s, %s, '%s', %s);", 
+							getMarkupId(), jsonOfPosition, mark.toJson(), markSupport.getMarkUrl(mark), 
+							SecurityUtils.getAccount()!=null);
+					target.appendJavaScript(script);
+					break;
+				case "addComment":
+					Preconditions.checkNotNull(SecurityUtils.getAccount());
+					mark = getMark(params, "param1", "param2", "param3", "param4", "param5");
+					markSupport.onAddComment(target, mark);
+					break;
+				case "openComment": 
+					Long commentId = params.getParameterValue("param1").toLong();
+					CodeComment comment = GitPlex.getInstance(CodeCommentManager.class).load(commentId);
+					markSupport.onOpenComment(target, comment);
+					script = String.format("gitplex.textdiff.onOpenComment($('#%s'), %s);", 
+							getMarkupId(), getJsonOfComment(comment));
+					target.appendJavaScript(script);
 					break;
 				}
 			}
@@ -216,9 +222,18 @@ public class TextDiffPanel extends Panel {
 		};
 		add(symbolTooltip);
 		
-		add(AttributeAppender.append("data-markfile", change.getPath()));
-
 		setOutputMarkupId(true);
+	}
+	
+	private DiffMark getMark(IRequestParameters params, String leftSideParam, 
+			String beginLineParam, String beginCharParam, 
+			String endLineParam, String endCharParam) {
+		boolean leftSide = params.getParameterValue(leftSideParam).toBoolean();
+		int beginLine = params.getParameterValue(beginLineParam).toInt();
+		int beginChar = params.getParameterValue(beginCharParam).toInt();
+		int endLine = params.getParameterValue(endLineParam).toInt();
+		int endChar = params.getParameterValue(endCharParam).toInt();
+		return new DiffMark(change.getPath(), leftSide, beginLine, beginChar, endLine, endChar);
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
@@ -260,11 +275,18 @@ public class TextDiffPanel extends Panel {
 			appendEqual(builder, block, i, 0);
 	}
 	
+	private RevCommit getOldCommit() {
+		return depotModel.getObject().getRevCommit(change.getOldBlobIdent().revision);
+	}
+	
+	private RevCommit getNewCommit() {
+		return depotModel.getObject().getRevCommit(change.getNewBlobIdent().revision);
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(URIResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
 		response.render(CssHeaderItem.forReference(
@@ -272,33 +294,105 @@ public class TextDiffPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
 		
+		String jsonOfOldCommentInfos;
+		String jsonOfNewCommentInfos;
+		String jsonOfMark;
+		String jsonOfCommentInfo;
+		String dirtyContainerId;
+		if (markSupport != null) {
+			String oldCommitHash = getOldCommit().name();
+			String newCommitHash = getNewCommit().name();
+			Map<Integer, List<CommentInfo>> oldCommentInfos = new HashMap<>(); 
+			Map<Integer, List<CommentInfo>> newCommentInfos = new HashMap<>(); 
+			for (CodeComment comment: markSupport.getComments()) {
+				if (comment.getMark() != null) {
+					int line = comment.getMark().getBeginLine();
+					List<CommentInfo> commentInfosAtLine;
+					CommentInfo commentInfo = new CommentInfo();
+					commentInfo.id = comment.getId();
+					commentInfo.mark = new DiffMark(comment, oldCommitHash, newCommitHash);
+					if (commentInfo.mark.isLeftSide()) {
+						commentInfosAtLine = oldCommentInfos.get(line);
+						if (commentInfosAtLine == null) {
+							commentInfosAtLine = new ArrayList<>();
+							oldCommentInfos.put(line, commentInfosAtLine);
+						}
+					} else {
+						commentInfosAtLine = newCommentInfos.get(line);
+						if (commentInfosAtLine == null) {
+							commentInfosAtLine = new ArrayList<>();
+							newCommentInfos.put(line, commentInfosAtLine);
+						}
+					}
+					commentInfosAtLine.add(commentInfo);
+				}
+			}
+			for (List<CommentInfo> value: oldCommentInfos.values()) {
+				value.sort((o1, o2)->(int)(o1.id-o2.id));
+			}
+			for (List<CommentInfo> value: newCommentInfos.values()) {
+				value.sort((o1, o2)->(int)(o1.id-o2.id));
+			}
+			
+			try {
+				jsonOfOldCommentInfos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(oldCommentInfos);
+				jsonOfNewCommentInfos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(newCommentInfos);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+			
+			DiffMark mark = markSupport.getMark();
+			if (mark != null) {
+				jsonOfMark = mark.toJson();
+			} else {
+				jsonOfMark = "undefined";
+			}
+			CodeComment comment = markSupport.getOpenComment();
+			if (comment != null) {
+				jsonOfCommentInfo = getJsonOfComment(comment);
+			} else {
+				jsonOfCommentInfo = "undefined";
+			}
+			dirtyContainerId = "'" + markSupport.getDirtyContainer().getMarkupId() + "'";
+		} else {
+			jsonOfMark = "undefined";
+			jsonOfCommentInfo = "undefined";
+			jsonOfOldCommentInfos = "undefined";
+			jsonOfNewCommentInfos = "undefined";
+			dirtyContainerId = "undefined";
+		}
+		
 		CharSequence callback = callbackBehavior.getCallbackFunction(
-				explicit("action"), explicit("param1"), explicit("param2"), explicit("param3")); 
-		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s, %s);", 
+				explicit("action"), explicit("param1"), explicit("param2"), 
+				explicit("param3"), explicit("param4"), explicit("param5"),
+				explicit("param6"), explicit("param7"), explicit("param8")); 
+		String script = String.format("gitplex.textdiff.init('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s);", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
-				RequestCycle.get().find(AjaxRequestTarget.class) == null, callback);
+				RequestCycle.get().find(AjaxRequestTarget.class) == null, callback, 
+				markSupport!=null, jsonOfMark, jsonOfCommentInfo, 
+				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
-
+	
 	private String renderDiffs() {
 		int contextSize = Constants.DIFF_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
 		if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append(""
 					+ "<colgroup>"
-					+ "<col width='40'></col>"
-					+ "<col width='40'></col>"
+					+ "<col width='60'></col>"
+					+ "<col width='60'></col>"
 					+ "<col width='15'></col>"
 					+ "<col></col>"
 					+ "</colgroup>");
 		} else {
 			builder.append(""
 					+ "<colgroup>"
-					+ "<col width='40'></col>"
+					+ "<col width='60'></col>"
 					+ "<col width='15'></col>"
 					+ "<col></col>"
-					+ "<col width='40'></col>"
+					+ "<col width='60'></col>"
 					+ "<col width='15'></col>"
 					+ "<col></col>"
 					+ "</colgroup>");
@@ -612,6 +706,30 @@ public class TextDiffPanel extends Panel {
 	private List<MarkAwareDiffBlock> getDiffBlocks() {
 		if (diffBlocks == null) {
 			diffBlocks = new ArrayList<>();
+			List<Range> oldRanges = new ArrayList<>();
+			List<Range> newRanges = new ArrayList<>();
+			if (markSupport != null) {
+				List<DiffMark> marks = new ArrayList<>();
+				DiffMark mark = markSupport.getMark();
+				if (mark != null) {
+					marks.add(mark);
+				}
+				String oldCommitHash = getOldCommit().name();
+				String newCommitHash = getNewCommit().name();
+				for (CodeComment comment: markSupport.getComments()) {
+					mark = new DiffMark(comment, oldCommitHash, newCommitHash);
+					marks.add(mark);
+				}
+				for (DiffMark each: marks) {
+					Range range = new Range(each.beginLine, each.endLine+1);
+					if (each.isLeftSide()) {
+						oldRanges.add(range);
+					} else {
+						newRanges.add(range);
+					}
+				}
+			}
+			
 			for (DiffBlock<List<CmToken>> diffBlock: change.getDiffBlocks()) {
 				if (diffBlock.getOperation() == Operation.DELETE) {
 					diffBlocks.add(new MarkAwareDiffBlock(Type.DELETE, diffBlock.getUnits(), 
@@ -620,44 +738,42 @@ public class TextDiffPanel extends Panel {
 					diffBlocks.add(new MarkAwareDiffBlock(Type.INSERT, diffBlock.getUnits(), 
 							diffBlock.getOldStart(), diffBlock.getNewStart()));
 				} else {
-					if (markInfo != null) {
-						int beginMarkIndex;
-						int endMarkIndex;
-						if (markInfo.isOld()) {
-							beginMarkIndex = markInfo.getBeginLine() - diffBlock.getOldStart();
-							endMarkIndex = markInfo.getEndLine() - diffBlock.getOldStart();
-						} else {
-							beginMarkIndex = markInfo.getBeginLine() - diffBlock.getNewStart();
-							endMarkIndex = markInfo.getEndLine() - diffBlock.getNewStart();
-						}	
-						if (beginMarkIndex < 0)
-							beginMarkIndex = 0;
-						if (beginMarkIndex > diffBlock.getUnits().size())
-							beginMarkIndex = diffBlock.getUnits().size();
-						if (endMarkIndex < 0)
-							endMarkIndex = 0;
-						if (endMarkIndex > diffBlock.getUnits().size())
-							endMarkIndex = diffBlock.getUnits().size();
-						List<List<CmToken>> lines = diffBlock.getUnits().subList(0, beginMarkIndex);
-						if (!lines.isEmpty()) {
-							diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
-									diffBlock.getOldStart(), diffBlock.getNewStart()));
+					List<Range> ranges = new ArrayList<>();
+					for (Range range: oldRanges) {
+						ranges.add(new Range(range.getFrom()-diffBlock.getOldStart(), range.getTo()-diffBlock.getOldStart()));
+					}
+					for (Range range: newRanges) {
+						ranges.add(new Range(range.getFrom()-diffBlock.getNewStart(), range.getTo()-diffBlock.getNewStart()));
+					}
+					ranges = RangeUtils.merge(ranges);
+					
+					int lastIndex = 0;
+					for (Range range: ranges) {
+						int from = range.getFrom();
+						int to = range.getTo();
+						if (from < diffBlock.getUnits().size() && to > 0) {
+							if (from < lastIndex)
+								from = lastIndex;
+							if (to > diffBlock.getUnits().size())
+								to = diffBlock.getUnits().size();
+							if (lastIndex < from) {
+								List<List<CmToken>> lines = diffBlock.getUnits().subList(lastIndex, from);
+								diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
+										diffBlock.getOldStart()+lastIndex, diffBlock.getNewStart()+lastIndex));
+							}
+							if (from < to) {
+								List<List<CmToken>> lines = diffBlock.getUnits().subList(from, to);
+								diffBlocks.add(new MarkAwareDiffBlock(Type.MARKED_EQUAL, lines, 
+										diffBlock.getOldStart()+from, diffBlock.getNewStart()+from));
+							}
+							lastIndex = to;
 						}
-						lines = diffBlock.getUnits().subList(beginMarkIndex, endMarkIndex);
-						if (!lines.isEmpty()) {
-							diffBlocks.add(new MarkAwareDiffBlock(Type.MARKED_EQUAL, lines, 
-									diffBlock.getOldStart()+beginMarkIndex, 
-									diffBlock.getNewStart()+beginMarkIndex));
-						}
-						lines = diffBlock.getUnits().subList(endMarkIndex, diffBlock.getUnits().size());
-						if (!lines.isEmpty()) {
-							diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
-									diffBlock.getOldStart()+endMarkIndex, 
-									diffBlock.getNewStart()+endMarkIndex));
-						}
-					} else {
-						diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, diffBlock.getUnits(), 
-								diffBlock.getOldStart(), diffBlock.getNewStart()));
+					}
+					
+					if (lastIndex < diffBlock.getUnits().size()) {
+						List<List<CmToken>> lines = diffBlock.getUnits().subList(lastIndex, diffBlock.getUnits().size());
+						diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
+								diffBlock.getOldStart()+lastIndex, diffBlock.getNewStart()+lastIndex));
 					}
 				}
 			}
@@ -669,7 +785,65 @@ public class TextDiffPanel extends Panel {
 	protected void onDetach() {
 		depotModel.detach();
 		requestModel.detach();
+		
 		super.onDetach();
+	}
+
+	private String getJsonOfComment(CodeComment comment) {
+		CommentInfo commentInfo = new CommentInfo();
+		commentInfo.id = comment.getId();
+		commentInfo.mark = new DiffMark(comment, getOldCommit().name(), getNewCommit().name());
+
+		String jsonOfCommentInfo;
+		try {
+			jsonOfCommentInfo = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(commentInfo);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		return jsonOfCommentInfo;
+	}
+	
+	@Override
+	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
+		String script = String.format("gitplex.textdiff.onCommentDeleted($('#%s'), %s);", 
+				getMarkupId(), getJsonOfComment(comment));
+		target.appendJavaScript(script);
+	}
+
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
+		String script = String.format("gitplex.textdiff.onCloseComment($('#%s'));", getMarkupId());
+		target.appendJavaScript(script);
+	}
+
+	@Override
+	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
+		String script = String.format("gitplex.textdiff.onCommentAdded($('#%s'), %s);", 
+				getMarkupId(), getJsonOfComment(comment));
+		target.appendJavaScript(script);
+	}
+
+	@Override
+	public void mark(AjaxRequestTarget target, DiffMark mark) {
+		String script = String.format(""
+				+ "var $container = $('#%s');"
+				+ "var mark = %s;"
+				+ "gitplex.textdiff.scroll($container, mark);"
+				+ "gitplex.textdiff.mark($container, mark);", 
+				getMarkupId(), mark.toJson());
+		target.appendJavaScript(script);
+	}
+	
+	@Override
+	public void clearMark(AjaxRequestTarget target) {
+		String script = String.format("gitplex.textdiff.clearMark($('#%s'));", getMarkupId());
+		target.appendJavaScript(script);
+	}
+	
+	private static class CommentInfo {
+		long id;
+		
+		DiffMark mark;
 	}
 
 }

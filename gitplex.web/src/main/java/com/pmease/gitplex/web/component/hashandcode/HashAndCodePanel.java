@@ -12,7 +12,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.web.component.commithash.CommitHashPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
-import com.pmease.gitplex.web.page.depot.file.DepotFilePage.HistoryState;
 
 @SuppressWarnings("serial")
 public class HashAndCodePanel extends Panel {
@@ -50,7 +49,7 @@ public class HashAndCodePanel extends Panel {
 		
 		add(new CommitHashPanel("hash", hash));
 		
-		HistoryState state = new HistoryState();
+		DepotFilePage.State state = new DepotFilePage.State();
 		state.requestId = requestId;
 		state.blobIdent.revision = hash;
 		state.blobIdent.path = path;

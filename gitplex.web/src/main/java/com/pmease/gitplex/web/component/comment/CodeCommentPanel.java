@@ -8,7 +8,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -471,9 +470,6 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		}
 		add(repliesView);
 		add(newAddReplyContainer());
-		
-		add(AttributeAppender.append("data-line", getComment().getMark().getBeginLine()));
-		add(AttributeAppender.append("data-comment", getComment().getId()));
 		
 		setOutputMarkupId(true);
 	}

@@ -67,6 +67,9 @@
 .revision-diff>.body>.loading {
 	font-size: 20px;
 }
+.revision-diff>.body>.detail>.diffs {
+	margin-bottom: 0;
+}
 .revision-diff>.body>.detail>.diffs>.diff {
 	margin-bottom: 20px;
 }
@@ -87,6 +90,12 @@
 	margin-right: 8px;
 	font-size: 20px;
 }
+.revision-diff>.body>.detail>.comment>.content>.head .permanent {
+	margin-top: 2px;
+	margin-right: 8px;
+	font-size: 18px;
+}
+
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
 	position: absolute;
     background: #EEE url("vgrabber.png") no-repeat scroll right center;
