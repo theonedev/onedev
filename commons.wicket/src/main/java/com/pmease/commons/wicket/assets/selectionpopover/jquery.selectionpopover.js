@@ -1,37 +1,43 @@
 (function ( $ ) {
- 
     $.fn.selectionPopover = function(action, options) {
     	var $container = jQuery(this);
-    	
+    	$container.css("position", "relative");
     	function popover(options) {
-    		var popover = $container.data("selectionPopover");
-    		if (popover && jQuery.contains(document, popover)) {
-    			$(popover).remove();
-    		}
-    		if (options) {
-            	var $popover = $("" +
-        				"<div class='selection-popover'>" +
-        				"<div class='content'></div>" +
-        				"<div class='triangle'></div>" +
-        				"</div>");
-            	$popover.children(".content").append(options.content);
-
-            	$("body").append($popover);
-            	$popover.data("container", $container[0]);
-
-    			var alignment = {
-    					target: {left: options.position.left, top: options.position.top, width: 0, height: 0}, 
-    					placement: {x: 50, y: 100, targetX: 0, targetY: 0}};
-    			$popover.children(".triangle").show();
-    			$popover.show().align(alignment);
-    			if (Math.abs($popover.offset().top+$popover.outerHeight() - options.position.top)>10) {
-    				$popover.children(".triangle").hide();
-    			} 
-    			$container.data("selectionPopover", $popover[0]);
+			var $popover = $container.children(".selection-popover");
+			if (options === "close") {
+				$popover.remove();
+			} else if (options) {
+    			if ($popover.length == 0) {
+                	$popover = $("" +
+            				"<div class='selection-popover'>" +
+            				"<div class='content'></div>" +
+            				"<div class='triangle'></div>" +
+            				"</div>");
+                	$container.append($popover);
+    			}
+    			var $content = $popover.children(".content");
+    			$content.empty();
+    			$content.append(options.content);
+            	var left = options.position.left - $popover.outerWidth()/2;
+            	var top = options.position.top - $popover.outerHeight();
+            	if (left < $(window).scrollLeft())
+            		left = $(window).scrollLeft();
+            	if (left + $popover.outerWidth() > $(window).width() + $(window).scrollLeft())
+            		left = $(window).width() + $(window).scrollLeft() - $popover.outerWidth();
+            	if (top < $(window).scrollTop())
+            		top = $(window).scrollTop();
+            	if (top + $popover.outerHeight() > $(window).height() + $(window).scrollTop())
+            		top = $(window).height() + $(window).scrollTop() - $popover.outerHeight();
+            	if (top + $popover.outerHeight() > options.position.top+10)
+            		$popover.children(".triangle").hide();
+            	$popover.css({
+            		left: left-$container.offset().left,
+            		top: top-$container.offset().top
+            	});
     		}
     	}
 
-    	if (action == "init") {
+    	if (action === "init") {
     	    $container.on("mouseup", function() {
     			// use a timeout to make sure selection remains stable after mouse or keyboard action
     	    	setTimeout(function() {
@@ -46,10 +52,10 @@
         	    	}, 100);
     	    	}
     	    });
-    	} else if (action == "open") {
+    	} else if (action === "open") {
     		popover(options);
-    	} else {
-    		popover();
+    	} else if (action === "close") {
+    		popover("close");
     	}
     	
     	return this;
@@ -58,17 +64,9 @@
 }( jQuery ));
 
 $(function() {
-	Wicket.Event.subscribe('/ajax/call/complete', function() {
-		$("body>.selection-popover").each(function() {
-			var $popover = $(this);
-			if (!jQuery.contains(document, $popover.data("container"))) {
-				$popover.remove();
-			}
-		});
-	});  
 	$(document).keydown(function(e) {
 		if (e.keyCode == 27) {
-			$("body>.selection-popover").remove();
+			$(".selection-popover").remove();
 		}
 	});
 });

@@ -44,7 +44,7 @@ gitplex.textdiff = {
 		$container.selectionPopover("init", function() {
 	    	var selection = window.getSelection();
 	    	if (!selection.rangeCount) {
-	    		return;
+	    		return "close";
 	    	}
     		var firstRange = selection.getRangeAt(0).cloneRange();
     		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
@@ -75,7 +75,7 @@ gitplex.textdiff = {
 			
 			// selection must be within same file
 			if ($startDiff.length == 0 || $endDiff.length == 0 || !$startDiff.is($endDiff)) { 
-				return;
+	    		return "close";
 			}
 			
 			var $startTd = $start.is("td.content")? $start: $start.closest(".text-diff td.content");
@@ -83,7 +83,7 @@ gitplex.textdiff = {
 
 			// at least one side of selection must be within a table cell
 			if ($startTd.length == 0 && $endTd.length == 0) {
-				return;
+	    		return "close";
 			}
 
 			// make sure we are processing td.content on the same side on split view
@@ -142,14 +142,14 @@ gitplex.textdiff = {
 				} else if ($start.is("tr.expander") || $start.closest("tr.expander").length != 0) { // this may happen if we drag mouse over to expander line 
 					var $tr = $start.is("tr.expander")? $start.next(): $start.closest("tr.expander").next();
 					if ($tr.length == 0) {
-						return;
+			    		return "close";
 					}
 					$td = getTd($tr);
 					startOffset = 0;
 				} else {
 					var $tr = $startDiff.find("tr.code").first();
 					if ($tr.length == 0) {
-						return;
+			    		return "close";
 					}
 					$td = getTd($tr);
 					startOffset = 0;
@@ -167,7 +167,7 @@ gitplex.textdiff = {
 			if (noneSelected && $startTd.parent().next().is("tr.expander")) {
 				var $tr = $startTd.parent().next().next();
 				if ($tr.length == 0) {
-					return;
+		    		return "close";
 				}
 				var $td = getTd($tr);
 				$start = $td.contents().first();
@@ -187,14 +187,14 @@ gitplex.textdiff = {
 				} else if ($end.is("tr.expander") || $end.closest("tr.expander").length != 0) {
 					var $tr = $end.is("tr.expander")? $end.prev(): $end.closest("tr.expander").prev();
 					if ($tr.length == 0) {
-						return;
+			    		return "close";
 					}
 					$td = getTd($tr);
 					endOffset = $td.contents().length;
 				} else {
 					var $tr = $endDiff.find("tr.code").last();
 					if ($tr.length == 0) {
-						return;
+			    		return "close";
 					}
 					$td = getTd($tr);
 					endOffset = $td.contents().length;
@@ -212,7 +212,7 @@ gitplex.textdiff = {
 			if (noneSelected && $endTd.parent().prev().is("tr.expander")) {
 				var $tr = $endTd.parent().prev().prev();
 				if ($tr.length == 0) {
-					return;
+		    		return "close";
 				}
 				var $td = getTd($tr);
 				$end = $td.contents().last();
@@ -225,13 +225,13 @@ gitplex.textdiff = {
 			// selection must not span the split view
 			if ($startTd.hasClass("left") && $endTd.hasClass("right") 
 					|| $startTd.hasClass("right") && $endTd.hasClass("left")) { 
-				return;
+	    		return "close";
 			}	    	
 			
 			var $startTr = $startTd.parent();
 			var $endTr = $endTd.parent();
 			if ($startTr.index() > $endTr.index()) {
-				return;
+	    		return "close";
 			}
 
 			function nextContent($content) {
@@ -287,7 +287,7 @@ gitplex.textdiff = {
 			while (!$content.is($end) && (startOffset >= $content.text().length || !hasOldOrNewData($content))) {
 				$content = nextContent($content);
 				if (!$content) {
-					return;
+		    		return "close";
 				} else {
 					$start = $content;
 					startOffset = 0;
@@ -298,7 +298,7 @@ gitplex.textdiff = {
 			while (!$content.is($start) && (endOffset == 0 || !hasOldOrNewData($content))) {
 				$content = prevContent($content);
 				if (!$content) {
-					return;
+		    		return "close";
 				} else {
 					$end = $content;
 					endOffset = $content.text().length;
@@ -308,7 +308,7 @@ gitplex.textdiff = {
 			// check if there is anything selected
 			if ($start.is($end) && startOffset >= endOffset 
 					|| !hasOldOrNewData($start) || !hasOldOrNewData($end)) {
-				return;
+	    		return "close";
 			}
 			
 			firstRange.collapse(true);
@@ -679,6 +679,12 @@ gitplex.textdiff = {
 		$indicator.addClass("comment-indicator");
 		$indicator.data("comments", comments);
 		if (comments.length != 1) {
+			/* 
+			 * when there are multiple comments starts with the same line, we should 
+			 * display a comment indicator which will display a comment popover with 
+			 * list of comment triggers upon click, user can then click one of the 
+			 * trigger link to display the actual comment content  
+			 */
 			var oldOrNew = leftSide?"old":"new";
 			$indicator.append("<i class='fa fa-comments'></i>");
 			var content = "";
@@ -690,7 +696,7 @@ gitplex.textdiff = {
 			$indicator.popover({
 				html: true, 
 				container: $lineNumTd,
-				placement: "right",
+				placement: "right auto",
 				template: "<div class='" + oldOrNew + " popover comment-popover' data-line='" + line + "'><div class='arrow'></div><div class='popover-content'></div></div>",
 				content: content
 			});

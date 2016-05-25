@@ -1,7 +1,6 @@
 .selection-popover {
 	z-index: 10000;
 	position: absolute;
-	display: none;
 }
 .selection-popover>.content {
 	background: #333;
@@ -13,8 +12,8 @@
 	display: block;
 	white-space: nowrap;
 }
-.selection-popover>.content a:FIRST-CHILD {
-	margin-bottom: 8px;
+.selection-popover>.content a+a, a+span, span+span, span+a {
+	margin-top: 8px;
 }
 .selection-popover>.triangle {
 	position: relative;

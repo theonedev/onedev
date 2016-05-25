@@ -12,7 +12,7 @@ gitplex.sourceview = {
 		$sourceView.data("markCallback", markCallback);
 		
 		var $code = $sourceView.children(".code");
-		$sourceView.closest(".content").css("overflow", "hidden");
+		$sourceView.closest(".content").css("overflow", "visible");
 		
 		function repositionCommentPopovers() {
 			$(".comment-popover:visible").each(function() {
@@ -22,10 +22,15 @@ gitplex.sourceview = {
 					var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
 					if (gutter) {
 						var $indicator = $(gutter).children("a");
-						$popover.css({
-							"left": $indicator.offset().left + $indicator.outerWidth() - $sourceView.offset().left,
-							"top": $indicator.offset().top + ($indicator.outerHeight() - $popover.outerHeight())/2 - $sourceView.offset().top
-						});
+						if ($indicator.offset().top+$indicator.height() < $sourceView.offset().top 
+								|| $indicator.offset().top > $sourceView.offset().top+$sourceView.height()) {
+							$popover.css("left", "-10000px");
+						} else {
+							$popover.css({
+								"left": $indicator.offset().left + $indicator.outerWidth() - $sourceView.offset().left,
+								"top": $indicator.offset().top + ($indicator.outerHeight() - $popover.outerHeight())/2 - $sourceView.offset().top
+							});
+						}
 					}
 				}
 			});
@@ -122,8 +127,10 @@ gitplex.sourceview = {
 				    	var to = cm.getCursor("to");
 				    	if (from.line != to.line || from.ch != to.ch) {
 				    		markCallback("openSelectionPopover", from.line, from.ch, to.line, to.ch);
+				    		return;
 				    	}
-			    	}
+			    	}	
+			    	return "close";
 			    });
 			    
 			    $code.mouseover(function(e) {
@@ -136,7 +143,7 @@ gitplex.sourceview = {
 				cm.setSize($code.width(), $code.height());
 			    if (mark)
 			    	pmease.commons.codemirror.mark(cm, mark, true);
-				if (initState)
+				if (initState) // restore cursor and scroll
 					pmease.commons.codemirror.initState(cm, viewState);
 				cm.on("scroll", function() {
 					gitplex.mouseState.moved = false;					
@@ -237,7 +244,7 @@ gitplex.sourceview = {
 			$indicator.popover({
 				html: true, 
 				container: ".source-view",
-				placement: "right",
+				placement: "right auto",
 				template: "<div data-line='" + line + "' class='popover comment-popover'><div class='arrow'></div><div class='popover-content'></div></div>",
 				content: content
 			});
@@ -352,10 +359,11 @@ gitplex.sourceview = {
 		}
 		gitplex.sourceview.highlightCommentTrigger();				
 		gitplex.sourceview.onLayoutChange();
+
+		// make sure marked text is in view port after changing layout
 		var mark = $sourceView.data("mark");
-		if (mark) {
+		if (mark) 
 			gitplex.sourceview.mark(mark, true);
-		}
 	},
 	onLayoutChange: function() {
 		$sourceView = $('.source-view');
@@ -370,7 +378,11 @@ gitplex.sourceview = {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.clearSelection(cm);
 		gitplex.sourceview.onLayoutChange();
+
+		// mark and scroll after changing layout to make sure scroll 
+		// works correctly
 		pmease.commons.codemirror.mark(cm, mark, true);
+		
 		gitplex.sourceview.highlightCommentTrigger();
 	},
 	onOpenComment: function(comment) {
@@ -379,6 +391,9 @@ gitplex.sourceview = {
 		$sourceView.data("mark", comment.mark);
 		gitplex.sourceview.highlightCommentTrigger();
 		gitplex.sourceview.onLayoutChange();
+		
+		// mark and scroll after changing layout to make sure scroll 
+		// works correctly
 		gitplex.sourceview.mark(comment.mark, true);
 	},
 	onCloseComment: function() {
@@ -386,6 +401,8 @@ gitplex.sourceview = {
 		$sourceView.removeData("openComment");
 		gitplex.sourceview.highlightCommentTrigger();
 		gitplex.sourceview.onLayoutChange();
+		
+		// make sure marked text is in view port after layout change
 		var mark = $sourceView.data("mark");
 		if (mark) {
 			gitplex.sourceview.mark(mark, true);
@@ -397,6 +414,12 @@ gitplex.sourceview = {
 	highlightCommentTrigger: function() {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
 		$(".comment-popover a").removeClass("active");
+		
+		/*
+		 * we can not simply select all comment triggers via jQuery 
+		 * as comment gutter may be create/destroy dynamically by 
+		 * CodeMirror 
+		 */
 		for (var i=0; i<cm.lineCount(); i++) {
 			var gutterMarkers = cm.lineInfo(i).gutterMarkers;
 			if (gutterMarkers) {
