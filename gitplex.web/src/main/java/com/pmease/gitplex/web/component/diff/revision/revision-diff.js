@@ -15,17 +15,19 @@ gitplex.revisionDiff = {
 				Cookies.set(cookieName, "yes", {expires: Infinity});
 			}
 		});
-		function onWindowResizeOrScroll(e) {
-			if (e && e.target && $(e.target).hasClass("ui-resizable"))
+		gitplex.revisionDiff.reposition();
+	},
+	reposition: function(e) {
+		if (e) {
+			e.stopPropagation();
+			if (e.target && $(e.target).hasClass("ui-resizable"))
 				return;
-			
-			var $detail = $body.children(".detail");
-			$detail.show();
-			$body.children(".loading").hide();
-
+		}
+		
+		var $detail = $(".revision-diff>.body>.detail");
+		if ($detail.length != 0) {
 			var $comment = $detail.children(".comment");
 			var $diffs = $detail.children(".diffs");
-			var diffsHeight = $diffs.outerHeight();
 			if ($comment.is(":visible")) {
 				$diffs.css("left", $comment.outerWidth(true));
 				$diffs.outerWidth($detail.width() - $comment.outerWidth(true));
@@ -58,19 +60,14 @@ gitplex.revisionDiff = {
 				$diffs.css("left", "0");
 				$diffs.outerWidth($detail.width());
 			}
+			var diffsHeight = $diffs.outerHeight();
 			$detail.height(commentHeight>diffsHeight?commentHeight:diffsHeight);
 		}
-		
-		onWindowResizeOrScroll();
-		$(window).on("scroll resize", onWindowResizeOrScroll);
 	},
 	initComment: function() {
 		var $comment = $(".revision-diff>.body>.detail>.comment");
 		
-		// we do not use $comment.is(":visible") here as comment can also be invisible 
-		// when its parent is not visible initially (in order not to display a weild 
-		// page before we adjust the width and height of comment and diffs)
-		if ($comment.css("display") != "none") {
+		if ($comment.is(":visible")) {
 			var commentWidthCookieKey = "revisionDiff.comment.width";
 			var commentWidth = Cookies.get(commentWidthCookieKey);
 			if (!commentWidth)
@@ -96,3 +93,6 @@ gitplex.revisionDiff = {
 		}
 	}
 }
+$(function() {
+	$(window).on("scroll resize", gitplex.revisionDiff.position);	
+});

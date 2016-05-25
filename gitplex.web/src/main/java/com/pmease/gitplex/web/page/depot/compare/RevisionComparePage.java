@@ -27,6 +27,7 @@ import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.FileUtils;
+import com.pmease.commons.wicket.behavior.TooltipBehavior;
 import com.pmease.commons.wicket.component.backtotop.BackToTop;
 import com.pmease.commons.wicket.component.tabbable.AjaxActionTab;
 import com.pmease.commons.wicket.component.tabbable.Tab;
@@ -120,6 +121,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
+		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		state.mark = DiffMark.of(params.get(PARAM_MARK).toString());
+		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
 			@Override
@@ -180,27 +184,53 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				State state = new State(RevisionComparePage.this.state);
-				state.leftSide = new DepotAndRevision(depot, revision);
+				State newState = new State();
+				newState.leftSide = new DepotAndRevision(depot, revision);
+				newState.rightSide = state.rightSide;
+				newState.pathFilter = state.pathFilter;
+				newState.whitespaceOption = state.whitespaceOption;
 
-				PageParameters params = paramsOf(depot, state);
+				PageParameters params = paramsOf(depot, newState);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		});
-		newRightSideRevisionPicker(null);
+		add(new AffinalRevisionPicker("rightSide", 
+				state.rightSide.getDepotId(), state.rightSide.getRevision()) { 
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
+				State newState = new State();
+				newState.leftSide = state.leftSide;
+				newState.rightSide = new DepotAndRevision(depot, revision);
+				newState.pathFilter = state.pathFilter;
+				newState.whitespaceOption = state.whitespaceOption;
+				
+				PageParameters params = paramsOf(getDepot(), newState);
+				setResponsePage(RevisionComparePage.class, params);
+			}
+			
+		});
 		
 		add(new Link<Void>("swap") {
 
 			@Override
 			public void onClick() {
-				State state = new State(RevisionComparePage.this.state);
-				state.leftSide = RevisionComparePage.this.state.rightSide;
-				state.rightSide = RevisionComparePage.this.state.leftSide;
-				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), state));
+				State newState = new State();
+				newState.leftSide = state.rightSide;
+				newState.rightSide = state.leftSide;
+				newState.pathFilter = state.pathFilter;
+				newState.whitespaceOption = state.whitespaceOption;
+				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), newState));
 			}
 
-		});
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!mergeBaseModel.getObject().equals(state.leftSide.getCommit().name()));
+			}
+
+		}.add(new TooltipBehavior(Model.of("Left side is ahead of right side, swap to see changes"))));
 		
 		add(new Link<Void>("createRequest") {
 
@@ -281,34 +311,6 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			}
 
 		});
-		add(new WebMarkupContainer("leftAhead") {
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(new Link<Void>("swap") {
-
-					@Override
-					public void onClick() {
-						State newState = new State(state);
-						newState.leftSide = state.rightSide;
-						newState.rightSide = state.leftSide;
-						PageParameters params = paramsOf(getDepot(), newState);
-						setResponsePage(RevisionComparePage.class, params);
-					}
-					
-				});
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(!mergeBaseModel.getObject().equals(state.leftSide.getCommit().name()));
-			}
-
-		});
 		
 		List<Tab> tabs = new ArrayList<>();
 		
@@ -347,28 +349,6 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		newTabPanel(null);
 		
 		add(new BackToTop("backToTop"));
-	}
-	
-	private void newRightSideRevisionPicker(@Nullable AjaxRequestTarget target) {
-		AffinalRevisionPicker revisionPicker = new AffinalRevisionPicker("rightSide", 
-				state.rightSide.getDepotId(), state.rightSide.getRevision()) { 
-
-			@Override
-			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
-				State state = new State(RevisionComparePage.this.state);
-				state.rightSide = new DepotAndRevision(depot, revision);
-				
-				PageParameters params = paramsOf(getDepot(), state);
-				setResponsePage(RevisionComparePage.class, params);
-			}
-			
-		};
-		if (target != null) {
-			replace(revisionPicker);
-			target.add(revisionPicker);
-		} else {
-			add(revisionPicker);
-		}
 	}
 	
 	private boolean hasChanges() {
@@ -518,19 +498,19 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
 		markState.whitespaceOption = state.whitespaceOption;
-		return urlFor(RevisionComparePage.class, paramsOf(state.rightSide.getDepot(), state)).toString();
+		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getDepot(), markState)).toString();
 	}
 
 	@Override
 	public String getCommentUrl(CodeComment comment) {
-		State markState = new State();
-		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), mergeBaseModel.getObject());
-		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), resolvedRightSideRevision.name());
-		markState.mark = new DiffMark(comment, mergeBaseModel.getObject(), resolvedRightSideRevision.name());
-		markState.commentId = comment.getId();
-		markState.pathFilter = state.pathFilter;
-		markState.whitespaceOption = state.whitespaceOption;
-		return urlFor(RevisionComparePage.class, paramsOf(state.rightSide.getDepot(), state)).toString();
+		State commentState = new State();
+		commentState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), mergeBaseModel.getObject());
+		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), resolvedRightSideRevision.name());
+		commentState.mark = new DiffMark(comment, mergeBaseModel.getObject(), resolvedRightSideRevision.name());
+		commentState.commentId = comment.getId();
+		commentState.pathFilter = state.pathFilter;
+		commentState.whitespaceOption = state.whitespaceOption;
+		return urlFor(RevisionComparePage.class, paramsOf(commentState.rightSide.getDepot(), commentState)).toString();
 	}
 	
 	@Override

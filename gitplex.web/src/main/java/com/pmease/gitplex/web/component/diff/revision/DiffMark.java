@@ -1,5 +1,7 @@
 package com.pmease.gitplex.web.component.diff.revision;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -98,5 +100,11 @@ public class DiffMark extends Mark {
 			throw new RuntimeException(e);
 		} 
 	}
-	
+
+	public static DiffMark of(@Nullable String markStr) {
+		if (markStr != null)
+			return new DiffMark(markStr);
+		else
+			return null;
+	}
 }

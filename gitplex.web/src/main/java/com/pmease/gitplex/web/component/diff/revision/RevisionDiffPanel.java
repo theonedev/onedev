@@ -81,7 +81,7 @@ import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
-import com.pmease.gitplex.web.component.diff.blob.CommentAware;
+import com.pmease.gitplex.web.component.diff.blob.MarkAware;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
@@ -502,7 +502,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		});
 		add(form);
 
-		commentContainer = new WebMarkupContainer("comment") {
+		commentContainer = new WebMarkupContainer("comment", Model.of((DiffMark)null)) {
 
 			@Override
 			public void renderHead(IHeaderResponse response) {
@@ -529,11 +529,11 @@ public abstract class RevisionDiffPanel extends Panel {
 				if (comment != null) {
 					mark = new DiffMark(comment, getOldCommit().name(), getNewCommit().name());
 				} else {
-					mark = (DiffMark)commentContainer.getDefaultModel();
+					mark = (DiffMark)commentContainer.getDefaultModelObject();
 				}
-				CommentAware commentAware = getCommentAware(mark.getPath());
-				if (commentAware != null)
-					commentAware.mark(target, mark);
+				MarkAware markAware = getMarkAware(mark.getPath());
+				if (markAware != null)
+					markAware.mark(target, mark);
 				markSupport.onMark(target, mark);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
@@ -578,12 +578,20 @@ public abstract class RevisionDiffPanel extends Panel {
 				clearComment(target);
 				CodeComment comment = markSupport.getOpenComment();
 				if (comment != null) {
-					CommentAware commentAware = getCommentAware(comment.getPath());
-					if (commentAware != null) 
-						commentAware.onCommentClosed(target, comment);
+					MarkAware markAware = getMarkAware(comment.getPath());
+					if (markAware != null) 
+						markAware.onCommentClosed(target, comment);
 					markSupport.onCommentClosed(target);
 				}
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("gitplex.revisionDiff.reposition();");
+				
+				DiffMark mark = markSupport.getMark();
+				if (mark != null) {
+					MarkAware markAware = getMarkAware(mark.getPath());
+					if (markAware != null) {
+						markAware.mark(target, mark);
+					}
+				}
 			}
 			
 		});
@@ -641,7 +649,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			totalChangedLink.add(AttributeAppender.append("class", "expanded"));			
 		}
 		body.add(diffStats);
-		diffStats.add(diffsView = new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
+		diffStats.add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -692,7 +700,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		body.add(new ListView<BlobChange>("diffs", new AbstractReadOnlyModel<List<BlobChange>>() {
+		body.add(diffsView = new ListView<BlobChange>("diffs", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -759,20 +767,20 @@ public abstract class RevisionDiffPanel extends Panel {
 							
 							CodeComment prevComment = markSupport.getOpenComment();
 							if (prevComment != null) {
-								CommentAware commentAware = getCommentAware(prevComment.getPath());
-								if (commentAware != null) 
-									commentAware.onCommentClosed(target, prevComment);
+								MarkAware markAware = getMarkAware(prevComment.getPath());
+								if (markAware != null) 
+									markAware.onCommentClosed(target, prevComment);
 							} 
 							
 							DiffMark prevMark = markSupport.getMark();
 							if (prevMark != null) {
-								CommentAware commentAware = getCommentAware(prevMark.getPath());
-								if (commentAware != null)
-									commentAware.clearMark(target);
+								MarkAware markAware = getMarkAware(prevMark.getPath());
+								if (markAware != null)
+									markAware.clearMark(target);
 							}
 							
 							markSupport.onCommentOpened(target, comment);
-							target.appendJavaScript("$(window).resize();");
+							target.appendJavaScript("gitplex.revisionDiff.reposition();");
 						}
 	
 						@Override
@@ -810,7 +818,7 @@ public abstract class RevisionDiffPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									clearComment(target);
-									target.appendJavaScript("$(window).resize();");
+									target.appendJavaScript("gitplex.revisionDiff.reposition();");
 								}
 								
 							});
@@ -870,37 +878,39 @@ public abstract class RevisionDiffPanel extends Panel {
 										}
 										
 									};
-									commentContainer.replaceWith(commentPanel);
+									commentContainer.replace(commentPanel);
 									target.add(commentContainer);
 									
-									CommentAware commentAware = getCommentAware(comment.getPath());
-									if (commentAware != null) 
-										commentAware.onCommentAdded(target, comment);
+									MarkAware markAware = getMarkAware(comment.getPath());
+									if (markAware != null) 
+										markAware.onCommentAdded(target, comment);
 
 									markSupport.onCommentOpened(target, comment);
+									target.appendJavaScript("gitplex.revisionDiff.reposition();");
 								}
 
 							});
 							fragment.add(form);
+							
 							commentContainer.replace(fragment);
 							commentContainer.setVisible(true);
 							target.add(commentContainer);
 							
-							CodeComment prevComment = markSupport.getOpenComment();
-							if (prevComment != null) {
-								CommentAware commentAware = getCommentAware(prevComment.getPath());
-								if (commentAware != null) 
-									commentAware.onCommentClosed(target, prevComment);
-							}
 							DiffMark prevMark = markSupport.getMark();
 							if (prevMark != null) {
-								CommentAware commentAware = getCommentAware(prevMark.getPath());
-								if (commentAware != null) 
-									commentAware.clearMark(target);
+								MarkAware markAware = getMarkAware(prevMark.getPath());
+								if (markAware != null) 
+									markAware.clearMark(target);
 							}
 							
+							CodeComment prevComment = markSupport.getOpenComment();
+							if (prevComment != null) {
+								MarkAware markAware = getMarkAware(prevComment.getPath());
+								if (markAware != null) 
+									markAware.onCommentClosed(target, prevComment);
+							}  
 							markSupport.onAddComment(target, mark);
-							target.appendJavaScript("$(window).resize();");
+							target.appendJavaScript("gitplex.revisionDiff.reposition();");
 						}
 
 						@Override
@@ -917,7 +927,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 						@Override
 						public Component getDirtyContainer() {
-							return RevisionDiffPanel.this;
+							return commentContainer;
 						}
 
 					}));
@@ -932,16 +942,20 @@ public abstract class RevisionDiffPanel extends Panel {
 	}
 	
 	@Nullable
-	private CommentAware getCommentAware(String path) {
-		return diffsView.visitChildren(ListItem.class, new IVisitor<ListItem<BlobChange>, CommentAware>() {
+	private MarkAware getMarkAware(String path) {
+		return diffsView.visitChildren(new IVisitor<Component, MarkAware>() {
 
+			@SuppressWarnings("unchecked")
 			@Override
-			public void component(ListItem<BlobChange> object, IVisit<CommentAware> visit) {
-				if (object.getModelObject().getPaths().contains(path)) {
-					visit.stop((CommentAware) object.get(DIFF_ID));
-				} else {
-					visit.dontGoDeeper();
-				}
+			public void component(Component object, IVisit<MarkAware> visit) {
+				if (object instanceof ListItem) {
+					ListItem<BlobChange> item = (ListItem<BlobChange>) object;
+					if (item.getModelObject().getPaths().contains(path)) {
+						visit.stop((MarkAware) item.get(DIFF_ID));
+					} else {
+						visit.dontGoDeeper();
+					}
+				} 
 			}
 
 		});
@@ -957,11 +971,18 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
 		clearComment(target);
-		CommentAware commentAware = getCommentAware(comment.getPath());
-		if (commentAware != null)
-			commentAware.onCommentDeleted(target, comment);
+		MarkAware markAware = getMarkAware(comment.getPath());
+		if (markAware != null)
+			markAware.onCommentDeleted(target, comment);
 		markSupport.onCommentClosed(target);
-		target.appendJavaScript("$(window).resize();");
+		target.appendJavaScript("gitplex.revisionDiff.reposition();");
+		DiffMark mark = markSupport.getMark();
+		if (mark != null) {
+			markAware = getMarkAware(mark.getPath());
+			if (markAware != null) {
+				markAware.mark(target, mark);
+			}
+		}
 	}
 	
 	private void clearComment(AjaxRequestTarget target) {

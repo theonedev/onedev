@@ -11,7 +11,7 @@ public class RangeUtils {
 		sorted.sort((o1, o2) -> o1.getFrom() - o2.getFrom());
 		List<Range> merged = new ArrayList<>();
 		Range current = null;
-		for (Range range: ranges) {
+		for (Range range: sorted) {
 			if (current == null) {
 				current = range;
 			} else if (range.getFrom() <= current.getTo()) {

@@ -206,9 +206,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		String modeStr = params.get(PARAM_MODE).toString();
 		if (modeStr != null)
 			mode = Mode.valueOf(modeStr.toUpperCase());
-		String markStr = params.get(PARAM_MARK).toString();
-		if (markStr != null)
-			mark = new Mark(markStr);
+		mark = Mark.of(params.get(PARAM_MARK).toString());
 		
 		String commentIdStr = params.get(PARAM_COMMENT).toString();
 		if (commentIdStr != null)

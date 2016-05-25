@@ -3,7 +3,7 @@ gitplex.textdiff = {
 	init: function(containerId, symbolTooltipId, oldRev, newRev, scroll, callback, 
 			markSupport, mark, openComment, oldComments, newComments, dirtyContainerId) {
 		var $container = $("#" + containerId);
-		$container.data("dirtyContainer", $("#" + dirtyContainerId));
+		$container.data("dirtyContainerId", dirtyContainerId);
 		$container.data("callback", callback);
 		$container.data("symbolHover", function() {
 			var revision;
@@ -339,7 +339,7 @@ gitplex.textdiff = {
 					endRect = startRect;
 				}
 				var position = {
-					left: Math.round((startRect.left + endRect.right)/2),
+					left: (startRect.left + endRect.right)/2,
 					top: startRect.top
 				};
 				position.left += $(window).scrollLeft();
@@ -431,10 +431,10 @@ gitplex.textdiff = {
 	    		var endCursor = getCursor($end, endOffset);
 
 	    		if (startCursor.newLine && endCursor.newLine) {
-		    		callback("openSelectionPopup", position.left, position.top, false, 
+		    		callback("openSelectionPopup", Math.round(position.left), Math.round(position.top), false, 
 		    				startCursor.newLine-1, startCursor.newCh, endCursor.newLine-1, endCursor.newCh);
 	    		} else if (startCursor.oldLine && endCursor.oldLine) {
-		    		callback("openSelectionPopup", position.left, position.top, true, 
+		    		callback("openSelectionPopup", Math.round(position.left), Math.round(position.top), true, 
 		    				startCursor.oldLine-1, startCursor.oldCh, endCursor.oldLine-1, endCursor.oldCh);
 	    		} else {
 					showInvalidSelection();
@@ -443,14 +443,8 @@ gitplex.textdiff = {
 	    	}, 100);
 		});
 	    	
-		if (mark) {
-			$container.data("mark", mark);
-			gitplex.textdiff.mark($container, mark);	
-			if (scroll) 
-				gitplex.textdiff.scroll($container, mark);
-		}
 		if (openComment) {
-			$container.data("comment", openComment);
+			$container.data("openComment", openComment);
 		}
 		for (var line in oldComments) {
 		    if (oldComments.hasOwnProperty(line)) {
@@ -465,23 +459,12 @@ gitplex.textdiff = {
 
 		gitplex.textdiff.highlightCommentTrigger($container);				
 		
-		function alignCommentPopovers() {
-			$container.find(".comment-popover:visible").each(function() {
-				var $popover = $(this);
-				var leftSide = $popover.hasClass("old");
-				var $indicator = gitplex.textdiff.getLineNumTd($container, leftSide, $popover.data("line")).children(".comment-indicator");
-				if ($indicator.length != 0) {
-					$popover.css({
-						"left": $indicator.offset().left + $indicator.outerWidth() - $container.offset().left,
-						"top": $indicator.offset().top + ($indicator.outerHeight() - $popover.outerHeight())/2 - $container.offset().top
-					});
-				}
-			});
+		if (mark) {
+			$container.data("mark", mark);
+			gitplex.textdiff.mark($container, mark);	
+			if (scroll)
+				gitplex.textdiff.scroll($container, mark);
 		}
-		$(window).on("resize scroll", function(e) {
-			e.preventDefault();
-			alignCommentPopovers();
-		});
 	},
 	openSelectionPopup: function(containerId, position, mark, markUrl, loggedIn) {
 		var $container = $("#" + containerId);
@@ -491,26 +474,15 @@ gitplex.textdiff = {
 		};
 
 		var commentLinkCallback = function($commentLink) {
+			$commentLink.html("<i class='fa fa-comment'></i> Add comment of this selection");
 			$commentLink.off("click");
+			$commentLink.attr("href", "javascript:void(0);");
 			if (loggedIn) {
 				$commentLink.click(function() {
-					if ($container.data("dirtyContainer").find("form.dirty").length != 0 
+					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
 							&& !confirm("There are unsaved changes, discard and continue?")) {
 						return;
 					}
-					$container.removeData("openComment");
-					$container.data("mark", mark);
-					
-					$("#selection-popup").hide();
-					window.getSelection().removeAllRanges();
-
-    				// continue to operate DOM in a timer to give browser a chance to 
-    				// clear selections
-					setTimeout(function() {
-						gitplex.textdiff.mark($container, mark);
-						gitplex.textdiff.highlightCommentTrigger($container);
-					}, 100);
-					
     				$container.data("callback")("addComment", mark.leftSide, 
     						mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
 				});
@@ -539,6 +511,7 @@ gitplex.textdiff = {
 		var $symbols = $expandedTrs.find(gitplex.textdiff.symbolClasses); 
 		$symbols.mouseover($container.data("symbolHover"));
 		$expandedTrs.find("td.content").mouseover($container.data("onMouseOverContent"));
+		gitplex.revisionDiff.reposition();
 	},
 	getMarkInfo: function($container, mark) {
 		var oldOrNew = mark.leftSide?"old":"new";
@@ -575,20 +548,23 @@ gitplex.textdiff = {
 		};
 	},
 	scroll: function($container, mark) {
-		var markInfo = gitplex.textdiff.getMarkInfo($container, mark);
-		var $startTd = markInfo.startTd;
-		var $endTd = markInfo.endTd;
-		if ($startTd && $endTd) {
-			var top = $startTd.offset().top;
-			var bottom = $endTd.offset().top + $endTd.outerHeight();
-			var markHeight = bottom - top;
-			var windowHeight = $(window).height();
-			if (windowHeight <= markHeight) {
-				$(window).scrollTop(top-50);
-			} else {
-				$(window).scrollTop((top+bottom-windowHeight)/2);
+		// use a timer to scroll after possible view port resize 
+		setTimeout(function() {
+			var markInfo = gitplex.textdiff.getMarkInfo($container, mark);
+			var $startTd = markInfo.startTd;
+			var $endTd = markInfo.endTd;
+			if ($startTd && $endTd) {
+				var top = $startTd.offset().top;
+				var bottom = $endTd.offset().top + $endTd.outerHeight();
+				var markHeight = bottom - top;
+				var windowHeight = $(window).height();
+				if (windowHeight <= markHeight) {
+					$(window).scrollTop(top-50);
+				} else {
+					$(window).scrollTop((top+bottom-windowHeight)/2);
+				}
 			}
-		}
+		}, 0);
 	},
 	mark: function($container, mark) {
 		gitplex.textdiff.clearMark($container);
@@ -726,6 +702,7 @@ gitplex.textdiff = {
 	addCommentIndicator: function($container, leftSide, line, comments) {
 		var oldOrNew = leftSide?"old":"new";
 		$container.find("." + oldOrNew + ".comment-popover[data-line='" + line + "']").remove();
+		var $lineNumTd = gitplex.textdiff.getLineNumTd($container, leftSide, line);
 		
 		var callback = $container.data("callback");
 		
@@ -743,9 +720,9 @@ gitplex.textdiff = {
 			}
 			$indicator.popover({
 				html: true, 
-				container: $container,
-				placement: "right auto",
-				template: "<div class='" + oldOrNew + "' data-line='" + line + "' class='popover comment-popover'><div class='arrow'></div><div class='popover-content'></div></div>",
+				container: $lineNumTd,
+				placement: "right",
+				template: "<div class='" + oldOrNew + " popover comment-popover' data-line='" + line + "'><div class='arrow'></div><div class='popover-content'></div></div>",
 				content: content
 			});
 			$indicator.on('shown.bs.popover', function () {
@@ -758,7 +735,7 @@ gitplex.textdiff = {
 						gitplex.textdiff.restoreMark($container);
 					});
 					$(this).click(function() {
-    					if ($container.data("dirtyContainer").find("form.dirty").length != 0 
+    					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
     							&& !confirm("There are unsaved changes, discard and continue?")) {
     						return;
     					}
@@ -779,36 +756,31 @@ gitplex.textdiff = {
 				gitplex.textdiff.restoreMark($container);
 			});
 			$indicator.click(function() {
-				if ($container.data("dirtyContainer").find("form.dirty").length != 0 
+				if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
 						&& !confirm("There are unsaved changes, discard and continue?")) {
 					return;
 				}
 				callback("openComment", comment.id);
 			});
 		}
-		var $lineNumTd = gitplex.textdiff.getLineNumTd($container, leftSide, line);
-		if ($lineNumTd) {
-			$lineNumTd.children(".comment-indicator").remove();
-			$lineNumTd.prepend($indicator);
-		}
+		$lineNumTd.children(".comment-indicator").remove();
+		$lineNumTd.prepend($indicator);
 	},	
 	getLineNumTd: function($container, leftSide, line) {
 		if (leftSide) {
-			var $lineNumTds = $container.find("td.content[data-old='" + line + "']").prevAll("td.number");
-			if ($lineNumTds.length != 0) {
-				return $lineNumTds.first();
-			}
+			var $contentTd = $container.find("td.left.content[data-old='" + line + "']");
+			if ($contentTd.length == 0)
+				$contentTd = $container.find("td.content[data-old='" + line + "']");
+			return $contentTd.prevAll("td.number").last();
 		} else {
-			var $lineNumTds = $container.find("td.content[data-new='" + line + "']").prevAll("td.number");
-			if ($lineNumTds.length != 0) {
-				return $lineNumTds.last();
-			}
+			var $contentTd = $container.find("td.right.content[data-new='" + line + "']");
+			if ($contentTd.length == 0)
+				$contentTd = $container.find("td.content[data-new='" + line + "']");
+			return $contentTd.prevAll("td.number").first();
 		}
-		return $();
 	},
 	highlightCommentTrigger: function($container) {
 		$container.find(".comment-trigger").removeClass("active");
-		
 		var openComment = $container.data("openComment");
 		if (openComment) {
 			var line = parseInt(openComment.mark.beginLine);
@@ -818,7 +790,7 @@ gitplex.textdiff = {
 				if (comments.length == 1) {
 					$indicator.addClass("active");
 				} else {
-					var oldOrNew = leftSide?"old":"new";
+					var oldOrNew = openComment.mark.leftSide?"old":"new";
 					$container.find("." + oldOrNew + ".comment-popover[data-line='" + line + "'] a").each(function() {
 						var comment = comments[$(this).index()];			        						
 						if (comment.id == openComment.id) {
@@ -844,7 +816,7 @@ gitplex.textdiff = {
 			comments = [];
 		} 
 		comments.push(comment);
-		gitplex.textdiff.addCommentIndicator($container, line, leftSide, comments);
+		gitplex.textdiff.addCommentIndicator($container, leftSide, line, comments);
 		gitplex.textdiff.highlightCommentTrigger($container);				
 	},
 	onCommentDeleted: function($container, comment) {
@@ -858,24 +830,40 @@ gitplex.textdiff = {
 			$indicator.remove();
 		} else {
 			for (var i in comments) {
-				var comment = comments[i];
-				if (comment.id == commentId) {
+				var each = comments[i];
+				if (each.id == comment.id) {
 					comments.splice(i, 1);
 					break;
 				}
 			}
-			gitplex.textdiff.addCommentIndicator($container, line, leftSide, comments);
+			gitplex.textdiff.addCommentIndicator($container, leftSide, line, comments);
 		}
-		gitplex.textdiff.highlightCommentTrigger();				
+		gitplex.textdiff.highlightCommentTrigger($container);				
 	},
 	onOpenComment: function($container, comment) {
 		$container.data("openComment", comment);
 		$container.data("mark", comment.mark);
 		gitplex.textdiff.highlightCommentTrigger($container);
 		gitplex.textdiff.mark($container, comment.mark);
+		gitplex.textdiff.scroll($container, comment.mark);
 	},
 	onCloseComment: function($container) {
 		$container.removeData("openComment");
 		gitplex.textdiff.highlightCommentTrigger($container);
-	}	
+	},
+	onAddComment: function($container, mark) {
+		$container.removeData("openComment");
+		$container.data("mark", mark);
+		
+		$("#selection-popup").hide();
+		window.getSelection().removeAllRanges();
+
+		// continue to operate DOM in a timer to give browser a chance to 
+		// clear selections
+		setTimeout(function() {
+			gitplex.textdiff.highlightCommentTrigger($container);
+			gitplex.textdiff.mark($container, mark);
+			gitplex.textdiff.scroll($container, mark);
+		}, 100);
+	}
 }

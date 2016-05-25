@@ -41,9 +41,9 @@ public class Mark implements Serializable {
 				tokenPos.getLine(), tokenPos.getRange().getTo());
 	}
 
-	public Mark(String str) {
-		String begin = StringUtils.substringBefore(str, "-");
-		String end = StringUtils.substringAfter(str, "-");
+	public Mark(String markStr) {
+		String begin = StringUtils.substringBefore(markStr, "-");
+		String end = StringUtils.substringAfter(markStr, "-");
 		beginLine = Integer.parseInt(StringUtils.substringBefore(begin, "."))-1;
 		beginChar = Integer.parseInt(StringUtils.substringAfter(begin, "."));
 		endLine = Integer.parseInt(StringUtils.substringBefore(end, "."))-1;
@@ -99,6 +99,13 @@ public class Mark implements Serializable {
 	public static @Nullable Mark of(@Nullable TokenPosition tokenPos) {
 		if (tokenPos != null)
 			return new Mark(tokenPos);
+		else
+			return null;
+	}
+	
+	public static @Nullable Mark of(@Nullable String markStr) {
+		if (markStr != null)
+			return new Mark(markStr);
 		else
 			return null;
 	}

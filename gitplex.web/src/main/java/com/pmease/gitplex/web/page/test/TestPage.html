@@ -1,3 +1,9 @@
 <wicket:extend>
-	<a wicket:id="link">link</a>
+	<script type="text/javascript">
+		var $content = $("<div class='content'><a>gogo</a></div>");
+		$content.children("a").click(function() {
+			console.log("clicked");
+		});
+		$("body").append($content);
+	</script>
 </wicket:extend>

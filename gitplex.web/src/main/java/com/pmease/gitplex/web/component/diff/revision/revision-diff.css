@@ -64,9 +64,6 @@
 	margin-right: 4px;
 	margin-top: 2px;
 }
-.revision-diff>.body>.loading {
-	font-size: 20px;
-}
 .revision-diff>.body>.detail>.diffs {
 	margin-bottom: 0;
 }
@@ -75,7 +72,6 @@
 }
 .revision-diff>.body>.detail {
 	position: relative;
-	display: none;
 }
 .revision-diff>.body>.detail>.comment {
 	border: 1px solid #DDD;

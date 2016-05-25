@@ -9,24 +9,26 @@ pmease.commons.codemirror = {
     	cm.setCursor(cm.getCursor("from"));
 	},
 	mark: function(cm, mark, scroll) {
-		if (scroll) {
-			var top = cm.charCoords({line: mark.beginLine, ch: 0}, "local").top;
-			var bottom = cm.charCoords({line: mark.endLine, ch: 0}, "local").bottom;
-			
-			var markHeight = bottom - top;
-			var clientHeight = cm.getScrollInfo().clientHeight;
-			if (clientHeight <= markHeight) {
-				cm.scrollTo(null, top - 50); 			
-			} else {
-				cm.scrollTo(null, (top+bottom-clientHeight)/2); 			
-			}
-		}
-
 		pmease.commons.codemirror.clearMark(cm);
 		cm.markText(
 				{line: mark.beginLine, ch: mark.beginChar}, 
 				{line: mark.endLine, ch: mark.endChar},
 				{className: "CodeMirror-mark"});
+		if (scroll) {
+			// use a timer to scroll after possible view port resize
+			setTimeout(function() {
+				var top = cm.charCoords({line: mark.beginLine, ch: 0}, "local").top;
+				var bottom = cm.charCoords({line: mark.endLine, ch: 0}, "local").bottom;
+				
+				var markHeight = bottom - top;
+				var clientHeight = cm.getScrollInfo().clientHeight;
+				if (clientHeight <= markHeight) {
+					cm.scrollTo(null, top - 50); 			
+				} else {
+					cm.scrollTo(null, (top+bottom-clientHeight)/2); 			
+				}
+			}, 0);
+		}
 	},
 	setMode: function(cm, filePath) {
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);

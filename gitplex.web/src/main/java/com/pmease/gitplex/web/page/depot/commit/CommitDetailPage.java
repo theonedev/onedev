@@ -414,9 +414,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 			whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();
 			commentId = params.get(PARAM_COMMENT).toOptionalLong();
-			String markStr = params.get(PARAM_MARK).toString();
-			if (markStr != null)
-				mark = new DiffMark(markStr);
+			mark = DiffMark.of(params.get(PARAM_MARK).toString());
 		}
 		
 	}

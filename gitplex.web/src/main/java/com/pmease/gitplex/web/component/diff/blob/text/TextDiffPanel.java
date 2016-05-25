@@ -54,7 +54,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
-import com.pmease.gitplex.web.component.diff.blob.CommentAware;
+import com.pmease.gitplex.web.component.diff.blob.MarkAware;
 import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
@@ -67,7 +67,7 @@ import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 
 @SuppressWarnings("serial")
-public class TextDiffPanel extends Panel implements CommentAware {
+public class TextDiffPanel extends Panel implements MarkAware {
 
 	private final IModel<Depot> depotModel;
 	
@@ -182,8 +182,12 @@ public class TextDiffPanel extends Panel implements CommentAware {
 					break;
 				case "addComment":
 					Preconditions.checkNotNull(SecurityUtils.getAccount());
+					
 					mark = getMark(params, "param1", "param2", "param3", "param4", "param5");
 					markSupport.onAddComment(target, mark);
+					script = String.format("gitplex.textdiff.onAddComment($('#%s'), %s);", 
+							getMarkupId(), mark.toJson());
+					target.appendJavaScript(script);
 					break;
 				case "openComment": 
 					Long commentId = params.getParameterValue("param1").toLong();
@@ -836,7 +840,11 @@ public class TextDiffPanel extends Panel implements CommentAware {
 	
 	@Override
 	public void clearMark(AjaxRequestTarget target) {
-		String script = String.format("gitplex.textdiff.clearMark($('#%s'));", getMarkupId());
+		String script = String.format(""
+				+ "var $container = $('#%s');"
+				+ "gitplex.textdiff.clearMark($container);"
+				+ "$container.removeData('mark');", 
+				getMarkupId());
 		target.appendJavaScript(script);
 	}
 	

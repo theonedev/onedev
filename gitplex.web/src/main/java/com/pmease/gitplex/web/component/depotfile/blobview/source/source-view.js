@@ -14,17 +14,17 @@ gitplex.sourceview = {
 		var $code = $sourceView.children(".code");
 		$sourceView.closest(".content").css("overflow", "hidden");
 		
-		function alignCommentPopovers() {
+		function repositionCommentPopovers() {
 			$(".comment-popover:visible").each(function() {
 				var $popover = $(this);
 				var lineInfo = cm.lineInfo($popover.data("line"));
 				if (lineInfo.gutterMarkers) {
 					var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
 					if (gutter) {
-						var $commentLink = $(gutter).children("a");
+						var $indicator = $(gutter).children("a");
 						$popover.css({
-							"left": $commentLink.offset().left + $commentLink.outerWidth() - $sourceView.offset().left,
-							"top": $commentLink.offset().top + ($commentLink.outerHeight() - $popover.outerHeight())/2 - $sourceView.offset().top
+							"left": $indicator.offset().left + $indicator.outerWidth() - $sourceView.offset().left,
+							"top": $indicator.offset().top + ($indicator.outerHeight() - $popover.outerHeight())/2 - $sourceView.offset().top
 						});
 					}
 				}
@@ -151,13 +151,13 @@ gitplex.sourceview = {
 					pmease.commons.codemirror.initState(cm, viewState);
 				cm.on("scroll", function() {
 					gitplex.mouseState.moved = false;					
-					alignCommentPopovers(cm);					
+					repositionCommentPopovers(cm);					
 				});
 			} else {
 				cm.setSize($code.width(), $code.height());
 				if (cm.getOption("fullScreen"))
 					cm.setOption("fullScreen", false);
-				alignCommentPopovers(cm);
+				repositionCommentPopovers(cm);
 			}
 		});
 	},
@@ -231,22 +231,28 @@ gitplex.sourceview = {
 		$gutter.addClass("CodeMirror-comment");
 		$gutter.data("comments", comments);
 		if (comments.length != 1) {
+			/* 
+			 * when there are multiple comments starts with the same line, we should 
+			 * display a comment indicator which will display a comment popover with 
+			 * list of comment triggers upon click, user can then click one of the 
+			 * trigger link to display the actual comment content  
+			 */
 			$gutter.append("<a><i class='fa fa-comments'></i></a>");
-			var $commentLink = $gutter.children("a");
+			var $indicator = $gutter.children("a");
 			var content = "";
 			for (var i in comments) {
 				var comment = comments[i];
 				var index = parseInt(i) + 1;
 				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + index + "</a>";
 			}
-			$commentLink.popover({
+			$indicator.popover({
 				html: true, 
 				container: ".source-view",
-				placement: "right auto",
+				placement: "right",
 				template: "<div data-line='" + line + "' class='popover comment-popover'><div class='arrow'></div><div class='popover-content'></div></div>",
 				content: content
 			});
-			$commentLink.on('shown.bs.popover', function () {
+			$indicator.on('shown.bs.popover', function () {
 				$(".comment-popover[data-line='" + line + "'] a").each(function() {
 					$(this).mouseover(function() {
 						var comment = comments[$(this).index()];			        						
@@ -269,14 +275,14 @@ gitplex.sourceview = {
 		} else {
 			var comment = comments[0];
 			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><i class='fa fa-commenting'></i></a>");
-			var $commentLink = $gutter.children("a");
-			$commentLink.mouseover(function() {
+			var $indicator = $gutter.children("a");
+			$indicator.mouseover(function() {
 				pmease.commons.codemirror.mark(cm, comment.mark, false);
 			});
-			$commentLink.mouseout(function() {
+			$indicator.mouseout(function() {
 				gitplex.sourceview.restoreMark();
 			});
-			$commentLink.click(function() {
+			$indicator.click(function() {
 				if ($(".source-view form.dirty").length != 0 
 						&& !confirm("There are unsaved changes, discard and continue?")) {
 					return;
@@ -298,6 +304,7 @@ gitplex.sourceview = {
 		var commentLinkCallback = function($commentLink) {
 			$commentLink.off("click");
 			if (loggedIn) {
+				$commentLink.html("<i class='fa fa-comment'></i> Add comment of this selection");
 				$commentLink.click(function() {
 					if ($sourceView.find("form.dirty").length != 0 
 							&& !confirm("There are unsaved changes, discard and continue?")) {
@@ -332,6 +339,7 @@ gitplex.sourceview = {
 		comments.push(comment);
 		gitplex.sourceview.addCommentGutter(line, comments);
 		gitplex.sourceview.highlightCommentTrigger();				
+		gitplex.sourceview.onLayoutChange();
 	},
 	onCommentDeleted: function(comment) {
 		var $sourceView = $(".source-view");
@@ -355,6 +363,11 @@ gitplex.sourceview = {
 			gitplex.sourceview.addCommentGutter(line, comments);
 		}
 		gitplex.sourceview.highlightCommentTrigger();				
+		gitplex.sourceview.onLayoutChange();
+		var mark = $sourceView.data("mark");
+		if (mark) {
+			gitplex.sourceview.mark(mark, true);
+		}
 	},
 	onLayoutChange: function() {
 		$sourceView = $('.source-view');
@@ -368,24 +381,27 @@ gitplex.sourceview = {
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.clearSelection(cm);
-		pmease.commons.codemirror.mark(cm, mark, false);
-		
-		gitplex.sourceview.highlightCommentTrigger();
 		gitplex.sourceview.onLayoutChange();
+		pmease.commons.codemirror.mark(cm, mark, true);
+		gitplex.sourceview.highlightCommentTrigger();
 	},
 	onOpenComment: function(comment) {
 		var $sourceView = $(".source-view");
 		$sourceView.data("openComment", comment);
 		$sourceView.data("mark", comment.mark);
 		gitplex.sourceview.highlightCommentTrigger();
-		gitplex.sourceview.mark(comment.mark, false);
 		gitplex.sourceview.onLayoutChange();
+		gitplex.sourceview.mark(comment.mark, true);
 	},
 	onCloseComment: function() {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		gitplex.sourceview.highlightCommentTrigger();
 		gitplex.sourceview.onLayoutChange();
+		var mark = $sourceView.data("mark");
+		if (mark) {
+			gitplex.sourceview.mark(mark, true);
+		}
 	},
 	onToggleOutline: function() {
 		gitplex.sourceview.onLayoutChange();

@@ -160,9 +160,7 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		String markStr = params.get(PARAM_MARK).toString();
-		if (markStr != null)
-			state.mark = new DiffMark(markStr);
+		state.mark = DiffMark.of(params.get(PARAM_MARK).toString());
 		
 		initFromState(state);
 	}

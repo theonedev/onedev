@@ -5,7 +5,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 
-public interface CommentAware {
+public interface MarkAware {
 	
 	void onCommentDeleted(AjaxRequestTarget target, CodeComment comment);
 	

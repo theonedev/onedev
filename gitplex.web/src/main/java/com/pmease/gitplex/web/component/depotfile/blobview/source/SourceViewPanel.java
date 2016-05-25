@@ -238,7 +238,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		commentContainer = new WebMarkupContainer("comment") {
+		commentContainer = new WebMarkupContainer("comment", Model.of((Mark)null)) {
 			
 			@Override
 			public void renderHead(IHeaderResponse response) {

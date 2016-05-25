@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 
 @SuppressWarnings("serial")
-public class BlobDiffPanel extends Panel implements CommentAware {
+public class BlobDiffPanel extends Panel implements MarkAware {
 
 	private static final String CONTENT_ID = "content";
 	
@@ -151,45 +151,45 @@ public class BlobDiffPanel extends Panel implements CommentAware {
 	@Override
 	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof CommentAware) {
-			CommentAware commentAware = (CommentAware) content;
-			commentAware.onCommentDeleted(target, comment);
+		if (content instanceof MarkAware) {
+			MarkAware markAware = (MarkAware) content;
+			markAware.onCommentDeleted(target, comment);
 		}
 	}
 
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof CommentAware) {
-			CommentAware commentAware = (CommentAware) content;
-			commentAware.onCommentClosed(target, comment);
+		if (content instanceof MarkAware) {
+			MarkAware markAware = (MarkAware) content;
+			markAware.onCommentClosed(target, comment);
 		}
 	}
 
 	@Override
 	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof CommentAware) {
-			CommentAware commentAware = (CommentAware) content;
-			commentAware.onCommentAdded(target, comment);
+		if (content instanceof MarkAware) {
+			MarkAware markAware = (MarkAware) content;
+			markAware.onCommentAdded(target, comment);
 		}
 	}
 
 	@Override
 	public void mark(AjaxRequestTarget target, DiffMark mark) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof CommentAware) {
-			CommentAware commentAware = (CommentAware) content;
-			commentAware.mark(target, mark);
+		if (content instanceof MarkAware) {
+			MarkAware markAware = (MarkAware) content;
+			markAware.mark(target, mark);
 		}
 	}
 	
 	@Override
 	public void clearMark(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof CommentAware) {
-			CommentAware commentAware = (CommentAware) content;
-			commentAware.clearMark(target);
+		if (content instanceof MarkAware) {
+			MarkAware markAware = (MarkAware) content;
+			markAware.clearMark(target);
 		}
 	}
 	
