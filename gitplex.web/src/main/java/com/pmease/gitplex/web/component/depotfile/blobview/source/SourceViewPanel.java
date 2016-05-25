@@ -64,6 +64,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
+import com.pmease.commons.wicket.assets.selectionpopover.SelectionPopoverResourceReference;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -348,9 +349,9 @@ public class SourceViewPanel extends BlobViewPanel {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				
 				switch(params.getParameterValue("action").toString()) {
-				case "openSelectionPopup": 
+				case "openSelectionPopover": 
 					Mark mark = getMark(params, "param1", "param2", "param3", "param4");
-					String script = String.format("gitplex.sourceview.openSelectionPopup(%s, '%s', %s);", 
+					String script = String.format("gitplex.sourceview.openSelectionPopover(%s, '%s', %s);", 
 							mark.toJson(), context.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
@@ -706,6 +707,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(SelectionPopoverResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));

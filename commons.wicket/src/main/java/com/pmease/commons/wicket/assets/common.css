@@ -435,32 +435,3 @@ span.move.icon {
     cursor: inherit;
     display: block;
 }
-
-/* Selection popup */
-#selection-popup {
-	z-index: 10000;
-	position: absolute;
-	display: none;
-}
-#selection-popup>.content {
-	background: #333;
-	border-radius: 6px;
-	padding: 12px;
-}
-#selection-popup>.content a {
-	color: white;
-	display: block;
-	white-space: nowrap;
-}
-#selection-popup>.content>a.permanent {
-	margin-bottom: 8px;
-}
-#selection-popup>.triangle {
-	position: relative;
-	left: 50%;
-	width: 0; 
-	height: 0; 
-	border-left: 6px solid transparent;
-	border-right: 6px solid transparent;
-	border-top: 6px solid #333;
-}

@@ -116,27 +116,16 @@ gitplex.sourceview = {
 					gitplex.sourceview.highlightCommentTrigger();				
 			    }, 10);
 			    
-			    function onSelectText() {
+			    $code.selectionPopover("init", function() {
 			    	if (cm.hasFocus()) {
 				    	var from = cm.getCursor("from");
 				    	var to = cm.getCursor("to");
 				    	if (from.line != to.line || from.ch != to.ch) {
-				    		markCallback("openSelectionPopup", from.line, from.ch, to.line, to.ch);
-				    	} else {
-				    		$("#selection-popup").hide();
+				    		markCallback("openSelectionPopover", from.line, from.ch, to.line, to.ch);
 				    	}
 			    	}
-			    }
-
-			    $code.on("mouseup", function() {
-			    	onSelectText();
 			    });
-			    $code.on("keyup", function(e) {
-			    	if (e.which == 37 || e.which == 38 || e.which == 39 || e.which == 40) {
-			    		onSelectText();
-			    	}
-			    });
-
+			    
 			    $code.mouseover(function(e) {
 					var node = e.target || e.srcElement, $node = $(node);
 					if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") || $node.hasClass("cm-variable-2") 
@@ -292,32 +281,31 @@ gitplex.sourceview = {
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
-	openSelectionPopup: function(mark, markUrl, loggedIn) {
+	openSelectionPopover: function(mark, markUrl, loggedIn) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
-		var $sourceView = $(".source-view");
-		var markCallback = $sourceView.data("markCallback");
 		var ch = (mark.beginChar + mark.endChar)/2;
 		var position = cm.charCoords({line:mark.beginLine, ch:ch});
-		var permanentLinkCallback = function($permanentLink) {
-			$permanentLink.attr("href", markUrl);
-		};
-		var commentLinkCallback = function($commentLink) {
-			$commentLink.off("click");
-			if (loggedIn) {
-				$commentLink.html("<i class='fa fa-comment'></i> Add comment of this selection");
-				$commentLink.click(function() {
-					if ($sourceView.find("form.dirty").length != 0 
-							&& !confirm("There are unsaved changes, discard and continue?")) {
-						return;
-					}
-    				markCallback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
-				});
-			} else {
-				$commentLink.html("Log in to comment on selection");
-			}
-		};
-		$("#selection-popup").data("open")(
-				position, permanentLinkCallback, commentLinkCallback, $(".source-view>.code")[0]);
+		
+		var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
+		$content.children("a.permanent").attr("href", markUrl);
+		if (loggedIn) {
+			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
+			$content.children("a.comment").click(function() {
+				if ($(".source-view").find("form.dirty").length != 0 
+						&& !confirm("There are unsaved changes, discard and continue?")) {
+					return;
+				}
+				var markCallback = $(".source-view").data("markCallback");
+				markCallback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+			});
+		} else {
+			$content.append("<span class='comment'><i class='fa fa-warning'></i> Log in to comment on selection</span>");
+		}			
+		
+		$(".source-view>.code").selectionPopover("open", {
+			position: position,
+			content: $content
+		});
 	},
 	onCommentAdded: function(comment) {
 		var $sourceView = $(".source-view");
@@ -377,7 +365,7 @@ gitplex.sourceview = {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		$sourceView.data("mark", mark);
-		$("#selection-popup").hide();
+		$(".source-view>.code").selectionPopover("close");
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		pmease.commons.codemirror.clearSelection(cm);

@@ -94,5 +94,5 @@ gitplex.revisionDiff = {
 	}
 }
 $(function() {
-	$(window).on("scroll resize", gitplex.revisionDiff.position);	
+	$(window).on("scroll resize", gitplex.revisionDiff.reposition);	
 });

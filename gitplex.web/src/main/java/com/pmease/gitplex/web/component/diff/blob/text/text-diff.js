@@ -40,407 +40,380 @@ gitplex.textdiff = {
 		
 		if (!markSupport) 
 			return;
-		
-		$container.on("mouseup keyup", function() {
-			// use a timeout to make sure selection remains stable after mouse or keyboard action
-	    	setTimeout(function() { 
-	    		function hideSelectionPopup() {
-	    			$("#selection-popup").hide();	    			
-	    		}
-		    	var selection = window.getSelection();
-		    	if (!selection.rangeCount) {
-		    		hideSelectionPopup();
-		    		return;
-		    	}
-	    		var firstRange = selection.getRangeAt(0).cloneRange();
-	    		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
-	    		var $start = $(firstRange.startContainer);
-	    		var $end = $(lastRange.endContainer);
-	    		
-	    		/* 
-	    		 * offset represents offset within $start or $end node, for instance for below selection
-	    		 * <span>hello</span><span>world</span>
-	    		 *         ^                   ^
-	    		 * $start will be <span>hello</span> and startOffset will be index of character 'l' which is 2, 
-	    		 * $end will be <span>world</span> and endOffset will be index of character 'd' which will be 4  
-	    		 */   
-	    		var startOffset = firstRange.startOffset;
-	    		var endOffset = lastRange.endOffset;
-	    		
-    			var $startDiff;
-    			if (!$start.hasClass("text-diff"))
-    				$startDiff = $start.closest(".text-diff");
-    			else
-    				$startDiff = $start;
-    			
-    			var $endDiff;
-    			if (!$end.hasClass("text-diff"))
-    				$endDiff = $end.closest(".text-diff");
-    			else
-    				$endDiff = $end;
-    			
-    			// selection must be within same file
-    			if ($startDiff.length == 0 || $endDiff.length == 0 || !$startDiff.is($endDiff)) { 
-    				hideSelectionPopup();
-    				return;
-    			}
-    			
-				var $startTd = $start.is("td.content")? $start: $start.closest(".text-diff td.content");
-				var $endTd = $end.is("td.content")? $end: $end.closest(".text-diff td.content");
 
-				// at least one side of selection must be within a table cell
-				if ($startTd.length == 0 && $endTd.length == 0) {
-    				hideSelectionPopup();
-    				return;
-				}
+		$container.selectionPopover("init", function() {
+	    	var selection = window.getSelection();
+	    	if (!selection.rangeCount) {
+	    		return;
+	    	}
+    		var firstRange = selection.getRangeAt(0).cloneRange();
+    		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
+    		var $start = $(firstRange.startContainer);
+    		var $end = $(lastRange.endContainer);
+    		
+    		/* 
+    		 * offset represents offset within $start or $end node, for instance for below selection
+    		 * <span>hello</span><span>world</span>
+    		 *         ^                   ^
+    		 * $start will be <span>hello</span> and startOffset will be index of character 'l' which is 2, 
+    		 * $end will be <span>world</span> and endOffset will be index of character 'd' which will be 4  
+    		 */   
+    		var startOffset = firstRange.startOffset;
+    		var endOffset = lastRange.endOffset;
+    		
+			var $startDiff;
+			if (!$start.hasClass("text-diff"))
+				$startDiff = $start.closest(".text-diff");
+			else
+				$startDiff = $start;
+			
+			var $endDiff;
+			if (!$end.hasClass("text-diff"))
+				$endDiff = $end.closest(".text-diff");
+			else
+				$endDiff = $end;
+			
+			// selection must be within same file
+			if ($startDiff.length == 0 || $endDiff.length == 0 || !$startDiff.is($endDiff)) { 
+				return;
+			}
+			
+			var $startTd = $start.is("td.content")? $start: $start.closest(".text-diff td.content");
+			var $endTd = $end.is("td.content")? $end: $end.closest(".text-diff td.content");
 
-				// make sure we are processing td.content on the same side on split view
-				function getTd($tr) {
-					var $td = $startTd.length != 0? $startTd: $endTd;
-					if ($td.hasClass("left"))
-						return $tr.find("td.content.left");
-					else if ($td.hasClass("right"))
-						return $tr.find("td.content.right");
-					else
-						return $tr.find("td.content");
-				}
+			// at least one side of selection must be within a table cell
+			if ($startTd.length == 0 && $endTd.length == 0) {
+				return;
+			}
 
-				/*
-				 * sometimes the selection returns $start and $end as td instead of 
-				 * children under td, for instance:
-				 * <td><span>hello</span><span>world</span></td>
-				 *                                        ^
-				 * in this case, both $start and $end is the whole td, and startOffset
-				 * is index of first span element which is 0, and endOffset is index of 
-				 * last span element plus 1 which is 2. 
-				 * 
-				 * this function returns the equivalent child node and offset under td. 
-				 * with above example, the equivalent child node will be <span>hello</span>
-				 * and offset will be 0 for selection start, while equivalent end child node
-				 * is <span>world</span> with offset being 5   
-				 * 
-				 */
-				function getNodeAndOffsetUnderTd($td, contentIndex) {
-    				var $contents = $td.contents();
-	    			for (var i=0; i<$contents.length; i++) {
-	    				if (i == contentIndex) {
-	    					return {
-	    						node: $($contents[i]),
-	    						offset: 0
-	    					}
-	    				}
-	    			}		    
-	    			var $lastContent = $contents.last();
-    				return {
-    					node: $lastContent,
-    					offset: $lastContent.text().length
-    				}
-				}
+			// make sure we are processing td.content on the same side on split view
+			function getTd($tr) {
+				var $td = $startTd.length != 0? $startTd: $endTd;
+				if ($td.hasClass("left"))
+					return $tr.find("td.content.left");
+				else if ($td.hasClass("right"))
+					return $tr.find("td.content.right");
+				else
+					return $tr.find("td.content");
+			}
 
-				// normalize $start to be within td.content
-				if ($start.parent().parent().is("td.content")) // $start might be the text node under span
-					$start = $start.parent();
-				if (!$start.parent().is("td.content")) { 
-					var $td;
-    				if ($start.is("td.content")) { // this happens if we triple click to select a line in firefox 
-    					$td = $start;
-    				} else if ($start.is("tr.code")) { // this may happen if we drag mouse to select multiple lines in firefox 
-    					$td = getTd($start);
-    					startOffset = startOffset<=$td.index()? 0: $td.contents().length;
-    				} else if ($start.is("tr.expander") || $start.closest("tr.expander").length != 0) { // this may happen if we drag mouse over to expander line 
-    					var $tr = $start.is("tr.expander")? $start.next(): $start.closest("tr.expander").next();
-    					if ($tr.length == 0) {
-    						hideSelectionPopup();
-    						return;
+			/*
+			 * sometimes the selection returns $start and $end as td instead of 
+			 * children under td, for instance:
+			 * <td><span>hello</span><span>world</span></td>
+			 *                                        ^
+			 * in this case, both $start and $end is the whole td, and startOffset
+			 * is index of first span element which is 0, and endOffset is index of 
+			 * last span element plus 1 which is 2. 
+			 * 
+			 * this function returns the equivalent child node and offset under td. 
+			 * with above example, the equivalent child node will be <span>hello</span>
+			 * and offset will be 0 for selection start, while equivalent end child node
+			 * is <span>world</span> with offset being 5   
+			 * 
+			 */
+			function getNodeAndOffsetUnderTd($td, contentIndex) {
+				var $contents = $td.contents();
+    			for (var i=0; i<$contents.length; i++) {
+    				if (i == contentIndex) {
+    					return {
+    						node: $($contents[i]),
+    						offset: 0
     					}
-						$td = getTd($tr);
-						startOffset = 0;
-    				} else {
-    					var $tr = $startDiff.find("tr.code").first();
-    					if ($tr.length == 0) {
-    						hideSelectionPopup();
-    						return;
-    					}
-						$td = getTd($tr);
-						startOffset = 0;
     				}
-    				var nodeAndOffset = getNodeAndOffsetUnderTd($td, startOffset);
-    				$start = nodeAndOffset.node;
-    				startOffset = nodeAndOffset.offset;
+    			}		    
+    			var $lastContent = $contents.last();
+				return {
+					node: $lastContent,
+					offset: $lastContent.text().length
 				}
-				
-				// drag mouse over a line below expander, chrome may set $start as the line 
-				// above expander, below code normalizes this case
-				$startTd = $start.parent();
-				var $lastContent = $startTd.contents().last();
-				var noneSelected = $start.is($lastContent) && startOffset >= $lastContent.text().length;
-				if (noneSelected && $startTd.parent().next().is("tr.expander")) {
-					var $tr = $startTd.parent().next().next();
+			}
+
+			// normalize $start to be within td.content
+			if ($start.parent().parent().is("td.content")) // $start might be the text node under span
+				$start = $start.parent();
+			if (!$start.parent().is("td.content")) { 
+				var $td;
+				if ($start.is("td.content")) { // this happens if we triple click to select a line in firefox 
+					$td = $start;
+				} else if ($start.is("tr.code")) { // this may happen if we drag mouse to select multiple lines in firefox 
+					$td = getTd($start);
+					startOffset = startOffset<=$td.index()? 0: $td.contents().length;
+				} else if ($start.is("tr.expander") || $start.closest("tr.expander").length != 0) { // this may happen if we drag mouse over to expander line 
+					var $tr = $start.is("tr.expander")? $start.next(): $start.closest("tr.expander").next();
 					if ($tr.length == 0) {
-						hideSelectionPopup();
 						return;
 					}
-					var $td = getTd($tr);
-					$start = $td.contents().first();
+					$td = getTd($tr);
+					startOffset = 0;
+				} else {
+					var $tr = $startDiff.find("tr.code").first();
+					if ($tr.length == 0) {
+						return;
+					}
+					$td = getTd($tr);
 					startOffset = 0;
 				}
-				
-				// normalize $end to be within td.content
-				if ($end.parent().parent().is("td.content"))
-					$end = $end.parent();
-				if (!$end.parent().is("td.content")) { 
-					var $td;
-    				if ($end.is("td.content")) {
-    					$td = $end;
-    				} else if ($end.is("tr.code")) {
-    					$td = getTd($end);
-    					endOffset = endOffset>$td.index()? $td.contents().length: 0;
-    				} else if ($end.is("tr.expander") || $end.closest("tr.expander").length != 0) {
-    					var $tr = $end.is("tr.expander")? $end.prev(): $end.closest("tr.expander").prev();
-    					if ($tr.length == 0) {
-    						hideSelectionPopup();
-    						return;
-    					}
-						$td = getTd($tr);
-						endOffset = $td.contents().length;
-    				} else {
-    					var $tr = $endDiff.find("tr.code").last();
-    					if ($tr.length == 0) {
-    						hideSelectionPopup();
-    						return;
-    					}
-						$td = getTd($tr);
-						endOffset = $td.contents().length;
-    				}
-    				var nodeAndOffset = getNodeAndOffsetUnderTd($td, endOffset);
-    				$end = nodeAndOffset.node;
-    				endOffset = nodeAndOffset.offset;
+				var nodeAndOffset = getNodeAndOffsetUnderTd($td, startOffset);
+				$start = nodeAndOffset.node;
+				startOffset = nodeAndOffset.offset;
+			}
+			
+			// drag mouse over a line below expander, chrome may set $start as the line 
+			// above expander, below code normalizes this case
+			$startTd = $start.parent();
+			var $lastContent = $startTd.contents().last();
+			var noneSelected = $start.is($lastContent) && startOffset >= $lastContent.text().length;
+			if (noneSelected && $startTd.parent().next().is("tr.expander")) {
+				var $tr = $startTd.parent().next().next();
+				if ($tr.length == 0) {
+					return;
 				}
-				
-				// drag mouse over a line above expander, chrome may set $end as the line 
-				// below expander, below code normalizes this case
-				$endTd = $end.parent();
-				var $firstContent = $endTd.contents().first();
-				var noneSelected = $end.is($firstContent) && endOffset == 0;
-				if (noneSelected && $endTd.parent().prev().is("tr.expander")) {
-					var $tr = $endTd.parent().prev().prev();
+				var $td = getTd($tr);
+				$start = $td.contents().first();
+				startOffset = 0;
+			}
+			
+			// normalize $end to be within td.content
+			if ($end.parent().parent().is("td.content"))
+				$end = $end.parent();
+			if (!$end.parent().is("td.content")) { 
+				var $td;
+				if ($end.is("td.content")) {
+					$td = $end;
+				} else if ($end.is("tr.code")) {
+					$td = getTd($end);
+					endOffset = endOffset>$td.index()? $td.contents().length: 0;
+				} else if ($end.is("tr.expander") || $end.closest("tr.expander").length != 0) {
+					var $tr = $end.is("tr.expander")? $end.prev(): $end.closest("tr.expander").prev();
 					if ($tr.length == 0) {
-						hideSelectionPopup();
 						return;
 					}
-					var $td = getTd($tr);
-					$end = $td.contents().last();
-					endOffset = $end.text().length;
-				}
-				
-				$startTd = $start.parent();
-				$endTd = $end.parent();
-				
-				// selection must not span the split view
-				if ($startTd.hasClass("left") && $endTd.hasClass("right") 
-						|| $startTd.hasClass("right") && $endTd.hasClass("left")) { 
-					hideSelectionPopup();
-					return;
-				}	    	
-				
-				var $startTr = $startTd.parent();
-				var $endTr = $endTd.parent();
-				if ($startTr.index() > $endTr.index()) {
-					hideSelectionPopup();
-					return;
-				}
-
-				function nextContent($content) {
-					var $td = $content.parent();
-					var array = $td.contents().toArray();
-					var index = array.indexOf($content[0]);
-					if (index == array.length-1) {
-						var $nextTr = $td.parent().next();
-						if ($nextTr.hasClass("expander")) {
-							$nextTr = $nextTr.next();
-						}
-						if ($nextTr.length == 0)
-							return undefined;
-						return getTd($nextTr).contents().first();
-					} else {
-						return $(array[index+1]);
-					}
-				}
-				
-				function prevContent($content) {
-					var $td = $content.parent();
-					var array = $td.contents().toArray();
-					var index = array.indexOf($content[0]);
-					if (index == 0) {
-						var $prevTr = $td.parent().prev();
-						if ($prevTr.hasClass("expander")) {
-							$prevTr = $prevTr.next();
-						}
-						if ($prevTr.length == 0)
-							return undefined;
-						return getTd($prevTr).contents().last();
-					} else {
-						return $(array[index-1]);
-					}
-				}
-
-				function hasOldOrNewData($content) {
-					var $td = $content.parent();
-					return $td.attr("data-old") || $td.attr("data-new");					
-				}
-				
-				/*
-				 * continue to normalize $start and $end. This time we convert below selection:
-				 * <span>begin</span><span>middle</span><span>end</span>
-				 *            ^                               ^       
-				 * into this selection:
-				 * <span>begin</span><span>middle</span><span>end</span>
-				 *                         ^     ^
-				 * this normalization makes it accurate to detect invalid selections where start 
-				 * and end of selection points to different revisions
-				 */
-				var $content = $start;
-				while (!$content.is($end) && (startOffset >= $content.text().length || !hasOldOrNewData($content))) {
-					$content = nextContent($content);
-					if (!$content) {
-						hideSelectionPopup();
+					$td = getTd($tr);
+					endOffset = $td.contents().length;
+				} else {
+					var $tr = $endDiff.find("tr.code").last();
+					if ($tr.length == 0) {
 						return;
-					} else {
-						$start = $content;
-						startOffset = 0;
 					}
+					$td = getTd($tr);
+					endOffset = $td.contents().length;
 				}
-
-				$content = $end;
-				while (!$content.is($start) && (endOffset == 0 || !hasOldOrNewData($content))) {
-					$content = prevContent($content);
-					if (!$content) {
-						hideSelectionPopup();
-						return;
-					} else {
-						$end = $content;
-						endOffset = $content.text().length;
-					}
-				}
-
-				// check if there is anything selected
-				if ($start.is($end) && startOffset >= endOffset 
-						|| !hasOldOrNewData($start) || !hasOldOrNewData($end)) {
-					hideSelectionPopup();
+				var nodeAndOffset = getNodeAndOffsetUnderTd($td, endOffset);
+				$end = nodeAndOffset.node;
+				endOffset = nodeAndOffset.offset;
+			}
+			
+			// drag mouse over a line above expander, chrome may set $end as the line 
+			// below expander, below code normalizes this case
+			$endTd = $end.parent();
+			var $firstContent = $endTd.contents().first();
+			var noneSelected = $end.is($firstContent) && endOffset == 0;
+			if (noneSelected && $endTd.parent().prev().is("tr.expander")) {
+				var $tr = $endTd.parent().prev().prev();
+				if ($tr.length == 0) {
 					return;
 				}
-				
-				firstRange.collapse(true);
-				var startRect = firstRange.getClientRects()[0];
-				lastRange.collapse(false);
-				var endRect = lastRange.getClientRects()[0];
-				if (!startRect || !endRect) {
-					startRect = selection.getRangeAt(0).getClientRects()[0];
-					endRect = startRect;
+				var $td = getTd($tr);
+				$end = $td.contents().last();
+				endOffset = $end.text().length;
+			}
+			
+			$startTd = $start.parent();
+			$endTd = $end.parent();
+			
+			// selection must not span the split view
+			if ($startTd.hasClass("left") && $endTd.hasClass("right") 
+					|| $startTd.hasClass("right") && $endTd.hasClass("left")) { 
+				return;
+			}	    	
+			
+			var $startTr = $startTd.parent();
+			var $endTr = $endTd.parent();
+			if ($startTr.index() > $endTr.index()) {
+				return;
+			}
+
+			function nextContent($content) {
+				var $td = $content.parent();
+				var array = $td.contents().toArray();
+				var index = array.indexOf($content[0]);
+				if (index == array.length-1) {
+					var $nextTr = $td.parent().next();
+					if ($nextTr.hasClass("expander")) {
+						$nextTr = $nextTr.next();
+					}
+					if ($nextTr.length == 0)
+						return undefined;
+					return getTd($nextTr).contents().first();
+				} else {
+					return $(array[index+1]);
 				}
-				var position = {
-					left: (startRect.left + endRect.right)/2,
-					top: startRect.top
+			}
+			
+			function prevContent($content) {
+				var $td = $content.parent();
+				var array = $td.contents().toArray();
+				var index = array.indexOf($content[0]);
+				if (index == 0) {
+					var $prevTr = $td.parent().prev();
+					if ($prevTr.hasClass("expander")) {
+						$prevTr = $prevTr.next();
+					}
+					if ($prevTr.length == 0)
+						return undefined;
+					return getTd($prevTr).contents().last();
+				} else {
+					return $(array[index-1]);
+				}
+			}
+
+			function hasOldOrNewData($content) {
+				var $td = $content.parent();
+				return $td.attr("data-old") || $td.attr("data-new");					
+			}
+			
+			/*
+			 * continue to normalize $start and $end. This time we convert below selection:
+			 * <span>begin</span><span>middle</span><span>end</span>
+			 *            ^                               ^       
+			 * into this selection:
+			 * <span>begin</span><span>middle</span><span>end</span>
+			 *                         ^     ^
+			 * this normalization makes it accurate to detect invalid selections where start 
+			 * and end of selection points to different revisions
+			 */
+			var $content = $start;
+			while (!$content.is($end) && (startOffset >= $content.text().length || !hasOldOrNewData($content))) {
+				$content = nextContent($content);
+				if (!$content) {
+					return;
+				} else {
+					$start = $content;
+					startOffset = 0;
+				}
+			}
+
+			$content = $end;
+			while (!$content.is($start) && (endOffset == 0 || !hasOldOrNewData($content))) {
+				$content = prevContent($content);
+				if (!$content) {
+					return;
+				} else {
+					$end = $content;
+					endOffset = $content.text().length;
+				}
+			}
+
+			// check if there is anything selected
+			if ($start.is($end) && startOffset >= endOffset 
+					|| !hasOldOrNewData($start) || !hasOldOrNewData($end)) {
+				return;
+			}
+			
+			firstRange.collapse(true);
+			var startRect = firstRange.getClientRects()[0];
+			lastRange.collapse(false);
+			var endRect = lastRange.getClientRects()[0];
+			if (!startRect || !endRect) {
+				startRect = selection.getRangeAt(0).getClientRects()[0];
+				endRect = startRect;
+			}
+			var position = {
+				left: (startRect.left + endRect.right)/2,
+				top: startRect.top
+			};
+			position.left += $(window).scrollLeft();
+			position.top += $(window).scrollTop();
+
+			function showInvalidSelection() {
+				var $content = $("<div></div>");
+				$content.append("<a class='invalid'><i class='fa fa-warning'></i> Invalid selection, click for details</a>");
+				$content.children("a").attr("href", "http://wiki.pmease.com/display/gp/Diff+Selection");
+				return {
+					position: position, 
+					content: $content
+				}
+			}
+
+			// all lines between selection has been expanded
+			if ($startTr.nextAll("tr.expander").filter($endTr.prevAll("tr.expander")).length != 0
+					|| $startTr.prevAll("tr.expander").filter($endTr.nextAll("tr.expander")).length != 0) {  
+				return showInvalidSelection();
+			}
+			
+			/*
+			 * cursor.line represents line number of selection and cursor.ch represents 
+			 * character index inside text of the whole line, without considering element 
+			 * tags. 
+			 */
+    		function getCursor($node, offset) {
+				$nodeTd = $node.parent();
+    			var oldLine, newLine;
+				if (!$nodeTd.hasClass("old") && !$nodeTd.hasClass("new") 
+						|| $nodeTd.hasClass("old") && $nodeTd.hasClass("new")) {
+					oldLine = $nodeTd.data("old") + 1;
+					newLine = $nodeTd.data("new") + 1;
+				} else if ($nodeTd.hasClass("old")) {
+					oldLine = $nodeTd.data("old") + 1;
+				} else {
+					newLine = $nodeTd.data("new") + 1;
+				}
+				var $contents = $nodeTd.contents();
+				var oldOffset = 0, newOffset = 0;
+    			for (var i=0; i<$contents.length; i++) {
+    				var $content = $($contents[i]);
+    				if ($content.is($node)) {
+    					if ($content.hasClass("delete")) { 
+    						oldCh = oldOffset + offset;
+    						newCh = undefined;
+    						newLine = undefined;
+    					} else if ($content.hasClass("insert")) {
+    						oldCh = undefined;
+    						oldLine = undefined;
+    						newCh = newOffset + offset;
+    					} else {
+    						oldCh = oldOffset + offset;
+    						newCh = newOffset + offset;
+    					}
+    					break;
+    				} else {
+    					var len = $content.text().length;
+    					if ($content.hasClass("delete")) {
+    						oldOffset += len;
+    					} else if ($content.hasClass("insert")) {
+    						newOffset += len;
+    					} else {
+	    					oldOffset += len;
+	    					newOffset += len;
+    					}
+    				}
+    			}
+    			if ($nodeTd.hasClass("left")) {
+    				newLine = newCh = undefined;
+    			} else if ($nodeTd.hasClass("right")) {
+    				oldLine = oldCh = undefined;
+    			}
+				return {
+					oldLine: oldLine,
+					oldCh: oldCh,
+					newLine: newLine,
+					newCh: newCh
 				};
-				position.left += $(window).scrollLeft();
-				position.top += $(window).scrollTop();
-	
-				function showInvalidSelection() {
-		    		var invalidSelectionUrl = "http://wiki.pmease.com/display/gp/Diff+Selection";
-					var permanentCallback = function($permanentLink) {
-						$permanentLink.off("click");
-	    				$permanentLink.attr("href", invalidSelectionUrl);
-	    				$permanentLink.html("<i class='fa fa-link'></i> No permanent link to this selection, see why");
-					};
-		    		var commentCallback = function($commentLink) {
-	    				$commentLink.attr("href", invalidSelectionUrl);
-	    				$commentLink.html("<i class='fa fa-comment'></i> Unable to comment this selection, see why");
-		    		};
-		    		$("#selection-popup").data("open")(position, permanentCallback, 
-		    				commentCallback, $container[0]);	
-				}
+    		}
 
-				// all lines between selection has been expanded
-				if ($startTr.nextAll("tr.expander").filter($endTr.prevAll("tr.expander")).length != 0
-						|| $startTr.prevAll("tr.expander").filter($endTr.nextAll("tr.expander")).length != 0) {  
-					showInvalidSelection();
-					return;
-				}
-				
-				/*
-				 * cursor.line represents line number of selection and cursor.ch represents 
-				 * character index inside text of the whole line, without considering element 
-				 * tags. 
-				 */
-	    		function getCursor($node, offset) {
-					$nodeTd = $node.parent();
-	    			var oldLine, newLine;
-					if (!$nodeTd.hasClass("old") && !$nodeTd.hasClass("new") 
-							|| $nodeTd.hasClass("old") && $nodeTd.hasClass("new")) {
-						oldLine = $nodeTd.data("old") + 1;
-						newLine = $nodeTd.data("new") + 1;
-					} else if ($nodeTd.hasClass("old")) {
-						oldLine = $nodeTd.data("old") + 1;
-					} else {
-						newLine = $nodeTd.data("new") + 1;
-					}
-					var $contents = $nodeTd.contents();
-					var oldOffset = 0, newOffset = 0;
-	    			for (var i=0; i<$contents.length; i++) {
-	    				var $content = $($contents[i]);
-	    				if ($content.is($node)) {
-	    					if ($content.hasClass("delete")) { 
-	    						oldCh = oldOffset + offset;
-	    						newCh = undefined;
-	    						newLine = undefined;
-	    					} else if ($content.hasClass("insert")) {
-	    						oldCh = undefined;
-	    						oldLine = undefined;
-	    						newCh = newOffset + offset;
-	    					} else {
-	    						oldCh = oldOffset + offset;
-	    						newCh = newOffset + offset;
-	    					}
-	    					break;
-	    				} else {
-	    					var len = $content.text().length;
-	    					if ($content.hasClass("delete")) {
-	    						oldOffset += len;
-	    					} else if ($content.hasClass("insert")) {
-	    						newOffset += len;
-	    					} else {
-		    					oldOffset += len;
-		    					newOffset += len;
-	    					}
-	    				}
-	    			}
-	    			if ($nodeTd.hasClass("left")) {
-	    				newLine = newCh = undefined;
-	    			} else if ($nodeTd.hasClass("right")) {
-	    				oldLine = oldCh = undefined;
-	    			}
-					return {
-						oldLine: oldLine,
-						oldCh: oldCh,
-						newLine: newLine,
-						newCh: newCh
-					};
-	    		}
+    		var startCursor = getCursor($start, startOffset);
+    		var endCursor = getCursor($end, endOffset);
 
-	    		var startCursor = getCursor($start, startOffset);
-	    		var endCursor = getCursor($end, endOffset);
-
-	    		if (startCursor.newLine && endCursor.newLine) {
-		    		callback("openSelectionPopup", Math.round(position.left), Math.round(position.top), false, 
-		    				startCursor.newLine-1, startCursor.newCh, endCursor.newLine-1, endCursor.newCh);
-	    		} else if (startCursor.oldLine && endCursor.oldLine) {
-		    		callback("openSelectionPopup", Math.round(position.left), Math.round(position.top), true, 
-		    				startCursor.oldLine-1, startCursor.oldCh, endCursor.oldLine-1, endCursor.oldCh);
-	    		} else {
-					showInvalidSelection();
-					return;
-	    		}
-	    	}, 100);
+    		if (startCursor.newLine && endCursor.newLine) {
+	    		callback("openSelectionPopover", Math.round(position.left), Math.round(position.top), false, 
+	    				startCursor.newLine-1, startCursor.newCh, endCursor.newLine-1, endCursor.newCh);
+    		} else if (startCursor.oldLine && endCursor.oldLine) {
+	    		callback("openSelectionPopover", Math.round(position.left), Math.round(position.top), true, 
+	    				startCursor.oldLine-1, startCursor.oldCh, endCursor.oldLine-1, endCursor.oldCh);
+    		} else {
+				return showInvalidSelection();
+    		}			
 		});
 	    	
 		if (openComment) {
@@ -466,33 +439,29 @@ gitplex.textdiff = {
 				gitplex.textdiff.scroll($container, mark);
 		}
 	},
-	openSelectionPopup: function(containerId, position, mark, markUrl, loggedIn) {
+	openSelectionPopover: function(containerId, position, mark, markUrl, loggedIn) {
 		var $container = $("#" + containerId);
-		var permanentLinkCallback = function($permanentLink) {
-			$permanentLink.attr("href", markUrl);
-			$permanentLink.html("<i class='fa fa-link'></i> Permanent link of this selection");
-		};
-
-		var commentLinkCallback = function($commentLink) {
-			$commentLink.html("<i class='fa fa-comment'></i> Add comment of this selection");
-			$commentLink.off("click");
-			$commentLink.attr("href", "javascript:void(0);");
-			if (loggedIn) {
-				$commentLink.click(function() {
-					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
-							&& !confirm("There are unsaved changes, discard and continue?")) {
-						return;
-					}
-    				$container.data("callback")("addComment", mark.leftSide, 
-    						mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
-				});
-			} else {
-				$commentLink.html("Log in to comment on selection");
-			}
-		};
 		
-		$("#selection-popup").data("open")(position, permanentLinkCallback, 
-				commentLinkCallback, $container[0]);				
+		var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
+		$content.children("a.permanent").attr("href", markUrl);
+		if (loggedIn) {
+			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
+			$content.children("a.comment").click(function() {
+				if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
+						&& !confirm("There are unsaved changes, discard and continue?")) {
+					return;
+				}
+				$container.data("callback")("addComment", mark.leftSide, 
+						mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+			});
+		} else {
+			$content.append("<span class='comment'><i class='fa fa-warning'></i> Log in to comment on selection</span>");
+		}			
+		
+		$container.selectionPopover("open", {
+			position: position,
+			content: $content
+		});
 	},
 	expand: function(containerId, blockIndex, expandedHtml) {
 		var $container = $("#" + containerId);
@@ -855,7 +824,7 @@ gitplex.textdiff = {
 		$container.removeData("openComment");
 		$container.data("mark", mark);
 		
-		$("#selection-popup").hide();
+		$container.selectionPopover("close");
 		window.getSelection().removeAllRanges();
 
 		// continue to operate DOM in a timer to give browser a chance to 

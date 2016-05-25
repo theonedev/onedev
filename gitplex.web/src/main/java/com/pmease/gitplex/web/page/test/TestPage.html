@@ -4,6 +4,7 @@
 		$content.children("a").click(function() {
 			console.log("clicked");
 		});
+		$content.children("a").after("<a></a>");
 		$("body").append($content);
 	</script>
 </wicket:extend>

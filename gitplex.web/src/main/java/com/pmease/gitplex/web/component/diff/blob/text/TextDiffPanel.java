@@ -45,6 +45,7 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.RangeUtils;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.assets.selectionpopover.SelectionPopoverResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -170,12 +171,12 @@ public class TextDiffPanel extends Panel implements MarkAware {
 							getMarkupId(), index, expanded);
 					target.appendJavaScript(script);
 					break;
-				case "openSelectionPopup":
+				case "openSelectionPopover":
 					String jsonOfPosition = String.format("{left: %d, top: %d}", 
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
 					DiffMark mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
-					script = String.format("gitplex.textdiff.openSelectionPopup('%s', %s, %s, '%s', %s);", 
+					script = String.format("gitplex.textdiff.openSelectionPopover('%s', %s, %s, '%s', %s);", 
 							getMarkupId(), jsonOfPosition, mark.toJson(), markSupport.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
@@ -291,6 +292,7 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		response.render(JavaScriptHeaderItem.forReference(SelectionPopoverResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
 		response.render(CssHeaderItem.forReference(

@@ -8,12 +8,12 @@
 	border-radius: 6px;
 	padding: 12px;
 }
-.selection-popover>.content a {
+.selection-popover>.content a, .selection-popover>.content span {
 	color: white;
 	display: block;
 	white-space: nowrap;
 }
-.selection-popover>.content>a.permanent {
+.selection-popover>.content a:FIRST-CHILD {
 	margin-bottom: 8px;
 }
 .selection-popover>.triangle {

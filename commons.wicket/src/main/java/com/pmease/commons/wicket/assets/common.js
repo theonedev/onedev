@@ -451,37 +451,6 @@ pmease.commons = {
 				|| ua.indexOf("iphone") != -1 
 				|| ua.indexOf("ipad") != -1 
 				|| ua.indexOf("windows phone") != -1; 
-	},
-	setupSelectionPopup: function() {
-		$("body").append("" +
-				"<div id='selection-popup'>" +
-				"<div class='content'>" +
-				"<a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>" +
-				"<a class='comment'><i class='fa fa-comment'></i> Add comment for this selection</a>" +
-				"</div>" +
-				"<div class='triangle'></div>" +
-				"</div>");
-
-		var $selectionPopup = $("#selection-popup");
-		$selectionPopup.data("open", function(position, permanentCallback, commentCallback, containerEl) {
-			var alignment = {
-					target: {left: position.left, top: position.top, width: 0, height: 0}, 
-					placement: {x: 50, y: 100, targetX: 0, targetY: 0}};
-			$selectionPopup.find(".triangle").show();
-			$selectionPopup.show().align(alignment);
-			if (Math.abs($selectionPopup.offset().top+$selectionPopup.outerHeight() - position.top)>10) {
-				$selectionPopup.find(".triangle").hide();
-			} 
-			permanentCallback($selectionPopup.find(".permanent"));
-			commentCallback($selectionPopup.find(".comment"));
-			$selectionPopup.data("container", containerEl);
-		});
-		Wicket.Event.subscribe('/ajax/call/complete', function() {
-			if (!jQuery.contains(document, $selectionPopup.data("container"))) {
-				$selectionPopup.hide();
-			}
-		});
-		
 	}
 };
 
@@ -491,5 +460,4 @@ $(function() {
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.websocket.setupCallback();
-	pmease.commons.setupSelectionPopup();
 });
