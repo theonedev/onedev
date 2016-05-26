@@ -53,7 +53,6 @@ import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.search.query.BlobQuery;
 import com.pmease.gitplex.search.query.FileQuery;
 import com.pmease.gitplex.search.query.SymbolQuery;
-import com.pmease.gitplex.search.query.TextQuery;
 import com.pmease.gitplex.search.query.TooGeneralQueryException;
 import com.pmease.gitplex.web.component.depotfile.blobsearch.result.SearchResultPanel;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
@@ -77,11 +76,7 @@ public abstract class InstantSearchPanel extends Panel {
 	
 	private List<QueryHit> symbolHits;
 	
-	private List<QueryHit> textHits;
-	
 	private RunTaskBehavior moreSymbolHitsBehavior;
-	
-	private RunTaskBehavior moreTextHitsBehavior;
 	
 	private int activeHitIndex;
 	
@@ -92,6 +87,58 @@ public abstract class InstantSearchPanel extends Panel {
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.revisionModel = revisionModel;
+	}
+	
+	private List<QueryHit> querySymbols(String searchInput, int count) {
+		SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
+		ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());		
+		List<QueryHit> symbolHits = new ArrayList<>();
+		try {
+			// first try an exact search against primary symbol to make sure the result 
+			// always contains exact match if exists
+			BlobQuery query = new SymbolQuery(searchInput, null, true, false, 
+					null, null, count);
+			symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+			
+			// now do wildcard search but exclude the exact match returned above 
+			if (symbolHits.size() < count) {
+				query = new SymbolQuery("*"+searchInput+"*", searchInput, true, false, 
+						null, null, count-symbolHits.size());
+				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+			}
+
+			// do the same for file names
+			if (symbolHits.size() < count) {
+				query = new FileQuery(searchInput, null, false, null, 
+						count-symbolHits.size());
+				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+			}
+			
+			if (symbolHits.size() < count) {
+				query = new FileQuery("*"+searchInput+"*", searchInput, false, null, 
+						count-symbolHits.size());
+				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+			}
+			
+			// do the same for secondary symbols
+			if (symbolHits.size() < count) {
+				query = new SymbolQuery(searchInput, null, false, false, 
+						null, null, count-symbolHits.size());
+				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+			}
+			
+			if (symbolHits.size() < count) {
+				query = new SymbolQuery("*"+searchInput+"*", searchInput, false, false, 
+						null, null, count-symbolHits.size());
+				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
+			}
+			
+		} catch (TooGeneralQueryException e) {
+			symbolHits = new ArrayList<>();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		return symbolHits;
 	}
 
 	@Override
@@ -115,47 +162,13 @@ public abstract class InstantSearchPanel extends Panel {
 				if (key.equals("input")) {
 					searchInput = params.getParameterValue("input").toString();
 					if (StringUtils.isNotBlank(searchInput)) {
-						SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-						ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());
-						try {
-							BlobQuery query = new SymbolQuery("*"+searchInput+"*", true, false, 
-									null, null, MAX_QUERY_ENTRIES);
-							symbolHits = searchManager.search(depotModel.getObject(), commit, query);
-							
-							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-								query = new FileQuery("*"+searchInput+"*", false, null, 
-										MAX_QUERY_ENTRIES-symbolHits.size());
-								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-							}
-							
-							if (symbolHits.size() < MAX_QUERY_ENTRIES) {
-								query = new SymbolQuery("*"+searchInput+"*", false, false, 
-										null, null, MAX_QUERY_ENTRIES-symbolHits.size());
-								symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-							}
-						} catch (TooGeneralQueryException e) {
-							symbolHits = new ArrayList<>();
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}
-						
-						try {
-							BlobQuery query = new TextQuery(searchInput, false, false, false, 
-									null, null, MAX_QUERY_ENTRIES);
-							textHits = searchManager.search(depotModel.getObject(), commit, query);
-						} catch (TooGeneralQueryException e) {
-							textHits = new ArrayList<>();
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}
-						
+						symbolHits = querySymbols(searchInput, MAX_QUERY_ENTRIES);
 						if (searchHint == null)
 							newSearchHint(target);
 						else
 							target.add(searchHint.getContent());
 					} else {
 						symbolHits = new ArrayList<>();
-						textHits = new ArrayList<>();
 						
 						if (searchHint != null)
 							searchHint.close();
@@ -166,8 +179,6 @@ public abstract class InstantSearchPanel extends Panel {
 					if (activeHit != null) {
 						if (activeHit instanceof MoreSymbolHit) 
 							moreSymbolHitsBehavior.requestRun(target);
-						else if (activeHit instanceof MoreTextHit) 
-							moreTextHitsBehavior.requestRun(target);
 						else 
 							selectHit(target, activeHit);
 					}
@@ -217,15 +228,6 @@ public abstract class InstantSearchPanel extends Panel {
 				WebMarkupContainer searchResult = new Fragment(id, "resultFrag", InstantSearchPanel.this);
 				searchResult.setOutputMarkupId(true);
 				
-				searchResult.add(new WebMarkupContainer("symbolsTitle") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!textHits.isEmpty());
-					}
-					
-				});
 				searchResult.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
 
 					@Override
@@ -293,34 +295,8 @@ public abstract class InstantSearchPanel extends Panel {
 							
 							@Override
 							protected void runTask(AjaxRequestTarget target) {
-								try {
-									List<QueryHit> hits = new ArrayList<>();
-
-									BlobQuery query = new SymbolQuery("*"+searchInput+"*", true, false, 
-											null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
-
-									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());
-									hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-									
-									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
-										query = new FileQuery("*"+searchInput+"*", false, null, 
-												SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
-										hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-									}
-									
-									if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
-										query = new SymbolQuery("*"+searchInput+"*", false, false, 
-												null, null, SearchResultPanel.MAX_QUERY_ENTRIES-hits.size());
-										hits.addAll(searchManager.search(depotModel.getObject(), commit, query));
-									}
-									onMoreQueried(target, hits);
-								} catch (TooGeneralQueryException e) {
-									// this is impossible as we already queried part of the result
-									throw new IllegalStateException();
-								} catch (InterruptedException e) {
-									throw new RuntimeException(e);
-								}								
+								List<QueryHit> hits = querySymbols(searchInput, SearchResultPanel.MAX_QUERY_ENTRIES);
+								onMoreQueried(target, hits);
 								close();
 							}
 							
@@ -340,120 +316,12 @@ public abstract class InstantSearchPanel extends Panel {
 					
 				});
 				
-				searchResult.add(new WebMarkupContainer("textsTitle") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!symbolHits.isEmpty());
-					}
-					
-				});
-				searchResult.add(new ListView<QueryHit>("textHits", new AbstractReadOnlyModel<List<QueryHit>>() {
-
-					@Override
-					public List<QueryHit> getObject() {
-						return textHits;
-					}
-					
-				}) {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!textHits.isEmpty());
-					}
-
-					@Override
-					protected void populateItem(ListItem<QueryHit> item) {
-						final QueryHit hit = item.getModelObject();
-						PreventDefaultAjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
-
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-							}
-							
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								selectHit(target, hit);
-							}
-							
-						};
-						link.add(new Image("icon", hit.getIcon()) {
-
-							@Override
-							protected boolean shouldAddAntiCacheParameter() {
-								return false;
-							}
-							
-						});
-						link.add(hit.render("label"));
-						link.add(new Label("scope", hit.getScope()).setVisible(hit.getScope()!=null));
-						item.add(link);
-
-						if (item.getIndex() + symbolHits.size() == activeHitIndex)
-							item.add(AttributeModifier.append("class", " active"));
-						
-						DepotFilePage.State state = new DepotFilePage.State();
-						state.blobIdent.revision = revisionModel.getObject();
-						state.blobIdent.path = hit.getBlobPath();
-						state.mark = Mark.of(hit.getTokenPos());
-						state.requestId = PullRequest.idOf(requestModel.getObject());
-						PageParameters params = DepotFilePage.paramsOf(depotModel.getObject(), state);
-						CharSequence url = RequestCycle.get().urlFor(DepotFilePage.class, params);
-						link.add(AttributeAppender.replace("href", url.toString()));
-					}
-					
-				});
-				searchResult.add(new PreventDefaultAjaxLink<Void>("moreTextHits") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(moreTextHitsBehavior = new RunTaskBehavior() {
-							
-							@Override
-							protected void runTask(AjaxRequestTarget target) {
-								TextQuery query = new TextQuery(searchInput, false, false, false, 
-										null, null, SearchResultPanel.MAX_QUERY_ENTRIES);
-								try {
-									SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-									ObjectId commit = depotModel.getObject().getRevCommit(revisionModel.getObject());
-									List<QueryHit> hits = searchManager.search(depotModel.getObject(), commit, query);
-									onMoreQueried(target, hits);
-								} catch (TooGeneralQueryException e) {
-									// this is impossible as we already queried part of the result
-									throw new IllegalStateException();
-								} catch (InterruptedException e) {
-									throw new RuntimeException(e);
-								}								
-								close();
-							}
-							
-						});
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(textHits.size() == MAX_QUERY_ENTRIES);
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						moreTextHitsBehavior.requestRun(target);
-					}
-					
-				});
-				
 				searchResult.add(new WebMarkupContainer("noMatches") {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(symbolHits.isEmpty() && textHits.isEmpty());
+						setVisible(symbolHits.isEmpty());
 					}
 					
 				});
@@ -479,9 +347,6 @@ public abstract class InstantSearchPanel extends Panel {
 		hits.addAll(symbolHits);
 		if (symbolHits.size() == MAX_QUERY_ENTRIES)
 			hits.add(new MoreSymbolHit());
-		hits.addAll(textHits);
-		if (textHits.size() == MAX_QUERY_ENTRIES)
-			hits.add(new MoreTextHit());
 		
 		if (activeHitIndex >=0 && activeHitIndex<hits.size())
 			return hits.get(activeHitIndex);
@@ -521,34 +386,6 @@ public abstract class InstantSearchPanel extends Panel {
 	private static class MoreSymbolHit extends QueryHit {
 
 		public MoreSymbolHit() {
-			super(null, null);
-		}
-
-		@Override
-		public Component render(String componentId) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String getScope() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ResourceReference getIcon() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		protected int score() {
-			throw new UnsupportedOperationException();
-		}
-		
-	}
-	
-	private static class MoreTextHit extends QueryHit {
-
-		public MoreTextHit() {
 			super(null, null);
 		}
 

@@ -244,19 +244,19 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		List<QueryHit> hits = searchManager.search(depot, commit, query);
 		assertEquals(4, hits.size());
 
-		query = new SymbolQuery("nam*", false, false, null, null, Integer.MAX_VALUE);
+		query = new SymbolQuery("nam*", null, false, false, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 		
-		query = new SymbolQuery("nam", false, false, null, null, Integer.MAX_VALUE);
+		query = new SymbolQuery("nam", null, false, false, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(depot, commit, query);
 		assertEquals(0, hits.size());
 		
-		query = new SymbolQuery("name", false, false, null, null, Integer.MAX_VALUE);
+		query = new SymbolQuery("name", null, false, false, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 		
-		query = new SymbolQuery("cat", true, false, null, null, Integer.MAX_VALUE);
+		query = new SymbolQuery("cat", null, true, false, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(depot, commit, query);
 		assertEquals(1, hits.size());
 		
@@ -274,7 +274,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 		
-		query = new SymbolQuery("Age", false, false, null, null, Integer.MAX_VALUE);
+		query = new SymbolQuery("Age", null, false, false, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(depot, commit, query);
 		assertEquals(1, hits.size());
 		
@@ -351,7 +351,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 		
 		assertEquals(2, indexManager.index(depot, commit).get().getIndexed());
 		
-		query = new SymbolQuery("tiger", false, true, null, null, Integer.MAX_VALUE);
+		query = new SymbolQuery("tiger", null, false, true, null, null, Integer.MAX_VALUE);
 		hits = searchManager.search(depot, commit, query);
 		assertEquals(2, hits.size());
 	}

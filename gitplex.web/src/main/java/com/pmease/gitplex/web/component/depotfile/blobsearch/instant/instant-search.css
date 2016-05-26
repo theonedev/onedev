@@ -7,15 +7,11 @@
 .instant-search a {
 	color: #666;
 }
-.instant-search-result .section {
-	margin-bottom: 8px;
-}
 .instant-search-result {
-	padding: 8px; 
+	padding: 12px; 
 }
-.instant-search-result .section>.title {
-	font-weight: bold; 
-	margin-bottom: 4px;
+.instant-search-result ul {
+	margin-bottom: 0;
 }
 .instant-search-result li.hit .scope {
 	color: #666; 

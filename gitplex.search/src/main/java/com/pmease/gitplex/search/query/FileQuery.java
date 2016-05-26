@@ -23,14 +23,18 @@ public class FileQuery extends BlobQuery {
 
 	private final String fileNames;
 	
+	private final String excludeFileName;
+	
 	private final boolean caseSensitive;
 	
 	private final String directory;
 	
-	public FileQuery(String fileNames, boolean caseSensitive, @Nullable String directory, int count) {
+	public FileQuery(String fileNames, @Nullable String excludeFileName, boolean caseSensitive,  
+			@Nullable String directory, int count) {
 		super(count);
 		
 		this.fileNames = fileNames;
+		this.excludeFileName = excludeFileName;
 		this.caseSensitive = caseSensitive;
 		this.directory = directory;
 	}
@@ -41,21 +45,22 @@ public class FileQuery extends BlobQuery {
 		String blobName = blobPath.substring(blobPath.lastIndexOf('/')+1);
 		if (caseSensitive) {
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames)) {
-				if (WildcardUtils.matchString(pattern, blobName)) {
+				if (WildcardUtils.matchString(pattern, blobName) 
+						&& (excludeFileName == null || !excludeFileName.equals(blobName))) {
 					Range matchRange = WildcardUtils.rangeOfMatch(pattern, blobName);
 					hits.add(new FileHit(blobPath, matchRange));
 					break;
 				}
 			}
 		} else {
-			Range matchRange = null;
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase())) {
-				matchRange = WildcardUtils.rangeOfMatch(pattern, blobName.toLowerCase());
-				if (matchRange != null) {
+				if (WildcardUtils.matchString(pattern, blobName.toLowerCase()) 
+						&& (excludeFileName == null || !excludeFileName.equalsIgnoreCase(blobName))) {
+					Range matchRange = WildcardUtils.rangeOfMatch(pattern, blobName.toLowerCase());
+					hits.add(new FileHit(blobPath, matchRange));
 					break;
 				}
 			}
-			hits.add(new FileHit(blobPath, matchRange));
 		}
 	}
 

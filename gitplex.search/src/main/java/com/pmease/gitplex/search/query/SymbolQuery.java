@@ -38,6 +38,8 @@ public class SymbolQuery extends BlobQuery {
 
 	private final String term;
 
+	private final String excludeTerm;
+	
 	private final boolean primary;
 	
 	private final boolean caseSensitive;
@@ -46,11 +48,12 @@ public class SymbolQuery extends BlobQuery {
 	
 	private final String fileNames;
 	
-	public SymbolQuery(String term, boolean primary, boolean caseSensitive, 
-			@Nullable String directory, @Nullable String fileNames, int count) {
+	public SymbolQuery(String term, @Nullable String excludeTerm, boolean primary, 
+			boolean caseSensitive, @Nullable String directory, @Nullable String fileNames, int count) {
 		super(count);
 		
 		this.term = term;
+		this.excludeTerm = excludeTerm;
 		this.primary = primary;
 		this.caseSensitive = caseSensitive;
 		this.directory = directory;
@@ -86,7 +89,17 @@ public class SymbolQuery extends BlobQuery {
 										else
 											normalizedSymbolName = symbol.getName();
 										
-										if (WildcardUtils.matchString(normalizedTerm, normalizedSymbolName)) {
+										String normalizedExcludeTerm;
+										if (excludeTerm != null) {
+											if (!caseSensitive)
+												normalizedExcludeTerm = excludeTerm.toLowerCase();
+											else
+												normalizedExcludeTerm = excludeTerm;
+										} else {
+											normalizedExcludeTerm = null;
+										}
+										if (WildcardUtils.matchString(normalizedTerm, normalizedSymbolName)
+												&& (normalizedExcludeTerm == null || !normalizedSymbolName.equals(normalizedExcludeTerm))) {
 											Range matchRange = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
 											hits.add(new SymbolHit(blobPath, symbol, matchRange));
 										}

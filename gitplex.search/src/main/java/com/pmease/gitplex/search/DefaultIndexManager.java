@@ -54,6 +54,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -249,7 +250,7 @@ public class DefaultIndexManager implements IndexManager {
 		}
 	}
 	
-	private void indexBlob(IndexWriter writer, org.eclipse.jgit.lib.Repository repo, 
+	private void indexBlob(IndexWriter writer, Repository repository, 
 			Extractor extractor, ObjectId blobId, String blobPath) throws IOException {
 		Document document = new Document();
 		
@@ -263,7 +264,7 @@ public class DefaultIndexManager implements IndexManager {
 		
 		document.add(new StringField(BLOB_NAME.name(), blobName.toLowerCase(), Store.NO));
 		
-		ObjectLoader objectLoader = repo.open(blobId);
+		ObjectLoader objectLoader = repository.open(blobId);
 		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
 			byte[] bytes = objectLoader.getCachedBytes();
 			String content = ContentDetector.convertToText(bytes, blobName);
@@ -306,7 +307,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 	
 	private String getSequentialExecutorKey(Depot depot) {
-		return "repository-" + depot.getId() + "-indexBlob";
+		return "depot-" + depot.getId() + "-indexBlob";
 	}
 	
 	@Override

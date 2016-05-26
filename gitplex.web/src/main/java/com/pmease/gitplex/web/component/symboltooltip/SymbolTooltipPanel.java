@@ -194,12 +194,12 @@ public abstract class SymbolTooltipPanel extends Panel {
 				if (symbol.startsWith("@"))
 					symbol = symbol.substring(1);
 				try {
-					SymbolQuery query = new SymbolQuery(symbol, true, true, null, null, QUERY_ENTRIES);
+					SymbolQuery query = new SymbolQuery(symbol, null, true, true, null, null, QUERY_ENTRIES);
 					SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 					ObjectId commit = depotModel.getObject().getRevCommit(revision);
 					symbolHits = searchManager.search(depotModel.getObject(), commit, query);
 					if (symbolHits.size() < QUERY_ENTRIES) {
-						query = new SymbolQuery(symbol, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
+						query = new SymbolQuery(symbol, null, false, true, null, null, QUERY_ENTRIES - symbolHits.size());
 						symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 					}
 				} catch (InterruptedException e) {

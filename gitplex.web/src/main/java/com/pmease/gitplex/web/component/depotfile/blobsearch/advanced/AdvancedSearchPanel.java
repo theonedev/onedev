@@ -232,7 +232,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 								
 							});
 						} else {
-							SymbolQuery query = new SymbolQuery(validatable.getValue(), true, false, null, null, 0);
+							SymbolQuery query = new SymbolQuery(validatable.getValue(), null, true, false, null, null, 0);
 							try {
 								query.asLuceneQuery();
 							} catch (TooGeneralQueryException e) {
@@ -309,7 +309,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 								
 							});
 						} else {
-							FileQuery query = new FileQuery(validatable.getValue(), false, null, 0);
+							FileQuery query = new FileQuery(validatable.getValue(), null, false, null, 0);
 							try {
 								query.asLuceneQuery();
 							} catch (TooGeneralQueryException e) {
@@ -518,14 +518,14 @@ public abstract class AdvancedSearchPanel extends Panel {
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
 			List<QueryHit> hits;
-			BlobQuery query = new SymbolQuery(term, true, caseSensitive, 
+			BlobQuery query = new SymbolQuery(term, null, true, caseSensitive, 
 					context.getDirectory(insideCurrentDir), fileNames, 
 					SearchResultPanel.MAX_QUERY_ENTRIES);
 			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
 			hits = searchManager.search(context.depotModel.getObject(), commit, query);
 			
 			if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
-				query = new SymbolQuery(term, false, caseSensitive, 
+				query = new SymbolQuery(term, null, false, caseSensitive, 
 						context.getDirectory(insideCurrentDir), fileNames, 
 						SearchResultPanel.MAX_QUERY_ENTRIES - hits.size());
 				hits.addAll(searchManager.search(context.depotModel.getObject(), commit, query));
@@ -547,7 +547,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		@Override
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			SearchManager searchManager = GitPlex.getInstance(SearchManager.class);
-			BlobQuery query = new FileQuery(term, caseSensitive, 
+			BlobQuery query = new FileQuery(term, null, caseSensitive, 
 					context.getDirectory(insideCurrentDir), SearchResultPanel.MAX_QUERY_ENTRIES);
 			ObjectId commit = context.depotModel.getObject().getRevCommit(context.revisionModel.getObject());
 			return searchManager.search(context.depotModel.getObject(), commit, query);
