@@ -46,7 +46,7 @@ public abstract class BlobChange implements Serializable {
 		newBlobIdent = GitUtils.getNewBlobIdent(diffEntry, newRev);
 	}
 	
-	public BlobChange(ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent, 
+	public BlobChange(@Nullable ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent, 
 			WhitespaceOption whitespaceOption) {
 		this.type = type;
 		this.oldBlobIdent = oldBlobIdent;
@@ -54,6 +54,14 @@ public abstract class BlobChange implements Serializable {
 		this.whitespaceOption = whitespaceOption;
 	}
 	
+	/**
+	 * Get change type. Return <tt>null</tt> if this is a faked change representing 
+	 * an unchanged file
+	 * 
+	 * @return 
+	 * 			type of change, or <tt>null</tt> if the file is not changed actually
+	 */
+	@Nullable
 	public ChangeType getType() {
 		return type;
 	}

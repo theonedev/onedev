@@ -27,6 +27,7 @@
 }
 .revision-diff>.body>.diff-stats>.diff-stat>.icon {
 	margin-top: 2px;
+	margin-right: 0;
 }
 .revision-diff>.body>.diff-stats>.diff-stat .fa-diff-modified, 
 .revision-diff>.body>.diff-stats>.diff-stat .fa-diff-renamed {

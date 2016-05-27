@@ -111,7 +111,8 @@ public class BlobDiffPanel extends Panel implements MarkAware {
 					add(newFragment("Unable to diff as the file is too large.", true));
 				} else if (change.getAdditions() + change.getDeletions() > Constants.MAX_SINGLE_FILE_DIFF_LINES) {
 					add(newFragment("Diff is too large to be displayed.", true));
-				} else if (change.getAdditions() + change.getDeletions() == 0) {
+				} else if (change.getAdditions() + change.getDeletions() == 0 
+						&& (markSupport == null || markSupport.getComments().isEmpty())) {
 					add(newFragment("Content is identical", false));
 				} else {
 					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, markSupport));

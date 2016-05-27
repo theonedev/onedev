@@ -1,11 +1,14 @@
 package com.pmease.gitplex.web.component.diff.revision;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -47,6 +50,7 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Objects;
@@ -133,8 +137,9 @@ public abstract class RevisionDiffPanel extends Panel {
 		protected ChangesAndCount load() {
 			List<DiffEntry> diffEntries = diffEntriesModel.getObject();
 			
-			List<BlobChange> filterChanges = new ArrayList<>();
-	    	for (DiffEntry entry: diffEntries) {
+			Set<String> changedPaths = new HashSet<>();
+			List<BlobChange> allChanges = new ArrayList<>();
+			for (DiffEntry entry: diffEntries) {
     			BlobChange change = new BlobChange(oldRev, newRev, entry, whitespaceOption) {
 
 					@Override
@@ -143,6 +148,30 @@ public abstract class RevisionDiffPanel extends Panel {
 					}
 
 	    		};
+	    		allChanges.add(change);
+	    		changedPaths.addAll(change.getPaths());
+			}
+
+			Set<String> commentedPaths = new HashSet<>();
+			for (CodeComment comment: commentsModel.getObject()) {
+				if (!changedPaths.contains(comment.getPath()) 
+						&& !commentedPaths.contains(comment.getPath())) {
+					BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getPath(), FileMode.TYPE_FILE);
+					BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getPath(), FileMode.TYPE_FILE);
+					allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOption) {
+
+						@Override
+						public Blob getBlob(BlobIdent blobIdent) {
+							return depotModel.getObject().getBlob(blobIdent);
+						}
+						
+					});
+				}
+				commentedPaths.add(comment.getPath());
+			}
+			
+			List<BlobChange> filterChanges = new ArrayList<>();
+	    	for (BlobChange change: allChanges) {
 	    		if (StringUtils.isNotBlank(pathFilter)) {
 		    		String matchWith = pathFilter.toLowerCase().trim();
 	    			matchWith = StringUtils.stripStart(matchWith, "/");
@@ -193,6 +222,9 @@ public abstract class RevisionDiffPanel extends Panel {
 	    			normalizedChanges.add(change);
 	    		}
 	    	}
+
+	    	normalizedChanges.sort((change1, change2)
+	    			->Paths.get(change1.getPath()).compareTo(Paths.get(change2.getPath())));
 	    	
 			List<BlobChange> diffChanges = new ArrayList<>();
 			if (normalizedChanges.size() > Constants.MAX_DIFF_FILES)
@@ -224,13 +256,15 @@ public abstract class RevisionDiffPanel extends Panel {
 	    	}
 	    	
 	    	int totalChanges = normalizedChanges.size();
+	    	
 	    	if (diffChanges.size() == totalChanges) { 
 		    	// some changes should be removed if content is the same after line processing 
 		    	for (Iterator<BlobChange> it = diffChanges.iterator(); it.hasNext();) {
 		    		BlobChange change = it.next();
 		    		if (change.getType() == ChangeType.MODIFY 
 		    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
-		    				&& change.getAdditions() + change.getDeletions() == 0) {
+		    				&& change.getAdditions() + change.getDeletions() == 0
+		    				&& !commentedPaths.contains(change.getPath())) {
 		    			Blob.Text oldText = change.getOldText();
 		    			Blob.Text newText = change.getNewText();
 		    			if (oldText != null && newText != null 
@@ -275,9 +309,13 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected Collection<CodeComment> load() {
-			Depot depot = depotModel.getObject();
-			return GitPlex.getInstance(CodeCommentManager.class).query(
-					depot, depot.getRevCommit(oldRev), depot.getRevCommit(newRev));
+			if (markSupport != null) {
+				Depot depot = depotModel.getObject();
+				return GitPlex.getInstance(CodeCommentManager.class).query(
+						depot, depot.getRevCommit(oldRev), depot.getRevCommit(newRev));
+			} else {
+				return new ArrayList<>();
+			}
 		}
 		
 	};
@@ -423,31 +461,37 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		}));
 		
-		List<String> diffPaths = new ArrayList<>();
+		Set<String> setOfInvolvedPaths = new HashSet<>();
 		for (DiffEntry diffEntry: diffEntriesModel.getObject()) {
 			if (diffEntry.getChangeType() == DiffEntry.ChangeType.ADD) {
-				diffPaths.add(diffEntry.getNewPath());
+				setOfInvolvedPaths.add(diffEntry.getNewPath());
 			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.COPY) {
-				diffPaths.add(diffEntry.getNewPath());
-				diffPaths.add(diffEntry.getOldPath());
+				setOfInvolvedPaths.add(diffEntry.getNewPath());
+				setOfInvolvedPaths.add(diffEntry.getOldPath());
 			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.DELETE) {
-				diffPaths.add(diffEntry.getOldPath());
+				setOfInvolvedPaths.add(diffEntry.getOldPath());
 			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.MODIFY) {
-				diffPaths.add(diffEntry.getNewPath());
+				setOfInvolvedPaths.add(diffEntry.getNewPath());
 			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.RENAME) {
-				diffPaths.add(diffEntry.getNewPath());
-				diffPaths.add(diffEntry.getOldPath());
+				setOfInvolvedPaths.add(diffEntry.getNewPath());
+				setOfInvolvedPaths.add(diffEntry.getOldPath());
 			} else {
 				throw new IllegalStateException();
 			}
 		}
+		for (CodeComment comment: commentsModel.getObject()) {
+			setOfInvolvedPaths.add(comment.getPath());
+		}
+		
+		List<String> listOfInvolvedPaths = new ArrayList<>(setOfInvolvedPaths);
+		listOfInvolvedPaths.sort((path1, path2)->Paths.get(path1).compareTo(Paths.get(path2)));
 		
 		filterInput.add(new InputAssistBehavior() {
 			
 			@Override
 			protected List<InputCompletion> getSuggestions(InputStatus inputStatus, int count) {
 				List<InputCompletion> completions = new ArrayList<>();
-				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(diffPaths, 
+				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(listOfInvolvedPaths, 
 						inputStatus.getContentBeforeCaret().trim(), count)) {
 					int caret = suggestion.getCaret();
 					if (caret == -1)
@@ -621,7 +665,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return changesAndCountModel.getObject().getChanges().size() + " changed files ";
+				return changesAndCountModel.getObject().getChanges().size() + " changed or commented files ";
 			}
 			
 		}));
@@ -659,7 +703,9 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				String iconClass;
-				if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
+				if (change.getType() == null) {
+					iconClass = " fa fa-commenting";
+				} else if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
 					iconClass = " fa-ext fa-diff-added";
 				else if (change.getType() == ChangeType.DELETE)
 					iconClass = " fa-ext fa-diff-removed";

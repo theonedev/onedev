@@ -460,7 +460,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 						List<Path> paths = new ArrayList<>();
 						for (String file: (Set<String>)SerializationUtils.deserialize(bytes))
 							paths.add(Paths.get(file));
-						paths.sort((path1, path2) -> path1.compareTo(path2));
+						paths.sort(Path::compareTo);
 						List<String> files = new ArrayList<>();
 						for (Path path: paths)
 							files.add(path.toString().replace('\\', '/'));
