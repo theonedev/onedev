@@ -36,7 +36,6 @@
 #revision-compare>.body>.revisions>.revision>div>a {
 	color: #666;
 	margin-left: 4px;
-	margin-bottom: 4px;
 }
 
 #revision-compare .with-merge-base ul>li.commit:last-child {

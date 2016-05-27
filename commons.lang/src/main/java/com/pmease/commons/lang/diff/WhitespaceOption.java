@@ -82,7 +82,7 @@ public enum WhitespaceOption {
 	
 	public static WhitespaceOption of(@Nullable String name) {
 		if (name != null) {
-			return valueOf(name);
+			return valueOf(name.toUpperCase());
 		} else {
 			return DEFAULT;
 		}

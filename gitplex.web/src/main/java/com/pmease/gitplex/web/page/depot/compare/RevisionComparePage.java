@@ -59,11 +59,25 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.Requ
 @SuppressWarnings("serial")
 public class RevisionComparePage extends DepotPage implements MarkSupport {
 
+	public enum TabPanel {
+		COMMITS, 
+		FILES;
+
+		public static TabPanel of(@Nullable String name) {
+			if (name != null) {
+				return valueOf(name.toUpperCase());
+			} else {
+				return COMMITS;
+			}
+		}
+		
+	};
+	
 	private static final String PARAM_LEFT = "left";
 	
 	private static final String PARAM_RIGHT = "right";
 	
-	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compareWithMergeBase";
+	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compare-with-merge-base";
 	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
@@ -72,6 +86,8 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	private static final String PARAM_MARK = "mark";
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
+	
+	private static final String PARAM_TAB = "tab-panel";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
@@ -104,6 +120,8 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
+		if (state.tabPanel != null)
+			params.set(PARAM_TAB, state.tabPanel.name());
 		return params;
 	}
 
@@ -147,6 +165,8 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = DiffMark.of(params.get(PARAM_MARK).toString());
+		
+		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
 		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -228,6 +248,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.leftSide = new DepotAndRevision(depot, revision);
 				newState.rightSide = state.rightSide;
 				newState.pathFilter = state.pathFilter;
+				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.mark = state.mark;
@@ -268,7 +289,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		add(checkBox);
 
 		String tooltip;
-		if (!state.leftSide.getDepotId().equals(state.rightSide.getDepotId())) {
+		if (!state.leftSide.getDepot().equals(state.rightSide.getDepot())) {
 			checkBox.add(AttributeAppender.append("disabled", "disabled"));
 			tooltip = "Can only compare with common ancestor when compare across different repositories";
 		} else {
@@ -286,6 +307,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.leftSide = state.leftSide;
 				newState.rightSide = new DepotAndRevision(depot, revision);
 				newState.pathFilter = state.pathFilter;
+				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.commentId = state.commentId;
@@ -305,6 +327,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.leftSide = state.rightSide;
 				newState.rightSide = state.leftSide;
 				newState.pathFilter = state.pathFilter;
+				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.mark = state.mark;
@@ -400,7 +423,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				state.pathFilter = null;
+				state.tabPanel = TabPanel.COMMITS;
 				newTabPanel(target);
 				pushState(target);
 			}
@@ -411,7 +434,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				state.pathFilter = "";
+				state.tabPanel = TabPanel.FILES;
 				newTabPanel(target);
 				pushState(target);
 			}
@@ -449,20 +472,21 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	}
 
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {
-		WebMarkupContainer tabPanel;
-		if (state.pathFilter != null) {
-			IModel<Depot> depotModel = new LoadableDetachableModel<Depot>() {
+		IModel<Depot> depotModel = new LoadableDetachableModel<Depot>() {
 
-				@Override
-				protected Depot load() {
-					Depot depot = state.rightSide.getDepot();
-					if (state.leftSide.getDepotId().equals(state.rightSide.getDepotId()))
-						depot.cacheObjectId(state.leftSide.getRevision(), leftCommitId);
-					depot.cacheObjectId(state.rightSide.getRevision(), rightCommitId);
-					return depot;
-				}
-				
-			};
+			@Override
+			protected Depot load() {
+				Depot depot = state.rightSide.getDepot();
+				if (state.leftSide.getDepot().equals(state.rightSide.getDepot()))
+					depot.cacheObjectId(state.leftSide.getRevision(), leftCommitId);
+				depot.cacheObjectId(state.rightSide.getRevision(), rightCommitId);
+				return depot;
+			}
+			
+		};
+		WebMarkupContainer tabPanel;
+		switch (state.tabPanel) {
+		case FILES:
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
 					new Model<PullRequest>(null), 
 					state.compareWithMergeBase?mergeBaseModel.getObject():state.leftSide.getRevision(), 
@@ -490,8 +514,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				
 			};
 			commitsTab.setSelected(false);
-			filesTab.setSelected(true);
-		} else {
+			filesTab.setSelected(true);	
+			break;
+		default:
 			tabPanel = new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel){
 
 				@Override
@@ -507,6 +532,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			if (!mergeBaseModel.getObject().equals(leftCommitId.name()) && !state.compareWithMergeBase) {
 				tabPanel.add(AttributeAppender.append("class", "with-merge-base"));
 			}
+			break;
 		}
 		tabPanel.setOutputMarkupId(true);
 		if (target != null) {
@@ -548,7 +574,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;
-
+		
 		public DepotAndRevision leftSide;
 		
 		public DepotAndRevision rightSide;
@@ -556,6 +582,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		public boolean compareWithMergeBase = true;
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
+		
+		@Nullable
+		public TabPanel tabPanel;
 
 		@Nullable
 		public String pathFilter;
@@ -577,6 +606,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			pathFilter = state.pathFilter;
 			commentId = state.commentId;
 			mark = state.mark;
+			tabPanel = state.tabPanel;
 		}
 		
 	}
@@ -594,6 +624,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
+		markState.tabPanel = state.tabPanel;
 		markState.whitespaceOption = state.whitespaceOption;
 		markState.compareWithMergeBase = state.compareWithMergeBase;
 		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getDepot(), markState)).toString();
@@ -607,6 +638,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		commentState.mark = new DiffMark(comment, mergeBaseModel.getObject(), rightCommitId.name());
 		commentState.commentId = comment.getId();
+		commentState.tabPanel = state.tabPanel;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
 		return urlFor(RevisionComparePage.class, paramsOf(commentState.rightSide.getDepot(), commentState)).toString();

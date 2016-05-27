@@ -641,6 +641,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
+		state.tabPanel = RevisionComparePage.TabPanel.FILES;
 		state.whitespaceOption = whitespaceOption;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
 	}
@@ -674,6 +675,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
+		state.tabPanel = RevisionComparePage.TabPanel.FILES;
 		state.whitespaceOption = whitespaceOption;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
 	}

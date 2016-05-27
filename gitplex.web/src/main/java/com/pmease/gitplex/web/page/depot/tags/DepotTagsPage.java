@@ -337,7 +337,7 @@ public class DepotTagsPage extends DepotPage {
 							RevisionComparePage.State state = new RevisionComparePage.State();
 							state.leftSide = target;
 							state.rightSide = source;
-							state.pathFilter = "";
+							state.tabPanel = RevisionComparePage.TabPanel.FILES;
 							PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
 							setResponsePage(RevisionComparePage.class, params);
 						} catch (IOException e) {

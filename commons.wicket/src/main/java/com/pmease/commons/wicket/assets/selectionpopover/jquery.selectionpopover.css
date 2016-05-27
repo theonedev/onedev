@@ -12,7 +12,10 @@
 	display: block;
 	white-space: nowrap;
 }
-.selection-popover>.content a+a, a+span, span+span, span+a {
+.selection-popover>.content a+a, 
+.selection-popover>.content a+span, 
+.selection-popover>.content span+span, 
+.selection-popover>.content span+a {
 	margin-top: 8px;
 }
 .selection-popover>.triangle {

@@ -418,10 +418,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public void setObject(String object) {
-				if (object != null)
-					pathFilter = object;
-				else
-					pathFilter = ""; // use empty string to make files tab being selected upon refresh
+				pathFilter = object;
 			}
 			
 		}));

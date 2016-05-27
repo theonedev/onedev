@@ -431,6 +431,7 @@ public class DepotCommitsPage extends DepotPage {
 				state.leftSide = new DepotAndRevision(getDepot(), commit.getHash());
 				state.rightSide = new DepotAndRevision(getDepot(), DepotCommitsPage.this.state.getCompareWith());
 				state.pathFilter = path;
+				state.tabPanel = RevisionComparePage.TabPanel.FILES;
 				
 				PageParameters params = RevisionComparePage.paramsOf(getDepot(), state);
 				item.add(new BookmarkablePageLink<Void>("compare", RevisionComparePage.class, params));
