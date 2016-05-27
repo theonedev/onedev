@@ -102,7 +102,7 @@ public abstract class InstantSearchPanel extends Panel {
 			
 			// now do wildcard search but exclude the exact match returned above 
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery("*"+searchInput+"*", searchInput, true, false, 
+				query = new SymbolQuery(searchInput+"*", searchInput, true, false, 
 						null, null, count-symbolHits.size());
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
@@ -115,7 +115,7 @@ public abstract class InstantSearchPanel extends Panel {
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new FileQuery("*"+searchInput+"*", searchInput, false, null, 
+				query = new FileQuery(searchInput+"*", searchInput, false, null, 
 						count-symbolHits.size());
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
@@ -128,7 +128,7 @@ public abstract class InstantSearchPanel extends Panel {
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery("*"+searchInput+"*", searchInput, false, false, 
+				query = new SymbolQuery(searchInput+"*", searchInput, false, false, 
 						null, null, count-symbolHits.size());
 				symbolHits.addAll(searchManager.search(depotModel.getObject(), commit, query));
 			}
