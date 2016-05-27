@@ -15,7 +15,7 @@ public class CompareContext implements Serializable {
 
 	@OptimisticLock(excluded=true)
 	private String compareCommit;
-	
+
 	@OptimisticLock(excluded=true)
 	private Boolean leftSide;
 	

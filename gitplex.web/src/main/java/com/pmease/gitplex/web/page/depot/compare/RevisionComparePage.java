@@ -9,10 +9,13 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -23,8 +26,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.google.common.collect.Lists;
 import com.pmease.commons.git.Commit;
 import com.pmease.commons.git.Git;
+import com.pmease.commons.git.command.LogCommand;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
@@ -58,6 +63,8 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	
 	private static final String PARAM_RIGHT = "right";
 	
+	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compareWithMergeBase";
+	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
 	private static final String PARAM_COMMENT = "comment";
@@ -80,12 +87,15 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	
 	private State state = new State();
 	
-	private ObjectId resolvedRightSideRevision;
+	private ObjectId leftCommitId;
+	
+	private ObjectId rightCommitId;
 	
 	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
 		params.set(PARAM_LEFT, state.leftSide.toString());
 		params.set(PARAM_RIGHT, state.rightSide.toString());
+		params.set(PARAM_COMPARE_WITH_MERGE_BASE, state.compareWithMergeBase);
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
@@ -103,19 +113,33 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		if (!getDepot().git().hasRefs()) 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getDepot()));
 
-		String str = params.get(PARAM_RIGHT).toString();
+		String str = params.get(PARAM_LEFT).toString();
+		if (str != null) {
+			state.leftSide = new DepotAndRevision(str);
+		} else {
+			state.leftSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
+		}
+		leftCommitId = state.leftSide.getCommit().copy();
+		
+		str = params.get(PARAM_RIGHT).toString();
 		if (str != null) {
 			state.rightSide = new DepotAndRevision(str);
 		} else {
 			state.rightSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
 		}
-		resolvedRightSideRevision = state.rightSide.getCommit().copy();
+		rightCommitId = state.rightSide.getCommit().copy();
 		
-		str = params.get(PARAM_LEFT).toString();
-		if (str != null) {
-			state.leftSide = new DepotAndRevision(str);
-		} else {
-			state.leftSide = new DepotAndRevision(getDepot(), getDepot().getDefaultBranch());
+		state.compareWithMergeBase = params.get(PARAM_COMPARE_WITH_MERGE_BASE).toBoolean(true);
+		
+		/*
+		 * When compare across different repositories, left revision and right revision might not 
+		 * exist in same repository and this cause many difficulties such as calculating changes, 
+		 * recording comment revisions, or get permanent mark urls. So we add below constraint as
+		 * merge base commit and right side revision are guaranteed to be both in right side 
+		 * repository  
+		 */
+		if (!state.compareWithMergeBase && !state.leftSide.getDepot().equals(state.rightSide.getDepot())) {
+			throw new IllegalArgumentException("Can only compare with merge base when compare across repositories");
 		}
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
@@ -147,7 +171,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 						tempGit.clone(leftDepot.git(), false, true, true, state.leftSide.getRevision());
 						tempGit.reset(null, null);
 						tempGit.fetch(rightDepot.git(), state.rightSide.getRevision());
-						return tempGit.calcMergeBase(state.leftSide.getCommit().name(), state.rightSide.getCommit().name());
+						return tempGit.calcMergeBase(leftCommitId.name(), rightCommitId.name());
 					} finally {
 						FileUtils.deleteDir(tempGit.depotDir());
 					}
@@ -164,10 +188,26 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			protected List<Commit> load() {
 				Depot rightDepot = state.rightSide.getDepot();
 				
-				// for right side, we use resolved commit name instead of revision 
-				// to make sure that revision is resolved consistently
-				return rightDepot.git().log(mergeBaseModel.getObject(), 
-						state.rightSide.getCommit().name(), null, 0, 0, false);
+				/*
+				 * have to pass commit id here to log command even if we cached the object id as log command
+				 * calls external git command and object id cache will not take effect
+				 */
+				if (rightDepot.equals(state.leftSide.getDepot())) {
+					if (!state.compareWithMergeBase) {
+						String revisions = leftCommitId.name() + "..." + rightCommitId.name();
+						LogCommand log = new LogCommand(rightDepot.git().depotDir());
+						List<Commit> commits = log.revisions(Lists.newArrayList(revisions)).call();
+						// add the merge base commit to make the revision graph understandable 
+						if (!mergeBaseModel.getObject().equals(leftCommitId.name()))
+							commits.add(rightDepot.git().showRevision(mergeBaseModel.getObject()));
+						return commits;
+					} else {
+						return rightDepot.git().log(mergeBaseModel.getObject(), rightCommitId.name(), null, 0, 0, false);
+					}
+				} else {
+					return rightDepot.git().log(mergeBaseModel.getObject(), 
+							rightCommitId.name(), null, 0, 0, false);
+				}
 			}
 			
 		};
@@ -189,12 +229,54 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.rightSide = state.rightSide;
 				newState.pathFilter = state.pathFilter;
 				newState.whitespaceOption = state.whitespaceOption;
+				newState.compareWithMergeBase = state.compareWithMergeBase;
+				newState.mark = state.mark;
+				newState.commentId = state.commentId;
 
 				PageParameters params = paramsOf(depot, newState);
 				setResponsePage(RevisionComparePage.class, params);
 			}
 			
 		});
+		
+		CheckBox checkBox = new CheckBox("compareWithMergeBase", Model.of(state.compareWithMergeBase)) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!mergeBaseModel.getObject().equals(leftCommitId.name()));
+			}
+			
+		};
+		checkBox.add(new OnChangeAjaxBehavior() {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				State newState = new State();
+				newState.leftSide = state.leftSide;
+				newState.rightSide = state.rightSide;
+				newState.whitespaceOption = state.whitespaceOption;
+				newState.compareWithMergeBase = !state.compareWithMergeBase;
+				newState.commentId = state.commentId;
+				newState.mark = state.mark;
+				
+				PageParameters params = RevisionComparePage.paramsOf(depotModel.getObject(), newState);
+				setResponsePage(RevisionComparePage.class, params);
+			}
+			
+		});
+		add(checkBox);
+
+		String tooltip;
+		if (!state.leftSide.getDepotId().equals(state.rightSide.getDepotId())) {
+			checkBox.add(AttributeAppender.append("disabled", "disabled"));
+			tooltip = "Can only compare with common ancestor when compare across different repositories";
+		} else {
+			tooltip = "Check this to compare \"right side\" with common ancestor of left and right";
+		}
+		
+		add(new WebMarkupContainer("tooltip").add(new TooltipBehavior(Model.of(tooltip))));
+		
 		add(new AffinalRevisionPicker("rightSide", 
 				state.rightSide.getDepotId(), state.rightSide.getRevision()) { 
 
@@ -205,6 +287,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.rightSide = new DepotAndRevision(depot, revision);
 				newState.pathFilter = state.pathFilter;
 				newState.whitespaceOption = state.whitespaceOption;
+				newState.compareWithMergeBase = state.compareWithMergeBase;
+				newState.commentId = state.commentId;
+				newState.mark = state.mark;
 				
 				PageParameters params = paramsOf(getDepot(), newState);
 				setResponsePage(RevisionComparePage.class, params);
@@ -221,16 +306,14 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.rightSide = state.leftSide;
 				newState.pathFilter = state.pathFilter;
 				newState.whitespaceOption = state.whitespaceOption;
+				newState.compareWithMergeBase = state.compareWithMergeBase;
+				newState.mark = state.mark;
+				newState.commentId = state.commentId;
+				
 				setResponsePage(RevisionComparePage.class,paramsOf(getDepot(), newState));
 			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!mergeBaseModel.getObject().equals(state.leftSide.getCommit().name()));
-			}
-
-		}.add(new TooltipBehavior(Model.of("Left side is ahead of right side, swap to see changes"))));
+		});
 		
 		add(new Link<Void>("createRequest") {
 
@@ -247,7 +330,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				
 				if (state.leftSide.getBranch()!=null && state.rightSide.getBranch()!=null) {
 					PullRequest request = requestModel.getObject();
-					setVisible(request == null && !mergeBaseModel.getObject().equals(state.rightSide.getCommit().name()));
+					setVisible(request == null && !mergeBaseModel.getObject().equals(rightCommitId.name()));
 				} else {
 					setVisible(false);
 				}
@@ -261,8 +344,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				PullRequest request = requestModel.getObject();
-				setVisible(request != null);
+				setVisible(requestModel.getObject() != null);
 			}
 
 			@Override
@@ -352,7 +434,11 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	}
 	
 	private boolean hasChanges() {
-		return !mergeBaseModel.getObject().equals(state.rightSide.getCommit().name());
+		if (state.compareWithMergeBase) {
+			return !mergeBaseModel.getObject().equals(rightCommitId.name());
+		} else {
+			return !leftCommitId.name().equals(rightCommitId.name());
+		}
 	}
 	
 	@Override
@@ -370,13 +456,16 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				@Override
 				protected Depot load() {
 					Depot depot = state.rightSide.getDepot();
-					depot.cacheObjectId(state.rightSide.getRevision(), resolvedRightSideRevision);
+					if (state.leftSide.getDepotId().equals(state.rightSide.getDepotId()))
+						depot.cacheObjectId(state.leftSide.getRevision(), leftCommitId);
+					depot.cacheObjectId(state.rightSide.getRevision(), rightCommitId);
 					return depot;
 				}
 				
 			};
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
-					new Model<PullRequest>(null), mergeBaseModel.getObject(), 
+					new Model<PullRequest>(null), 
+					state.compareWithMergeBase?mergeBaseModel.getObject():state.leftSide.getRevision(), 
 					state.rightSide.getRevision(), state.pathFilter, 
 					state.whitespaceOption, this) {
 
@@ -414,6 +503,10 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			};
 			commitsTab.setSelected(true);
 			filesTab.setSelected(false);
+			
+			if (!mergeBaseModel.getObject().equals(leftCommitId.name()) && !state.compareWithMergeBase) {
+				tabPanel.add(AttributeAppender.append("class", "with-merge-base"));
+			}
 		}
 		tabPanel.setOutputMarkupId(true);
 		if (target != null) {
@@ -460,6 +553,8 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		
 		public DepotAndRevision rightSide;
 		
+		public boolean compareWithMergeBase = true;
+		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 
 		@Nullable
@@ -477,6 +572,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		public State(State state) {
 			leftSide = state.leftSide;
 			rightSide = state.rightSide;
+			compareWithMergeBase = state.compareWithMergeBase;
 			whitespaceOption = state.whitespaceOption;
 			pathFilter = state.pathFilter;
 			commentId = state.commentId;
@@ -493,20 +589,23 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	@Override
 	public String getMarkUrl(DiffMark mark) {
 		State markState = new State();
-		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), mergeBaseModel.getObject());
-		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), resolvedRightSideRevision.name());
+		markState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
+				state.compareWithMergeBase?mergeBaseModel.getObject():leftCommitId.name());
+		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
 		markState.whitespaceOption = state.whitespaceOption;
+		markState.compareWithMergeBase = state.compareWithMergeBase;
 		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getDepot(), markState)).toString();
 	}
 
 	@Override
 	public String getCommentUrl(CodeComment comment) {
 		State commentState = new State();
-		commentState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), mergeBaseModel.getObject());
-		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), resolvedRightSideRevision.name());
-		commentState.mark = new DiffMark(comment, mergeBaseModel.getObject(), resolvedRightSideRevision.name());
+		commentState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
+				state.compareWithMergeBase?mergeBaseModel.getObject():leftCommitId.name());
+		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
+		commentState.mark = new DiffMark(comment, mergeBaseModel.getObject(), rightCommitId.name());
 		commentState.commentId = comment.getId();
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
@@ -523,7 +622,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		state.mark = new DiffMark(comment, mergeBaseModel.getObject(), resolvedRightSideRevision.name());
+		state.mark = new DiffMark(comment, mergeBaseModel.getObject(), rightCommitId.name());
 		state.commentId = comment.getId();
 		pushState(target);
 	}

@@ -36,15 +36,9 @@
 #revision-compare>.body>.revisions>.revision>div>a {
 	color: #666;
 	margin-left: 4px;
+	margin-bottom: 4px;
 }
 
-#revision-compare>.body>.nav-tabs {
-	margin-bottom: 20px;
-}
-#revision-compare>.body>.tab-panel>.diff-option {
-	padding: 8px;
-	background: #F2F2F2;
-	border: 1px solid #DDD;
-	z-index: 200;
-	margin-bottom: 16px;
+#revision-compare .with-merge-base ul>li.commit:last-child {
+	opacity: 0.6;	
 }
