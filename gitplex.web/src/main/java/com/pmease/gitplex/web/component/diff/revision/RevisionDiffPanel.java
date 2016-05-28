@@ -152,12 +152,29 @@ public abstract class RevisionDiffPanel extends Panel {
 	    		changedPaths.addAll(change.getPaths());
 			}
 
-			Set<String> commentedPaths = new HashSet<>();
-			for (CodeComment comment: commentsModel.getObject()) {
-				if (!changedPaths.contains(comment.getPath()) 
-						&& !commentedPaths.contains(comment.getPath())) {
-					BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getPath(), FileMode.TYPE_FILE);
-					BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getPath(), FileMode.TYPE_FILE);
+			Set<String> markedPaths = new HashSet<>();
+			if (markSupport != null) {
+				for (CodeComment comment: commentsModel.getObject()) {
+					if (!changedPaths.contains(comment.getPath()) 
+							&& !markedPaths.contains(comment.getPath())) {
+						BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getPath(), FileMode.TYPE_FILE);
+						BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getPath(), FileMode.TYPE_FILE);
+						allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOption) {
+
+							@Override
+							public Blob getBlob(BlobIdent blobIdent) {
+								return depotModel.getObject().getBlob(blobIdent);
+							}
+							
+						});
+					}
+					markedPaths.add(comment.getPath());
+				}
+				
+				DiffMark mark = markSupport.getMark();
+				if (mark != null) {
+					BlobIdent oldBlobIdent = new BlobIdent(oldRev, mark.getPath(), FileMode.TYPE_FILE);
+					BlobIdent newBlobIdent = new BlobIdent(newRev, mark.getPath(), FileMode.TYPE_FILE);
 					allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOption) {
 
 						@Override
@@ -166,8 +183,8 @@ public abstract class RevisionDiffPanel extends Panel {
 						}
 						
 					});
+					markedPaths.add(mark.getPath());
 				}
-				commentedPaths.add(comment.getPath());
 			}
 			
 			List<BlobChange> filterChanges = new ArrayList<>();
@@ -176,12 +193,22 @@ public abstract class RevisionDiffPanel extends Panel {
 		    		String matchWith = pathFilter.toLowerCase().trim();
 	    			matchWith = StringUtils.stripStart(matchWith, "/");
 	    			matchWith = StringUtils.stripEnd(matchWith, "/");
-	    			String path = change.getPath().toLowerCase();
-	    			if (matchWith.equals(path)) {
+	    			String oldPath = change.getOldBlobIdent().path;
+	    			if (oldPath == null)
+	    				oldPath = "";
+	    			else
+	    				oldPath = oldPath.toLowerCase();
+	    			String newPath = change.getNewBlobIdent().path.toLowerCase();
+	    			if (newPath == null)
+	    				newPath = "";
+	    			else
+	    				newPath = newPath.toLowerCase();
+	    			if (matchWith.equals(oldPath) || matchWith.equals(newPath)) {
 	    				filterChanges.add(change);
-	    			} else if (path.startsWith(matchWith + "/")) {
+	    			} else if (oldPath.startsWith(matchWith + "/") || newPath.startsWith(matchWith + "/")) {
 	    				filterChanges.add(change);
-	    			} else if (WildcardUtils.matchString(matchWith, path)){
+	    			} else if (WildcardUtils.matchString(matchWith, oldPath) 
+	    					|| WildcardUtils.matchString(matchWith, newPath)){
 	    				filterChanges.add(change);
 	    			}
 	    		} else {
@@ -264,7 +291,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		    		if (change.getType() == ChangeType.MODIFY 
 		    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
 		    				&& change.getAdditions() + change.getDeletions() == 0
-		    				&& !commentedPaths.contains(change.getPath())) {
+		    				&& !markedPaths.contains(change.getPath())) {
 		    			Blob.Text oldText = change.getOldText();
 		    			Blob.Text newText = change.getNewText();
 		    			if (oldText != null && newText != null 
@@ -309,13 +336,9 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected Collection<CodeComment> load() {
-			if (markSupport != null) {
-				Depot depot = depotModel.getObject();
-				return GitPlex.getInstance(CodeCommentManager.class).query(
-						depot, depot.getRevCommit(oldRev), depot.getRevCommit(newRev));
-			} else {
-				return new ArrayList<>();
-			}
+			Depot depot = depotModel.getObject();
+			return GitPlex.getInstance(CodeCommentManager.class).query(
+					depot, depot.getRevCommit(oldRev), depot.getRevCommit(newRev));
 		}
 		
 	};
@@ -665,7 +688,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return changesAndCountModel.getObject().getChanges().size() + " changed or commented files ";
+				return changesAndCountModel.getObject().getChanges().size() + " files ";
 			}
 			
 		}));
@@ -704,7 +727,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				String iconClass;
 				if (change.getType() == null) {
-					iconClass = " fa fa-commenting";
+					iconClass = " fa fa-square-o";
 				} else if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
 					iconClass = " fa-ext fa-diff-added";
 				else if (change.getType() == ChangeType.DELETE)
@@ -719,8 +742,17 @@ public abstract class RevisionDiffPanel extends Panel {
 				WebMarkupContainer fileLink = new WebMarkupContainer("file");
 				fileLink.add(new Label("name", change.getPath()));
 				fileLink.add(AttributeModifier.replace("href", "#diff-" + change.getPath()));
-				
 				item.add(fileLink);
+
+				boolean hasComments = false;
+				for (CodeComment comment: commentsModel.getObject()) {
+					if (change.getPaths().contains(comment.getPath())) {
+						hasComments = true;
+						break;
+					}
+				}
+				
+				item.add(new WebMarkupContainer("hasComments").setVisible(hasComments));
 				
 				item.add(new Label("additions", "+" + change.getAdditions()));
 				item.add(new Label("deletions", "-" + change.getDeletions()));
@@ -960,8 +992,7 @@ public abstract class RevisionDiffPanel extends Panel {
 						public Collection<CodeComment> getComments() {
 							Collection<CodeComment> comments = new ArrayList<>();
 							for (CodeComment comment: commentsModel.getObject()) {
-								if (comment.getPath().equals(change.getOldBlobIdent().path)
-										|| comment.getPath().equals(change.getNewBlobIdent().path)) {
+								if (change.getPaths().contains(comment.getPath())) {
 									comments.add(comment);
 								}
 							}

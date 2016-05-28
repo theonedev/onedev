@@ -29,6 +29,13 @@
 	margin-top: 2px;
 	margin-right: 0;
 }
+.revision-diff>.body>.diff-stats>.diff-stat .fa-square-o {
+	font-size: 16px;
+}
+.revision-diff>.body>.diff-stats>.diff-stat .has-comments {
+	color: #999;
+}
+
 .revision-diff>.body>.diff-stats>.diff-stat .fa-diff-modified, 
 .revision-diff>.body>.diff-stats>.diff-stat .fa-diff-renamed {
 	color: #D0B44C;

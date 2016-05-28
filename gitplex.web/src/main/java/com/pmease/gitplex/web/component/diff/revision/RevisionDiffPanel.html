@@ -27,11 +27,12 @@
 			<div class="title">
 				Total <a wicket:id="totalChanged"></a>
 			</div>
-			<div wicket:id="tooManyChanges" class="alert alert-warning">Sorry we are unable to display the full diff as there are too many changes</div>
+			<div wicket:id="tooManyChanges" class="alert alert-warning">Sorry we are unable to display all files as there are too many</div>
 			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
 				<li wicket:id="diffStats" class="diff-stat clearfix">
 					<i wicket:id="icon" class="icon pull-left"></i>
 					<a wicket:id="file" class="file pull-left"><span wicket:id="name"></span></a>
+					<span wicket:id="hasComments" title="There are comments on this file" class="has-comments pull-left"><i class="fa fa-commenting"></i></span>
 					<wicket:enclosure child="bar">
 					<span wicket:id="bar" class="bar pull-right"></span>
 					<span wicket:id="deletions" class="deletions pull-right"></span>
