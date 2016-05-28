@@ -25,6 +25,8 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobChange;
@@ -36,6 +38,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.diffmatchpatch.DiffMatchPatchResourceReference;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.Mark;
@@ -221,7 +224,7 @@ public abstract class FileEditPanel extends Panel {
 				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
 				previewBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
 				saveBehavior.getCallbackFunction(CallbackParameter.explicit("content")), 
-				mark!=null?mark.toJson():"undefined",
+				mark!=null?getJson(mark):"undefined",
 				viewState!=null?"JSON.parse('"+viewState+"')":"undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
@@ -248,9 +251,17 @@ public abstract class FileEditPanel extends Panel {
 				getMarkupId(), getNewPathParam()));
 	}
 	
+	private String getJson(Mark mark) {
+		try {
+			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(mark);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public void mark(AjaxRequestTarget target, Mark mark) {
 		String script = String.format("gitplex.fileedit.mark('%s', %s);", 
-				getMarkupId(), mark.toJson());
+				getMarkupId(), getJson(mark));
 		target.appendJavaScript(script);
 	}
 

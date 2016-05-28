@@ -253,6 +253,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.mark = state.mark;
 				newState.commentId = state.commentId;
+				newState.tabPanel = state.tabPanel;
 
 				PageParameters params = paramsOf(depot, newState);
 				setResponsePage(RevisionComparePage.class, params);
@@ -280,6 +281,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.compareWithMergeBase = !state.compareWithMergeBase;
 				newState.commentId = state.commentId;
 				newState.mark = state.mark;
+				newState.tabPanel = state.tabPanel;
 				
 				PageParameters params = RevisionComparePage.paramsOf(depotModel.getObject(), newState);
 				setResponsePage(RevisionComparePage.class, params);
@@ -312,6 +314,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.commentId = state.commentId;
 				newState.mark = state.mark;
+				newState.tabPanel = state.tabPanel;
 				
 				PageParameters params = paramsOf(getDepot(), newState);
 				setResponsePage(RevisionComparePage.class, params);
@@ -624,7 +627,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
-		markState.tabPanel = state.tabPanel;
+		markState.tabPanel = TabPanel.FILES;
 		markState.whitespaceOption = state.whitespaceOption;
 		markState.compareWithMergeBase = state.compareWithMergeBase;
 		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getDepot(), markState)).toString();
@@ -636,9 +639,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		commentState.leftSide = new DepotAndRevision(state.rightSide.getDepot(), 
 				state.compareWithMergeBase?mergeBaseModel.getObject():leftCommitId.name());
 		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
-		commentState.mark = new DiffMark(comment, mergeBaseModel.getObject(), rightCommitId.name());
+		commentState.mark = new DiffMark(comment);
 		commentState.commentId = comment.getId();
-		commentState.tabPanel = state.tabPanel;
+		commentState.tabPanel = TabPanel.FILES;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
 		return urlFor(RevisionComparePage.class, paramsOf(commentState.rightSide.getDepot(), commentState)).toString();
@@ -654,7 +657,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		state.mark = new DiffMark(comment, mergeBaseModel.getObject(), rightCommitId.name());
+		state.mark = new DiffMark(comment);
 		state.commentId = comment.getId();
 		pushState(target);
 	}

@@ -152,6 +152,9 @@
 	font-size: 16px;	
 	color: #333;	
 }
+.text-diff>.body>tbody>tr>td.number>.comment-trigger.active {
+	line-height: 14px;
+}
 
 .diff-tokentooltip {
 	background-color: infobackground; 

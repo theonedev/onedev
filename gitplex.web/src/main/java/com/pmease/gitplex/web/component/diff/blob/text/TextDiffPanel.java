@@ -50,6 +50,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
@@ -97,6 +98,15 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		this.change = change;
 		this.diffMode = diffMode;
 		this.markSupport = markSupport;
+	}
+
+	private String getJson(DiffMark mark) {
+		try {
+			MarkInfo markInfo = new MarkInfo(mark, getOldCommit().name());
+			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(markInfo);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -177,7 +187,7 @@ public class TextDiffPanel extends Panel implements MarkAware {
 							params.getParameterValue("param2").toInt());
 					DiffMark mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
 					script = String.format("gitplex.textdiff.openSelectionPopover('%s', %s, %s, '%s', %s);", 
-							getMarkupId(), jsonOfPosition, mark.toJson(), markSupport.getMarkUrl(mark), 
+							getMarkupId(), jsonOfPosition, getJson(mark), markSupport.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
 					break;
@@ -187,7 +197,7 @@ public class TextDiffPanel extends Panel implements MarkAware {
 					mark = getMark(params, "param1", "param2", "param3", "param4", "param5");
 					markSupport.onAddComment(target, mark);
 					script = String.format("gitplex.textdiff.onAddComment($('#%s'), %s);", 
-							getMarkupId(), mark.toJson());
+							getMarkupId(), getJson(mark));
 					target.appendJavaScript(script);
 					break;
 				case "openComment": 
@@ -238,7 +248,8 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		int beginChar = params.getParameterValue(beginCharParam).toInt();
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
-		return new DiffMark(change.getPath(), leftSide, beginLine, beginChar, endLine, endChar);
+		String commit = leftSide?getOldCommit().name():getNewCommit().name();
+		return new DiffMark(commit, change.getPath(), beginLine, beginChar, endLine, endChar);
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
@@ -307,7 +318,6 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		String dirtyContainerId;
 		if (markSupport != null) {
 			String oldCommitHash = getOldCommit().name();
-			String newCommitHash = getNewCommit().name();
 			Map<Integer, List<CommentInfo>> oldCommentInfos = new HashMap<>(); 
 			Map<Integer, List<CommentInfo>> newCommentInfos = new HashMap<>(); 
 			for (CodeComment comment: markSupport.getComments()) {
@@ -316,8 +326,8 @@ public class TextDiffPanel extends Panel implements MarkAware {
 					List<CommentInfo> commentInfosAtLine;
 					CommentInfo commentInfo = new CommentInfo();
 					commentInfo.id = comment.getId();
-					commentInfo.mark = new DiffMark(comment, oldCommitHash, newCommitHash);
-					if (commentInfo.mark.isLeftSide()) {
+					commentInfo.mark = new MarkInfo(comment, oldCommitHash);
+					if (commentInfo.mark.leftSide) {
 						commentInfosAtLine = oldCommentInfos.get(line);
 						if (commentInfosAtLine == null) {
 							commentInfosAtLine = new ArrayList<>();
@@ -340,16 +350,17 @@ public class TextDiffPanel extends Panel implements MarkAware {
 				value.sort((o1, o2)->(int)(o1.id-o2.id));
 			}
 			
+			ObjectMapper mapper = GitPlex.getInstance(ObjectMapper.class);
 			try {
-				jsonOfOldCommentInfos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(oldCommentInfos);
-				jsonOfNewCommentInfos = GitPlex.getInstance(ObjectMapper.class).writeValueAsString(newCommentInfos);
+				jsonOfOldCommentInfos = mapper.writeValueAsString(oldCommentInfos);
+				jsonOfNewCommentInfos = mapper.writeValueAsString(newCommentInfos);
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
 			
 			DiffMark mark = markSupport.getMark();
 			if (mark != null) {
-				jsonOfMark = mark.toJson();
+				jsonOfMark = getJson(mark);
 			} else {
 				jsonOfMark = "undefined";
 			}
@@ -721,14 +732,13 @@ public class TextDiffPanel extends Panel implements MarkAware {
 					marks.add(mark);
 				}
 				String oldCommitHash = getOldCommit().name();
-				String newCommitHash = getNewCommit().name();
 				for (CodeComment comment: markSupport.getComments()) {
-					mark = new DiffMark(comment, oldCommitHash, newCommitHash);
+					mark = new DiffMark(comment);
 					marks.add(mark);
 				}
 				for (DiffMark each: marks) {
 					Range range = new Range(each.beginLine, each.endLine+1);
-					if (each.isLeftSide()) {
+					if (each.getCommit().equals(oldCommitHash)) {
 						oldRanges.add(range);
 					} else {
 						newRanges.add(range);
@@ -798,7 +808,7 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	private String getJsonOfComment(CodeComment comment) {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();
-		commentInfo.mark = new DiffMark(comment, getOldCommit().name(), getNewCommit().name());
+		commentInfo.mark = new MarkInfo(comment, getOldCommit().name());
 
 		String jsonOfCommentInfo;
 		try {
@@ -836,7 +846,7 @@ public class TextDiffPanel extends Panel implements MarkAware {
 				+ "var mark = %s;"
 				+ "gitplex.textdiff.scroll($container, mark);"
 				+ "gitplex.textdiff.mark($container, mark);", 
-				getMarkupId(), mark.toJson());
+				getMarkupId(), getJson(mark));
 		target.appendJavaScript(script);
 	}
 	
@@ -853,7 +863,32 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	private static class CommentInfo {
 		long id;
 		
-		DiffMark mark;
+		MarkInfo mark;
 	}
 
+	@SuppressWarnings("unused")
+	private static class MarkInfo extends Mark {
+		
+		String path;
+		
+		boolean leftSide;
+
+		public MarkInfo() {
+			
+		}
+		
+		public MarkInfo(CodeComment comment, String oldCommitHash) {
+			super(comment.getMark());
+			path = comment.getPath();
+			leftSide = comment.getCommit().equals(oldCommitHash);
+		}
+		
+		public MarkInfo(DiffMark mark, String oldCommitHash) {
+			super(mark);
+			path = mark.getPath();
+			leftSide = mark.getCommit().equals(oldCommitHash);
+		}
+		
+	}
+	
 }

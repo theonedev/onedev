@@ -231,8 +231,16 @@ public class SourceViewPanel extends BlobViewPanel {
 
 	public void mark(AjaxRequestTarget target, Mark mark, boolean scroll) {
 		String script = String.format("gitplex.sourceview.mark(%s, %s);", 
-				mark.toJson(), scroll);
+				getJson(mark), scroll);
 		target.appendJavaScript(script);
+	}
+	
+	private String getJson(Mark mark) {
+		try {
+			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(mark);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override
@@ -352,7 +360,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				case "openSelectionPopover": 
 					Mark mark = getMark(params, "param1", "param2", "param3", "param4");
 					String script = String.format("gitplex.sourceview.openSelectionPopover(%s, '%s', %s);", 
-							mark.toJson(), context.getMarkUrl(mark), 
+							getJson(mark), context.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
 					break;
@@ -452,7 +460,7 @@ public class SourceViewPanel extends BlobViewPanel {
 					commentContainer.setVisible(true);
 					target.add(commentContainer);
 					context.onAddComment(target, mark);
-					target.appendJavaScript(String.format("gitplex.sourceview.onAddComment(%s);", mark.toJson()));
+					target.appendJavaScript(String.format("gitplex.sourceview.onAddComment(%s);", getJson(mark)));
 					break;
 				case "openComment":
 					Long commentId = params.getParameterValue("param1").toLong();
@@ -753,7 +761,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",
-				context.getMark()!=null?context.getMark().toJson():"undefined",
+				context.getMark()!=null?getJson(context.getMark()):"undefined",
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
 				jsonOfBlameInfos, 

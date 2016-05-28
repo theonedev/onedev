@@ -6,9 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.component.Mark;
 
@@ -16,42 +13,42 @@ public class DiffMark extends Mark {
 	
 	private static final long serialVersionUID = 1L;
 
+	private final String commit;
+	
 	private final String path;
 	
-	private final boolean leftSide;
-
-	public DiffMark(String path, boolean leftSide, int beginLine, int beginChar, 
+	public DiffMark(String commit, String path, int beginLine, int beginChar, 
 			int endLine, int endChar) {
 		super(beginLine, beginChar, endLine, endChar);
+		this.commit = commit;
 		this.path = path;
-		this.leftSide = leftSide;
 	}
 	
-	public DiffMark(String path, boolean leftSide, Mark mark) {
+	public DiffMark(String commit, String path, Mark mark) {
 		super(mark);
+		this.commit = commit;
 		this.path = path;
-		this.leftSide = leftSide;
 	}
 	
-	public DiffMark(CodeComment comment, String oldCommitHash, String newCommitHash) {
+	public DiffMark(CodeComment comment) {
 		super(comment.getMark());
+		commit = comment.getCommit();
 		path = comment.getPath();
-		leftSide = comment.getCommit().equals(oldCommitHash);
+	}
+
+	public String getCommit() {
+		return commit;
 	}
 
 	public String getPath() {
 		return path;
 	}
 
-	public boolean isLeftSide() {
-		return leftSide;
-	}
-
 	public DiffMark(String str) {
 		super(str.substring(getMarkIndex(str)+1));
 		String tempStr = str.substring(0, getMarkIndex(str));
-		path = StringUtils.substringBeforeLast(tempStr, "-");
-		leftSide = Boolean.valueOf(StringUtils.substringAfterLast(tempStr, "-"));
+		commit = StringUtils.substringBefore(tempStr, "-");
+		path = StringUtils.substringAfter(tempStr, "-");
 	}
 	
 	private static int getMarkIndex(String str) {
@@ -60,7 +57,7 @@ public class DiffMark extends Mark {
 	
 	@Override
 	public String toString() {
-		return path + "-" + leftSide + "-" + super.toString();
+		return commit + "-" + path + "-" + super.toString();
 	}
 	
 	@Override
@@ -71,8 +68,8 @@ public class DiffMark extends Mark {
 			return true;
 		DiffMark otherMark = (DiffMark) other;
 		return new EqualsBuilder()
+				.append(commit, otherMark.commit)
 				.append(path, otherMark.path)
-				.append(leftSide, otherMark.leftSide)
 				.append(beginLine, otherMark.beginLine)
 				.append(beginChar, otherMark.beginChar)
 				.append(endLine, otherMark.endLine)
@@ -83,8 +80,8 @@ public class DiffMark extends Mark {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
+				.append(commit)
 				.append(path)
-				.append(leftSide)
 				.append(beginLine)
 				.append(beginChar)
 				.append(endLine)
@@ -92,15 +89,6 @@ public class DiffMark extends Mark {
 				.toHashCode();
 	}
 	
-	@Override
-	public String toJson() {
-		try {
-			return GitPlex.getInstance(ObjectMapper.class).writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		} 
-	}
-
 	public static DiffMark of(@Nullable String markStr) {
 		if (markStr != null)
 			return new DiffMark(markStr);

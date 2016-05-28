@@ -439,7 +439,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 	public String getCommentUrl(CodeComment comment) {
 		State commentState = new State();
 		String compareWith = getCompareWith().name();
-		commentState.mark = new DiffMark(comment, compareWith, resolvedRevision.name());
+		commentState.mark = new DiffMark(comment);
 		commentState.commentId = comment.getId();
 		commentState.whitespaceOption = state.whitespaceOption;
 		commentState.compareWith = compareWith;
@@ -459,7 +459,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		state.commentId = comment.getId();
-		state.mark = new DiffMark(comment, getCompareWith().name(), resolvedRevision.name());
+		state.mark = new DiffMark(comment);
 		pushState(target);
 	}
 	

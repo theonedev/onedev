@@ -91,6 +91,9 @@
 	font-size: 16px;	
 	color: #333;	
 }
+.CodeMirror-comment .comment-trigger.active {
+	line-height: 14px;
+}
 .CodeMirror-annotations {
 	width: 240px;
 }

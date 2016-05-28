@@ -657,8 +657,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		commentId = comment.getId();
-		PullRequest request = getPullRequest();
-		mark = new DiffMark(comment, request.getBaseCommitHash(), request.getLatestUpdate().getHeadCommitHash());
+		mark = new DiffMark(comment);
 	}
 
 	@Override
@@ -669,8 +668,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	@Override
 	public String getCommentUrl(CodeComment comment) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
-		PullRequest request = getPullRequest();
-		mark = new DiffMark(comment, request.getBaseCommitHash(), request.getLatestUpdate().getHeadCommitHash());
+		mark = new DiffMark(comment);
 		state.commentId = comment.getId();
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());

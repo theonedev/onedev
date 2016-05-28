@@ -706,7 +706,7 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 	@Override
 	public String getCommentUrl(CodeComment comment) {
 		State state = new State();
-		state.mark = new DiffMark(comment, oldCommitHash, newCommitHash);
+		state.mark = new DiffMark(comment);
 		state.commentId = comment.getId();
 		state.oldRev = oldCommitHash;
 		state.newRev = newCommitHash;
@@ -726,7 +726,7 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		commentId = state.commentId = comment.getId();
-		mark = state.mark = new DiffMark(comment, oldCommitHash, newCommitHash);
+		mark = state.mark = new DiffMark(comment);
 		pushState(target);
 	}
 
