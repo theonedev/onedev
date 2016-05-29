@@ -84,11 +84,20 @@ public class CommitListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-
 				setVisible(commitsModel.getObject().size()>Constants.MAX_DISPLAY_COMMITS);
 			}
 			
 		});
+		add(new Label("noAnyCommits", "No any commits found") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(commitsModel.getObject().isEmpty());
+			}
+			
+		});
+		
 		container = new WebMarkupContainer("container");
 		container.setOutputMarkupId(true);
 		add(container);

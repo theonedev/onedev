@@ -16,6 +16,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -52,6 +53,7 @@ import com.pmease.gitplex.web.component.diff.revision.RevisionDiffPanel;
 import com.pmease.gitplex.web.component.revisionpicker.AffinalRevisionPicker;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetailPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
@@ -240,7 +242,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 		setOutputMarkupId(true);
 		
-		add(new AffinalRevisionPicker("leftSide", state.leftSide.getDepotId(), state.leftSide.getRevision()) { 
+		add(new AffinalRevisionPicker("leftRevSelector", state.leftSide.getDepotId(), state.leftSide.getRevision()) { 
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Depot depot, String revision) {
@@ -298,9 +300,19 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			tooltip = "Check this to compare \"right side\" with common ancestor of left and right";
 		}
 		
-		add(new WebMarkupContainer("tooltip").add(new TooltipBehavior(Model.of(tooltip))));
+		add(new WebMarkupContainer("mergeBaseTooltip").add(new TooltipBehavior(Model.of(tooltip))));
+
+		PageParameters params = CommitDetailPage.paramsOf(state.leftSide.getDepot(), state.leftSide.getCommit().name());
+		Link<Void> leftCommitLink = new BookmarkablePageLink<Void>("leftCommitLink", CommitDetailPage.class, params);
+		leftCommitLink.add(new Label("message", state.leftSide.getCommit().getShortMessage()));
+		add(leftCommitLink);
 		
-		add(new AffinalRevisionPicker("rightSide", 
+		params = CommitDetailPage.paramsOf(state.rightSide.getDepot(), state.rightSide.getCommit().name());
+		Link<Void> rightCommitLink = new BookmarkablePageLink<Void>("rightCommitLink", CommitDetailPage.class, params);
+		rightCommitLink.add(new Label("message", state.rightSide.getCommit().getShortMessage()));
+		add(rightCommitLink);
+		
+		add(new AffinalRevisionPicker("rightRevSelector", 
 				state.rightSide.getDepotId(), state.rightSide.getRevision()) { 
 
 			@Override
@@ -409,16 +421,6 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			}
 			
 		});
-		add(new WebMarkupContainer("noChanges") {
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-
-				setVisible(!hasChanges());
-			}
-
-		});
 		
 		List<Tab> tabs = new ArrayList<>();
 		
@@ -444,27 +446,11 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			
 		});
 
-		add(new Tabbable("tabs", tabs) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(hasChanges());
-			}
-
-		});
+		add(new Tabbable("tabs", tabs));
 
 		newTabPanel(null);
 		
 		add(new BackToTop("backToTop"));
-	}
-	
-	private boolean hasChanges() {
-		if (state.compareWithMergeBase) {
-			return !mergeBaseModel.getObject().equals(rightCommitId.name());
-		} else {
-			return !leftCommitId.name().equals(rightCommitId.name());
-		}
 	}
 	
 	@Override
@@ -497,12 +483,6 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 					state.whitespaceOption, this) {
 
 				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(hasChanges());
-				}
-
-				@Override
 				protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
 					state.pathFilter = pathFilter;
 					pushState(target);
@@ -520,15 +500,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			filesTab.setSelected(true);	
 			break;
 		default:
-			tabPanel = new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel){
-
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(hasChanges());
-				}
-				
-			};
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel);
 			commitsTab.setSelected(true);
 			filesTab.setSelected(false);
 			

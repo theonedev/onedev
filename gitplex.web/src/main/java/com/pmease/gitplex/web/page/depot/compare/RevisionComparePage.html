@@ -2,35 +2,40 @@
 	<div id="revision-compare">
 		<div class="head">Compare Revisions</div>
 		<div class="body">
-			<div class="revisions clearfix">
-				<div class="revision pull-left">
-					<div class="clearfix">
-						<label class="pull-left">Left side</label>
-						<wicket:enclosure child="compareWithMergeBase">
-							<input wicket:id="compareWithMergeBase" type="checkbox" class="pull-left"></input> 
-							<span class="pull-left">common ancestor</span>
-							<a wicket:id="tooltip" class="pull-left"><i class="fa fa-question-circle"></i></a>
-						</wicket:enclosure>
-					</div>
-					<div wicket:id="leftSide"></div>
-				</div>
-				<div class="action pull-left">
-					<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-exchange"></i></a>
-				</div>
-				<div class="revision pull-left">
-					<div>
-						<label>Right side</label>
-					</div>
-					<div wicket:id="rightSide"></div>
-				</div>
-			</div>
+			<table class="revisions">
+				<tr>
+					<td class="left revision">
+						<div class="title clearfix">
+							<label class="pull-left">Left side</label>
+							<wicket:enclosure child="compareWithMergeBase">
+								<input wicket:id="compareWithMergeBase" type="checkbox" class="pull-left"></input> 
+								<span class="pull-left">common ancestor</span>
+								<a wicket:id="mergeBaseTooltip" class="pull-left"><i class="fa fa-question-circle"></i></a>
+							</wicket:enclosure>
+						</div>
+						<div wicket:id="leftRevSelector" class="selector"></div>
+						<div class="message">
+							<a wicket:id="leftCommitLink"><i class="fa fa-info-circle"></i> <span wicket:id="message"></span></a>
+						</div>
+					</td>
+					<td class="action">
+						<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-exchange"></i></a>
+					</td>
+					<td class="right revision">
+						<div class="title">
+							<label>Right side</label>
+						</div>
+						<div wicket:id="rightRevSelector" class="selector"></div>
+						<div class="message">
+							<a wicket:id="rightCommitLink"><i class="fa fa-info-circle"></i> <span wicket:id="message"></span></a>
+						</div>
+					</td>
+				</tr>
+			</table>
 			<div wicket:id="openedRequest" class="alert alert-info">
 				<div>Pull request #<span wicket:id="no"></span> is already open for this comparison:</div> 
 				<b><a wicket:id="link"><span wicket:id="label"></span></a></b>
 			</div>
-			<div wicket:id="noChanges" class="alert alert-warning">
-				No changes between left side and right side
-			</div>		
 			<div>
 				<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>
 			</div>

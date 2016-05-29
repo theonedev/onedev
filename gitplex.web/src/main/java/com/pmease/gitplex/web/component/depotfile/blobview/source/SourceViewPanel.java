@@ -73,6 +73,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -341,6 +342,11 @@ public class SourceViewPanel extends BlobViewPanel {
 					CodeComment comment = commentModel.getObject();
 					SourceViewPanel.this.onCommentDeleted(target, comment);
 				}
+
+				@Override
+				protected CompareContext getCompareContext() {
+					return SourceViewPanel.this.getCompareContext();
+				}
 				
 			};
 			commentContainer.add(commentPanel);
@@ -425,6 +431,8 @@ public class SourceViewPanel extends BlobViewPanel {
 							comment.setDepot(context.getDepot());
 							comment.setUser(SecurityUtils.getAccount());
 							comment.setMark(mark);
+							comment.setCompareContext(getCompareContext());
+							
 							GitPlex.getInstance(CodeCommentManager.class).persist(comment);
 							
 							Long commentId = comment.getId();
@@ -442,6 +450,11 @@ public class SourceViewPanel extends BlobViewPanel {
 								protected void onCommentDeleted(AjaxRequestTarget target) {
 									CodeComment comment = commentModel.getObject();
 									SourceViewPanel.this.onCommentDeleted(target, comment);
+								}
+
+								@Override
+								protected CompareContext getCompareContext() {
+									return SourceViewPanel.this.getCompareContext();
 								}
 								
 							};
@@ -478,6 +491,11 @@ public class SourceViewPanel extends BlobViewPanel {
 						protected void onCommentDeleted(AjaxRequestTarget target) {
 							CodeComment comment = commentModel.getObject();
 							SourceViewPanel.this.onCommentDeleted(target, comment);
+						}
+
+						@Override
+						protected CompareContext getCompareContext() {
+							return SourceViewPanel.this.getCompareContext();
 						}
 						
 					};
@@ -708,6 +726,12 @@ public class SourceViewPanel extends BlobViewPanel {
 			jsonOfBlameInfos = "undefined";
 		}
 		return jsonOfBlameInfos;
+	}
+	
+	private CompareContext getCompareContext() {
+		CompareContext compareContext = new CompareContext();
+		compareContext.setCompareCommit(context.getCommit().name());
+		return compareContext;
 	}
 	
 	@Override

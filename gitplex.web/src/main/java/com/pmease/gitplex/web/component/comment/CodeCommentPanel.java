@@ -8,17 +8,20 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.hibernate.StaleObjectStateException;
 
@@ -30,11 +33,15 @@ import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
+import com.pmease.gitplex.core.entity.component.CompareContext;
+import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -55,6 +62,37 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		commentContainer.add(new AvatarLink("authorAvatar", getComment().getUser()));
 		commentContainer.add(new AccountLink("authorName", getComment().getUser()));
 		commentContainer.add(new Label("authorDate", DateUtils.formatAge(getComment().getDate())));
+		commentContainer.add(new Link<Void>("compareContext") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getCompareContext().equals(getComment().getCompareContext()));
+			}
+
+			@Override
+			public void onClick() {
+				CodeComment comment = getComment();
+				CompareContext compareContext = comment.getCompareContext();
+				RevisionComparePage.State state = new RevisionComparePage.State();
+				state.commentId = comment.getId();
+				state.compareWithMergeBase = false;
+				if (compareContext.isLeftSide()) {
+					state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+					state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+				} else {
+					state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+					state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+				}
+				state.mark = new DiffMark(comment);
+				state.pathFilter = compareContext.getPathFilter();
+				state.tabPanel = RevisionComparePage.TabPanel.FILES;
+				state.whitespaceOption = compareContext.getWhitespaceOption();
+				PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
+				setResponsePage(RevisionComparePage.class, params);
+			}
+			
+		}.add(AttributeAppender.append("title", "This comment is added in a different compare context, click to show")));
 
 		NotificationPanel feedback = new NotificationPanel("feedback", commentContainer);
 		feedback.setOutputMarkupPlaceholderTag(true);
@@ -216,6 +254,38 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		replyContainer.add(new AvatarLink("authorAvatar", getReply(replyId).getUser()));
 		replyContainer.add(new AccountLink("authorName", getReply(replyId).getUser()));
 		replyContainer.add(new Label("authorDate", DateUtils.formatAge(getReply(replyId).getDate())));
+		replyContainer.add(new Link<Void>("compareContext") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getCompareContext().equals(getReply(replyId).getCompareContext()));
+			}
+
+			@Override
+			public void onClick() {
+				CodeCommentReply reply = getReply(replyId);
+				CompareContext compareContext = reply.getCompareContext();
+				RevisionComparePage.State state = new RevisionComparePage.State();
+				CodeComment comment = reply.getComment();
+				state.commentId = comment.getId();
+				state.compareWithMergeBase = false;
+				if (compareContext.isLeftSide()) {
+					state.leftSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+					state.rightSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+				} else {
+					state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+					state.rightSide = new DepotAndRevision(comment.getDepot(), compareContext.getCompareCommit());
+				}
+				state.mark = new DiffMark(comment);
+				state.pathFilter = compareContext.getPathFilter();
+				state.tabPanel = RevisionComparePage.TabPanel.FILES;
+				state.whitespaceOption = compareContext.getWhitespaceOption();
+				PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
+				setResponsePage(RevisionComparePage.class, params);
+			}
+			
+		}.add(AttributeAppender.append("title", "This reply is added in a different compare context, click to show")));		
 
 		NotificationPanel feedback = new NotificationPanel("feedback", replyContainer);
 		feedback.setOutputMarkupPlaceholderTag(true);
@@ -429,6 +499,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 						reply.setComment(getComment());
 						reply.setUser(SecurityUtils.getAccount());
 						reply.setContent(input.getModelObject());
+						reply.setCompareContext(getCompareContext());
 						GitPlex.getInstance(CodeCommentReplyManager.class).persist(reply);
 						
 						WebMarkupContainer replyContainer = newReplyContainer(repliesView.newChildId(), reply.getId());
@@ -490,4 +561,6 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 	}
 	
 	protected abstract void onCommentDeleted(AjaxRequestTarget target);
+	
+	protected abstract CompareContext getCompareContext();
 }

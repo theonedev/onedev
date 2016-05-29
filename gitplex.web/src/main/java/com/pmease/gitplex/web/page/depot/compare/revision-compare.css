@@ -10,32 +10,43 @@
 }
 #revision-compare>.body>.revisions {
 	margin-bottom: 20px;
+	width: auto;
 }
-#revision-compare>.body>.revisions>.revision {
-	background: #F0F0F0; 
-	border: 1px dashed #BBB;
-	border-radius: 4px; 
+#revision-compare>.body>.revisions td {
+	vertical-align: middle;
+	background: #F5F5F5; 
+	border: 1px solid #DDD;
+	border-radius: 4px;
 	padding: 12px;
 }
-#revision-compare>.body>.revisions>.action {
-	margin-right: 0;
-	padding: 18px;
+#revision-compare>.body>.revisions td.action {
+	text-align: center;
+	background: white;
+	border-top: none;
+	border-bottom: none;
 }
-#revision-compare>.body>.revisions>.revision>div>label {
+#revision-compare>.body>.revisions .revision .title label {
 	font-size: 16px;
 	color: #888;
 	font-weight: normal;
 }
-#revision-compare>.body>.revisions>.revision>div>input {
+#revision-compare>.body>.revisions .revision .title input {
 	margin-left: 16px;
 }
-#revision-compare>.body>.revisions>.revision>div>span {
+#revision-compare>.body>.revisions .revision .title span {
 	color: #888;
 	margin-left: 4px;
 }
-#revision-compare>.body>.revisions>.revision>div>a {
+#revision-compare>.body>.revisions .revision .title a {
 	color: #666;
 	margin-left: 4px;
+}
+#revision-compare>.body>.revisions .revision .message {
+	margin-top: 8px;
+}
+#revision-compare>.body>.revisions .revision .message a {
+	font-size: 13px;
+	color: #888;
 }
 
 #revision-compare .with-merge-base ul>li.commit:last-child {
