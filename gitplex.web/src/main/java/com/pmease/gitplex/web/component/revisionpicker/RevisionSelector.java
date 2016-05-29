@@ -38,6 +38,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.unbescape.html.HtmlEscape;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
@@ -111,9 +112,11 @@ public abstract class RevisionSelector extends Panel {
 		target.focusComponent(revField);
 	}
 
-	public RevisionSelector(String id, IModel<Depot> depotModel, String revision, boolean canCreateRef) {
+	public RevisionSelector(String id, IModel<Depot> depotModel, @Nullable String revision, boolean canCreateRef) {
 		super(id);
 		
+		Preconditions.checkArgument(revision!=null || !canCreateRef);
+	
 		this.depotModel = depotModel;
 		this.revision = revision;		
 		if (canCreateRef) {
@@ -125,17 +128,25 @@ public abstract class RevisionSelector extends Panel {
 			canCreateBranch = false;
 			canCreateTag = false;
 		}
-		Ref ref = depotModel.getObject().getRef(revision);
-		branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
+		if (revision != null) {
+			Ref ref = depotModel.getObject().getRef(revision);
+			branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
+		} else {
+			branchesActive = true;
+		}
 		
 		refs = findRefs();
 		itemValues = getItemValues(null);
 	}
 	
-	public RevisionSelector(String id, IModel<Depot> depotModel, String revision) {
+	public RevisionSelector(String id, IModel<Depot> depotModel, @Nullable String revision) {
 		this(id, depotModel, revision, false);
 	}
 
+	public RevisionSelector(String id, IModel<Depot> depotModel) {
+		this(id, depotModel, null, false);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

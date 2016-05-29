@@ -99,6 +99,13 @@
 	margin-right: 8px;
 	font-size: 18px;
 }
+.revision-diff>.body>.detail>.comment>.content>.head .context {
+	margin-right: 8px;
+	margin-top: -2px;
+}
+.revision-diff>.body>.detail>.comment>.content>.head .context .fa-ext {
+	font-size: 16px;
+}
 
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
 	position: absolute;

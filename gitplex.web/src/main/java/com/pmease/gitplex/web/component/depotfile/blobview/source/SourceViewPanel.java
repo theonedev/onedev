@@ -66,6 +66,7 @@ import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.assets.selectionpopover.SelectionPopoverResourceReference;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.PreventDefaultAjaxLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
@@ -74,6 +75,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.CompareContext;
+import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -84,8 +86,11 @@ import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewPanel;
+import com.pmease.gitplex.web.component.diff.revision.DiffMark;
+import com.pmease.gitplex.web.component.revisionpicker.RevisionSelector;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
 import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
+import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.util.DateUtils;
 
@@ -257,6 +262,37 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 			
 		};
+		commentContainer.add(new DropdownLink("context") {
+
+			@Override
+			protected Component newContent(String id) {
+				return new RevisionSelector(id, new AbstractReadOnlyModel<Depot>() {
+
+					@Override
+					public Depot getObject() {
+						return context.getDepot();
+					}
+					
+				}) {
+					
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String revision) {
+						RevisionComparePage.State state = new RevisionComparePage.State();
+						CodeComment comment = context.getOpenComment();
+						state.commentId = comment.getId();
+						state.mark = new DiffMark(comment);
+						state.compareWithMergeBase = false;
+						state.leftSide = new DepotAndRevision(context.getDepot(), comment.getCommit());
+						state.rightSide = new DepotAndRevision(context.getDepot(), revision);
+						state.tabPanel = RevisionComparePage.TabPanel.FILES;
+						PageParameters params = RevisionComparePage.paramsOf(context.getDepot(), state);
+						setResponsePage(RevisionComparePage.class, params);
+					}
+					
+				};
+			}
+			
+		});
 		commentContainer.add(new AjaxLink<Void>("locate") {
 
 			@Override

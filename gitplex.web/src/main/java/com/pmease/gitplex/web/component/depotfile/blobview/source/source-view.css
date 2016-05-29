@@ -8,6 +8,13 @@
 	top: 0;
 	left: 0;
 }
+.source-view>.comment>.content>.head .context {
+	margin-right: 8px;
+	margin-top: -2px;
+}
+.source-view>.comment>.content>.head .context .fa-ext {
+	font-size: 16px;
+}
 .source-view>.comment>.content>.head .locate {
 	margin-right: 8px;
 	font-size: 20px;

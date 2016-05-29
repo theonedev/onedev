@@ -44,6 +44,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.util.visit.IVisit;
@@ -70,6 +71,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.behavior.inputassist.InputAssistBehavior;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 import com.pmease.gitplex.core.GitPlex;
@@ -77,6 +79,7 @@ import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.component.CompareContext;
+import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -87,6 +90,8 @@ import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.blob.MarkAware;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
+import com.pmease.gitplex.web.component.revisionpicker.RevisionSelector;
+import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -909,6 +914,38 @@ public abstract class RevisionDiffPanel extends Panel {
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
+		commentContainer.add(new DropdownLink("context") {
+
+			@Override
+			protected Component newContent(String id) {
+				return new RevisionSelector(id, new AbstractReadOnlyModel<Depot>() {
+
+					@Override
+					public Depot getObject() {
+						return getOpenComment().getDepot();
+					}
+					
+				}) {
+					
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String revision) {
+						RevisionComparePage.State state = new RevisionComparePage.State();
+						CodeComment comment = getOpenComment();
+						state.commentId = comment.getId();
+						state.mark = new DiffMark(comment);
+						state.compareWithMergeBase = false;
+						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
+						state.rightSide = new DepotAndRevision(comment.getDepot(), revision);
+						state.tabPanel = RevisionComparePage.TabPanel.FILES;
+						PageParameters params = RevisionComparePage.paramsOf(comment.getDepot(), state);
+						setResponsePage(RevisionComparePage.class, params);
+					}
+					
+				};
+			}
+			
+		});
+
 		commentContainer.add(new AjaxLink<Void>("locate") {
 
 			@Override

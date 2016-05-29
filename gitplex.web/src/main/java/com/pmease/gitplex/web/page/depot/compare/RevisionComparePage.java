@@ -601,7 +601,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		markState.pathFilter = state.pathFilter;
 		markState.tabPanel = TabPanel.FILES;
 		markState.whitespaceOption = state.whitespaceOption;
-		markState.compareWithMergeBase = state.compareWithMergeBase;
+		markState.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getDepot(), markState)).toString();
 	}
 
@@ -616,6 +616,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		commentState.tabPanel = TabPanel.FILES;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
+		commentState.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, paramsOf(commentState.rightSide.getDepot(), commentState)).toString();
 	}
 	

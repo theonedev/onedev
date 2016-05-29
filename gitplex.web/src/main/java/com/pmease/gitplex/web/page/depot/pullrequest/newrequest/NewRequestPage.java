@@ -643,6 +643,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		state.pathFilter = pathFilter;
 		state.tabPanel = RevisionComparePage.TabPanel.FILES;
 		state.whitespaceOption = whitespaceOption;
+		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
 	}
 
@@ -675,6 +676,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		state.pathFilter = pathFilter;
 		state.tabPanel = RevisionComparePage.TabPanel.FILES;
 		state.whitespaceOption = whitespaceOption;
+		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
 	}
 
