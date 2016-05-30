@@ -61,6 +61,7 @@ import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
+import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
@@ -132,7 +133,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private SymbolTooltipPanel symbolTooltip;
 	
-	private AbstractDefaultAjaxBehavior markBehavior;
+	private AbstractDefaultAjaxBehavior ajaxBehavior;
 	
 	public SourceViewPanel(String id, BlobViewContext context, @Nullable String viewState) {
 		super(id, context);
@@ -392,16 +393,24 @@ public class SourceViewPanel extends BlobViewPanel {
 		}
 		add(commentContainer);
 		
-		add(markBehavior = new AbstractDefaultAjaxBehavior() {
+		add(ajaxBehavior = new AbstractDefaultAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				
 				switch(params.getParameterValue("action").toString()) {
+				case "showBlameMessage":
+					String line = params.getParameterValue("param1").toString();
+					String commitHash = params.getParameterValue("param2").toString();
+					String message = context.getDepot().getRevCommit(commitHash).getFullMessage();
+					String escapedMessage = JavaScriptEscape.escapeJavaScript(message);
+					String script = String.format("gitplex.sourceview.showBlameMessage(%s, '%s');", line, escapedMessage); 
+					target.appendJavaScript(script);
+					break;
 				case "openSelectionPopover": 
 					Mark mark = getMark(params, "param1", "param2", "param3", "param4");
-					String script = String.format("gitplex.sourceview.openSelectionPopover(%s, '%s', %s);", 
+					script = String.format("gitplex.sourceview.openSelectionPopover(%s, '%s', %s);", 
 							getJson(mark), context.getMarkUrl(mark), 
 							SecurityUtils.getAccount()!=null);
 					target.appendJavaScript(script);
@@ -743,8 +752,8 @@ public class SourceViewPanel extends BlobViewPanel {
 				BlameInfo blameInfo = new BlameInfo();
 				blameInfo.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
 				blameInfo.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());
-				blameInfo.hash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
-				blameInfo.message = blame.getCommit().getSubject();
+				blameInfo.hash = blame.getCommit().getHash();
+				blameInfo.abbreviatedHash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
 				CommitDetailPage.State state = new CommitDetailPage.State();
 				state.revision = blame.getCommit().getHash();
 				state.pathFilter = context.getBlobIdent().path;
@@ -776,6 +785,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(SelectionPopoverResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
@@ -813,7 +823,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
-		CharSequence commentCallback = markBehavior.getCallbackFunction(
+		CharSequence callback = ajaxBehavior.getCallbackFunction(
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"));
 		String script = String.format("gitplex.sourceview.init('%s', '%s', %s, %s, '%s', '%s', "
@@ -826,7 +836,7 @@ public class SourceViewPanel extends BlobViewPanel {
 				context.getBlobIdent().revision, 
 				jsonOfBlameInfos, 
 				jsonOfCommentInfos,
-				commentCallback, 
+				callback, 
 				viewState!=null?"JSON.parse('"+viewState+"')":"undefined", 
 				SecurityUtils.getAccount()!=null);
 		response.render(OnDomReadyHeaderItem.forScript(script));
@@ -841,9 +851,9 @@ public class SourceViewPanel extends BlobViewPanel {
 	@SuppressWarnings("unused")
 	private static class BlameInfo {
 		
-		String hash;
+		String abbreviatedHash;
 		
-		String message;
+		String hash;
 		
 		String url;
 		

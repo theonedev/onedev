@@ -121,3 +121,6 @@
 .CodeMirror-activeline .CodeMirror-annotation {
 	background: #E8F2FE;	
 }
+.blame-message {
+	position: absolute;
+}

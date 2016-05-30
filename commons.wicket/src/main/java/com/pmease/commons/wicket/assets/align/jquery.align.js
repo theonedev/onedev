@@ -4,11 +4,22 @@
 	var scrollbarWidth = 20;
 	var textHeight = 25;
 	
+	/**
+	 * @parameter alignment
+	 * 			alignment should be in form of {placement, target}, where placement represents relative position 
+	 * 			of aligned element to target element in form of {x, y, targetX, targetY}, and target should be 
+	 * 			either a region in form of {left, top, width, height}, or an DOM element in form of {element}, 
+	 * 			the target may also includes a index property to denote which character to align with in target 
+	 *          input/textarea element
+	 */
     $.fn.align = function(alignment) {
-    	if (!this.parent().is("body")) 
-    		jQuery("body").append(this);
-    	if(this.css("position") != "absolute")
+    	var $parent = this.parent();
+    	if ($parent.css("position") != "relative") {
+    		$parent.css("position", "relative");
+    	}
+    	if(this.css("position") != "absolute") {
     		this.css("position", "absolute");
+    	}
 
     	var autoSize = this.find(".autosize");
     	if (autoSize.length == 0)
@@ -178,7 +189,7 @@
     		}
     	}
     	
-    	this.css({left:left, top:top});	
+    	this.css({left:left-$parent.offset().left, top:top-$parent.offset().top});	
     	
     	if (height < thisHeight)
         	autoSize.outerHeight(autoSize.outerHeight()+height-thisHeight);

@@ -207,6 +207,22 @@ gitplex.sourceview = {
 			}
 		});
 	},
+	showBlameMessage: function(line, message) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
+		var gutterMarkers = cm.lineInfo(line).gutterMarkers;
+		if (gutterMarkers) {
+			var gutter = gutterMarkers["CodeMirror-annotations"];
+			if (gutter) {
+				var $hashLink = $(gutter).children("a.hash");
+				var $tooltip = $("<div class='blame-message'></div>");
+				$tooltip.text(message);
+				$(".source-view").append($tooltip);
+				$hashLink.mouseout(function() {
+					$tooltip.remove();
+				});
+			}
+		}
+	},
 	restoreMark: function() {
 		var $sourceView = $(".source-view");
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
@@ -461,6 +477,7 @@ gitplex.sourceview = {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		
 		if (blameInfos) {
+			var markCallback = $sourceView.data("markCallback");
 			var gutters = cm.getOption("gutters").slice();
 			gutters.splice(1, 0, "CodeMirror-annotations");
 			cm.setOption("gutters", gutters);
@@ -470,7 +487,13 @@ gitplex.sourceview = {
         			var range = blameInfo.ranges[j];
         			var $gutter = $(document.createElement("div"));
         			$gutter.addClass("CodeMirror-annotation");
-            		$("<a class='hash'>" + blameInfo.hash + "</a>").appendTo($gutter).attr("href", blameInfo.url).attr("title", blameInfo.message);
+            		$("<a class='hash'>" + blameInfo.abbreviatedHash + "</a>").appendTo($gutter).attr("href", blameInfo.url);
+            		var $hashLink = $gutter.children("a.hash");
+            		$hashLink.data("hash", blameInfo.hash);
+            		$hashLink.data("line", range.from);
+            		$gutter.children("a.hash").mouseover(function() {
+            			markCallback($(this).data("line"), $(this).data("hash"));
+            		});
             		$gutter.append("<span class='date'>" + blameInfo.commitDate + "</span>");
             		$gutter.append("<span class='author'>" + blameInfo.authorName + "</span>");
             		cm.setGutterMarker(range.from, "CodeMirror-annotations", $gutter[0]);

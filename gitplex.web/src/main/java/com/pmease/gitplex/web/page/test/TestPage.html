@@ -1,2 +1,12 @@
 <wicket:extend>
+	<div class='container' style="margin: 100px;">
+	<a class="trigger" style='border:1px solid blue;'>test</a>
+	</div>
+	<script type="text/javascript">
+	$(".trigger").hover(function() {
+		var $content = $("<div style='border:1px solid red;'>hello world</div>");
+		$(".container").append($content);
+		return $content;
+	}, {targetX: 0, targetY: 0, x: 0, y:0});	
+	</script>
 </wicket:extend>
