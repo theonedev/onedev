@@ -61,9 +61,9 @@ import com.pmease.commons.lang.extractors.Extractors;
 import com.pmease.commons.lang.extractors.Symbol;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.align.AlignResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
+import com.pmease.commons.wicket.assets.hover.HoverResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.assets.selectionpopover.SelectionPopoverResourceReference;
 import com.pmease.commons.wicket.behavior.ViewStateAwareBehavior;
@@ -785,7 +785,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		
 		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(SelectionPopoverResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(AlignResourceReference.INSTANCE));
+		response.render(JavaScriptHeaderItem.forReference(HoverResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));

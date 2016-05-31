@@ -208,20 +208,9 @@ gitplex.sourceview = {
 		});
 	},
 	showBlameMessage: function(line, message) {
-		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
-		var gutterMarkers = cm.lineInfo(line).gutterMarkers;
-		if (gutterMarkers) {
-			var gutter = gutterMarkers["CodeMirror-annotations"];
-			if (gutter) {
-				var $hashLink = $(gutter).children("a.hash");
-				var $tooltip = $("<div class='blame-message'></div>");
-				$tooltip.text(message);
-				$(".source-view").append($tooltip);
-				$hashLink.mouseout(function() {
-					$tooltip.remove();
-				});
-			}
-		}
+		var $blameTooltip = $("#blame-message-at-line-" + line);
+		$blameTooltip.empty().text(message);
+		$blameTooltip.align({placement: $blameTooltip.data("alignment"), target: {element: $blameTooltip.data("trigger")}});
 	},
 	restoreMark: function() {
 		var $sourceView = $(".source-view");
@@ -475,9 +464,10 @@ gitplex.sourceview = {
 	},
 	blame: function(blameInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var alignment = {targetX: 100, targetY: 0, x: 0, y: 0};
 		
 		if (blameInfos) {
-			var markCallback = $sourceView.data("markCallback");
+			var markCallback = $(".source-view").data("markCallback");
 			var gutters = cm.getOption("gutters").slice();
 			gutters.splice(1, 0, "CodeMirror-annotations");
 			cm.setOption("gutters", gutters);
@@ -491,9 +481,18 @@ gitplex.sourceview = {
             		var $hashLink = $gutter.children("a.hash");
             		$hashLink.data("hash", blameInfo.hash);
             		$hashLink.data("line", range.from);
-            		$gutter.children("a.hash").mouseover(function() {
-            			markCallback($(this).data("line"), $(this).data("hash"));
-            		});
+
+    				$hashLink.hover(function() {
+    					var line = $(this).data("line");
+            			markCallback("showBlameMessage", line, $(this).data("hash"));
+    					var $tooltip = $("<div class='blame-message'><div class='loading'>Loading...</div></div>");
+    					$tooltip.attr("id", "blame-message-at-line-" + line);
+    					$tooltip.data("trigger", this);
+    					$tooltip.data("alignment", alignment);
+    					$(".source-view").append($tooltip);
+    					return $tooltip;
+    				}, alignment);
+            		
             		$gutter.append("<span class='date'>" + blameInfo.commitDate + "</span>");
             		$gutter.append("<span class='author'>" + blameInfo.authorName + "</span>");
             		cm.setGutterMarker(range.from, "CodeMirror-annotations", $gutter[0]);

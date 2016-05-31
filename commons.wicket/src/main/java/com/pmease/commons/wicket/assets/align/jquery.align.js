@@ -13,7 +13,7 @@
 	 *          input/textarea element
 	 */
     $.fn.align = function(alignment) {
-    	var $parent = this.parent();
+    	var $parent = jQuery(this.parent());
     	if ($parent.css("position") != "relative") {
     		$parent.css("position", "relative");
     	}

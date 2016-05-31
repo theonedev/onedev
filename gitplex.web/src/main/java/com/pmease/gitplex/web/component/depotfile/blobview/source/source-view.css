@@ -122,5 +122,11 @@
 	background: #E8F2FE;	
 }
 .blame-message {
+	white-space: pre-wrap;
+	word-wrap: break-word;
 	position: absolute;
+	z-index: 10;
+	border: 1px solid #BBB;
+	background: #F9F9F9;
+	padding: 8px;
 }

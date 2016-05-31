@@ -17,7 +17,7 @@
 
 		function show() {
 			if (!popover) {
-				popover = callback();
+				popover = callback.call($trigger[0]);
 				
 				var $popover = jQuery(popover);
 				
