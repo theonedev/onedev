@@ -100,6 +100,8 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	
 	private String pathFilter;
 	
+	private String blameFile;
+	
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 	
 	public static PageParameters paramsOf(Depot depot, DepotAndBranch target, DepotAndBranch source) {
@@ -335,6 +337,58 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 			
 		};
 		
+		IModel<String> blameModel = new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return blameFile;
+			}
+
+			@Override
+			public void setObject(String object) {
+				blameFile = object;
+			}
+			
+		};
+		IModel<String> pathFilterModel = new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return pathFilter;
+			}
+
+			@Override
+			public void setObject(String object) {
+				pathFilter = object;
+			}
+			
+		};
+		IModel<WhitespaceOption> whitespaceOptionModel = new IModel<WhitespaceOption>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public WhitespaceOption getObject() {
+				return whitespaceOption;
+			}
+
+			@Override
+			public void setObject(WhitespaceOption object) {
+				whitespaceOption = object;
+			}
+			
+		};
+
 		/*
 		 * we are passing source revision here instead of head commit hash of latest update
 		 * as we want to preserve the branch name in case they are useful at some point 
@@ -343,20 +397,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		 */
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
 				new Model<PullRequest>(null), request.getBaseCommitHash(), 
-				source.getRevision(), pathFilter, whitespaceOption, this) {
-
-			@Override
-			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
-				NewRequestPage.this.pathFilter = pathFilter;
-			}
-
-			@Override
-			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
-					WhitespaceOption whitespaceOption) {
-				NewRequestPage.this.whitespaceOption = whitespaceOption;
-			}
-
-		};
+				source.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 		diffPanel.setOutputMarkupId(true);
 		return diffPanel;
 	}
@@ -657,15 +698,14 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		commentId = comment.getId();
-		mark = new DiffMark(comment);
+		if (comment != null) {
+			commentId = comment.getId();
+			mark = new DiffMark(comment);
+		} else {
+			commentId = null;
+		}
 	}
 
-	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
-		commentId = null;
-	}
-	
 	@Override
 	public String getCommentUrl(CodeComment comment) {
 		RevisionComparePage.State state = new RevisionComparePage.State();

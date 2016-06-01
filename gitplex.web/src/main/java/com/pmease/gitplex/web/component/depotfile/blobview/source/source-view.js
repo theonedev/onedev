@@ -207,8 +207,8 @@ gitplex.sourceview = {
 			}
 		});
 	},
-	showBlameMessage: function(line, message) {
-		var $blameTooltip = $("#blame-message-at-line-" + line);
+	showBlameMessage: function(tooltipId, message) {
+		var $blameTooltip = $("#" + tooltipId);
 		$blameTooltip.empty().text(message);
 		$blameTooltip.align({placement: $blameTooltip.data("alignment"), target: {element: $blameTooltip.data("trigger")}});
 	},
@@ -483,10 +483,10 @@ gitplex.sourceview = {
             		$hashLink.data("line", range.from);
 
     				$hashLink.hover(function() {
-    					var line = $(this).data("line");
-            			markCallback("showBlameMessage", line, $(this).data("hash"));
+    					var tooltipId = "blame-message-line-" + $(this).data("line");
+            			markCallback("showBlameMessage", tooltipId, $(this).data("hash"));
     					var $tooltip = $("<div class='blame-message'><div class='loading'>Loading...</div></div>");
-    					$tooltip.attr("id", "blame-message-at-line-" + line);
+    					$tooltip.attr("id", tooltipId);
     					$tooltip.data("trigger", this);
     					$tooltip.data("alignment", alignment);
     					$(".source-view").append($tooltip);

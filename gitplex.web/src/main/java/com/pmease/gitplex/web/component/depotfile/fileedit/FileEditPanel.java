@@ -137,7 +137,7 @@ public abstract class FileEditPanel extends Panel {
 
 				};
 				BlobDiffPanel preview = new BlobDiffPanel("preview", depotModel, new Model<PullRequest>(null), 
-						change, DiffViewMode.UNIFIED, null);
+						change, DiffViewMode.UNIFIED, null, null);
 				replace(preview);
 				target.add(preview);
 				

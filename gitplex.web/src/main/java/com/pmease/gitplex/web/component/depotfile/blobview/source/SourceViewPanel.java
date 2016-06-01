@@ -356,7 +356,7 @@ public class SourceViewPanel extends BlobViewPanel {
 			public void onClick(AjaxRequestTarget target) {
 				clearComment(target);
 				if (context.getOpenComment() != null) 
-					context.onCommentClosed(target);
+					context.onCommentOpened(target, null);
 				target.appendJavaScript("gitplex.sourceview.onCloseComment();");
 			}
 			
@@ -401,11 +401,11 @@ public class SourceViewPanel extends BlobViewPanel {
 				
 				switch(params.getParameterValue("action").toString()) {
 				case "showBlameMessage":
-					String line = params.getParameterValue("param1").toString();
+					String tooltipId = params.getParameterValue("param1").toString();
 					String commitHash = params.getParameterValue("param2").toString();
 					String message = context.getDepot().getRevCommit(commitHash).getFullMessage();
 					String escapedMessage = JavaScriptEscape.escapeJavaScript(message);
-					String script = String.format("gitplex.sourceview.showBlameMessage(%s, '%s');", line, escapedMessage); 
+					String script = String.format("gitplex.sourceview.showBlameMessage('%s', '%s');", tooltipId, escapedMessage); 
 					target.appendJavaScript(script);
 					break;
 				case "openSelectionPopover": 
@@ -729,7 +729,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		String script = String.format("gitplex.sourceview.onCommentDeleted(%s);", 
 				getJsonOfComment(comment));
 		target.appendJavaScript(script);
-		context.onCommentClosed(target);
+		context.onCommentOpened(target, null);
 	}
 	
 	private List<Symbol> getChildSymbols(@Nullable Symbol parentSymbol) {

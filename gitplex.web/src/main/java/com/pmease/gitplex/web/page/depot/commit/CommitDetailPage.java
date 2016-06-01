@@ -25,6 +25,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -66,6 +67,8 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 	// make sure to use a different value from wicket:id according to wicket bug:
 	// https://issues.apache.org/jira/browse/WICKET-6069
 	private static final String PARAM_COMPARE_WITH = "compare-with";
+	
+	private static final String PARAM_BLAME_FILE = "blame-file";
 	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
@@ -306,25 +309,65 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 	}
 	
 	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
-		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
-				Model.of((PullRequest)null), getCompareWith().name(), state.revision, 
-				state.pathFilter, state.whitespaceOption, this) {
+		IModel<String> blameModel = new IModel<String>() {
 
 			@Override
-			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
-				state.pathFilter = pathFilter;
-				pushState(target);
+			public void detach() {
 			}
 
 			@Override
-			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
-					WhitespaceOption whitespaceOption) {
-				state.whitespaceOption = whitespaceOption;
+			public String getObject() {
+				return state.blameFile;
+			}
+
+			@Override
+			public void setObject(String object) {
+				state.blameFile = object;
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+			}
+			
+		};
+		IModel<String> pathFilterModel = new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return state.pathFilter;
+			}
+
+			@Override
+			public void setObject(String object) {
+				state.pathFilter = object;
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+			}
+			
+		};
+		IModel<WhitespaceOption> whitespaceOptionModel = new IModel<WhitespaceOption>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public WhitespaceOption getObject() {
+				return state.whitespaceOption;
+			}
+
+			@Override
+			public void setObject(WhitespaceOption object) {
+				state.whitespaceOption = object;
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				newParentsContainer(target);
 				pushState(target);
 			}
-
+			
 		};
+		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
+				Model.of((PullRequest)null), getCompareWith().name(), state.revision, 
+				pathFilterModel, whitespaceOptionModel, blameModel, this);
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
 			replace(revisionDiff);
@@ -353,6 +396,8 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.blameFile != null)
+			params.set(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
@@ -403,6 +448,9 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 		public String pathFilter;
 		
 		@Nullable
+		public String blameFile;
+		
+		@Nullable
 		public DiffMark mark;
 		
 		public State() {
@@ -413,6 +461,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 			compareWith = params.get(PARAM_COMPARE_WITH).toString();
 			whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 			pathFilter = params.get(PARAM_PATH_FILTER).toString();
+			blameFile = params.get(PARAM_BLAME_FILE).toString();
 			commentId = params.get(PARAM_COMMENT).toOptionalLong();
 			mark = DiffMark.of(params.get(PARAM_MARK).toString());
 		}
@@ -458,14 +507,12 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		state.commentId = comment.getId();
-		state.mark = new DiffMark(comment);
-		pushState(target);
-	}
-	
-	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
-		state.commentId = null;
+		if (comment != null) {
+			state.commentId = comment.getId();
+			state.mark = new DiffMark(comment);
+		} else {
+			state.commentId = null;
+		}
 		pushState(target);
 	}
 	

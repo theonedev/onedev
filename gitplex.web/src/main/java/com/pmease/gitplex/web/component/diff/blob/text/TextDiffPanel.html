@@ -1,11 +1,12 @@
 <wicket:panel>
-	<div class="text-diff cm-s-eclipse" tabindex="-1">
+	<div class="text-diff cm-s-eclipse">
 		<div class="head clearfix">
 			<div wicket:id="diffStat" class="pull-left"></div>
 			<div wicket:id="title" class="pull-left"></div>
 			<div class="actions btn-group pull-right">
-				<a wicket:id="viewFile" class="btn btn-xs btn-default">View whole file</a>
-				<a wicket:id="editFile" class="btn btn-xs btn-default">Edit on source branch</a>
+				<a wicket:id="blameFile" class="btn btn-xs btn-default">Blame</a>
+				<a wicket:id="viewFile" class="btn btn-xs btn-default">View</a>
+				<a wicket:id="editFile" class="btn btn-xs btn-default">Edit</a>
 			</div>
 		</div>
 		<table class="body"><wicket:container wicket:id="diffLines"></wicket:container></table>

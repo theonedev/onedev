@@ -103,7 +103,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
  *
  */
 @SuppressWarnings("serial")
-public abstract class RevisionDiffPanel extends Panel {
+public class RevisionDiffPanel extends Panel {
 
 	private static final String COOKIE_VIEW_MODE = "gitplex.diff.viewmode";
 
@@ -118,12 +118,14 @@ public abstract class RevisionDiffPanel extends Panel {
 	private final String oldRev;
 	
 	private final String newRev;
+
+	private final IModel<String> blameModel;
 	
 	private final MarkSupport markSupport;
 	
-	private String pathFilter;
+	private final IModel<String> pathFilterModel;
 	
-	private WhitespaceOption whitespaceOption;
+	private final IModel<WhitespaceOption> whitespaceOptionModel;
 	
 	private DiffViewMode diffMode;
 	
@@ -145,7 +147,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			Set<String> changedPaths = new HashSet<>();
 			List<BlobChange> allChanges = new ArrayList<>();
 			for (DiffEntry entry: diffEntries) {
-    			BlobChange change = new BlobChange(oldRev, newRev, entry, whitespaceOption) {
+    			BlobChange change = new BlobChange(oldRev, newRev, entry, whitespaceOptionModel.getObject()) {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
@@ -162,7 +164,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				if (!changedPaths.contains(comment.getPath()) && !markedPaths.contains(comment.getPath())) {
 					BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getPath(), FileMode.TYPE_FILE);
 					BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getPath(), FileMode.TYPE_FILE);
-					allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOption) {
+					allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
 
 						@Override
 						public Blob getBlob(BlobIdent blobIdent) {
@@ -178,7 +180,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			if (mark != null && !changedPaths.contains(mark.getPath()) && !markedPaths.contains(mark.getPath())) {
 				BlobIdent oldBlobIdent = new BlobIdent(oldRev, mark.getPath(), FileMode.TYPE_FILE);
 				BlobIdent newBlobIdent = new BlobIdent(newRev, mark.getPath(), FileMode.TYPE_FILE);
-				allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOption) {
+				allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
@@ -191,8 +193,8 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 			List<BlobChange> filterChanges = new ArrayList<>();
 	    	for (BlobChange change: allChanges) {
-	    		if (StringUtils.isNotBlank(pathFilter)) {
-		    		String matchWith = pathFilter.toLowerCase().trim();
+	    		if (StringUtils.isNotBlank(pathFilterModel.getObject())) {
+		    		String matchWith = pathFilterModel.getObject().toLowerCase().trim();
 	    			matchWith = StringUtils.stripStart(matchWith, "/");
 	    			matchWith = StringUtils.stripEnd(matchWith, "/");
 	    			String oldPath = change.getOldBlobIdent().path;
@@ -237,7 +239,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	    		if (oldBlobIdent != null && newBlobIdent != null) {
 	    			if (change.getType() == ChangeType.DELETE) {
 	        			BlobChange normalizedChange = new BlobChange(ChangeType.MODIFY, 
-	        					oldBlobIdent, newBlobIdent, whitespaceOption) {
+	        					oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
 
 	    					@Override
 	    					public Blob getBlob(BlobIdent blobIdent) {
@@ -353,16 +355,17 @@ public abstract class RevisionDiffPanel extends Panel {
 	private ListView<BlobChange> diffsView;
 	
 	public RevisionDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			String oldRev, String newRev, @Nullable String pathFilter, 
-			WhitespaceOption whitespaceOption, @Nullable MarkSupport markSupport) {
+			String oldRev, String newRev, IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
+			@Nullable IModel<String> blameModel, @Nullable MarkSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.oldRev = oldRev;
 		this.newRev = newRev;
-		this.pathFilter = pathFilter;
-		this.whitespaceOption = whitespaceOption;
+		this.pathFilterModel = pathFilterModel;
+		this.blameModel = blameModel;
+		this.whitespaceOptionModel = whitespaceOptionModel;
 		this.markSupport = markSupport;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
@@ -434,7 +437,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 						@Override
 						public String getIconClass() {
-							if (whitespaceOption == each)
+							if (whitespaceOptionModel.getObject() == each)
 								return "fa fa-check";
 							else
 								return null;
@@ -447,9 +450,8 @@ public abstract class RevisionDiffPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									close();
-									whitespaceOption = each;
+									whitespaceOptionModel.setObject(each);
 									target.add(body);
-									onWhitespaceOptionChange(target, whitespaceOption);
 								}
 
 								@Override
@@ -471,23 +473,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 		Form<?> form = new Form<Void>("pathFilter");
 		TextField<String> filterInput;
-		form.add(filterInput = new TextField<String>("input", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return pathFilter;
-			}
-
-			@Override
-			public void setObject(String object) {
-				pathFilter = object;
-			}
-			
-		}));
+		form.add(filterInput = new TextField<String>("input", pathFilterModel));
 		
 		Set<String> setOfInvolvedPaths = new HashSet<>();
 		for (DiffEntry diffEntry: diffEntriesModel.getObject()) {
@@ -566,7 +552,6 @@ public abstract class RevisionDiffPanel extends Panel {
 				super.onSubmit(target, form);
 				body.replace(commentContainer = newCommentContainer());
 				target.add(body);
-				onPathFilterChange(target, pathFilter);
 			}
 			
 		});
@@ -680,7 +665,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				if (markSupport != null) {
-					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, new BlobMarkSupport() {
+					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, getBlobBlameModel(change), new BlobMarkSupport() {
 	
 						@Override
 						public DiffMark getMark() {
@@ -893,13 +878,40 @@ public abstract class RevisionDiffPanel extends Panel {
 
 					}));
 				} else {
-					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, null));
+					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, getBlobBlameModel(change), null));
 				}
 			}
 			
 		});
 		
 		setOutputMarkupId(true);
+	}
+	
+	private @Nullable IModel<Boolean> getBlobBlameModel(BlobChange change) {
+		if (blameModel != null) {
+			return new IModel<Boolean>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public Boolean getObject() {
+					return change.getPath().equals(blameModel.getObject());
+				}
+
+				@Override
+				public void setObject(Boolean object) {
+					if (object)
+						blameModel.setObject(change.getPath());
+					else
+						blameModel.setObject(null);
+				}
+				
+			};
+		} else {
+			return null;
+		}
 	}
 	
 	private WebMarkupContainer newCommentContainer() {
@@ -1013,7 +1025,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					MarkAware markAware = getMarkAware(comment.getPath());
 					if (markAware != null) 
 						markAware.onCommentClosed(target, comment);
-					markSupport.onCommentClosed(target);
+					markSupport.onCommentOpened(target, null);
 				}
 				target.appendJavaScript("gitplex.revisionDiff.reposition();");
 				
@@ -1134,7 +1146,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		MarkAware markAware = getMarkAware(comment.getPath());
 		if (markAware != null)
 			markAware.onCommentDeleted(target, comment);
-		markSupport.onCommentClosed(target);
+		markSupport.onCommentOpened(target, null);
 		target.appendJavaScript("gitplex.revisionDiff.reposition();");
 		DiffMark mark = getMark();
 		if (mark != null) {
@@ -1158,6 +1170,10 @@ public abstract class RevisionDiffPanel extends Panel {
 		changesAndCountModel.detach();
 		depotModel.detach();
 		requestModel.detach();
+		if (blameModel != null)
+			blameModel.detach();
+		pathFilterModel.detach();
+		whitespaceOptionModel.detach();
 		
 		super.onDetach();
 	}
@@ -1172,11 +1188,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(RevisionDiffPanel.class, "revision-diff.css")));
 	}
-	
-	protected abstract void onPathFilterChange(AjaxRequestTarget target, String pathFilter);
-	
-	protected abstract void onWhitespaceOptionChange(AjaxRequestTarget target, 
-			WhitespaceOption whitespaceOption);
 	
 	private static class ChangesAndCount {
 		
@@ -1224,8 +1235,8 @@ public abstract class RevisionDiffPanel extends Panel {
 			compareContext.setCompareCommit(oldCommitHash);
 			compareContext.setLeftSide(true);
 		}
-		compareContext.setPathFilter(pathFilter);
-		compareContext.setWhitespaceOption(whitespaceOption);
+		compareContext.setPathFilter(pathFilterModel.getObject());
+		compareContext.setWhitespaceOption(whitespaceOptionModel.getObject());
 		return compareContext;
 	}
 	

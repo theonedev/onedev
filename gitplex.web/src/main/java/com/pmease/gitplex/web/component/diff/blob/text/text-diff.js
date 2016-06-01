@@ -415,6 +415,8 @@ gitplex.textdiff = {
 				return showInvalidSelection();
     		}			
 		});
+		
+		gitplex.textdiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
 	    	
 		if (openComment) {
 			$container.data("openComment", openComment);
@@ -438,6 +440,34 @@ gitplex.textdiff = {
 			if (scroll)
 				gitplex.textdiff.scroll($container, mark);
 		}
+	},
+	initBlameTooltip: function(containerId, $hashLink) {
+		var $container = $("#" + containerId);
+		var alignment = {targetX: 100, targetY: 0, x: 0, y: 0};
+		$hashLink.hover(function() {
+			var $commitLink = $(this);
+			var $content = $commitLink.closest("tr").children("td.content");
+			var oldLine = $content.data("old");
+			if (oldLine == undefined)
+				oldLine = -1;
+			var newLine = $content.data("new");
+			if (newLine == undefined)
+				newLine = -1;
+
+			var tooltipId = "blame-message-" + containerId + "_" + oldLine + "_" + newLine;
+			$container.data("callback")("showBlameMessage", tooltipId, $(this).data("hash"));
+			var $tooltip = $("<div class='blame-message'><div class='loading'>Loading...</div></div>");
+			$tooltip.attr("id", tooltipId);
+			$tooltip.data("trigger", this);
+			$tooltip.data("alignment", alignment);
+			$container.append($tooltip);
+			return $tooltip;
+		}, alignment);
+	},
+	showBlameMessage: function(tooltipId, message) {
+		var $blameTooltip = $("#" + tooltipId);
+		$blameTooltip.empty().text(message);
+		$blameTooltip.align({placement: $blameTooltip.data("alignment"), target: {element: $blameTooltip.data("trigger")}});
 	},
 	openSelectionPopover: function(containerId, position, mark, markUrl, loggedIn) {
 		var $container = $("#" + containerId);
@@ -480,7 +510,41 @@ gitplex.textdiff = {
 		var $symbols = $expandedTrs.find(gitplex.textdiff.symbolClasses); 
 		$symbols.mouseover($container.data("symbolHover"));
 		$expandedTrs.find("td.content").mouseover($container.data("onMouseOverContent"));
-		gitplex.revisionDiff.reposition();
+		var $firstExpandedTr = $expandedTrs.first();
+		var commitHash = $firstExpandedTr.find(">td.blame>a.hash").data("hash");
+		var prevCommitHash;
+		$firstExpandedTr.prevAll().each(function() {
+			if (!prevCommitHash) {
+				var $tr = $(this);
+				var $prevCommitLink = $tr.find(">td.blame>a.hash");
+				if ($prevCommitLink.length != 0) {
+					prevCommitHash = $prevCommitLink.data("hash");
+				}
+			}
+		});
+		if (commitHash == prevCommitHash) {
+			$firstExpandedTr.children("td.blame").html("<div class='same-as-above'>...</div>");
+		}
+		
+		if ($nextTr.length != 0) {
+			commitHash = $nextTr.find(">td.blame>a.hash").data("hash");
+			prevCommitHash = undefined;
+			$nextTr.prevAll().each(function() {
+				if (!prevCommitHash) {
+					var $prevCommitLink = $(this).find(">td.blame>a.hash");
+					if ($prevCommitLink.length != 0) {
+						prevCommitHash = $prevCommitLink.data("hash");
+					}
+				}
+			});
+			if (commitHash == prevCommitHash) {
+				$nextTr.children("td.blame").html("<div class='same-as-above'>...</div>");
+			}
+		}
+		
+		gitplex.textdiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
+		
+		$(window).resize();
 	},
 	getMarkInfo: function($container, mark) {
 		var oldOrNew = mark.leftSide?"old":"new";

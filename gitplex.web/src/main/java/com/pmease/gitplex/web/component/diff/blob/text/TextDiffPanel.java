@@ -2,6 +2,7 @@ package com.pmease.gitplex.web.component.diff.blob.text;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,6 +14,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -23,6 +25,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.http.WebSession;
@@ -32,11 +35,17 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.unbescape.html.HtmlEscape;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.pmease.commons.git.Blame;
 import com.pmease.commons.git.BlobChange;
+import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.git.Git;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.DiffBlock;
 import com.pmease.commons.lang.diff.DiffMatchPatch.Operation;
 import com.pmease.commons.lang.diff.DiffUtils;
@@ -45,6 +54,7 @@ import com.pmease.commons.lang.tokenizers.CmToken;
 import com.pmease.commons.util.Range;
 import com.pmease.commons.util.RangeUtils;
 import com.pmease.commons.util.StringUtils;
+import com.pmease.commons.wicket.assets.hover.HoverResourceReference;
 import com.pmease.commons.wicket.assets.selectionpopover.SelectionPopoverResourceReference;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -64,7 +74,9 @@ import com.pmease.gitplex.web.component.diff.revision.BlobMarkSupport;
 import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 import com.pmease.gitplex.web.component.symboltooltip.SymbolTooltipPanel;
+import com.pmease.gitplex.web.page.depot.commit.CommitDetailPage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
+import com.pmease.gitplex.web.util.DateUtils;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 
@@ -80,6 +92,8 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	private final Map<Integer, Integer> contextSizes = new HashMap<>();
 	
 	private final DiffViewMode diffMode;
+
+	private final IModel<Boolean> blameModel;
 	
 	private final BlobMarkSupport markSupport;
 	
@@ -89,8 +103,11 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	
 	private transient List<MarkAwareDiffBlock> diffBlocks;
 	
+	private BlameInfo blameInfo;
+	
 	public TextDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			BlobChange change, DiffViewMode diffMode, @Nullable BlobMarkSupport markSupport) {
+			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
+			@Nullable BlobMarkSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
@@ -98,6 +115,11 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		this.change = change;
 		this.diffMode = diffMode;
 		this.markSupport = markSupport;
+		this.blameModel = blameModel;
+		
+		if (blameModel != null && blameModel.getObject()) {
+			blameInfo = getBlameInfo();
+		}
 	}
 
 	private String getJson(DiffMark mark) {
@@ -108,6 +130,30 @@ public class TextDiffPanel extends Panel implements MarkAware {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	private BlameInfo getBlameInfo() {
+		blameInfo = new BlameInfo();
+		Git git = depotModel.getObject().git();
+		String oldPath = change.getOldBlobIdent().path;
+		if (oldPath != null) {
+			for (Blame blame: git.blame(getOldCommit().name(), oldPath).values()) {
+				for (Range range: blame.getRanges()) {
+					for (int i=range.getFrom(); i<range.getTo(); i++) 
+						blameInfo.oldBlame.put(i, blame.getCommit());
+				}
+			}
+		}
+		String newPath = change.getNewBlobIdent().path;
+		if (newPath != null) {
+			for (Blame blame: git.blame(getNewCommit().name(), newPath).values()) {
+				for (Range range: blame.getRanges()) {
+					for (int i=range.getFrom(); i<range.getTo(); i++) 
+						blameInfo.newBlame.put(i, blame.getCommit());
+				}
+			}
+		}
+		return blameInfo;
+	}
 
 	@Override
 	protected void onInitialize() {
@@ -116,6 +162,34 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true));
 		add(new BlobDiffTitle("title", change));
 
+		add(new AjaxLink<Void>("blameFile") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(blameModel != null);
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				if (blameInfo != null) {
+					blameInfo = null;
+				} else {
+					blameInfo = getBlameInfo();
+				}
+				target.add(TextDiffPanel.this);
+				blameModel.setObject(blameInfo != null);
+			}
+			
+		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return blameInfo!=null? "active": "";
+			}
+			
+		})).setOutputMarkupId(true));
+		
 		PullRequest request = requestModel.getObject();
 		if (request != null) {
 			DepotFilePage.State state = new DepotFilePage.State();
@@ -164,7 +238,17 @@ public class TextDiffPanel extends Panel implements MarkAware {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getQueryParameters();
 				switch (params.getParameterValue("action").toString()) {
+				case "showBlameMessage": 
+					String tooltipId = params.getParameterValue("param1").toString();
+					String commitHash = params.getParameterValue("param2").toString();
+					String message = depotModel.getObject().getRevCommit(commitHash).getFullMessage();
+					String escapedMessage = JavaScriptEscape.escapeJavaScript(message);
+					String script = String.format("gitplex.textdiff.showBlameMessage('%s', '%s');", tooltipId, escapedMessage); 
+					target.appendJavaScript(script);
+					break;
 				case "expand":
+					if (blameInfo != null)
+						blameInfo.lastCommitHash = null;
 					int index = params.getParameterValue("param1").toInt();
 					Integer lastContextSize = contextSizes.get(index);
 					if (lastContextSize == null)
@@ -177,7 +261,7 @@ public class TextDiffPanel extends Panel implements MarkAware {
 					
 					String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
 					expanded = StringUtils.replace(expanded, "\n", "");
-					String script = String.format("gitplex.textdiff.expand('%s', %d, \"%s\");",
+					script = String.format("gitplex.textdiff.expand('%s', %d, \"%s\");",
 							getMarkupId(), index, expanded);
 					target.appendJavaScript(script);
 					break;
@@ -303,6 +387,7 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
+		response.render(JavaScriptHeaderItem.forReference(HoverResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(SelectionPopoverResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(TextDiffPanel.class, "text-diff.js")));
@@ -393,9 +478,18 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	}
 	
 	private String renderDiffs() {
-		int contextSize = Constants.DIFF_CONTEXT_SIZE;
 		StringBuilder builder = new StringBuilder();
-		if (diffMode == DiffViewMode.UNIFIED) {
+		if (blameInfo != null) {
+			blameInfo.lastCommitHash = null;
+			builder.append(""
+					+ "<colgroup>"
+					+ "<col width='240'></col>"
+					+ "<col width='60'></col>"
+					+ "<col width='60'></col>"
+					+ "<col width='15'></col>"
+					+ "<col></col>"
+					+ "</colgroup>");
+		} else if (diffMode == DiffViewMode.UNIFIED) {
 			builder.append(""
 					+ "<colgroup>"
 					+ "<col width='60'></col>"
@@ -417,7 +511,10 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		for (int i=0; i<getDiffBlocks().size(); i++) {
 			MarkAwareDiffBlock block = getDiffBlocks().get(i);
 			if (block.getType() == Type.EQUAL) {
-				appendEquals(builder, i, 0, contextSize);
+				Integer lastContextSize = contextSizes.get(i);
+				if (lastContextSize == null)
+					lastContextSize = Constants.DIFF_CONTEXT_SIZE;
+				appendEquals(builder, i, 0, lastContextSize);
 			} else if (block.getType() == Type.MARKED_EQUAL) {
 				appendMarkedEquals(builder, i);
 			} else if (block.getType () == Type.DELETE) {
@@ -426,36 +523,59 @@ public class TextDiffPanel extends Panel implements MarkAware {
 					if (nextBlock.getType() == Type.INSERT) {
 						LinkedHashMap<Integer, LineDiff> lineChanges = 
 								DiffUtils.align(block.getLines(), nextBlock.getLines());
-						int prevDeleteLineIndex = 0;
-						int prevInsertLineIndex = 0;
-						for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {
-							int deleteLineIndex = entry.getKey();
-							LineDiff lineChange = entry.getValue();
-							int insertLineIndex = lineChange.getCompareLine();
-							
-							appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, deleteLineIndex, 
-									prevInsertLineIndex, insertLineIndex);
-							
-							appendModification(builder, block, nextBlock, deleteLineIndex, insertLineIndex, lineChange.getTokenDiffs()); 
-							
-							prevDeleteLineIndex = deleteLineIndex+1;
-							prevInsertLineIndex = insertLineIndex+1;
+						if (blameInfo != null) {
+							for (int j=0; j<block.getLines().size(); j++) { 
+								LineDiff lineDiff = lineChanges.get(j);
+								if (lineDiff != null) {
+									appendDelete(builder, block, j, lineDiff.getTokenDiffs());
+								} else {
+									appendDelete(builder, block, j, null);
+								}
+							}
+							Map<Integer, LineDiff> lineChangesByInsert = new HashMap<>();
+							for (LineDiff diff: lineChanges.values()) {
+								lineChangesByInsert.put(diff.getCompareLine(), diff);
+							}
+							for (int j=0; j<nextBlock.getLines().size(); j++) {
+								LineDiff lineDiff = lineChangesByInsert.get(j);
+								if (lineDiff != null) {
+									appendInsert(builder, block, j, lineDiff.getTokenDiffs());
+								} else {
+									appendInsert(builder, block, j, null);
+								}
+							}
+						} else {
+							int prevDeleteLineIndex = 0;
+							int prevInsertLineIndex = 0;
+							for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {
+								int deleteLineIndex = entry.getKey();
+								LineDiff lineChange = entry.getValue();
+								int insertLineIndex = lineChange.getCompareLine();
+								
+								appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, deleteLineIndex, 
+										prevInsertLineIndex, insertLineIndex);
+								
+								appendModification(builder, block, nextBlock, deleteLineIndex, insertLineIndex, lineChange.getTokenDiffs()); 
+								
+								prevDeleteLineIndex = deleteLineIndex+1;
+								prevInsertLineIndex = insertLineIndex+1;
+							}
+							appendDeletesAndInserts(builder, block, nextBlock, 
+									prevDeleteLineIndex, block.getLines().size(), 
+									prevInsertLineIndex, nextBlock.getLines().size());
 						}
-						appendDeletesAndInserts(builder, block, nextBlock, 
-								prevDeleteLineIndex, block.getLines().size(), 
-								prevInsertLineIndex, nextBlock.getLines().size());
 						i++;
 					} else {
 						for (int j=0; j<block.getLines().size(); j++) 
-							appendDelete(builder, block, j);
+							appendDelete(builder, block, j, null);
 					}
 				} else {
 					for (int j=0; j<block.getLines().size(); j++) 
-						appendDelete(builder, block, j);
+						appendDelete(builder, block, j, null);
 				}
 			} else {
 				for (int j=0; j<block.getLines().size(); j++) 
-					appendInsert(builder, block, j);
+					appendInsert(builder, block, j, null);
 			}
 		}
 		return builder.toString();
@@ -466,9 +586,9 @@ public class TextDiffPanel extends Panel implements MarkAware {
 			int fromInsertLineIndex, int toInsertLineIndex) {
 		if (diffMode == DiffViewMode.UNIFIED) {
 			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
-				appendDelete(builder, deleteBlock, i);
+				appendDelete(builder, deleteBlock, i, null);
 			for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++)
-				appendInsert(builder, insertBlock, i);
+				appendInsert(builder, insertBlock, i, null);
 		} else {
 			int deleteSize = toDeleteLineIndex - fromDeleteLineIndex;
 			int insertSize = toInsertLineIndex - fromInsertLineIndex;
@@ -476,14 +596,36 @@ public class TextDiffPanel extends Panel implements MarkAware {
 				for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++) 
 					appendSideBySide(builder, deleteBlock, insertBlock, i, i-fromDeleteLineIndex+fromInsertLineIndex);
 				for (int i=fromInsertLineIndex+deleteSize; i<toInsertLineIndex; i++)
-					appendInsert(builder, insertBlock, i);
+					appendInsert(builder, insertBlock, i, null);
 			} else {
 				for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++) 
 					appendSideBySide(builder, deleteBlock, insertBlock, i-fromInsertLineIndex+fromDeleteLineIndex, i);
 				for (int i=fromDeleteLineIndex+insertSize; i<toDeleteLineIndex; i++)
-					appendDelete(builder, deleteBlock, i);
+					appendDelete(builder, deleteBlock, i, null);
 			}
 		}
+	}
+	
+	private void appendBlame(StringBuilder builder, int oldLineNo, int newLineNo) {
+		BriefCommit commit;
+		if (oldLineNo != -1)
+			commit = Preconditions.checkNotNull(blameInfo.oldBlame.get(oldLineNo));
+		else
+			commit = Preconditions.checkNotNull(blameInfo.newBlame.get(newLineNo));
+		if (!commit.getHash().equals(blameInfo.lastCommitHash)) {
+			CommitDetailPage.State state = new CommitDetailPage.State();
+			state.revision = commit.getHash();
+			state.whitespaceOption = change.getWhitespaceOption();
+			PageParameters params = CommitDetailPage.paramsOf(depotModel.getObject(), state);
+			String url = urlFor(CommitDetailPage.class, params).toString();
+			builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
+					url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash()), 
+					DateUtils.formatDate(commit.getCommitter().getWhen()),
+					HtmlEscape.escapeHtml5(commit.getAuthor().getName())));
+		} else {
+			builder.append("<td class='blame noselect'><div class='same-as-above'>...</div></td>");
+		}
+		blameInfo.lastCommitHash = commit.getHash();
 	}
 	
 	private void appendEqual(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, int lastContextSize) {
@@ -495,7 +637,10 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
 		
-		if (diffMode == DiffViewMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+			if (blameInfo != null) {
+				appendBlame(builder, oldLineNo, newLineNo);
+			}
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
@@ -538,21 +683,37 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		builder.append("</tr>");
 	}
 	
-	private void appendInsert(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex) {
+	private void appendInsert(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, @Nullable List<DiffBlock<CmToken>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
-		if (diffMode == DiffViewMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+			if (blameInfo != null) {
+				appendBlame(builder, -1, newLineNo);
+			}
 			builder.append("<td class='number noselect new'>&nbsp;</td>");
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
-			List<CmToken> tokens = block.getLines().get(lineIndex);
-			if (tokens.isEmpty()) {
-				builder.append("&nbsp;");
+			if (tokenDiffs != null) {
+				if (tokenDiffs.isEmpty()) {
+					builder.append("&nbsp;");
+				} else {
+					for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
+						for (CmToken token: tokenBlock.getUnits()) {
+							if (tokenBlock.getOperation() != Operation.DELETE) 
+								builder.append(token.toHtml(tokenBlock.getOperation()));
+						}
+					}
+				}			
 			} else {
-				for (int i=0; i<tokens.size(); i++) 
-					builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+				List<CmToken> tokens = block.getLines().get(lineIndex);
+				if (tokens.isEmpty()) {
+					builder.append("&nbsp;");
+				} else {
+					for (int i=0; i<tokens.size(); i++) 
+						builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+				}
 			}
 			builder.append("</td>");
 		} else {
@@ -574,21 +735,37 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		builder.append("</tr>");
 	}
 	
-	private void appendDelete(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex) {
+	private void appendDelete(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, @Nullable List<DiffBlock<CmToken>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
-		if (diffMode == DiffViewMode.UNIFIED) {
+		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+			if (blameInfo != null) {
+				appendBlame(builder, oldLineNo, -1);
+			}
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='number noselect old'>&nbsp;</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content old' data-old='").append(oldLineNo).append("'>");
-			List<CmToken> tokens = block.getLines().get(lineIndex);
-			if (tokens.isEmpty()) {
-				builder.append("&nbsp;");
+			if (tokenDiffs != null) {
+				if (tokenDiffs.isEmpty()) {
+					builder.append("&nbsp;");
+				} else {
+					for (DiffBlock<CmToken> tokenBlock: tokenDiffs) { 
+						for (CmToken token: tokenBlock.getUnits()) {
+							if (tokenBlock.getOperation() != Operation.INSERT) 
+								builder.append(token.toHtml(tokenBlock.getOperation()));
+						}
+					}
+				}
 			} else {
-				for (int i=0; i<tokens.size(); i++) 
-					builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+				List<CmToken> tokens = block.getLines().get(lineIndex);
+				if (tokens.isEmpty()) {
+					builder.append("&nbsp;");
+				} else {
+					for (int i=0; i<tokens.size(); i++) 
+						builder.append(tokens.get(i).toHtml(Operation.EQUAL));
+				}
 			}
 			builder.append("</td>");
 		} else {
@@ -702,13 +879,16 @@ public class TextDiffPanel extends Panel implements MarkAware {
 	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
-		String script = String.format("javascript: "
-				+ "var callback = $('#%s').data('callback');"
-				+ "if (callback) callback('expand', %d);", 
-				getMarkupId(), blockIndex);
-		if (diffMode == DiffViewMode.UNIFIED) {
-			builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
-					.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
+		String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);
+		if (diffMode == DiffViewMode.UNIFIED || blameInfo != null) {
+			if (blameInfo != null) {
+				builder.append("<td colspan='3' class='expander noselect'><a title='Show more lines' href=\"")
+						.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
+				blameInfo.lastCommitHash = null;
+			} else {
+				builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
+						.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
+			}
 			builder.append("<td colspan='2' class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
 					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		} else {
@@ -802,6 +982,9 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		depotModel.detach();
 		requestModel.detach();
 		
+		if (blameModel != null)
+			blameModel.detach();
+		
 		super.onDetach();
 	}
 
@@ -888,6 +1071,16 @@ public class TextDiffPanel extends Panel implements MarkAware {
 			path = mark.getPath();
 			leftSide = mark.getCommit().equals(oldCommitHash);
 		}
+		
+	}
+	
+	private static class BlameInfo implements Serializable {
+		
+		Map<Integer, BriefCommit> oldBlame = new HashMap<>();
+		
+		Map<Integer, BriefCommit> newBlame = new HashMap<>();
+		
+		String lastCommitHash;
 		
 	}
 	

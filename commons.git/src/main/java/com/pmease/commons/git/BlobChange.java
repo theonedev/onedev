@@ -176,6 +176,10 @@ public abstract class BlobChange implements Serializable {
 		return getNewBlob().getText();
 	}
 	
+	public WhitespaceOption getWhitespaceOption() {
+		return whitespaceOption;
+	}
+
 	public Collection<String> getPaths() {
 		Collection<String> paths = new HashSet<>();
 		if (oldBlobIdent.path != null)

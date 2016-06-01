@@ -126,6 +126,7 @@
 	word-wrap: break-word;
 	position: absolute;
 	z-index: 10;
+	font-size: 13px;
 	border: 1px solid #BBB;
 	background: #F9F9F9;
 	padding: 8px;

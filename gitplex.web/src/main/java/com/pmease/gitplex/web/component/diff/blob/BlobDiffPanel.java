@@ -41,17 +41,21 @@ public class BlobDiffPanel extends Panel implements MarkAware {
 	
 	private final BlobChange change;
 	
+	private final IModel<Boolean> blameModel;
+	
 	private final DiffViewMode diffMode;
 	
 	private final BlobMarkSupport markSupport;
 	
 	public BlobDiffPanel(String id, IModel<Depot> depotModel, IModel<PullRequest> requestModel, 
-			BlobChange change, DiffViewMode diffMode, @Nullable BlobMarkSupport markSupport) {
+			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
+			@Nullable BlobMarkSupport markSupport) {
 		super(id);
 		
 		this.depotModel = depotModel;
 		this.requestModel = requestModel;
 		this.change = change;
+		this.blameModel = blameModel;
 		this.diffMode = diffMode;
 		this.markSupport = markSupport;
 	}
@@ -79,7 +83,7 @@ public class BlobDiffPanel extends Panel implements MarkAware {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, markSupport));
+				add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, blameModel, markSupport));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -115,7 +119,7 @@ public class BlobDiffPanel extends Panel implements MarkAware {
 						&& (markSupport == null || markSupport.getComments().isEmpty())) {
 					add(newFragment("Content is identical", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, markSupport));
+					add(new TextDiffPanel(CONTENT_ID, depotModel, requestModel, change, diffMode, blameModel, markSupport));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));
@@ -145,6 +149,9 @@ public class BlobDiffPanel extends Panel implements MarkAware {
 	protected void onDetach() {
 		depotModel.detach();
 		requestModel.detach();
+		
+		if (blameModel != null)
+			blameModel.detach();
 		
 		super.onDetach();
 	}

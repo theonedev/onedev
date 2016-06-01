@@ -69,6 +69,8 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
+	private static final String PARAM_BLAME_FILE = "blame-file";
+	
 	private static final String PARAM_COMMENT = "comment";
 	
 	private static final String PARAM_MARK = "mark";
@@ -98,6 +100,8 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 	
 	private String pathFilter;
+	
+	private String blameFile;
 	
 	private Long commentId;
 	
@@ -158,6 +162,7 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 		state.oldRev = params.get(PARAM_OLD_REV).toString();
 		state.newRev = params.get(PARAM_NEW_REV).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
+		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = DiffMark.of(params.get(PARAM_MARK).toString());
@@ -170,6 +175,7 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 		newCommitHash = getCommitHash(state.newRev);
 		whitespaceOption = state.whitespaceOption;
 		pathFilter = state.pathFilter;
+		blameFile = state.blameFile;
 		commentId = state.commentId;
 		mark = state.mark;
 	}
@@ -493,6 +499,8 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.blameFile != null)
+			params.set(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
@@ -653,24 +661,64 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 	}
 	
 	private void newCompareResult(@Nullable IPartialPageRequestHandler partialPageRequestHandler) {
-		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
-				requestModel, oldCommitHash, newCommitHash, pathFilter, 
-				whitespaceOption, this) {
+		IModel<String> blameModel = new IModel<String>() {
 
 			@Override
-			protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
-				pathFilter = state.pathFilter = pathFilter;
-				pushState(target);
+			public void detach() {
 			}
 
 			@Override
-			protected void onWhitespaceOptionChange(AjaxRequestTarget target,
-					WhitespaceOption whitespaceOption) {
-				whitespaceOption = state.whitespaceOption = whitespaceOption;
-				pushState(target);
+			public String getObject() {
+				return blameFile;
+			}
+
+			@Override
+			public void setObject(String object) {
+				blameFile = state.blameFile = object;
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+			}
+			
+		};
+		IModel<String> pathFilterModel = new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return pathFilter;
+			}
+
+			@Override
+			public void setObject(String object) {
+				pathFilter = state.pathFilter = object;
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+			}
+			
+		};
+		IModel<WhitespaceOption> whitespaceOptionModel = new IModel<WhitespaceOption>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public WhitespaceOption getObject() {
+				return whitespaceOption;
+			}
+
+			@Override
+			public void setObject(WhitespaceOption object) {
+				whitespaceOption = state.whitespaceOption = object;
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 			}
 
 		};
+		
+		revisionDiff = new RevisionDiffPanel("revisionDiff", depotModel,  
+				requestModel, oldCommitHash, newCommitHash, pathFilterModel, 
+				whitespaceOptionModel, blameModel, this);
 		revisionDiff.setOutputMarkupId(true);
 		if (partialPageRequestHandler != null) {
 			replace(revisionDiff);
@@ -725,14 +773,12 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		commentId = state.commentId = comment.getId();
-		mark = state.mark = new DiffMark(comment);
-		pushState(target);
-	}
-
-	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
-		commentId = state.commentId = null;
+		if (comment != null) {
+			commentId = state.commentId = comment.getId();
+			mark = state.mark = new DiffMark(comment);
+		} else {
+			commentId = state.commentId = null;
+		}
 		pushState(target);
 	}
 
@@ -759,10 +805,16 @@ public class RequestComparePage extends RequestDetailPage implements MarkSupport
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 		
+		@Nullable
 		public String pathFilter;
 		
+		@Nullable
+		public String blameFile;
+		
+		@Nullable
 		public Long commentId;
 		
+		@Nullable
 		public DiffMark mark;
 		
 	}

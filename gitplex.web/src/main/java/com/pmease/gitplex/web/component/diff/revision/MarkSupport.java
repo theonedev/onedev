@@ -20,10 +20,8 @@ public interface MarkSupport extends Serializable {
 	
 	@Nullable CodeComment getOpenComment();
 
-	void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
+	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 	
-	void onCommentClosed(AjaxRequestTarget target);
-
 	void onAddComment(AjaxRequestTarget target, DiffMark mark);
 
 }

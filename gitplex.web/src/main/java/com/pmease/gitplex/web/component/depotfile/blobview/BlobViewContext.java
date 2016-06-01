@@ -52,10 +52,8 @@ public interface BlobViewContext extends Serializable {
 	
 	void onEdit(AjaxRequestTarget target, @Nullable String viewState);
 	
-	void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
+	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 
-	void onCommentClosed(AjaxRequestTarget target);
-	
 	void onAddComment(AjaxRequestTarget target, Mark mark);
 	
 	@Nullable

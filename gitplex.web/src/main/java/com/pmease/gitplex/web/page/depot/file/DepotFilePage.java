@@ -930,17 +930,15 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		commentId = comment.getId();
-		mark = comment.getMark();
+		if (comment != null) {
+			commentId = comment.getId();
+			mark = comment.getMark();
+		} else {
+			commentId = null;
+		}
 		pushState(target);
 	}
 
-	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
-		commentId = null;
-		pushState(target);
-	}
-	
 	@Override
 	public void onAddComment(AjaxRequestTarget target, Mark mark) {
 		commentId = null;

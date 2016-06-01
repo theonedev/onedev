@@ -89,6 +89,8 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
+	private static final String PARAM_BLAME_FILE = "blame-file";
+	
 	private static final String PARAM_TAB = "tab-panel";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
@@ -118,6 +120,8 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.blameFile != null)
+			params.set(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
@@ -163,6 +167,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		}
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
+		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.of(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
@@ -476,26 +481,66 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		WebMarkupContainer tabPanel;
 		switch (state.tabPanel) {
 		case FILES:
-			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
-					new Model<PullRequest>(null), 
-					state.compareWithMergeBase?mergeBaseModel.getObject():state.leftSide.getRevision(), 
-					state.rightSide.getRevision(), state.pathFilter, 
-					state.whitespaceOption, this) {
+			IModel<String> blameModel = new IModel<String>() {
 
 				@Override
-				protected void onPathFilterChange(AjaxRequestTarget target, String pathFilter) {
-					state.pathFilter = pathFilter;
-					pushState(target);
+				public void detach() {
 				}
 
 				@Override
-				protected void onWhitespaceOptionChange(AjaxRequestTarget target,
-						WhitespaceOption whitespaceOption) {
-					state.whitespaceOption = whitespaceOption;
-					pushState(target);
+				public String getObject() {
+					return state.blameFile;
+				}
+
+				@Override
+				public void setObject(String object) {
+					state.blameFile = object;
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 				}
 				
 			};
+			
+			IModel<String> pathFilterModel = new IModel<String>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public String getObject() {
+					return state.pathFilter;
+				}
+
+				@Override
+				public void setObject(String object) {
+					state.pathFilter = object;
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				}
+				
+			};
+			IModel<WhitespaceOption> whitespaceOptionModel = new IModel<WhitespaceOption>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public WhitespaceOption getObject() {
+					return state.whitespaceOption;
+				}
+
+				@Override
+				public void setObject(WhitespaceOption object) {
+					state.whitespaceOption = object;
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				}
+
+			};
+			
+			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
+					new Model<PullRequest>(null), 
+					state.compareWithMergeBase?mergeBaseModel.getObject():state.leftSide.getRevision(), 
+					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 			commitsTab.setSelected(false);
 			filesTab.setSelected(true);	
 			break;
@@ -565,6 +610,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		public String pathFilter;
 		
 		@Nullable
+		public String blameFile;
+		
+		@Nullable
 		public Long commentId;
 
 		@Nullable
@@ -579,6 +627,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			compareWithMergeBase = state.compareWithMergeBase;
 			whitespaceOption = state.whitespaceOption;
 			pathFilter = state.pathFilter;
+			blameFile = state.blameFile;
 			commentId = state.commentId;
 			mark = state.mark;
 			tabPanel = state.tabPanel;
@@ -630,14 +679,12 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		state.mark = new DiffMark(comment);
-		state.commentId = comment.getId();
-		pushState(target);
-	}
-
-	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
-		state.commentId = null;
+		if (comment != null) {
+			state.mark = new DiffMark(comment);
+			state.commentId = comment.getId();
+		} else {
+			state.commentId = null;
+		}
 		pushState(target);
 	}
 
