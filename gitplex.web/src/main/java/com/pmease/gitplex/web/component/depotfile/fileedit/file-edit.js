@@ -17,8 +17,15 @@ gitplex.fileedit = {
 	    	saveCallback(cm.getValue());
 	    });
 	    
-		$fileEdit.on("autofit", function(event, width, height) {
-			event.stopPropagation();
+	    $fileEdit.on("storeViewState", function(e) {
+			e.stopPropagation();
+			if (cm) {
+				pmease.commons.history.setViewState(pmease.commons.codemirror.getViewState(cm));
+			}
+	    });
+	    
+		$fileEdit.on("autofit", function(e, width, height) {
+			e.stopPropagation();
 			$fileEdit.outerWidth(width);
 			$fileEdit.outerHeight(height);
 			
@@ -177,6 +184,13 @@ gitplex.fileedit = {
     	}
     	var $fileEdit = $tab.closest(".file-edit");
     	var $body = $fileEdit.find(">.body");
+
+    	var $cm = $fileEdit.find(">.body>div.edit>.CodeMirror");
+    	if ($cm.is(":visible")) {
+        	var cm = $cm[0].CodeMirror;		
+    		$fileEdit.find(">.body>div.save").data("viewState", pmease.commons.codemirror.getViewState(cm));
+    	}
+    	
 		$body.find(">div").hide();
 		if ($tab.hasClass("edit")) {
 			$body.find(">div.edit").show().find(">.CodeMirror")[0].CodeMirror.focus();

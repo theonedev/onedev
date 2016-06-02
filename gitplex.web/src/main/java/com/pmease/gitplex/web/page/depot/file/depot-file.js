@@ -63,7 +63,7 @@ $(window).load(function() {
 					-$("#search-result-resize-handle").outerHeight());
 		}
 		$fileViewer.outerWidth(width).outerHeight(height);
-		$fileViewer.closestDescendant(".autofit:visible").trigger("autofit", [$fileViewer.width(), $fileViewer.height()]);
+		$fileViewer.find(".autofit:visible").first().trigger("autofit", [$fileViewer.width(), $fileViewer.height()]);
 	});
 	$(window).resize();
 });

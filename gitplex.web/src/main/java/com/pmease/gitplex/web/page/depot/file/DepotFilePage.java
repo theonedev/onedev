@@ -50,7 +50,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.exception.ObjectNotExistException;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.lang.extractors.TokenPosition;
-import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.cookies.CookiesResourceReference;
 import com.pmease.commons.wicket.assets.jqueryui.JQueryUIResourceReference;
 import com.pmease.commons.wicket.component.menu.MenuItem;
@@ -97,8 +96,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 
 	private static class SearchResultKey extends MetaDataKey<ArrayList<QueryHit>> {
 	};
-	
+
 	public static final SearchResultKey SEARCH_RESULT_KEY = new SearchResultKey();		
+	
+	private static class ViewStateKey extends MetaDataKey<String> {
+	};
+	
+	public static final ViewStateKey VIEW_STATE_KEY = new ViewStateKey();		
 	
 	private static final String PARAM_REVISION = "revision";
 	
@@ -159,9 +163,6 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	
 	private transient List<QueryHit> queryHits;
 	
-	// client state holding CodeMirror cursor, scroll, marks, etc.
-	private transient String viewState;
-
 	public DepotFilePage(final PageParameters params) {
 		super(params);
 		
@@ -229,7 +230,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			}
 		}
 		
-		viewState = params.get(PARAM_VIEW_STATE).toString();
+		RequestCycle.get().setMetaData(VIEW_STATE_KEY, params.get(PARAM_VIEW_STATE).toString());
 		
 		if (mode == Mode.EDIT || mode == Mode.DELETE) {
 			if (!isOnBranch()) 
@@ -344,7 +345,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		});
 
 		newContributionPanel(null);
-		newFileViewer(null, viewState);
+		newFileViewer(null);
 
 		add(searchResultContainer = new WebMarkupContainer("searchResultContainer"));
 		
@@ -441,7 +442,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				
 				newFileNavigator(target);
 				newContributionPanel(target);
-				newFileViewer(target, null);
+				newFileViewer(target);
 				
 				pushState(target);
 				resizeWindow(target);
@@ -492,9 +493,9 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		}
 	}
 	
-	private BlobViewPanel renderBlobViewer(String panelId, @Nullable String viewState) {
+	private BlobViewPanel renderBlobViewer(String panelId) {
 		for (BlobRenderer renderer: GitPlex.getExtensions(BlobRenderer.class)) {
-			BlobViewPanel panel = renderer.render(panelId, this, viewState);
+			BlobViewPanel panel = renderer.render(panelId, this);
 			if (panel != null)
 				return panel;
 		}
@@ -502,7 +503,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		throw new IllegalStateException("No applicable blob renderer found.");
 	}
 	
-	private void newFileViewer(@Nullable AjaxRequestTarget target, @Nullable String viewState) {
+	private void newFileViewer(@Nullable AjaxRequestTarget target) {
 		Component fileViewer;
 		if (mode == Mode.EDIT) {
 			final String refName = GitUtils.branch2ref(blobIdent.revision);
@@ -511,7 +512,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					FILE_VIEWER_ID, depotModel, refName, 
 					blobIdent.isTree()?null:blobIdent.path, 
 					blobIdent.isTree()?"":getDepot().getBlob(blobIdent).getText().getContent(), 
-							getDepot().getObjectId(blobIdent.revision), mark, viewState) {
+							getDepot().getObjectId(blobIdent.revision), mark) {
  
 				@Override
 				protected void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit) {
@@ -537,7 +538,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					mode = null;
 					newFileNavigator(target);
 					newContributionPanel(target);
-					newFileViewer(target, null);
+					newFileViewer(target);
 					pushState(target);
 					resizeWindow(target);
 				}
@@ -551,8 +552,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				@Override
 				public void onCancel(AjaxRequestTarget target) {
 					mode = null;
-
-					newFileViewer(target, null);
+					newFileViewer(target);
 					
 					pushState(target);
 					resizeWindow(target);
@@ -605,7 +605,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 				
 			};
 		} else {
-			fileViewer = renderBlobViewer(FILE_VIEWER_ID, viewState);
+			fileViewer = renderBlobViewer(FILE_VIEWER_ID);
 		}
 		if (target != null) {
 			replace(fileViewer);
@@ -717,14 +717,13 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		target.add(revisionIndexing);
 		
 		newContributionPanel(target);
-		newFileViewer(target, null);
+		newFileViewer(target);
 	}
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		response.render(JavaScriptHeaderItem.forReference(ClosestDescendantResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(CookiesResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(JQueryUIResourceReference.INSTANCE));
 		
@@ -871,7 +870,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 					FileEditPanel fileEditor = (FileEditPanel) fileViewer;
 					fileEditor.mark(target, mark);
 				} else {
-					newFileViewer(target, null);
+					newFileViewer(target);
 					resizeWindow(target);
 				}
 			}
@@ -884,7 +883,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 			newFileNavigator(target);
 			newContributionPanel(target);
-			newFileViewer(target, null);
+			newFileViewer(target);
 			
 			resizeWindow(target);
 		}
@@ -902,7 +901,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 		mode = (blamed?Mode.BLAME:null);
 		Component fileViewer = get(FILE_VIEWER_ID);
 		if (!(fileViewer instanceof SourceViewPanel)) {
-			newFileViewer(target, null);
+			newFileViewer(target);
 			resizeWindow(target);
 		}
 		pushState(target);
@@ -912,18 +911,18 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	public void onDelete(AjaxRequestTarget target) {
 		mode = Mode.DELETE;
 
-		newFileViewer(target, null);
+		newFileViewer(target);
 		pushState(target);
 		resizeWindow(target);
 	}
 
 	@Override
-	public void onEdit(AjaxRequestTarget target, @Nullable String viewState) {
+	public void onEdit(AjaxRequestTarget target) {
 		mode = Mode.EDIT;
 		
 		newFileNavigator(target);
 		newContributionPanel(target);
-		newFileViewer(target, viewState);
+		newFileViewer(target);
 		pushState(target);
 		resizeWindow(target);
 	}

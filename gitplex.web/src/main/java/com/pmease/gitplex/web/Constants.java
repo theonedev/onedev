@@ -22,5 +22,5 @@ public class Constants {
 	
 	/* commit constants */
 	public static final int MAX_DISPLAY_COMMITS = 500;
-	
+
 }

@@ -494,7 +494,8 @@ public abstract class FileNavigator extends Panel {
 									@Override
 									public void onClick(AjaxRequestTarget target, String viewState) {
 										close();
-										context.onEdit(target, viewState);
+										RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
+										context.onEdit(target);
 									}
 								};
 								

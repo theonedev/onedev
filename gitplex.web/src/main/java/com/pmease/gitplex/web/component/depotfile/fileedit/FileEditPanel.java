@@ -8,7 +8,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -35,9 +34,9 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.git.PathAndContent;
 import com.pmease.commons.lang.diff.WhitespaceOption;
 import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
-import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.assets.codemirror.CodeMirrorResourceReference;
 import com.pmease.commons.wicket.assets.diffmatchpatch.DiffMatchPatchResourceReference;
+import com.pmease.commons.wicket.component.ViewStateAwareAjaxLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
@@ -45,6 +44,7 @@ import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.web.component.depotfile.editsave.EditSavePanel;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 @SuppressWarnings("serial")
 public abstract class FileEditPanel extends Panel {
@@ -65,8 +65,6 @@ public abstract class FileEditPanel extends Panel {
 	
 	private final Mark mark;
 	
-	private final String viewState;
-	
 	private AbstractDefaultAjaxBehavior previewBehavior;
 	
 	private AbstractDefaultAjaxBehavior saveBehavior;
@@ -75,7 +73,7 @@ public abstract class FileEditPanel extends Panel {
 	
 	public FileEditPanel(String id, IModel<Depot> depotModel, String refName, 
 			@Nullable String oldPath, String content, ObjectId prevCommitId, 
-			@Nullable Mark mark, @Nullable String viewState) {
+			@Nullable Mark mark) {
 		super(id);
 		this.depotModel = depotModel;
 		this.refName = refName;
@@ -83,7 +81,6 @@ public abstract class FileEditPanel extends Panel {
 		this.content = content;
 		this.prevCommitId = prevCommitId;
 		this.mark = mark;
-		this.viewState = viewState;
 		
 		newPath = this.oldPath;
 	}
@@ -165,7 +162,7 @@ public abstract class FileEditPanel extends Panel {
 		};
 		add(new WebMarkupContainer("saveLink").add(saveBehavior));
 		
-		add(new AjaxLink<Void>("cancelLink") {
+		add(new ViewStateAwareAjaxLink<Void>("cancelLink") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -174,7 +171,8 @@ public abstract class FileEditPanel extends Panel {
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
+			protected void onClick(AjaxRequestTarget target, String viewState) {
+				RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
 				FileEditPanel.this.onCancel(target);
 			}
 			
@@ -212,13 +210,14 @@ public abstract class FileEditPanel extends Panel {
 		super.renderHead(response);
 
 		response.render(JavaScriptHeaderItem.forReference(CodeMirrorResourceReference.INSTANCE));
-		response.render(JavaScriptHeaderItem.forReference(ClosestDescendantResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(DiffMatchPatchResourceReference.INSTANCE));
 		
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(FileEditPanel.class, "file-edit.js")));
 		response.render(CssHeaderItem.forReference(
 				new CssResourceReference(FileEditPanel.class, "file-edit.css")));
+		
+		String viewState = RequestCycle.get().getMetaData(DepotFilePage.VIEW_STATE_KEY);
 		
 		String script = String.format("gitplex.fileedit.init('%s', '%s', '%s', %s, %s, %s, %s);", 
 				getMarkupId(), getNewPathParam(), StringEscapeUtils.escapeEcmaScript(content), 
@@ -268,4 +267,5 @@ public abstract class FileEditPanel extends Panel {
 	protected abstract void onCommitted(AjaxRequestTarget target, ObjectId oldCommit, ObjectId newCommit);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
+	
 }

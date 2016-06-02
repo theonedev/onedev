@@ -7,6 +7,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.ComponentTag;
@@ -21,6 +23,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -47,6 +50,7 @@ import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
+import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import jersey.repackaged.com.google.common.base.Objects;
@@ -201,6 +205,17 @@ public abstract class EditSavePanel extends Panel {
 		form.add(new AjaxButton("save") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setMethod(Method.POST);
+				
+				String script = String.format(""
+						+ "var viewState = $('#%s').data('viewState');"
+						+ "return viewState?JSON.stringify(viewState):'';", EditSavePanel.this.getMarkupId());
+				attributes.getDynamicExtraParameters().add("return {view_state: function() {" + script + "}}");
+			}
+
+			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 
@@ -211,6 +226,10 @@ public abstract class EditSavePanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+
+				String viewState = RequestCycle.get().getRequest().getRequestParameters()
+						.getParameterValue("view_state").toString();
+				RequestCycle.get().setMetaData(DepotFilePage.VIEW_STATE_KEY, viewState);
 
 				change = null;
 				

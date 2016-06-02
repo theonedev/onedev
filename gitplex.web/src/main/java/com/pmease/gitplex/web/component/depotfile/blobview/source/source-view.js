@@ -36,6 +36,13 @@ gitplex.sourceview = {
 			});
 		}
 		
+		$sourceView.on("storeViewState", function(event) {
+			event.stopPropagation();
+			if (cm) {
+		    	pmease.commons.history.setViewState(pmease.commons.codemirror.getViewState(cm));
+			}
+		});
+		
 		$sourceView.on("autofit", function(event, width, height) {
 			event.stopPropagation();
 			$sourceView.outerWidth(width);

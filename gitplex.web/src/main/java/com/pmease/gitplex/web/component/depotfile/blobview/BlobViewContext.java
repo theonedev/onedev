@@ -37,7 +37,7 @@ public interface BlobViewContext extends Serializable {
 	String getMarkUrl(Mark mark);
 	
 	Mode getMode();
-	
+
 	boolean isOnBranch();
 	
 	boolean isAtSourceBranchHead();
@@ -50,7 +50,7 @@ public interface BlobViewContext extends Serializable {
 	
 	void onDelete(AjaxRequestTarget target);
 	
-	void onEdit(AjaxRequestTarget target, @Nullable String viewState);
+	void onEdit(AjaxRequestTarget target);
 	
 	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 

@@ -41,29 +41,17 @@ pmease.commons.codemirror = {
 			CodeMirror.autoLoadMode(cm, modeInfo.mode);
 	    }
 	},
+	getViewState: function(cm) {
+		var cursor = cm.getCursor();
+    	var scrollInfo = cm.getScrollInfo();
+    	var scroll = {left: scrollInfo.left, top: scrollInfo.top};
+		return {cursor: cursor, scroll: scroll};		
+	},
 	initState: function(cm, viewState) {
-	    if (viewState) {
-	    	pmease.commons.history.setViewState(viewState);
+	    if (!viewState) {
+	    	viewState = pmease.commons.history.getViewState();
 	    }
 
-	    // use timer to minimize performance impact 
-	    var timer;
-	    function onViewStateChange() {
-    		if (timer)
-    			clearTimeout(timer);
-    		timer = setTimeout(function() {
-    			timer = undefined;
-    			var cursor = cm.getCursor();
-    	    	var scrollInfo = cm.getScrollInfo();
-    	    	var scroll = {left: scrollInfo.left, top: scrollInfo.top};
-    	    	pmease.commons.history.setViewState({cursor: cursor, scroll: scroll});
-	    	}, 500);
-	    };
-	    
-	    cm.on("cursorActivity", onViewStateChange);
-	    cm.on("scroll", onViewStateChange);
-
-	    var viewState = pmease.commons.history.getViewState();
 	    if (viewState) {
 	    	if (viewState.cursor)
 	    		cm.setCursor(viewState.cursor);

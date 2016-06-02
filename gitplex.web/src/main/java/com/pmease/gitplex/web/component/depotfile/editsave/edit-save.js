@@ -1,12 +1,12 @@
 gitplex.editsave = {
 	init: function(containerId) {
 		var $editSave = $("#" + containerId + ">.edit-save");
-		$editSave.scroll(function() {
+		$editSave.on("storeViewState", function(e) {
+			e.stopPropagation();
 	    	pmease.commons.history.setViewState({scroll:{left: $editSave.scrollLeft(), top: $editSave.scrollTop()}});
 		});
-
-		$editSave.on("autofit", function(event, width, height) {
-			event.stopPropagation();
+		$editSave.on("autofit", function(e, width, height) {
+			e.stopPropagation();
 			
 			$editSave.closest(".body").css("overflow", "hidden");
 			$editSave.outerWidth(width);

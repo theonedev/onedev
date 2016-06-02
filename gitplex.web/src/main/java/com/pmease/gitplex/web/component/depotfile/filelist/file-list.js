@@ -3,8 +3,8 @@ gitplex.filelist = {
 		var $container = $("#" + containerId);
 		var $fileList = $container.find(">.file-list");
 		
-		$fileList.on("autofit", function(event, width, height) {
-			event.stopPropagation();
+		$fileList.on("autofit", function(e, width, height) {
+			e.stopPropagation();
 			$fileList.outerWidth(width);
 			$fileList.outerHeight(height);
 
@@ -14,9 +14,10 @@ gitplex.filelist = {
 			    $fileList.scrollTop(viewState.scroll.top);
 			}
 		});
-
-		$fileList.scroll(function() {
-	    	pmease.commons.history.setViewState({scroll:{left: $fileList.scrollLeft(), top: $fileList.scrollTop()}});
+		
+		$fileList.on("storeViewState", function(e) {
+			e.stopPropagation();
+			pmease.commons.history.setViewState({scroll:{left: $fileList.scrollLeft(), top: $fileList.scrollTop()}});			
 		});
 
 		$.ajax({

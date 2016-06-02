@@ -10,13 +10,13 @@ import com.pmease.gitplex.web.component.depotfile.blobview.source.SourceViewPane
 public class MarkdownRenderer implements BlobRenderer {
 
 	@Override
-	public BlobViewPanel render(String panelId, BlobViewContext context, String viewState) {
+	public BlobViewPanel render(String panelId, BlobViewContext context) {
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
 		if (context.getBlobIdent().isFile() 
 				&& blob.getText() != null 
 				&& context.getBlobIdent().path.endsWith(".md")) { 
 			if (context.getMark() != null || context.getMode() == Mode.BLAME)
-				return new SourceViewPanel(panelId, context, viewState);
+				return new SourceViewPanel(panelId, context);
 			else
 				return new MarkdownFilePanel(panelId, context);
 		} else {

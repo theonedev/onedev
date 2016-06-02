@@ -114,8 +114,6 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
-	private final String viewState;
-	
 	private final IModel<Collection<CodeComment>> commentsModel = 
 			new LoadableDetachableModel<Collection<CodeComment>>() {
 
@@ -135,7 +133,7 @@ public class SourceViewPanel extends BlobViewPanel {
 	
 	private AbstractDefaultAjaxBehavior ajaxBehavior;
 	
-	public SourceViewPanel(String id, BlobViewContext context, @Nullable String viewState) {
+	public SourceViewPanel(String id, BlobViewContext context) {
 		super(id, context);
 		
 		Blob blob = context.getDepot().getBlob(context.getBlobIdent());
@@ -150,7 +148,6 @@ public class SourceViewPanel extends BlobViewPanel {
 			}
 		}
 		
-		this.viewState = viewState;
 	}
 	
 	@Override
@@ -826,6 +823,7 @@ public class SourceViewPanel extends BlobViewPanel {
 		CharSequence callback = ajaxBehavior.getCallbackFunction(
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"));
+		String viewState = RequestCycle.get().getMetaData(DepotFilePage.VIEW_STATE_KEY);
 		String script = String.format("gitplex.sourceview.init('%s', '%s', %s, %s, '%s', '%s', "
 				+ "%s, %s, %s, %s, %s);", 
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),

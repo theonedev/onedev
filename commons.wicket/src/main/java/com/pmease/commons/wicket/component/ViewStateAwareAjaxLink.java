@@ -26,6 +26,7 @@ public abstract class ViewStateAwareAjaxLink<T> extends PreventDefaultAjaxLink<T
 		attributes.setMethod(Method.POST);
 		
 		String script = ""
+				+ "$('.autofit:visible').first().trigger('storeViewState');"
 				+ "var viewState = pmease.commons.history.getViewState();"
 				+ "return viewState?JSON.stringify(viewState):'';";
 		attributes.getDynamicExtraParameters().add("return {view_state: function() {" + script + "}}");

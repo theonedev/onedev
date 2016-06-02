@@ -1,12 +1,17 @@
 <wicket:extend>
-	<div class='container' style="margin: 100px;">
-	<a class="trigger" style='border:1px solid blue;'>test</a>
-	</div>
+	<div class="doit"></div>
+	<div><div class="autofit 1"><div><div class="autofit 2"></div></div></div></div>
+	<div class="autofit 3"></div>
+	<a class="link">test</a>
 	<script type="text/javascript">
-	$(".trigger").hover(function() {
-		var $content = $("<div style='border:1px solid red;'>hello world</div>");
-		$(".container").append($content);
-		return $content;
-	}, {targetX: 0, targetY: 0, x: 0, y:0});	
+		$(".autofit.1").on("storeViewState", function(e) {
+			e.stopPropagation();
+			console.log("view state stored");
+		});
+		$("a.link").click(function(e) {
+			console.log("before");
+			$(".autofit:visible").first().trigger("storeViewState");
+			console.log("after");		
+		});
 	</script>
 </wicket:extend>

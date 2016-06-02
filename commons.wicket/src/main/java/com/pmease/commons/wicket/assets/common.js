@@ -425,6 +425,7 @@ pmease.commons = {
 			};
 		},
 		pushState: function(url, data) {
+			$(".autofit:visible").first().trigger("storeViewState");			
 			var state = {data: data};
 			pmease.commons.history.current = {state: state, url: url};
 			history.pushState(state, '', url);
@@ -491,4 +492,7 @@ $(function() {
 
 $(window).load(function() {
 	pmease.commons.history.setVisited();
+});
+$(window).on("beforeunload", function() {
+	$(".autofit:visible").first().trigger("storeViewState");	
 });

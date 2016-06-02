@@ -13,7 +13,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.google.common.base.Preconditions;
 import com.pmease.commons.git.BlobIdent;
-import com.pmease.commons.wicket.assets.closestdescendant.ClosestDescendantResourceReference;
 import com.pmease.commons.wicket.component.menu.MenuItem;
 import com.pmease.commons.wicket.component.menu.MenuLink;
 
@@ -47,7 +46,6 @@ public abstract class BlobViewPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(ClosestDescendantResourceReference.INSTANCE));
 		response.render(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(BlobViewPanel.class, "blob-view.js")));
 		response.render(CssHeaderItem.forReference(
