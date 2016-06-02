@@ -230,7 +230,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 		});				
 		
-		add(AttributeAppender.append("class", " hidden"));
+		add(AttributeAppender.append("class", " hidden symbol-tooltip-container"));
 		
 		setOutputMarkupId(true);
 	}

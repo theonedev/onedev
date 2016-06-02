@@ -95,3 +95,11 @@ gitplex.symboltooltip = {
 		}
 	}
 }
+
+$(function() {
+	$(window).scroll(function() {
+		$(".symbol-tooltip-container").each(function() {
+			gitplex.symboltooltip.removeTooltip(this);
+		});
+	});
+})

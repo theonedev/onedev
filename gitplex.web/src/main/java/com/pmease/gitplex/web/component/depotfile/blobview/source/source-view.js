@@ -153,6 +153,7 @@ gitplex.sourceview = {
 				if (initState) // restore cursor and scroll
 					pmease.commons.codemirror.initState(cm, viewState);
 				cm.on("scroll", function() {
+					gitplex.symboltooltip.removeTooltip(document.getElementById(symbolTooltipId));					
 					gitplex.mouseState.moved = false;					
 					repositionCommentPopovers(cm);					
 				});
