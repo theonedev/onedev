@@ -437,13 +437,13 @@ gitplex.textdiff = {
 		if (mark) {
 			$container.data("mark", mark);
 			gitplex.textdiff.mark($container, mark);	
-			if (scroll)
+			if (scroll && !pmease.commons.history.isVisited())
 				gitplex.textdiff.scroll($container, mark);
 		}
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
 		var $container = $("#" + containerId);
-		var alignment = {targetX: 100, targetY: 0, x: 0, y: 0};
+		var alignment = {targetX: 100, targetY: 100, x: 0, y: 0};
 		$hashLink.hover(function() {
 			var $commitLink = $(this);
 			var $content = $commitLink.closest("tr").children("td.content");

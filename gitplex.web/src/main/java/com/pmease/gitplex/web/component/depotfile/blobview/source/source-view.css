@@ -125,7 +125,7 @@
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	position: absolute;
-	z-index: 10;
+	z-index: 10000;
 	font-size: 13px;
 	border: 1px solid #BBB;
 	background: #F9F9F9;

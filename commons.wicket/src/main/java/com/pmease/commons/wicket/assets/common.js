@@ -383,55 +383,82 @@ pmease.commons = {
 	},
 
 	history: {
+		getHashlessUrl: function(url) {
+			var index = url.indexOf('#');
+			if (index != -1)
+				return url.substring(0, index);
+			else
+				return url;
+		},
 		init: function(callback) {
-			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:"");
-			
 			// Use a timeout here solve the problem that Safari (and previous versions of Chrome) 
 			// fires event "onpopstate" on initial page load and this causes the page to reload 
 			// infinitely  
 			setTimeout(function() {
 				window.onpopstate = function(event) {
-					var currentUrlWithoutHash = location.pathname+(location.search?location.search:"");
-					if (currentUrlWithoutHash != pmease.commons.history.urlWithoutHash) {
+					if (pmease.commons.history.getHashlessUrl(window.location.href) 
+							!= pmease.commons.history.getHashlessUrl(pmease.commons.history.current.url)) {
 						if (pmease.commons.form.confirmLeave()) {
-							if (!event.state || !event.state.data) 
+							if (!event.state || !event.state.data) {
 								location.reload();
-							else 
+							} else {
 								callback(event.state.data);
-							pmease.commons.history.current = {
-								state: event.state,
-								url: window.location.href
-							};
+								pmease.commons.history.current = {
+									state: event.state,
+									url: window.location.href
+								};
+							}
 						} else {
+							/*
+							 * In case we want to stay in the page, we should also re-push previous url 
+							 * as url has already been changed when user hits back/forward button
+							 */
 							history.pushState(pmease.commons.history.current.state, '' , 
 									pmease.commons.history.current.url);
 						}
 					}
-					pmease.commons.history.urlWithoutHash = currentUrlWithoutHash;
 				};
 			}, 100);
 			
 			pmease.commons.history.current = {
-				url: window.location.href	
+				url: window.location.href 
 			};
 		},
 		pushState: function(url, data) {
 			var state = {data: data};
 			pmease.commons.history.current = {state: state, url: url};
 			history.pushState(state, '', url);
-			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:'');
+			setTimeout(function() {
+				pmease.commons.history.setVisited();
+			}, 100);
 		},
-		replaceState: function(data, url) {
-			var state = {data: data};
-			pmease.commons.history.current = {state: state, url: url};
-			history.replaceState(state, '', url);
-			pmease.commons.history.urlWithoutHash = location.pathname+(location.search?location.search:'');
+		/*
+		 * visited flag is used to determine whether or not a page is newly visited 
+		 * or loaded via back/forward button. If loaded via back/forward button we
+		 * will not respect scroll flag (such as mark param in url) and let browser
+		 * scroll to original position for better usage experience 
+		 */
+		setVisited: function() {
+			var state = history.state;
+			if (!state)
+				state = {};
+			if (!state.loaded) {
+				var newState = {viewState: state.viewState, data: state.data, visited: true};
+				history.replaceState(newState, '', window.location.href);
+				pmease.commons.history.current = {
+					state: newState,
+					url: window.location.href
+				};
+			}
+		},
+		isVisited: function() {
+			return history.state && history.state.visited;
 		},
 		setViewState: function(viewState) {
 			var state = history.state;
 			if (!state)
 				state = {};
-			var newState = {viewState: viewState, data: state.data};
+			var newState = {viewState: viewState, data: state.data, visited: state.visited};
 			history.replaceState(newState, '', window.location.href );
 			pmease.commons.history.current = {
 				state: newState,
@@ -460,4 +487,8 @@ $(function() {
 	pmease.commons.form.setupDirtyCheck();
 	pmease.commons.focus.setupAutoFocus();
 	pmease.commons.websocket.setupCallback();
+});
+
+$(window).load(function() {
+	pmease.commons.history.setVisited();
 });

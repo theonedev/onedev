@@ -464,7 +464,7 @@ gitplex.sourceview = {
 	},
 	blame: function(blameInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var alignment = {targetX: 100, targetY: 0, x: 0, y: 0};
+		var alignment = {targetX: 100, targetY: 100, x: 0, y: 0};
 		
 		if (blameInfos) {
 			var markCallback = $(".source-view").data("markCallback");

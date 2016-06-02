@@ -67,8 +67,12 @@ pmease.commons.codemirror = {
 	    if (viewState) {
 	    	if (viewState.cursor)
 	    		cm.setCursor(viewState.cursor);
-	    	if (viewState.scroll)
-	    		cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
+	    	if (viewState.scroll) {
+	    		// use a timeout to make sure we scroll after possible viewport resize
+	    		setTimeout(function() {
+		    		cm.scrollTo(viewState.scroll.left, viewState.scroll.top);
+	    		}, 10);
+	    	}
 	    }
 	    
 	    CodeMirror.keyMap.default["Ctrl-L"] = "gotoLine";
