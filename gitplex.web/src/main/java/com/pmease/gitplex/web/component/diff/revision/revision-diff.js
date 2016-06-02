@@ -79,13 +79,7 @@ gitplex.revisionDiff = {
 				autoHide: false,
 				handles: {"e": $commentResizeHandle},
 				minWidth: 200,
-				resize: function(e, ui) {
-					var diffsWidth = $diffs.outerWidth();
-				    if(diffsWidth < 300)
-				    	$(this).resizable({maxWidth: ui.size.width});
-				},
 				stop: function(e, ui) {
-					$(this).resizable({maxWidth: undefined});
 					Cookies.set(commentWidthCookieKey, ui.size.width, {expires: Infinity});
 					$(window).resize();
 				}
