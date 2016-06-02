@@ -539,9 +539,9 @@ public class TextDiffPanel extends Panel implements MarkAware {
 							for (int j=0; j<nextBlock.getLines().size(); j++) {
 								LineDiff lineDiff = lineChangesByInsert.get(j);
 								if (lineDiff != null) {
-									appendInsert(builder, block, j, lineDiff.getTokenDiffs());
+									appendInsert(builder, nextBlock, j, lineDiff.getTokenDiffs());
 								} else {
-									appendInsert(builder, block, j, null);
+									appendInsert(builder, nextBlock, j, null);
 								}
 							}
 						} else {

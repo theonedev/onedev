@@ -101,15 +101,13 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 	
 	private IModel<String> mergeBaseModel;
 
-	private AjaxActionTab commitsTab;
-	
-	private AjaxActionTab filesTab;
-	
 	private State state = new State();
 	
 	private ObjectId leftCommitId;
 	
 	private ObjectId rightCommitId;
+	
+	private Tabbable tabbable;
 	
 	public static PageParameters paramsOf(Depot depot, State state) {
 		PageParameters params = paramsOf(depot);
@@ -429,8 +427,13 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(commitsTab = new AjaxActionTab(Model.of("Commits")) {
+		tabs.add(new AjaxActionTab(Model.of("Commits")) {
 			
+			@Override
+			public boolean isSelected() {
+				return state.tabPanel == null || state.tabPanel == TabPanel.COMMITS;
+			}
+
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				state.tabPanel = TabPanel.COMMITS;
@@ -440,7 +443,12 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			
 		});
 
-		tabs.add(filesTab = new AjaxActionTab(Model.of("Changed Files")) {
+		tabs.add(new AjaxActionTab(Model.of("Changed Files")) {
+			
+			@Override
+			public boolean isSelected() {
+				return state.tabPanel == TabPanel.FILES;
+			}
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -451,7 +459,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			
 		});
 
-		add(new Tabbable("tabs", tabs));
+		add(tabbable = new Tabbable("tabs", tabs));
 
 		newTabPanel(null);
 		
@@ -541,13 +549,9 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 					new Model<PullRequest>(null), 
 					state.compareWithMergeBase?mergeBaseModel.getObject():state.leftSide.getRevision(), 
 					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
-			commitsTab.setSelected(false);
-			filesTab.setSelected(true);	
 			break;
 		default:
 			tabPanel = new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel);
-			commitsTab.setSelected(true);
-			filesTab.setSelected(false);
 			
 			if (!mergeBaseModel.getObject().equals(leftCommitId.name()) && !state.compareWithMergeBase) {
 				tabPanel.add(AttributeAppender.append("class", "with-merge-base"));
@@ -575,6 +579,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		
 		state = (State) data;
 		newTabPanel(target);
+		target.add(tabbable);
 	}
 	
 	@Override

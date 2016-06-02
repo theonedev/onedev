@@ -31,7 +31,7 @@ public abstract class ActionTab extends Tab {
 	}
 
 	@Override
-	public final boolean isSelected() {
+	public boolean isSelected() {
 		return selected;
 	}
 	
