@@ -46,7 +46,7 @@ public interface BlobViewContext extends Serializable {
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
-	void onBlameChange(AjaxRequestTarget target, boolean blamed);
+	void onBlameChange(AjaxRequestTarget target, boolean blame);
 	
 	void onDelete(AjaxRequestTarget target);
 	

@@ -66,7 +66,7 @@ import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.search.hit.QueryHit;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.component.depotfile.blobview.BlobViewContext.Mode;
-import com.pmease.gitplex.web.component.diff.blob.MarkAware;
+import com.pmease.gitplex.web.component.diff.blob.SourceAware;
 import com.pmease.gitplex.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.diff.difftitle.BlobDiffTitle;
@@ -81,7 +81,7 @@ import com.pmease.gitplex.web.util.DateUtils;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 
 @SuppressWarnings("serial")
-public class TextDiffPanel extends Panel implements MarkAware {
+public class TextDiffPanel extends Panel implements SourceAware {
 
 	private final IModel<Depot> depotModel;
 	
@@ -1024,23 +1024,28 @@ public class TextDiffPanel extends Panel implements MarkAware {
 
 	@Override
 	public void mark(AjaxRequestTarget target, DiffMark mark) {
-		String script = String.format(""
+		String script;
+		if (mark != null) {
+			script = String.format(""
 				+ "var $container = $('#%s');"
 				+ "var mark = %s;"
 				+ "gitplex.textdiff.scroll($container, mark);"
 				+ "gitplex.textdiff.mark($container, mark);", 
 				getMarkupId(), getJson(mark));
-		target.appendJavaScript(script);
-	}
-	
-	@Override
-	public void clearMark(AjaxRequestTarget target) {
-		String script = String.format(""
+		} else {
+			script = String.format(""
 				+ "var $container = $('#%s');"
 				+ "gitplex.textdiff.clearMark($container);"
 				+ "$container.removeData('mark');", 
 				getMarkupId());
+		}
 		target.appendJavaScript(script);
+	}
+	
+	@Override
+	public void onUnblame(AjaxRequestTarget target) {
+		blameInfo = null;
+		target.add(this);
 	}
 	
 	private static class CommentInfo {
@@ -1083,5 +1088,5 @@ public class TextDiffPanel extends Panel implements MarkAware {
 		String lastCommitHash;
 		
 	}
-	
+
 }

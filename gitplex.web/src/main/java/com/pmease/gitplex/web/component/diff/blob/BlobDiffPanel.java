@@ -31,7 +31,7 @@ import com.pmease.gitplex.web.component.diff.revision.DiffMark;
 import com.pmease.gitplex.web.component.diff.revision.DiffViewMode;
 
 @SuppressWarnings("serial")
-public class BlobDiffPanel extends Panel implements MarkAware {
+public class BlobDiffPanel extends Panel implements SourceAware {
 
 	private static final String CONTENT_ID = "content";
 	
@@ -159,46 +159,46 @@ public class BlobDiffPanel extends Panel implements MarkAware {
 	@Override
 	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof MarkAware) {
-			MarkAware markAware = (MarkAware) content;
-			markAware.onCommentDeleted(target, comment);
+		if (content instanceof SourceAware) {
+			SourceAware sourceAware = (SourceAware) content;
+			sourceAware.onCommentDeleted(target, comment);
 		}
 	}
 
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof MarkAware) {
-			MarkAware markAware = (MarkAware) content;
-			markAware.onCommentClosed(target, comment);
+		if (content instanceof SourceAware) {
+			SourceAware sourceAware = (SourceAware) content;
+			sourceAware.onCommentClosed(target, comment);
 		}
 	}
 
 	@Override
 	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof MarkAware) {
-			MarkAware markAware = (MarkAware) content;
-			markAware.onCommentAdded(target, comment);
+		if (content instanceof SourceAware) {
+			SourceAware sourceAware = (SourceAware) content;
+			sourceAware.onCommentAdded(target, comment);
 		}
 	}
 
 	@Override
 	public void mark(AjaxRequestTarget target, DiffMark mark) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof MarkAware) {
-			MarkAware markAware = (MarkAware) content;
-			markAware.mark(target, mark);
+		if (content instanceof SourceAware) {
+			SourceAware sourceAware = (SourceAware) content;
+			sourceAware.mark(target, mark);
 		}
 	}
-	
+
 	@Override
-	public void clearMark(AjaxRequestTarget target) {
+	public void onUnblame(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof MarkAware) {
-			MarkAware markAware = (MarkAware) content;
-			markAware.clearMark(target);
+		if (content instanceof SourceAware) {
+			SourceAware sourceAware = (SourceAware) content;
+			sourceAware.onUnblame(target);
 		}
 	}
-	
+
 }

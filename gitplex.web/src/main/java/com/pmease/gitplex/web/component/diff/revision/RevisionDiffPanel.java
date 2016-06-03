@@ -88,7 +88,7 @@ import com.pmease.gitplex.web.component.comment.CodeCommentPanel;
 import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.diff.blob.BlobDiffPanel;
-import com.pmease.gitplex.web.component.diff.blob.MarkAware;
+import com.pmease.gitplex.web.component.diff.blob.SourceAware;
 import com.pmease.gitplex.web.component.diff.diffstat.DiffStatBar;
 import com.pmease.gitplex.web.component.revisionpicker.RevisionSelector;
 import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
@@ -364,7 +364,31 @@ public class RevisionDiffPanel extends Panel {
 		this.oldRev = oldRev;
 		this.newRev = newRev;
 		this.pathFilterModel = pathFilterModel;
-		this.blameModel = blameModel;
+		this.blameModel = new IModel<String>() {
+
+			@Override
+			public void detach() {
+				blameModel.detach();
+			}
+
+			@Override
+			public String getObject() {
+				return blameModel.getObject();
+			}
+
+			@Override
+			public void setObject(String object) {
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				String prevBlameFile = blameModel.getObject();
+				blameModel.setObject(object);
+				if (prevBlameFile != null && object != null && !prevBlameFile.equals(object)) {
+					SourceAware sourceAware = getSourceAware(prevBlameFile);
+					sourceAware.onUnblame(target);
+				}
+				target.appendJavaScript("gitplex.revisionDiff.reposition();");
+			}
+			
+		};
 		this.whitespaceOptionModel = whitespaceOptionModel;
 		this.markSupport = markSupport;
 		
@@ -665,7 +689,8 @@ public class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + change.getPath());
 				if (markSupport != null) {
-					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, getBlobBlameModel(change), new BlobMarkSupport() {
+					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, 
+							getBlobBlameModel(change), new BlobMarkSupport() {
 	
 						@Override
 						public DiffMark getMark() {
@@ -723,16 +748,16 @@ public class RevisionDiffPanel extends Panel {
 							
 							CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
 							if (prevComment != null) {
-								MarkAware markAware = getMarkAware(prevComment.getPath());
-								if (markAware != null) 
-									markAware.onCommentClosed(target, prevComment);
+								SourceAware sourceAware = getSourceAware(prevComment.getPath());
+								if (sourceAware != null) 
+									sourceAware.onCommentClosed(target, prevComment);
 							} 
 							
 							DiffMark prevMark = RevisionDiffPanel.this.getMark();
 							if (prevMark != null) {
-								MarkAware markAware = getMarkAware(prevMark.getPath());
-								if (markAware != null)
-									markAware.clearMark(target);
+								SourceAware sourceAware = getSourceAware(prevMark.getPath());
+								if (sourceAware != null)
+									sourceAware.mark(target, null);
 							}
 							
 							markSupport.onCommentOpened(target, comment);
@@ -828,9 +853,9 @@ public class RevisionDiffPanel extends Panel {
 									commentContainer.replace(commentPanel);
 									target.add(commentContainer);
 									
-									MarkAware markAware = getMarkAware(comment.getPath());
-									if (markAware != null) 
-										markAware.onCommentAdded(target, comment);
+									SourceAware sourceAware = getSourceAware(comment.getPath());
+									if (sourceAware != null) 
+										sourceAware.onCommentAdded(target, comment);
 
 									markSupport.onCommentOpened(target, comment);
 									target.appendJavaScript("gitplex.revisionDiff.reposition();");
@@ -845,16 +870,16 @@ public class RevisionDiffPanel extends Panel {
 							
 							DiffMark prevMark = RevisionDiffPanel.this.getMark();
 							if (prevMark != null) {
-								MarkAware markAware = getMarkAware(prevMark.getPath());
-								if (markAware != null) 
-									markAware.clearMark(target);
+								SourceAware sourceAware = getSourceAware(prevMark.getPath());
+								if (sourceAware != null) 
+									sourceAware.mark(target, null);
 							}
 							
 							CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
 							if (prevComment != null) {
-								MarkAware markAware = getMarkAware(prevComment.getPath());
-								if (markAware != null) 
-									markAware.onCommentClosed(target, prevComment);
+								SourceAware sourceAware = getSourceAware(prevComment.getPath());
+								if (sourceAware != null) 
+									sourceAware.onCommentClosed(target, prevComment);
 							}  
 							markSupport.onAddComment(target, mark);
 							target.appendJavaScript("gitplex.revisionDiff.reposition();");
@@ -878,7 +903,8 @@ public class RevisionDiffPanel extends Panel {
 
 					}));
 				} else {
-					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, diffMode, getBlobBlameModel(change), null));
+					item.add(new BlobDiffPanel(DIFF_ID, depotModel, requestModel, change, 
+							diffMode, getBlobBlameModel(change), null));
 				}
 			}
 			
@@ -975,9 +1001,9 @@ public class RevisionDiffPanel extends Panel {
 				} else {
 					mark = (DiffMark)commentContainer.getDefaultModelObject();
 				}
-				MarkAware markAware = getMarkAware(mark.getPath());
-				if (markAware != null)
-					markAware.mark(target, mark);
+				SourceAware sourceAware = getSourceAware(mark.getPath());
+				if (sourceAware != null)
+					sourceAware.mark(target, mark);
 				markSupport.onMark(target, mark);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
@@ -1022,18 +1048,18 @@ public class RevisionDiffPanel extends Panel {
 				clearComment(target);
 				CodeComment comment = getOpenComment();
 				if (comment != null) {
-					MarkAware markAware = getMarkAware(comment.getPath());
-					if (markAware != null) 
-						markAware.onCommentClosed(target, comment);
+					SourceAware sourceAware = getSourceAware(comment.getPath());
+					if (sourceAware != null) 
+						sourceAware.onCommentClosed(target, comment);
 					markSupport.onCommentOpened(target, null);
 				}
 				target.appendJavaScript("gitplex.revisionDiff.reposition();");
 				
 				DiffMark mark = getMark();
 				if (mark != null) {
-					MarkAware markAware = getMarkAware(mark.getPath());
-					if (markAware != null) {
-						markAware.mark(target, mark);
+					SourceAware sourceAware = getSourceAware(mark.getPath());
+					if (sourceAware != null) {
+						sourceAware.mark(target, mark);
 					}
 				}
 			}
@@ -1122,16 +1148,16 @@ public class RevisionDiffPanel extends Panel {
 	}
 	
 	@Nullable
-	private MarkAware getMarkAware(String path) {
-		return diffsView.visitChildren(new IVisitor<Component, MarkAware>() {
+	private SourceAware getSourceAware(String path) {
+		return diffsView.visitChildren(new IVisitor<Component, SourceAware>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public void component(Component object, IVisit<MarkAware> visit) {
+			public void component(Component object, IVisit<SourceAware> visit) {
 				if (object instanceof ListItem) {
 					ListItem<BlobChange> item = (ListItem<BlobChange>) object;
 					if (item.getModelObject().getPaths().contains(path)) {
-						visit.stop((MarkAware) item.get(DIFF_ID));
+						visit.stop((SourceAware) item.get(DIFF_ID));
 					} else {
 						visit.dontGoDeeper();
 					}
@@ -1143,16 +1169,16 @@ public class RevisionDiffPanel extends Panel {
 	
 	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
 		clearComment(target);
-		MarkAware markAware = getMarkAware(comment.getPath());
-		if (markAware != null)
-			markAware.onCommentDeleted(target, comment);
+		SourceAware sourceAware = getSourceAware(comment.getPath());
+		if (sourceAware != null)
+			sourceAware.onCommentDeleted(target, comment);
 		markSupport.onCommentOpened(target, null);
 		target.appendJavaScript("gitplex.revisionDiff.reposition();");
 		DiffMark mark = getMark();
 		if (mark != null) {
-			markAware = getMarkAware(mark.getPath());
-			if (markAware != null) {
-				markAware.mark(target, mark);
+			sourceAware = getSourceAware(mark.getPath());
+			if (sourceAware != null) {
+				sourceAware.mark(target, mark);
 			}
 		}
 	}

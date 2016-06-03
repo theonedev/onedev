@@ -897,8 +897,8 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 	}
 
 	@Override
-	public void onBlameChange(AjaxRequestTarget target, boolean blamed) {
-		mode = (blamed?Mode.BLAME:null);
+	public void onBlameChange(AjaxRequestTarget target, boolean blame) {
+		mode = (blame?Mode.BLAME:null);
 		Component fileViewer = get(FILE_VIEWER_ID);
 		if (!(fileViewer instanceof SourceViewPanel)) {
 			newFileViewer(target);
