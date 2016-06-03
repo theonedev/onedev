@@ -88,6 +88,8 @@ gitplex.symboltooltip = {
 			$tooltip.align($tooltip.data("alignment"));
 		}
 	},
+	
+	// this is public API which can be called from other components using this component
 	removeTooltip: function(container) {
 		if (container.tooltip) {
 			$(container.tooltip).remove();

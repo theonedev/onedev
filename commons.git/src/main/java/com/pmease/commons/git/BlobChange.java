@@ -106,7 +106,7 @@ public abstract class BlobChange implements Serializable {
 						if (oldLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> newLines = new ArrayList<>();
 							diffBlocks = DiffUtils.diff(
-									oldLines, oldBlobIdent.isFile()?newBlobIdent.path:null, 
+									oldLines, oldBlobIdent.isFile()?oldBlobIdent.path:null, 
 									newLines, null, 
 									WhitespaceOption.DEFAULT);
 						} else {
