@@ -356,7 +356,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	
 	@Override
 	public void collect(Depot depot, ObjectId commit) {
-		final Long repoId = depot.getId();
+		Long depotId = depot.getId();
 		sequentialWorkManager.execute(getSequentialExecutorKey(depot), new PrioritizedRunnable(PRIORITY) {
 
 			@Override
@@ -370,7 +370,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 
 								@Override
 								public Void call() throws Exception {
-									doCollect(depotManager.load(repoId), commit);
+									doCollect(depotManager.load(depotId), commit);
 									return null;
 								}
 								
@@ -653,7 +653,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
 				if (revObj instanceof RevCommit) {
 					Environment env = getEnv(depot);
-					final Store commitsStore = getStore(env, COMMITS_STORE);
+					Store commitsStore = getStore(env, COMMITS_STORE);
 					boolean collected = env.computeInReadonlyTransaction(new TransactionalComputable<Boolean>() {
 						
 						@Override

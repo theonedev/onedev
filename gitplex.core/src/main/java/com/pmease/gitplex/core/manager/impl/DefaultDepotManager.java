@@ -34,7 +34,6 @@ import com.pmease.commons.hibernate.Sessional;
 import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
-import com.pmease.commons.hibernate.dao.EntityCriteria;
 import com.pmease.commons.util.FileUtils;
 import com.pmease.commons.util.Pair;
 import com.pmease.commons.util.StringUtils;
@@ -183,6 +182,9 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 					nameToId.inverse().put(depot.getId(), new Pair<>(depot.getAccount().getId(), depot.getName()));
 				} finally {
 					idLock.writeLock().unlock();
+				}
+				if (isNew) {
+					auxiliaryManager.collect(depot);
 				}
 			}
         	
@@ -334,8 +336,6 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
             FileUtils.writeFile(gitPostReceiveHookFile, gitPostReceiveHook);
             gitPostReceiveHookFile.setExecutable(true);
         }
-        
-        auxiliaryManager.collect(depot);
 	}
 	
 	@Sessional
@@ -348,8 +348,9 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	@Transactional
 	@Override
 	public void systemStarted() {
-		for (Depot depot: query(EntityCriteria.of(Depot.class), 0, 0)) {
+		for (Depot depot: all()) {
 			checkSanity(depot);
+	        auxiliaryManager.collect(depot);
 		}
 		
 		pullRequestManager.checkSanity();
