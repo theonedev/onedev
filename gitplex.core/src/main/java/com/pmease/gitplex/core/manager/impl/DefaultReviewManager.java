@@ -97,7 +97,7 @@ public class DefaultReviewManager extends AbstractEntityDao<Review> implements R
 		}
 		
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onReviewed(review, comment);
+			listener.onReviewRequest(review, comment);
 
 		final Long requestId = request.getId();
 		

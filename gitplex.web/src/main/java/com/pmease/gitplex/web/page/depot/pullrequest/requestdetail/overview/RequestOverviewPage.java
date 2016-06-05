@@ -298,7 +298,8 @@ public class RequestOverviewPage extends RequestDetailPage {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+				return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
+						requestModel.getObject().getAttachmentDirUUID());
 			}
 			
 		};

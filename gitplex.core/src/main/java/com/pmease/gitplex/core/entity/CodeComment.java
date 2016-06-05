@@ -72,10 +72,13 @@ public class CodeComment extends AbstractEntity {
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
+	@Column(nullable=false)
+	private String attachmentDirUUID;
+	
 	public Depot getDepot() {
 		return depot;
 	}
-
+	
 	public void setDepot(Depot depot) {
 		this.depot = depot;
 	}
@@ -151,6 +154,14 @@ public class CodeComment extends AbstractEntity {
 
 	public void setReplies(Collection<CodeCommentReply> replies) {
 		this.replies = replies;
+	}
+
+	public String getAttachmentDirUUID() {
+		return attachmentDirUUID;
+	}
+
+	public void setAttachmentDirUUID(String attachmentDirUUID) {
+		this.attachmentDirUUID = attachmentDirUUID;
 	}
 
 }

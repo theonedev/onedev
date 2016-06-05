@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -773,12 +774,13 @@ public class RevisionDiffPanel extends Panel {
 							
 							Form<?> form = new Form<Void>("form");
 							
+							String attachmentDirUUID = UUID.randomUUID().toString();
 							CommentInput input;
 							form.add(input = new CommentInput("input", Model.of("")) {
 
 								@Override
 								protected DepotAttachmentSupport getAttachmentSupport() {
-									return new DepotAttachmentSupport(depotModel.getObject());
+									return new DepotAttachmentSupport(depotModel.getObject(), attachmentDirUUID);
 								}
 								
 							});
@@ -817,6 +819,7 @@ public class RevisionDiffPanel extends Panel {
 									super.onSubmit(target, form);
 									
 									CodeComment comment = new CodeComment();
+									comment.setAttachmentDirUUID(attachmentDirUUID);
 									comment.setDepot(depotModel.getObject());
 									comment.setUser(SecurityUtils.getAccount());
 									comment.setCommit(mark.getCommit());
@@ -825,7 +828,7 @@ public class RevisionDiffPanel extends Panel {
 											mark.getEndLine(), mark.getEndChar()));
 									comment.setCompareContext(getCompareContext(comment.getCommit()));
 									comment.setContent(input.getModelObject());
-									GitPlex.getInstance(CodeCommentManager.class).persist(comment);
+									GitPlex.getInstance(CodeCommentManager.class).save(comment);
 									
 									Long commentId = comment.getId();
 									IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {

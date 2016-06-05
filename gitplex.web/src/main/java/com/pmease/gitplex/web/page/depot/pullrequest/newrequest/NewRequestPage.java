@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -146,6 +147,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		
 		if (pullRequest == null) {
 			pullRequest = new PullRequest();
+			pullRequest.setAttachmentDirUUID(UUID.randomUUID().toString());
 			pullRequest.setTarget(target);
 			pullRequest.setSource(source);
 			pullRequest.setSubmitter(currentUser);
@@ -291,7 +293,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 			
 		});
 
-		tabs.add(new AjaxActionTab(Model.of("Files Changed")) {
+		tabs.add(new AjaxActionTab(Model.of("Files")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -319,7 +321,15 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel).setOutputMarkupId(true);
+		return new CommitListPanel(TAB_PANEL_ID, depotModel, commitsModel) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().getStatus() != INTEGRATED);
+			}
+			
+		}.setOutputMarkupId(true);
 	}
 	
 	private RevisionDiffPanel newRevDiffPanel() {
@@ -397,7 +407,15 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		 */
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, depotModel, 
 				new Model<PullRequest>(null), request.getBaseCommitHash(), 
-				source.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
+				source.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().getStatus() != INTEGRATED);
+			}
+			
+		};
 		diffPanel.setOutputMarkupId(true);
 		return diffPanel;
 	}
@@ -573,7 +591,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new DepotAttachmentSupport(getDepot());
+				return new DepotAttachmentSupport(getDepot(), getPullRequest().getAttachmentDirUUID());
 			}
 			
 		});

@@ -32,7 +32,7 @@ public class DefaultPullRequestCommentManager extends AbstractEntityDao<PullRequ
 		
 		if (notify) {
 			for (PullRequestListener listener: pullRequestListeners)
-				listener.onCommented(comment);
+				listener.onCommentRequest(comment);
 		}
 	}
 

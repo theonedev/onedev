@@ -209,6 +209,9 @@ public class PullRequest extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private IntegrationStrategy integrationStrategy;
+	
+	@Column(nullable=false)
+	private String attachmentDirUUID;
 
 	@OneToMany(mappedBy="request")
 	@OnDelete(action=OnDeleteAction.CASCADE)
@@ -934,6 +937,14 @@ public class PullRequest extends AbstractEntity {
 
 	public long getVersion() {
 		return version;
+	}
+
+	public String getAttachmentDirUUID() {
+		return attachmentDirUUID;
+	}
+
+	public void setAttachmentDirUUID(String attachmentDirUUID) {
+		this.attachmentDirUUID = attachmentDirUUID;
 	}
 
 }

@@ -255,7 +255,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
-		tabs.add(new RequestTab("Compare", RequestComparePage.class) {
+		tabs.add(new RequestTab("Files", RequestComparePage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -672,7 +672,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 				@Override
 				protected AttachmentSupport getAttachmentSupport() {
-					return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+					return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
+							requestModel.getObject().getAttachmentDirUUID());
 				}
 				
 			});
@@ -691,7 +692,8 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
+								requestModel.getObject().getAttachmentDirUUID());
 					}
 					
 				});

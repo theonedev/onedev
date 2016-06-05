@@ -120,7 +120,8 @@ class OpenActivityPanel extends AbstractActivityPanel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot());
+						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
+								requestModel.getObject().getAttachmentDirUUID());
 					}
 					
 				};

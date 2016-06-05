@@ -1,17 +1,3 @@
 <wicket:extend>
-	<div class="doit"></div>
-	<div><div class="autofit 1"><div><div class="autofit 2"></div></div></div></div>
-	<div class="autofit 3"></div>
-	<a class="link">test</a>
-	<script type="text/javascript">
-		$(".autofit.1").on("storeViewState", function(e) {
-			e.stopPropagation();
-			console.log("view state stored");
-		});
-		$("a.link").click(function(e) {
-			console.log("before");
-			$(".autofit:visible").first().trigger("storeViewState");
-			console.log("after");		
-		});
-	</script>
+	<a wicket:id="test">test</a>
 </wicket:extend>

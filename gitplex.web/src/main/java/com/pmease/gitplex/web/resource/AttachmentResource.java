@@ -21,8 +21,8 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.manager.AttachmentManager;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 
 public class AttachmentResource extends AbstractResource {
@@ -32,6 +32,8 @@ public class AttachmentResource extends AbstractResource {
 	private static final String PARAM_ACCOUNT = "account";
 	
 	private static final String PARAM_DEPOT = "depot";
+	
+	private static final String PARAM_UUID = "uuid";
 	
 	private static final String PARAM_ATTACHMENT = "attachment";
 	
@@ -55,14 +57,18 @@ public class AttachmentResource extends AbstractResource {
 		if (depot == null) 
 			throw new EntityNotFoundException("Unable to find repository " + userName + "/" + repoName);
 		
+		if (!SecurityUtils.canRead(depot)) 
+			throw new UnauthorizedException();
+
+		String storage = params.get(PARAM_UUID).toString();
+		if (StringUtils.isBlank(storage))
+			throw new IllegalArgumentException("uuid parameter has to be specified");
+
 		String attachment = params.get(PARAM_ATTACHMENT).toString();
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
-		if (!SecurityUtils.canRead(depot)) 
-			throw new UnauthorizedException();
-
-		File attachmentFile = new File(getAttachmentsDir(depot), attachment);
+		File attachmentFile = new File(getAttachmentDir(depot, storage), attachment);
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(attachmentFile.length());
@@ -91,16 +97,17 @@ public class AttachmentResource extends AbstractResource {
 		return response;
 	}
 
-	private static File getAttachmentsDir(Depot depot) {
-		return GitPlex.getInstance(StorageManager.class).getAttachmentsDir(depot);		
+	private static File getAttachmentDir(Depot depot, String uuid) {
+		return GitPlex.getInstance(AttachmentManager.class).getAttachmentDir(depot, uuid);		
 	}
 	
-	public static PageParameters paramsOf(Depot depot, String attachment) {
+	public static PageParameters paramsOf(Depot depot, String attachmentDirUUID, String attachmentName) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_ACCOUNT, depot.getAccount().getName());
 		params.set(PARAM_DEPOT, depot.getName());
-		params.set(PARAM_ATTACHMENT, attachment);
-		final File attachmentFile = new File(getAttachmentsDir(depot), attachment);
+		params.set(PARAM_UUID, attachmentDirUUID);
+		params.set(PARAM_ATTACHMENT, attachmentName);
+		final File attachmentFile = new File(getAttachmentDir(depot, attachmentDirUUID), attachmentName);
 		params.set("v", attachmentFile.lastModified());
 		
 		return params;

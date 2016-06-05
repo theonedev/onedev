@@ -76,7 +76,7 @@ public class DefaultVerificationManager extends AbstractEntityDao<Verification> 
 	
 	private void onVerificationChange(PullRequest request) {
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onVerified(request);
+			listener.onVerifyRequest(request);
 
 		final Long requestId = request.getId();
 		afterCommit(new Runnable() {

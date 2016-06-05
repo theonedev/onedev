@@ -149,7 +149,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot());
+						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getAttachmentDirUUID());
 					}
 					
 				};
@@ -237,7 +237,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				GitPlex.getInstance(CodeCommentManager.class).remove(getComment());
+				GitPlex.getInstance(CodeCommentManager.class).delete(getComment());
 				onCommentDeleted(target);
 			}
 			
@@ -342,7 +342,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot());
+						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getAttachmentDirUUID());
 					}
 					
 				};
@@ -455,7 +455,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot());
+						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getAttachmentDirUUID());
 					}
 					
 				};

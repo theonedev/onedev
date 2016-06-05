@@ -16,53 +16,66 @@ import com.pmease.gitplex.core.manager.StorageManager;
 public class DefaultStorageManager implements StorageManager {
 
     private final ConfigManager configManager;
-
+    
     @Inject
     public DefaultStorageManager(ConfigManager configManager) {
         this.configManager = configManager;
     }
 
-    @Override
-    public File getDepotDir(Depot depot) {
+    private File getDepotDir(Depot depot) {
     	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-        return createIfNotExist(new File(storageDir, "repositories/" + depot.getId()));
+        File depotDir = new File(storageDir, "repositories/" + depot.getId());
+        FileUtils.createDir(depotDir);
+        return depotDir;
+    }
+    
+    private File getRequestDir(PullRequest request) {
+    	File requestDir = new File(getDepotDir(request.getTargetDepot()), "requests/" + request.getId());
+    	FileUtils.createDir(requestDir);
+    	return requestDir;
+    }
+    
+    @Override
+    public File getGitDir(Depot depot) {
+        File gitDir = new File(getDepotDir(depot), "git");
+        FileUtils.createDir(gitDir);
+        return gitDir;
     }
 
 	@Override
 	public File getCacheDir(Depot depot) {
-    	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-        return createIfNotExist(new File(storageDir, "caches/repositories/" + depot.getId()));
+        File cacheDir = new File(getDepotDir(depot), "cache");
+        FileUtils.createDir(cacheDir);
+        return cacheDir;
 	}
 
 	@Override
 	public File getCacheDir(PullRequest request) {
-		File repoCacheDir = getCacheDir(request.getTargetDepot());
-        return createIfNotExist(new File(repoCacheDir, "requests/" + request.getId()));
+        File cacheDir = new File(getRequestDir(request), "cache");
+        FileUtils.createDir(cacheDir);
+        return cacheDir;
 	}
 
 	@Override
 	public File getCacheDir(PullRequestUpdate update) {
 		File requestCacheDir = getCacheDir(update.getRequest());
-        return createIfNotExist(new File(requestCacheDir, "updates/" + update.getId()));
-	}
-
-	private File createIfNotExist(File dir) {
-		if (!dir.exists()) 
-			FileUtils.createDir(dir);
-		return dir;
+        File updateCacheDir = new File(requestCacheDir, "updates/" + update.getId());
+        FileUtils.createDir(updateCacheDir);
+        return updateCacheDir;
 	}
 
 	@Override
 	public File getIndexDir(Depot depot) {
-    	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-        return createIfNotExist(new File(storageDir, "indexes/repositories/" + depot.getId()));
+        File indexDir = new File(getDepotDir(depot), "index");
+        FileUtils.createDir(indexDir);
+        return indexDir;
 	}
 
 	@Override
-	public File getAttachmentsDir(Depot depot) {
-    	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-    	File attachmentsDir = new File(storageDir, "attachments/repositories/" + depot.getId());
-        return createIfNotExist(attachmentsDir);
+	public File getAttachmentDir(Depot depot) {
+        File attachmentDir = new File(getDepotDir(depot), "attachment");
+        FileUtils.createDir(attachmentDir);
+        return attachmentDir;
 	}
 
 }

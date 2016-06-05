@@ -31,11 +31,11 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 	}
 
 	@Override
-	public void onDepotDelete(Depot depot) {
+	public void onDeleteDepot(Depot depot) {
 	}
 
 	@Override
-	public void onDepotRename(Depot renamedDepot, String oldName) {
+	public void onRenameDepot(Depot renamedDepot, String oldName) {
 	}
 
 	@Transactional
@@ -55,7 +55,7 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 
 	@Transactional
 	@Override
-	public void onDepotTransfer(Depot depot, Account oldAccount) {
+	public void onTransferDepot(Depot depot, Account oldAccount) {
 		Query query = getSession().createQuery("delete from TeamAuthorization where depot=:depot");
 		query.setParameter("depot", depot);
 		query.executeUpdate();

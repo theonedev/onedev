@@ -13,27 +13,29 @@ import com.pmease.gitplex.core.entity.ReviewInvitation;
 @ExtensionPoint
 public interface PullRequestListener {
 	
-	void onOpened(PullRequest request);
+	void onOpenRequest(PullRequest request);
 	
-	void onReopened(PullRequest request, @Nullable Account user, @Nullable String comment);
+	void onDeleteRequest(PullRequest request);
 	
-	void onUpdated(PullRequestUpdate update);
+	void onReopenRequest(PullRequest request, @Nullable Account user, @Nullable String comment);
 	
-	void onMentioned(PullRequest request, Account user);
+	void onUpdateRequest(PullRequestUpdate update);
 	
-	void onMentioned(PullRequestComment comment, Account user);
+	void onMentionAccount(PullRequest request, Account account);
+	
+	void onMentionAccount(PullRequestComment comment, Account account);
 
-	void onCommented(PullRequestComment comment);
+	void onCommentRequest(PullRequestComment comment);
 	
-	void onReviewed(Review review, @Nullable String comment);
+	void onReviewRequest(Review review, @Nullable String comment);
 	
-	void onAssigned(PullRequest request);
+	void onAssignRequest(PullRequest request);
 	
-	void onVerified(PullRequest request);
+	void onVerifyRequest(PullRequest request);
 	
-	void onIntegrated(PullRequest request, @Nullable Account user, @Nullable String comment);
+	void onIntegrateRequest(PullRequest request, @Nullable Account user, @Nullable String comment);
 	
-	void onDiscarded(PullRequest request, @Nullable Account user, @Nullable String comment);
+	void onDiscardRequest(PullRequest request, @Nullable Account user, @Nullable String comment);
 
 	void onIntegrationPreviewCalculated(PullRequest request);
 	

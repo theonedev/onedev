@@ -76,15 +76,15 @@
 	max-height: 300px;
 	overflow: auto;
 	margin-bottom: 20px;
-	border: 1px solid #CCC;
-	border-radius: 4px;
-	padding: 4px;
 }
 .select-url .attachments img {
 	max-width: 100%;
 }
-.select-url .alert {
-	margin-bottom: 0;
+.select-url .attachment a {
+	color: #666;
+}
+.select-url .attachment a.select {
+	margin-right: 6px;
 }
 .select-url .alert-info {
 	margin-top: 20px;

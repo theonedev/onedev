@@ -608,7 +608,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	}
 
 	@Override
-	public synchronized void onDepotDelete(Depot depot) {
+	public synchronized void onDeleteDepot(Depot depot) {
 		sequentialWorkManager.removeExecutor(getSequentialExecutorKey(depot));
 		Environment env = envs.remove(depot.getId());
 		if (env != null)
@@ -618,7 +618,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	}
 	
 	@Override
-	public void onDepotRename(Depot renamedDepot, String oldName) {
+	public void onRenameDepot(Depot renamedDepot, String oldName) {
 	}
 
 	private byte[] getBytes(@Nullable ByteIterable byteIterable) {
@@ -693,7 +693,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	}
 
 	@Override
-	public void onDepotTransfer(Depot depot, Account oldAccount) {
+	public void onTransferDepot(Depot depot, Account oldAccount) {
 	}
 
 	@Override

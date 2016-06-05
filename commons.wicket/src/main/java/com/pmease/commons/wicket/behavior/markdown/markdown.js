@@ -10,7 +10,8 @@ pmease.commons.markdown = {
        	   		"</div>" +
        	   		"</div>" +
        	   		"</div>");
-       	   $input.closest("form").after($modal);
+     	   // make sure to append to body to avoid z-index issues causing modal to sit in background
+       	   $("body").append($modal);
        	   $modal.modal({show: true, backdrop: "static", keyboard: true});
        	   $modal.on('hidden.bs.modal', function (e) {
        		   $modal.remove();
@@ -322,6 +323,19 @@ pmease.commons.markdown = {
 					$input.range($input.caret()-message.length, $input.caret());
 			}
 		} 
-	}
+	},
 	
+	initFileUpload: function(uploadId, maxSize, maxSizeForDisplay) {
+		var $upload = $('#' + uploadId);
+		$upload.change(function() {
+			if ($upload[0].files[0].size>maxSize) {
+				$upload.closest('form').prepend("<div class='alert alert-danger'>Size of upload file should be less than " 
+						+ maxSizeForDisplay + "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>" +
+								"<span aria-hidden='true'>&times;</span></button></div>");
+			} else {
+				$upload.closest('form').children(".alert").remove();
+				$upload.next().click();
+			}
+		})
+	}
 }

@@ -60,7 +60,7 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 		Mockito.when(AppLoader.getInstance(StorageManager.class)).thenReturn(new StorageManager() {
 			
 			@Override
-			public File getDepotDir(Depot depot) {
+			public File getGitDir(Depot depot) {
 				throw new UnsupportedOperationException();
 			}
 			
@@ -87,9 +87,10 @@ public class PullRequestUpdateTest extends AbstractGitTest {
 			}
 
 			@Override
-			public File getAttachmentsDir(Depot depot) {
+			public File getAttachmentDir(Depot depot) {
 				throw new UnsupportedOperationException();
 			}
+
 		});
     }
     

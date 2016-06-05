@@ -26,8 +26,6 @@ public class DepotAndRevision implements Serializable {
 	
 	private final String revision;
 	
-	private transient Depot depot;
-	
 	public DepotAndRevision(Long depotId, String revision) {
 		this.depotId = depotId;
 		this.revision = revision;
@@ -36,8 +34,6 @@ public class DepotAndRevision implements Serializable {
 	public DepotAndRevision(Depot depot, String revision) {
 		this.depotId = depot.getId();
 		this.revision = revision;
-		
-		this.depot = depot;
 	}
 	
 	public DepotAndRevision(String depotAndRevision) {
@@ -115,9 +111,7 @@ public class DepotAndRevision implements Serializable {
 	}
 	
 	public Depot getDepot() {
-		if (depot == null)
-			depot = GitPlex.getInstance(DepotManager.class).load(depotId);
-		return depot;
+		return GitPlex.getInstance(DepotManager.class).load(depotId);
 	}
 	
 	protected String normalizeRevision() {
@@ -146,5 +140,5 @@ public class DepotAndRevision implements Serializable {
 	public String toString() {
 		return depotId + SEPARATOR + revision;
 	}
-	
+
 }

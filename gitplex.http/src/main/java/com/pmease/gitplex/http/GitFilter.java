@@ -127,7 +127,7 @@ public class GitFilter implements Filter {
 		environments.put("GITPLEX_URL", serverUrl);
 		environments.put("GITPLEX_USER_ID", Account.getCurrentId().toString());
 		environments.put("GITPLEX_REPOSITORY_ID", depot.getId().toString());
-		final File gitDir = storageManager.getDepotDir(depot);
+		final File gitDir = storageManager.getGitDir(depot);
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot))) {
@@ -188,7 +188,7 @@ public class GitFilter implements Filter {
 		Depot depot = getDepot(request, response, depotInfo);
 		String service = request.getParameter("service");
 		
-		File gitDir = storageManager.getDepotDir(depot);
+		File gitDir = storageManager.getGitDir(depot);
 
 		if (service.contains("upload")) {
 			if (!SecurityUtils.getSubject().isPermitted(ObjectPermission.ofDepotRead(depot))) {

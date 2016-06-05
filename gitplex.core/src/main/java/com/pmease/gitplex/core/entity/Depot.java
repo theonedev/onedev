@@ -344,7 +344,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	}
 	
 	public Git git() {
-		return new Git(AppLoader.getInstance(StorageManager.class).getDepotDir(this));
+		return new Git(AppLoader.getInstance(StorageManager.class).getGitDir(this));
 	}
 	
 	/**

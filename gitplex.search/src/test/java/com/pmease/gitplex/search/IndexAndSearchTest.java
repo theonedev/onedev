@@ -204,7 +204,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
         
 		storageManager = mock(StorageManager.class);
 		when(storageManager.getIndexDir(Mockito.any(Depot.class))).thenReturn(indexDir);
-		when(storageManager.getDepotDir(Mockito.any(Depot.class))).thenReturn(new File(git.depotDir(), ".git"));
+		when(storageManager.getGitDir(Mockito.any(Depot.class))).thenReturn(new File(git.depotDir(), ".git"));
 		
 		dao = mock(Dao.class);
 		when(dao.load(Depot.class, 1L)).thenReturn(depot);
@@ -422,7 +422,7 @@ public class IndexAndSearchTest extends AbstractGitTest {
 	@Override
 	protected void teardown() {
 		super.teardown();
-		indexManager.onDepotDelete(depot);
+		indexManager.onDeleteDepot(depot);
 	}
 
 }

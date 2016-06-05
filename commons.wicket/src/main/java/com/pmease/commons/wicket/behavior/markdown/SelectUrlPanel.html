@@ -16,15 +16,15 @@
 	<wicket:fragment wicket:id="attachmentsFrag">
 		<wicket:enclosure child="attachments">
 		<ul class="attachments list-unstyled">
-			<li wicket:id="attachments" class="attachment selectable">
-				<a wicket:id="link"></a>
+			<li wicket:id="attachments" class="attachment">
+				<a wicket:id="select" title="Select this attachment" class="select"></a>
+				<a wicket:id="delete" title="Remove this attachment" class="delete"><i class="fa fa-trash"></i></a>
 			</li>
 		</ul>
 		</wicket:enclosure>
-		<form wicket:id="form">
-			<div wicket:id="feedback" class="feedback"></div>
+		<form wicket:id="form" class="upload">
 		    <span class="btn btn-default btn-file">
-		        Select local file... <input wicket:id="file" type="file"></input>
+		        Select local file... <input wicket:id="file" type="file"></input> <button wicket:id="submit" class="hidden">submit</button>
 		    </span>		
 		</form>
 		<div class="alert alert-info">

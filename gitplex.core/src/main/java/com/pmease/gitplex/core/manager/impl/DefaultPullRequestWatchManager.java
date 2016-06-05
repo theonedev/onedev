@@ -72,7 +72,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 	
 	@Transactional
 	@Override
-	public void onOpened(PullRequest request) {
+	public void onOpenRequest(PullRequest request) {
 		for (BranchWatch branchWatch: branchWatchManager.findBy(request.getTargetDepot(), request.getTargetBranch())) {
 			watch(request, branchWatch.getUser(), 
 					"You are set to watch this pull request as you are watching the target branch.");
@@ -111,7 +111,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 
 	@Transactional
 	@Override
-	public void onReopened(PullRequest request, Account user, String comment) {
+	public void onReopenRequest(PullRequest request, Account user, String comment) {
 		watch(request, user, "You are set to watch this pull request as you've reopened it.");
 		
 		Collection<Account> excludingUsers = new HashSet<>();
@@ -123,7 +123,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 
 	@Transactional
 	@Override
-	public void onUpdated(PullRequestUpdate update) {
+	public void onUpdateRequest(PullRequestUpdate update) {
 		addParticipantsToWatchList(update);
 
 		notify(update.getRequest(), new HashSet<Account>(), UPDATED);
@@ -131,7 +131,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 
 	@Transactional
 	@Override
-	public void onCommented(PullRequestComment comment) {
+	public void onCommentRequest(PullRequestComment comment) {
 		watch(comment.getRequest(), comment.getUser(), 
 				"You are set to watch this pull request as you've commented.");
 		notify(comment.getRequest(), Sets.newHashSet(comment.getUser()), COMMENTED);
@@ -139,26 +139,26 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 
 	@Transactional
 	@Override
-	public void onReviewed(Review review, String comment) {
+	public void onReviewRequest(Review review, String comment) {
 		notify(review.getUpdate().getRequest(), Sets.newHashSet(review.getReviewer()), REVIEWED);
 	}
 
 	@Transactional
 	@Override
-	public void onAssigned(PullRequest request) {
+	public void onAssignRequest(PullRequest request) {
 		watch(request, request.getAssignee(), 
 				"You are set to watch this pull request as you've assigned to integrate it.");
 	}
 
 	@Transactional
 	@Override
-	public void onVerified(PullRequest request) {
+	public void onVerifyRequest(PullRequest request) {
 		notify(request, new HashSet<Account>(), VERIFIED);
 	}
 
 	@Transactional
 	@Override
-	public void onIntegrated(PullRequest request, Account user, String comment) {
+	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
 		if (user != null)
 			notify(request, Sets.newHashSet(user), INTEGRATED);
 		else
@@ -167,7 +167,7 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 
 	@Transactional
 	@Override
-	public void onDiscarded(PullRequest request, Account user, String comment) {
+	public void onDiscardRequest(PullRequest request, Account user, String comment) {
 		if (user != null)
 			notify(request, Sets.newHashSet(user), DISCARDED);
 		else
@@ -252,13 +252,17 @@ public class DefaultPullRequestWatchManager extends AbstractEntityDao<PullReques
 
 	@Transactional
 	@Override
-	public void onMentioned(PullRequest request, Account user) {
+	public void onMentionAccount(PullRequest request, Account user) {
 		watch(request, user, "You are set to watch this pull request as you are mentioned.");
 	}
 
 	@Override
-	public void onMentioned(PullRequestComment comment, Account user) {
+	public void onMentionAccount(PullRequestComment comment, Account user) {
 		watch(comment.getRequest(), user, "You are set to watch this pull request as you are mentioned.");
+	}
+
+	@Override
+	public void onDeleteRequest(PullRequest request) {
 	}
 
 }

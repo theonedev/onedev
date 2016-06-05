@@ -17,8 +17,8 @@ import com.pmease.commons.util.StringUtils;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
+import com.pmease.gitplex.core.manager.AttachmentManager;
 import com.pmease.gitplex.core.manager.DepotManager;
-import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.resource.AttachmentResource;
 import com.pmease.gitplex.web.resource.AttachmentResourceReference;
@@ -35,13 +35,16 @@ public class DepotAttachmentSupport implements AttachmentSupport {
 	
 	private final Long depotId;
 	
-	public DepotAttachmentSupport(Depot depot) {
+	private final String attachmentDirUUID;
+	
+	public DepotAttachmentSupport(Depot depot, String attachmentDirUUID) {
 		depotId = depot.getId();
+		this.attachmentDirUUID = attachmentDirUUID;
 	}
 	
 	@Override
 	public String getAttachmentUrl(String attachment) {
-		PageParameters params = AttachmentResource.paramsOf(getDepot(), attachment);
+		PageParameters params = AttachmentResource.paramsOf(getDepot(), attachmentDirUUID, attachment);
 		String url = RequestCycle.get().urlFor(new AttachmentResourceReference(), params).toString();
 		return RequestCycle.get().getUrlRenderer().renderFullUrl(Url.parse(url));
 	}
@@ -49,33 +52,27 @@ public class DepotAttachmentSupport implements AttachmentSupport {
 	@Override
 	public List<String> getAttachments() {
 		List<String> attachments = new ArrayList<>();
-		File attachmentsDir = GitPlex.getInstance(StorageManager.class).getAttachmentsDir(getDepot());
-		if (attachmentsDir.exists()) {
-			for (File file: attachmentsDir.listFiles())
+		File attachmentDir = GitPlex.getInstance(AttachmentManager.class).getAttachmentDir(getDepot(), attachmentDirUUID);
+		if (attachmentDir.exists()) {
+			for (File file: attachmentDir.listFiles())
 				attachments.add(file.getName());
 		}
 		return attachments;
 	}
 
-	private File getAttachmentsDir() {
-		return GitPlex.getInstance(StorageManager.class).getAttachmentsDir(getDepot());
+	private File getAttachmentDir() {
+		return GitPlex.getInstance(AttachmentManager.class).getAttachmentDir(getDepot(), attachmentDirUUID);
 	}
 	
 	@Override
 	public void deleteAttachemnt(String attachment) {
-		File attachmentsDir = GitPlex.getInstance(StorageManager.class)
-				.getAttachmentsDir(getDepot());
-		FileUtils.deleteFile(new File(attachmentsDir, attachment));
+		File attachmentDir = GitPlex.getInstance(AttachmentManager.class).getAttachmentDir(getDepot(), attachmentDirUUID);
+		FileUtils.deleteFile(new File(attachmentDir, attachment));
 	}
 
 	@Override
 	public long getAttachmentMaxSize() {
 		return MAX_FILE_SIZE;
-	}
-
-	@Override
-	public long getAttachmentSize(String attachment) {
-		return new File(getAttachmentsDir(), attachment).length();
 	}
 
 	private Depot getDepot() {
@@ -87,9 +84,10 @@ public class DepotAttachmentSupport implements AttachmentSupport {
 		Preconditions.checkState(SecurityUtils.canRead(getDepot()));
 		
 		String attachmentName = suggestedAttachmentName;
-		File attachmentsDir = getAttachmentsDir();
+		File attachmentDir = getAttachmentDir();
+		FileUtils.createDir(attachmentDir);
 		int index = 2;
-		while (new File(attachmentsDir, attachmentName).exists()) {
+		while (new File(attachmentDir, attachmentName).exists()) {
 			if (suggestedAttachmentName.contains(".")) {
 				String nameBeforeExt = StringUtils.substringBeforeLast(suggestedAttachmentName, ".");
 				String ext = StringUtils.substringAfterLast(suggestedAttachmentName, ".");
@@ -101,7 +99,7 @@ public class DepotAttachmentSupport implements AttachmentSupport {
 		}
 		
 		Exception ex = null;
-		File file = new File(attachmentsDir, attachmentName);
+		File file = new File(attachmentDir, attachmentName);
 		try (OutputStream os = new FileOutputStream(file)) {
 			byte[] buffer = new byte[BUFFER_SIZE];
 	        long count = 0;

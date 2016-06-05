@@ -27,27 +27,27 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 	
 	@Override
-	public void onOpened(PullRequest request) {
+	public void onOpenRequest(PullRequest request) {
 		onChange(request, PullRequest.Event.OPENED);
 	}
 
 	@Override
-	public void onUpdated(PullRequestUpdate update) {
+	public void onUpdateRequest(PullRequestUpdate update) {
 		onChange(update.getRequest(), PullRequest.Event.UPDATED);
 	}
 
 	@Override
-	public void onReviewed(Review review, String comment) {
+	public void onReviewRequest(Review review, String comment) {
 		onChange(review.getUpdate().getRequest(), PullRequest.Event.REVIEWED);
 	}
 
 	@Override
-	public void onIntegrated(PullRequest request, Account user, String comment) {
+	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
 		onChange(request, PullRequest.Event.INTEGRATED);
 	}
 
 	@Override
-	public void onDiscarded(PullRequest request, Account user, String comment) {
+	public void onDiscardRequest(PullRequest request, Account user, String comment) {
 		onChange(request, PullRequest.Event.DISCARDED);
 	}
 
@@ -57,17 +57,17 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 
 	@Override
-	public void onCommented(PullRequestComment comment) {
+	public void onCommentRequest(PullRequestComment comment) {
 		onChange(comment.getRequest(), PullRequest.Event.COMMENTED);
 	}
 
 	@Override
-	public void onVerified(PullRequest request) {
+	public void onVerifyRequest(PullRequest request) {
 		onChange(request, PullRequest.Event.VERIFIED);
 	}
 
 	@Override
-	public void onAssigned(PullRequest request) {
+	public void onAssignRequest(PullRequest request) {
 		onChange(request, PullRequest.Event.ASSIGNED);
 	}
 
@@ -100,16 +100,16 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 	}
 	
 	@Override
-	public void onReopened(PullRequest request, Account user, String comment) {
+	public void onReopenRequest(PullRequest request, Account user, String comment) {
 		onChange(request, PullRequest.Event.REOPENED);
 	}
 
 	@Override
-	public void onMentioned(PullRequest request, Account user) {
+	public void onMentionAccount(PullRequest request, Account user) {
 	}
 
 	@Override
-	public void onMentioned(PullRequestComment comment, Account user) {
+	public void onMentionAccount(PullRequestComment comment, Account user) {
 	}
 
 	@Override
@@ -126,6 +126,10 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 
 	@Override
 	public void pendingApproval(PullRequest request) {
+	}
+
+	@Override
+	public void onDeleteRequest(PullRequest request) {
 	}
 
 }

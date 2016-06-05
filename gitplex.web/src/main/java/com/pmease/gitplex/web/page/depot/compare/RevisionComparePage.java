@@ -443,7 +443,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			
 		});
 
-		tabs.add(new AjaxActionTab(Model.of("Changed Files")) {
+		tabs.add(new AjaxActionTab(Model.of("Files")) {
 			
 			@Override
 			public boolean isSelected() {

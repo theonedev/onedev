@@ -83,7 +83,7 @@ public class UrlMapper extends CompoundRequestMapper {
 	private void addResources() {
 		add(new DepotResourceMapper("${account}/${depot}/archive", new ArchiveResourceReference()));
 		add(new DepotResourceMapper("${account}/${depot}/raw", new BlobResourceReference()));
-		add(new DepotResourceMapper("${account}/${depot}/pulls/${request}/attachments/${attachment}", 
+		add(new DepotResourceMapper("${account}/${depot}/attachment/${uuid}/${attachment}", 
 				new AttachmentResourceReference()));
 	}
 	

@@ -144,7 +144,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     	if (oldAccountId != null && !depot.getAccount().getId().equals(oldAccountId)) {
     		Account oldAccount = userManager.load(oldAccountId);
     		for (DepotListener listener: listenersProvider.get())
-    			listener.onDepotTransfer(depot, oldAccount);
+    			listener.onTransferDepot(depot, oldAccount);
     		
     		for (Depot each: all()) {
     			for (IntegrationPolicy policy: each.getIntegrationPolicies()) {
@@ -158,7 +158,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     	}
     	if (oldName != null && !depot.getName().equals(oldName)) {
     		for (DepotListener listener: listenersProvider.get())
-    			listener.onDepotRename(depot, oldName);
+    			listener.onRenameDepot(depot, oldName);
     		
     		for (Depot each: all()) {
     			for (IntegrationPolicy integrationPolicy: each.getIntegrationPolicies()) {
@@ -193,7 +193,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     @Override
     public void delete(Depot depot) {
 		for (DepotListener listener: listenersProvider.get())
-			listener.onDepotDelete(depot);
+			listener.onDeleteDepot(depot);
 		
     	Query query = getSession().createQuery("update Depot set forkedFrom=null where forkedFrom=:forkedFrom");
     	query.setParameter("forkedFrom", depot);
@@ -225,7 +225,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 				getRepository(depot).close();
 				repositoryCache.remove(depot.getId());
 				
-		        FileUtils.deleteDir(storageManager.getDepotDir(depot));
+		        FileUtils.deleteDir(storageManager.getGitDir(depot));
 			}
 			
 		});

@@ -6,16 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -29,7 +28,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
+
+import com.pmease.commons.util.FileUtils;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
@@ -61,7 +63,7 @@ class SelectUrlPanel extends Panel {
 		add(urlForm);
 		urlForm.add(new NotificationPanel("feedback", urlForm));
 		
-		final TextField<String> urlField = new TextField<String>("url", new IModel<String>() {
+		TextField<String> urlField = new TextField<String>("url", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -102,14 +104,14 @@ class SelectUrlPanel extends Panel {
 			
 		});
 		
-		final AttachmentSupport attachmentSupport = markdownBehavior.getAttachmentSupport();
+		AttachmentSupport attachmentSupport = markdownBehavior.getAttachmentSupport();
 		if (attachmentSupport != null) {
 			if (isImage)
 				urlField.add(AttributeAppender.append("placeholder", "Input image url here or select below"));
 			else
 				urlField.add(AttributeAppender.append("placeholder", "Input link url here or select below"));
 				
-			final Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
+			Fragment fragment = new Fragment("attachments", "attachmentsFrag", this);
 			fragment.setOutputMarkupId(true);
 			
 			fragment.add(new ListView<String>("attachments", new LoadableDetachableModel<List<String>>() {
@@ -128,9 +130,9 @@ class SelectUrlPanel extends Panel {
 
 				@Override
 				protected void populateItem(final ListItem<String> item) {
-					final String attachmentName = item.getModelObject();
-					final String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
-					item.add(new AjaxLink<Void>("link") {
+					String attachmentName = item.getModelObject();
+					String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
+					item.add(new AjaxLink<Void>("select") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
@@ -149,6 +151,16 @@ class SelectUrlPanel extends Panel {
 						}
 						
 					}.setEscapeModelStrings(false));
+					
+					item.add(new AjaxLink<Void>("delete") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							attachmentSupport.deleteAttachemnt(attachmentName);
+							target.add(SelectUrlPanel.this);
+						}
+						
+					});
 				}
 
 				@Override
@@ -159,25 +171,26 @@ class SelectUrlPanel extends Panel {
 				
 			});
 			
-			Form<?> fileForm = new Form<Void>("form") {
-				
+			FileUploadField uploadField = new FileUploadField("file") {
+
 				@Override
-				protected void onFileUploadException(FileUploadException e, Map<String, Object> model) {
-					if (e instanceof SizeLimitExceededException) 
-					    error("Upload must be less than " + FileUtils.byteCountToDisplaySize(getMaxSize().bytes()));
+				public void renderHead(IHeaderResponse response) {
+					super.renderHead(response);
+					
+					String script = String.format("pmease.commons.markdown.initFileUpload('%s', %d, '%s');", 
+							getMarkupId(), attachmentSupport.getAttachmentMaxSize(), 
+							FileUtils.byteCountToDisplaySize(attachmentSupport.getAttachmentMaxSize()));
+					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
 				
 			};
-			fileForm.add(new NotificationPanel("feedback", fileForm));
-			fileForm.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
-			fileForm.setMultiPart(true);
-			fragment.add(fileForm);
-			final FileUploadField uploadField = new FileUploadField("file");
-			uploadField.add(new AjaxFormSubmitBehavior("change") {
+			Form<?> fileForm = new Form<Void>("form") {
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target) {
-					super.onSubmit(target);
+				protected void onSubmit() {
+					super.onSubmit();
+					
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 					FileUpload upload = uploadField.getFileUpload();
 					if (upload != null) {
 						String attachmentName;
@@ -191,15 +204,19 @@ class SelectUrlPanel extends Panel {
 						markdownBehavior.closeUrlSelector(target, SelectUrlPanel.this);
 					}
 				}
-
+				
 				@Override
-				protected void onError(AjaxRequestTarget target) {
-					super.onError(target);
-					target.add(SelectUrlPanel.this);
+				protected void onFileUploadException(FileUploadException e, Map<String, Object> model) {
+					throw new RuntimeException(e);
 				}
 				
-			});
+			};
+			fileForm.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
+			fileForm.setMultiPart(true);
 			fileForm.add(uploadField);
+			fileForm.add(new AjaxButton("submit") {});
+			
+			fragment.add(fileForm);
 			
 			if (isImage) {
 				fragment.add(new Label("hint", "you may drag and drop to insert image directly without "

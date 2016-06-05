@@ -217,7 +217,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		
 		if (request.isOpen()) {
 			for (PullRequestListener listener: pullRequestListeners)
-				listener.onReopened(request, user, comment);
+				listener.onReopenRequest(request, user, comment);
 		}
 	}
 
@@ -251,7 +251,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		persist(request);
 		
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onDiscarded(request, user, comment);
+			listener.onDiscardRequest(request, user, comment);
 	}
 	
 	@Transactional
@@ -333,12 +333,12 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		persist(request);
 
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onIntegrated(request, user, comment);
+			listener.onIntegrateRequest(request, user, comment);
 	}
 	
 	@Transactional
 	@Override
-	public void open(final PullRequest request, final Object listenerData) {
+	public void open(PullRequest request, Object listenerData) {
 		persist(request);
 
 		PullRequestActivity activity = new PullRequestActivity();
@@ -361,7 +361,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			reviewInvitationManager.save(invitation);
 
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onOpened(request);
+			listener.onOpenRequest(request);
 		
 		afterCommit(new Runnable() {
 
@@ -395,7 +395,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	public void onAssigneeChange(PullRequest request) {
 		persist(request);
 		for (PullRequestListener listener: pullRequestListeners)
-			listener.onAssigned(request);
+			listener.onAssignRequest(request);
 	}
 	
 	@Transactional
@@ -433,7 +433,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			persist(request);
 			
 			for (PullRequestListener listener: pullRequestListeners)
-				listener.onIntegrated(request, null, null);
+				listener.onIntegrateRequest(request, null, null);
 		} 
 	}
 
@@ -667,7 +667,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	@Transactional
 	@Override
-	public void onDepotDelete(Depot depot) {
+	public void onDeleteDepot(Depot depot) {
     	for (PullRequest request: depot.getOutgoingRequests()) {
     		if (!request.getTargetDepot().equals(depot) && request.isOpen())
         		discard(request, "Source repository is deleted.");
@@ -680,7 +680,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	}
 	
 	@Override
-	public void onDepotRename(Depot renamedDepot, String oldName) {
+	public void onRenameDepot(Depot renamedDepot, String oldName) {
 	}
 
 	@Transactional
@@ -836,7 +836,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	}
 
 	@Override
-	public void onDepotTransfer(Depot depot, Account oldAccount) {
+	public void onTransferDepot(Depot depot, Account oldAccount) {
 	}
 
 	@Sessional

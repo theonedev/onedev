@@ -83,7 +83,7 @@ import com.pmease.gitplex.core.manager.WorkManager;
 public class DefaultIndexManager implements IndexManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIndexManager.class);
-	
+
 	private static final int UI_INDEXING_PRIORITY = 10;
 	
 	private static final int BACKEND_INDEXING_PRIORITY = 50;
@@ -414,14 +414,14 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Transactional
 	@Override
-	public void onDepotDelete(Depot depot) {
+	public void onDeleteDepot(Depot depot) {
 		for (IndexListener listener: listeners)
 			listener.indexRemoving(depot);
 		FileUtils.deleteDir(storageManager.getIndexDir(depot));
 	}
 
 	@Override
-	public void onDepotRename(Depot renamedDepot, String oldName) {
+	public void onRenameDepot(Depot renamedDepot, String oldName) {
 	}
 
 	@Override
@@ -433,7 +433,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public void onDepotTransfer(Depot depot, Account oldAccount) {
+	public void onTransferDepot(Depot depot, Account oldAccount) {
 	}
 
 }

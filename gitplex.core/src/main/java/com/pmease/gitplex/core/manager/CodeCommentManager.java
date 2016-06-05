@@ -16,4 +16,7 @@ public interface CodeCommentManager extends EntityDao<CodeComment> {
 	
 	Collection<CodeComment> query(Depot depot, ObjectId...commitIds);
 	
+	void save(CodeComment comment);
+	
+	void delete(CodeComment comment);
 }

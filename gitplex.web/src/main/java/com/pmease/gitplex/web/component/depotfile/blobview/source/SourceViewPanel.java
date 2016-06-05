@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -423,12 +424,13 @@ public class SourceViewPanel extends BlobViewPanel {
 					
 					Form<?> form = new Form<Void>("form");
 					
+					String attachmentDirUUID = UUID.randomUUID().toString();
 					CommentInput input;
 					form.add(input = new CommentInput("input", Model.of("")) {
 
 						@Override
 						protected DepotAttachmentSupport getAttachmentSupport() {
-							return new DepotAttachmentSupport(context.getDepot());
+							return new DepotAttachmentSupport(context.getDepot(), attachmentDirUUID);
 						}
 						
 					});
@@ -467,6 +469,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							super.onSubmit(target, form);
 							
 							CodeComment comment = new CodeComment();
+							comment.setAttachmentDirUUID(attachmentDirUUID);
 							comment.setCommit(context.getCommit().name());
 							comment.setPath(context.getBlobIdent().path);
 							comment.setContent(input.getModelObject());
@@ -475,7 +478,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							comment.setMark(mark);
 							comment.setCompareContext(getCompareContext());
 							
-							GitPlex.getInstance(CodeCommentManager.class).persist(comment);
+							GitPlex.getInstance(CodeCommentManager.class).save(comment);
 							
 							Long commentId = comment.getId();
 							IModel<CodeComment> commentModel = new LoadableDetachableModel<CodeComment>() {

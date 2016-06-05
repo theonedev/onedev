@@ -53,7 +53,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityDao<PullReque
 		
 		if (notify) { 
 			for (PullRequestListener listener: pullRequestListeners)
-				listener.onUpdated(update);
+				listener.onUpdateRequest(update);
 		}
 
 	}

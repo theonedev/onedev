@@ -58,14 +58,14 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 
 	@Transactional
 	@Override
-	public void onOpened(PullRequest request) {
+	public void onOpenRequest(PullRequest request) {
 		if (request.getAssignee() != null && !request.getAssignee().equals(request.getSubmitter()))
-			onAssigned(request);
+			onAssignRequest(request);
 	}
 
 	@Transactional
 	@Override
-	public void onUpdated(PullRequestUpdate update) {
+	public void onUpdateRequest(PullRequestUpdate update) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request and task=:task");
 		query.setParameter("request", update.getRequest());
@@ -74,12 +74,12 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 	}
 
 	@Override
-	public void onCommented(PullRequestComment comment) {
+	public void onCommentRequest(PullRequestComment comment) {
 	}
 
 	@Transactional
 	@Override
-	public void onReviewed(Review review, String comment) {
+	public void onReviewRequest(Review review, String comment) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request and user=:user and task=:task");
 		query.setParameter("request", review.getUpdate().getRequest());
@@ -90,7 +90,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 
 	@Transactional
 	@Override
-	public void onAssigned(PullRequest request) {
+	public void onAssignRequest(PullRequest request) {
 		Preconditions.checkNotNull(request.getAssignee());
 		
 		if (request.getStatus() == PENDING_INTEGRATE) {  
@@ -106,12 +106,12 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 	}
 
 	@Override
-	public void onVerified(PullRequest request) {
+	public void onVerifyRequest(PullRequest request) {
 	}
 
 	@Transactional
 	@Override
-	public void onIntegrated(PullRequest request, Account user, String comment) {
+	public void onIntegrateRequest(PullRequest request, Account user, String comment) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
@@ -120,7 +120,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 
 	@Transactional
 	@Override
-	public void onDiscarded(PullRequest request, Account user, String comment) {
+	public void onDiscardRequest(PullRequest request, Account user, String comment) {
 		Query query = getSession().createQuery("delete from Notification "
 				+ "where request=:request");
 		query.setParameter("request", request);
@@ -189,7 +189,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 
 	@Transactional
 	@Override
-	public void onMentioned(PullRequest request, Account user) {
+	public void onMentionAccount(PullRequest request, Account user) {
 		String subject = String.format("You are mentioned in pull request #%d (%s)", 
 				request.getId(), request.getTitle());
 		String url = urlManager.urlFor(request);
@@ -204,7 +204,7 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 
 	@Transactional
 	@Override
-	public void onMentioned(PullRequestComment comment, Account user) {
+	public void onMentionAccount(PullRequestComment comment, Account user) {
 		String subject = String.format("You are mentioned in comment of pull request #%d (%s)", 
 				comment.getRequest().getId(), comment.getRequest().getTitle());
 		String url = urlManager.urlFor(comment);
@@ -219,9 +219,9 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 	
 	@Transactional
 	@Override
-	public void onReopened(PullRequest request, Account user, String comment) {
+	public void onReopenRequest(PullRequest request, Account user, String comment) {
 		if (request.getAssignee() != null && !request.getAssignee().equals(user))
-			onAssigned(request);
+			onAssignRequest(request);
 	}
 
 	private void requestIntegration(PullRequest request) {
@@ -269,6 +269,10 @@ public class DefaultNotificationManager extends AbstractEntityDao<Notification> 
 			if (find(criteria) == null)
 				persist(notification);
 		}
+	}
+
+	@Override
+	public void onDeleteRequest(PullRequest request) {
 	}
 
 }

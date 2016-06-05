@@ -7,10 +7,10 @@ import com.pmease.gitplex.core.entity.Depot;
 @ExtensionPoint
 public interface DepotListener {
 	
-	void onDepotDelete(Depot depot);
+	void onDeleteDepot(Depot depot);
 
-	void onDepotRename(Depot renamedDepot, String oldName);
+	void onRenameDepot(Depot renamedDepot, String oldName);
 	
-	void onDepotTransfer(Depot depot, Account oldAccount);
+	void onTransferDepot(Depot depot, Account oldAccount);
 	
 }

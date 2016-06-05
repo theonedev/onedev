@@ -16,5 +16,4 @@ public interface AttachmentSupport extends Serializable {
 	
 	void deleteAttachemnt(String attachmentName);
 	
-	long getAttachmentSize(String attachmentName);
 }
