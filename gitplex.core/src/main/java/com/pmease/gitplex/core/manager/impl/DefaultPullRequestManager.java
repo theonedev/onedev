@@ -848,4 +848,8 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 		return count(criteria);
 	}
 
+	@Override
+	public void onSaveDepot(Depot depot) {
+	}
+
 }

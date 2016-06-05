@@ -76,4 +76,8 @@ public class DefaultTeamAuthorizationManager extends AbstractEntityDao<TeamAutho
 		return query(criteria);
 	}
 
+	@Override
+	public void onSaveDepot(Depot depot) {
+	}
+
 }

@@ -237,4 +237,8 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		FileUtils.deleteDir(getPermanentAttachmentDir(request.getTargetDepot(), request.getAttachmentDirUUID()));
 	}
 
+	@Override
+	public void onSaveDepot(Depot depot) {
+	}
+
 }

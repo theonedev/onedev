@@ -436,4 +436,8 @@ public class DefaultIndexManager implements IndexManager {
 	public void onTransferDepot(Depot depot, Account oldAccount) {
 	}
 
+	@Override
+	public void onSaveDepot(Depot depot) {
+	}
+
 }

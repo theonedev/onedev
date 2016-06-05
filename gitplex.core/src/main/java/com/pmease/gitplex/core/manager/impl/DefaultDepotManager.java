@@ -139,7 +139,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     	boolean isNew = depot.isNew();
     	
     	persist(depot);
-
+    	
     	if (oldAccountId != null && !depot.getAccount().getId().equals(oldAccountId)) {
     		Account oldAccount = userManager.load(oldAccountId);
     		for (DepotListener listener: listenersProvider.get())
@@ -168,11 +168,11 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     			}
     		}
     	}
-
-    	if (isNew) {
-    		checkSanity(depot);
+    	
+    	for (DepotListener listener: listenersProvider.get()) {
+    		listener.onSaveDepot(depot);
     	}
-        
+
         afterCommit(new Runnable() {
 
 			@Override
@@ -184,6 +184,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 					idLock.writeLock().unlock();
 				}
 				if (isNew) {
+		    		checkSanity(depot);
 					auxiliaryManager.collect(depot);
 				}
 			}

@@ -720,4 +720,8 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 		return commitCount;
 	}
 
+	@Override
+	public void onSaveDepot(Depot depot) {
+	}
+
 }
