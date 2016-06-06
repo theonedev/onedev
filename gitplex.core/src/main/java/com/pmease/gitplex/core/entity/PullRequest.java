@@ -816,16 +816,6 @@ public class PullRequest extends AbstractEntity {
 		return pendingCommits;
 	}
 
-	public List<String> getCommentables() {
-		List<String> commentables = new ArrayList<>();
-		commentables.add(getBaseCommitHash());
-		for (PullRequestUpdate update: getSortedUpdates()) {
-			for (Commit commit: update.getCommits())
-				commentables.add(commit.getHash());
-		}
-		return commentables;
-	}
-	
 	/**
 	 * Merged commits represent commits already merged to target branch since base commit.
 	 * 

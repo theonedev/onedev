@@ -13,7 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestFilesPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
@@ -21,20 +21,20 @@ class SinceChangesLink extends Panel {
 
 	private final IModel<PullRequest> requestModel;
 	
-	private final IModel<String> oldRevModel = new LoadableDetachableModel<String>() {
+	private final IModel<String> oldCommitModel = new LoadableDetachableModel<String>() {
 
 		@Override
 		protected String load() {
 			PullRequest request = requestModel.getObject();
-			String revision = RequestComparePage.REV_BASE;
+			String commit = request.getBaseCommitHash();
 			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
 				if (update.getDate().before(sinceDate)) {
-					revision = RequestComparePage.REV_UPDATE_PREFIX + (i+1);
+					commit = update.getHeadCommitHash();
 					break;
 				}
 			}
-			return revision;
+			return commit;
 		}
 		
 	};
@@ -60,11 +60,11 @@ class SinceChangesLink extends Panel {
 			@Override
 			public void onClick() {
 				PullRequest request = requestModel.getObject();
-				RequestComparePage.State state = new RequestComparePage.State();
-				state.oldRev = oldRevModel.getObject();
-				state.newRev = RequestComparePage.REV_LAST_UPDATE_PREFIX+1;
-				PageParameters params = RequestComparePage.paramsOf(request, state);
-				setResponsePage(RequestComparePage.class, params);
+				RequestFilesPage.State state = new RequestFilesPage.State();
+				state.oldCommit = oldCommitModel.getObject();
+				state.newCommit = request.getLatestUpdate().getHeadCommitHash();
+				PageParameters params = RequestFilesPage.paramsOf(request, state);
+				setResponsePage(RequestFilesPage.class, params);
 			}
 			
 		};
@@ -88,13 +88,13 @@ class SinceChangesLink extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!oldRevModel.getObject().equals(requestModel.getObject().getLatestUpdate().getHeadCommitHash()));
+		setVisible(!oldCommitModel.getObject().equals(requestModel.getObject().getLatestUpdate().getHeadCommitHash()));
 	}
 
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
-		oldRevModel.detach();
+		oldCommitModel.detach();
 		
 		super.onDetach();
 	}

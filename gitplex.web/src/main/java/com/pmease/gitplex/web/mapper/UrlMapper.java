@@ -39,7 +39,7 @@ import com.pmease.gitplex.web.page.depot.compare.RevisionComparePage;
 import com.pmease.gitplex.web.page.depot.file.DepotFilePage;
 import com.pmease.gitplex.web.page.depot.overview.DepotOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.newrequest.NewRequestPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestComparePage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestFilesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
@@ -173,7 +173,7 @@ public class UrlMapper extends CompoundRequestMapper {
 		add(new DepotMapper(
 				"${account}/${depot}/pulls/${request}/updates", RequestUpdatesPage.class));
 		add(new DepotMapper(
-				"${account}/${depot}/pulls/${request}/compare", RequestComparePage.class));
+				"${account}/${depot}/pulls/${request}/compare", RequestFilesPage.class));
 
 		add(new DepotMapper("${account}/${depot}/settings/general", GeneralSettingPage.class));
 		add(new DepotMapper("${account}/${depot}/settings/teams", DepotTeamListPage.class));

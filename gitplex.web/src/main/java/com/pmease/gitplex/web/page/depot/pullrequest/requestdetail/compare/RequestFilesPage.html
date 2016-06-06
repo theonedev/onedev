@@ -1,0 +1,23 @@
+<wicket:extend>
+	<div class="files">
+		<div class="head clearfix">
+			<div class="pull-left btn-group">
+				<a wicket:id="prevCommit" title="Previous commit"><i class="fa fa-arrow-left""></i></a>
+				<a wicket:id="selectedCommits"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="nextCommit" title="Next commit"><i class="fa fa-arrow-right"></i></a>
+			</div>
+		</div>
+		<div wicket:id="revisionDiff" class="body"></div>
+	</div>
+	<wicket:fragment wicket:id="commitsFrag">
+		<ul class="request-commits">
+			<li wicket:id="commits">
+				<a wicket:id="link">
+					<i class="fa fa-ext fa-commit"></i> 
+					<span wicket:id="hash"></span>
+					<span wicket:id="subject"></span>
+				</a>
+			</li>
+		</ul>
+	</wicket:fragment>
+</wicket:extend>
