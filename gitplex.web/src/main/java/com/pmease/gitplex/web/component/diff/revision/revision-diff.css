@@ -83,11 +83,11 @@
 }
 .revision-diff>.body>.detail>.comment {
 	border: 1px solid #DDD;
-	position: absolute;
-	left: 0;
 	margin-right: 12px;
 	padding-right: 4px;	
 	background: white;
+	position: absolute;
+	left: 0;
 	z-index: 1;
 }
 .revision-diff>.body>.detail>.comment>.content>.head .locate {
@@ -124,9 +124,4 @@
 	font-size: 13px;
 	padding: 12px;
 	overflow: auto; 
-}
-
-.revision-diff>.body>.detail>.diffs {
-	position: absolute;
-	top: 0;
 }

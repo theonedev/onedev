@@ -19,7 +19,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -35,7 +34,6 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import com.google.common.base.Preconditions;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.wicket.behavior.TooltipBehavior;
-import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
@@ -54,8 +52,6 @@ import com.pmease.gitplex.core.security.ObjectPermission;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
-import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
-import com.pmease.gitplex.web.component.comment.CommentInput;
 import com.pmease.gitplex.web.component.comment.event.CommentRemoved;
 import com.pmease.gitplex.web.component.pullrequest.ReviewResultIcon;
 import com.pmease.gitplex.web.component.pullrequest.requestassignee.AssigneeChoice;
@@ -67,7 +63,6 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
 
@@ -278,35 +273,6 @@ public class RequestOverviewPage extends RequestDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		WebMarkupContainer addComment = new WebMarkupContainer("addComment") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(GitPlex.getInstance(AccountManager.class).getCurrent() != null);
-			}
-			
-		};
-		addComment.setOutputMarkupId(true);
-		add(addComment);
-		
-		Form<?> form = new Form<Void>("form");
-		addComment.add(form);
-		
-		CommentInput input = new CommentInput("input", Model.of("")) {
-
-			@Override
-			protected AttachmentSupport getAttachmentSupport() {
-				return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
-						requestModel.getObject().getAttachmentDirUUID());
-			}
-			
-		};
-		input.setRequired(true);
-		form.add(input);
-		
-		form.add(new NotificationPanel("feedback", input));
 		
 		add(newIntegrationStrategyContainer());
 		add(newAssigneeContainer());

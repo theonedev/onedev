@@ -25,44 +25,40 @@ gitplex.revisionDiff = {
 		}
 		
 		var $detail = $(".revision-diff>.body>.detail");
-		if ($detail.length != 0) {
-			var $comment = $detail.children(".comment");
-			var $diffs = $detail.children(".diffs");
-			if ($comment.is(":visible")) {
-				$diffs.css("left", $comment.outerWidth(true));
-				$diffs.outerWidth($detail.width() - $comment.outerWidth(true));
-				
-				var scrollTop = $(window).scrollTop();
-				var commentOffset = scrollTop - $diffs.offset().top;
-				if (commentOffset > 0) {
-					$comment.css("top", commentOffset);
-				} else {
-					$comment.css("top", 0);
-				}
-				var $lastDiff = $diffs.children().last();
-				var commentHeight;
-				if ($lastDiff.length != 0) {
-					commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop;
-				} else {
-					commentHeight = $diffs.offset().top + $diffs.height() - scrollTop;
-				}
-				var windowHeight = $(window).height();
-				var minCommentHeight = windowHeight - 100;
-				if (commentHeight < minCommentHeight)
-					commentHeight = minCommentHeight;
-				else if (commentHeight > windowHeight)
-					commentHeight = windowHeight;
-				var $commentResizeHandle = $comment.children(".ui-resizable-handle");
-				$commentResizeHandle.outerHeight(commentHeight - 2);
-				var $commentHead = $comment.find(">.content>.head");
-				$comment.find(">.content>.body").outerHeight(commentHeight-2-$commentHead.outerHeight());
+		var $comment = $detail.children(".comment");
+		var $diffs = $detail.children(".diffs");
+		if ($comment.is(":visible")) {
+			$detail.css("padding-left", $comment.outerWidth(true));
+			
+			var scrollTop = $(window).scrollTop();
+			var commentOffset = scrollTop - $diffs.offset().top;
+			if (commentOffset > 0) {
+				$comment.css("top", commentOffset);
 			} else {
-				$diffs.css("left", "0");
-				$diffs.outerWidth($detail.width());
+				$comment.css("top", 0);
 			}
-			var diffsHeight = $diffs.outerHeight();
-			$detail.height(commentHeight>diffsHeight?commentHeight:diffsHeight);
+			var $lastDiff = $diffs.children().last();
+			var commentHeight;
+			if ($lastDiff.length != 0) {
+				commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop;
+			} else {
+				commentHeight = $diffs.offset().top + $diffs.height() - scrollTop;
+			}
+			var windowHeight = $(window).height();
+			var minCommentHeight = windowHeight - 100;
+			if (commentHeight < minCommentHeight)
+				commentHeight = minCommentHeight;
+			else if (commentHeight > windowHeight)
+				commentHeight = windowHeight;
+			var $commentResizeHandle = $comment.children(".ui-resizable-handle");
+			$commentResizeHandle.outerHeight(commentHeight - 2);
+			var $commentHead = $comment.find(">.content>.head");
+			$comment.find(">.content>.body").outerHeight(commentHeight-2-$commentHead.outerHeight());
+		} else {
+			$detail.css("padding-left", "0");
 		}
+		var diffsHeight = $diffs.outerHeight();
+		$detail.height(commentHeight>diffsHeight?commentHeight:diffsHeight);
 	},
 	initComment: function() {
 		var $comment = $(".revision-diff>.body>.detail>.comment");
