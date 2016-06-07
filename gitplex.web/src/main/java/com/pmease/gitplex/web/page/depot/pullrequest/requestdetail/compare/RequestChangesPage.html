@@ -1,0 +1,29 @@
+<wicket:extend>
+	<div class="changes">
+		<div wicket:id="changesHead" class="head clearfix">
+			<div class="pull-left btn-group">
+				<a wicket:id="prevCommitLink" class="btn btn-default" title="Previous commit"><i class="fa fa-arrow-left"></i></a>
+				<a wicket:id="comparingCommits" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+				<a wicket:id="nextCommitLink" class="btn btn-default" title="Next commit"><i class="fa fa-arrow-right"></i></a>
+			</div>
+		</div>
+		<div wicket:id="revisionDiff" class="body"></div>
+	</div>
+	<wicket:fragment wicket:id="commitsFrag">
+		<div class="commits-selector">
+			<div class="head clearfix">
+				<div class="title pull-left">Click to select a commit, or shift-click to select range of commits</div>
+				<a title="Apply selected commits" class="btn btn-xs btn-default">Apply</a>
+			</div>
+			<ul class="body list-unstyled">
+				<li wicket:id="commits">
+					<a>
+						<span class="fa fa-ext fa-commit icon"></span> 
+						<span wicket:id="hash" class="hash"></span>
+						<span wicket:id="subject" class="subject"></span>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

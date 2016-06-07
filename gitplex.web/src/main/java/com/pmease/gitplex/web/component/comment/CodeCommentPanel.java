@@ -86,7 +86,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 				}
 				state.mark = new DiffMark(comment);
 				state.pathFilter = compareContext.getPathFilter();
-				state.tabPanel = RevisionComparePage.TabPanel.FILES;
+				state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 				state.whitespaceOption = compareContext.getWhitespaceOption();
 				PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
 				setResponsePage(RevisionComparePage.class, params);
@@ -279,7 +279,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 				}
 				state.mark = new DiffMark(comment);
 				state.pathFilter = compareContext.getPathFilter();
-				state.tabPanel = RevisionComparePage.TabPanel.FILES;
+				state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 				state.whitespaceOption = compareContext.getWhitespaceOption();
 				PageParameters params  = RevisionComparePage.paramsOf(comment.getDepot(), state);
 				setResponsePage(RevisionComparePage.class, params);

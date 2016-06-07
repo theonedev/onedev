@@ -13,7 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequestUpdate;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestFilesPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestChangesPage;
 import com.pmease.gitplex.web.websocket.PullRequestChanged;
 
 @SuppressWarnings("serial")
@@ -60,11 +60,11 @@ class SinceChangesLink extends Panel {
 			@Override
 			public void onClick() {
 				PullRequest request = requestModel.getObject();
-				RequestFilesPage.State state = new RequestFilesPage.State();
+				RequestChangesPage.State state = new RequestChangesPage.State();
 				state.oldCommit = oldCommitModel.getObject();
 				state.newCommit = request.getLatestUpdate().getHeadCommitHash();
-				PageParameters params = RequestFilesPage.paramsOf(request, state);
-				setResponsePage(RequestFilesPage.class, params);
+				PageParameters params = RequestChangesPage.paramsOf(request, state);
+				setResponsePage(RequestChangesPage.class, params);
 			}
 			
 		};

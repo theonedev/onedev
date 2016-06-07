@@ -584,8 +584,8 @@ public class RevisionDiffPanel extends Panel {
 		
 		body.add(commentContainer = newCommentContainer());
 		
-		Component totalChangedLink;
-		body.add(totalChangedLink = new Label("totalChanged", new AbstractReadOnlyModel<String>() {
+		Component totalFilesLink;
+		body.add(totalFilesLink = new Label("totalFiles", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -594,7 +594,7 @@ public class RevisionDiffPanel extends Panel {
 			
 		}));
 
-		body.add(new WebMarkupContainer("tooManyChanges") {
+		body.add(new WebMarkupContainer("tooManyFiles") {
 
 			@Override
 			protected void onConfigure() {
@@ -611,7 +611,7 @@ public class RevisionDiffPanel extends Panel {
 		if (cookie == null || !"yes".equals(cookie.getValue())) {
 			diffStats.add(AttributeAppender.append("style", "display:none;"));
 		} else {
-			totalChangedLink.add(AttributeAppender.append("class", "expanded"));			
+			totalFilesLink.add(AttributeAppender.append("class", "expanded"));			
 		}
 		body.add(diffStats);
 		diffStats.add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
@@ -977,7 +977,7 @@ public class RevisionDiffPanel extends Panel {
 						state.compareWithMergeBase = false;
 						state.leftSide = new DepotAndRevision(comment.getDepot(), comment.getCommit());
 						state.rightSide = new DepotAndRevision(comment.getDepot(), revision);
-						state.tabPanel = RevisionComparePage.TabPanel.FILES;
+						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 						PageParameters params = RevisionComparePage.paramsOf(comment.getDepot(), state);
 						setResponsePage(RevisionComparePage.class, params);
 					}

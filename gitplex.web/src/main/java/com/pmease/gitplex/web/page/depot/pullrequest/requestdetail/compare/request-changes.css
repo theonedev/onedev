@@ -1,0 +1,35 @@
+#request-detail>.changes>.head {
+	margin-bottom: 20px;
+}
+.commits-selector>.head {
+	padding: 8px;
+	border-bottom: 1px solid #CCC;
+	background: #F5F5F5;	
+}
+.commits-selector>.head>a {
+	margin-left: 8px;
+}
+.commits-selector ul {
+	margin-bottom: 0;
+	padding: 8px;
+	overflow-y: auto;
+}
+.commits-selector ul a {
+	text-decoration: none;
+	display: block;
+	color: #333;
+	padding: 4px 8px;
+	white-space: nowrap;
+}
+.commits-selector ul a:hover {
+	background: #F2F2F2;
+}
+.commits-selector ul a.selected {
+	background: #EEE;	
+}
+.commits-selector ul .hash, .commits-selector ul .icon {
+	color: #666;
+}
+.commits-selector ul .hash {
+	font-family: monospace;
+}

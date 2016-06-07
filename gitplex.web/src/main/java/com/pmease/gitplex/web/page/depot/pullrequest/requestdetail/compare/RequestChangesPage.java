@@ -13,15 +13,25 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.CssResourceReference;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import com.pmease.commons.git.BriefCommit;
+import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.lang.diff.WhitespaceOption;
+import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
@@ -35,7 +45,7 @@ import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.RequestDetail
 import com.pmease.gitplex.web.page.depot.pullrequest.requestlist.RequestListPage;
 
 @SuppressWarnings("serial")
-public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
+public class RequestChangesPage extends RequestDetailPage implements MarkSupport {
 
 	private static final String PARAM_OLD_COMMIT = "old-commit";
 	
@@ -53,12 +63,8 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 	
 	private State state = new State();
 	
-	private AjaxLink<Void> prevCommitLink;
+	private WebMarkupContainer head;
 	
-	private AjaxLink<Void> nextCommitLink;
-	
-	private Label selectedCommitsLabel;
-
 	private final IModel<List<BriefCommit>> commitsModel = new LoadableDetachableModel<List<BriefCommit>>() {
 
 		@Override
@@ -72,7 +78,7 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 		
 	};
 	
-	public RequestFilesPage(PageParameters params) {
+	public RequestChangesPage(PageParameters params) {
 		super(params);
 
 		state.oldCommit = params.get(PARAM_OLD_COMMIT).toString();
@@ -100,15 +106,25 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(prevCommitLink = new AjaxLink<Void>("prevCommitLink") {
+		add(head = new WebMarkupContainer("changesHead"));
+		head.setOutputMarkupId(true);
+		
+		head.add(new AjaxLink<Void>("prevCommitLink") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 
-				if (getCommitIndex(state.oldCommit) == -1 || getCommitIndex(state.newCommit) == -1) {
+				configure();
+				if (!isEnabled()) {
 					tag.put("disabled", "disabled");
 				}
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(getCommitIndex(state.oldCommit) != -1 && getCommitIndex(state.newCommit) != -1);
 			}
 
 			@Override
@@ -123,22 +139,34 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 						state.oldCommit = commitsModel.getObject().get(index).getHash();
 					}
 					newRevisionDiff(target);
-					target.add(selectedCommitsLabel);
 				}
-				target.add(this);
+				target.add(head);
 			}
 			
 		});
-		add(nextCommitLink = new AjaxLink<Void>("nextCommitLink") {
+		head.add(new AjaxLink<Void>("nextCommitLink") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				int oldIndex = getCommitIndex(state.oldCommit);
+				int newIndex = getCommitIndex(state.newCommit);
+				if (!state.oldCommit.equals(getPullRequest().getBaseCommitHash()) && oldIndex == -1 
+						|| newIndex == -1 || newIndex == commitsModel.getObject().size()-1) {
+					setEnabled(false);
+				} else {
+					setEnabled(true);
+				}
+				
+			}
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				int oldIndex = getCommitIndex(state.oldCommit);
-				int newIndex = getCommitIndex(state.newCommit);
-				if (!state.oldCommit.equals(getPullRequest().getBaseCommitHash()) && oldIndex == -1 
-						|| newIndex == -1 || newIndex == commitsModel.getObject().size()-1) {
+				configure();
+				if (!isEnabled()) {
 					tag.put("disabled", "disabled");
 				}
 			}
@@ -151,12 +179,57 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 					index++;
 					state.newCommit = commitsModel.getObject().get(index).getHash();
 					newRevisionDiff(target);
-					target.add(selectedCommitsLabel);
 				} 
-				target.add(this);
+				target.add(head);
 			}
 			
 		});
+		
+		DropdownLink selectedCommitsLink = new DropdownLink("comparingCommits") {
+			
+			@Override
+			protected Component newContent(String id) {
+				Fragment fragment = new Fragment(id, "commitsFrag", RequestChangesPage.this) {
+
+					@Override
+					public void renderHead(IHeaderResponse response) {
+						super.renderHead(response);
+						String script;
+						int oldIndex = getCommitIndex(state.oldCommit);
+						int newIndex = getCommitIndex(state.newCommit);
+						if ((state.oldCommit.equals(getPullRequest().getBaseCommitHash()) || oldIndex != -1) 
+								&& newIndex != -1) {
+							script = String.format("gitplex.requestChanges.initCommitSelector(%d, %d);", oldIndex+1, newIndex+1);
+						} else {
+							script = "gitplex.requestChanges.initCommitSelector();";
+						}
+						response.render(OnDomReadyHeaderItem.forScript(script));
+					}
+					
+				};
+				fragment.add(new ListView<BriefCommit>("commits", commitsModel) {
+
+					@Override
+					protected void populateItem(ListItem<BriefCommit> item) {
+						item.add(new Label("hash", GitUtils.abbreviateSHA(item.getModelObject().getHash())));
+						item.add(new Label("subject", item.getModelObject().getSubject()));
+					}
+					
+				});
+				return fragment;
+			}
+		};
+		selectedCommitsLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return GitUtils.abbreviateSHA(state.oldCommit) + "..." + GitUtils.abbreviateSHA(state.newCommit);
+			}
+			
+		}).setEscapeModelStrings(false));
+		
+		head.add(selectedCommitsLink);
+		
 		newRevisionDiff(null);
 	}
 
@@ -209,7 +282,7 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
 		PageParameters params = paramsOf(getPullRequest(), state);
-		CharSequence url = RequestCycle.get().urlFor(RequestFilesPage.class, params);
+		CharSequence url = RequestCycle.get().urlFor(RequestChangesPage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
 	
@@ -284,8 +357,10 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(RequestChangesPage.class, "request-changes.js")));
 		response.render(CssHeaderItem.forReference(
-				new CssResourceReference(RequestFilesPage.class, "request-files.css")));
+				new CssResourceReference(RequestChangesPage.class, "request-changes.css")));
 	}
 
 	@Override
@@ -301,7 +376,7 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 		markState.newCommit = state.newCommit;
 		markState.pathFilter = state.pathFilter;
 		markState.whitespaceOption = state.whitespaceOption;
-		return urlFor(RequestFilesPage.class, paramsOf(getPullRequest(), markState)).toString();
+		return urlFor(RequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
 	}
 
 	@Override
@@ -313,7 +388,7 @@ public class RequestFilesPage extends RequestDetailPage implements MarkSupport {
 		commentState.newCommit = state.newCommit;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
-		return urlFor(RequestFilesPage.class, paramsOf(getPullRequest(), commentState)).toString();
+		return urlFor(RequestChangesPage.class, paramsOf(getPullRequest(), commentState)).toString();
 	}
 	
 	@Override

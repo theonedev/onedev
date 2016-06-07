@@ -700,7 +700,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
-		state.tabPanel = RevisionComparePage.TabPanel.FILES;
+		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();
@@ -732,7 +732,7 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		state.leftSide = new DepotAndBranch(source.getDepot(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new DepotAndBranch(source.getDepot(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
-		state.tabPanel = RevisionComparePage.TabPanel.FILES;
+		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getDepot(), state)).toString();

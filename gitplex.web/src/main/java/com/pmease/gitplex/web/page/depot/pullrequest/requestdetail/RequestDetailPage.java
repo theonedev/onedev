@@ -78,7 +78,7 @@ import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestFilesPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestChangesPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
 import com.pmease.gitplex.web.util.DateUtils;
@@ -255,7 +255,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
-		tabs.add(new RequestTab("Files", RequestFilesPage.class) {
+		tabs.add(new RequestTab("Changes", RequestChangesPage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -264,7 +264,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 						PullRequest request = getPullRequest();
-						PageParameters params = RequestFilesPage.paramsOf(request, request.getBaseCommitHash(),  
+						PageParameters params = RequestChangesPage.paramsOf(request, request.getBaseCommitHash(),  
 								request.getLatestUpdate().getHeadCommitHash());
 						return new BookmarkablePageLink<Void>(linkId, pageClass, params);
 					}
@@ -439,9 +439,9 @@ public abstract class RequestDetailPage extends PullRequestPage {
 					@Override
 					public void onClick() {
 						PullRequest request = getPullRequest();
-						PageParameters params = RequestFilesPage.paramsOf(request, 
+						PageParameters params = RequestChangesPage.paramsOf(request, 
 								request.getIntegrationPreview().getTargetHead(), request.getIntegrationPreview().getIntegrated());
-						setResponsePage(RequestFilesPage.class, params);
+						setResponsePage(RequestChangesPage.class, params);
 					}
 					
 				};

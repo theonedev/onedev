@@ -63,7 +63,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 
 	public enum TabPanel {
 		COMMITS, 
-		FILES;
+		CHANGES;
 
 		public static TabPanel of(@Nullable String name) {
 			if (name != null) {
@@ -443,16 +443,16 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 			
 		});
 
-		tabs.add(new AjaxActionTab(Model.of("Files")) {
+		tabs.add(new AjaxActionTab(Model.of("Changes")) {
 			
 			@Override
 			public boolean isSelected() {
-				return state.tabPanel == TabPanel.FILES;
+				return state.tabPanel == TabPanel.CHANGES;
 			}
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				state.tabPanel = TabPanel.FILES;
+				state.tabPanel = TabPanel.CHANGES;
 				newTabPanel(target);
 				pushState(target);
 			}
@@ -488,7 +488,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		};
 		WebMarkupContainer tabPanel;
 		switch (state.tabPanel) {
-		case FILES:
+		case CHANGES:
 			IModel<String> blameModel = new IModel<String>() {
 
 				@Override
@@ -653,7 +653,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		markState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
-		markState.tabPanel = TabPanel.FILES;
+		markState.tabPanel = TabPanel.CHANGES;
 		markState.whitespaceOption = state.whitespaceOption;
 		markState.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getDepot(), markState)).toString();
@@ -667,7 +667,7 @@ public class RevisionComparePage extends DepotPage implements MarkSupport {
 		commentState.rightSide = new DepotAndRevision(state.rightSide.getDepot(), rightCommitId.name());
 		commentState.mark = new DiffMark(comment);
 		commentState.commentId = comment.getId();
-		commentState.tabPanel = TabPanel.FILES;
+		commentState.tabPanel = TabPanel.CHANGES;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
 		commentState.compareWithMergeBase = false;

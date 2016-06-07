@@ -283,7 +283,7 @@ public class SourceViewPanel extends BlobViewPanel {
 						state.compareWithMergeBase = false;
 						state.leftSide = new DepotAndRevision(context.getDepot(), comment.getCommit());
 						state.rightSide = new DepotAndRevision(context.getDepot(), revision);
-						state.tabPanel = RevisionComparePage.TabPanel.FILES;
+						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 						PageParameters params = RevisionComparePage.paramsOf(context.getDepot(), state);
 						setResponsePage(RevisionComparePage.class, params);
 					}
