@@ -1,13 +1,31 @@
 #request-detail>.changes>.head {
+	padding-bottom: 20px;
+	border-bottom: 1px dotted #BBB;
 	margin-bottom: 20px;
+	font-size: 16px;
+}
+#request-detail>.changes>.head .btn {
+	font-size: 16px;
+}
+#request-detail>.changes>.head .full-changes {
+	margin: 6px 0 0 20px;
+}
+#request-detail>.changes>.head .full-changes a {
+	color: #666;
+}
+
+.commits-selector {
+	min-width: 520px;
 }
 .commits-selector>.head {
 	padding: 8px;
-	border-bottom: 1px solid #CCC;
+	border-bottom: 1px solid #DDD;
 	background: #F5F5F5;	
+	font-size: 16px;
 }
 .commits-selector>.head>a {
 	margin-left: 8px;
+	display: none;
 }
 .commits-selector ul {
 	margin-bottom: 0;
@@ -20,16 +38,17 @@
 	color: #333;
 	padding: 4px 8px;
 	white-space: nowrap;
+	font-family: monospace;
 }
 .commits-selector ul a:hover {
-	background: #F2F2F2;
+	background: #FCEDAA;
 }
 .commits-selector ul a.selected {
-	background: #EEE;	
+	background: #FAE170;	
+}
+.commits-selector ul a.selected:hover {
+	background: #F7CD11;	
 }
 .commits-selector ul .hash, .commits-selector ul .icon {
 	color: #666;
-}
-.commits-selector ul .hash {
-	font-family: monospace;
 }

@@ -1,0 +1,19 @@
+<wicket:extend>
+	<div wicket:id="content" class="integration-preview"></div>
+	<wicket:fragment wicket:id="availableFrag">
+		<div class="available">
+			<div class="head clearfix">
+				<div class="title pull-left">
+					Comparison of target branch and integrated commit
+				</div>
+				<div class="out-dated pull-left">
+					<a wicket:id="refresh"><i class="fa fa-warning"></i> Integration preview is out dated, click to refresh</a> 
+				</div>
+			</div>
+			<div wicket:id="revisionDiff" class="body"></div>		
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="notAvailableFrag">
+		<div class="not-available"><i class="fa fa-info-circle"></i> Integration preview is not available yet</div>
+	</wicket:fragment>
+</wicket:extend>

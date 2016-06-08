@@ -267,6 +267,8 @@ public class PullRequest extends AbstractEntity {
 	
 	private transient List<Review> reviews;
 	
+	private transient IntegrationPreview integrationPreview;
+	
 	/**
 	 * Get title of this merge request.
 	 * 
@@ -570,7 +572,9 @@ public class PullRequest extends AbstractEntity {
 	@JsonView(ExternalView.class)
 	@Nullable
 	public IntegrationPreview getIntegrationPreview() {
-		return GitPlex.getInstance(PullRequestManager.class).previewIntegration(this);
+		if (integrationPreview == null)
+			integrationPreview = GitPlex.getInstance(PullRequestManager.class).previewIntegration(this);
+		return integrationPreview;
 	}
 	
 	/**

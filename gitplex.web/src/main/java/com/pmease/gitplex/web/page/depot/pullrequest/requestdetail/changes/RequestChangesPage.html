@@ -6,21 +6,26 @@
 				<a wicket:id="comparingCommits" class="btn btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
 				<a wicket:id="nextCommitLink" class="btn btn-default" title="Next commit"><i class="fa fa-arrow-right"></i></a>
 			</div>
+			<wicket:enclosure child="fullChanges">
+			<div class="full-changes pull-left">
+				<a wicket:id="fullChanges" class="pull-left"><i class="fa fa-warning"></i> You are viewing a subset of all changes, click to show all changes</a>
+			</div>
+			</wicket:enclosure>
 		</div>
-		<div wicket:id="revisionDiff" class="body"></div>
+		<div wicket:id="revisionDiff" class="body"></div>		
 	</div>
 	<wicket:fragment wicket:id="commitsFrag">
-		<div class="commits-selector">
+		<div class="commits-selector noselect">
 			<div class="head clearfix">
 				<div class="title pull-left">Click to select a commit, or shift-click to select range of commits</div>
 				<a title="Apply selected commits" class="btn btn-xs btn-default">Apply</a>
 			</div>
-			<ul class="body list-unstyled">
+			<ul class="body list-unstyled autosize">
 				<li wicket:id="commits">
-					<a>
-						<span class="fa fa-ext fa-commit icon"></span> 
-						<span wicket:id="hash" class="hash"></span>
-						<span wicket:id="subject" class="subject"></span>
+					<a unselectable="on">
+						<span class="fa fa-ext fa-commit icon" unselectable="on"></span> 
+						<span wicket:id="hash" class="hash" unselectable="on"></span>
+						<span wicket:id="subject" class="subject" unselectable="on"></span>
 					</a>
 				</li>
 			</ul>

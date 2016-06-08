@@ -6,16 +6,23 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior;
 import com.pmease.commons.wicket.websocket.WebSocketTrait;
+import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.PullRequest;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 
 @SuppressWarnings("serial")
-public abstract class PullRequestChangeRenderer extends WebSocketRenderBehavior {
+public class PullRequestChangeRenderer extends WebSocketRenderBehavior {
 
+	private final Long requestId;
+	
+	public PullRequestChangeRenderer(Long requestId) {
+		this.requestId = requestId;
+	}
+	
 	@Override
 	protected WebSocketTrait getTrait() {
-		// Do not call getPullRequest().getId() here to avoid unnecessary SQL query
 		PullRequestChangeTrait trait = new PullRequestChangeTrait();
-		trait.requestId = PullRequest.idOf(getPullRequest());
+		trait.requestId = requestId;
 		return trait;
 	}
 
@@ -23,10 +30,9 @@ public abstract class PullRequestChangeRenderer extends WebSocketRenderBehavior 
 	protected void onRender(WebSocketRequestHandler handler, WebSocketTrait trait) {
 		Component component = getComponent();
 		PullRequestChangeTrait pullRequestChangeTrait = (PullRequestChangeTrait) trait;
+		PullRequest request = GitPlex.getInstance(PullRequestManager.class).load(pullRequestChangeTrait.requestId);
 		component.send(component.getPage(), Broadcast.BREADTH, 
-				new PullRequestChanged(handler, getPullRequest(), pullRequestChangeTrait.requestEvent));
+				new PullRequestChanged(handler, request, pullRequestChangeTrait.requestEvent));
 	}
 
-	protected abstract PullRequest getPullRequest();
-	
 }

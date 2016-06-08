@@ -71,14 +71,15 @@ import com.pmease.gitplex.core.entity.component.IntegrationPreview;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
-import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.comment.CommentInput;
+import com.pmease.gitplex.web.component.comment.DepotAttachmentSupport;
 import com.pmease.gitplex.web.component.pullrequest.verificationstatus.VerificationStatusPanel;
 import com.pmease.gitplex.web.model.EntityModel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
 import com.pmease.gitplex.web.page.depot.NoCommitsPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.PullRequestPage;
-import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.compare.RequestChangesPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.changes.RequestChangesPage;
+import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.integrationpreview.IntegrationPreviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.overview.RequestOverviewPage;
 import com.pmease.gitplex.web.page.depot.pullrequest.requestdetail.updates.RequestUpdatesPage;
 import com.pmease.gitplex.web.util.DateUtils;
@@ -255,37 +256,14 @@ public abstract class RequestDetailPage extends PullRequestPage {
 		
 		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
 		tabs.add(new RequestTab("Updates", RequestUpdatesPage.class));
-		tabs.add(new RequestTab("Changes", RequestChangesPage.class) {
-
-			@Override
-			public Component render(String componentId) {
-				return new PageTabLink(componentId, this) {
-
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						PullRequest request = getPullRequest();
-						PageParameters params = RequestChangesPage.paramsOf(request, request.getBaseCommitHash(),  
-								request.getLatestUpdate().getHeadCommitHash());
-						return new BookmarkablePageLink<Void>(linkId, pageClass, params);
-					}
-					
-				};
-			}
-			
-		});
+		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
+		tabs.add(new RequestTab("Integration Preview", IntegrationPreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
 		add(new BackToTop("backToTop"));
 		
-		add(new PullRequestChangeRenderer() {
-
-			@Override
-			protected PullRequest getPullRequest() {
-				return RequestDetailPage.this.getPullRequest();
-			}
-
-		});
+		add(new PullRequestChangeRenderer(getPullRequest().getId()));
 	}
 	
 	private WebMarkupContainer newStatusAndBranchesContainer() {
@@ -428,20 +406,10 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				Link<Void> link = new Link<Void>("preview") {
 					
 					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						PullRequest request = getPullRequest();
-						IntegrationPreview preview = request.getIntegrationPreview();
-						setVisible(!preview.getIntegrated().equals(preview.getRequestHead()));
-					}
-
-					@Override
 					public void onClick() {
 						PullRequest request = getPullRequest();
-						PageParameters params = RequestChangesPage.paramsOf(request, 
-								request.getIntegrationPreview().getTargetHead(), request.getIntegrationPreview().getIntegrated());
-						setResponsePage(RequestChangesPage.class, params);
+						PageParameters params = IntegrationPreviewPage.paramsOf(request);
+						setResponsePage(IntegrationPreviewPage.class, params);
 					}
 					
 				};

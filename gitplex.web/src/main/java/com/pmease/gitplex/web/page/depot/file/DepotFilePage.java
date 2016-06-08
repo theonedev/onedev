@@ -366,14 +366,7 @@ public class DepotFilePage extends DepotPage implements BlobViewContext {
 			
 		});
 		if (getPullRequest() != null) {
-			add(new PullRequestChangeRenderer() {
-
-				@Override
-				protected PullRequest getPullRequest() {
-					return DepotFilePage.this.getPullRequest();
-				}
-
-			});
+			add(new PullRequestChangeRenderer(getPullRequest().getId()));
 		}
 	}
 

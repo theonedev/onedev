@@ -78,7 +78,7 @@ public class PullRequestChangeBroadcaster implements PullRequestListener {
 		 * expected status as rendering happens in another thread which may get
 		 * executed before pull request modification is committed.
 		 */
-		final PullRequestChangeTrait trait = new PullRequestChangeTrait();
+		PullRequestChangeTrait trait = new PullRequestChangeTrait();
 		trait.requestId = request.getId();
 		trait.requestEvent = event;
 		dao.afterCommit(new Runnable() {
