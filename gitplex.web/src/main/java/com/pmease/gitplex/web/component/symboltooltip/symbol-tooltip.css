@@ -1,6 +1,6 @@
 .symbol-tooltip {
 	background-color: infobackground; 
-	border: 1px solid black;
+	border: 1px solid infotext;
 	border-radius: 4px; 
 	color: infotext; 
 	font-family: monospace; 

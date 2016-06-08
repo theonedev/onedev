@@ -184,8 +184,10 @@
 	position: absolute;
 	z-index: 10000;
 	font-size: 13px;
-	border: 1px solid #BBB;
-	background: #F9F9F9;
+	background-color: infobackground; 
+	border: 1px solid infotext;
+	border-radius: 4px; 
+	color: infotext; 
 	padding: 8px;
 }
 
