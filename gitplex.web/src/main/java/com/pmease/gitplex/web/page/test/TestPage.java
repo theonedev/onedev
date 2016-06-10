@@ -37,10 +37,10 @@ public class TestPage extends BasePage {
 				};
 				new Thread(runnable).start();
 				new Thread(runnable).start();
-/*				new Thread(runnable).start();
 				new Thread(runnable).start();
 				new Thread(runnable).start();
-*/			}
+				new Thread(runnable).start();
+			}
 			
 		});
 		add(new Link<Void>("test2") {
