@@ -464,12 +464,6 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 		logger.info("locked");
 		getSession().refresh(depot);
 		logger.info("refreshed");
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		logger.info("next request number: " + depot.getNextPullRequestNumber());
 		depot.setNextPullRequestNumber(depot.getNextPullRequestNumber()+1);
 		persist(depot);
