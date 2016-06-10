@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
@@ -19,8 +20,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
@@ -92,32 +91,25 @@ public class Account extends AbstractUser implements ProtectedObject {
 	private long version;
 	
 	@OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
 	private Collection<OrganizationMembership> organizations = new ArrayList<>();
 	
-	@OneToMany(mappedBy="organization")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="organization", cascade=CascadeType.REMOVE)
 	private Collection<OrganizationMembership> organizationMembers = new ArrayList<>();
 	
-	@OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<TeamMembership> joinedTeams = new ArrayList<>();
 	
-	@OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<UserAuthorization> authorizedDepots = new ArrayList<>();
 	
-	@OneToMany(mappedBy="account")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="account", cascade=CascadeType.REMOVE)
 	private Collection<Depot> depots = new ArrayList<>();
 
 	/* used by organization account */
-	@OneToMany(mappedBy="organization")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="organization", cascade=CascadeType.REMOVE)
 	private Collection<Team> definedTeams = new ArrayList<>();
 	
-	@OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> requestReferences = new ArrayList<>();
 	
 	@OneToMany(mappedBy="submitter")
@@ -129,28 +121,22 @@ public class Account extends AbstractUser implements ProtectedObject {
 	@OneToMany(mappedBy="closeInfo.closedBy")
 	private Collection<PullRequest> closedRequests = new ArrayList<>();
 	
-	@OneToMany(mappedBy="reviewer")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
 	private Collection<Review> reviews = new ArrayList<Review>();
 	
-	@OneToMany(mappedBy="reviewer")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="reviewer", cascade=CascadeType.REMOVE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 
-    @OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<BranchWatch> branchWatches = new ArrayList<>();
 
-    @OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
-    @OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<Notification> requestNotifications = new ArrayList<>();
 
-    @OneToMany(mappedBy="user")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestVisit> requestVisits = new ArrayList<>();
     
     private transient Collection<TeamAuthorization> allTeamAuthorizationsInOrganization;

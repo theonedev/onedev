@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,8 +17,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -42,12 +41,10 @@ public class Team extends AbstractEntity {
 	
 	private String description;
 
-	@OneToMany(mappedBy="team")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
 	private Collection<TeamAuthorization> authorizations = new ArrayList<>();
 	
-	@OneToMany(mappedBy="team")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="team", cascade=CascadeType.REMOVE)
 	private Collection<TeamMembership> memberships = new ArrayList<>();
 	
 	private transient Collection<Account> members;

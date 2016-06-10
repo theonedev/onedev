@@ -13,15 +13,13 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
@@ -49,8 +47,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
-	@OneToMany(mappedBy="update")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Review> reviews = new ArrayList<Review>();
 	
 	private transient List<Commit> commits;

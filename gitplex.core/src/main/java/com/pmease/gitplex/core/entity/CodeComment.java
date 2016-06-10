@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -16,8 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
 
 import com.pmease.commons.hibernate.AbstractEntity;
@@ -68,8 +67,7 @@ public class CodeComment extends AbstractEntity {
 	@Embedded
 	private CompareContext compareContext;
 	
-	@OneToMany(mappedBy="comment")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
 	@Column(nullable=false)

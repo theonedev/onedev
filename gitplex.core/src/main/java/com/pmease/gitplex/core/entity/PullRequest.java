@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -27,8 +28,6 @@ import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
@@ -213,44 +212,34 @@ public class PullRequest extends AbstractEntity {
 	@Column(nullable=false)
 	private String attachmentDirUUID;
 
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 	
-	@OneToMany(mappedBy="referenced")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
 	
-	@OneToMany(mappedBy="referencedBy")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="referencedBy",cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReference> referenced = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<Verification> verifications = new ArrayList<>();
 
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestActivity> activities = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<Notification> notifications = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestVisit> visits = new ArrayList<>();
 
-	@OneToMany(mappedBy="request")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
 	private transient CheckResult checkResult;

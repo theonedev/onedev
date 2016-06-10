@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -58,8 +59,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
@@ -95,6 +96,7 @@ import com.pmease.gitplex.core.util.validation.DepotName;
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"g_account_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@DynamicUpdate
 @Editable
 public class Depot extends AbstractEntity implements AccountBelonging {
 
@@ -132,6 +134,12 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	@Version
 	private long version;
 	
+	@OptimisticLock(excluded=true)	
+	private long nextPullRequestNumber = 1;
+	
+	@OptimisticLock(excluded=true)	
+	private long nextPullRequestUpdateNumber = 1;
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<GateKeeper> gateKeepers = new ArrayList<>();
@@ -143,8 +151,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	@Column(nullable=false)
 	private Date createdAt = new Date();
 
-	@OneToMany(mappedBy="targetDepot")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="targetDepot", cascade=CascadeType.REMOVE)
 	private Collection<PullRequest> incomingRequests = new ArrayList<>();
 	
 	@OneToMany(mappedBy="sourceDepot")
@@ -153,12 +160,10 @@ public class Depot extends AbstractEntity implements AccountBelonging {
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Depot> forks = new ArrayList<>();
     
-	@OneToMany(mappedBy="depot")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="depot", cascade=CascadeType.REMOVE)
 	private Collection<TeamAuthorization> authorizedTeams = new ArrayList<>();
 	
-	@OneToMany(mappedBy="depot")
-	@OnDelete(action=OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy="depot", cascade=CascadeType.REMOVE)
 	private Collection<UserAuthorization> authorizedUsers = new ArrayList<>();
 	
 	private transient Repository repository;
@@ -981,6 +986,22 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	public long getVersion() {
 		return version;
+	}
+
+	public long getNextPullRequestNumber() {
+		return nextPullRequestNumber;
+	}
+
+	public void setNextPullRequestNumber(long nextPullRequestNumber) {
+		this.nextPullRequestNumber = nextPullRequestNumber;
+	}
+
+	public long getNextPullRequestUpdateNumber() {
+		return nextPullRequestUpdateNumber;
+	}
+
+	public void setNextPullRequestUpdateNumber(long nextPullRequestUpdateNumber) {
+		this.nextPullRequestUpdateNumber = nextPullRequestUpdateNumber;
 	}
 
 	public boolean matches(@Nullable String searchTerm) {

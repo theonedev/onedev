@@ -73,7 +73,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.24</version>
+			<version>5.1.39</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -84,6 +84,13 @@
 			<groupId>com.pmease</groupId>
 			<artifactId>commons.jackson</artifactId>
 			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>sqljdbc4</artifactId>
+			<version>3.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/sqljdbc4.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.pmease</groupId>

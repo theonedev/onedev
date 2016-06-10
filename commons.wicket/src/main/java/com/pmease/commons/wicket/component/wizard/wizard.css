@@ -5,6 +5,6 @@
 .wizard>.body {
 	margin-bottom: 20px;
 }
-.wizard span.disabled>em {
-	font-style: normal;
+.wizard>.foot>* {
+	margin-right: 8px;
 }

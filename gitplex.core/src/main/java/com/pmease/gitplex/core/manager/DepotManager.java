@@ -55,5 +55,6 @@ public interface DepotManager extends EntityDao<Depot> {
 	Repository getRepository(Depot depot);
 	
 	Collection<Depot> getAccessibles(@Nullable Account account, @Nullable Account user);
-	
+
+	void test(Depot depot);
 }

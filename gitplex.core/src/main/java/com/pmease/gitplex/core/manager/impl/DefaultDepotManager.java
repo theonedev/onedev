@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -456,5 +457,22 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 					.collect(Collectors.toSet());
 		}
 	}
-
+	
+	@Transactional
+	public void test(Depot depot) {
+		getSession().lock(depot, LockMode.PESSIMISTIC_WRITE);
+		logger.info("locked");
+		getSession().refresh(depot);
+		logger.info("refreshed");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		logger.info("next request number: " + depot.getNextPullRequestNumber());
+		depot.setNextPullRequestNumber(depot.getNextPullRequestNumber()+1);
+		persist(depot);
+	}
+	
 }
