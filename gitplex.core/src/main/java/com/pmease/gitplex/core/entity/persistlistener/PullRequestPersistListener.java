@@ -111,9 +111,7 @@ public class PullRequestPersistListener implements PersistListener {
 		if (entity instanceof PullRequest) {
 			PullRequest request = (PullRequest) entity;
 			for (int i=0; i<propertyNames.length; i++) {
-				if (propertyNames[i].equals("idStr")) {
-					state[i] = id.toString();
-				} else if (propertyNames[i].equals("description")) {
+				if (propertyNames[i].equals("description")) {
 					String description = (String) state[i];
 					if (description != null) {
 						String html = markdownManager.parse(description);

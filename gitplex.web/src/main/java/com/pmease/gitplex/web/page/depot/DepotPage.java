@@ -37,7 +37,7 @@ import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
@@ -136,7 +136,7 @@ public abstract class DepotPage extends AccountPage {
 		tabs.add(new DepotTab(Model.of("Overview"), "fa fa-fw fa-list-alt", 0, DepotOverviewPage.class));
 		tabs.add(new DepotTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, DepotFilePage.class));
 		tabs.add(new DepotTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 
-				GitPlex.getInstance(AuxiliaryManager.class).getCommitCount(getDepot()), 
+				GitPlex.getInstance(CommitInfoManager.class).getCommitCount(getDepot()), 
 				DepotCommitsPage.class, CommitDetailPage.class));
 		tabs.add(new DepotTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
 				getDepot().getRefs(Constants.R_HEADS).size(), DepotBranchesPage.class));

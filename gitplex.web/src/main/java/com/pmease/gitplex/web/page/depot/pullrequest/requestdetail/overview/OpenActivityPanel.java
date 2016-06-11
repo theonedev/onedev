@@ -22,6 +22,7 @@ import com.pmease.commons.wicket.ajaxlistener.ConfirmLeaveListener;
 import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
@@ -121,7 +122,12 @@ class OpenActivityPanel extends AbstractActivityPanel {
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
 						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
-								requestModel.getObject().getAttachmentDirUUID());
+								requestModel.getObject().getUUID());
+					}
+
+					@Override
+					protected Depot getDepot() {
+						return requestModel.getObject().getTargetDepot();
 					}
 					
 				};

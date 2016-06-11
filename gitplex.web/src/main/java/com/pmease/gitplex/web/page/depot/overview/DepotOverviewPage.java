@@ -23,7 +23,7 @@ import com.pmease.commons.git.Blob;
 import com.pmease.commons.git.BlobIdent;
 import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.UrlManager;
 import com.pmease.gitplex.web.component.depotfile.filelist.FileListPanel;
 import com.pmease.gitplex.web.page.depot.DepotPage;
@@ -82,14 +82,14 @@ public class DepotOverviewPage extends DepotPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(GitPlex.getInstance(AuxiliaryManager.class).getCommitCount(getDepot()) != 0);
+				setVisible(GitPlex.getInstance(CommitInfoManager.class).getCommitCount(getDepot()) != 0);
 			}
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
-				add(new Label("count", auxiliaryManager.getCommitCount(getDepot()) + " commits"));
+				CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
+				add(new Label("count", commitInfoManager.getCommitCount(getDepot()) + " commits"));
 			}
 			
 		});

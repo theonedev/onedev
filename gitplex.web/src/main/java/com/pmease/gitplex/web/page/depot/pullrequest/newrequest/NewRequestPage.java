@@ -147,12 +147,13 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		
 		if (pullRequest == null) {
 			pullRequest = new PullRequest();
-			pullRequest.setAttachmentDirUUID(UUID.randomUUID().toString());
+			pullRequest.setUUID(UUID.randomUUID().toString());
 			pullRequest.setTarget(target);
 			pullRequest.setSource(source);
 			pullRequest.setSubmitter(currentUser);
 			
 			PullRequestUpdate update = new PullRequestUpdate();
+			update.setUUID(UUID.randomUUID().toString());
 			pullRequest.addUpdate(update);
 			update.setRequest(pullRequest);
 			update.setHeadCommitHash(source.getObjectName());
@@ -591,7 +592,12 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new DepotAttachmentSupport(getDepot(), getPullRequest().getAttachmentDirUUID());
+				return new DepotAttachmentSupport(getDepot(), getPullRequest().getUUID());
+			}
+
+			@Override
+			protected Depot getDepot() {
+				return NewRequestPage.this.getDepot();
 			}
 			
 		});

@@ -14,9 +14,14 @@ import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -27,8 +32,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jgit.lib.ObjectId;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -110,6 +117,8 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	private final WorkManager workManager;
 	
 	private final PullRequestActivityManager pullRequestActivityManager;
+	
+	private final Map<Long, AtomicLong> nextNumbers = Collections.synchronizedMap(new HashMap<>());
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, 
@@ -296,13 +305,13 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			Git sourceGit = sourceDepot.git();
 			String sourceRef = request.getSourceRef();
 			sourceGit.updateRef(sourceRef, integrated, preview.getRequestHead(), 
-					"Pull request #" + request.getId());
+					"Pull request #" + request.getNumber());
 			sourceDepot.cacheObjectId(request.getSourceRef(), integratedCommit);
 			onRefUpdate(sourceDepot, sourceRef, ObjectId.fromString(preview.getRequestHead()), integratedCommit);
 		}
 		
 		String targetRef = request.getTargetRef();
-		git.updateRef(targetRef, integrated, preview.getTargetHead(), "Pull request #" + request.getId());
+		git.updateRef(targetRef, integrated, preview.getTargetHead(), "Pull request #" + request.getNumber());
 		targetDepot.cacheObjectId(request.getTargetRef(), ObjectId.fromString(integrated));
 		onRefUpdate(targetDepot, targetRef, ObjectId.fromString(preview.getTargetHead()), integratedCommit);
 		
@@ -339,8 +348,10 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	@Transactional
 	@Override
 	public void open(PullRequest request, Object listenerData) {
+		AtomicLong nextNumber = Preconditions.checkNotNull(nextNumbers.get(request.getTargetDepot().getId()));
+		request.setNumber(nextNumber.getAndIncrement());
 		persist(request);
-
+		
 		PullRequestActivity activity = new PullRequestActivity();
 		activity.setDate(request.getSubmitDate());
 		activity.setAction(PullRequestActivity.Action.OPEN);
@@ -442,6 +453,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	public void onSourceBranchUpdate(PullRequest request, boolean notify) {
 		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			PullRequestUpdate update = new PullRequestUpdate();
+			update.setUUID(UUID.randomUUID().toString());
 			update.setRequest(request);
 			update.setDate(new Date());
 			update.setHeadCommitHash(request.getSource().getObjectName());
@@ -451,7 +463,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			closeIfMerged(request);
 
 			if (request.isOpen()) {
-				final Long requestId = request.getId();
+				Long requestId = request.getId();
 				afterCommit(new Runnable() {
 
 					@Override
@@ -547,9 +559,10 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			try {
 				if (!integrationPreviewCalculatingRequestIds.contains(requestId)) {
 					integrationPreviewCalculatingRequestIds.add(requestId);
-					logger.info("Calculating integration preview of pull request #{}...", requestId);
 					try {
 						PullRequest request = load(requestId);
+						logger.info("Calculating integration preview of pull request #{} in repository '{}'...", 
+								request.getNumber(), request.getTargetDepot());
 						IntegrationPreview preview = request.getLastIntegrationPreview();
 						if (request.isOpen() && (preview == null || preview.isObsolete(request))) {
 							String requestHead = request.getLatestUpdate().getHeadCommitHash();
@@ -589,7 +602,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 											String commitMessage = request.getTitle() + "\n\n";
 											if (request.getDescription() != null)
 												commitMessage += request.getDescription() + "\n\n";
-											commitMessage += "(squashed commit of pull request #" + request.getId() + ")\n";
+											commitMessage += "(squashed commit of pull request #" + request.getNumber() + ")\n";
 											integrated = tempGit.squash(requestHead, null, null, commitMessage);
 										} else {
 											FastForwardMode fastForwardMode;
@@ -597,7 +610,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 												fastForwardMode = FastForwardMode.NO_FF;
 											else 
 												fastForwardMode = FastForwardMode.FF;
-											String commitMessage = "Merge pull request #" + request.getId() 
+											String commitMessage = "Merge pull request #" + request.getNumber() 
 													+ "\n\n" + request.getTitle() + "\n";
 											integrated = tempGit.merge(requestHead, fastForwardMode, null, null, commitMessage);
 										}
@@ -624,13 +637,14 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 							for (PullRequestListener listener: pullRequestListeners)
 								listener.onIntegrationPreviewCalculated(request);
 						}
+						logger.info("Integration preview of pull request #{} in repository '{}' is calculated.", 
+								request.getNumber(), request.getTargetDepot());
 					} finally {
 						integrationPreviewCalculatingRequestIds.remove(requestId);
-						logger.info("Integration preview of pull request #{} is calculated.", requestId);
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Error calculating integration preview of pull request #" + requestId, e);
+				logger.error("Error calculating pull request integration preview", e);
 			} finally {
 				unitOfWork.end();
 			}
@@ -653,8 +667,17 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	}
 
+	@Sessional
 	@Override
 	public void systemStarted() {
+		Criteria criteria = getSession().createCriteria(PullRequest.class);
+		criteria.setProjection(Projections.projectionList()
+				.add(Projections.groupProperty("targetDepot.id"))
+				.add(Projections.max("number")));
+		for (Object row: criteria.list()) {
+			Object[] rowProps = (Object[]) row;
+			nextNumbers.put((Long) rowProps[0], new AtomicLong((Long)rowProps[1]+1));
+		}
 	}
 
 	@Override
@@ -668,6 +691,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	@Transactional
 	@Override
 	public void onDeleteDepot(Depot depot) {
+		nextNumbers.remove(depot.getId());
     	for (PullRequest request: depot.getOutgoingRequests()) {
     		if (!request.getTargetDepot().equals(depot) && request.isOpen())
         		discard(request, "Source repository is deleted.");
@@ -700,10 +724,10 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 					if (depot.getObjectId(request.getBaseCommitHash(), false) != null)
 						onSourceBranchUpdate(request, true);
 					else
-						logger.error("Unable to update pull request #{} due to unexpected source repository.", request.getId());
+						logger.error("Unable to update pull request #{} due to unexpected source repository.", request.getNumber());
 				}
 				
-				final Long repoId = depot.getId();
+				Long depotId = depot.getId();
 				afterCommit(new Runnable() {
 
 					@Override
@@ -712,14 +736,13 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 							@Override
 							public void run() {
-								DepotAndBranch depotAndBranch = new DepotAndBranch(repoId, branch);								
+								DepotAndBranch depotAndBranch = new DepotAndBranch(depotId, branch);								
 								Criterion criterion = Restrictions.and(ofOpen(), ofTarget(depotAndBranch));
 								for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) { 
 									if (request.getSourceDepot().getObjectId(request.getBaseCommitHash(), false) != null)
 										onTargetBranchUpdate(request);
 									else
-										logger.error("Unable to update pull request #{} due to unexpected target repository.", request.getId());
-									
+										logger.error("Unable to update pull request #{} due to unexpected target repository.", request.getNumber());
 								}
 							}
 							
@@ -805,7 +828,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 					else 
 						onSourceBranchUpdate(request, true);
 				} else {
-					logger.error("Unable to update pull request #{} due to unexpected source repository", request.getId());
+					logger.error("Unable to update pull request #{} due to unexpected source repository", request.getNumber());
 				}
 			}
 
@@ -824,7 +847,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 						else 
 							onTargetBranchUpdate(request);
 					} else {
-						logger.error("Unable to update pull request #{} due to unexpected target repository", request.getId());
+						logger.error("Unable to update pull request #{} due to unexpected target repository", request.getNumber());
 					}
 				}
 			}
@@ -850,6 +873,17 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	@Override
 	public void onSaveDepot(Depot depot) {
+		nextNumbers.put(depot.getId(), new AtomicLong(1));
+	}
+
+	@Sessional
+	@Override
+	public PullRequest find(Depot target, long number) {
+		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(Restrictions.eq("targetDepot", target));
+		criteria.add(Restrictions.eq("number", number));
+		
+		return find(criteria);
 	}
 
 }

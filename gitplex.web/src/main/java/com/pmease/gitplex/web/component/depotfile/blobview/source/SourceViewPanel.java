@@ -432,6 +432,11 @@ public class SourceViewPanel extends BlobViewPanel {
 						protected DepotAttachmentSupport getAttachmentSupport() {
 							return new DepotAttachmentSupport(context.getDepot(), attachmentDirUUID);
 						}
+
+						@Override
+						protected Depot getDepot() {
+							return context.getDepot();
+						}
 						
 					});
 					input.setRequired(true);
@@ -469,7 +474,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							super.onSubmit(target, form);
 							
 							CodeComment comment = new CodeComment();
-							comment.setAttachmentDirUUID(attachmentDirUUID);
+							comment.setUUID(attachmentDirUUID);
 							comment.setCommit(context.getCommit().name());
 							comment.setPath(context.getBlobIdent().path);
 							comment.setContent(input.getModelObject());

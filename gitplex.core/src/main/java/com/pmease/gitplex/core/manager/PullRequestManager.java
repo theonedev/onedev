@@ -23,6 +23,9 @@ public interface PullRequestManager extends EntityDao<PullRequest> {
    
     Collection<PullRequest> queryOpen(DepotAndBranch sourceOrTarget);
     
+    @Nullable
+    PullRequest find(Depot target, long number);
+    
     boolean canIntegrate(PullRequest request);
     
     /**

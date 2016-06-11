@@ -43,6 +43,6 @@
 #request-list td.request .title a {
 	color: #444;
 }
-#request-list td.request .id, #request-list td.request .auxiliary {
+#request-list td.request .number, #request-list td.request .auxiliary {
 	color: #888;
 }

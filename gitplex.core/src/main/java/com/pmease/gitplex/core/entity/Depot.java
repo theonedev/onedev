@@ -125,7 +125,7 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	private String description;
 	
 	private boolean publicRead;
-	
+
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
 	 * gate keepers and integration policies upon depot renaming/deletion

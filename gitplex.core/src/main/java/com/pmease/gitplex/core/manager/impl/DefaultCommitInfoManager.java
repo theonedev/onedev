@@ -53,7 +53,7 @@ import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.RefListener;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.SequentialWorkManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -71,16 +71,16 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener, 
+public class DefaultCommitInfoManager implements CommitInfoManager, DepotListener, 
 		RefListener, LifecycleListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultAuxiliaryManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final String AUXILIARY_DIR = "auxiliary";
+	private static final String DB_DIR = "commits";
 	
 	private static final String DEFAULT_STORE = "default";
 	
-	private static final String COMMITS_STORE = "commmits";
+	private static final String COMMITS_STORE = "commits";
 	
 	private static final String CONTRIBUTIONS_STORE = "contributions";
 	
@@ -115,7 +115,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	private final Map<Long, List<NameAndEmail>> contributorsCache = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultAuxiliaryManager(DepotManager depotManager, StorageManager storageManager, 
+	public DefaultCommitInfoManager(DepotManager depotManager, StorageManager storageManager, 
 			WorkManager workManager, SequentialWorkManager sequentialWorkManager, 
 			UnitOfWork unitOfWork, ExecutorService executorService) {
 		this.depotManager = depotManager;
@@ -127,11 +127,11 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 	}
 	
 	private String getSequentialExecutorKey(Depot depot) {
-		return "repository-" + depot.getId() + "-checkAuxiliary";
+		return "repository-" + depot.getId() + "-checkCommits";
 	}
 	
 	private void doCollect(Depot depot, ObjectId commit) {
-		logger.info("Collecting auxiliary information (repository: {}, until commit: {})", 
+		logger.info("Caching commits information (repository: {}, until commit: {})", 
 				depot.getFQN(), commit.name());
 		Environment env = getEnv(depot);
 		final Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -351,7 +351,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 			}
 		});
 		
-		logger.info("Auxiliary information collected (repository: {}, until commit: {})", depot.getFQN(), commit.name());		
+		logger.info("Commit information cached (repository: {}, until commit: {})", depot.getFQN(), commit.name());		
 	}
 	
 	@Override
@@ -379,7 +379,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 
 					}).get();
 				} catch (InterruptedException | ExecutionException e) {
-					logger.error("Error collecting auxiliary information", e);
+					logger.error("Error caching commit information", e);
 				}
 			}
 
@@ -393,17 +393,17 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 			config.setLogCacheShared(false);
 			config.setMemoryUsage(1024*1024*64);
 			config.setLogFileSize(64*1024);
-			env = Environments.newInstance(getAuxiliaryDir(depot), config);
+			env = Environments.newInstance(getCacheDir(depot), config);
 			envs.put(depot.getId(), env);
 		}
 		return env;
 	}
 	
-	private File getAuxiliaryDir(Depot depot) {
-		File auxiliaryDir = new File(storageManager.getCacheDir(depot), AUXILIARY_DIR);
-		if (!auxiliaryDir.exists()) 
-			FileUtils.createDir(auxiliaryDir);
-		return auxiliaryDir;
+	private File getCacheDir(Depot depot) {
+		File cacheDir = new File(storageManager.getCacheDir(depot), DB_DIR);
+		if (!cacheDir.exists()) 
+			FileUtils.createDir(cacheDir);
+		return cacheDir;
 	}
 	
 	private Store getStore(final Environment env, final String storeName) {
@@ -614,7 +614,7 @@ public class DefaultAuxiliaryManager implements AuxiliaryManager, DepotListener,
 		if (env != null)
 			env.close();
 		filesCache.remove(depot.getId());
-		FileUtils.deleteDir(getAuxiliaryDir(depot));
+		FileUtils.deleteDir(getCacheDir(depot));
 	}
 	
 	@Override

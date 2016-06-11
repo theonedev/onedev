@@ -32,8 +32,8 @@ gitplex.comment = function(inputId, atWhoLimit, callback) {
             	callback("requestQuery", query);
         	}
         },
-        displayTpl: "<li><span class='text-muted'>#${requestId}</span> - ${requestTitle}</li>",
-        insertTpl: '#${requestId}', 
+        displayTpl: "<li><span class='text-muted'>#${requestNumber}</span> - ${requestTitle}</li>",
+        insertTpl: '#${requestNumber}', 
         limit: atWhoLimit
     });		
 }

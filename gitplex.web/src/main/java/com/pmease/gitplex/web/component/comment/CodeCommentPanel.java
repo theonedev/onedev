@@ -33,6 +33,7 @@ import com.pmease.commons.wicket.component.markdownviewer.MarkdownViewer;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.CodeCommentReply;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.component.CompareContext;
 import com.pmease.gitplex.core.entity.component.DepotAndRevision;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
@@ -149,7 +150,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getAttachmentDirUUID());
+						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
+					}
+
+					@Override
+					protected Depot getDepot() {
+						return getComment().getDepot();
 					}
 					
 				};
@@ -342,7 +348,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getAttachmentDirUUID());
+						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
+					}
+
+					@Override
+					protected Depot getDepot() {
+						return getComment().getDepot();
 					}
 					
 				};
@@ -455,7 +466,12 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getAttachmentDirUUID());
+						return new DepotAttachmentSupport(getComment().getDepot(), getComment().getUUID());
+					}
+
+					@Override
+					protected Depot getDepot() {
+						return getComment().getDepot();
 					}
 					
 				};

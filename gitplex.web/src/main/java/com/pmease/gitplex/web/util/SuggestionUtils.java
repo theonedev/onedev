@@ -21,7 +21,7 @@ import com.pmease.commons.util.match.PatternApplied;
 import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 
 public class SuggestionUtils {
 	
@@ -89,8 +89,8 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestPath(Depot depot, String matchWith, int count) {
-		AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
-		return suggestPath(auxiliaryManager.getFiles(depot), matchWith, count);
+		CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
+		return suggestPath(commitInfoManager.getFiles(depot), matchWith, count);
 	}
 	
 	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {

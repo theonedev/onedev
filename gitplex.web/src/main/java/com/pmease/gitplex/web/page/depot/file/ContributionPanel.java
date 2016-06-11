@@ -22,7 +22,7 @@ import com.pmease.commons.git.NameAndEmail;
 import com.pmease.commons.wicket.component.DropdownLink;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.web.component.avatar.Avatar;
 import com.pmease.gitplex.web.component.avatar.AvatarLink;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
@@ -73,7 +73,7 @@ class ContributionPanel extends Panel {
 
 					@Override
 					protected List<NameAndEmail> load() {
-						Map<NameAndEmail, Long> contributorsMap = GitPlex.getInstance(AuxiliaryManager.class)
+						Map<NameAndEmail, Long> contributorsMap = GitPlex.getInstance(CommitInfoManager.class)
 								.getContributions(depotModel.getObject(), blobIdent.path);
 						List<NameAndEmail> contributors = new ArrayList<>(contributorsMap.keySet());
 						contributors.sort((element1, element2)

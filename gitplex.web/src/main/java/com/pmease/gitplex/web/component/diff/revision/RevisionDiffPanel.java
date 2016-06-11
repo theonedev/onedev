@@ -782,6 +782,11 @@ public class RevisionDiffPanel extends Panel {
 								protected DepotAttachmentSupport getAttachmentSupport() {
 									return new DepotAttachmentSupport(depotModel.getObject(), attachmentDirUUID);
 								}
+
+								@Override
+								protected Depot getDepot() {
+									return depotModel.getObject();
+								}
 								
 							});
 							input.setRequired(true);
@@ -819,7 +824,7 @@ public class RevisionDiffPanel extends Panel {
 									super.onSubmit(target, form);
 									
 									CodeComment comment = new CodeComment();
-									comment.setAttachmentDirUUID(attachmentDirUUID);
+									comment.setUUID(attachmentDirUUID);
 									comment.setDepot(depotModel.getObject());
 									comment.setUser(SecurityUtils.getAccount());
 									comment.setCommit(mark.getCommit());

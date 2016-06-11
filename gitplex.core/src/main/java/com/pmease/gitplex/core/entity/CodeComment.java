@@ -71,7 +71,7 @@ public class CodeComment extends AbstractEntity {
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
 	@Column(nullable=false)
-	private String attachmentDirUUID;
+	private String uuid;
 	
 	public Depot getDepot() {
 		return depot;
@@ -154,12 +154,12 @@ public class CodeComment extends AbstractEntity {
 		this.replies = replies;
 	}
 
-	public String getAttachmentDirUUID() {
-		return attachmentDirUUID;
+	public String getUUID() {
+		return uuid;
 	}
 
-	public void setAttachmentDirUUID(String attachmentDirUUID) {
-		this.attachmentDirUUID = attachmentDirUUID;
+	public void setUUID(String uuid) {
+		this.uuid = uuid;
 	}
 
 }

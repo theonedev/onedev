@@ -29,6 +29,7 @@ import com.pmease.commons.wicket.behavior.markdown.AttachmentSupport;
 import com.pmease.commons.wicket.behavior.markdown.MarkdownBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Account;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.web.avatar.AvatarManager;
 
@@ -83,9 +84,9 @@ public abstract class CommentInput extends TextArea<String> {
 					List<Map<String, String>> requestList = new ArrayList<>();
 					for (PullRequest request: queryRequests(requestQuery, ATWHO_LIMIT)) {
 						Map<String, String> requestMap = new HashMap<>();
-						requestMap.put("requestId", request.getIdStr());
+						requestMap.put("requestNumber", request.getNumberStr());
 						requestMap.put("requestTitle", request.getTitle());
-						requestMap.put("searchKey", request.getIdStr() + " " + request.getNoSpaceTitle());
+						requestMap.put("searchKey", request.getNumberStr() + " " + request.getNoSpaceTitle());
 						requestList.add(requestMap);
 					}
 					
@@ -136,16 +137,19 @@ public abstract class CommentInput extends TextArea<String> {
 
 	protected List<PullRequest> queryRequests(String query, int count) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(Restrictions.eq("targetDepot", getDepot()));
 		if (StringUtils.isNotBlank(query)) {
 			query = StringUtils.deleteWhitespace(query);
 			criteria.add(Restrictions.or(
 					Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
-					Restrictions.ilike("idStr", query, MatchMode.START)));
+					Restrictions.ilike("numberStr", query, MatchMode.START)));
 		}
-		criteria.addOrder(Order.desc("id"));
+		criteria.addOrder(Order.desc("number"));
 		return GitPlex.getInstance(Dao.class).query(criteria, 0, count);
 	}
 	
 	protected abstract AttachmentSupport getAttachmentSupport();
+	
+	protected abstract Depot getDepot();
 	
 }

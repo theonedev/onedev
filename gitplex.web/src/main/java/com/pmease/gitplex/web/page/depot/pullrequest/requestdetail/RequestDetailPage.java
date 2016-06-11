@@ -61,6 +61,7 @@ import com.pmease.commons.wicket.component.tabbable.Tab;
 import com.pmease.commons.wicket.component.tabbable.Tabbable;
 import com.pmease.commons.wicket.websocket.WebSocketRenderBehavior.PageId;
 import com.pmease.gitplex.core.GitPlex;
+import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
 import com.pmease.gitplex.core.entity.PullRequest.IntegrationStrategy;
 import com.pmease.gitplex.core.entity.PullRequest.Status;
@@ -68,6 +69,7 @@ import com.pmease.gitplex.core.entity.PullRequestUpdate;
 import com.pmease.gitplex.core.entity.Verification;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
 import com.pmease.gitplex.core.entity.component.IntegrationPreview;
+import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.security.SecurityUtils;
 import com.pmease.gitplex.web.component.AccountLink;
 import com.pmease.gitplex.web.component.BranchLink;
@@ -105,7 +107,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 			@Override
 			protected PullRequest load() {
-				return GitPlex.getInstance(Dao.class).load(PullRequest.class, params.get("request").toLong());
+				return Preconditions.checkNotNull(GitPlex.getInstance(PullRequestManager.class).find(getDepot(), params.get("request").toLong()));
 			}
 			
 		};
@@ -139,7 +141,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 			
 		});
 		
-		requestTitle.add(new Label("id", "#" + request.getId()) {
+		requestTitle.add(new Label("number", "#" + request.getNumber()) {
 
 			@Override
 			protected void onConfigure() {
@@ -642,7 +644,12 @@ public abstract class RequestDetailPage extends PullRequestPage {
 				@Override
 				protected AttachmentSupport getAttachmentSupport() {
 					return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
-							requestModel.getObject().getAttachmentDirUUID());
+							requestModel.getObject().getUUID());
+				}
+
+				@Override
+				protected Depot getDepot() {
+					return requestModel.getObject().getTargetDepot();
 				}
 				
 			});
@@ -662,7 +669,12 @@ public abstract class RequestDetailPage extends PullRequestPage {
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
 						return new DepotAttachmentSupport(requestModel.getObject().getTargetDepot(), 
-								requestModel.getObject().getAttachmentDirUUID());
+								requestModel.getObject().getUUID());
+					}
+
+					@Override
+					protected Depot getDepot() {
+						return requestModel.getObject().getTargetDepot();
 					}
 					
 				});
@@ -902,7 +914,7 @@ public abstract class RequestDetailPage extends PullRequestPage {
 
 	public static PageParameters paramsOf(PullRequest request) {
 		PageParameters params = DepotPage.paramsOf(request.getTarget().getDepot());
-		params.set("request", request.getId());
+		params.set("request", request.getNumber());
 		return params;
 	}
 

@@ -17,9 +17,11 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
@@ -33,6 +35,7 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.manager.StorageManager;
 
 @Entity
+@Table(indexes={@Index(columnList="uuid"), @Index(columnList="date")})
 public class PullRequestUpdate extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -49,6 +52,9 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Review> reviews = new ArrayList<Review>();
+	
+	@Column(nullable=false)
+	private String uuid;
 	
 	private transient List<Commit> commits;
 
@@ -143,6 +149,14 @@ public class PullRequestUpdate extends AbstractEntity {
 			return request.getBaseCommit();
 	}
 	
+	public String getUUID() {
+		return uuid;
+	}
+
+	public void setUUID(String uuid) {
+		this.uuid = uuid;
+	}
+
 	private CachedInfo getCachedInfo() {
 		if (cachedInfo == null) {
 			Callable<CachedInfo> callable = new Callable<CachedInfo>() {

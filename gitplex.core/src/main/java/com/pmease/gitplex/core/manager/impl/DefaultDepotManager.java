@@ -48,7 +48,7 @@ import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.StorageManager;
@@ -66,7 +66,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     
     private final AccountManager userManager;
     
-    private final AuxiliaryManager auxiliaryManager;
+    private final CommitInfoManager commitInfoManager;
    
     private final PullRequestManager pullRequestManager;
     
@@ -85,14 +85,14 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     @Inject
     public DefaultDepotManager(Dao dao, AccountManager userManager, 
     		TeamAuthorizationManager teamAuthorizationManager,
-    		StorageManager storageManager, AuxiliaryManager auxiliaryManager, 
+    		StorageManager storageManager, CommitInfoManager commitInfoManager, 
     		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
     	super(dao);
     	
         this.storageManager = storageManager;
         this.userManager = userManager;
         this.teamAuthorizationManager = teamAuthorizationManager;
-        this.auxiliaryManager = auxiliaryManager;
+        this.commitInfoManager = commitInfoManager;
         this.pullRequestManager = pullRequestManager;
         this.listenersProvider = listenersProvider;
         
@@ -185,7 +185,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 				}
 				if (isNew) {
 		    		checkSanity(depot);
-					auxiliaryManager.collect(depot);
+					commitInfoManager.collect(depot);
 				}
 			}
         	
@@ -351,7 +351,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	public void systemStarted() {
 		for (Depot depot: all()) {
 			checkSanity(depot);
-	        auxiliaryManager.collect(depot);
+	        commitInfoManager.collect(depot);
 		}
 		
 		pullRequestManager.checkSanity();

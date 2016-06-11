@@ -281,7 +281,7 @@ public class RequestListPage extends PullRequestPage {
 					String componentId, final IModel<PullRequest> rowModel) {
 				PullRequest request = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "requestFrag", RequestListPage.this);
-				fragment.add(new Label("id", "#" + request.getId()));
+				fragment.add(new Label("number", "#" + request.getNumber()));
 				fragment.add(new RequestLink("title", rowModel));
 				fragment.add(new RequestStatusPanel("status", rowModel, false));
 				fragment.add(new AccountLink("submitter", rowModel.getObject().getSubmitter()));

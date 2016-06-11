@@ -21,7 +21,7 @@ import com.pmease.commons.util.match.WildcardUtils;
 import com.pmease.commons.wicket.behavior.inputassist.ANTLRAssistBehavior;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.web.Constants;
 import com.pmease.gitplex.web.util.SuggestionUtils;
 
@@ -73,8 +73,8 @@ public class QueryAssistBehavior extends ANTLRAssistBehavior {
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
 							Map<String, Range> suggestedInputs = new LinkedHashMap<>();
-							AuxiliaryManager auxiliaryManager = GitPlex.getInstance(AuxiliaryManager.class);
-							List<NameAndEmail> contributors = auxiliaryManager.getContributors(depot);
+							CommitInfoManager commitInfoManager = GitPlex.getInstance(CommitInfoManager.class);
+							List<NameAndEmail> contributors = commitInfoManager.getContributors(depot);
 							for (NameAndEmail contributor: contributors) {
 								String content;
 								if (StringUtils.isNotBlank(contributor.getEmailAddress()))

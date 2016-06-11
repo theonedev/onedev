@@ -44,8 +44,8 @@ import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
 import com.pmease.gitplex.core.entity.PullRequest;
-import com.pmease.gitplex.core.manager.AuxiliaryManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.web.component.avatar.ContributorAvatars;
 import com.pmease.gitplex.web.component.contributorpanel.ContributorPanel;
 import com.pmease.gitplex.web.component.createbranch.CreateBranchLink;
@@ -157,7 +157,7 @@ public class CommitDetailPage extends DepotPage implements MarkSupport {
 
 					@Override
 					protected List<Ref> load() {
-						Set<ObjectId> descendants = GitPlex.getInstance(AuxiliaryManager.class)
+						Set<ObjectId> descendants = GitPlex.getInstance(CommitInfoManager.class)
 								.getDescendants(getDepot(), getCommit().getId());
 						descendants.add(getCommit().getId());
 						

@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -22,8 +21,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +39,6 @@ import com.pmease.commons.git.GitUtils;
 import com.pmease.commons.hibernate.AbstractEntity;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.jackson.ExternalView;
-import com.pmease.commons.util.LockUtils;
 import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.component.CloseInfo;
 import com.pmease.gitplex.core.entity.component.DepotAndBranch;
@@ -49,7 +47,6 @@ import com.pmease.gitplex.core.gatekeeper.checkresult.Blocking;
 import com.pmease.gitplex.core.gatekeeper.checkresult.CheckResult;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Failed;
 import com.pmease.gitplex.core.gatekeeper.checkresult.Pending;
-import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.ReviewManager;
 import com.pmease.gitplex.core.security.ObjectPermission;
@@ -61,7 +58,8 @@ import com.pmease.gitplex.core.security.ObjectPermission;
  * which can be updated from background thread.
  */
 @DynamicUpdate 
-@Table(indexes={@Index(columnList="title"), @Index(columnList="idStr"), @Index(columnList="noSpaceTitle")})
+@Table(indexes={@Index(columnList="title"), @Index(columnList="uuid"), @Index(columnList="numberStr"), @Index(columnList="noSpaceTitle")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetdepot_id", "number"})})
 public class PullRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -180,9 +178,9 @@ public class PullRequest extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Account assignee;
 
-	// used for id search in markdown editor
+	// used for number search in markdown editor
 	@Column(nullable=false)
-	private String idStr;
+	private String numberStr;
 	
 	// used for title search in markdown editor
 	@Column(nullable=false)
@@ -210,7 +208,9 @@ public class PullRequest extends AbstractEntity {
 	private IntegrationStrategy integrationStrategy;
 	
 	@Column(nullable=false)
-	private String attachmentDirUUID;
+	private String uuid;
+	
+	private long number;
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
@@ -627,13 +627,13 @@ public class PullRequest extends AbstractEntity {
 	@JsonView(ExternalView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
-		return Depot.REFS_GITPLEX + "pulls/" + getId() + "/base";
+		return Depot.REFS_GITPLEX + "pulls/" + getNumber() + "/base";
 	}
 
 	@JsonView(ExternalView.class)
 	public String getIntegrateRef() {
 		Preconditions.checkNotNull(getId());
-		return Depot.REFS_GITPLEX + "pulls/" + getId() + "/integrate";
+		return Depot.REFS_GITPLEX + "pulls/" + getNumber() + "/integrate";
 	}
 
 	/**
@@ -644,12 +644,6 @@ public class PullRequest extends AbstractEntity {
 		git.deleteRef(getBaseRef(), null, null);
 		git.deleteRef(getIntegrateRef(), null, null);
 	}
-	
-    public <T> T lockAndCall(Callable<T> callable) {
-		Preconditions.checkNotNull(getId());
-		
-    	return LockUtils.call("pull request: " + getId(), callable);
-    }
 	
 	/**
 	 * Invite specified number of users in candidates to review this request.
@@ -900,18 +894,8 @@ public class PullRequest extends AbstractEntity {
 		return null;
 	}
 	
-	public String getUrl() {
-		return GitPlex.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() 
-				+ "/" + getTargetDepot().getFQN() + "/pull_requests/" + getId() + "/overview";
-	}
-
-	@PrePersist
-	public void prePersist() {
-		idStr = getId().toString();
-	}
-
-	public String getIdStr() {
-		return idStr;
+	public String getNumberStr() {
+		return numberStr;
 	}
 
 	public String getNoSpaceTitle() {
@@ -922,12 +906,21 @@ public class PullRequest extends AbstractEntity {
 		return version;
 	}
 
-	public String getAttachmentDirUUID() {
-		return attachmentDirUUID;
+	public String getUUID() {
+		return uuid;
 	}
 
-	public void setAttachmentDirUUID(String attachmentDirUUID) {
-		this.attachmentDirUUID = attachmentDirUUID;
+	public void setUUID(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public long getNumber() {
+		return number;
+	}
+
+	public void setNumber(long number) {
+		this.number = number;
+		numberStr = String.valueOf(number);
 	}
 
 }
