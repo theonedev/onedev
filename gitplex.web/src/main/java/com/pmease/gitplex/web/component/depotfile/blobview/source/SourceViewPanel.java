@@ -424,13 +424,13 @@ public class SourceViewPanel extends BlobViewPanel {
 					
 					Form<?> form = new Form<Void>("form");
 					
-					String attachmentDirUUID = UUID.randomUUID().toString();
+					String uuid = UUID.randomUUID().toString();
 					CommentInput input;
 					form.add(input = new CommentInput("input", Model.of("")) {
 
 						@Override
 						protected DepotAttachmentSupport getAttachmentSupport() {
-							return new DepotAttachmentSupport(context.getDepot(), attachmentDirUUID);
+							return new DepotAttachmentSupport(context.getDepot(), uuid);
 						}
 
 						@Override
@@ -474,7 +474,7 @@ public class SourceViewPanel extends BlobViewPanel {
 							super.onSubmit(target, form);
 							
 							CodeComment comment = new CodeComment();
-							comment.setUUID(attachmentDirUUID);
+							comment.setUUID(uuid);
 							comment.setCommit(context.getCommit().name());
 							comment.setPath(context.getBlobIdent().path);
 							comment.setContent(input.getModelObject());

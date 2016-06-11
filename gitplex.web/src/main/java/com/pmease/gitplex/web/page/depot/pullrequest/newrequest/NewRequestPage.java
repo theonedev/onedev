@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -147,13 +146,11 @@ public class NewRequestPage extends PullRequestPage implements MarkSupport {
 		
 		if (pullRequest == null) {
 			pullRequest = new PullRequest();
-			pullRequest.setUUID(UUID.randomUUID().toString());
 			pullRequest.setTarget(target);
 			pullRequest.setSource(source);
 			pullRequest.setSubmitter(currentUser);
 			
 			PullRequestUpdate update = new PullRequestUpdate();
-			update.setUUID(UUID.randomUUID().toString());
 			pullRequest.addUpdate(update);
 			update.setRequest(pullRequest);
 			update.setHeadCommitHash(source.getObjectName());

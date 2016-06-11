@@ -774,13 +774,13 @@ public class RevisionDiffPanel extends Panel {
 							
 							Form<?> form = new Form<Void>("form");
 							
-							String attachmentDirUUID = UUID.randomUUID().toString();
+							String uuid = UUID.randomUUID().toString();
 							CommentInput input;
 							form.add(input = new CommentInput("input", Model.of("")) {
 
 								@Override
 								protected DepotAttachmentSupport getAttachmentSupport() {
-									return new DepotAttachmentSupport(depotModel.getObject(), attachmentDirUUID);
+									return new DepotAttachmentSupport(depotModel.getObject(), uuid);
 								}
 
 								@Override
@@ -824,7 +824,7 @@ public class RevisionDiffPanel extends Panel {
 									super.onSubmit(target, form);
 									
 									CodeComment comment = new CodeComment();
-									comment.setUUID(attachmentDirUUID);
+									comment.setUUID(uuid);
 									comment.setDepot(depotModel.getObject());
 									comment.setUser(SecurityUtils.getAccount());
 									comment.setCommit(mark.getCommit());

@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -126,6 +127,9 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	
 	private boolean publicRead;
 
+	@Column(nullable=false)
+	private String uuid = UUID.randomUUID().toString();
+	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
 	 * gate keepers and integration policies upon depot renaming/deletion
@@ -214,6 +218,14 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	public void setPublicRead(boolean publicRead) {
 		this.publicRead = publicRead;
+	}
+
+	public String getUUID() {
+		return uuid;
+	}
+
+	public void setUUID(String uuid) {
+		this.uuid = uuid;
 	}
 
 	@NotNull

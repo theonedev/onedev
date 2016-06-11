@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import javax.persistence.CascadeType;
@@ -48,13 +49,13 @@ public class PullRequestUpdate extends AbstractEntity {
 	private String headCommitHash;
 
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 	
 	@OneToMany(mappedBy="update", cascade=CascadeType.REMOVE)
 	private Collection<Review> reviews = new ArrayList<Review>();
 	
 	@Column(nullable=false)
-	private String uuid;
+	private String uuid = UUID.randomUUID().toString();
 	
 	private transient List<Commit> commits;
 

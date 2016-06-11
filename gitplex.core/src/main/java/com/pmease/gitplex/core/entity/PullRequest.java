@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -208,7 +209,7 @@ public class PullRequest extends AbstractEntity {
 	private IntegrationStrategy integrationStrategy;
 	
 	@Column(nullable=false)
-	private String uuid;
+	private String uuid = UUID.randomUUID().toString();
 	
 	private long number;
 

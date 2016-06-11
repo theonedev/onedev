@@ -3,6 +3,7 @@ package com.pmease.gitplex.core.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -71,7 +72,7 @@ public class CodeComment extends AbstractEntity {
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
 	@Column(nullable=false)
-	private String uuid;
+	private String uuid = UUID.randomUUID().toString();
 	
 	public Depot getDepot() {
 		return depot;

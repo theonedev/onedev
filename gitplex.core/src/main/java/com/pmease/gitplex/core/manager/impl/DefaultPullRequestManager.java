@@ -14,13 +14,11 @@ import static com.pmease.gitplex.core.entity.PullRequest.Status.PENDING_UPDATE;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
@@ -32,10 +30,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jgit.lib.ObjectId;
-import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -118,7 +114,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	
 	private final PullRequestActivityManager pullRequestActivityManager;
 	
-	private final Map<Long, AtomicLong> nextNumbers = Collections.synchronizedMap(new HashMap<>());
+	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 
 	@Inject
 	public DefaultPullRequestManager(Dao dao, 
@@ -345,11 +341,41 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 			listener.onIntegrateRequest(request, user, comment);
 	}
 	
+	private long getNextNumber(Depot depot) {
+		AtomicLong nextNumber;
+		synchronized (nextNumbers) {
+			nextNumber = nextNumbers.get(depot.getUUID());
+		}
+		if (nextNumber == null) {
+			long maxNumber;
+			Query query = getSession().createQuery("select max(number) from PullRequest where targetDepot=:depot");
+			query.setParameter("depot", depot);
+			Object result = query.uniqueResult();
+			if (result != null) {
+				maxNumber = (Long)result;
+			} else {
+				maxNumber = 0;
+			}
+			
+			/*
+			 * do not put the whole method in synchronized block to avoid possible deadlocks
+			 * if there are limited connections. 
+			 */
+			synchronized (nextNumbers) {
+				nextNumber = nextNumbers.get(depot.getUUID());
+				if (nextNumber == null) {
+					nextNumber = new AtomicLong(maxNumber+1);
+					nextNumbers.put(depot.getUUID(), nextNumber);
+				}
+			}
+		} 
+		return nextNumber.getAndIncrement();
+	}
+	
 	@Transactional
 	@Override
 	public void open(PullRequest request, Object listenerData) {
-		AtomicLong nextNumber = Preconditions.checkNotNull(nextNumbers.get(request.getTargetDepot().getId()));
-		request.setNumber(nextNumber.getAndIncrement());
+		request.setNumber(getNextNumber(request.getTargetDepot()));
 		persist(request);
 		
 		PullRequestActivity activity = new PullRequestActivity();
@@ -453,9 +479,7 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	public void onSourceBranchUpdate(PullRequest request, boolean notify) {
 		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			PullRequestUpdate update = new PullRequestUpdate();
-			update.setUUID(UUID.randomUUID().toString());
 			update.setRequest(request);
-			update.setDate(new Date());
 			update.setHeadCommitHash(request.getSource().getObjectName());
 			
 			request.addUpdate(update);
@@ -667,17 +691,8 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	}
 
-	@Sessional
 	@Override
 	public void systemStarted() {
-		Criteria criteria = getSession().createCriteria(PullRequest.class);
-		criteria.setProjection(Projections.projectionList()
-				.add(Projections.groupProperty("targetDepot.id"))
-				.add(Projections.max("number")));
-		for (Object row: criteria.list()) {
-			Object[] rowProps = (Object[]) row;
-			nextNumbers.put((Long) rowProps[0], new AtomicLong((Long)rowProps[1]+1));
-		}
 	}
 
 	@Override
@@ -691,7 +706,6 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 	@Transactional
 	@Override
 	public void onDeleteDepot(Depot depot) {
-		nextNumbers.remove(depot.getId());
     	for (PullRequest request: depot.getOutgoingRequests()) {
     		if (!request.getTargetDepot().equals(depot) && request.isOpen())
         		discard(request, "Source repository is deleted.");
@@ -873,7 +887,6 @@ public class DefaultPullRequestManager extends AbstractEntityDao<PullRequest> im
 
 	@Override
 	public void onSaveDepot(Depot depot) {
-		nextNumbers.put(depot.getId(), new AtomicLong(1));
 	}
 
 	@Sessional
