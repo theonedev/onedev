@@ -56,5 +56,4 @@ public interface DepotManager extends EntityDao<Depot> {
 	
 	Collection<Depot> getAccessibles(@Nullable Account account, @Nullable Account user);
 
-	void test(Depot depot);
 }

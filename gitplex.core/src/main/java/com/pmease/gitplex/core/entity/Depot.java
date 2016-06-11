@@ -60,7 +60,6 @@ import org.eclipse.jgit.util.io.NullOutputStream;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Objects;
@@ -133,12 +132,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 	 */
 	@Version
 	private long version;
-	
-	@OptimisticLock(excluded=true)	
-	private long nextPullRequestNumber = 1;
-	
-	@OptimisticLock(excluded=true)	
-	private long nextPullRequestUpdateNumber = 1;
 	
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -986,22 +979,6 @@ public class Depot extends AbstractEntity implements AccountBelonging {
 
 	public long getVersion() {
 		return version;
-	}
-
-	public long getNextPullRequestNumber() {
-		return nextPullRequestNumber;
-	}
-
-	public void setNextPullRequestNumber(long nextPullRequestNumber) {
-		this.nextPullRequestNumber = nextPullRequestNumber;
-	}
-
-	public long getNextPullRequestUpdateNumber() {
-		return nextPullRequestUpdateNumber;
-	}
-
-	public void setNextPullRequestUpdateNumber(long nextPullRequestUpdateNumber) {
-		this.nextPullRequestUpdateNumber = nextPullRequestUpdateNumber;
 	}
 
 	public boolean matches(@Nullable String searchTerm) {
