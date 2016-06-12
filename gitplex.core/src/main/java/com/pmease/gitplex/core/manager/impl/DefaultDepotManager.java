@@ -50,6 +50,7 @@ import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
+import com.pmease.gitplex.core.manager.PullRequestInfoManager;
 import com.pmease.gitplex.core.manager.PullRequestManager;
 import com.pmease.gitplex.core.manager.StorageManager;
 import com.pmease.gitplex.core.manager.TeamAuthorizationManager;
@@ -67,6 +68,8 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     private final AccountManager userManager;
     
     private final CommitInfoManager commitInfoManager;
+    
+    private final PullRequestInfoManager pullRequestInfoManager;
    
     private final PullRequestManager pullRequestManager;
     
@@ -84,13 +87,14 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	
     @Inject
     public DefaultDepotManager(Dao dao, AccountManager userManager, 
-    		TeamAuthorizationManager teamAuthorizationManager,
+    		TeamAuthorizationManager teamAuthorizationManager, PullRequestInfoManager pullRequestInfoManager,
     		StorageManager storageManager, CommitInfoManager commitInfoManager, 
     		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
     	super(dao);
     	
         this.storageManager = storageManager;
         this.userManager = userManager;
+        this.pullRequestInfoManager = pullRequestInfoManager;
         this.teamAuthorizationManager = teamAuthorizationManager;
         this.commitInfoManager = commitInfoManager;
         this.pullRequestManager = pullRequestManager;
@@ -352,6 +356,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 		for (Depot depot: all()) {
 			checkSanity(depot);
 	        commitInfoManager.collect(depot);
+	        pullRequestInfoManager.collect(depot);
 		}
 		
 		pullRequestManager.checkSanity();

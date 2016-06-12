@@ -11,10 +11,12 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
@@ -32,6 +34,8 @@ import com.pmease.gitplex.core.entity.component.Mark;
  * which can be updated from background thread.
  */
 @Entity
+@Table(indexes={@Index(columnList="uuid"), @Index(columnList="commit"), 
+		@Index(columnList="path"), @Index(columnList="compareCommit")})
 @DynamicUpdate 
 public class CodeComment extends AbstractEntity {
 	
@@ -70,6 +74,9 @@ public class CodeComment extends AbstractEntity {
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
+	
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<CodeCommentRelation> requestRelations = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -153,6 +160,14 @@ public class CodeComment extends AbstractEntity {
 
 	public void setReplies(Collection<CodeCommentReply> replies) {
 		this.replies = replies;
+	}
+
+	public Collection<CodeCommentRelation> getRequestRelations() {
+		return requestRelations;
+	}
+
+	public void setRequestRelations(Collection<CodeCommentRelation> requestRelations) {
+		this.requestRelations = requestRelations;
 	}
 
 	public String getUUID() {

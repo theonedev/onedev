@@ -76,7 +76,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final String DB_DIR = "commits";
+	private static final String INFO_DIR = "commitInfo";
 	
 	private static final String DEFAULT_STORE = "default";
 	
@@ -127,11 +127,11 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 	}
 	
 	private String getSequentialExecutorKey(Depot depot) {
-		return "repository-" + depot.getId() + "-checkCommits";
+		return "repository-" + depot.getId() + "-collectCommitInfo";
 	}
 	
 	private void doCollect(Depot depot, ObjectId commit) {
-		logger.info("Caching commits information (repository: {}, until commit: {})", 
+		logger.info("Collecting commits information (repository: {}, until commit: {})", 
 				depot.getFQN(), commit.name());
 		Environment env = getEnv(depot);
 		final Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -351,7 +351,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 			}
 		});
 		
-		logger.info("Commit information cached (repository: {}, until commit: {})", depot.getFQN(), commit.name());		
+		logger.info("Commit information collected (repository: {}, until commit: {})", depot.getFQN(), commit.name());		
 	}
 	
 	@Override
@@ -393,17 +393,17 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 			config.setLogCacheShared(false);
 			config.setMemoryUsage(1024*1024*64);
 			config.setLogFileSize(64*1024);
-			env = Environments.newInstance(getCacheDir(depot), config);
+			env = Environments.newInstance(getInfoDir(depot), config);
 			envs.put(depot.getId(), env);
 		}
 		return env;
 	}
 	
-	private File getCacheDir(Depot depot) {
-		File cacheDir = new File(storageManager.getCacheDir(depot), DB_DIR);
-		if (!cacheDir.exists()) 
-			FileUtils.createDir(cacheDir);
-		return cacheDir;
+	private File getInfoDir(Depot depot) {
+		File infoDir = new File(storageManager.getCacheDir(depot), INFO_DIR);
+		if (!infoDir.exists()) 
+			FileUtils.createDir(infoDir);
+		return infoDir;
 	}
 	
 	private Store getStore(final Environment env, final String storeName) {
@@ -614,7 +614,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 		if (env != null)
 			env.close();
 		filesCache.remove(depot.getId());
-		FileUtils.deleteDir(getCacheDir(depot));
+		FileUtils.deleteDir(getInfoDir(depot));
 	}
 	
 	@Override

@@ -283,7 +283,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends Serializable> T readFile(File file, Callable<T> callable) {
+	public static <T> T readFile(File file, Callable<T> callable) {
 		T result = null;
 		String lockName;
 		try {
@@ -313,7 +313,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
 				lock.lockInterruptibly();
 				Preconditions.checkNotNull(result = callable.call());
 				
-				FileUtils.writeByteArrayToFile(file, SerializationUtils.serialize(result));
+				FileUtils.writeByteArrayToFile(file, SerializationUtils.serialize((Serializable) result));
 			} catch (Exception e) {
 				Throwables.propagate(e);
 			} finally {

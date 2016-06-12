@@ -217,6 +217,9 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<CodeCommentRelation> commentRelations = new ArrayList<>();
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
@@ -408,6 +411,14 @@ public class PullRequest extends AbstractEntity {
 		updates.add(update);
 		sortedUpdates = null;
 		effectiveUpdates = null;
+	}
+
+	public Collection<CodeCommentRelation> getCommentRelations() {
+		return commentRelations;
+	}
+
+	public void setCommentRelations(Collection<CodeCommentRelation> commentRelations) {
+		this.commentRelations = commentRelations;
 	}
 
 	public Collection<ReviewInvitation> getReviewInvitations() {
