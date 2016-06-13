@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -20,11 +19,8 @@ import com.pmease.commons.hibernate.Transactional;
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.commons.hibernate.dao.EntityCriteria;
-import com.pmease.gitplex.core.GitPlex;
 import com.pmease.gitplex.core.entity.CodeComment;
 import com.pmease.gitplex.core.entity.Depot;
-import com.pmease.gitplex.core.entity.component.CompareContext;
-import com.pmease.gitplex.core.entity.component.Mark;
 import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 
@@ -66,19 +62,6 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment>
 		return query(criteria);
 	}
 
-	@Sessional
-	@Override
-	public Collection<CodeComment> query(Depot depot, String... commitIds) {
-		EntityCriteria<CodeComment> criteria = newCriteria();
-		criteria.add(Restrictions.eq("depot", depot));
-		List<Criterion> criterions = new ArrayList<>();
-		for (String commitId: commitIds) {
-			criterions.add(Restrictions.eq("commit", commitId));
-		}
-		criteria.add(Restrictions.or(criterions.toArray(new Criterion[criterions.size()])));
-		return query(criteria);
-	}
-	
 	@Transactional
 	@Override
 	public void save(CodeComment comment) {
@@ -93,31 +76,6 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment>
 		for (CodeCommentListener listener: listenersProvider.get())
 			listener.onDeleteComment(comment);
 		dao.remove(comment);
-	}
-
-	@Transactional
-	@Override
-	public void test(Depot depot) {
-		for (int i=0; i<1000; i++) {
-		CodeComment comment = new CodeComment();
-		comment.setCommit(UUID.randomUUID().toString());
-		CompareContext compareContext = new CompareContext();
-		compareContext.setCompareCommit(UUID.randomUUID().toString());
-		comment.setCompareContext(compareContext);
-		comment.setContent(UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString()
-				+ UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString());
-		comment.setDepot(depot);
-		Mark mark = new Mark();
-		mark.beginLine = 100;
-		mark.beginChar = 0;
-		mark.endLine = 200;
-		mark.endChar = 100;
-		comment.setMark(mark);
-		comment.setPath(UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString());
-		comment.setUUID(UUID.randomUUID().toString());
-		comment.setUser(depot.getAccount());
-		persist(comment);
-		}
 	}
 
 }

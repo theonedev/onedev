@@ -3,8 +3,6 @@ package com.pmease.gitplex.core.manager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.eclipse.jgit.lib.ObjectId;
-
 import com.pmease.commons.hibernate.dao.AbstractEntityDao;
 import com.pmease.commons.hibernate.dao.Dao;
 import com.pmease.gitplex.core.entity.CodeComment;
@@ -27,10 +25,6 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityDao<CodeCom
 
 	@Override
 	public void onSaveComment(CodeComment comment) {
-		ObjectId commitId = ObjectId.fromString(comment.getCommit());
-		for (String requestUUId: pullRequestInfoManager.getRequests(comment.getDepot(), commitId)) {
-			
-		}
 	}
 
 	@Override
