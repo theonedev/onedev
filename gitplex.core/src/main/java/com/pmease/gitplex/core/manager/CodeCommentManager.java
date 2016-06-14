@@ -1,6 +1,7 @@
 package com.pmease.gitplex.core.manager;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -20,4 +21,8 @@ public interface CodeCommentManager extends EntityDao<CodeComment> {
 	
 	void delete(CodeComment comment);
 	
+	@Nullable
+	CodeComment find(String uuid);
+	
+	List<CodeComment> queryAfter(Depot depot, @Nullable String commentUUID);
 }

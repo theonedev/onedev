@@ -48,6 +48,7 @@ import com.pmease.gitplex.core.listener.DepotListener;
 import com.pmease.gitplex.core.listener.LifecycleListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
+import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.DepotManager;
 import com.pmease.gitplex.core.manager.PullRequestInfoManager;
@@ -70,6 +71,8 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
     private final CommitInfoManager commitInfoManager;
     
     private final PullRequestInfoManager pullRequestInfoManager;
+    
+    private final CodeCommentInfoManager codeCommentInfoManager;
    
     private final PullRequestManager pullRequestManager;
     
@@ -86,7 +89,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
 	
     @Inject
-    public DefaultDepotManager(Dao dao, AccountManager userManager, 
+    public DefaultDepotManager(Dao dao, AccountManager userManager, CodeCommentInfoManager codeCommentInfoManager,
     		TeamAuthorizationManager teamAuthorizationManager, PullRequestInfoManager pullRequestInfoManager,
     		StorageManager storageManager, CommitInfoManager commitInfoManager, 
     		PullRequestManager pullRequestManager, Provider<Set<DepotListener>> listenersProvider) {
@@ -97,6 +100,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
         this.pullRequestInfoManager = pullRequestInfoManager;
         this.teamAuthorizationManager = teamAuthorizationManager;
         this.commitInfoManager = commitInfoManager;
+        this.codeCommentInfoManager = codeCommentInfoManager;
         this.pullRequestManager = pullRequestManager;
         this.listenersProvider = listenersProvider;
         
@@ -357,6 +361,7 @@ public class DefaultDepotManager extends AbstractEntityDao<Depot> implements Dep
 			checkSanity(depot);
 	        commitInfoManager.collect(depot);
 	        pullRequestInfoManager.collect(depot);
+	        codeCommentInfoManager.collect(depot);
 		}
 		
 		pullRequestManager.checkSanity();

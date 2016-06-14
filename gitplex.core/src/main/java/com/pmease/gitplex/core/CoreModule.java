@@ -30,11 +30,12 @@ import com.pmease.gitplex.core.listener.PullRequestUpdateListener;
 import com.pmease.gitplex.core.listener.RefListener;
 import com.pmease.gitplex.core.manager.AccountManager;
 import com.pmease.gitplex.core.manager.AttachmentManager;
-import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.BranchWatchManager;
+import com.pmease.gitplex.core.manager.CodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 import com.pmease.gitplex.core.manager.CodeCommentRelationManager;
 import com.pmease.gitplex.core.manager.CodeCommentReplyManager;
+import com.pmease.gitplex.core.manager.CommitInfoManager;
 import com.pmease.gitplex.core.manager.ConfigManager;
 import com.pmease.gitplex.core.manager.DataManager;
 import com.pmease.gitplex.core.manager.DepotManager;
@@ -60,11 +61,12 @@ import com.pmease.gitplex.core.manager.VerificationManager;
 import com.pmease.gitplex.core.manager.WorkManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAccountManager;
 import com.pmease.gitplex.core.manager.impl.DefaultAttachmentManager;
-import com.pmease.gitplex.core.manager.impl.DefaultCommitInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultBranchWatchManager;
+import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentRelationManager;
 import com.pmease.gitplex.core.manager.impl.DefaultCodeCommentReplyManager;
+import com.pmease.gitplex.core.manager.impl.DefaultCommitInfoManager;
 import com.pmease.gitplex.core.manager.impl.DefaultConfigManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDataManager;
 import com.pmease.gitplex.core.manager.impl.DefaultDepotManager;
@@ -182,6 +184,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(NotificationManager.class).to(DefaultNotificationManager.class);
 		bind(CommitInfoManager.class).to(DefaultCommitInfoManager.class);
 		bind(PullRequestInfoManager.class).to(DefaultPullRequestInfoManager.class);
+		bind(CodeCommentInfoManager.class).to(DefaultCodeCommentInfoManager.class);
 		bind(WorkManager.class).to(DefaultWorkManager.class);
 		bind(SequentialWorkManager.class).to(DefaultSequentialWorkManager.class);
 		bind(TeamManager.class).to(DefaultTeamManager.class);
@@ -198,10 +201,12 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AbstractRealm.class).to(SecurityRealm.class);
 
 		contribute(CodeCommentListener.class, DefaultAttachmentManager.class);
+		contribute(CodeCommentListener.class, DefaultCodeCommentInfoManager.class);
 		
 		contribute(DepotListener.class, DefaultPullRequestManager.class);
 		contribute(DepotListener.class, DefaultCommitInfoManager.class);
 		contribute(DepotListener.class, DefaultPullRequestInfoManager.class);
+		contribute(DepotListener.class, DefaultCodeCommentInfoManager.class);
 		contribute(DepotListener.class, DefaultTeamAuthorizationManager.class);
 		
 		contribute(RefListener.class, DefaultPullRequestManager.class);

@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
@@ -25,8 +26,7 @@ import com.pmease.gitplex.core.listener.CodeCommentListener;
 import com.pmease.gitplex.core.manager.CodeCommentManager;
 
 @Singleton
-public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> 
-		implements CodeCommentManager {
+public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment> implements CodeCommentManager {
 
 	private final Provider<Set<CodeCommentListener>> listenersProvider;
 	
@@ -76,6 +76,29 @@ public class DefaultCodeCommentManager extends AbstractEntityDao<CodeComment>
 		for (CodeCommentListener listener: listenersProvider.get())
 			listener.onDeleteComment(comment);
 		dao.remove(comment);
+	}
+
+	@Sessional
+	@Override
+	public CodeComment find(String uuid) {
+		EntityCriteria<CodeComment> criteria = newCriteria();
+		criteria.add(Restrictions.eq("uuid", uuid));
+		return find(criteria);
+	}
+	
+	@Sessional
+	@Override
+	public List<CodeComment> queryAfter(Depot depot, String commentUUID) {
+		EntityCriteria<CodeComment> criteria = newCriteria();
+		criteria.add(Restrictions.eq("depot", depot));
+		criteria.addOrder(Order.asc("id"));
+		if (commentUUID != null) {
+			CodeComment comment = find(commentUUID);
+			if (comment != null) {
+				criteria.add(Restrictions.gt("id", comment.getId()));
+			}
+		}
+		return query(criteria);
 	}
 
 }

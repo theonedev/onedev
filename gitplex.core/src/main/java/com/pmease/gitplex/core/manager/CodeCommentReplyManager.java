@@ -5,4 +5,7 @@ import com.pmease.gitplex.core.entity.CodeCommentReply;
 
 public interface CodeCommentReplyManager extends EntityDao<CodeCommentReply> {
 
+	void save(CodeCommentReply reply);
+	
+	void delete(CodeCommentReply reply);
 }

@@ -12,4 +12,6 @@ public interface PullRequestInfoManager {
 	
 	Collection<String> getRequests(Depot depot, ObjectId commit);
 	
+	void removeRequest(Depot depot, Collection<ObjectId> commits, String request);
+	
 }

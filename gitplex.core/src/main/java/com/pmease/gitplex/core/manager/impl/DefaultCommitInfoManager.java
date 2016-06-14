@@ -379,7 +379,7 @@ public class DefaultCommitInfoManager implements CommitInfoManager, DepotListene
 
 					}).get();
 				} catch (InterruptedException | ExecutionException e) {
-					logger.error("Error caching commit information", e);
+					logger.error("Error collecting commit information", e);
 				}
 			}
 

@@ -65,6 +65,8 @@ public class PullRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final int MAX_CODE_COMMENTS = 1000;
+	
 	public enum Status {
 		PENDING_APPROVAL("Pending Approval"), 
 		PENDING_UPDATE("Pending Update"), PENDING_INTEGRATE("Pending Integration"), 
@@ -217,7 +219,7 @@ public class PullRequest extends AbstractEntity {
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentRelation> commentRelations = new ArrayList<>();
+	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
@@ -413,12 +415,12 @@ public class PullRequest extends AbstractEntity {
 		effectiveUpdates = null;
 	}
 
-	public Collection<CodeCommentRelation> getCommentRelations() {
-		return commentRelations;
+	public Collection<CodeCommentRelation> getCodeCommentRelations() {
+		return codeCommentRelations;
 	}
 
-	public void setCommentRelations(Collection<CodeCommentRelation> commentRelations) {
-		this.commentRelations = commentRelations;
+	public void setCodeCommentRelations(Collection<CodeCommentRelation> codeCommentRelations) {
+		this.codeCommentRelations = codeCommentRelations;
 	}
 
 	public Collection<ReviewInvitation> getReviewInvitations() {

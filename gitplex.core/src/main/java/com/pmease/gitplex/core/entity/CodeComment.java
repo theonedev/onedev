@@ -56,7 +56,10 @@ public class CodeComment extends AbstractEntity {
 	private String content;
 	
 	@Column(nullable=false)
-	private Date date = new Date();
+	private Date createDate = new Date();
+	
+	@Column(nullable=false)
+	private Date updateDate = new Date();
 	
 	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
@@ -71,6 +74,8 @@ public class CodeComment extends AbstractEntity {
 
 	@Embedded
 	private CompareContext compareContext;
+	
+	private boolean resolved;
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
@@ -110,8 +115,20 @@ public class CodeComment extends AbstractEntity {
 		this.content = content;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
 	}
 
 	public void delete() {
@@ -135,7 +152,7 @@ public class CodeComment extends AbstractEntity {
 	}
 
 	public void setDate(Date date) {
-		this.date = date;
+		this.createDate = date;
 	}
 
 	public Mark getMark() {
@@ -176,6 +193,14 @@ public class CodeComment extends AbstractEntity {
 
 	public void setUUID(String uuid) {
 		this.uuid = uuid;
+	}
+
+	public boolean isResolved() {
+		return resolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
 	}
 
 }

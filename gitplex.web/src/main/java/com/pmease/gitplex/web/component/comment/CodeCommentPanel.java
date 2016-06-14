@@ -62,7 +62,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 		
 		commentContainer.add(new AvatarLink("authorAvatar", getComment().getUser()));
 		commentContainer.add(new AccountLink("authorName", getComment().getUser()));
-		commentContainer.add(new Label("authorDate", DateUtils.formatAge(getComment().getDate())));
+		commentContainer.add(new Label("authorDate", DateUtils.formatAge(getComment().getCreateDate())));
 		commentContainer.add(new Link<Void>("compareContext") {
 
 			@Override
@@ -119,7 +119,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					if (comment.getVersion() != lastVersionRef.get())
 						throw new StaleObjectStateException(CodeComment.class.getName(), comment.getId());
 					comment.setContent(object);
-					GitPlex.getInstance(CodeCommentManager.class).persist(comment);				
+					GitPlex.getInstance(CodeCommentManager.class).save(comment);				
 					target.add(feedback); // clear the feedback
 				} catch (StaleObjectStateException e) {
 					commentContainer.warn("Some one changed the content you are editing. "
@@ -201,7 +201,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 							if (comment.getVersion() != lastVersion)
 								throw new StaleObjectStateException(CodeComment.class.getName(), comment.getId());
 							comment.setContent(input.getModelObject());
-							GitPlex.getInstance(CodeCommentManager.class).persist(comment);
+							GitPlex.getInstance(CodeCommentManager.class).save(comment);
 							WebMarkupContainer commentContainer = newCommentContainer();
 							fragment.replaceWith(commentContainer);
 							target.add(commentContainer);
@@ -317,7 +317,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 					if (reply.getVersion() != lastVersionRef.get())
 						throw new StaleObjectStateException(CodeCommentReply.class.getName(), reply.getId());
 					reply.setContent(object);
-					GitPlex.getInstance(CodeCommentReplyManager.class).persist(reply);				
+					GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);				
 					target.add(feedback); // clear the feedback
 				} catch (StaleObjectStateException e) {
 					replyContainer.warn("Some one changed the content you are editing. The content has now been reloaded, "
@@ -399,7 +399,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 							if (reply.getVersion() != lastVersion)
 								throw new StaleObjectStateException(CodeComment.class.getName(), reply.getId());
 							reply.setContent(input.getModelObject());
-							GitPlex.getInstance(CodeCommentReplyManager.class).persist(reply);
+							GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
 							WebMarkupContainer replyContainer = newReplyContainer(componentId, replyId);
 							fragment.replaceWith(replyContainer);
 							target.add(replyContainer);
@@ -434,7 +434,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				GitPlex.getInstance(CodeCommentReplyManager.class).remove(getReply(replyId));
+				GitPlex.getInstance(CodeCommentReplyManager.class).delete(getReply(replyId));
 				String script = String.format("$('#%s').remove();", replyContainer.getMarkupId());
 				target.appendJavaScript(script);
 			}
@@ -516,7 +516,7 @@ public abstract class CodeCommentPanel extends GenericPanel<CodeComment> {
 						reply.setUser(SecurityUtils.getAccount());
 						reply.setContent(input.getModelObject());
 						reply.setCompareContext(getCompareContext());
-						GitPlex.getInstance(CodeCommentReplyManager.class).persist(reply);
+						GitPlex.getInstance(CodeCommentReplyManager.class).save(reply);
 						
 						WebMarkupContainer replyContainer = newReplyContainer(repliesView.newChildId(), reply.getId());
 						repliesView.add(replyContainer);
